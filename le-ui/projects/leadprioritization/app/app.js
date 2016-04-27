@@ -7,7 +7,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.modals.ServiceErrorModal',
+    'mainApp.core.modals.ServiceErrorModule',
     'mainApp.core.controllers.MainViewController',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',
@@ -135,6 +135,7 @@ var mainApp = angular.module('mainApp', [
     };
     
     $scope.getWidgetConfigDoc = function () {
+        return;
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
@@ -236,6 +237,7 @@ var mainApp = angular.module('mainApp', [
 
     function createMandatoryChangePasswordViewForLocale(locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
+        console.log('createMandatoryChangePasswordViewForLocale');
             $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;

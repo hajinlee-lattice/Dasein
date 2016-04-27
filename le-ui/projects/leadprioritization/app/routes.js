@@ -45,6 +45,15 @@ angular
         .state('home', {
             url: '/tenant/:tenantId',
             resolve: {
+                WidgetConfig: function($q, ConfigService) {
+                    var deferred = $q.defer();
+
+                    ConfigService.GetWidgetConfigDocument().then(function(result) {
+                        deferred.resolve();
+                    });
+
+                    return deferred.promise;
+                },
                 FeatureFlags: function($q, FeatureFlagService) {
                     var deferred = $q.defer();
                     

@@ -88,7 +88,6 @@ angular
                         
                         saveAs(blob, filename);
                     }, function(reason) {
-                        alert('Failed: ' + reason);
                     });
                 };
                 

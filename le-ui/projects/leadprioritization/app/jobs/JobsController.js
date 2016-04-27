@@ -25,10 +25,12 @@ angular.module('pd.jobs', [
         "score": "create_global_target_market", 
         "runScoreTableDataFlow": "create_global_target_market", 
         "runAttributeLevelSummaryDataFlows": "create_global_target_market" 
-    };
+    }; 
     
     var dictionary = {
-        'fitModelWorkflow': stepsNameDictionary,
+        'fitModelWorkflow': stepsNameDictionary,/*
+        'importMatchAndScoreWorkflow': {
+        },*/
         'importMatchAndModelWorkflow': {
             'importData': 'load_data',
             'createEventTableReport': 'load_data',
@@ -78,8 +80,6 @@ angular.module('pd.jobs', [
                 var errorCode = response.data.errorCode || 'Error';
                 var errorMsg = response.data.errorMsg || 'unspecified error.';
 
-                alert(errorCode + ': ' + errorMsg);
-
                 deferred.reject(errorMsg);
             }
         );
@@ -94,7 +94,8 @@ angular.module('pd.jobs', [
             method: 'GET',
             url: '/pls/scores/jobs/' + job.id + '/results',
             headers: { 
-                'Accept': 'application/csv;charset=utf-8' 
+                'Accept': 'application/csv;charset=utf-8',
+                'ErrorDisplayMethod': 'banner|home.models.list'
             }
         }).then(
             function onSuccess(response) {
@@ -108,8 +109,6 @@ angular.module('pd.jobs', [
 
                 var errorCode = response.data.errorCode || 'Error';
                 var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                alert(errorCode + ': ' + errorMsg);
 
                 deferred.reject(errorMsg);
             }
@@ -204,7 +203,10 @@ angular.module('pd.jobs', [
 
         $http({
             method: 'POST',
-            url: '/pls/scores/' + modelId + '/training'
+            url: '/pls/scores/' + modelId + '/training',
+            headers: { 
+                'ErrorDisplayMethod': 'modal'
+            }
         }).then(
             function onSuccess(response) {
                 console.log('success',response);

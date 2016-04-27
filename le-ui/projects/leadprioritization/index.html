@@ -32,7 +32,11 @@
                     <div class="content-wrap">
                         <div id="mainView">
                             <div id="mainHeaderView"></div>
-                            <div data-ng-view class="container"></div>
+                            <div data-ng-controller="MainViewController">
+                                <div ui-view="summary" id="mainSummaryView"></div>
+                                <div id="mainInfoView"></div>
+                                <div ui-view="main" id="mainContentView"></div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -42,10 +46,47 @@
         <!--[if IE]> <div id="isIE"></div> <![endif]-->
         
         <script src="/assets/vendor.min.js"></script>
+
+        <!-- build:template:dist
         <script src="/assets/lattice.min.js"></script>
+        /build -->
+        <!-- build:remove:dist -->
+        <script src="/app/directives/ArcChartDirective.js"></script>
+        <script src="/app/directives/helperMarkDirective.js"></script>
+        <script src="/app/directives/ngEnterDirective.js"></script>
+        <script src="/app/directives/ngQtipDirective.js"></script>
+        <script src="/app/utilities/AuthenticationUtility.js"></script>
+        <script src="/app/utilities/BrowserStorageUtility.js"></script>
+        <script src="/app/utilities/ConfigConstantUtility.js"></script>
+        <script src="/app/utilities/DateTimeFormatUtility.js"></script>
+        <script src="/app/utilities/EvergageUtility.js"></script>
+        <script src="/app/utilities/MetadataUtility.js"></script>
+        <script src="/app/utilities/NavUtility.js"></script>
+        <script src="/app/utilities/NumberUtility.js"></script>
+        <script src="/app/utilities/PasswordUtility.js"></script>
+        <script src="/app/utilities/ResourceUtility.js"></script>
+        <script src="/app/utilities/RightsUtility.js"></script>
+        <script src="/app/utilities/SortUtility.js"></script>
+        <script src="/app/utilities/StringUtility.js"></script>
+        <script src="/app/utilities/TenantIdParsingUtility.js"></script>
+        <script src="/app/utilities/TrackingConstantsUtility.js"></script>
+        <script src="/app/utilities/TimestampIntervalUtility.js"></script>
+        <script src="/app/utilities/UnderscoreUtility.js"></script>
+        <script src="/app/utilities/URLUtility.js"></script>
+        <script src="/app/services/ConfigService.js"></script>
+        <script src="/app/services/FeatureFlagService.js"></script>
+        <script src="/app/services/HelpService.js"></script>
+        <script src="/app/services/LoginService.js"></script>
+        <script src="/app/services/MetadataService.js"></script>
+        <script src="/app/services/ResourceStringsService.js"></script>
+        <script src="/app/services/SessionService.js"></script>
+        <script src="/app/modules/ServiceError/ServiceErrorModule.js"></script>
+        <!-- endbuild -->
+
         <!-- build:template:dist
         <script src="templates.js"></script>
         /build -->
+
         <!-- build:js app.js -->
         <script src="../demo/js/bootstrap-select.min.js"></script>
         <script src="app/app.js"></script>
@@ -91,36 +132,29 @@
         <script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
         <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
         <script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
-
         <script src="app/core/services/WidgetService.js"></script>
         <script src="app/core/controllers/MainViewController.js"></script>
         <script src="app/core/controllers/MainHeaderController.js"></script>
         <script src="app/core/controllers/SalesforceCredentialController.js"></script>
-
         <script src="app/create/controllers/CSVImportController.js"></script>
         <script src="app/create/controllers/CSVReportController.js"></script>
-
         <script src="app/navigation/NavigationController.js"></script>
         <script src="app/navigation/summary/OneLineController.js"></script>
         <script src="app/navigation/pagination/PaginationController.js"></script>
         <script src="app/navigation/table/TableController.js"></script>
         <script src="app/navigation/sidebar/RootController.js"></script>
-
         <script src="app/jobs/JobsController.js"></script>
         <script src="app/jobs/JobsRoutes.js"></script>
         <script src="app/jobs/status/StatusController.js"></script>
         <script src="app/jobs/import/credentials/CredentialsController.js"></script>
         <script src="app/jobs/import/file/FileController.js"></script>
         <script src="app/jobs/import/ready/ImportReadyController.js"></script>
-
         <script src="app/login/controllers/LoginController.js"></script>
         <script src="app/login/controllers/UpdatePasswordController.js"></script>
         <script src="app/login/modals/TenantSelectionModal.js"></script>
-
         <script src="app/config/controllers/ManageCredentialsController.js"></script>
         <script src="app/config/modals/EnterCredentialsModal.js"></script>
         <script src="app/config/services/ConfigService.js"></script>
-
         <script src="app/models/controllers/ModelListController.js"></script>
         <script src="app/models/controllers/ModelDetailController.js"></script>
         <script src="app/models/controllers/AdminInfoController.js"></script>
@@ -132,13 +166,11 @@
         <script src="app/models/modals/ImportModelModal.js"></script>
         <script src="app/models/modals/AddSegmentModal.js"></script>
         <script src="app/models/services/ModelService.js"></script>
-
         <script src="app/userManagement/controllers/UserManagementController.js"></script>
         <script src="app/userManagement/modals/AddUserModal.js"></script>
         <script src="app/userManagement/modals/DeleteUserModal.js"></script>
         <script src="app/userManagement/modals/EditUserModal.js"></script>
         <script src="app/userManagement/services/UserManagementService.js"></script>
-
         <script src="app/setup/controllers/SetupController.js"></script>
         <script src="app/setup/controllers/DeploymentWizardController.js"></script>
         <script src="app/setup/controllers/CredentialsController.js"></script>
@@ -155,7 +187,6 @@
         <script src="app/setup/services/TenantDeploymentService.js"></script>
         <script src="app/setup/services/LeadEnrichmentService.js"></script>
         <script src="app/setup/services/MetadataService.js"></script>
-
         <script src="app/apiConsole/controllers/APIConsoleController.js"></script>
         <script src="app/apiConsole/controllers/ScoringRequestController.js"></script>
         <script src="app/apiConsole/controllers/ScoringResponseController.js"></script>

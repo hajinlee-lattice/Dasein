@@ -11,12 +11,12 @@
                 <a 
                     href="javascript:void(0)" 
                     data-ng-click="clickGetScoringResults()" 
-                    data-ng-show="jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow'"
+                    data-ng-show="(jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow') && job.status != 'Failed'"
                 >
                     [Download Result]
                 </a>
             </span>
-            <span data-ng-show="jobRunning && ! cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)">[Cancel Job]</a></span>
+            <span data-ng-show="jobRunning && !cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)">[Cancel Job]</a></span>
             <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>
             
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
