@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -49,6 +50,9 @@ public class SimpleCascadingExecutor {
     @Autowired
     private VersionManager versionManager;
 
+    @Value("${dataflow.hdfs.stack:}")
+    private String stackName;
+
     public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
             String avroSchemaPath) throws IOException {
         Schema schema = new Schema.Parser().parse(HdfsUtils.getHdfsFileContents(yarnConfiguration, avroSchemaPath));
@@ -75,7 +79,7 @@ public class SimpleCascadingExecutor {
                 .addTailSink(csvToAvroPipe, avroTap);
 
         try {
-            String artifactVersion = versionManager.getCurrentVersion();
+            String artifactVersion = versionManager.getCurrentVersionInStack(stackName);
             String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
                     : "/app/" + artifactVersion + "/dataflow/lib/";
             log.info("Using dataflow lib path = " + dataFlowLibDir);

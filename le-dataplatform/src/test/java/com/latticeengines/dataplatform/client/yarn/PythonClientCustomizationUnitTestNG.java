@@ -35,7 +35,7 @@ public class PythonClientCustomizationUnitTestNG {
         ReflectionTestUtils.setField(customization, "softwareLibraryService", swlibService);
 
         VersionManager versionManager = mock(VersionManager.class);
-        when(versionManager.getCurrentVersion()).thenReturn("2.0.22-SNAPSHOT");
+        when(versionManager.getCurrentVersionInStack("")).thenReturn("2.0.22-SNAPSHOT");
         ReflectionTestUtils.setField(customization, "versionManager", versionManager);
     }
 

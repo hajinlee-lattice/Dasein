@@ -42,17 +42,20 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
 
     private VersionManager versionManager;
 
+    private String stackName;
+
     public AvroExportJob(Configuration config) {
         setConf(config);
     }
 
     public AvroExportJob(Configuration config, //
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager) {
+            VersionManager versionManager, String stackName) {
         this(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
+        this.stackName = stackName;
     }
 
     @SuppressWarnings("rawtypes")
@@ -102,7 +105,7 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
             List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
-                    + versionManager.getCurrentVersion() + jarDependencyPath, ".*.jar$");
+                    + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }

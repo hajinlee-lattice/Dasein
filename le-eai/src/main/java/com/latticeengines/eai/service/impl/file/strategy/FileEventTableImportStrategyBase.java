@@ -70,6 +70,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Value("${eai.file.csv.error.lines:1000}")
     private int errorLineNumber;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
     }
@@ -134,7 +137,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("errorLineNumber", errorLineNumber + "");
         props.put("importMapperClass", LedpCSVToAvroImportMapper.class.toString());
         props.put("columnTypes", StringUtils.join(types, ","));
-        props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersion()));
+        props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersionInStack(stackName)));
         System.out.println(TableUtils.createSchema(table.getName(), table).toString());
         props.put("avro.schema", TableUtils.createSchema(table.getName(), table).toString());
 

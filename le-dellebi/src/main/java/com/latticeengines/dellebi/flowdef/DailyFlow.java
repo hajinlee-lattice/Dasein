@@ -57,6 +57,9 @@ public class DailyFlow {
     @Value("${dellebi.env}")
     private String dellebiEnv;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
 
@@ -157,7 +160,7 @@ public class DailyFlow {
             if (config.getType().equalsIgnoreCase(dellEbiFlowService.getFileType(context))) {
 
                 FlowDef flow = flowDefinition.populateFlowDefByType(config.getType());
-                HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersion());
+                HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersionInStack(stackName));
                 return flow;
             }
         }

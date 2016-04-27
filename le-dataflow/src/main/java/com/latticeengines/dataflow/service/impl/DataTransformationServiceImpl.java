@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +40,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Autowired
     private VersionManager versionManager;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
         validateParameters(context);
@@ -62,7 +66,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.setEnforceGlobalOrdering(true);
 
-        return dataFlow.runFlow(context, versionManager.getCurrentVersion());
+        return dataFlow.runFlow(context, versionManager.getCurrentVersionInStack(stackName));
     }
 
     @Override

@@ -30,6 +30,8 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     protected Configuration yarnConfiguration;
 
     protected VersionManager versionManager;
+
+    protected String stackName;
     
     protected SoftwareLibraryService softwareLibraryService;
 
@@ -39,15 +41,20 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     public DefaultYarnClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
+            String stackName, //
             SoftwareLibraryService softwareLibraryService, //
             String hdfsJobBaseDir, //
             String webHdfs) {
         super();
         this.yarnConfiguration = yarnConfiguration;
         this.versionManager = versionManager;
+        this.stackName = stackName;
         this.softwareLibraryService = softwareLibraryService;
         this.hdfsJobBaseDir = hdfsJobBaseDir;
         this.webHdfs = webHdfs;
+        if (this.softwareLibraryService != null) {
+            this.softwareLibraryService.setStackName(stackName);
+        }
     }
 
     @Override
@@ -80,13 +87,13 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/dataplatform/*.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/dataplatform/*.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
 
         if (!excludeDataplatformLib) {
             hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                     LocalResourceVisibility.PUBLIC, //
-                    String.format("/app/%s/dataplatform/lib/*.jar", versionManager.getCurrentVersion()), //
+                    String.format("/app/%s/dataplatform/lib/*.jar", versionManager.getCurrentVersionInStack(stackName)), //
                     false));
         }
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //

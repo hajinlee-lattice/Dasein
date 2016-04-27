@@ -68,6 +68,9 @@ public class InfluxDbMetricWriter implements MetricWriter {
     @Value("${monitor.influxdb.environment:Local}")
     private String environment;
 
+    @Value("${monitor.influxdb.stack:}")
+    private String stack;
+
     @Value("${monitor.influxdb.log.level:NONE}")
     private InfluxDB.LogLevel logLevel;
 
@@ -138,6 +141,9 @@ public class InfluxDbMetricWriter implements MetricWriter {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
         builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
         builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
+        if (StringUtils.isNotEmpty(stack)) {
+            builder.tag(MetricUtils.TAG_STACK, stack);
+        }
         builder.tag(MetricUtils.TAG_ARTIFACT_VERSION, StringUtils.isEmpty(versionManager.getCurrentVersion())
                 ? MetricUtils.NULL : versionManager.getCurrentVersion());
         RetentionPolicy policy = RetentionPolicyImpl.DEFAULT;

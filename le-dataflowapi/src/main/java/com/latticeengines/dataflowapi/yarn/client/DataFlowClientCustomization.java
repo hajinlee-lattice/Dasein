@@ -19,11 +19,12 @@ public class DataFlowClientCustomization extends SingleContainerClientCustomizat
 
     @Autowired
     public DataFlowClientCustomization(Configuration yarnConfiguration, //
+            @Value("${dataplatform.hdfs.stack:}") String stackname,
             VersionManager versionManager, //
             SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, stackname, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 
     @Override

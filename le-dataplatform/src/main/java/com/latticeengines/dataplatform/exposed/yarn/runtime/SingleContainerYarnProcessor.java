@@ -18,6 +18,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.channel.AbstractPollableChannel;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
@@ -54,6 +55,9 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     //@Autowired
     protected LedpAppmasterService ledpAppmasterService;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @Autowired
     private LedpProgressReporter ledpProgressReporter;
 
@@ -67,6 +71,9 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
 
     public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
             ApplicationContext context, VersionManager versionManager) {
+        if (softwareLibraryService != null) {
+            softwareLibraryService.setStackName(stackName);
+        }
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
         if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
             packages = softwareLibraryService.getLatestInstalledPackages(module);

@@ -23,6 +23,7 @@ public class SwlibTool {
                 addOption("m", "module", true, " -<module> (module name - dataflow or workflow)"). //
                 addOption("g", "groupId", true, " -<groupId> (group id Maven-style)"). //
                 addOption("a", "artifactId", true, " -<artifactId> (artifact id Maven-style)"). //
+                addOption("s", "stack", true, " -<stack> (stackName: a or b)"). //
                 addOption("v", "version", true, " -<version> (version Maven-style)"). //
                 addOption("c", "classifier", false, " -<classifier> (classifier Maven-style)"). //
                 addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)"). //
@@ -37,6 +38,7 @@ public class SwlibTool {
                 String groupId = cmd.getOptionValue("groupId");
                 String artifactId = cmd.getOptionValue("artifactId");
                 String version = cmd.getOptionValue("version");
+                String stackName = cmd.getOptionValue("stack");
                 String classifier = cmd.getOptionValue("classifier");
                 String initializerClassName = cmd.getOptionValue("initializer");
                 String fsDefaultFS = cmd.getOptionValue("defaultFS");
@@ -44,6 +46,8 @@ public class SwlibTool {
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
                         SoftwareLibraryService.class);
+                swlibService.setStackName(stackName);
+
                 SoftwarePackage swPackage = new SoftwarePackage();
                 swPackage.setModule(module);
                 swPackage.setGroupId(groupId);

@@ -19,11 +19,16 @@ public class HTTPFSAccessMBean {
     @Autowired
     private VersionManager versionManager;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @ManagedOperation(description = "Check HttpFS Accessibility")
     public String checkHttpAccess() {
         try {
-            String s = versionManager.getCurrentVersion().equals("") ? "" : "/";
-            String url = String.format("%s/app/%s%sdataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS, versionManager.getCurrentVersion(),s);
+            String s = versionManager.getCurrentVersionInStack(stackName).equals("") ? "" : "/";
+            String url = String.format(
+                    "%s/app/%s%sdataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
+                    versionManager.getCurrentVersionInStack(stackName), s);
             return "dataplatform.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {
             return "Failed to access dataplatform.properties from HttpFS due to: " + e.getMessage();

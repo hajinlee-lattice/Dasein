@@ -26,13 +26,17 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
 
     private VersionManager versionManager;
 
+    private String stackname;
+
     @Autowired
     public WorkflowClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
+            @Value("${dataplatform.hdfs.stack:}") String stackname,
             SoftwareLibraryService softwareLibraryService,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, stackname, softwareLibraryService, hdfsJobBaseDir, webHdfs);
         this.versionManager = versionManager;
+        this.stackname = stackname;
     }
 
     @Override
@@ -46,17 +50,17 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
 
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/workflow/workflow.properties", versionManager.getCurrentVersion()),//
+                String.format("/app/%s/workflow/workflow.properties", versionManager.getCurrentVersionInStack(stackname)),//
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/propdata/propdata.properties", versionManager.getCurrentVersion()),//
+                String.format("/app/%s/propdata/propdata.properties", versionManager.getCurrentVersionInStack(stackname)),//
                 false));
 
         // there are propdata workflow steps need cascading, le-dataflow is the place to hold cascading dependency
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/dataflow/dataflow.properties", versionManager.getCurrentVersion()),//
+                String.format("/app/%s/dataflow/dataflow.properties", versionManager.getCurrentVersionInStack(stackname)),//
                 false));
 
         return hdfsEntries;

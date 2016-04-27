@@ -3,6 +3,7 @@ echo "examine environment vars"
 HADOOP_CONF_DIR=/usr/hdp/current/hadoop-client/conf
 
 echo $HADOOP_CONF_DIR
+echo $STACK_NAME
 
 JARFILE=`ls /tmp/le-swlib-*-shaded.jar`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
@@ -16,11 +17,11 @@ fi
 echo $VERSION
 
 echo "clean up hdfs"
-hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION
-hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION
+hdfs dfs -mkdir -p /app/$STACK_NAME/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION
+hdfs dfs -mkdir -p /app/$STACK_NAME/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION
 
-hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION/*
-hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION/*
+hdfs dfs -rm -r -f /app/$STACK_NAME/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION/*
+hdfs dfs -rm -r -f /app/$STACK_NAME/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION/*
 
 echo "install le-serviceflows-prospectdiscovery for dataflowapi"
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
@@ -29,6 +30,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -g com.latticeengines \
     -a le-serviceflows-prospectdiscovery \
     -v $VERSION \
+    -s $STACK_NAME \
     -i com.latticeengines.prospectdiscovery.Initializer \
     -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
 
@@ -39,6 +41,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -g com.latticeengines \
     -a le-serviceflows-leadprioritization \
     -v $VERSION \
+    -s $STACK_NAME \
     -i com.latticeengines.leadprioritization.Initializer \
     -f /tmp/le-serviceflows-leadprioritization-*-shaded.jar
 

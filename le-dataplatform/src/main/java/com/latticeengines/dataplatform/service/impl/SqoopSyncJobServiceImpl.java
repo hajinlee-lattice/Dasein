@@ -11,6 +11,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -44,6 +45,9 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
 
     @Autowired
     private VersionManager versionManager;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
 
     private static final int MAX_SQOOP_RETRY = 3;
 
@@ -122,7 +126,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                         metadataService, //
                         hadoopConfiguration, //
                         false, //
-                        versionManager.getCurrentVersion());
+                        versionManager.getCurrentVersionInStack(stackName));
                 long time2 = System.currentTimeMillis();
                 log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
                 return appId;
@@ -150,7 +154,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         while (retryCount < MAX_SQOOP_RETRY) {
             try {
                 ApplicationId appId = super.importData(importer, jobName, metadataService, hadoopConfiguration,
-                        versionManager.getCurrentVersion());
+                        versionManager.getCurrentVersionInStack(stackName));
                 long time2 = System.currentTimeMillis();
                 if (importer.isSync() && SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
                     log.info(String.format("Time for importin %s = %d ms.", importer.getTable(), (time2 - time1)));
@@ -261,7 +265,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 metadataService, //
                 hadoopConfiguration, //
                 true, //
-                versionManager.getCurrentVersion());
+                versionManager.getCurrentVersionInStack(stackName));
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
         return appId;
@@ -288,7 +292,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 metadataService, //
                 hadoopConfiguration, //
                 true, //
-                versionManager.getCurrentVersion());
+                versionManager.getCurrentVersionInStack(stackName));
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
         return appId;

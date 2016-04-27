@@ -16,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.AfterClass;
@@ -52,6 +53,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
@@ -156,8 +160,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         classifier.setTestDataHdfsPath(baseDir + "/test/nn_test.dat");
         classifier.setDataProfileHdfsPath(baseDir + "/training/a.avro");
         classifier.setConfigMetadataHdfsPath(baseDir + "/training/a.avsc");
-        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.py");
 
         return classifier;
     }

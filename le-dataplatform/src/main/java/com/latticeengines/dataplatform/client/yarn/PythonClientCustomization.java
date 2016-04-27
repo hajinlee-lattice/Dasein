@@ -38,18 +38,22 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
     
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
-    
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     public PythonClientCustomization() {
-        super(null, null, null, null, null);
+        super(null, null, null, null, null, null);
     }
 
     @Autowired
     public PythonClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
+            @Value("${dataplatform.hdfs.stack:}") String stackName,
             SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 
     @Override
@@ -82,7 +86,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
 
             
-            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
+            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
             properties.put(PythonContainerProperty.SWLIBARTIFACT.name(), getSwlibArtifactHdfsPath(classifier));
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
@@ -131,8 +135,8 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
                     }
                 }
                 List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion( //
-                        module, versionManager.getCurrentVersion());
-                if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
+                        module, versionManager.getCurrentVersionInStack(stackName));
+                if (StringUtils.isEmpty(versionManager.getCurrentVersionInStack(stackName))) {
                     packages = softwareLibraryService.getLatestInstalledPackages(module);
                 }
                 
@@ -146,7 +150,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
                     provenanceProperties = String.format("swlib.artifact_id=%s swlib.version=%s", //
                             pkg.getArtifactId(), pkg.getVersion());
                     classifier.setProvenanceProperties(classifier.getProvenanceProperties() + " " + provenanceProperties);
-                    return SoftwareLibraryService.TOPLEVELPATH + "/" + pkg.getHdfsPath();
+                    return softwareLibraryService.getTopLevelPath() + "/" + pkg.getHdfsPath();
                 }
                 
                 for (SoftwarePackage pkg : packages) {
@@ -158,7 +162,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
                             && module.equals(pkg.getModule()) //
                             && version.equals(pkg.getVersion())) {
                         resetClassifierWithProperProvenanceProperties(classifier, pkg);
-                        return SoftwareLibraryService.TOPLEVELPATH + "/" + pkg.getHdfsPath();
+                        return softwareLibraryService.getTopLevelPath() + "/" + pkg.getHdfsPath();
                     }
                 }
             }

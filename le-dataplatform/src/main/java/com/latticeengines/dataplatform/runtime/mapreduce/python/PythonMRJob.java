@@ -29,16 +29,19 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
 
     private VersionManager versionManager;
 
+    private String stackName;
+
     public PythonMRJob(Configuration config) {
         setConf(config);
     }
 
     public PythonMRJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
-            VersionManager versionManager) {
+            VersionManager versionManager, String stackName) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
+        this.stackName = stackName;
     }
 
     @VisibleForTesting
@@ -98,7 +101,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         if (reduceMemorySize != null) {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
-        config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
+        config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
         
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");

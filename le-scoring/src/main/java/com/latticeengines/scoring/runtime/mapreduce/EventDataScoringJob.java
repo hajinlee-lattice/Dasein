@@ -37,6 +37,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private VersionManager versionManager;
 
+    private String stackName;
+
     private static final String dependencyPath = "/app/";
 
     private static final String jarDependencyPath = "/scoring/lib";
@@ -47,11 +49,12 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         setConf(config);
     }
 
-    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry, VersionManager versionManager) {
+    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry, VersionManager versionManager, String stackName) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
+        this.stackName = stackName;
     }
 
     @Override
@@ -103,9 +106,9 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setNumReduceTasks(0);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersion() + scoringPythonPath));
+            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName) + scoringPythonPath));
             List<String> jarFilePaths = HdfsUtils
-                    .getFilesForDir(mrJob.getConfiguration(), dependencyPath + versionManager.getCurrentVersion() + jarDependencyPath, ".*.jar$");
+                    .getFilesForDir(mrJob.getConfiguration(), dependencyPath + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }

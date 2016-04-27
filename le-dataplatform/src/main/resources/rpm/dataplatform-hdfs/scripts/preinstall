@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo 'check env var STACK_NAME'
+echo $STACK_NAME
+
 RPMFILE=`ls /tmp/le-dataplatform-hdfs-rpm-*.rpm`
 VERSION=`echo $RPMFILE | cut -d \- -f 5`
 SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
@@ -12,6 +15,10 @@ fi
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
+
+if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+    VERSION=${STACK_NAME}/${VERSION}
+fi
 
 hdfs dfs -rm -f -r /app/$VERSION/dataflowapi || true
 hdfs dfs -rm -f -r /app/$VERSION/dataplatform || true

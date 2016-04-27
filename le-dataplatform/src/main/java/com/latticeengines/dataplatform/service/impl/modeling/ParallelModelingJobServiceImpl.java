@@ -45,6 +45,9 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${dataplatform.debug:false}")
     private String debug;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @Autowired
     private VersionManager versionManager;
     
@@ -65,13 +68,13 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         setDefaultValues(classifier);
 
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
-        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersion());
+        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersionInStack(stackName));
 
         Properties properties = new Properties();
         String inputDir = classifier.getModelHdfsDir() + "/" + classifier.getName();
         int mapperSize = Integer.parseInt(appMasterProperties.getProperty(PythonMRProperty.MAPPER_SIZE.name()));
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
         try {
             if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);
@@ -112,7 +115,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
                                                                                           // up
         String cacheFilePath = PythonMRUtils
                 .setupProfilingCacheFiles(classifier, properties.get(MapReduceProperty.CACHE_FILE_PATH.name())
-                        .toString(), versionManager.getCurrentVersion());
+                        .toString(), versionManager.getCurrentVersionInStack(stackName));
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
@@ -135,7 +138,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         String cacheFilePath = PythonMRUtils
                 .setupModelingCacheFiles(classifier, trainingFiles,
                         properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
-                        versionManager.getCurrentVersion());
+                        versionManager.getCurrentVersionInStack(stackName));
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);

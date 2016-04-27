@@ -26,17 +26,19 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
 
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
+            String stackName, //
             String hdfsJobBaseDir, //
             String webHdfs) {
-        this(yarnConfiguration, versionManager, null, hdfsJobBaseDir, webHdfs);
+        this(yarnConfiguration, versionManager, stackName, null, hdfsJobBaseDir, webHdfs);
     }
 
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
+            String stackName, //
             SoftwareLibraryService softwareLibraryService, //
             String hdfsJobBaseDir, //
             String webHdfs) {
-        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 
     public abstract String getModuleName();
@@ -85,33 +87,34 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersion(), module, module), //
+                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersionInStack(stackName), module, module), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/db/db.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/db/db.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/security/security.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/security/security.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/proxy/proxy.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/proxy/proxy.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/camille/camille.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/camille/camille.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/monitor/monitor.properties", versionManager.getCurrentVersion()), //
+                String.format("/app/%s/monitor/monitor.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersion(), module), //
+                String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersionInStack(stackName), module), //
                 false));
         if (softwareLibraryService != null) {
+            softwareLibraryService.setStackName(stackName);
             List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module,
                     versionManager.getCurrentVersion());
             if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
@@ -120,7 +123,7 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
 
             for (SoftwarePackage pkg : packages) {
                 String hdfsJar = String.format("%s/%s", //
-                        SoftwareLibraryService.TOPLEVELPATH, pkg.getHdfsPath());
+                        softwareLibraryService.getTopLevelPath(), pkg.getHdfsPath());
                 log.info(String.format("Adding %s to hdfs entry.", hdfsJar));
                 hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                         LocalResourceVisibility.PUBLIC, //

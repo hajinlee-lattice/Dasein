@@ -28,6 +28,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -41,6 +42,7 @@ import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomi
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
@@ -48,7 +50,6 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
@@ -76,6 +77,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private VersionManager versionManager;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -243,9 +247,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setDataFormat("csv");
         classifier.setDataProfileHdfsPath(baseDir + "/datascientist1/EventMetadata");
         classifier.setConfigMetadataHdfsPath(baseDir + "/datascientist1/EventMetadata");
-        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion()
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName)
                 + "/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion()
+        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName)
                 + "/dataplatform/scripts/pipeline.py");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
@@ -289,7 +293,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
         mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
         applicationId = jobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
@@ -327,7 +331,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "{Dell}");
         properties.setProperty(MapReduceProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));
         String newDir = ClassLoader.getSystemResource(

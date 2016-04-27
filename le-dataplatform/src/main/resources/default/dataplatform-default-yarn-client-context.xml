@@ -21,6 +21,7 @@
     <bean id="defaultYarnClientCustomization" class="com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization" >
         <constructor-arg ref="yarnConfiguration"/>
         <constructor-arg ref="versionManager"/>
+        <constructor-arg value="${dataplatform.hdfs.stack:}"/>
         <constructor-arg ref="softwareLibraryService"/>
         <constructor-arg value="${dataplatform.yarn.job.basedir}"/>
         <constructor-arg value="${dataplatform.fs.web.defaultFS}"/>

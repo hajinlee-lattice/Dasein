@@ -110,6 +110,9 @@ public class ModelingServiceImpl implements ModelingService {
     @Value("${dataplatform.container.memory}")
     private int memory;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @Override
     public ApplicationId loadData(LoadConfiguration config) {
         Model model = new Model();
@@ -171,7 +174,7 @@ public class ModelingServiceImpl implements ModelingService {
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
 
         return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()),
                 properties);
@@ -393,7 +396,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     private String getScriptPathWithVersion(String script) {
         String afterPart = StringUtils.substringAfter(script, "/app");
-        return "/app/" + versionManager.getCurrentVersion() + afterPart;
+        return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
     }
 
     private String getDataProfileAvroPathInHdfs(String path) {

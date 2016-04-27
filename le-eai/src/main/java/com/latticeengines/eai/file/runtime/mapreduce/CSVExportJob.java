@@ -17,8 +17,9 @@ public class CSVExportJob extends AvroExportJob {
 
     public CSVExportJob(Configuration config, //
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager) {
-        super(config, mapReduceCustomizationRegistry, versionManager);
+            VersionManager versionManager,
+            String version) {
+        super(config, mapReduceCustomizationRegistry, versionManager, version);
     }
 
     @Override

@@ -17,7 +17,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
-import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.swlib.functionalframework.SWLibFunctionalTestNGBase;
 
 public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase {
@@ -67,15 +66,15 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void validateInitialSetup() throws Exception {
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, SoftwareLibraryService.TOPLEVELPATH));
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, softwareLibraryService.getTopLevelPath()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "validateInitialSetup" })
     public void installPackage() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, SoftwareLibraryService.TOPLEVELPATH + "/dataflow");
+        HdfsUtils.rmdir(yarnConfiguration, softwareLibraryService.getTopLevelPath() + "/dataflow");
         softwareLibraryService.installPackage(pkgVersion1, new File(jarFile));
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration,
-                String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, pkgVersion1.getHdfsPath("json")));
+                String.format("%s/%s", softwareLibraryService.getTopLevelPath(), pkgVersion1.getHdfsPath("json")));
         SoftwarePackage deserializedPkg = JsonUtils.deserialize(contents, SoftwarePackage.class);
 
         assertEquals(deserializedPkg.getGroupId(), pkgVersion1.getGroupId());
@@ -141,7 +140,7 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
     public void getInstalledPackagesNonSWPackageJsonFile() throws Exception {
         String[] pkgTokens = pkgVersion1.getHdfsPath("json").split("/");
         pkgTokens[pkgTokens.length - 1] = "a.json";
-        String filePath = String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, StringUtils.join(pkgTokens, "/"));
+        String filePath = String.format("%s/%s", softwareLibraryService.getTopLevelPath(), StringUtils.join(pkgTokens, "/"));
         HdfsUtils.writeToFile(yarnConfiguration, filePath, "xyz");
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("dataflow");
 

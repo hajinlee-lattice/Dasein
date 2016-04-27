@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo 'check env var STACK_NAME'
+echo $STACK_NAME
+
 JARFILE=`ls /tmp/app/scoring/lib/le-scoring*-shaded.jar`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
 SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
@@ -7,6 +10,10 @@ SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
 if test $SNAPSHOT = "SNAPSHOT"
     then
         VERSION=$VERSION-"SNAPSHOT"
+fi
+
+if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+    VERSION=${STACK_NAME}/${VERSION}
 fi
 
 chmod 755 -R /tmp/app/scoring

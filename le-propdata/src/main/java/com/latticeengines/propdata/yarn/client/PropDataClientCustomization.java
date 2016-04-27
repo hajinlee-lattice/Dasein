@@ -18,9 +18,10 @@ public class PropDataClientCustomization extends SingleContainerClientCustomizat
 
     @Autowired
     public PropDataClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
-                                  @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
-                                  @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
+                                       @Value("${dataplatform.hdfs.stack:}") String stackName,
+                                       @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
+                                       @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+        super(yarnConfiguration, versionManager, stackName, hdfsJobBaseDir, webHdfs);
     }
 
     @Override

@@ -92,6 +92,9 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     @Value("${workflowapi.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     protected InternalResourceRestApiProxy internalResourceProxy;
 
     protected RestTemplate restTemplate = new RestTemplate();
@@ -111,6 +114,10 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
+        if (softwareLibraryService != null) {
+            softwareLibraryService.setStackName(stackName);
+        }
+
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -178,7 +185,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
         System.out.println(new String(stdout.toByteArray()));
 
         HdfsUtils.rmdir(yarnConfiguration, //
-                String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, "dataflowapi"));
+                String.format("%s/%s", softwareLibraryService.getTopLevelPath(), "dataflowapi"));
         SoftwarePackage pkg = new SoftwarePackage();
         pkg.setModule("dataflowapi");
         pkg.setGroupId("com.latticeengines");

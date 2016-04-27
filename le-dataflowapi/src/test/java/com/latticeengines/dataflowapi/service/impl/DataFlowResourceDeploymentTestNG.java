@@ -54,7 +54,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         String jarFile = ClassLoader.getSystemResource(
                 "com/latticeengines/dataflowapi/service/impl/le-serviceflows-prospectdiscovery.jar").getPath();
         HdfsUtils.rmdir(yarnConfiguration, //
-                String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, "dataflowapi"));
+                String.format("%s/%s", softwareLibraryService.getTopLevelPath(), "dataflowapi"));
         SoftwarePackage pkg = new SoftwarePackage();
         pkg.setModule("dataflowapi");
         pkg.setGroupId("com.latticeengines");

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -32,7 +33,22 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     @Autowired
     private Configuration yarnConfiguration;
 
+    private String topLevelPath = "/app/swlib";
+
     public SoftwareLibraryServiceImpl() {
+    }
+
+    @Override
+    public String getTopLevelPath() {
+        return topLevelPath;
+    }
+
+    @Override
+    public void setStackName(String stackName) {
+        if (StringUtils.isNotEmpty(stackName)) {
+            topLevelPath = "/app/" +  stackName + "/swlib";
+            log.info("Set top level path to " + topLevelPath);
+        }
     }
 
     @Override
@@ -45,8 +61,8 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     public void installPackage(SoftwarePackage swPackage, File localFile) {
         log.info("fs.defaultFS = " + yarnConfiguration.get("fs.defaultFS"));
         String localFilePath = localFile.getAbsolutePath();
-        String hdfsJarPath = String.format("%s/%s", TOPLEVELPATH, swPackage.getHdfsPath());
-        String hdfsJsonPath = String.format("%s/%s", TOPLEVELPATH, swPackage.getHdfsPath("json"));
+        String hdfsJarPath = String.format("%s/%s", topLevelPath, swPackage.getHdfsPath());
+        String hdfsJsonPath = String.format("%s/%s", topLevelPath, swPackage.getHdfsPath("json"));
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, hdfsJarPath)) {
                 throw new LedpException(LedpCode.LEDP_27002, new String[] { hdfsJarPath });
@@ -63,7 +79,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        createSoftwareLibDir(TOPLEVELPATH);
+        createSoftwareLibDir(topLevelPath);
         yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
     }
 
@@ -83,7 +99,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         List<SoftwarePackage> packages = new ArrayList<>();
         try {
             List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, //
-                    String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, module), //
+                    String.format("%s/%s", topLevelPath, module), //
                     new HdfsFileFilter() {
 
                         @Override
