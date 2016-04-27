@@ -13,7 +13,7 @@
         dfs.ha.namenodes.${dataplatform.dfs.nameservices}=nn1,nn2
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
-        fs.defaultFS=${dataplatform.fs.defaultFS}         
+        fs.defaultFS=${dataplatform.fs.defaultFS}
         yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
         yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
         mapred.job.tracker=${dataplatform.mapred.job.tracker}
