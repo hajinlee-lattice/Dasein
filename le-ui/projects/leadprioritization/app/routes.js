@@ -5,7 +5,7 @@
 .run(['$rootScope', '$state', 'ResourceUtility', function($rootScope, $state, ResourceUtility) {
 
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
-        var LoadingString = ResourceUtility.getString("GENERAL_LOADING");
+        var LoadingString = ResourceUtility.getString("");
 
         if (to.redirectTo) {
             evt.preventDefault();

@@ -22,7 +22,7 @@ angular.module('mainApp.create.csvImport', [
         }
     }
 })
-.service('csvImportService', function($q, $http, ModelService, BrowserStorageUtility, csvImportStore) {
+.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
     this.Upload = function(options) {
         var deferred = $q.defer(),
             formData = new FormData(),
@@ -49,11 +49,13 @@ angular.module('mainApp.create.csvImport', [
 
         xhr.addEventListener('load', function(event) {
             xhr.data = JSON.parse(this.responseText);
+            ServiceErrorUtility.check(xhr);
             deferred.resolve(xhr.data);
         });
 
         xhr.addEventListener('error', function(event) {
             xhr.data = JSON.parse(this.responseText);
+            ServiceErrorUtility.check(xhr);
 
             var result = {
                 Success: false,
