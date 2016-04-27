@@ -198,7 +198,9 @@ angular.module('pd.jobs', [
 
     this.rescoreTrainingData = function() {
         var deferred = $q.defer();
-        var result;
+        var result = {
+            success: true
+        };
         var modelId = $stateParams.modelId;
 
         $http({
@@ -213,7 +215,8 @@ angular.module('pd.jobs', [
                 deferred.resolve(result);
             }, function onError(response) {
                 console.log('error',response);
-
+                result.success = false;
+                deferred.resolve(result);
             }
         );
         return deferred.promise;
@@ -390,8 +393,9 @@ angular.module('pd.jobs', [
     }
 
     $scope.handleRescoreClick = function($event) {
-        JobsService.rescoreTrainingData();
-        $scope.handleJobCreationSuccess(true);
+        JobsService.rescoreTrainingData().then(function(jobResponse) {
+            $scope.handleJobCreationSuccess(jobResponse.success);
+        });
         $event.target.disabled = true;
     };
     
