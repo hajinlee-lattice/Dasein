@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 public class AvroUtils {
 
@@ -211,7 +214,7 @@ public class AvroUtils {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
         FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         FieldBuilder<Schema> fieldBuilder;
-        for (Map.Entry<String, Class<?>> classEntry: classMap.entrySet()) {
+        for (Map.Entry<String, Class<?>> classEntry : classMap.entrySet()) {
             fieldBuilder = fieldAssembler.name(classEntry.getKey());
             Type type = getAvroType(classEntry.getValue());
             fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
@@ -462,6 +465,15 @@ public class AvroUtils {
         try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),
                 new GenericDatumReader<GenericRecord>())) {
             schema = reader.getSchema();
+        }
+        return schema;
+    }
+
+    public static Schema readSchemaFromResource(ResourceLoader resourceLoader, String resourcePath) throws IOException {
+        Schema schema = null;
+        Resource schemaResource = resourceLoader.getResource(resourcePath);
+        try (InputStream is = schemaResource.getInputStream()) {
+            schema = Schema.parse(is);
         }
         return schema;
     }

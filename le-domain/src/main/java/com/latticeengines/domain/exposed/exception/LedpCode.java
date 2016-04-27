@@ -312,6 +312,8 @@ public enum LedpCode {
     LEDP_25015("Failed to find a chance to kick off a refresh of {0} after {1} retries."), //
     LEDP_25016("Invalid ingestion configuration for {0}"), //
     LEDP_25017("Failed to start new ingestion"), //
+    LEDP_25018("Could not find schema"), //
+    LEDP_25019("Could not find java type for Avro type {0}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
