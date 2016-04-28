@@ -225,7 +225,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
                 }
             }
 
-            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
+            String dedupKey = getClass().getName() + "-" + scoringCommand.getPid().toString();
+            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), dedupKey,
                     details);
         } else {
             return "";

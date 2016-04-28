@@ -52,7 +52,8 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
 
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
-        alertService.triggerCriticalEvent(e.getMessage(), null, details);
+        String dedupKey = getCurrentRequest().getRequestURL().toString() + e.getClass().getName();
+        alertService.triggerCriticalEvent(e.getMessage(), null, dedupKey, details);
 
         return getModelAndView(e, stackTrace);
     }

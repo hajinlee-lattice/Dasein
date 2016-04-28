@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
@@ -22,6 +23,12 @@ public class RequestInfoImpl implements RequestInfo {
 
     @Autowired
     private HttpStopWatch httpStopWatch;
+
+    @Override
+    public String get(String key) {
+        Map<String, String> context = getOrCreate();
+        return Strings.nullToEmpty(context.get(key));
+    }
 
     @Override
     public void put(String key, String value) {

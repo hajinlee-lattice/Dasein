@@ -120,26 +120,26 @@ public class ModelCommandCallable implements Callable<Long> {
         this.featuresThreshold = builder.featuresThreshold;
         this.metadataService = builder.metadataService;
 
-        assert(modelCommand != null);
-        assert(yarnConfiguration != null);
-        assert(modelingJobService != null);
-        assert(modelCommandEntityMgr != null);
-        assert(modelCommandStateEntityMgr != null);
-        assert(modelStepYarnProcessor != null);
-        assert(modelCommandLogService != null);
-        assert(modelCommandResultEntityMgr != null);
-        assert(modelStepOutputResultsProcessor != null);
-        assert(modelStepFinishProcessor != null);
-        assert(modelStepRetrieveMetadataProcessor != null);
-        assert(debugProcessorImpl != null);
-        assert(alertService != null);
-        assert(resourceManagerWebAppAddress != null);
-        assert(appTimeLineWebAppAddress != null);
-        assert(rowFailThreshold != -1);
-        assert(rowWarnThreshold != -1);
-        assert(positiveEventFailThreshold != -1);
-        assert(positiveEventWarnThreshold != -1);
-        assert(metadataService != null);
+        assert (modelCommand != null);
+        assert (yarnConfiguration != null);
+        assert (modelingJobService != null);
+        assert (modelCommandEntityMgr != null);
+        assert (modelCommandStateEntityMgr != null);
+        assert (modelStepYarnProcessor != null);
+        assert (modelCommandLogService != null);
+        assert (modelCommandResultEntityMgr != null);
+        assert (modelStepOutputResultsProcessor != null);
+        assert (modelStepFinishProcessor != null);
+        assert (modelStepRetrieveMetadataProcessor != null);
+        assert (debugProcessorImpl != null);
+        assert (alertService != null);
+        assert (resourceManagerWebAppAddress != null);
+        assert (appTimeLineWebAppAddress != null);
+        assert (rowFailThreshold != -1);
+        assert (rowWarnThreshold != -1);
+        assert (positiveEventFailThreshold != -1);
+        assert (positiveEventWarnThreshold != -1);
+        assert (metadataService != null);
 
     }
 
@@ -327,7 +327,9 @@ public class ModelCommandCallable implements Callable<Long> {
             }
         }
 
-        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(), details);
+        String dedupKey = getClass().getName() + "-" + modelCommand.getPid().toString();
+        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(), dedupKey,
+                details);
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {
@@ -429,7 +431,6 @@ public class ModelCommandCallable implements Callable<Long> {
         }
 
     }
-
 
     public static class Builder {
 

@@ -15,7 +15,7 @@ public abstract class BaseExceptionHandler {
         log.error("Request for " + request.getRequestURL() + " failed:\n" + message);
     }
 
-    private HttpServletRequest getCurrentRequest() {
+    protected HttpServletRequest getCurrentRequest() {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     }
 }

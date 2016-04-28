@@ -27,12 +27,13 @@ public class AlertServiceImpl implements AlertService {
     private PagerDutyService pagerDutyService;
 
     @Override
-    public String triggerCriticalEvent(String description, String clientUrl, BasicNameValuePair... details) {
-        return this.triggerCriticalEvent(description, clientUrl, Arrays.asList(details));
+    public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
+            BasicNameValuePair... details) {
+        return this.triggerCriticalEvent(description, clientUrl, dedupKey, Arrays.asList(details));
     }
 
     @Override
-    public String triggerCriticalEvent(String description, String clientUrl,
+    public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {
         if (!this.alertServiceEnabled) {
             return "";
@@ -41,10 +42,11 @@ public class AlertServiceImpl implements AlertService {
         String result = "";
 
         try {
-            result = this.pagerDutyService.triggerEvent(description, clientUrl, details);
+            result = this.pagerDutyService.triggerEvent(description, clientUrl, dedupKey, details);
         } catch (IOException e) {
             // Intentionally log and consume error
-            log.error("Problem sending event to PagerDuty", e);
+            log.error(String.format("Problem sending event to PagerDuty. description:%s clientUrl:%s dedupKey:%s",
+                    description, clientUrl, dedupKey), e);
         }
 
         return result;

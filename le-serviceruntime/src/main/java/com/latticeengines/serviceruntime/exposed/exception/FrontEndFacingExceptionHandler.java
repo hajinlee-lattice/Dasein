@@ -55,7 +55,8 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
 
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
-        this.alertService.triggerCriticalEvent(e.getMessage(), null, details);
+        String dedupKey = getCurrentRequest().getRequestURL().toString() + e.getClass().getName();
+        this.alertService.triggerCriticalEvent(e.getMessage(), null, dedupKey, details);
 
         return getModelAndView();
     }

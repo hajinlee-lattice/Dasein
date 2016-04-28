@@ -158,10 +158,13 @@ public class ScoringApiExceptionHandler {
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
             alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
+            alertDetails.add(new BasicNameValuePair("Tenant", requestInfo.get(RequestInfo.TENANT)));
             alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
 
             String logUrl = SPLUNK_URL + identifier + "%22";
-            alertService.triggerCriticalEvent(errorMessage, logUrl, alertDetails);
+            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-" + code + "-"
+                    + ex.getClass().getName();
+            alertService.triggerCriticalEvent(errorMessage, logUrl, dedupKey, alertDetails);
         }
 
         requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));

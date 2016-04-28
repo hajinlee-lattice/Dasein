@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.monitor.exposed.alerts.service.PagerDutyService;
 
@@ -32,20 +33,20 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     }
 
     @Override
-    public String triggerEvent(String description, String clientUrl, BasicNameValuePair... details)
+    public String triggerEvent(String description, String clientUrl, String dedupKey, BasicNameValuePair... details)
             throws ClientProtocolException, IOException {
 
-        return this.triggerEvent(description, clientUrl, Arrays.asList(details));
+        return this.triggerEvent(description, clientUrl, dedupKey, Arrays.asList(details));
     }
 
     @Override
-    public String triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details)
+    public String triggerEvent(String description, String clientUrl, String dedupKey, Iterable<? extends BasicNameValuePair> details)
             throws ClientProtocolException, IOException {
         // response should look like this -
         // {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
         return HttpClientWithOptionalRetryUtils.sendPostRequest(
                 "https://events.pagerduty.com/generic/2010-04-15/create_event.json", true, this.getHeaders(), this
-                        .getRequestPayload(description, clientUrl, details).toString());
+                        .getRequestPayload(description, clientUrl, dedupKey, details).toString());
     }
 
     @VisibleForTesting
@@ -62,14 +63,17 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONObject getRequestPayload(String description, String clientUrl,
+    private JSONObject getRequestPayload(String description, String clientUrl, String incidentKey,
             Iterable<? extends BasicNameValuePair> details) {
         JSONObject payload = new JSONObject();
 
         LinkedHashMap<String, String> detailsMap = new LinkedHashMap<>();
         payload.put("service_key", this.serviceApiKey);
         payload.put("event_type", "trigger");
-        payload.put("description", description);
+        payload.put("description", Strings.nullToEmpty(description));
+        if (!StringUtils.isEmpty(incidentKey)) {
+            payload.put("incident_key", incidentKey);
+        }
         payload.put("client", MODULE_NAME);
         if (!StringUtils.isEmpty(clientUrl)) {
             payload.put("client_url", clientUrl);
