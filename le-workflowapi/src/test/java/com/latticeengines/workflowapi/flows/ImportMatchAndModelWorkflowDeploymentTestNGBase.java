@@ -1,5 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -10,14 +12,18 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -26,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
 import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
@@ -56,6 +63,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
+
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
@@ -114,4 +124,38 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         waitForCompletion(workflowId);
     }
 
+    protected String getModelSummary(String name) {
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllActive();
+        String lookupId = null;
+        for (ModelSummary summary : summaries) {
+            if (summary.getName().startsWith(name)) {
+                lookupId = summary.getLookupId();
+            }
+        }
+
+        String[] tokens = lookupId.split("\\|");
+        String path = "/user/s-analytics/customers/%s/models/%s/%s";
+        path = String.format(path, tokens[0], tokens[1], tokens[2]);
+
+        assertNotNull(lookupId,
+                String.format("Could not find active model summary created with provided name %s", name));
+
+        try {
+            List<String> modelPaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, path,
+                    new HdfsUtils.HdfsFileFilter() {
+                        @Override
+                        public boolean accept(FileStatus file) {
+                            return file.getPath().getName().contains("_model.json");
+                        }
+                    });
+            assertEquals(modelPaths.size(), 1);
+            String modelPath = modelPaths.get(0);
+            String jsonString = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
+
+            return jsonString;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

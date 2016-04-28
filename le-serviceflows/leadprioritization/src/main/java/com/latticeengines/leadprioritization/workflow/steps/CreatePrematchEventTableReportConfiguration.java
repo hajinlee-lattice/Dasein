@@ -10,7 +10,7 @@ public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowRep
     private String sourceTableName;
 
     @NotNull
-    private Double minEventPercentage;
+    private Long minPositiveEvents;
 
     @NotNull
     private Long minDedupedRows;
@@ -23,12 +23,12 @@ public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowRep
         this.sourceTableName = sourceTableName;
     }
 
-    public Double getMinEventPercentage() {
-        return minEventPercentage;
+    public Long getMinPositiveEvents() {
+        return minPositiveEvents;
     }
 
-    public void setMinEventPercentage(Double minEventPercentage) {
-        this.minEventPercentage = minEventPercentage;
+    public void setMinPositiveEvents(Long minPositiveEvents) {
+        this.minPositiveEvents = minPositiveEvents;
     }
 
     public Long getMinDedupedRows() {

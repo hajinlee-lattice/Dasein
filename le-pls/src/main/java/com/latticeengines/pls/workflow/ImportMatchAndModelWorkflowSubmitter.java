@@ -33,13 +33,14 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Autowired
     private MatchCommandProxy matchCommandProxy;
 
-    @Value("${pls.modeling.validation.min.dedupedrows:1000}")
+    @Value("${pls.modeling.validation.min.dedupedrows:300}")
     private long minDedupedRows;
 
-    @Value("${pls.modeling.validation.min.eventpercentage:0.5}")
-    private double minEventPercentage;
+    @Value("${pls.modeling.validation.min.eventrows:50}")
+    private long minPositiveEvents;
 
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
+
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
         if (sourceFile == null) {
@@ -82,7 +83,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .trainingTableName(trainingTableName) //
                 .inputProperties(inputProperties) //
                 .minDedupedRows(minDedupedRows) //
-                .minEventPercentage(minEventPercentage) //
+                .minPositiveEvents(minPositiveEvents) //
                 .build();
         return configuration;
     }
