@@ -34,7 +34,7 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private MatchCommandType matchCommandType;
 
-    private MatchJoinType matchJoinType = MatchJoinType.INNER_JOIN;
+    private MatchJoinType matchJoinType = MatchJoinType.OUTER_JOIN;
 
     @NotEmptyString
     @NotNull
