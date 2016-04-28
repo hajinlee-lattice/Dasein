@@ -31,10 +31,11 @@ angular.module('mainApp.create.csvBulkUpload', [
                     displayName: $scope.csvFileName,
                     compressed: false
                 },
+                ServiceErrorMethod: 'modal|home.model.jobs',
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {
                         xhr.abort();
-                        $('div.loader').css({'display':'none'});
+                        $('div.loader').css({ 'display':'none' });
 
                         html = 'ERROR: Over file size limit.  File must be below 486MB';
                     } else {
@@ -63,9 +64,11 @@ angular.module('mainApp.create.csvBulkUpload', [
 
                     $('#file_progress').html(html);
                 }
-            }).then(function(result) {
-                console.log('# Upload Successful:' + result.state, result);
-                if (result.state == "Uploaded" && result.name) {
+            }).then(function(response) {
+                var result = response.Result || {};
+
+                console.log('# Upload Successful:' + response.Success, result.state, response);
+                if (response.Success && result.state == "Uploaded" && result.name) {
                     var fileName = result.name;
 
                     console.log('# CSV Upload Complete', fileName, modelId);

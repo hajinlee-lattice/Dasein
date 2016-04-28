@@ -26,20 +26,17 @@ angular
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
         if (response && response.data && (response.data.errorCode || response.data.errorMsg)) {
-            var params = (response.config.headers.ErrorDisplayMethod || 'modal').split('|'),
+            var config = response.config || { headers: {} },
+                params = (config.headers.ErrorDisplayMethod || 'modal').split('|'),
                 method = params[0],
-                state = params[1] || null;
+                state = params[1] || null; // state or elementQuery
                 stateParams = params[2] || null;
-
-            if (typeof stateParams == 'string') {
-                //stateParams = JSON.parse(stateParams);
-            }
 
             switch (method) {
                 case 'none': break;
                 case 'popup': this.showModal(response, false, state, stateParams); break;
                 case 'modal': this.showModal(response, true, state, stateParams); break;
-                case 'banner': this.showBanner(response); break;
+                case 'banner': this.showBanner(response, state); break;
                 case 'suppress': this.showSuppressed(response); break;
                 default: this.showModal(response);
             }
@@ -51,7 +48,7 @@ angular
 
     };  
 
-    this.showBanner = function (response) {
+    this.showBanner = function (response, elementQuery) {
         $http.get('/app/modules/ServiceError/ServiceErrorBanner.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new(),
                 data = response.data;
@@ -61,7 +58,7 @@ angular
             scope.status = response.status;
             scope.statusText = response.statusText;
 
-            $compile($("#mainInfoView").html(html))(scope);
+            $compile($(elementQuery || "#mainInfoView").html(html))(scope);
         });
     };
 

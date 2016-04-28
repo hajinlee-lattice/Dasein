@@ -4,20 +4,21 @@
         <span data-ng-if="job.timestamp != null" class="columns three">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state == 'model'">{{job.source}}</span>
         <span class="columns three" ng-if="state != 'model'">{{job.displayName}}</span>
-        <span class="columns three {{job.status}}">{{job.status}}
-            <span data-ng-show="(jobCompleted || jobFailed) && job.id != null">
-                <a ui-sref="home.jobs.status.ready({jobId: job.id})" ng-show="jobType == 'fitModelWorkflow'">[View Report]</a>
-                <a ui-sref="home.jobs.status.csv({jobId: job.id})" ng-show="jobType == 'importMatchAndModelWorkflow'">[View Report]</a>
+        <span class="columns one {{job.status}}">{{job.status}}</span>
+        <span class="columns two">
+            <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" data-ng-show="(jobCompleted || jobFailed) && job.id != null">
+                <a ui-sref="home.jobs.status.ready({jobId: job.id})" ng-show="jobType == 'fitModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
+                <a ui-sref="home.jobs.status.csv({jobId: job.id})" ng-show="jobType == 'importMatchAndModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
                 <a 
                     href="javascript:void(0)" 
                     data-ng-click="clickGetScoringResults()" 
                     data-ng-show="(jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow') && job.status != 'Failed'"
                 >
-                    [Download Result]
+                    <i class="fa fa-download"></i>Download
                 </a>
             </span>
-            <span data-ng-show="jobRunning && !cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)">[Cancel Job]</a></span>
-            <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>
+            <span class="button orange-button" data-ng-show="jobRunning && !cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)"><i class="fa fa-stop-circle"></i>Cancel Job</a></span>
+            <span class="button white-button" data-ng-show="jobRunning && cancelClicked"> <span><i class="fa fa-stop-circle"></i>Cancelling...</span></span>
             
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
                 <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && jobType != 'scoreWorkflow' && job.timestamp != null && job.id != null">
@@ -27,6 +28,7 @@
                     <span><i class="fa fa-angle-double-up fa-lg"></i></span>
                 </a>
             </span>
+            &nbsp
         </span>
         <span class="columns three job-status-username">{{job.user || 'Unknown'}}</span>
     </div>

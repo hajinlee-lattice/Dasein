@@ -135,6 +135,30 @@ span.chevron-content.chevron-content-text {
     color: black;
     font-size: 15px;
     
+    span.button {
+        padding: 0;
+        border-radius: 3px;
+        vertical-align: top;
+        
+        i {
+            margin-right: .6em;
+        }
+        a,span {
+            padding: .3em .8em .2em;
+            color: #eee;
+            display: inline-block;
+        }
+        a:visited, a:active {
+            color: #eee;
+        }
+        a:hover {
+            color: white;
+        }
+        span {
+            color: black;
+        }
+    }
+    
     .expanded-true {
         background: #f7f7f7;
     }

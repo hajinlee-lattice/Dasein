@@ -162,7 +162,10 @@ angular.module('pd.jobs', [
 
         $http({
             method: 'GET',
-            url: '/pls/jobs/' + jobId
+            url: '/pls/jobs/' + jobId,
+            headers: { 
+                'ErrorDisplayMethod': 'banner'
+            }
         }).then(
             function onSuccess(response) {
                 clearNumSteps();

@@ -72,6 +72,8 @@ angular.module('mainApp.create.csvImport', [
 
         xhr.open('POST', options.url);
         
+        xhr.setRequestHeader("ServiceErrorMethod", (options.ServiceErrorMethod || 'modal|home.models'));
+
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
         }
