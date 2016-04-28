@@ -57,6 +57,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Website" })) //
@@ -70,34 +71,35 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .withValidator(InterfaceName.Event.name()) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Account Name" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
-                .withValidator("Website") //
+                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("City") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "City", "Billing City" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
-                .withValidator("Website") //
+                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Billing State", "Billing Province" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .withValidator("Website") //
+                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Country", "Billing Country" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
-                .withValidator("Website") //
+                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PostalCode") //
@@ -165,6 +167,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Email") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Email" })) //
@@ -178,34 +181,35 @@ public class SchemaRepository {
                 .required().interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .withValidator(InterfaceName.Event.name()) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Company", "Account" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
-                .withValidator("Email") //
+                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("City") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "City" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
-                .withValidator("Email") //
+                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Province" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .withValidator("Email") //
+                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Country" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
-                .withValidator("Email") //
+                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PostalCode") //

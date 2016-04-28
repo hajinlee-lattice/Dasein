@@ -3,19 +3,17 @@ package com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroOutputFormat;
 import org.apache.avro.mapred.AvroWrapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +29,6 @@ import org.mortbay.log.Log;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -41,7 +37,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
 
 /**
@@ -56,13 +53,11 @@ public class LedpCSVToAvroImportMapper extends
     private final AvroWrapper<GenericRecord> wrapper = new AvroWrapper<GenericRecord>();
     private Schema schema;
     private Table table;
-    private List<Attribute> attributes;
     private LargeObjectLoader lobLoader;
     private Path outputPath;
     private CSVPrinter csvFilePrinter;
     private Map<String, String> errorMap;
     private String interpretation;
-    private boolean emailOrWebsiteIsEmpty;
     private boolean missingRequiredColValue;
     private boolean fieldMalFormed;
     private long lineNum;
@@ -75,7 +70,6 @@ public class LedpCSVToAvroImportMapper extends
         schema = AvroJob.getMapOutputSchema(conf);
         Log.info("schema is: " + schema.toString());
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
-        attributes = table.getAttributes();
         interpretation = table.getInterpretation();
         LOG.info("table is:" + table);
         LOG.info(interpretation);
@@ -105,7 +99,6 @@ public class LedpCSVToAvroImportMapper extends
             throw new IOException(sqlE);
         }
 
-        emailOrWebsiteIsEmpty = false;
         missingRequiredColValue = false;
         fieldMalFormed = false;
         importedLineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue();
@@ -131,49 +124,23 @@ public class LedpCSVToAvroImportMapper extends
     }
 
     private GenericRecord toGenericRecord(SqoopRecord val) {
-
         GenericRecord record = new GenericData.Record(schema);
         Map<String, Object> fieldMap = val.getFieldMap();
 
-        Map<String, Object> sortedFieldMap = new TreeMap<>(new Comparator<String>() {
-
-            @Override
-            public int compare(String o1, String o2) {
-                final String s = o1;
-                Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
-                    @Override
-                    public boolean apply(Attribute attribute) {
-                        return attribute.getName().equals(s);
-                    }
-                });
-                InterfaceName interfaceName = attr.getInterfaceName();
-                if (interfaceName != null
-                        && (interfaceName.equals(InterfaceName.Email) || interfaceName.equals(InterfaceName.Website))) {
-                    return -1;
-                } else
-                    return o1.compareTo(o2);
-            }
-
-        });
-        sortedFieldMap.putAll(fieldMap);
         LOG.info("Start to processing line: " + lineNum);
-        for (Map.Entry<String, Object> entry : sortedFieldMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
             final String fieldKey = entry.getKey();
-            Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
-                @Override
-                public boolean apply(Attribute attribute) {
-                    return attribute.getName().equals(fieldKey);
-                }
-            });
+            Attribute attr = table.getAttribute(fieldKey);
 
-            String attrKey = attr.getName();
-            Type avroType = schema.getField(attrKey).schema().getTypes().get(0).getType();
+            Type avroType = schema.getField(fieldKey).schema().getTypes().get(0).getType();
             String fieldCsvValue = String.valueOf(entry.getValue());
             Object fieldAvroValue = null;
 
+            List<InputValidator> validators = attr.getValidators();
+
             try {
-                validateRowValueBeforeConvertToAvro(interpretation, attr, fieldCsvValue);
-                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", attrKey));
+                validateAttribute(validators, fieldMap, attr);
+                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", fieldKey));
                 if (attr.isNullable() && StringUtils.isEmpty(fieldCsvValue)) {
                     fieldAvroValue = null;
                 } else {
@@ -183,35 +150,26 @@ public class LedpCSVToAvroImportMapper extends
                 LOG.error(e);
                 errorMap.put(fieldKey, e.getMessage());
             }
-            record.put(attrKey, fieldAvroValue);
+            record.put(fieldKey, fieldAvroValue);
         }
         record.put(InterfaceName.InternalId.name(), importedLineNum + 1);
         return record;
     }
 
-    private void validateRowValueBeforeConvertToAvro(String interpretation, Attribute attr, String fieldCsvValue) {
-        InterfaceName interfaceName = attr.getInterfaceName();
-        if (interfaceName == null) {
-            Log.info("InterfaceName for attribute " + attr.getName() + " is null.");
-        } else if ((interfaceName.equals(InterfaceName.Id) || interfaceName.equals(InterfaceName.Event))
-                && StringUtils.isEmpty(fieldCsvValue)) {
-            missingRequiredColValue = true;
-            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
-        } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())
-                && interfaceName.equals(InterfaceName.Website) && StringUtils.isEmpty(fieldCsvValue)) {
-            emailOrWebsiteIsEmpty = true;
-        } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())
-                && interfaceName.equals(InterfaceName.Email) && StringUtils.isEmpty(fieldCsvValue)) {
-            emailOrWebsiteIsEmpty = true;
-        } else if (emailOrWebsiteIsEmpty
-                && (interfaceName.equals(InterfaceName.CompanyName) || interfaceName.equals(InterfaceName.City)
-                        || interfaceName.equals(InterfaceName.State) || interfaceName.equals(InterfaceName.Country))
-                && StringUtils.isEmpty(fieldCsvValue)) {
-            missingRequiredColValue = true;
-            String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? InterfaceName.Website
-                    .name() : InterfaceName.Email.name();
-            throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", colName,
-                    attr.getDisplayName()));
+    private void validateAttribute(List<InputValidator> validators, Map<String, Object> fieldMap, Attribute attr) {
+        String attrKey = attr.getName();
+        if (CollectionUtils.isNotEmpty(validators)) {
+            RequiredIfOtherFieldIsEmpty validator = (RequiredIfOtherFieldIsEmpty) validators.get(0);
+            if (!validator.validate(attrKey, fieldMap, table)) {
+                missingRequiredColValue = true;
+                if (attrKey.equals(validator.otherField)) {
+                    throw new RuntimeException(String.format("Required Column %s is missing value.",
+                            attr.getDisplayName()));
+                } else {
+                    throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", table
+                            .getAttribute(validator.otherField).getDisplayName(), attr.getDisplayName()));
+                }
+            }
         }
     }
 

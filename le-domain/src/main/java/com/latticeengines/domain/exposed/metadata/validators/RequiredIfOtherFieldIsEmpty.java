@@ -22,13 +22,10 @@ public class RequiredIfOtherFieldIsEmpty extends InputValidator {
 
     @Override
     public boolean validate(String field, Map<String, Object> row, Table metadata) {
-        if (otherField.equals(field)) {
-            return true;
-        }
         Object value = row.get(field);
         if (value == null || value.toString().equals("")) {
             Object otherFieldValue = row.get(otherField);
-            if (otherFieldValue == null || value.toString().equals("")) {
+            if (otherFieldValue == null || otherFieldValue.toString().equals("")) {
                 return false;
             }
         }

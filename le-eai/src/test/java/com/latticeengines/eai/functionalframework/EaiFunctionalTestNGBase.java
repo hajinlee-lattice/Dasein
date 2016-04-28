@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
@@ -168,11 +169,13 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                 attr.setName(InterfaceName.Id.name());
                 attr.setInterfaceName(InterfaceName.Id);
                 attr.setPhysicalDataType(Type.STRING.name());
+                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Id.name()));
             }
             if (attr.getDisplayName().equals("Country")) {
                 attr.setName(InterfaceName.Country.name());
                 attr.setInterfaceName(InterfaceName.Country);
                 attr.setPhysicalDataType(Type.STRING.name());
+                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Email.name()));
             }
             if (attr.getDisplayName().equals("Company")) {
                 attr.setName(InterfaceName.CompanyName.name());
@@ -186,8 +189,9 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             }
             if (attr.getDisplayName().equals("City")) {
                 attr.setInterfaceName(InterfaceName.City);
-                attr.setName("City");
+                attr.setName(InterfaceName.City.name());
                 attr.setPhysicalDataType(Type.STRING.name());
+                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Email.name()));
             }
             if (attr.getDisplayName().equals("DS CompanyName Length")) {
                 attr.setName("DS_CompanyName_Length");
