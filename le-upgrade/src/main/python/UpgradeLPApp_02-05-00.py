@@ -17,6 +17,6 @@ sequence = []
 sequence.append(appsequence.LPCheckVersion('2.4.3'))
 #sequence.append(lp020500.LP_020500_VDB_NewSpecs())
 sequence.append(lp020500.LP_020500_RePDMatch_ReScore())
-sequence.append(appsequence.LPSetVersion('2.4.3'))
+sequence.append(appsequence.LPSetVersion('2.5.0'))
 app = appsequence.AppSequence(tenantFileName, resultsFileName, sequence, checkOnly)
 app.execute()
