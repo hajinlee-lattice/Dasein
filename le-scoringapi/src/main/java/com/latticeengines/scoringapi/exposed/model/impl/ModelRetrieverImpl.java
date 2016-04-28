@@ -181,6 +181,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Override
     public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
+        log.info(String.format("Retrieving model artifacts from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
@@ -491,8 +492,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
-                        log.info("Loading model artifacts");
-
                         return retrieveModelArtifactsFromHdfs(key.getKey(), key.getValue());
                     }
                 });

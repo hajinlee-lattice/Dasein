@@ -103,10 +103,10 @@ public class ScoreResource {
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        requestInfo.put("Tenant", customerSpace.toString());
+        requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            httpStopWatch.split("getTenantFromOAuth");
             if (log.isInfoEnabled()) {
-                log.info(httpStopWatch.split("getTenantFromOAuth"));
                 log.info(JsonUtils.serialize(scoreRequest));
             }
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
