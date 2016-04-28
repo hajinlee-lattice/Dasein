@@ -23,7 +23,7 @@ public class RecordTransformer {
     @Autowired
     private TransformRetriever transformRetriever;
 
-    public Map<String, Object> transformOld(String modelPath, //
+    public Map<String, Object> transform(String modelPath, //
             List<TransformDefinition> definitions, //
             Map<String, Object> record) {
 
@@ -65,7 +65,7 @@ public class RecordTransformer {
         return result;
     }
 
-    public Map<String, Object> transform(String modelPath, List<TransformDefinition> definitions,
+    public Map<String, Object> transformOld(String modelPath, List<TransformDefinition> definitions,
             Map<String, Object> record) {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
