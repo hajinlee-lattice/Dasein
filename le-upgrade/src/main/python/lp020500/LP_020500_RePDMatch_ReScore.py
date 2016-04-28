@@ -125,7 +125,7 @@ class LP_020500_RePDMatch_ReScore(StepBase):
     lgm.setLoadGroupFunctionality('PropDataMatch_Step2', pdms2_xml)
 
     #Create PushToScoringDB_Step2
-    lgm.createLoadGroup('PushToScoringDB_Step2', 'OperationalProcess\Standard',  'PushToScoringDB_Step2', True, False)
+    lgm.getLoadGroup( 'PushToScoringDB_Step2')
     ptss2_xml = ''
     if type == 'MKTO':
       ptss2_xml = '''
@@ -184,7 +184,7 @@ class LP_020500_RePDMatch_ReScore(StepBase):
           <cms/>
         </extractQuery>
       </extractQueries>'''
-    lgm.setLoadGroupFunctionality('PushToScoringDB_Step2', pdms2_xml)
+    lgm.setLoadGroupFunctionality('PushToScoringDB_Step2', ptss2_xml)
     success = True
 
     return success
