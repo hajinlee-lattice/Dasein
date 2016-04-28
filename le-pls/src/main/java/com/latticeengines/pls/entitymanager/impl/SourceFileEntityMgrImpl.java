@@ -1,5 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +62,11 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByApplicationId(String applicationId) {
         return sourceFileDao.findByApplicationId(applicationId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<SourceFile> findAllSourceFiles() {
+        return sourceFileDao.findAllSourceFiles();
     }
 }

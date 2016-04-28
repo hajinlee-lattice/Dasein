@@ -6,12 +6,14 @@
 
     <import resource="classpath:pls-modeldownload-quartz-context.xml"/>
     <!--<import resource="classpath:pls-fileprocessor-quartz-context.xml"/>-->
+    <import resource="classpath:pls-sourcefilepurge-quartz-context.xml"/>
 
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="modelSummaryDownloadCronTrigger" />
                 <!-- <ref bean="fileProcessorCronTrigger" /> -->
+                <ref bean="sourceFilePurgeCronTrigger" />
             </list>
         </property>
     </bean>

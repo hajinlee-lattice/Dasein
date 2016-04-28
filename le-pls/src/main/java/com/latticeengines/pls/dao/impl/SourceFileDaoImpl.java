@@ -1,5 +1,7 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -22,5 +24,10 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
     @Override
     public SourceFile findByApplicationId(String applicationId) {
         return findByField("applicationId", applicationId);
+    }
+    
+    @Override
+    public List<SourceFile> findAllSourceFiles() {
+        return findAll();
     }
 }
