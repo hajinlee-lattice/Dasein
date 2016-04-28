@@ -77,7 +77,8 @@ public class ScoreCorrectnessService {
     @Autowired
     private ModelRetriever modelRetriever;
 
-    public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore) throws IOException {
+    public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore)
+            throws IOException {
         String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId).getValue();
         Oauth2HeaderHttpRequestInterceptor interceptor = new Oauth2HeaderHttpRequestInterceptor(accessToken);
         scoringRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));
@@ -314,8 +315,8 @@ public class ScoreCorrectnessService {
         inputQueue.addAll(inputRecords.keySet());
         final int inputQueueSize = inputQueue.size();
         for (int i = 0; i < THREADPOOL_SIZE; i++) {
-            scoreExecutorService.execute(new ScoreApiCallable(scoreApiHostPort, scoringRestTemplate, modelId, inputRecords,
-                    inputQueue, problemScores, responses, inputQueueSize, counter));
+            scoreExecutorService.execute(new ScoreApiCallable(scoreApiHostPort, scoringRestTemplate, modelId,
+                    inputRecords, inputQueue, problemScores, responses, inputQueueSize, counter));
         }
 
         scoreExecutorService.shutdown();
@@ -366,8 +367,8 @@ public class ScoreCorrectnessService {
                 }
                 try {
                     DebugScoreResponse response = score(inputRecords.get(id), modelId);
-                    System.out.println((String.format("Scored record id %s #%d out of %d", id,
-                            counter.incrementAndGet(), initialInputQueueSize)));
+                    log.info((String.format("Scored record id %s #%d out of %d", id, counter.incrementAndGet(),
+                            initialInputQueueSize)));
                     responses.put(id, response);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -478,7 +479,8 @@ public class ScoreCorrectnessService {
     }
 
     // omit duplicate ID's from the test set
-    private Map<String, Double> getExpectedScoresFromScoredTxt(ScoreCorrectnessArtifacts artifacts, int numRecordsToScore) {
+    private Map<String, Double> getExpectedScoresFromScoredTxt(ScoreCorrectnessArtifacts artifacts,
+            int numRecordsToScore) {
         Map<String, Double> expectedScores = new HashMap<>();
         Map<String, Double> scoresToTest = new HashMap<>();
 
