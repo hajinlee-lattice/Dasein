@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.engine.publication.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,6 +33,9 @@ public class PublicationServiceImpl implements PublicationService {
 
     private static final Log log = LogFactory.getLog(PublicationServiceImpl.class);
 
+    private static final Long NEW_JOB_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
+    private static final Long RUNNING_JOB_TIMEOUT = TimeUnit.HOURS.toMillis(48);
+
     @Autowired
     private PublicationEntityMgr publicationEntityMgr;
 
@@ -54,6 +59,7 @@ public class PublicationServiceImpl implements PublicationService {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
+        killHangingJobs();
         publishAll();
         return scanForNewWorkFlow();
     }
@@ -64,8 +70,8 @@ public class PublicationServiceImpl implements PublicationService {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
-        PublicationProgress progress =  publicationProgressService.publishVersion(publication, request.getSourceVersion(),
-                request.getSubmitter());
+        PublicationProgress progress = publicationProgressService.publishVersion(publication,
+                request.getSourceVersion(), request.getSubmitter());
         if (progress == null) {
             log.info("There is already a progress for version " + request.getSourceVersion());
         }
@@ -84,6 +90,18 @@ public class PublicationServiceImpl implements PublicationService {
         }
     }
 
+    private void killHangingJobs() {
+        for (PublicationProgress progress : publicationProgressService.scanNonTerminalProgresses()) {
+            if ((ProgressStatus.NEW.equals(progress.getStatus())
+                    && progress.getLatestStatusUpdate().before(new Date(System.currentTimeMillis() - NEW_JOB_TIMEOUT)))
+                    || (ProgressStatus.PROCESSING.equals(progress.getStatus()) && progress.getLatestStatusUpdate()
+                            .before(new Date(System.currentTimeMillis() - RUNNING_JOB_TIMEOUT)))) {
+                log.error("Found a hanging job " + progress + ". Kill it.");
+                publicationProgressService.update(progress).fail("Time out at status " + progress.getStatus()).commit();
+            }
+        }
+    }
+
     private List<PublicationProgress> scanForNewWorkFlow() {
         List<PublicationProgress> progresses = new ArrayList<>();
         Boolean serviceTenantBootstrapped = false;
@@ -96,15 +114,19 @@ public class PublicationServiceImpl implements PublicationService {
                 Publication publication = progress.getPublication();
                 Source source = sourceService.findBySourceName(publication.getSourceName());
                 String avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
-                ApplicationId applicationId = submitWorkflow(progress, avroDir, HdfsPodContext.getHdfsPodId());
-                PublicationProgressUpdater updater = publicationProgressService.update(progress);
+                PublicationProgressUpdater updater = publicationProgressService.update(progress)
+                        .status(ProgressStatus.PROCESSING);
                 if (ProgressStatus.FAILED.equals(progress.getStatus())) {
                     updater.retry();
                 }
-                PublicationProgress progress1 = updater.applicationId(applicationId).commit();
+                updater.commit();
+                ApplicationId applicationId = submitWorkflow(progress, avroDir, HdfsPodContext.getHdfsPodId());
+                PublicationProgress progress1 = publicationProgressService.update(progress).applicationId(applicationId)
+                        .commit();
                 progresses.add(progress1);
                 log.info("Send progress [" + progress + "] to workflow api: ApplicationID=" + applicationId);
             } catch (Exception e) {
+                publicationProgressService.update(progress).status(ProgressStatus.FAILED).commit();
                 // do not block scanning other progresses
                 log.error("Failed to proceed progress " + progress, e);
             }
