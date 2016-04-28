@@ -30,13 +30,16 @@ public class PythonClientCustomizationUnitTestNG {
         packages.add(createSoftwarePackage("le-serviceflows-leadprioritization"));
         packages.add(createSoftwarePackage("le-serviceflows-propdata"));
         SoftwareLibraryService swlibService = mock(SoftwareLibraryService.class);
+        swlibService.setStackName("");
+        when(swlibService.getTopLevelPath()).thenReturn("/app/swlib");
         when(swlibService.getInstalledPackagesByVersion(anyString(), anyString())).thenReturn(
                 packages);
         ReflectionTestUtils.setField(customization, "softwareLibraryService", swlibService);
 
         VersionManager versionManager = mock(VersionManager.class);
-        when(versionManager.getCurrentVersionInStack("")).thenReturn("2.0.22-SNAPSHOT");
+        when(versionManager.getCurrentVersionInStack(anyString())).thenReturn("2.0.22-SNAPSHOT");
         ReflectionTestUtils.setField(customization, "versionManager", versionManager);
+        ReflectionTestUtils.setField(customization, "stackName", "");
     }
 
     private SoftwarePackage createSoftwarePackage(String artifactId) {
