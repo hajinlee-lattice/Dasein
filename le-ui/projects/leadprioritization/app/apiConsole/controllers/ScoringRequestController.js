@@ -8,9 +8,10 @@ angular.module('pd.apiconsole.ScoringRequestController', [
 .directive('scoringRequest', function () {
     return {
         templateUrl: 'app/apiConsole/views/ScoringRequestView.html',
-        controller: ['$scope', '$stateParams', '_', 'ResourceUtility', 'BrowserStorageUtility', 'APIConsoleService',
-                     function ($scope, $stateParams, _, ResourceUtility, BrowserStorageUtility, APIConsoleService) {
+        controller: ['$scope', '$q', '$stateParams', '_', 'ResourceUtility', 'BrowserStorageUtility', 'APIConsoleService',
+                     function ($scope, $q, $stateParams, _, ResourceUtility, BrowserStorageUtility, APIConsoleService) {
             $scope.ResourceUtility = ResourceUtility;
+            $scope.showScoringRequestError = false;
             initValues();
 
             var displayOrder = ["Email", "CompanyName", "State", "Country", "Website", "FirstName", "LastName"];
@@ -119,22 +120,75 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 }
                 var token = BrowserStorageUtility.getOAuthAccessToken();
                 if (token != null) {
-                    getScoreRecord(token, scoreRequest);
+                    getScoreRecordWithRetries(token, scoreRequest);
                 } else {
                     APIConsoleService.GetOAuthAccessToken($stateParams.tenantId).then(function (tokenResult) {
                         if (tokenResult.Success) {
                             BrowserStorageUtility.setOAuthAccessToken(tokenResult.ResultObj);
-                            getScoreRecord(tokenResult.ResultObj, scoreRequest);
+                            getScoreRecord(tokenResult.ResultObj, scoreRequest).then(function(scoringResult) {
+                                $scope.showScoringRequestError = true;
+                                $scope.scoreRecordLoading = false;
+                            });
                         } else {
                             $scope.scoringRequestError = result.ResultErrors;
+                            $scope.showScoringRequestError = true;
                             $scope.scoreRecordLoading = false;
                         }
                     });
                 }
             };
 
+            function refreshAccessToken() {
+                var deferred = $q.defer();
+                var result = {
+                    success: true,
+                    accessToken: null
+                }
+
+                APIConsoleService.GetOAuthAccessToken($stateParams.tenantId).then(function (tokenResult) {
+                    if (tokenResult.Success) {
+                        var accessToken = tokenResult.ResultObj;
+                        BrowserStorageUtility.setOAuthAccessToken(accessToken);
+                        result.accessToken = accessToken;
+                        deferred.resolve(result);
+                    } else {
+                        $scope.scoringRequestError = $scope.scoringRequestError + ' and refresh access token failed';
+                        result.success = false;
+                        deferred.resolve(result);
+                    }
+                });
+
+                return deferred.promise;
+            }
+
+            function getScoreRecordWithRetries(token, scoringRequest) {
+                getScoreRecord(token, scoringRequest).then(function(scoringResult) {
+                    if (!scoringResult.success && $scope.scoringRequestError.indexOf('Invalid access token') > -1) {
+                        refreshAccessToken().then(function(tokenResult) {
+                            if (tokenResult.success) {
+                                getScoreRecord(tokenResult.accessToken, scoringRequest).then(function(scoringResult) {
+                                    $scope.showScoringRequestError = true;
+                                    $scope.scoreRecordLoading = false;
+                                });
+                            } else {
+                                $scope.showScoringRequestError = true;
+                                $scope.scoreRecordLoading = false;
+                            }
+                        });
+                    } else {
+                        $scope.showScoringRequestError = true;
+                        $scope.scoreRecordLoading = false;
+                    }
+                });
+            }
+
             function getScoreRecord(token, scoreRequest) {
+                var deferred = $q.defer();
                 var start = new Date();
+                var scoringResult = {
+                    success: true
+                }
+
                 APIConsoleService.GetScoreRecord(token, scoreRequest).then(function (result) {
                     var end = new Date();
                     $scope.timeElapsed = (end.getTime() - start.getTime()) + ' MS';
@@ -143,11 +197,16 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     }
                     if (result.Success) {
                         $scope.score = result.ResultObj.score;
+                        $scope.scoringRequestError = null;
+                        deferred.resolve(scoringResult);
                     } else {
                         $scope.scoringRequestError = result.ResultErrors;
+                        scoringResult.success = false;
+                        deferred.resolve(scoringResult);
                     }
-                    $scope.scoreRecordLoading = false;
                 });
+
+                return deferred.promise;
             }
         }]
     };
