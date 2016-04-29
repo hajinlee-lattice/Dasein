@@ -163,7 +163,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.5.5</version>
+                        <version>${maven.assembly.version}</version>
                         <configuration>
                             <finalName>propdata</finalName>
                             <descriptors>
