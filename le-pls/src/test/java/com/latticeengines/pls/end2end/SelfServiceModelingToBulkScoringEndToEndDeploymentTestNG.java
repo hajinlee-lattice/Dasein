@@ -8,11 +8,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -34,8 +36,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -74,8 +78,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, null, null);
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
+        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
     }
 
     @Test(groups = "deployment.lp")
@@ -155,9 +159,10 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             assertTrue(csvHeaders.contains("LEAD"));
             assertTrue(csvHeaders.contains("Phone"));
             assertTrue(csvHeaders.contains("Some Column"));
+            assertTrue(csvHeaders.contains("Score"));
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
-                assertTrue(StringUtils.isNotEmpty(record.get("Percentile")));
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
                 line++;
             }
             assertEquals(line, TOTAL_QUALIFIED_LINES);
@@ -218,5 +223,30 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             throw new RuntimeException(e);
         }
     }
+
+    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
+        @Override
+        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
+            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
+                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+                    "Source_Detail__c", "Cloud_Plan__c" });
+            log.info(unknownColumns);
+            for (LinkedHashMap<String, String> map : unknownColumns) {
+                String columnName = map.get("columnName");
+                if (booleanSet.contains(columnName)) {
+                    map.put("columnType", Schema.Type.BOOLEAN.name());
+                } else if (strSet.contains(columnName)) {
+                    map.put("columnType", Schema.Type.STRING.name());
+                } else if (columnName.startsWith("Activity_Count_")) {
+                    map.put("columnType", Schema.Type.INT.name());
+                }
+            }
+            log.info(unknownColumns);
+
+            return null;
+        }
+    };
 
 }
