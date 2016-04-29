@@ -3,15 +3,13 @@
     justify-content: center;
     & > div {
         margin: 7px;
+        min-height: auto;
     }
-    .summary .stats.black-summary-list {
-		min-height: auto;
-	}
 }
 
 @media (max-width: 757px) {
 	.model-summary {
-		.summary .stats.black-summary-list {
+		& > div {
 			min-height: 165px;
 		}
 		.stats-group dl {
