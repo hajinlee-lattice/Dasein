@@ -93,10 +93,10 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, files);
         for (GenericRecord record : records) {
             assertNotNull(record.get(InterfaceName.Id.name()));
-            assertNotNull(record.get(ScoreResultField.Percentile.name()));
+            assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.RawScore.name()));
             if (scores.containsKey(record.get(InterfaceName.Id.name()).toString())) {
-                assertNotNull(record.get(ScoreResultField.Percentile.name()));
+                assertNotNull(record.get(ScoreResultField.Percentile.displayName));
                 assertTrue(Math.abs(scores.get(record.get(InterfaceName.Id.name()).toString())
                         - ((Double) (record.get(ScoreResultField.RawScore.name())))) < 0.000001);
             }else{

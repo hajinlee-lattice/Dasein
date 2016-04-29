@@ -49,7 +49,7 @@ public class CombineInputTableWithScoreTestNG extends ServiceFlowsDataFlowFuncti
         assertEquals(records.size(), scores.size());
         for (GenericRecord record : records) {
             assertNotNull(record.get(InterfaceName.Id.name()));
-            assertNotNull(record.get("Score"));
+            assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.RawScore.name()));
         }
     }

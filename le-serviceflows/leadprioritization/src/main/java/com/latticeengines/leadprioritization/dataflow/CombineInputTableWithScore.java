@@ -23,8 +23,6 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         Node combinedResultTable = inputTable.leftOuterJoin(InterfaceName.Id.name(), scoreTable,
                 InterfaceName.Id.name());
 
-        combinedResultTable = combinedResultTable.rename(new FieldList(ScoreResultField.Percentile.name()),
-                new FieldList("Score"));
         List<String> fieldsToDiscard = new ArrayList<>();
         if (!parameters.isDebuggingEnabled()) {
             fieldsToDiscard.add(ScoreResultField.RawScore.name());

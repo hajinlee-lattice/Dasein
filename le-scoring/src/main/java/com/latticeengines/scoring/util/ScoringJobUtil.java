@@ -115,8 +115,8 @@ public class ScoringJobUtil {
         id.setSourceLogicalDataType(InterfaceName.Id.name());
 
         Attribute percentile = new Attribute();
-        percentile.setName(ScoreResultField.Percentile.name());
-        percentile.setDisplayName(ScoreResultField.Percentile.name());
+        percentile.setName(ScoreResultField.Percentile.displayName);
+        percentile.setDisplayName(ScoreResultField.Percentile.displayName);
         percentile.setPhysicalDataType(ScoreResultField.Percentile.physicalDataType);
         percentile.setSourceLogicalDataType(ScoreResultField.Percentile.sourceLogicalDataType);
 
@@ -138,7 +138,7 @@ public class ScoringJobUtil {
         for (ScoreOutput scoreOutput : resultList) {
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             builder.set(InterfaceName.Id.name(), String.valueOf(scoreOutput.getLeadID()));
-            builder.set(ScoreResultField.Percentile.name(), scoreOutput.getPercentile());
+            builder.set(ScoreResultField.Percentile.displayName, scoreOutput.getPercentile());
             builder.set(ScoreResultField.RawScore.name(), scoreOutput.getRawScore());
             dataFileWriter.append(builder.build());
         }
