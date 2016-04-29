@@ -214,39 +214,49 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.version}</version>
                 <executions>
                     <execution>
                         <id>leframework</id>
-                        <configuration>
-                            <descriptor>src/assembly/leframework.xml</descriptor>
-                            <finalName>leframework</finalName>
-                        </configuration>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>leframework</finalName>
+                            <descriptors>
+                                <descriptor>src/assembly/leframework.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>lepipeline</id>
-                        <configuration>
-                            <descriptor>src/assembly/lepipeline.xml</descriptor>
-                            <finalName>lepipeline</finalName>
-                        </configuration>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>lepipeline</finalName>
+                            <descriptors>
+                                <descriptor>src/assembly/lepipeline.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>evpipeline</id>
-                        <configuration>
-                            <descriptor>src/assembly/evpipeline.xml</descriptor>
-                            <finalName>evpipeline</finalName>
-                        </configuration>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>evpipeline</finalName>
+                            <descriptors>
+                                <descriptor>src/assembly/evpipeline.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
