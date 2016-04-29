@@ -64,6 +64,8 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Website) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Event") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
@@ -120,11 +122,15 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CreatedDate", "Created Date" })) //
@@ -145,6 +151,8 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.YearStarted) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Phone", "PhoneNumber" })) //
@@ -175,6 +183,8 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Email) //
+                .fundamentalType(ModelingMetadata.FT_EMAIL) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
@@ -256,6 +266,8 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LeadSource", "Lead Source" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LeadSource) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("IsClosed") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "IsClosed", "Closed" })) //
@@ -281,11 +293,15 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "No. of Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
+                .fundamentalType(ModelingMetadata.FT_ENUM) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Industry") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Industry" })) //
@@ -378,6 +394,16 @@ public class SchemaRepository {
 
         public AttributeBuilder allowedDisplayNames(Set<String> allowedDisplayNames) {
             attribute.setAllowedDisplayNames(allowedDisplayNames);
+            return this;
+        }
+
+        public AttributeBuilder fundamentalType(String fundamentalType) {
+            attribute.setFundamentalType(fundamentalType);
+            return this;
+        }
+
+        public AttributeBuilder category(String category) {
+            attribute.setCategory(category);
             return this;
         }
     }

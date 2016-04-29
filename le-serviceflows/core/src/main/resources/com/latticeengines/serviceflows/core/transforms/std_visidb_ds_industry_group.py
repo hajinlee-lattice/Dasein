@@ -12,6 +12,7 @@ def metadata():
             , 'Description'     : 'Rollup of Industry field from Marketing Automation'
             , 'DisplayName'     : 'Industry Rollup'
             , 'Category'        : 'Lead Information'
+            , 'FundamentalType' : 'alpha'
             , 'StatisticalType' : 'nominal'
             , 'Tags'            : 'Internal' }
 

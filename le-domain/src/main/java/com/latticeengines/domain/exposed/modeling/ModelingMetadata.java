@@ -23,22 +23,28 @@ public class ModelingMetadata {
     public static final String INTERVAL_STAT_TYPE = "interval";
     public static final String RATIO_STAT_TYPE = "ratio";
     public static final String CATEGORY_EXTENSION = "Category";
+    public static final String CATEGORY_LEAD_INFORMATION = "Lead Information";
     public static final String FT_ALPHA = "alpha";
     public static final String FT_BOOLEAN = "boolean";
     public static final String FT_CURRENCY = "currency";
     public static final String FT_NUMERIC = "numeric";
     public static final String FT_PERCENTAGE = "percentage";
     public static final String FT_YEAR = "year";
+    public static final String FT_EMAIL = "email";
+    public static final String FT_PROBABILITY = "probability";
+    public static final String FT_PHONE = "phone";
+    public static final String FT_URI = "uri";
+    public static final String FT_ENUM = "enum";
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
     public static class KV implements Map.Entry<String, String> {
         private String key;
         private String value;
-        
+
         public KV() {
         }
-        
+
         public KV(String key, String value) {
             this.key = key;
             this.value = value;
@@ -98,7 +104,7 @@ public class ModelingMetadata {
 
     public static class AttributeMetadata {
         @AllowedValues(values = { //
-                MODEL_APPROVED_USAGE, //
+        MODEL_APPROVED_USAGE, //
                 MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE, //
                 MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE, //
                 NONE_APPROVED_USAGE })
@@ -114,7 +120,8 @@ public class ModelingMetadata {
         private String displayName;
         @RequiredKeysInMap(keys = { CATEGORY_EXTENSION })
         private List<KV> extensions;
-        @AllowedValues(values = { FT_ALPHA, FT_BOOLEAN, FT_CURRENCY, FT_NUMERIC, FT_PERCENTAGE, FT_YEAR })
+        @AllowedValues(values = { FT_ALPHA, FT_BOOLEAN, FT_CURRENCY, FT_NUMERIC, FT_PERCENTAGE, FT_YEAR, FT_EMAIL,
+                FT_PROBABILITY, FT_PHONE, FT_URI, FT_ENUM })
         private String fundamentalType;
         private List<DateTime> lastTimeSourceUpdated;
         private DateTime mostRecentUpdateDate;

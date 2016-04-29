@@ -10,6 +10,7 @@ def metadata():
             , 'Description'     : 'Indicates that First Name is same as Last Name'
             , 'DisplayName'     : 'Identical First and Last Names'
             , 'Category'        : 'Lead Information'
+            , 'FundamentalType' : 'boolean'
             , 'StatisticalType' : 'nominal'
             , 'Tags'            : 'Internal' }
 

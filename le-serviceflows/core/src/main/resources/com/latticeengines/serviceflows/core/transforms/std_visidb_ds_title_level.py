@@ -13,6 +13,7 @@ def metadata():
             , 'DisplayDiscretizationStrategy' : '{"linear": { "minValue":0,"stepSize":1,"minSamples":100,"minFreq":0.01,"maxBuckets":5,"maxPercentile":1}}'
             , 'DisplayName'     : 'Job Title Seniority'
             , 'Category'        : 'Lead Information'
+            , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ordinal'
             , 'Tags'            : 'Internal' }
 
