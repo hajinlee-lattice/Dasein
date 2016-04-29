@@ -4,4 +4,21 @@
     & > div {
         margin: 7px;
     }
+    .summary .stats.black-summary-list {
+		min-height: auto;
+	}
+}
+
+@media (max-width: 757px) {
+	.model-summary {
+		.summary .stats.black-summary-list {
+			min-height: 165px;
+		}
+		.stats-group dl {
+			border-left: none;
+			padding: 0;
+			float: none;
+			margin-bottom: 4px;
+    	}
+    }
 }

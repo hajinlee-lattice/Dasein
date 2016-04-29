@@ -135,9 +135,9 @@ Secondary Nav (Hamburger and Profile Nav)
   .model-name {
     display: inline-block;
     font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
-    color: #a9a9a9;
-    font-size: 16px;
-    padding-top: 17px;
+    color: #333;
+    font-size: 22px;
+    padding-top: 13px;
   }
   .profile-nav {
     float: right;
@@ -155,7 +155,7 @@ Secondary Nav (Hamburger and Profile Nav)
       }
       &.active {
         background-color: #222;
-        color: #fff;
+        color: rgba(255, 255, 255, 0.8);
       }
     }
     ul {
@@ -184,6 +184,8 @@ Secondary Nav (Hamburger and Profile Nav)
             padding-bottom: 8px;
           }
           &:hover {
+            background: #0d0d0d;
+            color: rgba(255, 255, 255, 1);
             text-decoration: none;
           }
         }
