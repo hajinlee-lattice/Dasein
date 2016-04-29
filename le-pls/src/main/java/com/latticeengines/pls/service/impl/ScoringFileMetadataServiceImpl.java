@@ -33,6 +33,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
 import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -51,6 +52,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private ModelMetadataService modelMetadataService;
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFileds,
@@ -103,17 +107,17 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
+        Table table = modelMetadataService.getTrainingTableFromModelId(modelId);
         MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
                 schemaInterpretation, null, yarnConfiguration);
-        strategy.calculate();
+        strategy.calculateBasedOnExistingMetadata(table);
         if (!strategy.isMetadataFullyDefined()) {
             List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
             strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(), schemaInterpretation, unknown,
                     yarnConfiguration);
-            strategy.calculate();
+            strategy.calculateBasedOnExistingMetadata(table);
         }
 
-        Table table = strategy.getMetadata();
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {

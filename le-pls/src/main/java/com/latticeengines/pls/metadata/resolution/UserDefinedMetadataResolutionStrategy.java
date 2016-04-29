@@ -51,16 +51,26 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         this.schema = schema;
         this.additionalColumns = additionalColumns != null ? additionalColumns : new ArrayList<ColumnTypeMapping>();
         this.yarnConfiguration = yarnConfiguration;
+        result = new Result();
 
     }
 
     @Override
+    public void calculateBasedOnExistingMetadata(Table metadataTable) {
+        result.metadata = metadataTable;
+        result.unknownColumns = new ArrayList<>();
+        calculateHelper();
+    }
+
+    @Override
     public void calculate() {
-        result = new Result();
         SchemaRepository repository = SchemaRepository.instance();
         result.metadata = repository.getSchema(schema);
         result.unknownColumns = new ArrayList<>();
+        calculateHelper();
+    }
 
+    private void calculateHelper() {
         // Get header
         Set<String> headerFields = getHeaderFields();
 

@@ -179,7 +179,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         return table;
     }
 
-    private Table getTrainingTableFromModelId(String modelId) {
+    @Override
+    public Table getTrainingTableFromModelId(String modelId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (modelSummary == null) {

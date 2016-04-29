@@ -62,7 +62,8 @@ public class SchemaRepository {
         table.addAttribute(attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Website" })) //
                 .type(Schema.Type.STRING) //
-                .required().interfaceName(InterfaceName.Website) //
+                .required() //
+                .interfaceName(InterfaceName.Website) //
                 .build());
         table.addAttribute(attr("Event") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //

@@ -8,6 +8,8 @@ public abstract class MetadataResolutionStrategy {
 
     public abstract void calculate();
 
+    public abstract void calculateBasedOnExistingMetadata(Table metadataTable);
+
     public abstract List<ColumnTypeMapping> getUnknownColumns();
 
     public abstract boolean isMetadataFullyDefined();

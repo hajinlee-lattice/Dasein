@@ -14,4 +14,6 @@ public interface ModelMetadataService {
     List<String> getRequiredColumnDisplayNames(String modelId);
 
     List<Attribute> getRequiredColumns(String modelId);
+
+    Table getTrainingTableFromModelId(String modelId);
 }
