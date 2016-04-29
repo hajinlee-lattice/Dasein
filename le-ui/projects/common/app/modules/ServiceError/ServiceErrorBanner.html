@@ -1,0 +1,8 @@
+<div class="service-error-banner" data-ng-controller="ServiceErrorController" ng-init="ShowErrorBanner = true">
+    <div class="messaging error-messaging" ng-show="ShowErrorBanner">
+        <span class="">
+            {{errorCode}}: {{errorMsg}}
+        </span>
+        <button id="close-button" type="button" class="close" ng-click="ShowErrorBanner = !ShowErrorBanner">×</button>
+    </div>
+</div>
