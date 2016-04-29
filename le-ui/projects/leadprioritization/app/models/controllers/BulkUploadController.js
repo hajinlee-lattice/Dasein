@@ -29,7 +29,7 @@ angular.module('mainApp.create.csvBulkUpload', [
                 params: {
                     modelId: modelId,
                     displayName: $scope.csvFileName,
-                    compressed: false
+                    compressed: true
                 },
                 ServiceErrorMethod: 'modal|home.model.jobs',
                 progress: function(e) {
@@ -92,7 +92,7 @@ angular.module('mainApp.create.csvBulkUpload', [
             $('#mainSummaryView .summary>h1').html('Uploading File');
             $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
 
-            ShowSpinner('<div><h6 id="file_progress"></h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
+            ShowSpinner('<div><h6 id="file_progress">Compressing...<br>This may take a moment.</h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
 
             $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
         };

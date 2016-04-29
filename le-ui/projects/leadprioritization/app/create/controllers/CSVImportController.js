@@ -72,12 +72,12 @@ angular.module('mainApp.create.csvImport', [
 
         xhr.open('POST', options.url);
         
-        xhr.setRequestHeader("ServiceErrorMethod", (options.ServiceErrorMethod || 'modal|home.models'));
 
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
         }
 
+        xhr.setRequestHeader("ServiceErrorMethod", (options.ServiceErrorMethod || 'modal|home.models'));
         xhr.setRequestHeader("Content-Encoding", "gzip");
 
         if (params.compressed) {
@@ -88,7 +88,7 @@ angular.module('mainApp.create.csvImport', [
                 var convertedData = new Uint8Array(FR.result);
 
                 // Zipping Uint8Array to Uint8Array
-                var zippedResult = pako.gzip(convertedData, { to : "string" });
+                var zippedResult = pako.gzip(convertedData, { to : "Uint8Array" });
 
                 // Need to convert back Uint8Array to ArrayBuffer for blob
                 var convertedZipped = zippedResult.buffer;
@@ -98,7 +98,7 @@ angular.module('mainApp.create.csvImport', [
 
                 // Creating a blob file with array of ArrayBuffer
                 var oMyBlob = new Blob(arrayBlob); // the blob (we need to set file.type if not it defaults to application/octet-stream since it's a gzip, up to you)
-                formData.append('file', oMyBlob, { type: 'application/zip' }); // we need to gzip the data
+                formData.append('file', oMyBlob);
                 xhr.send(formData);
                 console.log('filereader onload send', formData, name || params.displayName);
             };
@@ -328,7 +328,8 @@ angular.module('mainApp.create.csvImport', [
                 url: '/pls/models/fileuploads/unnamed',
                 params: {
                     schema: fileType,
-                    displayName: $scope.csvFileName
+                    displayName: $scope.csvFileName,
+                    compressed: true
                 },
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {
@@ -354,7 +355,7 @@ angular.module('mainApp.create.csvImport', [
 
                         if (percent < 100) {
                             var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
-                                        '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>';
+                                        '<div style="width:' + percent + '%;height:100%;background:lightgreen;"></div></div>';
                         } else {
                             var html =  'Processing...';
                         }
@@ -390,13 +391,12 @@ angular.module('mainApp.create.csvImport', [
             $('#mainSummaryView .summary>h1').html('Uploading File');
             $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
 
-            ShowSpinner('<div><h6 id="file_progress"></h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
+            ShowSpinner('<div><h6 id="file_progress">Compressing...<br>This may take a moment.</h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
 
             $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
         };
 
         $scope.cancelClicked = function() {
-            console.log('# Upload Cancelled');
             csvImportStore.Get('cancelXHR', true).abort();
             $state.go('home.models');
         };

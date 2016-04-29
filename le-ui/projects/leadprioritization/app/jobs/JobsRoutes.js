@@ -75,11 +75,10 @@ angular
                                 report = null;
 
                             reports.forEach(function(item) {
-                                if (item.purpose = "EVENT_TABLE_IMPORT_SUMMARY") {
+                                if (item.purpose == "IMPORT_DATA_SUMMARY") {
                                     report = item;
                                 }
                             });
-
 
                             deferred.resolve(report);
                         });

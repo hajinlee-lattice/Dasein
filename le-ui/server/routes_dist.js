@@ -4,7 +4,7 @@ module.exports = [
     {
         path: '/projects/common',
         folders: {
-            '/app/views': '/app/views',
+            '/app/modules/ServiceError': '/app/modules/ServiceError',
             '/assets': '/assets',
             '/lib': '/lib',
             '/fonts': '/assets/fonts',
