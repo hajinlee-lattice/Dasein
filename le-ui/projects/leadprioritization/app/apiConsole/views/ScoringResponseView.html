@@ -5,7 +5,7 @@
         <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
     </div>
     <div data-ng-show="!scoreRecordLoading">
-        <div class="global-error local-error" data-ng-show="scoringRequestError != null">
+        <div class="global-error local-error" data-ng-show="showScoringRequestError && scoringRequestError != null">
             <span><i class="fa fa-exclamation-triangle fa-inverse"></i>{{scoringRequestError}}</span>
         </div>
         <div data-ng-if="score != null" class="score circle">
