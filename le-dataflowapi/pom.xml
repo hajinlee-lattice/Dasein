@@ -18,7 +18,6 @@
         <le.domain.version>2.0.27-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.27-SNAPSHOT</le.scheduler.version>
         <le.security.version>2.0.27-SNAPSHOT</le.security.version>
-        <le.serviceruntime.version>2.0.27-SNAPSHOT</le.serviceruntime.version>
         <le.proxy.version>2.0.27-SNAPSHOT</le.proxy.version>
     </properties>
 
@@ -93,18 +92,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -215,6 +202,12 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

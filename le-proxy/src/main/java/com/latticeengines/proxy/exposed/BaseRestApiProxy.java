@@ -17,7 +17,7 @@ import org.springframework.web.util.UriTemplate;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
+import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
 public abstract class BaseRestApiProxy {
 

@@ -1,4 +1,4 @@
-package com.latticeengines.serviceruntime.exposed.exception;
+package com.latticeengines.security.exposed.serviceruntime.exception;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;

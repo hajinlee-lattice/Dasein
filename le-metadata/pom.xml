@@ -16,7 +16,6 @@
         <le.camille.version>2.0.27-SNAPSHOT</le.camille.version>
         <le.baton.version>2.0.27-SNAPSHOT</le.baton.version>
         <le.network.version>2.0.27-SNAPSHOT</le.network.version>
-        <le.serviceruntime.version>2.0.27-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -92,18 +91,6 @@
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

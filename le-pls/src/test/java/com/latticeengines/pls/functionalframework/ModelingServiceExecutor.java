@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
 public class ModelingServiceExecutor {
 
@@ -242,7 +242,6 @@ public class ModelingServiceExecutor {
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
         private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
-
 
         public Builder() {
         }

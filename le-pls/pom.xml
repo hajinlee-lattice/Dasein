@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-pls</artifactId>
@@ -25,7 +25,6 @@
         <le.serviceflows.prospectdiscovery.version>2.0.27-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>2.0.27-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.27-SNAPSHOT</le.proxy.version>
-        <le.serviceruntime.version>2.0.27-SNAPSHOT</le.serviceruntime.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -354,18 +353,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

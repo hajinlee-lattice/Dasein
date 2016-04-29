@@ -29,7 +29,7 @@ public class MultiTenantContext {
     public static CustomerSpace getCustomerSpace() {
         Tenant tenant = getTenant();
         if (tenant == null) {
-            throw new RuntimeException("No tenant set in context");
+            return null;
         }
         return CustomerSpace.parse(tenant.getId());
     }

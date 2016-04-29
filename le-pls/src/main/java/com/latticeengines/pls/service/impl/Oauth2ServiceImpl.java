@@ -16,7 +16,7 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
     private Oauth2RestApiProxy oauth2RestApiProxy;
  
     @Autowired
-    private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
+    private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;p
 
     @Override
     public String createAPIToken(String tenantId) {

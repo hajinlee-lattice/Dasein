@@ -1,10 +1,10 @@
 package com.latticeengines.security.exposed.util;
 
-import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
 public abstract class BaseRestApiProxy {
 
@@ -40,6 +40,5 @@ public abstract class BaseRestApiProxy {
         }
         return StringUtils.join(parts, "/");
     }
-
 
 }

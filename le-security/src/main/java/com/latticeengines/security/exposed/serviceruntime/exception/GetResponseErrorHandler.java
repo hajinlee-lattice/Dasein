@@ -1,4 +1,4 @@
-package com.latticeengines.serviceruntime.exposed.exception;
+package com.latticeengines.security.exposed.serviceruntime.exception;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

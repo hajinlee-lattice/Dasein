@@ -14,7 +14,6 @@
         <le.network.version>2.0.27-SNAPSHOT</le.network.version>
         <le.security.version>2.0.27-SNAPSHOT</le.security.version>
         <le.oauth2.db.version>2.0.27-SNAPSHOT</le.oauth2.db.version>
-        <le.serviceruntime.version>2.0.27-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -93,12 +92,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>

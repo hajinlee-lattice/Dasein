@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
 import com.latticeengines.serviceflows.workflow.modeling.ProvenanceProperties;
 

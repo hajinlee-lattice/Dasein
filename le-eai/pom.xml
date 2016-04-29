@@ -20,7 +20,6 @@
         <le.network.version>2.0.27-SNAPSHOT</le.network.version>
         <le.testfwk.version>2.0.27-SNAPSHOT</le.testfwk.version>
         <le.proxy.version>2.0.27-SNAPSHOT</le.proxy.version>
-        <le.serviceruntime.version>2.0.27-SNAPSHOT</le.serviceruntime.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -319,18 +318,6 @@
             <version>${le.domain.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceruntime</artifactId>
-            <version>${le.serviceruntime.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
