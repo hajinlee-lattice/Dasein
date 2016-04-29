@@ -1,0 +1,2 @@
+PID,IngestionName,Source,CronExpression,SchedularEnabled,NewJobRetryInterval,NewJobMaxRetry,IngestionType,IngestionCriteria
+1,BomboraFirehose,"{""ClassName"":""SftpProtocol"",""SftpHost"":""10.41.1.31"",""SftpPort"":22,""SftpUsername"":""sftpdev"",""SftpPassword"":""KPpl2JWz+k79LWvYIKz6cA=="",""SftpDir"":""/firehose""}",,1,10000,3,SFTP_TO_HDFS,ANY_MISSING_FILE

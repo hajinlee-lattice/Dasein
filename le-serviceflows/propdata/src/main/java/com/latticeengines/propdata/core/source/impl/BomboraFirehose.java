@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.propdata.core.IngenstionNames;
+import com.latticeengines.propdata.core.IngestionNames;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.RawTransformationType;
 import com.latticeengines.propdata.core.source.TransformedToAvroSource;
@@ -23,12 +23,12 @@ public class BomboraFirehose implements TransformedToAvroSource {
 
     @Override
     public Path getHDFSPathToImportFrom() {
-        return hdfsPathBuilder.constructIngestionDir(IngenstionNames.BOMBORA_FIREHOSE);
+        return hdfsPathBuilder.constructIngestionDir(IngestionNames.BOMBORA_FIREHOSE);
     }
 
     @Override
     public String getSourceName() {
-        return IngenstionNames.BOMBORA_FIREHOSE;
+        return IngestionNames.BOMBORA_FIREHOSE;
     }
 
     @Override

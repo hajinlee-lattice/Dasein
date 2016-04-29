@@ -32,6 +32,13 @@ ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/Ingestion.csv' INTO TABLE `Ingestion`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,IngestionName,Source,CronExpression,SchedularEnabled,NewJobRetryInterval,NewJobMaxRetry,IngestionType,IngestionCriteria);
+
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE ExternalColumn

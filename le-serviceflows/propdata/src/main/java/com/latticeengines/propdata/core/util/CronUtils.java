@@ -17,4 +17,12 @@ public final class CronUtils {
         return expression.getNextValidTimeAfter(new Date());
     }
 
+    public static Date getPreviouFireTimeFromNext(String cron) throws ParseException {
+        CronExpression expression = new CronExpression(cron);
+        Date nextValidTime = expression.getNextValidTimeAfter(new Date());
+        Date subsequentNextValidTime = expression.getNextValidTimeAfter(nextValidTime);
+        long interval = subsequentNextValidTime.getTime() - nextValidTime.getTime();
+        return new Date(nextValidTime.getTime() - interval);
+    }
+
 }

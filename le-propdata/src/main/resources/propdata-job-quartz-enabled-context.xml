@@ -17,6 +17,7 @@
                 <entry key="transformationOrchestrator" value-ref="transformationProgressOrchestrator" />
                 <entry key="scheduler" value-ref="propDataScheduler" />
                 <entry key="publicationProxy" value-ref="publicationProxy" />
+                <entry key="ingestionProxy" value-ref="ingestionProxy" />
             </map>
         </property>
     </bean>

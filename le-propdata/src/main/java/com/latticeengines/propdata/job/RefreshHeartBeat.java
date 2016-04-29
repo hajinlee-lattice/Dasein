@@ -9,6 +9,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.engine.transformation.TransformationProgressOrchestrator;
+import com.latticeengines.proxy.exposed.propdata.IngestionProxy;
 import com.latticeengines.proxy.exposed.propdata.PublicationProxy;
 
 @DisallowConcurrentExecution
@@ -20,15 +21,22 @@ public class RefreshHeartBeat extends QuartzJobBean {
     private TransformationProgressOrchestrator transformationOrchestrator;
     private PropDataScheduler scheduler;
     private PublicationProxy publicationProxy;
+    private IngestionProxy ingestionProxy;
 
     @Override
-    public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void executeInternal(JobExecutionContext jobExecutionContext)
+            throws JobExecutionException {
+
         orchestrator.executeRefresh();
         transformationOrchestrator.executeRefresh();
         scheduler.reschedule();
 
         log.debug(this.getClass().getSimpleName() + " invoking publication proxy scan.");
         publicationProxy.scan("");
+
+        // log.debug(this.getClass().getSimpleName() + " invoking ingestion
+        // proxy scan.");
+        // ingestionProxy.scan("FunctionalBomboraFireHose");
     }
 
     // ==============================
@@ -38,7 +46,8 @@ public class RefreshHeartBeat extends QuartzJobBean {
         this.orchestrator = progressOrchestrator;
     }
 
-    public void setTransformationOrchestrator(TransformationProgressOrchestrator transformationOrchestrator) {
+    public void setTransformationOrchestrator(
+            TransformationProgressOrchestrator transformationOrchestrator) {
         this.transformationOrchestrator = transformationOrchestrator;
     }
 
@@ -48,6 +57,10 @@ public class RefreshHeartBeat extends QuartzJobBean {
 
     public void setPublicationProxy(PublicationProxy publicationProxy) {
         this.publicationProxy = publicationProxy;
+    }
+
+    public void setIngestionProxy(IngestionProxy ingestionProxy) {
+        this.ingestionProxy = ingestionProxy;
     }
 
 }

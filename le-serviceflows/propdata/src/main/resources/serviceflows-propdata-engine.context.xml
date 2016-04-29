@@ -17,6 +17,14 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="ingestionDao" class="com.latticeengines.propdata.engine.ingestion.dao.impl.IngestionDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="ingestionProgressDao" class="com.latticeengines.propdata.engine.ingestion.dao.impl.IngestionProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
     <bean id="publicationDao" class="com.latticeengines.propdata.engine.publication.dao.impl.PublicationDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
