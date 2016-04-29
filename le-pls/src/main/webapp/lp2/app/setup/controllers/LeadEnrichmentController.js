@@ -342,10 +342,10 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
     function verifyLimitiation(attributes) {
         var source = 'HGData';
         var limit = $scope.premiumAttributesLimitation;
-        var attrs = _.filter(attributes, function(attr){ return attr.DataSource.indexOf(source) > -1; });
-        if (attrs.length > limit) {
+        var hgDataAttrs = _.filter(attributes, function(attr){ return attr.DataSource.indexOf(source) > -1; });
+        if (hgDataAttrs.length > limit) {
             $scope.attributesExcessAlert = ResourceUtility.getString('LEAD_ENRICHMENT_LIMITATION_EXCESS_ATTRIBUTES_ALERT',
-                    [attributes.length, limit]);
+                    [hgDataAttrs.length, limit]);
             $scope.showAttributesExcessAlert = true;
             return false;
         }
