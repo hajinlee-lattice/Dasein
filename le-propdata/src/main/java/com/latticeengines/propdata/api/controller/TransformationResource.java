@@ -13,17 +13,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
-
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "transform", description = "REST resource for source transformation")
 @RestController
@@ -52,6 +54,10 @@ public class TransformationResource extends InternalResourceBase implements Tran
             HttpServletRequest request) {
         checkHeader(request);
         try {
+            if (StringUtils.objectIsNullOrEmptyString(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getHdfsPodId();
+            }
+
             return sourceTransformationService.scan(hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25009, e);
@@ -70,6 +76,10 @@ public class TransformationResource extends InternalResourceBase implements Tran
             HttpServletRequest request, HttpServletResponse response) {
         checkHeader(request);
         try {
+            if (StringUtils.objectIsNullOrEmptyString(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getHdfsPodId();
+            }
+
             TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod);
             if (progress == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);

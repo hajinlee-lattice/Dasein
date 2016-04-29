@@ -8,9 +8,9 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
-import com.latticeengines.propdata.engine.transformation.TransformationProgressOrchestrator;
 import com.latticeengines.proxy.exposed.propdata.IngestionProxy;
 import com.latticeengines.proxy.exposed.propdata.PublicationProxy;
+import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
 @DisallowConcurrentExecution
 public class RefreshHeartBeat extends QuartzJobBean {
@@ -18,7 +18,7 @@ public class RefreshHeartBeat extends QuartzJobBean {
     private static final Log log = LogFactory.getLog(RefreshHeartBeat.class);
 
     private ProgressOrchestrator orchestrator;
-    private TransformationProgressOrchestrator transformationOrchestrator;
+    private TransformationProxy transformationProxy;
     private PropDataScheduler scheduler;
     private PublicationProxy publicationProxy;
     private IngestionProxy ingestionProxy;
@@ -28,11 +28,13 @@ public class RefreshHeartBeat extends QuartzJobBean {
             throws JobExecutionException {
 
         orchestrator.executeRefresh();
-        transformationOrchestrator.executeRefresh();
         scheduler.reschedule();
 
         log.debug(this.getClass().getSimpleName() + " invoking publication proxy scan.");
         publicationProxy.scan("");
+
+        log.debug(this.getClass().getSimpleName() + " invoking transformation proxy scan.");
+        transformationProxy.scan("");
 
         // log.debug(this.getClass().getSimpleName() + " invoking ingestion
         // proxy scan.");
@@ -46,9 +48,8 @@ public class RefreshHeartBeat extends QuartzJobBean {
         this.orchestrator = progressOrchestrator;
     }
 
-    public void setTransformationOrchestrator(
-            TransformationProgressOrchestrator transformationOrchestrator) {
-        this.transformationOrchestrator = transformationOrchestrator;
+    public void setTransformationProxy(TransformationProxy transformationProxy) {
+        this.transformationProxy = transformationProxy;
     }
 
     public void setScheduler(PropDataScheduler scheduler) {

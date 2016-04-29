@@ -14,7 +14,7 @@
         <property name="jobDataAsMap">
             <map>
                 <entry key="orchestrator" value-ref="progressOrchestrator" />
-                <entry key="transformationOrchestrator" value-ref="transformationProgressOrchestrator" />
+                <entry key="transformationProxy" value-ref="transformationProxy" />
                 <entry key="scheduler" value-ref="propDataScheduler" />
                 <entry key="publicationProxy" value-ref="publicationProxy" />
                 <entry key="ingestionProxy" value-ref="ingestionProxy" />

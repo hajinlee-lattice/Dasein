@@ -61,8 +61,8 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
         List<String> unprocessedBaseVersions = new ArrayList<>();
 
         try {
-            latestVersion = findLatestVersionInDir(rootSourceDir.toString());
-            latestBaseVersion = findLatestVersionInDir(rootBaseSourceDir.toString());
+            latestVersion = findLatestVersionInDir(rootSourceDir.toString(), null);
+            latestBaseVersion = findLatestVersionInDir(rootBaseSourceDir.toString(), null);
             LOG.info("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);

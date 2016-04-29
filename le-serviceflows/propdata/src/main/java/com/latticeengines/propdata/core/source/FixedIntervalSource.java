@@ -6,4 +6,6 @@ public interface FixedIntervalSource extends DerivedSource {
 
     String getTransformationServiceBeanName();
 
+    Long getCutoffDuration();
+
 }

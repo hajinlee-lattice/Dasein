@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -38,6 +39,9 @@ public abstract class AbstractTransformationService extends TransformationServic
 
     @Autowired
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
+
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     protected YarnConfiguration yarnConfiguration;
@@ -156,8 +160,8 @@ public abstract class AbstractTransformationService extends TransformationServic
         return true;
     }
 
-    protected String findLatestVersionInDir(String dir) throws IOException {
-        List<String> fullVersionDirs = findSortedVersionsInDir(dir);
+    protected String findLatestVersionInDir(String dir, String cutoffDateVersion) throws IOException {
+        List<String> fullVersionDirs = findSortedVersionsInDir(dir, cutoffDateVersion);
         if (!CollectionUtils.isEmpty(fullVersionDirs)) {
             return fullVersionDirs.get(0);
         }
@@ -168,7 +172,7 @@ public abstract class AbstractTransformationService extends TransformationServic
         return fullVersionPath.substring(fullVersionPath.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
     }
 
-    protected List<String> findSortedVersionsInDir(String dir) throws IOException {
+    protected List<String> findSortedVersionsInDir(String dir, String cutoffDateVersion) throws IOException {
         List<String> versionDirs = new ArrayList<>();
 
         if (HdfsUtils.fileExists(getYarnConfiguration(), dir)) {
@@ -178,7 +182,12 @@ public abstract class AbstractTransformationService extends TransformationServic
                 java.util.Collections.reverse(fullVersionDirs);
 
                 for (String fullVersionDir : fullVersionDirs) {
-                    versionDirs.add(getVersionFromPath(fullVersionDir));
+                    String version = getVersionFromPath(fullVersionDir);
+                    if (cutoffDateVersion == null || version.compareTo(cutoffDateVersion) >= 0) {
+                        versionDirs.add(version);
+                    } else {
+                        break;
+                    }
                 }
 
                 return versionDirs;
@@ -202,7 +211,20 @@ public abstract class AbstractTransformationService extends TransformationServic
         try {
             String sourceDir = sourceVersionDirInHdfs(progress);
             deleteFSEntry(progress, sourceDir);
+            String currentMaxVersion = null;
             HdfsUtils.copyFiles(yarnConfiguration, avroWorkflowDir, sourceDir);
+            try {
+                currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource());
+            } catch (Exception e) {
+                // We can log this exception and ignore this error as probably
+                // file does not even exists
+                LOG.debug("Could not read version file", e);
+            }
+            // overwrite max version if progress's version is higher
+            if (currentMaxVersion == null || progress.getVersion().compareTo(currentMaxVersion) > 0) {
+                hdfsSourceEntityMgr.setCurrentVersion(getSource(), progress.getVersion());
+            }
+
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;

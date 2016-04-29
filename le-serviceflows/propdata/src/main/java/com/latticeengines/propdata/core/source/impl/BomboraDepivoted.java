@@ -13,8 +13,15 @@ public class BomboraDepivoted implements FixedIntervalSource {
 
     private static final long serialVersionUID = 2471824706529427531L;
 
+    // 2 year duration in seconds
+    private static final long DEFAULT_CUTOFF_LIMIT_IN_SECONDS = 2 * 366 * 24 * 60 * 60L;
+
     @Value("${propdata.job.bomboradepivoted.fixedinterval.schedule:0 0 15 * * *}")
     private String cronExpression;
+
+    @Value("${propdata.job.bomboradepivoted.fixedinterval.cutoffLimitInSeconds:" + DEFAULT_CUTOFF_LIMIT_IN_SECONDS
+            + "}")
+    private long cutoffLimitInSeconds;
 
     @Autowired
     private BomboraFirehose baseSource;
@@ -69,4 +76,8 @@ public class BomboraDepivoted implements FixedIntervalSource {
         return "bomboraDepivotedService";
     }
 
+    @Override
+    public Long getCutoffDuration() {
+        return cutoffLimitInSeconds;
+    }
 }
