@@ -24,6 +24,7 @@
         <maven.surefire.version>2.12.3</maven.surefire.version>
         <maven.failsafe.version>2.12.4</maven.failsafe.version>
         <maven.deploy.version>2.7</maven.deploy.version>
+        <maven.assembly.version>2.6</maven.assembly.version>
         <maven.install.version>2.4</maven.install.version>
         <maven.eclipse.version>2.9</maven.eclipse.version>
         <maven.antrun.version>1.7</maven.antrun.version>
