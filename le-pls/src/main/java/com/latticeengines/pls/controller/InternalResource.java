@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -151,6 +152,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
+
+    @Value("${pls.current.stack:}")
+    private String currentStack;
 
     @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -403,6 +407,15 @@ public class InternalResource extends InternalResourceBase {
                 }
             }
         }
+    }
+
+    @RequestMapping(value = "/currentstack", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get current active stack")
+    public Map<String, String> getActiveStack() {
+        Map<String, String> response = new HashMap<>();
+        response.put("CurrentStack", currentStack);
+        return response;
     }
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
