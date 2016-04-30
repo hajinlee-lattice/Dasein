@@ -11,11 +11,7 @@
     <import resource="classpath:network-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
   
-    <context:component-scan base-package="com.latticeengines.microservice">
-        <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.swagger.SwaggerConfig" />
-        <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.doc.DocketProviderImpl" />
-        <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.controller.StatusController" />
-    </context:component-scan>
+    <context:component-scan base-package="com.latticeengines.microservice.exposed"/>
 
     <mvc:annotation-driven />
 

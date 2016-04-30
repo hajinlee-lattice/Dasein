@@ -8,7 +8,7 @@
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:eai-context.xml"/>
     <import resource="classpath:common-jmx-component-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.eai.controller" />
+    <context:component-scan base-package="com.latticeengines.eai.controller, com.latticeengines.microservice.eai" />
 
     <bean id="eaiHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="eai-microservice" />

@@ -1,17 +1,17 @@
 package com.latticeengines.microservice.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.StatusDocument;
+import com.latticeengines.microservice.service.StatusService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -20,44 +20,14 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/status")
 public class StatusController {
 
-    @Value("${microservice.rest.endpoint.hostport}")
-    protected String microserviceHostPort;
-
-    @Value("${microservices}")
-    protected String microservicesStr;
-
-    private RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private StatusService statusService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "check that all the microservices are up")
-    public Map<String, String> statusCheck() {
-        try {
-            SSLUtils.turnOffSslChecking();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        String [] microservices = microservicesStr.split(",");
-        Map<String, String> status = new HashMap<>();
-        Boolean overall = true;
-        for (String microservice : microservices) {
-            try {
-                String response = restTemplate.getForObject(String.format("%s/%s/v2/api-docs", microserviceHostPort, microservice), String.class);
-                if (response.contains("\"swagger\":\"2.0\"")) {
-                    status.put(microservice, "OK");
-                } else {
-                    status.put(microservice, "Unknown api-doc: " + response);
-                    overall = false;
-                }
-            } catch (Exception e) {
-                status.put(microservice, ExceptionUtils.getFullStackTrace(e));
-                overall = false;
-            }
-        }
-
-        status.put("Overall", overall ? "OK" : "ERROR");
-
-        return status;
+    @ApiOperation(value = "check status of all the microservices modules")
+    public Map<String, String> checkModules() {
+        return statusService.moduleStatus();
     }
+
 }
