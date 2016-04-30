@@ -32,8 +32,9 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "admin", description = "REST resource for managing PLS tenants")
 @RestController

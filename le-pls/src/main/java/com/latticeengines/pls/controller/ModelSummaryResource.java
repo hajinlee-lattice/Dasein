@@ -30,8 +30,9 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelsummary", description = "REST resource for model summaries")
 @RestController

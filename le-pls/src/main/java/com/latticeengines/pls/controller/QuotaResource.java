@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.pls.service.QuotaService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "quota", description = "REST resource for quotas")
 @RestController

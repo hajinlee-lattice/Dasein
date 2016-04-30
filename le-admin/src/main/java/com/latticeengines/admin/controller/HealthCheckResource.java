@@ -1,13 +1,14 @@
 package com.latticeengines.admin.controller;
 
-import com.latticeengines.domain.exposed.StatusDocument;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import com.latticeengines.domain.exposed.StatusDocument;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "health", description = "REST resource for checking health of admin console")
 @RestController

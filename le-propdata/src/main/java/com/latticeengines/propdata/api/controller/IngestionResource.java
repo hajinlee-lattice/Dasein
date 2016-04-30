@@ -23,8 +23,9 @@ import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.network.exposed.propdata.IngestionInterface;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "ingestion", description = "REST resource for source ingestion")
 @RestController

@@ -22,8 +22,9 @@ import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "metadata", description = "REST resource for metadata in VisiDB")
 @RestController

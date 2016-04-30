@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "admin", description = "REST resource for provisioning metadata component")
 @RestController

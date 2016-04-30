@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloaderEntityMgr;
-import com.wordnik.swagger.annotations.Api;
+import io.swagger.annotations.Api;
 
 @Api(value = "modelsummarydownload", description = "REST resource for model summary downloader")
 @RestController

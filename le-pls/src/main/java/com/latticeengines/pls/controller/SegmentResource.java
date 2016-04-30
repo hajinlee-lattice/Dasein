@@ -35,8 +35,9 @@ import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "segment", description = "REST resource for segments")
 @RestController

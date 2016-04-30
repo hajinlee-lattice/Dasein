@@ -14,8 +14,9 @@ import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.network.exposed.dataflowapi.DataFlowInterface;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dataflowapi", description = "REST resource for transformations")
 @RestController

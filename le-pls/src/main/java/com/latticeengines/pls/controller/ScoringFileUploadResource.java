@@ -32,8 +32,9 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scores/fileuploads", description = "REST resource for uploading csv files for scoring")
 @RestController

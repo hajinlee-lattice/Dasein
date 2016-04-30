@@ -19,8 +19,9 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "match", description = "REST resource for propdata matches")
 @RestController

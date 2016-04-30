@@ -19,8 +19,9 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "CRM Credential Verification", description = "REST resource for CRM credential verification")
 @RestController

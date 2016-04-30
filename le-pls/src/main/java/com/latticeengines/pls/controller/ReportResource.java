@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.workflow.exposed.service.ReportService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "report", description = "REST resource for reports")
 @RestController

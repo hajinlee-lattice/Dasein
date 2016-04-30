@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
 import com.latticeengines.network.exposed.propdata.MatchCommandInterface;
 import com.latticeengines.propdata.match.datasource.MatchClientContextHolder;
 import com.latticeengines.propdata.match.service.MatchCommandsService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "matchcommands", description = "REST resource for match commands")
 @RestController

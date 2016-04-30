@@ -18,7 +18,7 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
 
     ThreadLocal<String> tracker = new ThreadLocal<>();
 
-    @Around("@annotation(com.wordnik.swagger.annotations.ApiOperation)")
+    @Around("@annotation(io.swagger.annotations.ApiOperation)")
     public Object logRestApi(ProceedingJoinPoint joinPoint) throws Throwable {
 
         String trackId = tracker.get();

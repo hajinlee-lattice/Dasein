@@ -1,10 +1,7 @@
 package com.latticeengines.microservice.controller;
 
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.StatusDocument;
-import com.latticeengines.microservice.service.StatusService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,7 +9,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.StatusDocument;
+import com.latticeengines.microservice.service.StatusService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "health", description = "REST resource for checking health of microservice and lattice webapps")
 @RestController

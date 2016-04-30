@@ -16,8 +16,9 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.service.ScoringJobService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scoring", description = "REST resource for scoring service by Lattice")
 @RestController

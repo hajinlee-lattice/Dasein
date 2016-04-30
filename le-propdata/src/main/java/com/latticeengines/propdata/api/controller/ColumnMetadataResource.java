@@ -15,8 +15,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "columnmetadata", description = "REST resource for column metadata")
 @RestController

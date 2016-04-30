@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.network.exposed.pls.TargetMarketInterface;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "targetmarket", description = "REST resource for target markets")
 @RestController

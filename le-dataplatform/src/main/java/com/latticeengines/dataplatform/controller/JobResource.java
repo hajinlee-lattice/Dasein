@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.network.exposed.dataplatform.JobInterface;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import com.latticeengines.network.exposed.dataplatform.JobInterface;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "jobs", description = "REST resource for all jobs")
 @RestController

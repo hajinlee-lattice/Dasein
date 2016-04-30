@@ -13,8 +13,9 @@ import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "featureflagsadmin", description = "REST resource for managing feature flags")
 @RestController

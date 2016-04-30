@@ -15,8 +15,9 @@ import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.network.exposed.eai.EaiInterface;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "eaijobs", description = "REST resource for importing/exporting data into/from Lattice")
 @RestController

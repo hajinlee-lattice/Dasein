@@ -22,8 +22,9 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.propdata.engine.publication.service.PublicationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "publication", description = "REST resource for source publication")
 @RestController

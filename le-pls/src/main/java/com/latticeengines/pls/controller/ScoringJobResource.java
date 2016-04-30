@@ -19,8 +19,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.service.ScoringJobService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scores/jobs", description = "REST resource for retrieving job information for score operations")
 @RestController

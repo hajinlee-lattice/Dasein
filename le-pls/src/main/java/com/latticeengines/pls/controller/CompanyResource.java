@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.Company;
 import com.latticeengines.pls.entitymanager.CompanyEntityMgr;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "company", description = "REST resource for companies")
 @RestController

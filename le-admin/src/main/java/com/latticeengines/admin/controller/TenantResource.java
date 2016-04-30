@@ -26,8 +26,9 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController

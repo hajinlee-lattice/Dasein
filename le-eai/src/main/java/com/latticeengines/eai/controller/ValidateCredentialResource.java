@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.network.exposed.eai.ValidateCredentialInterface;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "validateCredential", description = "REST resource for importing data into Lattice")
 @RestController

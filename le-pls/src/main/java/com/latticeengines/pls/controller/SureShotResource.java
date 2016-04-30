@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.pls.SureShotUrls;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 @Api(value = "sureshot", description = "REST resource for providing SureShot links")
 @RestController
 @RequestMapping(value = "/sureshot")

@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.service.MetadataFileUploadService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "metadatauploads", description = "REST resource for uploading metadata files")
 @RestController

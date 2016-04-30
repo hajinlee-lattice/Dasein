@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.pls.service.ProspectDiscoveryConfigurationService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "prospectDiscoveryConfiguration", description = "REST resource for prospect discovery configurations")
 @RestController

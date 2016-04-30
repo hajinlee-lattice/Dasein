@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.Contact;
 import com.latticeengines.pls.entitymanager.ContactEntityMgr;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "contact", description = "REST resource for contacts")
 @RestController

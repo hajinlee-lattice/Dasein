@@ -22,8 +22,9 @@ import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "inernal", description = "Internal REST resource for propdata jobs.")
 @RestController

@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -33,15 +34,15 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
-import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "login", description = "REST resource for logging in using Lattice Global Auth")
 @RestController

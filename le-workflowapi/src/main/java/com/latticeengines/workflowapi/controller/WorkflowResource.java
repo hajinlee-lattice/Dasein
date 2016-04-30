@@ -27,8 +27,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController

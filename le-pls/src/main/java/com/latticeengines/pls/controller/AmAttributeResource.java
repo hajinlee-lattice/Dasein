@@ -23,8 +23,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AmAttribute;
 import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "amattibute", description = "REST resource for account master attributes")
 @RestController
