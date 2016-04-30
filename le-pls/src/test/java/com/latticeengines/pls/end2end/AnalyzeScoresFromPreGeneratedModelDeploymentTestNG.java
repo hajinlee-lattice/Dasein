@@ -62,7 +62,7 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     public void teardown() throws Exception {
     }
 
-    @Test(groups = "deployment.lp", enabled = true)
+    @Test(groups = "deployment.lp", enabled = false)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
         SSLUtils.turnOffSslChecking();
         String pathToModelInputCsv = RESOURCE_BASE + "/" + fileName;
