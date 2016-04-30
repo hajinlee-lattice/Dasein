@@ -170,6 +170,7 @@
                                 <descriptor>${basedir}/src/assembly/prod.xml</descriptor>
                                 <descriptor>${basedir}/src/assembly/qa.xml</descriptor>
                             </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </plugin>
                 </plugins>

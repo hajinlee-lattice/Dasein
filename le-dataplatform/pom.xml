@@ -228,6 +228,7 @@
                             <descriptors>
                                 <descriptor>src/assembly/leframework.xml</descriptor>
                             </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </execution>
                     <execution>
@@ -242,6 +243,7 @@
                             <descriptors>
                                 <descriptor>src/assembly/lepipeline.xml</descriptor>
                             </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </execution>
                     <execution>
@@ -256,6 +258,7 @@
                             <descriptors>
                                 <descriptor>src/assembly/evpipeline.xml</descriptor>
                             </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </execution>
                 </executions>
