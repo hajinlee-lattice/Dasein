@@ -13,7 +13,7 @@ def metadata():
             , 'Category'        : 'Growth Trends'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ordinal'
-            , 'Tags'            : 'External' }
+            , 'Tags'            : 'Internal' }
 
 
 def std_visidb_ds_pd_fundingstage_ordered(n):
