@@ -32,6 +32,10 @@ class ModelGenerator(State, JsonGenBase):
         if version is not None:
             model["LatticeVersion"] = version
             
+        randomSeed = self.__getRandomSeed()
+        if randomSeed is not None:
+            model["RandomSeed"] = randomSeed
+            
         with open("leframework.tar.gz/leframework/scoringengine.py", "r") as pythonFile:
             model["Script"] = "".join(pythonFile.readlines())
 
@@ -82,6 +86,11 @@ class ModelGenerator(State, JsonGenBase):
                 self.logger.warn(str(e));
         
         self.model = model
+        
+    def __getRandomSeed(self):
+        if "random_state" in self.mediator.algorithmProperties:
+            return self.mediator.algorithmProperties["random_state"]
+        return None
         
     def __getLatticeVersion(self):
         provenanceProperties = self.mediator.provenanceProperties

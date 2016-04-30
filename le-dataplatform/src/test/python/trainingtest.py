@@ -57,6 +57,7 @@ class TrainingTest(TrainingTestBase):
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
         self.assertEquals(jsonDict["Model"]["LatticeVersion"], "2.0.22-SNAPSHOT")
+        self.assertEquals(jsonDict["Model"]["RandomSeed"], "99999")
          
         # Test the scoring engine using the generated pipeline that was deserialized
         inputColumns = json.loads(open(glob.glob("model.json")[0]).read())["features"]

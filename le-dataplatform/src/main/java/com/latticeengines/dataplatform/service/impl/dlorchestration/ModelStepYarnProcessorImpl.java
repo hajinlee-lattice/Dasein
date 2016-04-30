@@ -287,7 +287,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             } else {
                 algorithm = new LogisticRegressionAlgorithm();
             }
-
+            
+            algorithm.resetAlgorithmProperties();
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
             algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY="

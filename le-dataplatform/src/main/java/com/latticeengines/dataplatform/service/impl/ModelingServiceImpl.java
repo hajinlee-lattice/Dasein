@@ -283,6 +283,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (CollectionUtils.isEmpty(algorithms)) {
             algorithms = new ArrayList<Algorithm>();
             RandomForestAlgorithm algorithm = new RandomForestAlgorithm();
+            algorithm.resetAlgorithmProperties();
             algorithm.setSampleName("all");
             algorithm.setPriority(0);
             algorithm.setContainerProperties(getDefaultContainerProperties());

@@ -53,6 +53,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     
     private void setDefaultValues(Classifier classifier) {
         RandomForestAlgorithm rf = new RandomForestAlgorithm();
+        rf.resetAlgorithmProperties();
         if (StringUtils.isEmpty(classifier.getPipelineDriver())) {
             classifier.setPipelineDriver(rf.getPipelineDriver());
         }
