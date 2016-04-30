@@ -58,10 +58,7 @@ public class ScoreCorrectnessService {
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 16;
-    // TODO: this threshold was 3.0, increased it to 5.0 (April 12, 2016)
-    // to make modeling to scoring deployment test to pass, should change back
-    // after release.
-    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 5.0;
+    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 3.0;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
