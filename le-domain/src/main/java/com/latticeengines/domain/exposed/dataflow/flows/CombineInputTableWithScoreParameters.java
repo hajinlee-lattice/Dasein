@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.dataflow.flows;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public class CombineInputTableWithScoreParameters extends DataFlowParameters {
@@ -53,4 +54,9 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
         this.debuggingEnabled = true;
     }
 
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

@@ -58,6 +58,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     @Override
     public void calculateBasedOnExistingMetadata(Table metadataTable) {
         result.metadata = metadataTable;
+        result.metadata.getExtracts().clear();
         result.unknownColumns = new ArrayList<>();
         calculateHelper();
     }
@@ -74,28 +75,33 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         // Get header
         Set<String> headerFields = getHeaderFields();
 
-        // Remove unrequired columns from metadata that are not in header,
-        // asserting that no required columns have been removed
+        // Shed columns from metadata that are not in the csv
         Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = result.metadata.getAttributes();
         Iterator<Attribute> attrIterator = attributes.iterator();
 
-        iterateAttr: while (attrIterator.hasNext()) {
+        while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
             Iterator<String> headerIterator = headerFields.iterator();
 
+            boolean foundMatchingAttribute = false;
             while (headerIterator.hasNext()) {
                 String header = headerIterator.next();
-                if (attribute.getAllowedDisplayNames().contains(header)) {
+                if (attribute.getAllowedDisplayNames() != null && attribute.getAllowedDisplayNames().contains(header)) {
                     headerIterator.remove();
                     attribute.setDisplayName(header);
-                    continue iterateAttr;
+                    foundMatchingAttribute = true;
+                } else if (attribute.getDisplayName().equals(header)) {
+                    headerIterator.remove();
+                    foundMatchingAttribute = true;
                 }
             }
-            if (!attribute.isNullable()) {
-                missingRequiredFields.add(attribute.getName());
+            if (!foundMatchingAttribute) {
+                if (!attribute.isNullable()) {
+                    missingRequiredFields.add(attribute.getName());
+                }
+                attrIterator.remove();
             }
-            attrIterator.remove();
         }
 
         // Add columns that are not in metadata to unknown columns

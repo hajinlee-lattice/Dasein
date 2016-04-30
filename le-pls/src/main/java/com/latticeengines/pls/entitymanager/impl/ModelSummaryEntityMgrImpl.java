@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +30,8 @@ import com.latticeengines.pls.dao.ModelSummaryDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.dao.TenantDao;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 
 @Component("modelSummaryEntityMgr")
@@ -142,9 +141,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         // already
         // have been caught there, which is why there is no defensive checking
         // here
-        TicketAuthenticationToken token = (TicketAuthenticationToken) SecurityContextHolder.getContext()
-                .getAuthentication();
-        return token.getSession().getTenant().getPid();
+        return MultiTenantContext.getTenant().getPid();
     }
 
     @Override

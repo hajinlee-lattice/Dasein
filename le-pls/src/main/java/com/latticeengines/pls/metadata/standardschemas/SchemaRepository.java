@@ -1,6 +1,8 @@
 package com.latticeengines.pls.metadata.standardschemas;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -393,7 +395,9 @@ public class SchemaRepository {
         }
 
         public AttributeBuilder allowedDisplayNames(Set<String> allowedDisplayNames) {
-            attribute.setAllowedDisplayNames(allowedDisplayNames);
+            List<String> list = new ArrayList<>();
+            list.addAll(allowedDisplayNames);
+            attribute.setAllowedDisplayNames(list);
             return this;
         }
 

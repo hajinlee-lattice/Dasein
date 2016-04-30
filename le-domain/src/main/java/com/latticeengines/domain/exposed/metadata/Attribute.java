@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private Table table;
     private Long tenantId;
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
-    private Set<String> allowedDisplayNames = new HashSet<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -619,14 +617,21 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public Set<String> getAllowedDisplayNames() {
-        return allowedDisplayNames;
+    @SuppressWarnings("unchecked")
+    public List<String> getAllowedDisplayNames() {
+        return (List<String>) properties.get("AllowedDisplayNames");
     }
 
     @Transient
     @JsonIgnore
-    public void setAllowedDisplayNames(Set<String> allowedDisplayNames) {
-        this.allowedDisplayNames = allowedDisplayNames;
+    public void setAllowedDisplayNames(List<String> allowedDisplayNames) {
+        properties.put("AllowedDisplayNames", allowedDisplayNames);
+    }
+
+    @JsonIgnore
+    @Transient
+    public void setAllowedDisplayNames(String allowedDisplayNamesString) {
+        setListPropertyFromString("AllowedDisplayNames", allowedDisplayNamesString);
     }
 
     @Override

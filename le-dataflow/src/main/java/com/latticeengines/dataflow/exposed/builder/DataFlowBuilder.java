@@ -193,7 +193,7 @@ public abstract class DataFlowBuilder {
                 for (String key : properties.keySet()) {
                     Object metadataValue = properties.get(key);
                     String avroValue = fm.getPropertyValue(key);
-                    if (avroValue != null && !avroValue.equals(metadataValue)) {
+                    if (avroValue != null && metadataValue != null && !avroValue.equals(metadataValue.toString())) {
                         log.warn(String
                                 .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
                                         field.name(), table.getName(), avroValue, metadataValue));
