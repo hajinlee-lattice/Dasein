@@ -23,7 +23,7 @@ import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
-public class BaseExceptionHandlerUnitTestNG extends SecurityFunctionalTestNGBase {
+public class BaseExceptionHandlerTestNG extends SecurityFunctionalTestNGBase {
     @Autowired
     @InjectMocks
     private TestExceptionHandler testExceptionHandler;
@@ -47,7 +47,7 @@ public class BaseExceptionHandlerUnitTestNG extends SecurityFunctionalTestNGBase
                         .getArguments()[3];
                 for (BasicNameValuePair pair : details) {
                     if (pair.getName().equals("tenant")) {
-                        assertEquals(pair.getValue(), CustomerSpace.parse("BaseExceptionHandlerUnitTestNG").toString());
+                        assertEquals(pair.getValue(), CustomerSpace.parse("BaseExceptionHandlerTestNG").toString());
                     }
                 }
                 return "{}";
@@ -59,7 +59,7 @@ public class BaseExceptionHandlerUnitTestNG extends SecurityFunctionalTestNGBase
     public void testPagerDuty() {
         int startValue = count.intValue();
         Tenant tenant = new Tenant();
-        tenant.setId(CustomerSpace.parse("BaseExceptionHandlerUnitTestNG").toString());
+        tenant.setId(CustomerSpace.parse("BaseExceptionHandlerTestNG").toString());
         MultiTenantContext.setTenant(tenant);
         try {
             throw new RuntimeException("Simulated Failure!");
