@@ -26,16 +26,17 @@ import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTe
 @Component
 public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBase {
 
-    @Autowired
-    @Qualifier("realTimeMatchExecutor")
-    private MatchExecutor matchExecutor;
+//    @Autowired
+//    @Qualifier("realTimeMatchExecutor")
+//    private MatchExecutor matchExecutor;
 
+    @Autowired
     private RealTimeMatchExecutor realTimeMatchExecutor;
 
-    @BeforeClass(groups = "functional")
-    public void setup() {
-        RealTimeMatchExecutor realTimeMatchExecutor = (RealTimeMatchExecutor) matchExecutor;
-    }
+//    @BeforeClass(groups = "functional")
+//    public void setup() {
+//        realTimeMatchExecutor = (RealTimeMatchExecutor) matchExecutor;
+//    }
 
     @Test(groups = { "functional" })
     public void testDistributeResults() {

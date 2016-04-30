@@ -25,6 +25,4 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
-    <aop:aspectj-autoproxy/>
-
 </beans>
