@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.modeling.algorithm;
 
+import java.util.Random;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
@@ -21,6 +23,11 @@ public class RandomForestAlgorithm extends AlgorithmBase {
         setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
     }
     
+    @Override
+    public void resetAlgorithmProperties() {
+    	setAlgorithmProperties(StringUtils.join(getAlgorithmPropertyArray(), " "));
+    }
+    
     @JsonIgnore
     @Transient
     private String[] getAlgorithmPropertyArray() {
@@ -31,7 +38,8 @@ public class RandomForestAlgorithm extends AlgorithmBase {
                 "min_samples_split=25", //
                 "min_samples_leaf=10", //
                 "max_depth=8", //
-                "bootstrap=True" //
+                "bootstrap=True", //
+                "random_state=" + new Random().nextInt(100000)
         };
     }
 }

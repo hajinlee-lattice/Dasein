@@ -75,4 +75,6 @@ public interface Algorithm extends HasName, HasPid {
     void setPipelineDriver(String pipelineDriver);
     
     String getPipelineDriver();
+    
+    void resetAlgorithmProperties();
 }

@@ -238,5 +238,9 @@ public class AlgorithmBase implements Algorithm {
         return pipelineDriver;
     }
 
+    @Override
+	public void resetAlgorithmProperties() {
+	}
+
 
 }
