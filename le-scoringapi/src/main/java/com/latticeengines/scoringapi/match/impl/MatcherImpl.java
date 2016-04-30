@@ -106,30 +106,17 @@ public class MatcherImpl implements Matcher {
                         nameLocationStr, errorMessages));
             }
 
-            if (outputRecord.isMatched()) {
-                mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
-            } else {
-                handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record, nameLocationStr);
+            mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
+            if (!outputRecord.isMatched()) {
+                warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
+                        JsonUtils.serialize(matchInput.getKeyMap()),
+                        Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
             }
         }
         if (log.isDebugEnabled()) {
             log.debug(JsonUtils.serialize(record));
         }
         return record;
-    }
-
-    private void handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput, OutputRecord outputRecord,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String nameLocationStr) {
-        for (int i = 0; i < matchFieldNames.size(); i++) {
-            String fieldName = matchFieldNames.get(i);
-            FieldSchema schema = fieldSchemas.get(fieldName);
-            if (schema != null && schema.source == FieldSource.PROPRIETARY) {
-                record.put(fieldName, null);
-            }
-        }
-        warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
-                JsonUtils.serialize(matchInput.getKeyMap()),
-                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
     }
 
     private void mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
