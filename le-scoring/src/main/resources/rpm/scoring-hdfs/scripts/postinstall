@@ -20,6 +20,6 @@ chmod 755 -R /tmp/app/scoring
 rm /tmp/app/scoring/scripts/*.pyc
 rm /tmp/app/scoring/scripts/*.pyo
 
-su -l yarn -c "hadoop dfs -mkdir /app/$VERSION" || true
-su -l yarn -c "hadoop dfs -copyFromLocal /tmp/app/scoring /app/$VERSION/scoring"
+su -l yarn -c "hadoop dfs -mkdir -p /app/$VERSION" || true
+su -l yarn -c "hadoop dfs -copyFromLocal /tmp/app/scoring /app/$VERSION"
 rm -rf /tmp/app/scoring

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo 'check env var STACK_NAME'
+echo $STACK_NAME
+
 RPMFILE=`ls /tmp/le-scoring-hdfs-*.rpm`
 VERSION=`echo $RPMFILE | cut -d \- -f 5`
 SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
@@ -8,6 +11,12 @@ if [[ $SNAPSHOT = SNAPSHOT* ]]
     then
         VERSION=$VERSION-"SNAPSHOT"
 fi
+
+if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+    VERSION=${STACK_NAME}/${VERSION}
+fi
+
+echo $VERSION
 
 rm -rf /tmp/app/scoring
 hdfs dfs -rm -f -r /app/$VERSION/scoring || true
