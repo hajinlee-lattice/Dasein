@@ -27,6 +27,11 @@
     <import resource="classpath:scoring-context.xml"/>
     <import resource="classpath:dellebi-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:propdata-job-quartz-${PROPDATA_COLLECTION_QUARTZ_ENABLED:disabled}-context.xml"/>
+
+    <bean id="jobHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
+        <property name="componentName" value="job" />
+    </bean>
 
 </beans>
