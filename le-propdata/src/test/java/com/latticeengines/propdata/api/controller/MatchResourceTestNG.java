@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -99,11 +100,13 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        Assert.assertTrue(output.getResult().size() > 0, String.format("(%s, %s, %s, %s) gives %d results", name, city,
-                state, country, output.getResult().size()));
-        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0,
-                String.format("(%s, %s, %s, %s) gives %d matched", name, city, state, country,
-                        output.getStatistics().getRowsMatched()));
+        if (StringUtils.isNotEmpty(state)) {
+            Assert.assertTrue(output.getResult().size() > 0, String.format("(%s, %s, %s, %s) gives %d results", name, city,
+                    state, country, output.getResult().size()));
+            Assert.assertTrue(output.getStatistics().getRowsMatched() > 0,
+                    String.format("(%s, %s, %s, %s) gives %d matched", name, city, state, country,
+                            output.getStatistics().getRowsMatched()));
+        }
     }
 
     @DataProvider(name = "cachedMatchGoodDataProvider")
