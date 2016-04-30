@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -18,13 +20,22 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
 @Component
 public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
+    @Qualifier("realTimeMatchExecutor")
+    private MatchExecutor matchExecutor;
+
     private RealTimeMatchExecutor realTimeMatchExecutor;
+
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        RealTimeMatchExecutor realTimeMatchExecutor = (RealTimeMatchExecutor) matchExecutor;
+    }
 
     @Test(groups = { "functional" })
     public void testDistributeResults() {

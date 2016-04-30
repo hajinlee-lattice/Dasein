@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.latticeengines.propdata.match.service.MatchPlanner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -24,7 +26,8 @@ import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTe
 public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
-    RealTimeMatchPlanner matchPlanner;
+    @Qualifier("realTimeMatchPlanner")
+    MatchPlanner matchPlanner;
 
     @Test(groups = "functional")
     public void testPrepareOutput() {
