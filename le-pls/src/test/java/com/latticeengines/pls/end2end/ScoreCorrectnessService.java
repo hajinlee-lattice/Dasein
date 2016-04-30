@@ -20,6 +20,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -43,6 +45,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
@@ -58,7 +61,7 @@ public class ScoreCorrectnessService {
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 16;
-    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 3.0;
+    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 2.0;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
@@ -73,6 +76,29 @@ public class ScoreCorrectnessService {
 
     @Autowired
     private ModelRetriever modelRetriever;
+
+    private Set<String> notPredictorFields = new HashSet<>();
+
+    @PostConstruct
+    public void init() {
+        notPredictorFields.add(InterfaceName.Id.name());
+        notPredictorFields.add(InterfaceName.Email.name());
+        notPredictorFields.add(InterfaceName.Event.name());
+        notPredictorFields.add(InterfaceName.CompanyName.name());
+        notPredictorFields.add(InterfaceName.City.name());
+        notPredictorFields.add(InterfaceName.State.name());
+        notPredictorFields.add(InterfaceName.Country.name());
+        notPredictorFields.add(InterfaceName.PostalCode.name());
+        notPredictorFields.add(InterfaceName.CreatedDate.name());
+        notPredictorFields.add(InterfaceName.LastModifiedDate.name());
+        notPredictorFields.add(InterfaceName.FirstName.name());
+        notPredictorFields.add(InterfaceName.LastName.name());
+        notPredictorFields.add(InterfaceName.Title.name());
+        notPredictorFields.add(InterfaceName.IsClosed.name());
+        notPredictorFields.add(InterfaceName.StageName.name());
+        notPredictorFields.add(InterfaceName.PhoneNumber.name());
+
+    }
 
     public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore)
             throws IOException {
@@ -191,12 +217,12 @@ public class ScoreCorrectnessService {
                 Map<String, Object> expectedMatchedRecord = matchedRecords.get(id);
                 Map<String, Object> scoreMatchedRecord = response.getMatchedRecord();
                 Triple<List<FieldConflict>, List<String>, List<String>> matchDiffs = diffRecords(expectedMatchedRecord,
-                        scoreMatchedRecord, schema);
+                        scoreMatchedRecord, schema, false);
 
                 Map<String, Object> expectedRecord = expectedRecords.get(id);
                 Map<String, Object> scoreRecord = response.getTransformedRecord();
                 Triple<List<FieldConflict>, List<String>, List<String>> transformDiffs = diffRecords(expectedRecord,
-                        scoreRecord, schema);
+                        scoreRecord, schema, true);
 
                 ComparedRecord comparedRecord = new ComparedRecord();
                 comparedRecord.setId(id);
@@ -228,7 +254,7 @@ public class ScoreCorrectnessService {
     }
 
     private Triple<List<FieldConflict>, List<String>, List<String>> diffRecords(Map<String, Object> expectedRecord,
-            Map<String, Object> scoreRecord, Map<String, FieldSchema> schema) {
+            Map<String, Object> scoreRecord, Map<String, FieldSchema> schema, boolean isDiffTransform) {
         List<FieldConflict> conflicts = new ArrayList<>();
         List<String> extraFields = new ArrayList<>();
         List<String> missingFields = new ArrayList<>();
@@ -255,6 +281,9 @@ public class ScoreCorrectnessService {
         Set<String> intersection = new HashSet<>(expectedRecord.keySet());
         intersection.retainAll(scoreRecord.keySet());
         for (String field : intersection) {
+            if (isDiffTransform && notPredictorFields.contains(field)) {
+                continue;
+            }
             try {
                 String expectedValueString = String.valueOf(expectedRecord.get(field));
                 String scoreValueString = String.valueOf(scoreRecord.get(field));

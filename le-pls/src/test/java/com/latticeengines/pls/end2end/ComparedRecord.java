@@ -38,8 +38,10 @@ public class ComparedRecord {
     @JsonIgnore
     private Map<String, Object> scoreApiMatchedRecord;
 
+    @JsonIgnore
     private List<String> scoreApiMatchExtraFields;
 
+    @JsonIgnore
     private List<String> scoreApiMatchMissingFields;
 
     @JsonIgnore
