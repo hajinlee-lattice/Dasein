@@ -10,7 +10,7 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.api.controller"/>
 
-    <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInsepection">
+    <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="propdata-microservice" />
         <property name="statsService" ref="statsService" />
     </bean>

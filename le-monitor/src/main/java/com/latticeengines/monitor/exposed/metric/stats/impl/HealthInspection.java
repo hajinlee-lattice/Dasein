@@ -5,16 +5,20 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 import com.latticeengines.monitor.metric.measurement.HealthCheck;
 
-public class HealthInsepection implements Inspection {
+public class HealthInspection implements Inspection {
 
     private static final Long interval = 10000L;
 
     private String componentName;
+
+    @Autowired
     private StatsService statsService;
 
     @PostConstruct
@@ -24,10 +28,6 @@ public class HealthInsepection implements Inspection {
 
     public void setComponentName(String componentName) {
         this.componentName = componentName;
-    }
-
-    public void setStatsService(StatsService statsService) {
-        this.statsService = statsService;
     }
 
     @Override

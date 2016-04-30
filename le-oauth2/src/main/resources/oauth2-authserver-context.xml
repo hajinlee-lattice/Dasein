@@ -18,9 +18,8 @@
 
     <mvc:annotation-driven/>
 
-    <bean id="oauth2HealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInsepection">
+    <bean id="oauth2HealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="oauth2"/>
-        <property name="statsService" ref="statsService"/>
     </bean>
 
 </beans>

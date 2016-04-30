@@ -14,7 +14,7 @@
     <context:component-scan base-package="com.latticeengines.dataplatform.controller" />
     <context:component-scan base-package="com.latticeengines.dataplatform.mbean" />
 
-    <bean id="modelingHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInsepection">
+    <bean id="modelingHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="modeling-microservice" />
         <property name="statsService" ref="statsService" />
     </bean>
