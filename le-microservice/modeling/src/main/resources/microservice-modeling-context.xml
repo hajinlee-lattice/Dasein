@@ -16,7 +16,6 @@
 
     <bean id="modelingHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="modeling-microservice" />
-        <property name="statsService" ref="statsService" />
     </bean>
 
 </beans>

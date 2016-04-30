@@ -12,7 +12,6 @@
 
     <bean id="eaiHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="eai-microservice" />
-        <property name="statsService" ref="statsService" />
     </bean>
 
 </beans>

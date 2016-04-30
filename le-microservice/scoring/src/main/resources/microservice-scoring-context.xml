@@ -13,7 +13,6 @@
 
     <bean id="scoringHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="scoring-microservice" />
-        <property name="statsService" ref="statsService" />
     </bean>
 
 </beans>

@@ -12,7 +12,6 @@
 
     <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="propdata-microservice" />
-        <property name="statsService" ref="statsService" />
     </bean>
 
     <bean id="propdataFetchPoolTracker" class="com.latticeengines.monitor.exposed.metric.stats.impl.ThreadPoolInspection">
