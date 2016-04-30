@@ -395,7 +395,7 @@ public enum LedpCode {
     LEDP_31008("ModelSummary {0} is missing eventTableName value"), //
     LEDP_31009("Retrieved null EventTable {0}"), //
     LEDP_31010("EventTable {0} interpretation is null or empty"), //
-    LEDP_31011("No percentile buckets found for model {0} in score derivation {1}"), //
+    LEDP_31011("No percentile buckets found"), //
     LEDP_31012("PMML model has multiple ({0}) results and no target was specified"), //
     LEDP_31013("PMML model evaluation returned no results"), //
     LEDP_31014("Problem scoring the record {0}"), //

@@ -28,8 +28,6 @@
         <le.transform.version>2.0.27-SNAPSHOT</le.transform.version>
         <jpmml.version>2.0.0</jpmml.version>
         <jackson.version>2.4.1</jackson.version>
-        <springfox.swagger.version>2.2.2</springfox.swagger.version>
-        <springfox.swagger.ui.version>2.2.2</springfox.swagger.ui.version>
     </properties>
 
     <build>
@@ -356,7 +354,7 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox.swagger.ui.version}</version>
+            <version>${springfox.swagger.version}</version>
         </dependency>
 
         <dependency>

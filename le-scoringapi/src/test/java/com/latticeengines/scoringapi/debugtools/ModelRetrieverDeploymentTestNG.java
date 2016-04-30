@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exposed.model.impl;
+package com.latticeengines.scoringapi.debugtools;
 
 import java.io.File;
 
@@ -8,13 +8,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
 
-public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
+public class ModelRetrieverDeploymentTestNG extends ScoringApiFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelRetrieverTestNG.class);
+    private static final Log log = LogFactory.getLog(ModelRetrieverDeploymentTestNG.class);
 
     @Autowired
     private ModelRetriever modelRetriever;
@@ -26,13 +27,14 @@ public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
      * Use this as a tool to download a model into test resources for running scoring tests against.
      * @throws Exception
      */
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "deployment.lp", enabled = false)
     public void downloadModelToLocal() throws Exception {
-        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/5MulesoftOneLeadPerDomain_20160316/";
+        SSLUtils.turnOffSslChecking();
+        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/NPE/";
         File file = new File(localPathToPersist);
         file.mkdirs();
-        String tenantId = "DevelopTestPLSTenant1.DevelopTestPLSTenant1.Production";
-        String modelId = "ms__fb8f3557-5af6-4e7d-ab66-4b24189d0779-4Mulesof";
+        String tenantId = "Lattice_LP3.Lattice_LP3.Production";
+        String modelId = "ms__d2e04d4a-8c67-4a01-8dc5-f2d85e7751de-LP2-Clon";
 
         log.info(String.format("Downloading model-score artifacts from HDFS for tenant:%s model%s to %s", tenantId,
                 modelId, localPathToPersist));

@@ -75,9 +75,9 @@ public class ModelEvaluator {
                  */
                 value = 0.0d;
             }
-            if(value instanceof Boolean) {
+            if (value instanceof Boolean) {
                 Boolean booleanValue = ((Boolean) value).booleanValue();
-                if(booleanValue)
+                if (booleanValue)
                     value = new Double("1.0");
                 else
                     value = new Double("0.0");
@@ -134,7 +134,12 @@ public class ModelEvaluator {
             result.put(ScoreType.LIFT, predicted / derivation.averageProbability);
         }
 
-        if (derivation.percentiles != null) {
+        if (derivation.percentiles == null) {
+            throw new ScoringApiException(LedpCode.LEDP_31011);
+        } else if (derivation.percentiles.size() != 100) {
+            log.warn(String.format("Not 100 buckets in score derivation. size:%d percentiles:%s",
+                    derivation.percentiles.size(), JsonUtils.serialize(derivation.percentiles)));
+        } else {
             double lowest = 1.0;
             double highest = 0.0;
             for (int index = 0; index < derivation.percentiles.size(); index++) {
@@ -151,9 +156,9 @@ public class ModelEvaluator {
                 }
             }
             if (!result.containsKey(ScoreType.PERCENTILE)) {
-                if (predicted < lowest) {
+                if (predicted <= lowest) {
                     result.put(ScoreType.PERCENTILE, 1);
-                } else if (predicted > highest) {
+                } else if (predicted >= highest) {
                     result.put(ScoreType.PERCENTILE, 100);
                 }
             }
