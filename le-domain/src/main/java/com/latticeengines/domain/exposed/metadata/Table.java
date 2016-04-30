@@ -451,7 +451,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         FieldSchema fieldSchema = new FieldSchema();
 
         List<String> tags = attr.getTags();
-        if (tags != null && !tags.isEmpty() && tags.get(0).equals("External")) {
+        if (tags != null && !tags.isEmpty() && tags.get(0).equals(ModelingMetadata.EXTERNAL_TAG)) {
             fieldSchema.source = FieldSource.PROPRIETARY;
         } else if (request) {
             fieldSchema.source = FieldSource.REQUEST;
