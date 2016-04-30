@@ -145,7 +145,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         public MatchCommandUpdaterImpl errorMessage(String errorMessage) {
-            matchCommand.setErrorMessage(errorMessage);
+            matchCommand.setErrorMessage(errorMessage.substring(0, Math.min(errorMessage.length(), 1000)));
             return this;
         }
 

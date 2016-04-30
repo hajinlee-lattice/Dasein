@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
@@ -20,13 +21,17 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
+import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
 
 @Configuration
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2db-properties-context.xml" })
+@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-properties-context.xml" })
 public class OAuthServer extends SpringBootServletInitializer {
+
+    @Autowired
+    private StatsService statsService;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {

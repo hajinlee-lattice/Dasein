@@ -5,11 +5,12 @@ import com.mangofactory.swagger.models.dto.ApiInfo;
 import com.mangofactory.swagger.plugin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.context.annotation.*;
 
 @Configuration
 @EnableSwagger
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
 public class SwaggerConfig {
 
     private SpringSwaggerConfig springSwaggerConfig;

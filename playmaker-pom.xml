@@ -29,6 +29,7 @@
         <module>le-common</module>
         <module>le-domain</module>
         <module>le-db</module>
+        <module>le-monitor</module>
         <module>le-oauth2db</module>
         <module>le-oauth2</module>
         <module>le-baton</module>

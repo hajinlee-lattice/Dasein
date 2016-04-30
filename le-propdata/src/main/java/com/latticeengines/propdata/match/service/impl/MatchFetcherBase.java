@@ -155,7 +155,7 @@ public abstract class MatchFetcherBase {
                     + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
             for (NameLocation nameLocation : nameLocations) {
-                if (StringUtils.isNotEmpty(nameLocation.getName())) {
+                if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
                     sql += " OR ( ";
                     sql += String.format("[%s] = '%s'", nameField, nameLocation.getName().replace("'", "''"));
                     if (StringUtils.isNotEmpty(nameLocation.getCountry())) {

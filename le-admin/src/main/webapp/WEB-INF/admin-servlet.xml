@@ -10,6 +10,11 @@
     <import resource="classpath:admin-properties-context.xml"/>
     <bean class="com.latticeengines.admin.swagger.SwaggerConfig" />
 
+    <bean id="adminHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInsepection">
+        <property name="componentName" value="admin" />
+        <property name="statsService" ref="statsService" />
+    </bean>
+
     <security:global-method-security
             secured-annotations="enabled"
             jsr250-annotations="enabled"

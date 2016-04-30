@@ -27,6 +27,7 @@
                 <value>file:${PLAYMAKER_PROPDIR:/etc/ledp}/playmaker.properties
                 </value>
                 <value>file:${OAUTH2_DB_PROPDIR:/etc/ledp}/oauth2.properties</value>
+                <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

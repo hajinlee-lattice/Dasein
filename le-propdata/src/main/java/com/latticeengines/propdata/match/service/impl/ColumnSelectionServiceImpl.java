@@ -20,7 +20,6 @@ import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.ExternalColumnService;
 
@@ -57,13 +56,11 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     @Override
-    @MatchStep
     public List<String> getTargetColumns(ColumnSelection.Predefined predefined) {
         return getSourceColumnMap(predefined).get(predefined.getName());
     }
 
     @Override
-    @MatchStep
     public Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined) {
         try {
             if (ColumnSelection.Predefined.Model.equals(predefined) ||
@@ -81,7 +78,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     @Override
-    @MatchStep
     public Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined) {
         try {
             if (ColumnSelection.Predefined.Model.equals(predefined) ||

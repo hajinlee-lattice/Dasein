@@ -4,6 +4,7 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,7 +18,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
 @Configuration
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
 @EnableResourceServer
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
 

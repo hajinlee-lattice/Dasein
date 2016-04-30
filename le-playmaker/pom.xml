@@ -15,6 +15,7 @@
         <le.domain.version>2.0.27-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.27-SNAPSHOT</le.db.version>
         <le.oauth2.db.version>2.0.27-SNAPSHOT</le.oauth2.db.version>
+        <le.monitor.version>2.0.27-SNAPSHOT</le.monitor.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
         <spring.version>4.1.6.RELEASE</spring.version>
@@ -156,6 +157,11 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

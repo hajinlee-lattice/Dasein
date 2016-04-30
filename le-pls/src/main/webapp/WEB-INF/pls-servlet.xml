@@ -17,6 +17,11 @@
         <property name="maxUploadSize" value="1000000000" />
     </bean>
 
+    <bean id="plsHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInsepection">
+        <property name="componentName" value="pls-microservice" />
+        <property name="statsService" ref="statsService" />
+    </bean>
+
     <security:global-method-security
         secured-annotations="enabled" jsr250-annotations="enabled"
         pre-post-annotations="enabled" proxy-target-class="true" />

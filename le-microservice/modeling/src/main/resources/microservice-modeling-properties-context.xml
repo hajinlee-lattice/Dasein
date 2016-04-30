@@ -26,6 +26,7 @@
             <list>
                 <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
                 <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

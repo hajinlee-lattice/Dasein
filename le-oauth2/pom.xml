@@ -15,6 +15,7 @@
         <le.domain.version>2.0.27-SNAPSHOT</le.domain.version>
         <le.oauth2.db.version>2.0.27-SNAPSHOT</le.oauth2.db.version>
         <le.baton.version>2.0.27-SNAPSHOT</le.baton.version>
+        <le.monitor.version>2.0.27-SNAPSHOT</le.monitor.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.7</java.version>
@@ -141,7 +142,11 @@
             <artifactId>le-oauth2db</artifactId>
             <version>${le.oauth2.db.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

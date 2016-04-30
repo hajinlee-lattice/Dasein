@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -24,6 +22,7 @@ import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,7 +50,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final Log log = LogFactory.getLog(MetricServiceImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
-    private static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Autowired
     private VersionManager versionManager;
@@ -83,9 +81,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
         if (StringUtils.isNotEmpty(url)) {
             try {
                 buildDbConnectionCache();
-                log.info("Enabled metric store at " + url);
-                enabled = true;
-
                 List<String> dbNames = listDatabases();
                 for (MetricDB db : MetricDB.values()) {
                     if (!dbNames.contains(db.getDbName())) {
@@ -101,12 +96,14 @@ public class InfluxDbMetricWriter implements MetricWriter {
                         }
                     }
                 }
-
+                log.info("Enabled metric store at " + url);
+                enabled = true;
             } catch (Exception e) {
-                log.warn("Had problem connecting fluxDb at " + url + ". Disable the metric service.", e);
-                enabled = false;
+                if (enabled) {
+                    log.warn("Had problem connecting fluxDb at " + url + ". Disable the metric service.", e);
+                    enabled = false;
+                }
             }
-
         } else {
             log.info("Disabled metric store because an empty url is provided.");
         }
@@ -120,8 +117,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            log.debug("Received " + measurements.size() + " points to write.");
-            executor.submit(new MetricRunnable<>(db, measurements));
+            writeAsync(db, measurements);
         } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
             postConstruct();
         }
@@ -200,32 +196,22 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 });
     }
 
-    private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
-
-        private MetricDB metricDb;
-        private Collection<? extends Measurement<F, D>> measurements;
-
-        MetricRunnable(MetricDB metricDb, Collection<? extends Measurement<F, D>> measurements) {
-            this.metricDb = metricDb;
-            this.measurements = measurements;
-        }
-
-        @Override
-        public void run() {
-            boolean needToWrite = false;
-            for (Measurement<F, D> measurement: measurements) {
-                if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
-                    needToWrite = true;
-                    break;
-                }
+    @Async("monitorExecutor")
+    private <F extends Fact, D extends Dimension> void writeAsync(MetricDB metricDb,
+                                                                  Collection<? extends Measurement<F, D>> measurements) {
+        boolean needToWrite = false;
+        for (Measurement<F, D> measurement : measurements) {
+            if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
+                needToWrite = true;
+                break;
             }
-            if (needToWrite) {
-                try {
-                    BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-                    getInfluxDB().write(batchPoints);
-                } catch (Exception e) {
-                    log.error(e);
-                }
+        }
+        if (needToWrite) {
+            try {
+                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
+                getInfluxDB().write(batchPoints);
+            } catch (Exception e) {
+                log.error(e);
             }
         }
     }

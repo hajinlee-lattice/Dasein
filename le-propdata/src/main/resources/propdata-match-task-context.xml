@@ -4,8 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
 
-    <task:annotation-driven executor="matchExecutor" scheduler="matchScheduler"/>
-
     <task:executor id="matchExecutor"
                    pool-size="${propdata.match.task.core.pool.size}-${propdata.match.task.max.pool.size}"
                    queue-capacity="${propdata.match.task.queue.capapcity}"
@@ -13,5 +11,8 @@
                    rejection-policy="CALLER_RUNS" />
 
     <task:scheduler id="matchScheduler" pool-size="${propdata.match.scheduler.pool.size}" />
+
+    <bean id="numFetchers" class="java.util.concurrent.atomic.AtomicInteger" />
+    <bean id="fetchQueueSize" class="java.util.concurrent.atomic.AtomicInteger" />
 
 </beans>

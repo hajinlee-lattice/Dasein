@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Api(value = "Playmaker recommendation api", description = "REST resource for getting playmaker recomendationss")
 @Configuration
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
 @RestController
 @ImportResource(value = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
 @RequestMapping(value = "/playmaker")

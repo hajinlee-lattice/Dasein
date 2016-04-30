@@ -15,8 +15,6 @@
     </parent>
 
     <modules>
-        <module>le-api/pom-api-rpm.xml</module>
-        <module>le-job/pom-job-rpm.xml</module>
         <module>le-api/pom-api-tc-rpm.xml</module>
         <module>le-job/pom-job-tc-rpm.xml</module>
         <module>le-config/pom-config-rpm.xml</module>
