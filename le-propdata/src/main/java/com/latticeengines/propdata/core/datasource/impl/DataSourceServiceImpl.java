@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.core.datasource.impl;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -30,13 +29,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         List<DataSourceConnection> connectionList = zkConfigurationService.getConnectionsInPool(pool);
         DataSourceConnection connection = connectionList.get(roundRobinPos);
         roundRobinPos = (roundRobinPos + 1) % connectionList.size();
-        JdbcTemplate jdbcTemplate = DataSourceUtils.getJdbcTemplate(connection);
-        try {
-            log.info("Got a JdbcTemplate for " + jdbcTemplate.getDataSource().getConnection().getMetaData().getURL());
-        } catch (SQLException e) {
-            // ignore
-        }
-        return jdbcTemplate;
+        return DataSourceUtils.getJdbcTemplate(connection);
     }
 
 }
