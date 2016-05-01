@@ -10,6 +10,6 @@
                    keep-alive="1"
                    rejection-policy="CALLER_RUNS" />
 
-    <task:scheduler id="matchScheduler" pool-size="${propdata.match.scheduler.pool.size}" />
+    <task:scheduler id="matchScheduler" pool-size="1" />
 
 </beans>
