@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusDocument {
@@ -42,4 +44,13 @@ public class StatusDocument {
         return doc;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        return EqualsBuilder.reflectionEquals(this, object);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 }
