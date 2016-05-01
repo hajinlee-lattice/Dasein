@@ -36,6 +36,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private static final Integer QUEUE_SIZE = 1000;
     private static final Integer TIMEOUT_HOURS = 1;
     private static AtomicBoolean inspectionRegistered = new AtomicBoolean(false);
+    private static Boolean fetchersInitialized = false;
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -63,33 +64,31 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     @PostConstruct
     private void postConstruct() {
-        for (int i = 0; i < numFetchers; i++) {
-            taskExecutor.submit(new Fetcher());
-        }
-
-        try {
-            Thread.sleep(1000L);
-        } catch (Exception e) {
-            // ignore
-        }
-
-        matchScheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                scanQueue();
-            }
-        }, 1000L);
+        taskExecutor.submit(new Fetcher());
     }
 
     @Override
     @MatchStep
     public MatchContext fetch(MatchContext matchContext) {
+        queue.add(matchContext);
+
+        if (!fetchersInitialized) {
+            for (int i = 1; i < numFetchers; i++) {
+                taskExecutor.submit(new Fetcher());
+            }
+            matchScheduler.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    scanQueue();
+                }
+            }, 1000L);
+        }
+
         if (!inspectionRegistered.get()) {
             statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
             inspectionRegistered.set(true);
         }
 
-        queue.add(matchContext);
         return waitForResult(matchContext.getOutput().getRootOperationUID());
     }
 
@@ -125,7 +124,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
                         synchronized (queue) {
-                            int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / numFetchers, 1));
+                            int thisGroupSize = Math.min(groupSize, Math.max(4 * queue.size() / numFetchers, 1));
                             int inGroup = 0;
                             while (inGroup < thisGroupSize && !queue.isEmpty()) {
                                 matchContextList.add(queue.poll());
