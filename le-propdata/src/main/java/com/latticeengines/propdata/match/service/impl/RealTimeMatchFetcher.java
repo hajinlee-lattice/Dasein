@@ -67,12 +67,10 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             taskExecutor.submit(new Fetcher());
         }
 
-        while (taskExecutor.getActiveCount() < numFetchers) {
-            try {
-                Thread.sleep(500L);
-            } catch (Exception e) {
-                // ignore
-            }
+        try {
+            Thread.sleep(1000L);
+        } catch (Exception e) {
+            // ignore
         }
 
         matchScheduler.scheduleWithFixedDelay(new Runnable() {
@@ -80,7 +78,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             public void run() {
                 scanQueue();
             }
-        }, 500L);
+        }, 1000L);
     }
 
     @Override
