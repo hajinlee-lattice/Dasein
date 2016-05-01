@@ -14,12 +14,16 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -28,9 +32,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
+import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
 @Component
@@ -42,81 +46,103 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
     private MatchProxy matchProxy;
 
     private static List<List<Object>> accountPool;
+    private AtomicInteger sharedCounter;
 
     @BeforeClass(groups = "load")
     private void setUp() {
         loadAccountPool();
+        warmup();
+        LogManager.getLogger(BaseRestApiProxy.class).setLevel(Level.WARN);
     }
 
-    @Test(groups = "load", enabled = true, dataProvider = "loadTestDataProvider")
-    public void testRealTimeMatchUnderLoad(int numRequests, int accountsPerRequest, long durationThreshold) {
+    @Test(groups = "load", dataProvider = "loadTestDataProvider")
+    public void testRealTimeMatchUnderLoad(int numRequests, int accountsPerRequest) {
+        sharedCounter = new AtomicInteger();
+        Integer totalRequests = numRequests * accountsPerRequest;
         ExecutorService executor = Executors.newFixedThreadPool(numRequests);
-        List<Future<MatchOutput>> futures = new ArrayList<>();
+        List<Future<Long>> futures = new ArrayList<>();
         for (int i = 0; i < numRequests; i++) {
-            Future<MatchOutput> future = executor.submit(new MatchCallable(matchProxy, accountsPerRequest));
+            Future<Long> future = executor
+                    .submit(new MatchCallable(matchProxy, accountsPerRequest, sharedCounter, totalRequests));
             futures.add(future);
         }
 
         boolean failed = false;
-        for (Future<MatchOutput> future : futures) {
+        Long totalDuration = 0L;
+        for (Future<Long> future : futures) {
             try {
-                MatchOutput output = future.get();
-                Assert.assertNotNull(output, "Match output should not be null.");
-                Assert.assertTrue(output.getStatistics().getTimeElapsedInMsec() <= durationThreshold,
-                        "Time elapsed in match, " + output.getStatistics().getTimeElapsedInMsec()
-                                + " msec, is longer than the threshold " + durationThreshold);
+                totalDuration += future.get();
             } catch (Exception e) {
                 failed = true;
                 log.error("Failed to get match output.", e);
             }
         }
 
+        log.info(String.format("%d threads with %d requests, average duration = %s", numRequests, accountsPerRequest,
+                DurationFormatUtils.formatDuration(totalDuration / numRequests, "mm:ss.SSS", failed)));
+
         Assert.assertFalse(failed, "Test failed, see log above for details.");
     }
 
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
-        return new Object[][] { { 1, 1000, 10000L }, { 1, 1, 5000L }, { 1, 10, 5000L }, { 1, 100, 5000L },
-                { 2, 100, 5000L }, { 2, 1000, 15000L }, { 4, 100, 5000L }, { 8, 100, 7500L }, { 16, 100, 15000L },
-                { 32, 100, 20000L }, { 64, 100, 30000L } };
+        return new Object[][] { { 1, 1 }, { 1, 10 }, { 4, 10 }, { 128, 10 } };
     }
 
-    static class MatchCallable implements Callable<MatchOutput> {
+    private void warmup() {
+        List<List<Object>> data = getGoodAccounts(1);
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        matchProxy.matchRealTime(input);
+    }
 
-        private final int numAccounts;
+    private class MatchCallable implements Callable<Long> {
+
+        private final Integer numAccounts;
         private final MatchProxy matchProxy;
+        private final Integer totalRequest;
+        private final AtomicInteger sharedCounter;
+        private Integer localCounter = 0;
 
-        MatchCallable(MatchProxy matchProxy, int numAccounts) {
+        MatchCallable(MatchProxy matchProxy, int numAccounts, AtomicInteger sharedCounter, Integer totalRequest) {
             this.numAccounts = numAccounts;
             this.matchProxy = matchProxy;
+            this.sharedCounter = sharedCounter;
+            this.totalRequest = totalRequest;
         }
 
         @Override
-        public MatchOutput call() {
+        public Long call() {
+            Long overallStartTime = System.currentTimeMillis();
             List<List<Object>> data = getGoodAccounts(numAccounts);
-            MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-            MatchOutput output = matchProxy.matchRealTime(input);
-            log.info("[" + Thread.currentThread().getName() + "] " + output.getStatistics().getRowsMatched()
-                    + " out of " + output.getStatistics().getRowsRequested() + " accounts are matched, time elapsed = "
-                    + output.getStatistics().getTimeElapsedInMsec() + " msec RootOperationUID="
-                    + output.getRootOperationUID());
-            return output;
-        }
-
-        private List<List<Object>> getGoodAccounts(int num) {
-            int poolSize = accountPool.size();
-            List<List<Object>> data = new ArrayList<>();
-            Set<Integer> visitedRows = new HashSet<>();
-            for (int i = 0; i < num; i++) {
-                int randomPos = new Random().nextInt(poolSize);
-                while (visitedRows.contains(randomPos)) {
-                    randomPos = new Random().nextInt(poolSize);
-                }
-                data.add(accountPool.get(randomPos));
-                visitedRows.add(randomPos);
+            for (List<Object> row : data) {
+                Long startTime = System.currentTimeMillis();
+                MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(Collections.singletonList(row));
+                matchProxy.matchRealTime(input);
+                localCounter++;
+                Long duration = System.currentTimeMillis() - startTime;
+                String logMsg = String.format(
+                        "Finished %d out of %d request in current thread, %d out of %d globally. Time elapsed = %s",
+                        localCounter, numAccounts, sharedCounter.incrementAndGet(), totalRequest,
+                        DurationFormatUtils.formatDuration(duration, "mm:ss.SSS", false));
+                log.info(logMsg);
             }
-            return data;
+            return (System.currentTimeMillis() - overallStartTime) / data.size();
         }
+    }
+
+    private List<List<Object>> getGoodAccounts(int num) {
+        int poolSize = accountPool.size();
+        List<List<Object>> data = new ArrayList<>();
+        Set<Integer> visitedRows = new HashSet<>();
+        for (int i = 0; i < num; i++) {
+            int randomPos = new Random().nextInt(poolSize);
+            while (visitedRows.contains(randomPos)) {
+                randomPos = new Random().nextInt(poolSize);
+            }
+            data.add(accountPool.get(randomPos));
+            visitedRows.add(randomPos);
+        }
+        return data;
     }
 
     private static void loadAccountPool() {
