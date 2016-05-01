@@ -58,8 +58,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private String enviroment;
     private String plsApiHostPort;
     private String adminApiHostPort;
-    private Boolean involvedDL;
-    private Boolean involvedZK;
+    private Boolean involvedDL = false;
+    private Boolean involvedZK = false;
 
     @Autowired
     private DataLoaderService dataLoaderService;
