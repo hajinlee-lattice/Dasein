@@ -140,11 +140,6 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                         } else {
                             fetchMultipleContexts(matchContextList);
                         }
-                        try {
-                            Thread.sleep(50L);
-                        } catch (Exception e1) {
-                            // ignore
-                        }
                     }
                 } catch (Exception e) {
                     log.warn("Error from fetcher.", e);
