@@ -36,7 +36,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private static final Integer QUEUE_SIZE = 1000;
     private static final Integer TIMEOUT_HOURS = 1;
     private static AtomicBoolean inspectionRegistered = new AtomicBoolean(false);
-    private static Boolean fetchersInitialized = false;
+    private static AtomicBoolean fetchersInitialized = new AtomicBoolean(false);
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -72,7 +72,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     public MatchContext fetch(MatchContext matchContext) {
         queue.add(matchContext);
 
-        if (!fetchersInitialized) {
+        if (!fetchersInitialized.get()) {
+            fetchersInitialized.set(true);
             for (int i = 1; i < numFetchers; i++) {
                 taskExecutor.submit(new Fetcher());
             }
@@ -85,8 +86,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         }
 
         if (!inspectionRegistered.get()) {
-            statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
             inspectionRegistered.set(true);
+            statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
         }
 
         return waitForResult(matchContext.getOutput().getRootOperationUID());
