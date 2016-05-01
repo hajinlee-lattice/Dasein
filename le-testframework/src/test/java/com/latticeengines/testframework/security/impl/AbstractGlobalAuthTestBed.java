@@ -8,12 +8,20 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -28,6 +36,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     private static Log log = LogFactory.getLog(AbstractGlobalAuthTestBed.class);
 
+    private static final String customerBase = "/user/s-analytics/customers";
+
     private Map<String, UserDocument> userTenantSessions = new HashMap<>();
 
     protected List<Tenant> testTenants = new ArrayList<>();
@@ -38,6 +48,9 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @PostConstruct
     private void postConstruct() {
@@ -144,7 +157,11 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     @Override
-    public void cleanup() {
+    public void cleanupDlZk() {
+    }
+
+    @Override
+    public void cleanupPlsHdfs() {
         for (Map.Entry<String, UserDocument> entry: userTenantSessions.entrySet()) {
             log.info("Logging out token for " + entry.getKey());
             UserDocument userDoc = entry.getValue();
@@ -161,6 +178,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
             log.info("Clean up test tenant " + tenant.getId());
             deleteTenant(tenant);
         }
+
+        cleanupHdfs();
     }
 
     /**
@@ -217,6 +236,54 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     public abstract void createTenant(Tenant tenant);
 
     public abstract void deleteTenant(Tenant tenant);
+
+    private void cleanupHdfs() {
+        Configuration yarnConfiguration;
+        String podId;
+        try {
+            yarnConfiguration = (Configuration) applicationContext.getBean("yarnConfiguration");
+            podId = PropertyUtils.getProperty("dataplatform.zk.pod.id");
+            if (StringUtils.isEmpty(podId)) {
+                podId = PropertyUtils.getProperty("camille.zk.pod.id");
+            }
+            if (StringUtils.isEmpty(podId)) {
+                throw new RuntimeException("Cannot find pod id from context");
+            }
+        } catch (Exception e) {
+            return;
+        }
+        for (Tenant tenant: testTenants) {
+            String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+            log.info("Clean up contract in HDFS: " + contractId);
+            String customerSpace = CustomerSpace.parse(contractId).toString();
+            String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, contractPath);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to clean up " + contractPath);
+            }
+
+            String customerPath = new Path(customerBase).append(customerSpace).toString();
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, customerPath);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to clean up " + customerPath);
+            }
+
+            contractPath = new Path(customerBase).append(contractId).toString();
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, contractPath);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to clean up " + customerPath);
+            }
+        }
+    }
 
     private void switchToTheSessionWithAccessLevel(AccessLevel level, Tenant tenant) {
         for (int i = 0; i < testTenants.size(); i++) {

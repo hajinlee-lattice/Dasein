@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
-import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;

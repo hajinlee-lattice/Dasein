@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PreDestroy;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -29,6 +28,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.query.ExistsRestriction;
 import com.latticeengines.common.exposed.query.Restriction;
@@ -44,7 +44,9 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
+import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
@@ -99,14 +101,6 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         this.testBed = testBed;
         restTemplate = testBed.getRestTemplate();
         magicRestTemplate = testBed.getMagicRestTemplate();
-    }
-
-    @PreDestroy
-    public void destroy() {
-        log.info("In PreDestroy of " + this.getClass().getSimpleName() + " ...");
-        if (testBed != null) {
-            testBed.cleanup();
-        }
     }
 
     protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload,

@@ -104,14 +104,18 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void cleanup() {
-        super.cleanup();
+    public void cleanupDlZk() {
         if (involvedZK) {
             cleanupTenantsInZK();
         }
         if (involvedDL) {
             cleanupTenantsInDL();
         }
+    }
+
+    @Override
+    public void cleanupPlsHdfs() {
+        super.cleanupPlsHdfs();
     }
 
     @Override

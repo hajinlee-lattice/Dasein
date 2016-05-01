@@ -12,7 +12,6 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -54,11 +53,6 @@ public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         log.info("Test environment setup finished.");
         System.out.println("Test environment setup finished.");
-    }
-
-    @AfterClass(groups = "deployment.precheckin")
-    public void tearDown() throws Exception {
-        testBed.cleanup();
     }
 
     @Test(groups = "deployment.precheckin")

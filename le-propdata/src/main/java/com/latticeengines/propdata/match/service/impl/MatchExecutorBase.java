@@ -334,12 +334,4 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         return "Country";
     }
 
-    private static void logError(Log log, String message, MatchContext matchContext, Exception e) {
-        if (e == null) {
-            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID());
-        } else {
-            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID(), e);
-        }
-    }
-
 }

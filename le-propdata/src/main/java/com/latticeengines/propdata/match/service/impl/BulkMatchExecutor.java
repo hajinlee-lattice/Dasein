@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.match.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -12,8 +10,6 @@ import com.latticeengines.propdata.match.service.MatchFetcher;
 
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
-
-    private static final Log log = LogFactory.getLog(BulkMatchExecutor.class);
 
     @Autowired
     @Qualifier(value = "bulkMatchFetcher")

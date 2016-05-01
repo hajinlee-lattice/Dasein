@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,11 +91,13 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                     && (System.currentTimeMillis() - tenant.getRegisteredTime()) > cleanupThreshold) {
                 log.info("Found a test tenant to clean up: " + tenant.getId());
                 cleanupTenantInGA(tenant);
-                cleanupTenantInZK(tenant);
-                cleanupTenantInHdfs(tenant);
-                cleanupTenantsInDL(tenant);
+                cleanupTenantInZK(CustomerSpace.parse(tenant.getId()).getContractId());
+                cleanupTenantInDL(CustomerSpace.parse(tenant.getId()).getContractId());
             }
         }
+
+        cleanupTenantsInHdfs();
+
         log.info("Finished cleaning up test tenants.");
     }
 
@@ -103,25 +106,49 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         tenantService.discardTenant(tenant);
     }
 
-    private void cleanupTenantInZK(Tenant tenant) throws Exception {
-        log.info("Clean up tenant in ZK: " + tenant.getId());
-        String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+    private void cleanupTenantInZK(String contractId) throws Exception {
+        log.info("Clean up tenant in ZK: " + contractId);
         Path contractPath = PathBuilder.buildContractPath(podId, contractId);
         if (camille.exists(contractPath)) {
             camille.delete(contractPath);
         }
     }
 
-    private void cleanupTenantInHdfs(Tenant tenant) throws Exception {
-        log.info("Clean up tenant in HDFS: " + tenant.getId());
-        String customerSpace = CustomerSpace.parse(tenant.getId()).toString();
-        String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+    private void cleanupTenantsInHdfs() {
+        String contractsPath = PathBuilder.buildContractsPath(podId).toString();
+        try {
+            List<FileStatus> fileStatuses = HdfsUtils.getFileStatusesForDir(yarnConfiguration, contractsPath, new HdfsUtils.HdfsFileFilter() {
+                @Override
+                public boolean accept(FileStatus file) {
+                    return file.isDirectory();
+                }
+            });
+            for (FileStatus fileStatus: fileStatuses) {
+                Long modifiedTime = fileStatus.getModificationTime();
+                if ((System.currentTimeMillis() - modifiedTime) > cleanupThreshold) {
+                    String contractId = fileStatus.getPath().getName();
+                    log.info("Found an old test contract " + contractId);
+                    try {
+                        cleanupTenantInHdfs(contractId);
+                        cleanupTenantInDL(contractId);
+                        cleanupTenantInZK(contractId);
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private void cleanupTenantInHdfs(String contractId) throws Exception {
+        log.info("Clean up contract in HDFS: " + contractId);
+        String customerSpace = CustomerSpace.parse(contractId).toString();
         String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
             HdfsUtils.rmdir(yarnConfiguration, contractPath);
         }
-
         String customerPath = new Path(customerBase).append(customerSpace).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
             HdfsUtils.rmdir(yarnConfiguration, customerPath);
@@ -132,10 +159,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private void cleanupTenantsInDL(Tenant tenant) {
-        log.info("Clean up test tenant " + tenant.getId() + " from DL.");
-        CustomerSpace customerSpace =CustomerSpace.parse(tenant.getId());
-        String tenantName = customerSpace.getTenantId();
+    private void cleanupTenantInDL(String tenantName) {
+        log.info("Clean up test tenant " + tenantName + " from DL.");
 
         try {
             String permStoreUrl = adminApiHostPort + "/admin/internal/BODCDEVVINT207/BODCDEVVINT187/" + tenantName;
@@ -148,8 +173,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
         try {
             List<BasicNameValuePair> adHeaders = loginAd();
-            String adminUrl = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
-                    + customerSpace.getContractId();
+            String adminUrl = adminApiHostPort + "/admin/tenants/" + tenantName + "?contractId="
+                    + tenantName;
             String response = HttpClientWithOptionalRetryUtils.sendGetRequest(adminUrl, false, adHeaders);
             TenantDocument tenantDoc = JsonUtils.deserialize(response, TenantDocument.class);
             String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();

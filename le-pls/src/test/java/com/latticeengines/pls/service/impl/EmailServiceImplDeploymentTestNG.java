@@ -60,7 +60,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void tearDown() throws Exception {
         deleteUserByRestCall(INTERNAL_USER_EMAIL);
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
-        super.teardown();
     }
 
     @Test(groups = "deployment", enabled = false)

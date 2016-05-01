@@ -39,5 +39,8 @@ public interface GlobalAuthTestBed {
     void switchToExternalUser(Tenant tenant);
     void switchToThirdPartyUser(Tenant tenant);
 
-    void cleanup();
+    void cleanupDlZk();
+
+    void cleanupPlsHdfs();
+
 }

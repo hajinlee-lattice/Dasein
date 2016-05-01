@@ -23,11 +23,6 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${pls.test.deployment.api}")
     private String deployedHostPort;
 
-    @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
-        testBed.cleanup();
-    }
-
     @PostConstruct
     private void postConstruct() {
         setTestBed(deploymentTestBed);

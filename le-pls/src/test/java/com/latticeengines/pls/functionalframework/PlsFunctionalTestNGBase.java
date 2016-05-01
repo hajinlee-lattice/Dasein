@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -75,11 +74,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneGATenant();
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        testBed.cleanup();
     }
 
     @Override
