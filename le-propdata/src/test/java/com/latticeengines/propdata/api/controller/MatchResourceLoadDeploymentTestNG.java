@@ -20,6 +20,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -27,6 +29,7 @@ import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -46,22 +49,33 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
     private MatchProxy matchProxy;
 
     private static List<List<Object>> accountPool;
-    private AtomicInteger sharedCounter;
+    private Long baseLine;
+
+    private static List<String> summary = new ArrayList<>();
 
     @BeforeClass(groups = "load")
     private void setUp() {
         loadAccountPool();
-        warmup();
+        warmUp();
         LogManager.getLogger(BaseRestApiProxy.class).setLevel(Level.WARN);
     }
 
+    @AfterClass(groups = "load")
+    private void tearDown() {
+        log.info("Summary:\n" + StringUtils.join(summary, "\n"));
+    }
+
     @Test(groups = "load", dataProvider = "loadTestDataProvider")
-    public void testRealTimeMatchUnderLoad(int numRequests, int accountsPerRequest) {
-        sharedCounter = new AtomicInteger();
-        Integer totalRequests = numRequests * accountsPerRequest;
-        ExecutorService executor = Executors.newFixedThreadPool(numRequests);
+    public void testRealTimeMatchUnderLoad(int numThreads, int accountsPerRequest, double threshold) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        AtomicInteger sharedCounter = new AtomicInteger();
+        Integer totalRequests = numThreads * accountsPerRequest;
+
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         List<Future<Long>> futures = new ArrayList<>();
-        for (int i = 0; i < numRequests; i++) {
+        for (int i = 0; i < numThreads; i++) {
             Future<Long> future = executor
                     .submit(new MatchCallable(matchProxy, accountsPerRequest, sharedCounter, totalRequests));
             futures.add(future);
@@ -78,18 +92,42 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
             }
         }
 
-        log.info(String.format("%d threads with %d requests, average duration = %s", numRequests, accountsPerRequest,
-                DurationFormatUtils.formatDuration(totalDuration / numRequests, "mm:ss.SSS", failed)));
+        stopWatch.stop();
+        String msg = String.format("Finished %d requests with in %d msec, throughput = %.2f request per second",
+                totalRequests, stopWatch.getTime(), (totalRequests * 1000.0 / stopWatch.getTime()));
+        summary.add(msg);
+        log.info(msg);
+
+        Long avgDuration = totalDuration / numThreads;
+
+        if (numThreads == 1) {
+            baseLine = avgDuration;
+            msg = String.format("%d threads with %d requests, average duration = %s, set the baseline to %s",
+                    numThreads, accountsPerRequest, duration(avgDuration), duration(baseLine));
+            summary.add(msg);
+            log.info(msg);
+        } else {
+            Double ratio = new Double(avgDuration) / new Double(baseLine);
+            msg = String.format(
+                    "%d threads with %d requests, average duration = %s, which is %.2f times of the baseline",
+                    numThreads, accountsPerRequest, duration(avgDuration), ratio);
+            summary.add(msg);
+            log.info(msg);
+            Assert.assertTrue(ratio < threshold,
+                    "Average duration when running with " + numThreads + " threads, " + avgDuration
+                            + ", exceeded the duration threshold: " + threshold + " * " + baseLine + " = "
+                            + (threshold * baseLine));
+        }
 
         Assert.assertFalse(failed, "Test failed, see log above for details.");
     }
 
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
-        return new Object[][] { { 1, 1 }, { 1, 10 }, { 4, 10 }, { 128, 10 }, { 1024, 10 } };
+        return new Object[][] { { 1, 1, 1 }, { 1, 10, 1 }, { 4, 10, 1.5 }, { 32, 10, 2.0 }, { 128, 10, 3.0 } };
     }
 
-    private void warmup() {
+    private void warmUp() {
         List<List<Object>> data = getGoodAccounts(1);
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         matchProxy.matchRealTime(input);
@@ -122,8 +160,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
                 Long duration = System.currentTimeMillis() - startTime;
                 String logMsg = String.format(
                         "Finished %d out of %d request in current thread, %d out of %d globally. Time elapsed = %s",
-                        localCounter, numAccounts, sharedCounter.incrementAndGet(), totalRequest,
-                        DurationFormatUtils.formatDuration(duration, "mm:ss.SSS", false));
+                        localCounter, numAccounts, sharedCounter.incrementAndGet(), totalRequest, duration(duration));
                 log.info(logMsg);
             }
             return (System.currentTimeMillis() - overallStartTime) / data.size();
@@ -143,6 +180,10 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
             visitedRows.add(randomPos);
         }
         return data;
+    }
+
+    private String duration(Long msec) {
+        return DurationFormatUtils.formatDuration(msec, "mm:ss.SSS", false);
     }
 
     private static void loadAccountPool() {

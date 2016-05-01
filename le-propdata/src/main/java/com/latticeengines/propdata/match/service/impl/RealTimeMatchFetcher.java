@@ -10,6 +10,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -34,22 +36,19 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
     private static final Integer QUEUE_SIZE = 1000;
-    private static final Integer TIMEOUT_HOURS = 1;
+    private static final Integer TIMEOUT_MINUTE = 10;
     private static AtomicBoolean inspectionRegistered = new AtomicBoolean(false);
-    private static AtomicBoolean fetchersInitialized = new AtomicBoolean(false);
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Long> fetcherActivity = new ConcurrentHashMap<>();
+    private ExecutorService executor;
 
     @Value("${propdata.match.group.size:20}")
     private Integer groupSize;
 
     @Value("${propdata.match.num.fetchers:16}")
     private Integer numFetchers;
-
-    @Autowired
-    @Qualifier("matchExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     @Qualifier("matchScheduler")
@@ -64,26 +63,22 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     @PostConstruct
     private void postConstruct() {
-        taskExecutor.submit(new Fetcher());
+        executor = Executors.newFixedThreadPool(numFetchers);
+        for (int i = 0; i < numFetchers; i++) {
+            executor.submit(new Fetcher());
+        }
+        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                scanQueue();
+            }
+        }, 10000L);
     }
 
     @Override
     @MatchStep
     public MatchContext fetch(MatchContext matchContext) {
         queue.add(matchContext);
-
-        if (!fetchersInitialized.get()) {
-            fetchersInitialized.set(true);
-            for (int i = 1; i < numFetchers; i++) {
-                taskExecutor.submit(new Fetcher());
-            }
-            matchScheduler.scheduleWithFixedDelay(new Runnable() {
-                @Override
-                public void run() {
-                    scanQueue();
-                }
-            }, 1000L);
-        }
 
         if (!inspectionRegistered.get()) {
             inspectionRegistered.set(true);
@@ -94,8 +89,18 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     }
 
     private void scanQueue() {
-        if (taskExecutor.getActiveCount() < numFetchers) {
-            taskExecutor.submit(new Fetcher());
+        int numNewFetchers = 0;
+        synchronized (fetcherActivity) {
+            for (Map.Entry<String, Long> entry: fetcherActivity.entrySet()) {
+                if (System.currentTimeMillis() - entry.getValue() > TimeUnit.HOURS.toMillis(1)) {
+                    log.warn("Fetcher " + entry.getKey() + " has no activity for 1 hour. Spawn a new one");
+                    fetcherActivity.remove(entry.getKey());
+                }
+            }
+            numNewFetchers = numNewFetchers - fetcherActivity.size();
+        }
+        for (int i = 0; i < numNewFetchers; i++) {
+            executor.submit(new Fetcher());
         }
     }
 
@@ -112,23 +117,32 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                 log.debug("Found fetch result for RootOperationUID=" + rootUid);
                 return map.remove(rootUid);
             }
-        } while (System.currentTimeMillis() - startTime < TIMEOUT_HOURS * 3600 * 1000L);
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE));
         throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUid);
     }
 
     private class Fetcher implements Runnable {
         @Override
         public void run() {
-            log.info("Launched a fetcher.");
+            String name = Thread.currentThread().getName();
+            log.info("Launched a fetcher " + name);
             while (true) {
                 try {
+                    fetcherActivity.put(name, System.currentTimeMillis());
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
-                        synchronized (queue) {
-                            int thisGroupSize = Math.min(groupSize, Math.max(4 * queue.size() / numFetchers, 1));
-                            int inGroup = 0;
-                            while (inGroup < thisGroupSize && !queue.isEmpty()) {
-                                matchContextList.add(queue.poll());
+                        int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 1));
+                        int inGroup = 0;
+
+                        while (inGroup < thisGroupSize && !queue.isEmpty()) {
+                            try {
+                                MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
+                                if (matchContext != null) {
+                                    matchContextList.add(matchContext);
+                                    inGroup++;
+                                }
+                            } catch (InterruptedException e) {
+                                // skip
                             }
                         }
 
@@ -138,6 +152,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                         } else {
                             fetchMultipleContexts(matchContextList);
                         }
+                        fetcherActivity.put(name, System.currentTimeMillis());
                     }
                 } catch (Exception e) {
                     log.warn("Error from fetcher.", e);
