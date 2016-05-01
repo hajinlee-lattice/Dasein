@@ -71,7 +71,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             public void run() {
                 scanQueue();
             }
-        }, 50L);
+        }, 100L);
     }
 
     @Override
@@ -117,22 +117,34 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         @Override
         public void run() {
             log.info("Launched a fetcher.");
-            while (!queue.isEmpty()) {
-                List<MatchContext> matchContextList = new ArrayList<>();
-                synchronized (queue) {
-                    int thisGroupSize = Math.min(groupSize,
-                            Math.max(queue.size() / taskExecutor.getActiveCount(), 1));
-                    int inGroup = 0;
-                    while (inGroup < thisGroupSize && !queue.isEmpty()) {
-                        matchContextList.add(queue.poll());
-                    }
-                }
+            while (true) {
+                try {
+                    while (!queue.isEmpty()) {
+                        List<MatchContext> matchContextList = new ArrayList<>();
+                        synchronized (queue) {
+                            int thisGroupSize = Math.min(groupSize,
+                                    Math.max(queue.size() / taskExecutor.getActiveCount(), 1));
+                            int inGroup = 0;
+                            while (inGroup < thisGroupSize && !queue.isEmpty()) {
+                                matchContextList.add(queue.poll());
+                            }
+                        }
 
-                if (matchContextList.size() == 1) {
-                    MatchContext matchContext = fetchSync(matchContextList.get(0));
-                    map.putIfAbsent(matchContext.getOutput().getRootOperationUID(), matchContext);
-                } else {
-                    fetchMultipleContexts(matchContextList);
+                        if (matchContextList.size() == 1) {
+                            MatchContext matchContext = fetchSync(matchContextList.get(0));
+                            map.putIfAbsent(matchContext.getOutput().getRootOperationUID(), matchContext);
+                        } else {
+                            fetchMultipleContexts(matchContextList);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Error from fetcher.", e);
+                } finally {
+                    try {
+                        Thread.sleep(50L);
+                    } catch (Exception e1) {
+                        // ignore
+                    }
                 }
             }
         }
