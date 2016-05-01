@@ -14,4 +14,9 @@
         <property name="componentName" value="propdata-microservice" />
     </bean>
 
+    <bean id="propdataFetchPoolTracker" class="com.latticeengines.monitor.exposed.metric.stats.impl.ThreadPoolInspection">
+        <property name="inspectionName" value="propdata-num-fetchers" />
+        <property name="taskExecutor" ref="matchExecutor" />
+    </bean>
+
 </beans>

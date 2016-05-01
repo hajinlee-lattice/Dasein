@@ -10,8 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -40,13 +39,20 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
-    private ExecutorService executor;
 
     @Value("${propdata.match.group.size:20}")
     private Integer groupSize;
 
     @Value("${propdata.match.num.fetchers:16}")
     private Integer numFetchers;
+
+    @Autowired
+    @Qualifier("matchExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    @Autowired
+    @Qualifier("matchScheduler")
+    private ThreadPoolTaskScheduler matchScheduler;
 
     @Autowired
     @Qualifier("monitorScheduler")
@@ -57,10 +63,24 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     @PostConstruct
     private void postConstruct() {
-        executor = Executors.newFixedThreadPool(numFetchers);
         for (int i = 0; i < numFetchers; i++) {
-            executor.submit(new Fetcher());
+            taskExecutor.submit(new Fetcher());
         }
+
+        while (taskExecutor.getActiveCount() < numFetchers) {
+            try {
+                Thread.sleep(500L);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+
+        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                scanQueue();
+            }
+        }, 500L);
     }
 
     @Override
@@ -73,6 +93,12 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
         queue.add(matchContext);
         return waitForResult(matchContext.getOutput().getRootOperationUID());
+    }
+
+    private void scanQueue() {
+        if (taskExecutor.getActiveCount() < numFetchers) {
+            taskExecutor.submit(new Fetcher());
+        }
     }
 
     private MatchContext waitForResult(String rootUid) {
