@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
@@ -43,9 +44,13 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
+    @Value("${dataplatform.queueScheme:legacy}")
+    private String yarnQueueScheme;
+
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
         validateParameters(context);
+        overwriteYarnQueueAssignment(context);
 
         boolean doCheckpoint = context.getProperty(CHECKPOINT, Boolean.class);
 
@@ -72,6 +77,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Override
     public Table executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
         validateParameters(dataFlowCtx);
+        overwriteYarnQueueAssignment(dataFlowCtx);
 
         ApplicationContext ctx = dataFlowCtx.getProperty(APPCTX, ApplicationContext.class);
 
@@ -104,6 +110,19 @@ public class DataTransformationServiceImpl implements DataTransformationService 
             throw new LedpException(LedpCode.LEDP_26001, new String[] { StringUtils.join(missingProps, ", ") });
         }
 
+    }
+
+    private void overwriteYarnQueueAssignment(DataFlowContext dataFlowContext) {
+        if ("default".equals(yarnQueueScheme)) {
+            dataFlowContext.setProperty("QUEUE", LedpQueueAssigner.getDefaultQueueNameForSubmission());
+        } else if ("legacy".equals(yarnQueueScheme)) {
+            String queue = dataFlowContext.getProperty("QUEUE", String.class);
+            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
+                    queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
+                    queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
+                dataFlowContext.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
+            }
+        }
     }
 
     private void validateParameters(DataFlowContext dataFlowCtx) {
