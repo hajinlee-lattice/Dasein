@@ -65,7 +65,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
     
 })
-.controller('ChangeModelNameController', function ($scope, $state, $rootScope, NavUtility, ResourceUtility, ModelService) {
+.controller('ChangeModelNameController', function ($scope, $state, $rootScope, NavUtility, ResourceUtility, ModelStore, ModelService) {
     $scope.submitting = false;
     $scope.showNameEditError = false;
     $scope.displayName = $scope.$parent.displayName == null ? $scope.$parent.name : $scope.$parent.displayName;
@@ -101,6 +101,8 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                 $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
 
                 $scope.nameStatus.editing = false;
+
+                ModelStore.removeModel($scope.$parent.data.Id);
 
                 $state.go('.', {}, { reload: true });
 

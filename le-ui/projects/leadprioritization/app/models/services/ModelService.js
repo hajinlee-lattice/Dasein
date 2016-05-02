@@ -30,7 +30,11 @@ angular.module('mainApp.models.services.ModelService', [
         }
 
         return deferred.promise;
-    }
+    };
+
+    this.removeModel = function(modelId) {
+        delete this.models[modelId];
+    };
 })
 .service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
 
@@ -223,7 +227,7 @@ angular.module('mainApp.models.services.ModelService', [
                     modelSummary = JSON.parse(data.Details.Payload);
                 }
                 modelSummary.ModelDetails.Status = data.Status;
-                modelSummary.ModelDetails.DisplayName = data.Name;
+                modelSummary.ModelDetails.DisplayName = data.DisplayName;
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
                 // sync with front-end json structure
                 result.resultObj = modelSummary;

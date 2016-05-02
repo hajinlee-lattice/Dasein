@@ -193,7 +193,7 @@ angular
             views: {
                 "navigation@": {
                     controller: function($scope, $rootScope, Model, FeatureFlagService) {
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.Name });
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
