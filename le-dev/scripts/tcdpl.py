@@ -1,6 +1,10 @@
+import subprocess, os, stat, sys, pexpect, signal, psutil, atexit
 import argparse
-import os
+import time
 from shutil import copyfile, rmtree
+
+tomcatPid = None
+tomcatProc = None
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print 'WSHOME=%s' % WSHOME
@@ -97,23 +101,54 @@ def printWars():
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
-    parser.add_argument('command', type=str, help='command: deploy, cleanup, check')
+    parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
     parser.add_argument('-a', dest='apps', type=str, default='microservice',
                         help='comma separated list of apps to be deployed. default is microservice. Avaiable choices are admin, pls, microservice, playmaker, oauth2, scoringapi')
     parser.add_argument('-m', dest='modules', type=str, default=','.join(MS_MODULES),
                         help='comma separated list of microservice modules to be deployed. core is implicitly included. default is all modules. Avaiable choices are dataflowapi, eai, metadata, modeling, propdata, scoring, workflowapi')
     args = parser.parse_args()
+
     return args
+
+
+def runTc():
+    proc = subprocess.Popen(['bash %s/le-dev/scripts/run-tomcat.sh' % os.environ['WSHOME']], shell=True)
+    if proc:
+        global tomcatPid
+        tomcatPid = proc.pid
+        atexit.register(killTc)
+
+def waitTc():
+    global tomcatPid
+    proc = psutil.Process(tomcatPid)
+    proc.wait()
+
+def killTc():
+    global tomcatPid
+    try:
+      proc = psutil.Process(tomcatPid)
+    except psutil.NoSuchProcess:
+      return
+    childPids = proc.children(recursive=True)
+    for childPid in childPids:
+      os.kill(childPid.pid, signal.SIGKILL)
+    os.kill(tomcatPid, signal.SIGKILL)
 
 
 if __name__ == '__main__':
     print ''
     args = parseCliArgs()
 
-    if args.command in ('deploy', 'cleanup'):
+    if args.command in ('deploy', 'cleanup', 'run'):
         cleanupWars()
 
-    if args.command == 'deploy':
+    if args.command == 'run':
+        runTc()
+        for i in xrange(10):
+            print 'wait %d sec for server to start' % (10 - i)
+            time.sleep(1)
+
+    if args.command in ('deploy', 'run'):
         apps = args.apps.split(',')
         modules = args.modules.split(',')
 
@@ -125,3 +160,6 @@ if __name__ == '__main__':
 
     if args.command in ('deploy', 'cleanup', 'check'):
         printWars()
+
+    if args.command == 'run':
+        waitTc()
