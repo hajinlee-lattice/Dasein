@@ -112,6 +112,10 @@ public class PublicationServiceImpl implements PublicationService {
                     }
                 } catch (Exception e) {
                     log.error("Failed to get application report for appId" + appIdStr, e);
+                    if (e.getMessage().contains("doesn't exist in the timeline store")) {
+                        // RM was restarted while it is running
+                        publicationProgressService.update(progress).fail(e.getMessage()).commit();
+                    }
                 }
             }
         }
