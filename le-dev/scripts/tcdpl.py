@@ -86,7 +86,8 @@ def deployMsModule(module):
 
     webappWar = 'ROOT.war' if (module == 'core') else module + '.war'
     webappDir = os.path.join(CATALINA_HOME, 'webapps', 'ms', webappWar)
-    copyfile(os.path.join(moduleDir, moduleWar), webappDir)
+    copyfile(os.path.join(moduleDir, moduleWar), webappDir + ".copy")
+    os.rename(webappDir + ".copy", webappDir)
     print 'deployed %s to %s\n' % (moduleWar, webappDir)
 
 
@@ -158,7 +159,7 @@ if __name__ == '__main__':
         for app in apps:
             deployApp(app, modules)
 
-    if args.command in ('deploy', 'cleanup', 'check'):
+    if args.command in ('deploy', 'cleanup', 'check', 'run'):
         printWars()
 
     if args.command == 'run':
