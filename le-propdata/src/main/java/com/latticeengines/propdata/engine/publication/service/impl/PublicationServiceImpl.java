@@ -8,10 +8,15 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
@@ -54,11 +59,15 @@ public class PublicationServiceImpl implements PublicationService {
     @Autowired
     private WorkflowProxy workflowProxy;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
+        checkFailedProgresses();
         killHangingJobs();
         publishAll();
         return scanForNewWorkFlow();
@@ -85,6 +94,24 @@ public class PublicationServiceImpl implements PublicationService {
                     publicationProgressService.kickoffNewProgress(publication, PropDataConstants.SCAN_SUBMITTER);
                 } catch (Exception e) {
                     log.error("Failed to trigger publication " + publication.getPublicationName(), e);
+                }
+            }
+        }
+    }
+
+    private void checkFailedProgresses() {
+        for (PublicationProgress progress : publicationProgressService.scanNonTerminalProgresses()) {
+            if (ProgressStatus.PROCESSING.equals(progress.getStatus())) {
+                String appIdStr = progress.getApplicationId();
+                try {
+                    ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration,
+                            ConverterUtils.toApplicationId(appIdStr));
+                    if (YarnApplicationState.FAILED.equals(report.getYarnApplicationState())) {
+                        log.info("Found a running progress which is already failed.");
+                        publicationProgressService.update(progress).fail("Yarn application failed.").commit();
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to get application report for appId" + appIdStr);
                 }
             }
         }
