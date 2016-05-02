@@ -7,6 +7,11 @@
         <span class="columns one {{job.status}}">{{job.status}}</span>
         <span class="columns two">
             <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" data-ng-show="(jobCompleted || jobFailed) && job.id != null">
+                <a href="javascript:void(0)" 
+                   data-ng-click="rescoreFailedJob({jobId: job.id})" 
+                   ng-show="job.status == 'Failed'">
+                   <i class="fa fa-refresh"></i>Restart
+                </a>
                 <a ui-sref="home.jobs.status.ready({jobId: job.id})" ng-show="jobType == 'fitModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
                 <a ui-sref="home.jobs.status.csv({jobId: job.id})" ng-show="jobType == 'importMatchAndModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
                 <a 

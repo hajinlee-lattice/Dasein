@@ -13,7 +13,7 @@ angular
                 expanded: '=',
                 cancelling: '='
             },
-            controller: ['$scope', '$rootScope', '$state', 'JobsService', function ($scope, $rootScope, $state, JobsService) {
+            controller: ['$http', '$scope', '$rootScope', '$state', 'JobsService', function ($http, $scope, $rootScope, $state, JobsService) {
                 var job = $scope.job;
 
                 $scope.jobType = job.jobType ? job.jobType : 'placeholder';
@@ -73,6 +73,20 @@ angular
                             }
                         });
                     }
+                };
+
+                $scope.rescoreFailedJob = function() {
+                    $http({
+                        method: 'POST',
+                        url: '/pls/jobs/' + job.id +'/restart'
+                    }).then(
+                        function onSuccess(response) {
+                            var jobId = $scope.job.id;
+                            JobsService.getJobStatus(jobId);
+                        }, function onError(response) {
+                            console.log("error");
+                        }
+                    );
                 };
 
                 $scope.clickGetScoringResults = function($event) {
@@ -164,6 +178,7 @@ angular
                 }
 
                 function queryJobStatusAndSetStatesVariables(jobId) {
+
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
                             var jobStatus = response.resultObj.jobStatus;
