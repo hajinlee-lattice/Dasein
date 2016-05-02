@@ -77,6 +77,11 @@ public class TestFrameworkUtils {
 
     public static Boolean isTestTenant(Tenant tenant) {
         String tenantId = CustomerSpace.parse(tenant.getId()).getTenantId();
+        return isTestTenant(tenantId);
+    }
+
+    public static Boolean isTestTenant(String tenantId) {
+        tenantId = CustomerSpace.parse(tenantId).getTenantId();
         Pattern pattern = Pattern.compile(TENANTID_PREFIX + "\\d+");
         Matcher matcher = pattern.matcher(tenantId);
         return matcher.find();

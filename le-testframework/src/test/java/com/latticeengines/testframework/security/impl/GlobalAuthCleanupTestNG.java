@@ -49,7 +49,7 @@ import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(GlobalAuthCleanupTestNG.class);
-    private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(1);
+    private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
     private static final String customerBase = "/user/s-analytics/customers";
 
     @Autowired
@@ -102,11 +102,19 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void cleanupTenantInGA(Tenant tenant) {
+        if (!TestFrameworkUtils.isTestTenant(tenant)) {
+            return;
+        }
+
         log.info("Clean up tenant in GA: " + tenant.getId());
         tenantService.discardTenant(tenant);
     }
 
     private void cleanupTenantInZK(String contractId) throws Exception {
+        if (!TestFrameworkUtils.isTestTenant(contractId)) {
+            return;
+        }
+
         log.info("Clean up tenant in ZK: " + contractId);
         Path contractPath = PathBuilder.buildContractPath(podId, contractId);
         if (camille.exists(contractPath)) {
@@ -124,16 +132,18 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                 }
             });
             for (FileStatus fileStatus: fileStatuses) {
-                Long modifiedTime = fileStatus.getModificationTime();
-                if ((System.currentTimeMillis() - modifiedTime) > cleanupThreshold) {
-                    String contractId = fileStatus.getPath().getName();
-                    log.info("Found an old test contract " + contractId);
-                    try {
-                        cleanupTenantInHdfs(contractId);
-                        cleanupTenantInDL(contractId);
-                        cleanupTenantInZK(contractId);
-                    } catch (Exception e) {
-                        // ignore
+                if (TestFrameworkUtils.isTestTenant(fileStatus.getPath().getName())) {
+                    Long modifiedTime = fileStatus.getModificationTime();
+                    if ((System.currentTimeMillis() - modifiedTime) > cleanupThreshold) {
+                        String contractId = fileStatus.getPath().getName();
+                        log.info("Found an old test contract " + contractId);
+                        try {
+                            cleanupTenantInHdfs(contractId);
+                            cleanupTenantInDL(contractId);
+                            cleanupTenantInZK(contractId);
+                        } catch (Exception e) {
+                            // ignore
+                        }
                     }
                 }
             }
@@ -143,23 +153,29 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void cleanupTenantInHdfs(String contractId) throws Exception {
-        log.info("Clean up contract in HDFS: " + contractId);
-        String customerSpace = CustomerSpace.parse(contractId).toString();
-        String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
-        if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-            HdfsUtils.rmdir(yarnConfiguration, contractPath);
-        }
-        String customerPath = new Path(customerBase).append(customerSpace).toString();
-        if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
-            HdfsUtils.rmdir(yarnConfiguration, customerPath);
-        }
-        contractPath = new Path(customerBase).append(contractId).toString();
-        if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-            HdfsUtils.rmdir(yarnConfiguration, contractPath);
+        if (TestFrameworkUtils.isTestTenant(contractId)) {
+            log.info("Clean up contract in HDFS: " + contractId);
+            String customerSpace = CustomerSpace.parse(contractId).toString();
+            String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            }
+            String customerPath = new Path(customerBase).append(customerSpace).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, customerPath);
+            }
+            contractPath = new Path(customerBase).append(contractId).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            }
         }
     }
 
     private void cleanupTenantInDL(String tenantName) {
+        if (!TestFrameworkUtils.isTestTenant(tenantName)) {
+            return;
+        }
+
         log.info("Clean up test tenant " + tenantName + " from DL.");
 
         try {
