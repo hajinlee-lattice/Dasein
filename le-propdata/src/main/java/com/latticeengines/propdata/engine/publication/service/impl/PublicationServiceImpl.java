@@ -111,7 +111,7 @@ public class PublicationServiceImpl implements PublicationService {
                         publicationProgressService.update(progress).fail("Yarn application failed.").commit();
                     }
                 } catch (Exception e) {
-                    log.error("Failed to get application report for appId" + appIdStr);
+                    log.error("Failed to get application report for appId" + appIdStr, e);
                 }
             }
         }
