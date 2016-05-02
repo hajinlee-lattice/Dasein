@@ -189,7 +189,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = restTemplate.exchange(
-                String.format("%s/pls/models/fileuploads/%s/import/errors", getRestAPIHostPort(),
+                String.format("%s/pls/fileuploads/%s/import/errors", getRestAPIHostPort(),
                         sourceFile.getName()), HttpMethod.GET, entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());

@@ -98,18 +98,4 @@ public class ScoringFileUploadResource {
             }
         }
     }
-
-    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "text/plain")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve file import errors")
-    public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
-        try {
-            InputStream is = fileUploadService.getImportErrorStream(fileName);
-            response.setContentType("text/plain");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "errors.csv"));
-            IOUtils.copy(is, response.getOutputStream());
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18093, e);
-        }
-    }
 }

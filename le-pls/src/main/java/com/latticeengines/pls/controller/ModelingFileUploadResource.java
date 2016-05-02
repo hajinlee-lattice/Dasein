@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -135,17 +132,4 @@ public class ModelingFileUploadResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "application/csv")
-    @ResponseBody
-    @ApiOperation(value = "Retrieve file import errors")
-    public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
-        try {
-            InputStream is = fileUploadService.getImportErrorStream(fileName);
-            response.setContentType("application/csv");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "errors.csv"));
-            IOUtils.copy(is, response.getOutputStream());
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18093, e);
-        }
-    }
 }
