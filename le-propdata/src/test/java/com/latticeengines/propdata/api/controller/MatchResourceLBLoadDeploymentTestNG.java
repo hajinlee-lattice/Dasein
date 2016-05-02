@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -134,6 +135,7 @@ public class MatchResourceLBLoadDeploymentTestNG extends PropDataApiDeploymentTe
     }
 
     private void warmUp() {
+        SSLUtils.turnOffSslChecking();
         List<List<Object>> data = getGoodAccounts(1);
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         matchProxy.matchRealTime(input);
@@ -161,6 +163,7 @@ public class MatchResourceLBLoadDeploymentTestNG extends PropDataApiDeploymentTe
             for (List<Object> row : data) {
                 Long startTime = System.currentTimeMillis();
                 MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(Collections.singletonList(row));
+                SSLUtils.turnOffSslChecking();
                 matchProxy.matchRealTime(input);
                 localCounter++;
                 Long duration = System.currentTimeMillis() - startTime;
