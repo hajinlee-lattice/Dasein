@@ -57,6 +57,7 @@ public class MatchResourceLBLoadDeploymentTestNG extends PropDataApiDeploymentTe
     private String tc1Url = getenv("PROPDATA_TC_1", "http://10.41.0.24:8080", String.class);
     private String tc2Url = getenv("PROPDATA_TC_2", "http://10.41.0.28:8080", String.class);
     private String svipUrl = getenv("PROPDATA_SVIP", "http://10.41.0.26:8080", String.class);
+    private Integer concurrency = getenv("PROPDATA_CONCURRENCY", 64, Integer.class);
 
     @BeforeClass(groups = "load.temp")
     private void setUp() {
@@ -130,8 +131,8 @@ public class MatchResourceLBLoadDeploymentTestNG extends PropDataApiDeploymentTe
 
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
-        return new Object[][] { { 1, 1, svipUrl }, { 64, 10, svipUrl }, { 1, 1, tc1Url }, { 64, 10, tc1Url },
-                { 1, 1, tc2Url }, { 64, 10, tc2Url } };
+        return new Object[][] { { 1, 1, svipUrl }, { concurrency, 10, svipUrl }, { 1, 1, tc1Url }, { concurrency, 10, tc1Url },
+                { 1, 1, tc2Url }, { concurrency, 10, tc2Url } };
     }
 
     private void warmUp() {
