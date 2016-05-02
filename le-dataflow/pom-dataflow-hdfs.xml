@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.27-SNAPSHOT</version>
+        <version>2.0.28-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -19,7 +19,7 @@
         <mapping.groupname>hdfs</mapping.groupname>
         <pre.install.script>preinstall</pre.install.script>
         <post.install.script>postinstall</post.install.script>
-        <le.rpm.version>2.0.27-SNAPSHOT</le.rpm.version>
+        <le.rpm.version>2.0.28-SNAPSHOT</le.rpm.version>
     </properties>
 
     <build>

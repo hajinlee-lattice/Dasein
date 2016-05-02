@@ -9,18 +9,18 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.27-SNAPSHOT</version>
+        <version>2.0.28-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>workflow</component-name>
-        <le.db.version>2.0.27-SNAPSHOT</le.db.version>
-        <le.monitor.version>2.0.27-SNAPSHOT</le.monitor.version>
-        <le.security.version>2.0.27-SNAPSHOT</le.security.version>
-        <le.db.version>2.0.27-SNAPSHOT</le.db.version>
-        <le.monitor.version>2.0.27-SNAPSHOT</le.monitor.version>
-        <le.security.version>2.0.27-SNAPSHOT</le.security.version>
+        <le.db.version>2.0.28-SNAPSHOT</le.db.version>
+        <le.monitor.version>2.0.28-SNAPSHOT</le.monitor.version>
+        <le.security.version>2.0.28-SNAPSHOT</le.security.version>
+        <le.db.version>2.0.28-SNAPSHOT</le.db.version>
+        <le.monitor.version>2.0.28-SNAPSHOT</le.monitor.version>
+        <le.security.version>2.0.28-SNAPSHOT</le.security.version>
         <spring.batch.version>3.0.3.RELEASE</spring.batch.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
     </properties>

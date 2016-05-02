@@ -9,14 +9,14 @@
     <properties>
         <component-name>swlib</component-name>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
-        <le.common.version>2.0.27-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.27-SNAPSHOT</le.domain.version>
+        <le.common.version>2.0.28-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.28-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.27-SNAPSHOT</version>
+        <version>2.0.28-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
