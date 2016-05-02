@@ -15,4 +15,8 @@ public interface IngestionService {
     public List<IngestionProgress> scan(String hdfsPod);
 
     public List<String> getMissingFiles(Ingestion ingestion);
+
+    public List<String> getTargetFiles(Ingestion ingestion);
+
+    public void killFailedProgresses();
 }

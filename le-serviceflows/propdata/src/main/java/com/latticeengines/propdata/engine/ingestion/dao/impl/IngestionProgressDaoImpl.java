@@ -98,8 +98,7 @@ public class IngestionProgressDaoImpl extends
         query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
         Date lastestScheduledTime;
         try {
-            lastestScheduledTime = CronUtils
-                    .getPreviouFireTimeFromNext(ingestion.getCronExpression());
+            lastestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression());
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             log.debug("Latest scheduled time: " + lastestScheduledTime == null ? "null"
                     : df.format(lastestScheduledTime) + " for ingestion " + ingestion.toString());
@@ -115,17 +114,31 @@ public class IngestionProgressDaoImpl extends
         }
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("unchecked")
     @Override
     public List<IngestionProgress> getRetryFailedProgresses() {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<IngestionProgress> progressEntityClz = IngestionProgress.class;
+        String queryStr = String.format(
+                "from %s progress where progress.status = :status and progress.retries < progress.ingestion.newJobMaxRetry",
+                progressEntityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("status", ProgressStatus.FAILED);
+        return query.list();
+    }
+
+    @Override
+    public boolean isDuplicateProgress(IngestionProgress progress) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Ingestion> ingestionEntityClz = Ingestion.class;
         Class<IngestionProgress> progressEntityClz = IngestionProgress.class;
         String queryStr = String.format(
-                "select {lhs.*} from %s lhs join %s rhs on lhs.IngestionName = rhs.IngestionName and Lhs.Status = :status and lhs.Retries < rhs.NewJobMaxRetry",
-                progressEntityClz, ingestionEntityClz);
-        Query query = session.createQuery(queryStr);
-        query.setParameter("status", ProgressStatus.FAILED);
-        return query.list();
+                "select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and !(lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
+                progressEntityClz.getSimpleName(), ingestionEntityClz.getSimpleName());
+        Query query = session.createSQLQuery(queryStr);
+        query.setParameter("destination", progress.getDestination());
+        query.setParameter("finishStatus", ProgressStatus.FINISHED.toString());
+        query.setParameter("failedStatus", ProgressStatus.FAILED.toString());
+        return !CollectionUtils.isEmpty(query.list());
     }
 }

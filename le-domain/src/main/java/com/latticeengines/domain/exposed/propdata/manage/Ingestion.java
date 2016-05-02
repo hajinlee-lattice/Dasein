@@ -33,7 +33,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.ingestion.Protocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -76,7 +76,7 @@ public class Ingestion implements HasPid, Serializable {
     private IngestionCriteria ingestionCriteria;
 
     @Transient
-    private Protocol protocol;
+    private ProviderConfiguration providerConfiguration;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "ingestion")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -176,24 +176,24 @@ public class Ingestion implements HasPid, Serializable {
     }
 
     @JsonIgnore
-    public Protocol getProtocol() {
-        if (this.protocol == null) {
+    public ProviderConfiguration getProviderConfiguration() {
+        if (this.providerConfiguration == null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                protocol = mapper.readValue(getSource(), Protocol.class);
+                providerConfiguration = mapper.readValue(getSource(), ProviderConfiguration.class);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
             }
         }
-        return this.protocol;
+        return this.providerConfiguration;
     }
 
     @JsonIgnore
-    public void setProtocol(Protocol protocol) {
-        this.protocol = protocol;
+    public void setProviderConfiguration(ProviderConfiguration providerConfiguration) {
+        this.providerConfiguration = providerConfiguration;
         ObjectMapper mapper = new ObjectMapper();
         try {
-            setSource(mapper.writeValueAsString(protocol));
+            setSource(mapper.writeValueAsString(providerConfiguration));
         } catch (JsonProcessingException e) {
             throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
         }

@@ -1,18 +1,15 @@
 package com.latticeengines.domain.exposed.propdata.ingestion;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
-@JsonSubTypes({ @JsonSubTypes.Type(value = SftpProtocol.class, name = "SftpProtocol") })
-public abstract class Protocol {
+@JsonSubTypes({ @JsonSubTypes.Type(value = SftpConfiguration.class, name = "SftpProtocol") })
+public abstract class ProviderConfiguration {
     private String className;
 
-    public Protocol() {
+    public ProviderConfiguration() {
         setClassName(getClass().getSimpleName());
     }
 
@@ -25,7 +22,4 @@ public abstract class Protocol {
     private void setClassName(String className) {
         this.className = className;
     }
-
-    @JsonIgnore
-    public abstract List<String> getAllFiles();
 }

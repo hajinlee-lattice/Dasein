@@ -4,7 +4,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.propdata.ingestion.Protocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.propdata.workflow.engine.IngestionWorkflowConfiguration;
@@ -29,8 +29,9 @@ public class IngestionWorkflowSubmitter {
         return this;
     }
 
-    public IngestionWorkflowSubmitter protocol(Protocol protocol) {
-        builder = builder.protocol(protocol);
+    public IngestionWorkflowSubmitter providerConfiguration(
+            ProviderConfiguration providerConfiguration) {
+        builder = builder.providerConfiguration(providerConfiguration);
         return this;
     }
 

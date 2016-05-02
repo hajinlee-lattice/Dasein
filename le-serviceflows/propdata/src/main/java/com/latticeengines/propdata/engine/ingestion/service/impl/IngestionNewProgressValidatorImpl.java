@@ -1,11 +1,8 @@
 package com.latticeengines.propdata.engine.ingestion.service.impl;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionNewProgressValidator;
 
@@ -38,23 +34,11 @@ public class IngestionNewProgressValidatorImpl implements IngestionNewProgressVa
 
     @Override
     public boolean isDuplicateProgress(IngestionProgress progress) {
-        Map<String, Object> newFields = new HashMap<String, Object>();
-        newFields.put("Destination", progress.getDestination());
-        newFields.put("Status", ProgressStatus.NEW);
-        Map<String, Object> processingFields = new HashMap<String, Object>();
-        processingFields.put("Destination", progress.getDestination());
-        processingFields.put("Status", ProgressStatus.PROCESSING);
-        if (CollectionUtils.isEmpty(ingestionProgressEntityMgr.getProgressesByField(newFields))
-                && CollectionUtils.isEmpty(
-                        ingestionProgressEntityMgr.getProgressesByField(processingFields))) {
-            return false;
-        } else {
-            return true;
-        }
+        return ingestionProgressEntityMgr.isDuplicateProgress(progress);
     }
 
     @Override
-    public List<IngestionProgress> checkDuplcateProgresses(List<IngestionProgress> progresses) {
+    public List<IngestionProgress> checkDuplicateProgresses(List<IngestionProgress> progresses) {
         Iterator<IngestionProgress> iter = progresses.iterator();
         while (iter.hasNext()) {
             IngestionProgress progress = iter.next();

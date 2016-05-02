@@ -10,5 +10,5 @@ public interface IngestionNewProgressValidator {
 
     public boolean isDuplicateProgress(IngestionProgress progress);
 
-    public List<IngestionProgress> checkDuplcateProgresses(List<IngestionProgress> progresses);
+    public List<IngestionProgress> checkDuplicateProgresses(List<IngestionProgress> progresses);
 }

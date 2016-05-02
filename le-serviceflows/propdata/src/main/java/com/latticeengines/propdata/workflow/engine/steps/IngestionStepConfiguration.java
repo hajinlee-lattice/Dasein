@@ -2,7 +2,7 @@ package com.latticeengines.propdata.workflow.engine.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.propdata.ingestion.Protocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -15,7 +15,7 @@ public class IngestionStepConfiguration extends BaseStepConfiguration {
     private Ingestion ingestion;
 
     @NotNull
-    private Protocol protocol;
+    private ProviderConfiguration providerConfiguration;
 
     @JsonProperty("ingestion_progress")
     public IngestionProgress getIngestionProgress() {
@@ -37,14 +37,14 @@ public class IngestionStepConfiguration extends BaseStepConfiguration {
         this.ingestion = ingestion;
     }
 
-    @JsonProperty("protocol")
-    public Protocol getProtocol() {
-        return protocol;
+    @JsonProperty("providerConfiguration")
+    public ProviderConfiguration getProviderConfiguration() {
+        return providerConfiguration;
     }
 
-    @JsonProperty("protocol")
-    public void setProtocol(Protocol protocol) {
-        this.protocol = protocol;
+    @JsonProperty("providerConfiguration")
+    public void setProviderConfiguration(ProviderConfiguration providerConfiguration) {
+        this.providerConfiguration = providerConfiguration;
     }
 
 }

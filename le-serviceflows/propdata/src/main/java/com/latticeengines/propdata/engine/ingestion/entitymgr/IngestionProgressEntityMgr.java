@@ -21,4 +21,6 @@ public interface IngestionProgressEntityMgr {
     public boolean isIngestionTriggered(Ingestion ingestion);
 
     public List<IngestionProgress> getRetryFailedProgresses();
+
+    public boolean isDuplicateProgress(IngestionProgress progress);
 }

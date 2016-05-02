@@ -11,7 +11,7 @@ import com.latticeengines.propdata.engine.ingestion.service.impl.IngestionProgre
 public interface IngestionProgressService {
     public List<IngestionProgress> getProgressesByField(Map<String, Object> fields);
 
-    public IngestionProgress createStagingIngestionProgress(Ingestion ingestion, String triggeredBy,
+    public IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
             String file);
 
     public String constructSource(Ingestion ingestion, String fileName);

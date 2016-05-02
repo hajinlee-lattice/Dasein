@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
-import com.latticeengines.domain.exposed.propdata.ingestion.Protocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
@@ -54,8 +54,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             progress = getConfiguration().getIngestionProgress();
             HdfsPodContext.changeHdfsPodId(progress.getHdfsPod());
             Ingestion ingestion = getConfiguration().getIngestion();
-            Protocol protocol = getConfiguration().getProtocol();
-            ingestion.setProtocol(protocol);
+            ProviderConfiguration providerConfiguration = getConfiguration()
+                    .getProviderConfiguration();
+            ingestion.setProviderConfiguration(providerConfiguration);
             progress.setIngestion(ingestion);
             initializeYarnClient();
             ingestionByCamelRoute();

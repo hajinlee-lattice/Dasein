@@ -21,7 +21,7 @@ public class IngestionProxy extends BaseRestApiProxy implements IngestionInterfa
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
         String url = constructUrl("/?HdfsPod={hdfsPod}", hdfsPod);
-        List<?> list = post("scan", url, "", List.class);
+        List<?> list = post("scan_ingestion", url, "", List.class);
         List<IngestionProgress> progresses = new ArrayList<>();
         if (list == null) {
             return progresses;

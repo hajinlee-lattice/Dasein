@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
-import com.latticeengines.domain.exposed.propdata.ingestion.SftpProtocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
@@ -44,7 +43,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     }
 
     @Override
-    public IngestionProgress createStagingIngestionProgress(Ingestion ingestion, String triggeredBy,
+    public IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
             String file) {
         String source = constructSource(ingestion, file);
         String destination = constructDestination(ingestion, file);
@@ -70,8 +69,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     public String constructSource(Ingestion ingestion, String fileName) {
         switch (ingestion.getIngestionType()) {
         case SFTP_TO_HDFS:
-            SftpProtocol sftpProptocol = (SftpProtocol) ingestion.getProtocol();
-            Path fileSource = new Path(sftpProptocol.getSftpDir(), fileName);
+            SftpConfiguration sftpConfiguration = (SftpConfiguration) ingestion
+                    .getProviderConfiguration();
+            Path fileSource = new Path(sftpConfiguration.getSftpDir(), fileName);
             return fileSource.toString();
         default:
             throw new UnsupportedOperationException(
@@ -105,26 +105,12 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     public List<IngestionProgress> getNewIngestionProgresses() {
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("Status", ProgressStatus.NEW);
-        return ingestionProgressEntityMgr.getProgressesByField(fields);
+        return getProgressesByField(fields);
     }
 
     @Override
     public List<IngestionProgress> getRetryFailedProgresses() {
-        Map<String, Object> fields = new HashMap<String, Object>();
-        fields.put("Status", ProgressStatus.FAILED);
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr
-                .getProgressesByField(fields);
-        Iterator<IngestionProgress> iter = progresses.iterator();
-        while (iter.hasNext()) {
-            IngestionProgress progress = iter.next();
-            if (progress.getRetries() >= progress.getIngestion().getNewJobMaxRetry()
-                    || (new Date().getTime()
-                            - progress.getLastestStatusUpdateTime().getTime()) < progress
-                                    .getIngestion().getNewJobRetryInterval()) {
-                iter.remove();
-            }
-        }
-        return progresses;
+        return ingestionProgressEntityMgr.getRetryFailedProgresses();
     }
 
     @Override
@@ -141,16 +127,17 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     private SftpToHdfsRouteConfiguration createSftpToHdfsRouteConfiguration(
             IngestionProgress progress) {
         SftpToHdfsRouteConfiguration config = new SftpToHdfsRouteConfiguration();
-        SftpProtocol protocol = (SftpProtocol) progress.getIngestion().getProtocol();
+        SftpConfiguration sftpConfig = (SftpConfiguration) progress.getIngestion()
+                .getProviderConfiguration();
         Path sourcePath = new Path(progress.getSource());
         Path destPath = new Path(progress.getDestination());
         config.setFileName(sourcePath.getName());
         config.setSftpDir(sourcePath.getParent().toString());
-        config.setSftpHost(protocol.getSftpHost());
-        config.setSftpPort(protocol.getSftpPort());
+        config.setSftpHost(sftpConfig.getSftpHost());
+        config.setSftpPort(sftpConfig.getSftpPort());
         config.setHdfsDir(destPath.getParent().toString());
-        config.setSftpUserName(protocol.getSftpUserName());
-        config.setSftpPasswordEncrypted(protocol.getSftpPasswordEncrypted());
+        config.setSftpUserName(sftpConfig.getSftpUserName());
+        config.setSftpPasswordEncrypted(sftpConfig.getSftpPasswordEncrypted());
         return config;
     }
 

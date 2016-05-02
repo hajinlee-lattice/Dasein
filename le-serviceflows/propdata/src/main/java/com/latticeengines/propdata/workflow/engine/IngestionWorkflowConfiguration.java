@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.workflow.engine;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.propdata.ingestion.Protocol;
+import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -24,8 +24,8 @@ public class IngestionWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder protocol(Protocol protocol) {
-            ingestionConfig.setProtocol(protocol);
+        public Builder providerConfiguration(ProviderConfiguration providerConfiguration) {
+            ingestionConfig.setProviderConfiguration(providerConfiguration);
             return this;
         }
 

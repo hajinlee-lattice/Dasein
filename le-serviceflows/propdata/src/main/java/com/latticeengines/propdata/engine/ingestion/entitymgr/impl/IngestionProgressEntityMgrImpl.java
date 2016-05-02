@@ -58,4 +58,10 @@ public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMg
     public List<IngestionProgress> getRetryFailedProgresses() {
         return ingestionProgressDao.getRetryFailedProgresses();
     }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public boolean isDuplicateProgress(IngestionProgress progress) {
+        return ingestionProgressDao.isDuplicateProgress(progress);
+    }
 }
