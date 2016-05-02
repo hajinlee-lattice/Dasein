@@ -23,18 +23,29 @@ public class StatusServiceImpl implements StatusService {
 
     private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
 
-    private static final String ADMIN_HEALTH = "http://localhost:8080/admin/health";
-    private static final String PLS_HEALTH = "http://localhost:8081/pls/health";
-    private static final String OAUTH2_HEALTH = "http://localhost:8072/health";
-    private static final String PLAYMAKER_HEALTH = "http://localhost:8071/health";
-    private static final String SCORINGAPI_HEALTH = "http://localhost:8073/score/health";
-    private static final String MICROSERVICE_HEALTH = "http://localhost:8080/doc/health";
-
     @Value("${microservices}")
     protected String microservicesStr;
 
     @Value("${microservice.rest.endpoint.hostport}")
     private String microserviceHostport;
+
+    @Value("${microservice.admin.health.url}")
+    private String adminHealthUrl;
+
+    @Value("${microservice.pls.health.url}")
+    private String plsHealthUrl;
+
+    @Value("${microservice.oauth2.health.url}")
+    private String oauth2HealthUrl;
+
+    @Value("${microservice.playmaker.health.url}")
+    private String playmakerHealthUrl;
+
+    @Value("${microservice.scoringapi.health.url}")
+    private String scoringapiHealthUrl;
+
+    @Value("${microservice.admin.health.url}")
+    private String microserviceHealthUrl;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -44,12 +55,12 @@ public class StatusServiceImpl implements StatusService {
 
     @PostConstruct
     private void postConstruct() {
-        healthUrls.put("admin", ADMIN_HEALTH);
-        healthUrls.put("pls", PLS_HEALTH);
-        healthUrls.put("oauth2", OAUTH2_HEALTH);
-        healthUrls.put("playmaker", PLAYMAKER_HEALTH);
-        healthUrls.put("scoringapi", SCORINGAPI_HEALTH);
-        healthUrls.put("microservice", MICROSERVICE_HEALTH);
+        healthUrls.put("admin", adminHealthUrl);
+        healthUrls.put("pls", plsHealthUrl);
+        healthUrls.put("oauth2", oauth2HealthUrl);
+        healthUrls.put("playmaker", playmakerHealthUrl);
+        healthUrls.put("scoringapi", scoringapiHealthUrl);
+        healthUrls.put("microservice", microserviceHealthUrl);
     }
 
     @Override
