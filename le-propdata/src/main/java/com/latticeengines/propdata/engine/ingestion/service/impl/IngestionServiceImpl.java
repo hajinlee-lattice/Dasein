@@ -136,11 +136,13 @@ public class IngestionServiceImpl implements IngestionService {
             } catch (YarnException | IOException e) {
                 log.error("Failed to track application status for " + progress.getApplicationId()
                         + ". Error: " + e.toString());
-                progress = ingestionProgressService.updateProgress(progress)
-                        .status(ProgressStatus.FAILED)
-                        .errorMessage("Failed to track application status in the scan")
-                        .commit(true);
-                log.info("Kill progress: " + progress.toString());
+                if (e.getMessage().contains("doesn't exist in the timeline store")) {
+                    progress = ingestionProgressService.updateProgress(progress)
+                            .status(ProgressStatus.FAILED)
+                            .errorMessage("Failed to track application status in the scan")
+                            .commit(true);
+                    log.info("Kill progress: " + progress.toString());
+                }
             }
         }
     }
