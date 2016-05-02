@@ -23,8 +23,6 @@ public class StatusServiceImpl implements StatusService {
 
     private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
 
-    private static final String MICROSERVICE_HOSTPORT = "http://localhost:8080";
-
     private static final String ADMIN_HEALTH = "http://localhost:8080/admin/health";
     private static final String PLS_HEALTH = "http://localhost:8081/pls/health";
     private static final String OAUTH2_HEALTH = "http://localhost:8072/health";
@@ -34,6 +32,9 @@ public class StatusServiceImpl implements StatusService {
 
     @Value("${microservices}")
     protected String microservicesStr;
+
+    @Value("${microservice.rest.endpoint.hostport}")
+    private String microserviceHostport;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -64,7 +65,7 @@ public class StatusServiceImpl implements StatusService {
         Boolean overall = true;
         for (String microservice : microservices) {
             try {
-                String response = restTemplate.getForObject(String.format("%s/%s/v2/api-docs", MICROSERVICE_HOSTPORT, microservice), String.class);
+                String response = restTemplate.getForObject(String.format("%s/%s/v2/api-docs", microserviceHostport, microservice), String.class);
                 if (response.contains("\"swagger\":\"2.0\"")) {
                     status.put(microservice, "OK");
                 } else {
