@@ -62,12 +62,14 @@ angular.module('pd.jobs', [
 
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
+        //jobType = jobType == 'importMatchAndModelWorkflow' ? 'models' : 'scores';
         
         $http({
             method: 'GET',
             url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors',
             headers: { 
-                'Accept': 'application/csv;charset=utf-8' 
+                'Accept': 'application/csv;charset=utf-8',
+                'ErrorDisplayMethod': 'modal'
             }
         }).then(
             function onSuccess(response) {
@@ -97,7 +99,7 @@ angular.module('pd.jobs', [
             url: '/pls/scores/jobs/' + job.id + '/results',
             headers: { 
                 'Accept': 'application/csv;charset=utf-8',
-                'ErrorDisplayMethod': 'banner|home.models'
+                'ErrorDisplayMethod': 'banner'
             }
         }).then(
             function onSuccess(response) {

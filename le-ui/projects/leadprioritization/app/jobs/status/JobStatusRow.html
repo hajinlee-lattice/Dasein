@@ -1,30 +1,44 @@
 <div class="expanded-{{jobRowExpanded}} {{jobType}}" style="position: relative;">
     <div class="clearfix">
-        <span data-ng-if="job.timestamp == null" class="columns three">N/A</span>
-        <span data-ng-if="job.timestamp != null" class="columns three">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
+        <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state == 'model'">{{job.source}}</span>
         <span class="columns three" ng-if="state != 'model'">{{job.displayName}}</span>
         <span class="columns one {{job.status}}">{{job.status}}</span>
-        <span class="columns two">
-            <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" data-ng-show="(jobCompleted || jobFailed) && job.id != null">
-                <a  ui-sref="home.jobs.status.ready({jobId: job.id})" 
-                    ng-show="jobType == 'fitModelWorkflow'">
-                        <i class="fa fa-list-alt"></i>View Report</a>
-                <a  ui-sref="home.jobs.status.csv({jobId: job.id})" 
-                    ng-show="jobType == 'importMatchAndModelWorkflow' || jobType == 'importMatchAndScoreWorkflow'">
-                        <i class="fa fa-list-alt"></i>View Report</a>
-                <a 
-                    href="javascript:void(0)" 
-                    data-ng-click="clickGetScoringResults()" 
-                    data-ng-show="(jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow') && job.status != 'Failed'"
-                >
-                    <i data-ng-show="!showProgress" class="fa fa-download"></i>
-                    <i data-ng-show="showProgress" class="fa fa-refresh fa-spin"></i>
-                    Download
+        <span class="columns three">
+            <span ng-if="(jobCompleted || jobFailed) && job.id != null">
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                      ng-if="jobType == 'fitModelWorkflow'">
+                    <a ui-sref="home.jobs.status.ready({jobId: job.id})">
+                        <i class="fa fa-list-alt"></i>Report
+                    </a>
+                </span>
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'importMatchAndScoreWorkflow'">
+                    <a ui-sref="home.jobs.status.csv({jobId: job.id})">
+                        <i class="fa fa-list-alt"></i>Report
+                    </a>
+                </span>
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                      ng-if="(jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow') && job.status != 'Failed'">
+                    <a href="javascript:void(0)" data-ng-click="clickGetScoringResults()">
+                        <i data-ng-show="!showProgress" class="fa fa-download"></i>
+                        <i data-ng-show="showProgress" class="fa fa-refresh fa-spin"></i>
+                        Download
+                    </a>
+                </span>
+            </span>
+
+            <span class="button orange-button" ng-if="jobRunning && !cancelClicked">
+                <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)">
+                    <i class="fa fa-stop-circle"></i>Cancel Job
                 </a>
             </span>
-            <span class="button orange-button" data-ng-show="jobRunning && !cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(job.id)"><i class="fa fa-stop-circle"></i>Cancel Job</a></span>
-            <span class="button white-button" data-ng-show="jobRunning && cancelClicked"> <span><i class="fa fa-stop-circle"></i>Cancelling...</span></span>
+            <span class="button white-button" ng-if="jobRunning && cancelClicked">
+                <span>
+                    <i class="fa fa-stop-circle"></i>Cancelling...
+                </span>
+            </span>
             
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
                 <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.timestamp != null && job.id != null && (jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow')">

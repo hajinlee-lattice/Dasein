@@ -74,20 +74,11 @@ angular
             .state('home.jobs.status.csv', {
                 url: '/csv/:jobId',
                 resolve: {
-                    JobReport: function($q, $stateParams, JobsService) {
+                    JobResult: function($q, $stateParams, JobsService) {
                         var deferred = $q.defer();
 
                         JobsService.getJobStatus($stateParams.jobId).then(function(result) {
-                            var reports = result.resultObj.reports,
-                                report = null;
-
-                            reports.forEach(function(item) {
-                                if (item.purpose == "IMPORT_DATA_SUMMARY") {
-                                    report = item;
-                                }
-                            });
-
-                            deferred.resolve(report);
+                            deferred.resolve(result.resultObj);
                         });
 
                         return deferred.promise;

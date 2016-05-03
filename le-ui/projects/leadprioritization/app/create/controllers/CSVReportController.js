@@ -5,12 +5,21 @@ angular.module('mainApp.create.csvReport', [
     'mainApp.core.utilities.NavUtility'
 ])
 .controller('CSVReportController', [
-    '$scope', 'JobsService', 'JobReport', 'ResourceUtility',
-    function($scope, JobsService, JobReport, ResourceUtility) {
+    '$scope', 'JobsService', 'JobResult', 'ResourceUtility',
+    function($scope, JobsService, JobResult, ResourceUtility) {
+        var reports = JobResult.reports,
+            JobReport = null;
+
+        reports.forEach(function(item) {
+            if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                JobReport = item;
+            }
+        });
+
         if (!JobReport) {
             return;
         }
-        
+        console.log(JobReport, JobResult);
         $scope.report = JobReport;
         $scope.data = data = JSON.parse(JobReport.json.Payload);
         $scope.data.total_records = data.imported_records + data.ignored_records;
@@ -18,7 +27,7 @@ angular.module('mainApp.create.csvReport', [
         $scope.ResourceUtility = ResourceUtility;
 
         $scope.clickGetErrorLog = function($event) {
-            JobsService.getErrorLog(JobReport).then(function(result) {
+            JobsService.getErrorLog(JobReport, JobResult.jobType).then(function(result) {
                 var blob = new Blob([ result ], { type: "application/csv" }),
                     date = new Date(),
                     year = date.getFullYear(),
@@ -29,8 +38,6 @@ angular.module('mainApp.create.csvReport', [
                     filename = 'import_errors.' + year + month + day + '.csv';
                 
                 saveAs(blob, filename);
-            }, function(reason) {
-                alert('Failed: ' + reason);
             });
         }
     }
