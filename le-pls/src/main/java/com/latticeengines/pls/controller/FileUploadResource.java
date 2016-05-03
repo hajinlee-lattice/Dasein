@@ -29,13 +29,13 @@ public class FileUploadResource {
     @Autowired
     private FileUploadService fileUploadService;
 
-    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "text/plain")
+    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "application/csv")
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
     public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
         try {
             InputStream is = fileUploadService.getImportErrorStream(fileName);
-            response.setContentType("text/plain");
+            response.setContentType("application/csv");
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "errors.csv"));
             IOUtils.copy(is, response.getOutputStream());
         } catch (IOException e) {
