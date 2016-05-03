@@ -131,7 +131,10 @@ angular.module('pd.jobs', [
 
         $http({
             method: 'GET',
-            url: url
+            url: url,
+            headers: {
+                'If-Modified-Since': 0
+            }
         }).then(
             function onSuccess(response) {
                 var jobs = response.data;
@@ -168,7 +171,8 @@ angular.module('pd.jobs', [
             method: 'GET',
             url: '/pls/jobs/' + jobId,
             headers: { 
-                'ErrorDisplayMethod': 'banner'
+                'ErrorDisplayMethod': 'banner',
+                'If-Modified-Since': 0
             }
         }).then(
             function onSuccess(response) {
