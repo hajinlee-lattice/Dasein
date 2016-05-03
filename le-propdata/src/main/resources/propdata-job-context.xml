@@ -24,7 +24,7 @@
 
     <bean id="propDataEngineHeartBeatTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="refreshJobHeartBeatDetail" />
+        <property name="jobDetail" ref="propDataEngineHeartBeatDetail" />
         <property name="cronExpression" value="${propdata.job.heartbeat.schedule}" />
     </bean>
 
