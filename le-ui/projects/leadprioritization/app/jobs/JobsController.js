@@ -193,7 +193,7 @@ angular.module('pd.jobs', [
                 };
 
                 deferred.resolve(result);
-            }, function onError(resposne) {
+            }, function onError(response) {
                 console.log("getting job failed: " + jobId);
             }
         );

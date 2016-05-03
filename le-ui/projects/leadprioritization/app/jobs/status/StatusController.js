@@ -16,6 +16,7 @@ angular
             controller: ['$http', '$scope', '$rootScope', '$state', 'JobsService', function ($http, $scope, $rootScope, $state, JobsService) {
                 var job = $scope.job;
 
+                $scope.showProgress = false;
                 $scope.jobType = job.jobType ? job.jobType : 'placeholder';
                 $scope.jobRunning = false;
                 $scope.jobCompleted = false;
@@ -75,6 +76,11 @@ angular
                     }
                 };
 
+
+
+
+                // Use this in JobStatusRow.html
+                // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
                 $scope.rescoreFailedJob = function() {
                     $http({
                         method: 'POST',
@@ -89,7 +95,12 @@ angular
                     );
                 };
 
+
+
                 $scope.clickGetScoringResults = function($event) {
+
+                    $scope.showProgress = true;
+
                     JobsService.getScoringResults($scope.job).then(function(result) {
                         var blob = new Blob([ result ], { type: "application/csv" }),
                             date = new Date(),
@@ -99,7 +110,9 @@ angular
                             day = date.getDate().toString(),
                             day = day.length > 1 ? day : '0' + day,
                             filename = 'score.' + $scope.job.id + '.' + year + month + day + '.csv';
-                        
+
+                        $scope.showProgress = false;
+
                         saveAs(blob, filename);
                     }, function(reason) {
                     });
