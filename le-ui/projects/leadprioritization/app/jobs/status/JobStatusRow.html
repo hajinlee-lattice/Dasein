@@ -2,18 +2,23 @@
     <div class="clearfix">
         <span data-ng-if="job.timestamp == null" class="columns three">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns three">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns three" ng-if="state == 'model'" tooltip-bak="{{job.source}}">{{job.source}}</span>
-        <span class="columns three" ng-if="state != 'model'" tooltip-bak="{{job.displayName}}">{{job.displayName}}</span>
+        <span class="columns three" ng-if="state == 'model'">{{job.source}}</span>
+        <span class="columns three" ng-if="state != 'model'">{{job.displayName}}</span>
         <span class="columns one {{job.status}}">{{job.status}}</span>
         <span class="columns two">
             <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" data-ng-show="(jobCompleted || jobFailed) && job.id != null">
-                <a href="javascript:void(0)" 
-                   data-ng-click="rescoreFailedJob({jobId: job.id})" 
-                   ng-show="job.status == 'Failed'">
-                   <i class="fa fa-refresh"></i>Restart
+                <a  href="javascript:void(0)" 
+                    data-ng-click="rescoreFailedJob({jobId: job.id})" 
+                    ng-show="job.status == 'Failed'"
+                    ng-if="false">
+                        <i class="fa fa-refresh"></i>Restart
                 </a>
-                <a ui-sref="home.jobs.status.ready({jobId: job.id})" ng-show="jobType == 'fitModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
-                <a ui-sref="home.jobs.status.csv({jobId: job.id})" ng-show="jobType == 'importMatchAndModelWorkflow'"><i class="fa fa-list-alt"></i>View Report</a>
+                <a  ui-sref="home.jobs.status.ready({jobId: job.id})" 
+                    ng-show="jobType == 'fitModelWorkflow'">
+                        <i class="fa fa-list-alt"></i>View Report</a>
+                <a  ui-sref="home.jobs.status.csv({jobId: job.id})" 
+                    ng-show="jobType == 'importMatchAndModelWorkflow' || jobType == 'importMatchAndScoreWorkflow'">
+                        <i class="fa fa-list-alt"></i>View Report</a>
                 <a 
                     href="javascript:void(0)" 
                     data-ng-click="clickGetScoringResults()" 
