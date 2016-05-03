@@ -18,8 +18,6 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
-    private static final int SECONDS_TO_MILLIS = 1000;
-
     abstract void uploadSourceSchema(String workflowDir) throws IOException;
 
     protected TransformationProgress transformHook(TransformationProgress progress) {
@@ -66,14 +64,18 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
             latestBaseVersions = findSortedVersionsInDir(rootBaseSourceDir, null);
 
             if (latestBaseVersions.isEmpty()) {
-                LOG.info("No version if found in base source");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No version if found in base source");
+                }
                 return null;
             }
 
             List<String> versionsToProcess = compareVersionLists(source, latestBaseVersions, latestVersions,
                     rootBaseSourceDir);
             if (versionsToProcess == null) {
-                LOG.info("Didn't find any unprocessed version in base source");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Didn't find any unprocessed version in base source");
+                }
                 return null;
             }
             return versionsToProcess;
@@ -113,7 +115,9 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
             boolean foundProcessedEntry = false;
             // try to find matching version in source version list
             for (String latestVersion : latestVersions) {
-                LOG.debug("Compare: " + baseVersion);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Compare: " + baseVersion);
+                }
                 if (baseVersion.equals(latestVersion)) {
                     // if found equal version then skip further checking for
                     // this version and break from this inner loop
@@ -161,7 +165,9 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
             shouldSkip = true;
         }
 
-        LOG.info("Should skip version " + baseVersion + " = " + shouldSkip);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Should skip version " + baseVersion + " = " + shouldSkip);
+        }
         return shouldSkip;
     }
 
@@ -169,7 +175,9 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
             throws IOException {
         boolean isUnsafe = isAlreadyBeingProcessed(source, baseVersion) || !hasSuccessFlag(pathForSuccessFlagLookup);
         if (isUnsafe) {
-            LOG.info("Unsafe to process base version " + baseVersion);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unsafe to process base version " + baseVersion);
+            }
         }
         return isUnsafe;
 
@@ -187,7 +195,9 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
         try {
             latestVersion = findLatestVersionInDir(rootSourceDir.toString(), null);
             latestBaseVersion = findLatestVersionInDir(rootBaseSourceDir.toString(), null);
-            LOG.info("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);
         }
