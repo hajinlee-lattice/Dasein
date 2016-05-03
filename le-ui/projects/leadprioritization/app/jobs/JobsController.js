@@ -41,6 +41,7 @@ angular.module('pd.jobs', [
             'processMatchResult': 'generate_insights',
             'addStandardAttributes': 'create_global_target_market',
             'sample': 'create_global_target_market',
+            'exportData': 'create_global_target_market',
             'profileAndModel': 'create_global_target_market',
             'activateModel': 'create_global_target_market'
         },
