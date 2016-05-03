@@ -157,8 +157,8 @@ public class IngestionServiceImpl implements IngestionService {
                 iter.remove();
             } else {
                 log.info("Triggered Ingestion: " + ingestion.toString());
+                progresses.addAll(getPreprocessProgresses(ingestion));
             }
-            progresses.addAll(getPreprocessProgresses(ingestion));
         }
         progresses = ingestionNewProgressValidator.checkDuplicateProgresses(progresses);
         ingestionProgressService.saveProgresses(progresses);
