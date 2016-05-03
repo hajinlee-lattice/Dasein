@@ -44,7 +44,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Value("${dataplatform.queueScheme:legacy}")
+    @Value("${dataplatform.queue.scheme:legacy}")
     private String yarnQueueScheme;
 
     @Override

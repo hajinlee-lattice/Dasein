@@ -22,12 +22,16 @@
         <value>0</value>
     </property>
     <property>
-      <name>yarn.nodemanager.resource.memory-mb</name>
-      <value>15360</value>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>12288</value>
     </property>
     <property>
-      <name>yarn.nodemanager.resource.cpu-vcores</name>
-      <value>8</value>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>512</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>24</value>
     </property>
     <property>
         <name>yarn.nodemanager.remote-app-log-dir</name>
@@ -90,10 +94,6 @@
         <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
     </property>
     <property>
-        <name>yarn.scheduler.minimum-allocation-mb</name>
-        <value>2048</value>
-    </property>
-    <property>
         <name>yarn.application.classpath</name>
         <value>$HADOOP_CONF_DIR, $TEZ_CONF_DIR, $HADOOP_COMMON_HOME/share/hadoop/common/*, $HADOOP_COMMON_HOME/share/hadoop/common/lib/*, $HADOOP_HDFS_HOME/share/hadoop/hdfs/*, $HADOOP_HDFS_HOME/share/hadoop/hdfs/lib/*, $HADOOP_YARN_HOME/share/hadoop/yarn/*, $HADOOP_YARN_HOME/share/hadoop/yarn/lib/*</value>
     </property>
@@ -121,4 +121,13 @@
         <name>yarn.timeline-service.generic-application-history.enabled</name>
         <value>true</value>
     </property>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>false</value>
+    </property>
+
 </configuration>

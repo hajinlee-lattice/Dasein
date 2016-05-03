@@ -36,7 +36,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class SqoopJobServiceImpl {
 
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
-    @Value("${dataplatform.queueScheme:legacy}")
+    @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
 
     protected ApplicationId exportData(String table, //

@@ -70,7 +70,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Value("${dataplatform.mapreduce.jobhistory.webapp.api.address}")
     private String mrJobHistoryServerUrl;
 
-    @Value("${dataplatform.queueScheme:legacy}")
+    @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
 
     @Override
