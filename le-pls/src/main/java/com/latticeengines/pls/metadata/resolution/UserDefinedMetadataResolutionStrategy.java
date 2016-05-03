@@ -167,13 +167,13 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     private String generateFundamentalTypeBasedOnColumnType(String columnType) {
         String fundamentalType = null;
         switch (columnType.toUpperCase()) {
-        case ("BOOLEAN"):
+        case "BOOLEAN":
             fundamentalType = ModelingMetadata.FT_BOOLEAN;
             break;
-        case ("DOUBLE"):
+        case "DOUBLE":
             fundamentalType = ModelingMetadata.FT_NUMERIC;
             break;
-        case ("STRING"):
+        case "STRING":
         default:
             fundamentalType = ModelingMetadata.FT_ALPHA;
             break;
@@ -184,13 +184,13 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     private String generateStatisticalTypeBasedOnColumnType(String columnType) {
         String statType = null;
         switch (columnType.toUpperCase()) {
-        case ("BOOLEAN"):
+        case "BOOLEAN":
             statType = ModelingMetadata.NOMINAL_STAT_TYPE;
             break;
-        case ("DOUBLE"):
+        case "DOUBLE":
             statType = ModelingMetadata.RATIO_STAT_TYPE;
             break;
-        case ("STRING"):
+        case "STRING":
             statType = ModelingMetadata.NOMINAL_STAT_TYPE;
             break;
         default:
