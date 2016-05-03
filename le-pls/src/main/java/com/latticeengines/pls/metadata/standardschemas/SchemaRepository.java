@@ -68,6 +68,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Website) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build());
         table.addAttribute(attr("Event") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
@@ -125,6 +126,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
@@ -132,6 +134,7 @@ public class SchemaRepository {
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
@@ -154,6 +157,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.YearStarted) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
@@ -186,6 +190,7 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.Email) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Event") //
@@ -269,6 +274,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LeadSource) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("IsClosed") //
@@ -296,6 +302,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
@@ -303,6 +310,7 @@ public class SchemaRepository {
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .fundamentalType(ModelingMetadata.FT_ENUM) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Industry") //
@@ -408,6 +416,11 @@ public class SchemaRepository {
 
         public AttributeBuilder category(String category) {
             attribute.setCategory(category);
+            return this;
+        }
+
+        public AttributeBuilder statisticalType(String statisticalType) {
+            attribute.setStatisticalType(statisticalType);
             return this;
         }
     }

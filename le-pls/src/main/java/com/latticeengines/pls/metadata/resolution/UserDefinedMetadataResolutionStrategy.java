@@ -138,12 +138,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attribute.setPhysicalDataType(ctm.getColumnType());
             } else {
                 // Add an attribute
-                attribute = new Attribute();
-                attribute.setName(ctm.getColumnName().replaceAll("[^A-Za-z0-9_]", "_"));
-                attribute.setPhysicalDataType(ctm.getColumnType());
-                attribute.setDisplayName(ctm.getColumnName());
-                attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
-                attribute.setNullable(true);
+                attribute = generateAttributeBasedOnColumnTypeMapping(ctm);
                 attributes.add(attribute);
             }
         }
@@ -154,6 +149,55 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         }
 
         // If there are any unknown columns, the metadata is not fully defined.
+    }
+
+    private Attribute generateAttributeBasedOnColumnTypeMapping(ColumnTypeMapping ctm) {
+        Attribute attribute = new Attribute();
+        attribute.setName(ctm.getColumnName().replaceAll("[^A-Za-z0-9_]", "_"));
+        attribute.setPhysicalDataType(ctm.getColumnType());
+        attribute.setDisplayName(ctm.getColumnName());
+        attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+        attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        attribute.setFundamentalType(generateFundamentalTypeBasedOnColumnType(ctm.getColumnType()));
+        attribute.setStatisticalType(generateStatisticalTypeBasedOnColumnType(ctm.getColumnType()));
+        attribute.setNullable(true);
+        return attribute;
+    }
+
+    private String generateFundamentalTypeBasedOnColumnType(String columnType) {
+        String fundamentalType = null;
+        switch (columnType.toUpperCase()) {
+        case ("BOOLEAN"):
+            fundamentalType = ModelingMetadata.FT_BOOLEAN;
+            break;
+        case ("DOUBLE"):
+            fundamentalType = ModelingMetadata.FT_NUMERIC;
+            break;
+        case ("STRING"):
+        default:
+            fundamentalType = ModelingMetadata.FT_ALPHA;
+            break;
+        }
+        return fundamentalType;
+    }
+
+    private String generateStatisticalTypeBasedOnColumnType(String columnType) {
+        String statType = null;
+        switch (columnType.toUpperCase()) {
+        case ("BOOLEAN"):
+            statType = ModelingMetadata.NOMINAL_STAT_TYPE;
+            break;
+        case ("DOUBLE"):
+            statType = ModelingMetadata.RATIO_STAT_TYPE;
+            break;
+        case ("STRING"):
+            statType = ModelingMetadata.NOMINAL_STAT_TYPE;
+            break;
+        default:
+            statType = ModelingMetadata.RATIO_STAT_TYPE;
+            break;
+        }
+        return statType;
     }
 
     private void validateDataType(ColumnTypeMapping ctm) {
