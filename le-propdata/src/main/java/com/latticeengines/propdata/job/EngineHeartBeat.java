@@ -24,14 +24,28 @@ public class EngineHeartBeat extends QuartzJobBean {
     public void executeInternal(JobExecutionContext jobExecutionContext)
             throws JobExecutionException {
 
-        log.debug(this.getClass().getSimpleName() + " invoking publication proxy scan.");
-        publicationProxy.scan("");
+        try {
+            log.info(this.getClass().getSimpleName() + " invoking publication proxy scan.");
+            publicationProxy.scan("");
+        } catch (Exception e) {
+            log.error("Failed to scan publication engine", e);
+        }
 
-        log.debug(this.getClass().getSimpleName() + " invoking transformation proxy scan.");
-        transformationProxy.scan("");
+        try {
+            log.info(this.getClass().getSimpleName() + " invoking transformation proxy scan.");
+            transformationProxy.scan("");
+        } catch (Exception e) {
+            log.error("Failed to scan transformation engine", e);
+        }
 
-        log.debug(this.getClass().getSimpleName() + " invoking ingestion proxy scan.");
-        ingestionProxy.scan("");
+        try {
+            log.info(this.getClass().getSimpleName() + " invoking ingestion proxy scan.");
+            ingestionProxy.scan("");
+        } catch (Exception e) {
+            log.error("Failed to scan ingestion engine", e);
+        }
+
+
     }
 
     // ==============================
