@@ -22,7 +22,9 @@ import com.latticeengines.propdata.core.IngenstionNames;
 
 @Component("bomboraDepivotFlow")
 public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowParameters> {
+    private static final String LE_TIMESTAMP = "LE_Last_Upload_Date";
     private static final String SCHEMA_BOMBORA_FIREHOSE = "classpath:schema/BomboraFirehoseAvroSchema.avsc";
+
     @Autowired
     private ResourceLoader resourceLoader;
 
@@ -46,7 +48,9 @@ public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowP
 
         setSchemaToNode(node);
 
-        return node.depivot(targetFields, sourceFieldTuples);
+        node = node.depivot(targetFields, sourceFieldTuples);
+        node = node.addTimestamp(LE_TIMESTAMP);
+        return node;
     }
 
     private void setSchemaToNode(Node node) {
