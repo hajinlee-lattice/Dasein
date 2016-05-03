@@ -133,7 +133,7 @@ public class IngestionProgressDaoImpl extends
         Class<Ingestion> ingestionEntityClz = Ingestion.class;
         Class<IngestionProgress> progressEntityClz = IngestionProgress.class;
         String queryStr = String.format(
-                "select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and !(lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
+                "select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and not (lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
                 progressEntityClz.getSimpleName(), ingestionEntityClz.getSimpleName());
         Query query = session.createSQLQuery(queryStr);
         query.setParameter("destination", progress.getDestination());
