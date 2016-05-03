@@ -35,6 +35,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         List<Model> models = response.getBody();
         Assert.assertEquals(models.size(), 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
+        Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
     }
 
     @Test(groups = "deployment", enabled = true)

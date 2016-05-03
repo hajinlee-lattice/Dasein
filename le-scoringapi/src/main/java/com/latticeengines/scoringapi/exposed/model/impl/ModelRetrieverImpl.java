@@ -112,7 +112,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 ModelType modelType = getModelType(map.get("SourceSchemaInterpretation"));
                 if ((type == ModelType.ACCOUNT && modelType == ModelType.ACCOUNT)
                         || (type == ModelType.CONTACT && modelType == ModelType.CONTACT)) {
-                    Model model = new Model(map.get("Id"), map.get("Name"), type);
+                    Model model = new Model(map.get("Id"), map.get("DisplayName"), type);
                     models.add(model);
                 }
             }

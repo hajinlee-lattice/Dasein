@@ -36,6 +36,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
 
     protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME +"_";
+    protected static final String MODEL_NAME = TEST_MODEL_FOLDERNAME;
     protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME +"/";
     protected static final String TENANT_ID = "ScoringApiTestTenant.ScoringApiTestTenant.Production";
     protected static final String APPLICATION_ID = "application_1457046993615_3821";
@@ -132,6 +133,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         modelSummary.setApplicationId(APPLICATION_ID);
         modelSummary.setEventTableName(EVENT_TABLE);
         modelSummary.setId(MODEL_ID);
+        modelSummary.setDisplayName(MODEL_NAME);
         modelSummary.setLookupId(String.format("%s|%s|%s", TENANT_ID, EVENT_TABLE, MODEL_VERSION));
         modelSummary.setSourceSchemaInterpretation(SOURCE_INTERPRETATION);
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
