@@ -8,12 +8,12 @@
     <description>LE PLS TOMCAT RPM</description>
 
     <properties>
-        <le.rpm.version>2.0.28-SNAPSHOT</le.rpm.version>
+        <le.rpm.version>2.0.29-SNAPSHOT</le.rpm.version>
     </properties>
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.28-SNAPSHOT</version>
+        <version>2.0.29-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

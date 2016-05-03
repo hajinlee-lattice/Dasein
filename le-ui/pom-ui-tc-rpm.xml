@@ -6,11 +6,11 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-ui-tc-rpm</artifactId>
     <packaging>rpm</packaging>
-    <version>2.0.28-SNAPSHOT</version>
+    <version>2.0.29-SNAPSHOT</version>
     <description>LE UI TOMCAT RPM</description>
 
     <properties>
-        <le.rpm.version>2.0.28-SNAPSHOT</le.rpm.version>
+        <le.rpm.version>2.0.29-SNAPSHOT</le.rpm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
