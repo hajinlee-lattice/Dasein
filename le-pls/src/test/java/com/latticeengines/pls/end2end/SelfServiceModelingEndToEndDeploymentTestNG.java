@@ -33,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -179,6 +180,21 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(originalModelSummary.getTrainingTableName());
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
+        // Inspect some predictors
+        String rawModelSummary = originalModelSummary.getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode predictors = modelSummaryJson.get("Predictors");
+        for (int i = 0; i < predictors.size(); ++i) {
+            JsonNode predictor = predictors.get(i);
+            if (predictor.get("Name") != null && predictor.get("Name").asText() != null
+                    && predictor.get("Name").asText().equals("Some_Column")) {
+                JsonNode tags = predictor.get("Tags");
+                assertEquals(tags.size(), 1);
+                assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
+                assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+            }
+            // TODO Assert more
+        }
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -189,19 +205,19 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = restTemplate.exchange(
-                String.format("%s/pls/fileuploads/%s/import/errors", getRestAPIHostPort(),
-                        sourceFile.getName()), HttpMethod.GET, entity, byte[].class);
+                String.format("%s/pls/fileuploads/%s/import/errors", getRestAPIHostPort(), sourceFile.getName()),
+                HttpMethod.GET, entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());
         assertTrue(errors.length() > 0);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = {"retrieveModelSummary"})
     public void cloneAndRemodel() {
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
-                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(),
-                        originalModelSummary.getId()), List.class);
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), originalModelSummary.getId()),
+                List.class);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Object rawField : rawFields) {
             VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
@@ -224,9 +240,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setSourceModelSummaryId(originalModelSummary.getId());
 
         ResponseDocument<?> response;
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName), parameters,
-                ResponseDocument.class);
+        response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),
+                parameters, ResponseDocument.class);
 
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
@@ -285,7 +300,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 return predictor.getCategory() != null;
             }
         }));
-        return found;
+
+        // Look up the model summary with details
+        Object rawSummary = restTemplate.getForObject(String.format("%s/pls/modelsummaries/%s",
+                getRestAPIHostPort(), found.getId()), Object.class);
+        return JsonUtils.convertValue(rawSummary, ModelSummary.class);
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
@@ -317,7 +336,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation,
-            Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName) throws InterruptedException {
+                               Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName)
+            throws InterruptedException {
         if (!StringUtils.isBlank(fileName)) {
             this.fileName = fileName;
         }

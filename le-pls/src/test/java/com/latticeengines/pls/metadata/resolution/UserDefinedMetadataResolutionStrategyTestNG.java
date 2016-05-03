@@ -1,12 +1,13 @@
 package com.latticeengines.pls.metadata.resolution;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -17,8 +18,10 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
@@ -39,7 +42,7 @@ public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTe
     }
 
     @Test(groups = "functional")
-    public void getUnknowColumns() {
+    public void getUnknownColumns() {
         UserDefinedMetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(hdfsPath,
                 SchemaInterpretation.SalesforceAccount, null, yarnConfiguration);
         strategy.calculate();
@@ -64,10 +67,19 @@ public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTe
         assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "Account Name");
         assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(), "Last Modified Date");
         assertNull(table.getAttribute(InterfaceName.AnnualRevenue));
+        Attribute attribute = table.getAttribute("Some_Column");
+        assertEquals(attribute.getTags().size(), 1);
+        assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
+        assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        for (Attribute a : table.getAttributes()) {
+            assertNotEquals(a.getTags(), 0);
+            assertEquals(a.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
+            assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        }
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
-         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 }

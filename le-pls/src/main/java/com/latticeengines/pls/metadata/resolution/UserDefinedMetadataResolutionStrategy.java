@@ -161,6 +161,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         attribute.setFundamentalType(generateFundamentalTypeBasedOnColumnType(ctm.getColumnType()));
         attribute.setStatisticalType(generateStatisticalTypeBasedOnColumnType(ctm.getColumnType()));
         attribute.setNullable(true);
+        attribute.setTags(ModelingMetadata.INTERNAL_TAG);
         return attribute;
     }
 
