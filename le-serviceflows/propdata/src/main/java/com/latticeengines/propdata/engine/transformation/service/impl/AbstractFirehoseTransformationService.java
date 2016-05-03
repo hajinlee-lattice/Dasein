@@ -18,6 +18,8 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
+    private static final int SECONDS_TO_MILLIS = 1000;
+
     abstract void uploadSourceSchema(String workflowDir) throws IOException;
 
     protected TransformationProgress transformHook(TransformationProgress progress) {
@@ -53,6 +55,128 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
     @Override
     public List<String> findUnprocessedVersions() {
+        Source source = getSource();
+        String rootSourceDir = sourceDirInHdfs(source);
+        String rootBaseSourceDir = getRootBaseSourceDirPath();
+
+        List<String> latestVersions = null;
+        List<String> latestBaseVersions = null;
+        try {
+            latestVersions = findSortedVersionsInDir(rootSourceDir, null);
+            latestBaseVersions = findSortedVersionsInDir(rootBaseSourceDir, null);
+
+            if (latestBaseVersions.isEmpty()) {
+                LOG.info("No version if found in base source");
+                return null;
+            }
+
+            List<String> versionsToProcess = compareVersionLists(source, latestBaseVersions, latestVersions,
+                    rootBaseSourceDir);
+            if (versionsToProcess == null) {
+                LOG.info("Didn't find any unprocessed version in base source");
+                return null;
+            }
+            return versionsToProcess;
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_25010, e);
+        }
+    }
+
+    /*
+     * GOAL: Ensure that over the period of time missing versions and also
+     * handled.
+     * 
+     * LOGIC: return the first element (in high-to-low order) from
+     * latestBaseVersions for which there is no entry in latestVersions list
+     */
+    protected List<String> compareVersionLists(Source source, List<String> latestBaseVersions,
+            List<String> latestVersions, String baseDir) {
+        List<String> unprocessedBaseVersion = new ArrayList<>();
+
+        for (String baseVersion : latestBaseVersions) {
+            String pathForSuccessFlagLookup = baseDir + HDFS_PATH_SEPARATOR + baseVersion;
+            boolean shouldSkip = false;
+            if (latestVersions.size() == 0) {
+                // if there is no version in source then then pick most recent
+                // unprocessed version from base source version list
+
+                shouldSkip = shouldSkipVersion(source, baseVersion, pathForSuccessFlagLookup);
+
+                if (shouldSkip) {
+                    continue;
+                }
+
+                unprocessedBaseVersion.add(baseVersion);
+                return unprocessedBaseVersion;
+            }
+
+            boolean foundProcessedEntry = false;
+            // try to find matching version in source version list
+            for (String latestVersion : latestVersions) {
+                LOG.debug("Compare: " + baseVersion);
+                if (baseVersion.equals(latestVersion)) {
+                    // if found equal version then skip further checking for
+                    // this version and break from this inner loop
+                    foundProcessedEntry = true;
+                    break;
+                } else {
+                    if (baseVersion.compareTo(latestVersion) > 0) {
+                        // if here, that means no corresponding version (equal)
+                        // is found in source version list till now and in
+                        // sorted order as soon as we see smaller version from
+                        // base version than just break loop if any smaller
+                        // version is seen
+                        break;
+                    }
+                    continue;
+                }
+            }
+
+            if (!foundProcessedEntry) {
+                // if no equal version found in source version list then we
+                // should process this base version as long as it is safe to
+                // process it. Otherwise loop over to next base version
+                shouldSkip = shouldSkipVersion(source, baseVersion, pathForSuccessFlagLookup);
+                if (shouldSkip) {
+                    continue;
+                }
+
+                // if we found a version that is smaller than baseVersion
+                // then we return base version as this is a missing version
+                unprocessedBaseVersion.add(baseVersion);
+                return unprocessedBaseVersion;
+            }
+        }
+        return unprocessedBaseVersion;
+    }
+
+    protected boolean shouldSkipVersion(Source source, String baseVersion, String pathForSuccessFlagLookup) {
+        boolean shouldSkip = false;
+        try {
+            if (isUnsafeToProcess(source, baseVersion, pathForSuccessFlagLookup)) {
+                shouldSkip = true;
+            }
+        } catch (IOException e) {
+            LOG.error("Could not lookup for success flag" + e);
+            shouldSkip = true;
+        }
+
+        LOG.info("Should skip version " + baseVersion + " = " + shouldSkip);
+        return shouldSkip;
+    }
+
+    private boolean isUnsafeToProcess(Source source, String baseVersion, String pathForSuccessFlagLookup)
+            throws IOException {
+        boolean isUnsafe = isAlreadyBeingProcessed(source, baseVersion) || !hasSuccessFlag(pathForSuccessFlagLookup);
+        if (isUnsafe) {
+            LOG.info("Unsafe to process base version " + baseVersion);
+        }
+        return isUnsafe;
+
+    }
+
+    @Deprecated
+    protected List<String> findUnprocessedLatestVersion() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
         String rootBaseSourceDir = getRootBaseSourceDirPath();
