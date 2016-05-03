@@ -150,12 +150,8 @@ public class IngestionServiceImpl implements IngestionService {
     public void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
-        Iterator<Ingestion> iter = ingestions.iterator();
-        while (iter.hasNext()) {
-            Ingestion ingestion = iter.next();
-            if (!ingestionNewProgressValidator.isIngestionTriggered(ingestion)) {
-                iter.remove();
-            } else {
+        for (Ingestion ingestion : ingestions) {
+            if (ingestionNewProgressValidator.isIngestionTriggered(ingestion)) {
                 log.info("Triggered Ingestion: " + ingestion.toString());
                 progresses.addAll(getPreprocessProgresses(ingestion));
             }
