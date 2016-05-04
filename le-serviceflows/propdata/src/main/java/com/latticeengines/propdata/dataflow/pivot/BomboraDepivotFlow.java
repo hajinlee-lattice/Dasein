@@ -71,8 +71,8 @@ public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowP
         node = addTruncateNode(node, "StateRegion", 128);
         node = addTruncateNode(node, "PostalCode", 32);
         node = addTruncateNode(node, "InteractionType", 32);
-        node = addTruncateNode(node, "SourceID", 4000);
-        node = addTruncateNode(node, "CustomID", 4000);
+        node = addTruncateNode(node, "SourceID", 128);
+        node = addTruncateNode(node, "CustomID", 256);
         return node;
     }
 
