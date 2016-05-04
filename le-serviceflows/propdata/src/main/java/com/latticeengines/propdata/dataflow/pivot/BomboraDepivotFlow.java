@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -14,14 +16,20 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.runtime.cascading.StringTruncateFunction;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.dataflow.DepivotDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.core.IngenstionNames;
+
+import cascading.operation.Function;
 
 @Component("bomboraDepivotFlow")
 public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowParameters> {
+    private static final Log LOG = LogFactory.getLog(BomboraDepivotFlow.class);
     private static final String LE_TIMESTAMP = "LE_Last_Upload_Date";
     private static final String SCHEMA_BOMBORA_FIREHOSE = "classpath:schema/BomboraFirehoseAvroSchema.avsc";
 
@@ -50,6 +58,27 @@ public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowP
 
         node = node.depivot(targetFields, sourceFieldTuples);
         node = node.addTimestamp(LE_TIMESTAMP);
+        node = addTruncateLogic(node, parameters.getColumns());
+        return node;
+    }
+
+    private Node addTruncateLogic(Node node, List<SourceColumn> columns) {
+        node = addTruncateNode(node, "Domain", 512);
+        node = addTruncateNode(node, "HashedEmailIDBase64", 256);
+        node = addTruncateNode(node, "Topic", 256);
+        node = addTruncateNode(node, "UniversalDateTime", 256);
+        node = addTruncateNode(node, "Country", 128);
+        node = addTruncateNode(node, "StateRegion", 128);
+        node = addTruncateNode(node, "PostalCode", 32);
+        node = addTruncateNode(node, "InteractionType", 32);
+        node = addTruncateNode(node, "SourceID", 4000);
+        node = addTruncateNode(node, "CustomID", 4000);
+        return node;
+    }
+
+    private Node addTruncateNode(Node node, String columnName, int maxLength) {
+        Function<?> function = new StringTruncateFunction(columnName, maxLength);
+        node = node.apply(function, new FieldList(columnName), new FieldMetadata(columnName, String.class));
         return node;
     }
 
