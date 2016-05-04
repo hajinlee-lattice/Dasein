@@ -14,7 +14,7 @@
                     </a>
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
-                      ng-if="jobType == 'importMatchAndModelWorkflow' || jobType == 'importMatchAndScoreWorkflow'">
+                      ng-if="jobType == 'importMatchAndModelWorkflow'">
                     <a ui-sref="home.jobs.status.csv({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>
