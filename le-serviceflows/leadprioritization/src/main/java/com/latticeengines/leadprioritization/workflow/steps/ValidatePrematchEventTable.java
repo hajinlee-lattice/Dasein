@@ -31,7 +31,7 @@ public class ValidatePrematchEventTable extends BaseWorkflowStep<CreatePrematchE
                             configuration.getMinDedupedRows(), count.longValue()));
         } else if (events.longValue() < configuration.getMinPositiveEvents()) {
             errors.add(String.format("Number of positive events must be greater than or equal to %d.  Found %d",
-                    events.longValue(), configuration.getMinPositiveEvents()));
+                    configuration.getMinPositiveEvents(), events.longValue()));
         }
 
         if (errors.size() > 0) {
