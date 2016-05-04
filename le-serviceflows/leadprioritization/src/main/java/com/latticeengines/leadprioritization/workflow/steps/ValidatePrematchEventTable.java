@@ -29,13 +29,14 @@ public class ValidatePrematchEventTable extends BaseWorkflowStep<CreatePrematchE
             errors.add(String
                     .format("Number of rows with unique domains (website, email address, etc...) must be greater than or equal to %d.  Found %d",
                             configuration.getMinDedupedRows(), count.longValue()));
-        } else if (events.longValue() < configuration.getMinPositiveEvents()) {
+        }
+        if (events.longValue() < configuration.getMinPositiveEvents()) {
             errors.add(String.format("Number of positive events must be greater than or equal to %d.  Found %d",
                     configuration.getMinPositiveEvents(), events.longValue()));
         }
 
         if (errors.size() > 0) {
-            String message = StringUtils.join(errors, ";");
+            String message = StringUtils.join(errors, "\n");
             throw new LedpException(LedpCode.LEDP_32000, new String[] { message });
         }
     }
