@@ -78,21 +78,21 @@ class LPCheckVersion( StepBase ):
         return Applicability.cannotApplyFail
       ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushLeadsLastScoredToDestination', 'targetQueries')
 
-    try:
-      if type in ('ELQ', 'MKTO'):
-        appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type, version) )
-        appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type, version) )
-        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
-      else:
-        appseq.setText( 'sfdc_lead_score_field', self.parseScoreField(ptld_lbo_xml, type+'Lead', version) )
-        appseq.setText( 'sfdc_lead_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Lead', version) )
-        appseq.setText( 'sfdc_contact_score_field', self.parseScoreField(ptld_lbo_xml, type+'Contact', version) )
-        appseq.setText( 'sfdc_contact_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Contact', version) )
-        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+    #try:
+    #  if type in ('ELQ', 'MKTO'):
+    #    appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type, version) )
+    #    appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type, version) )
+    #    appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+    #  else:
+    #    appseq.setText( 'sfdc_lead_score_field', self.parseScoreField(ptld_lbo_xml, type+'Lead', version) )
+    #    appseq.setText( 'sfdc_lead_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Lead', version) )
+    #    appseq.setText( 'sfdc_contact_score_field', self.parseScoreField(ptld_lbo_xml, type+'Contact', version) )
+    #    appseq.setText( 'sfdc_contact_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Contact', version) )
+    #    appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
 
-    except ValueError:
-      print "Get the score/scoreDate Field failed"
-      return Applicability.cannotApplyFail
+    #except ValueError:
+    #  print "Get the score/scoreDate Field failed"
+    #  return Applicability.cannotApplyFail
 
     if version == self._template_version:
       return Applicability.canApply

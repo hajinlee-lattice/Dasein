@@ -11,10 +11,11 @@
 import sys, os
 sys.path.append( os.path.join(os.path.dirname(__file__),'..','..','..','..','..','le-liaison','src','main','python') )
 
-from .Applicability  import Applicability
-from .AppArgs        import AppArgs
-from .AppSequence    import AppSequence
+from .Applicability      import Applicability
+from .AppArgs            import AppArgs
+from .AppSequence        import AppSequence
 from .AppSequence_MLR    import AppSequence_MLR
-from .StepBase       import StepBase
-from .LPCheckVersion import LPCheckVersion
-from .LPSetVersion   import LPSetVersion
+from .StepBase           import StepBase
+from .LPCheckVersion     import LPCheckVersion
+from .LPSetVersion       import LPSetVersion
+from .WriteQueryToCSV    import WriteQueryToCSV

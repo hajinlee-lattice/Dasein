@@ -1,0 +1,57 @@
+
+#
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
+#
+
+import os, sys
+from copy import deepcopy
+from liaison import *
+from appsequence import Applicability, AppSequence, StepBase
+
+class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
+
+    name        = 'LPMigration_LP3ModelingQuery1MoActivity'
+    description = 'Updates activity in event table for LP3 modeling to use one-month aggregations.'
+    version     = '$Rev$'
+
+    STD_ACTIVITY_COLS =  ['Activity_Count_Click_Email','Activity_Count_Click_Link','Activity_Count_Email_Bounced_Soft'
+                         ,'Activity_Count_Fill_Out_Form','Activity_Count_Interesting_Moment_Any'
+                         ,'Activity_Count_Open_Email','Activity_Count_Unsubscribe_Email','Activity_Count_Visit_Webpage'
+                         ,'Activity_Count_Interesting_Moment_Email'
+                         ,'Activity_Count_Interesting_Moment_Event'
+                         ,'Activity_Count_Interesting_Moment_Multiple'
+                         ,'Activity_Count_Interesting_Moment_Pricing'
+                         ,'Activity_Count_Interesting_Moment_Search'
+                         ,'Activity_Count_Interesting_Moment_Webinar'
+                         ,'Activity_Count_Interesting_Moment_key_web_page']
+
+
+    def __init__(self, forceApply=False):
+        super(LPMigration_LP3ModelingQuery1MoActivity, self).__init__(forceApply)
+
+
+    def getApplicability(self, appseq):
+        if appseq.getText('template_type') == 'MKTO':
+            return Applicability.canApply
+        return Applicability.cannotApplyPass
+
+
+    def apply( self, appseq ):
+        print '\n    * Updating modeling event table with 1-month activity aggregations . .',
+        sys.stdout.flush()
+
+        conn_mgr = appseq.getConnectionMgr()
+
+        q_lp3_modeling = conn_mgr.getQuery('Q_LP3_ModelingLead_OneLeadPerDomain')
+        colnames_modeling = deepcopy(q_lp3_modeling.getColumnNames())
+
+        for c in colnames_modeling:
+            if c in self.STD_ACTIVITY_COLS:
+                q_lp3_modeling.removeColumn(c)
+
+        
+
+        
+        return True

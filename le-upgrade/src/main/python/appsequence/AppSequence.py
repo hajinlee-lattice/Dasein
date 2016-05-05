@@ -9,7 +9,7 @@ from liaison import *
 
 from .Applicability import Applicability
 from .StepBase      import StepBase
-import traceback
+import traceback, sys
 
 class AppSequence( object ):
 
@@ -106,6 +106,7 @@ class AppSequence( object ):
           applyUpgrade = False
 
         print '.',
+        sys.stdout.flush()
 
       if not self._checkOnly and applyUpgrade:
 
@@ -118,6 +119,7 @@ class AppSequence( object ):
               allStepsSuccessful = False
               break
             print '.',
+            sys.stdout.flush()
           self._lg_mgr.commit()
           print 'Done'
         except Exception, exception:
