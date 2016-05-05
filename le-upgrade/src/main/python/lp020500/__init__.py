@@ -11,3 +11,4 @@ sys.path.append( os.path.join(os.path.dirname(__file__),'..','..','..','..','..'
 
 from .LP_020500_VDB_NewSpecs import LP_020500_VDB_NewSpecs
 from .LP_020500_RePDMatch_ReScore import LP_020500_RePDMatch_ReScore
+from .LP_020500_VDB_ModifiedColumns import LP_020500_VDB_ModifiedColumns
