@@ -62,9 +62,14 @@ public class PropDataYarnServiceImpl implements PropDataYarnService {
         propDataJob.setClient("propdataClient");
         propDataJob.setCustomer(customer);
 
+        String queue = jobConfiguration.getYarnQueue();
+        if (StringUtils.isEmpty(queue)) {
+            queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        }
+
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), queue);
         if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
             appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
         }
@@ -73,7 +78,7 @@ public class PropDataYarnServiceImpl implements PropDataYarnService {
         containerProperties.put(PropDataProperty.PROPDATACONFIG, jobConfiguration.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
-        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "2");
 
         propDataJob.setAppMasterPropertiesObject(appMasterProperties);
         propDataJob.setContainerPropertiesObject(containerProperties);

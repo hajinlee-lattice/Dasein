@@ -1,11 +1,20 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum FundamentalType {
 
-    ALPHA("alpha"), BOOLEAN("boolean"), CURRENCY("currency"), NUMERIC("numeric"), YEAR("year");
+    ALPHA("alpha"),
+    BOOLEAN("boolean"),
+    NUMERIC("numeric"),
+    PERCENTAGE("percentage"),
+    ENUM("enum"),
+    CURRENCY("currency"),
+    EMAIL("email"),
+    PHONE("phone"),
+    URI("uri"),
+    YEAR("year");
 
     private final String name;
     private static Map<String, FundamentalType> nameMap;
@@ -24,7 +33,11 @@ public enum FundamentalType {
     public String getName() { return this.name; }
 
     public static FundamentalType fromName(String name) {
-        return nameMap.get(name);
+        if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else  {
+            throw new IllegalArgumentException("Cannot find a FundamentalType with name " + name);
+        }
     }
 
 }

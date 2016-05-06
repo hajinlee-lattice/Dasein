@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,11 @@ public enum StatisticalType {
     public String getName() { return this.name; }
 
     public static StatisticalType fromName(String name) {
-        return nameMap.get(name);
+        if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else  {
+            throw new IllegalArgumentException("Cannot find a StatisticalType with name " + name);
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
 public class MatchStepConfiguration extends MicroserviceStepConfiguration {
@@ -39,6 +40,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull
     private String inputTableName;
+
+    private String matchQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -128,5 +131,15 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("retain_match_tables")
     public void setRetainMatchTables(boolean retainMatchTables) {
         this.retainMatchTables = retainMatchTables;
+    }
+
+    @JsonProperty("match_queue")
+    public String getMatchQueue() {
+        return matchQueue;
+    }
+
+    @JsonProperty("match_queue")
+    public void setMatchQueue(String matchQueue) {
+        this.matchQueue = matchQueue;
     }
 }

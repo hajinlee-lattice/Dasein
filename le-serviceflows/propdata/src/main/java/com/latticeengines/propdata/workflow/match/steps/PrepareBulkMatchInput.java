@@ -145,6 +145,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setGroupSize(groupSize);
         jobConfiguration.setThreadPoolSize(threadPoolSize);
         jobConfiguration.setSingleBlock(false);
+        jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
         return jobConfiguration;
     }
 

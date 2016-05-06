@@ -45,6 +45,9 @@ public class MatchInput implements Fact, Dimension {
     private String matchEngine;
     private Integer numSelectedColumns;
 
+    // only applicable to bulk match
+    private String yarnQueue;
+
     private UUID uuid;
 
     @JsonProperty("ReturnUnmatched")
@@ -197,6 +200,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonIgnore
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    @JsonProperty("YarnQueue")
+    public String getYarnQueue() {
+        return yarnQueue;
+    }
+
+    @JsonProperty("YarnQueue")
+    public void setYarnQueue(String yarnQueue) {
+        this.yarnQueue = yarnQueue;
     }
 
     @Override

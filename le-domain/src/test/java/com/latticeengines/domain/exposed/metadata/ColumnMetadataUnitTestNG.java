@@ -1,13 +1,19 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 
 public class ColumnMetadataUnitTestNG {
 
@@ -15,7 +21,7 @@ public class ColumnMetadataUnitTestNG {
     public void testDeSer() throws IOException {
         ColumnMetadata cm = new ColumnMetadata();
         cm.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL, ApprovedUsage.NONE));
-        cm.setTagList(Collections.singletonList("External"));
+        cm.setTagList(Collections.singletonList(Tag.EXTERNAL));
         cm.setFundamentalType(FundamentalType.BOOLEAN);
         cm.setStatisticalType(StatisticalType.ORDINAL);
 

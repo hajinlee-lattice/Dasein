@@ -13,10 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
-import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 
 @WebServlet("/propdata/metadata/predefined/leadenrichment")
 public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
@@ -33,7 +34,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setDisplayName("Add This");
         column.setDataType("NVARCHAR(50)");
         column.setMatchDestination("BuiltWithPivoted");
-        column.setTagList(Collections.singletonList("LeadEnrichment"));
+        column.setTagList(Collections.singletonList(Tag.EXTERNAL));
         column.setFundamentalType(FundamentalType.BOOLEAN);
         column.setStatisticalType(StatisticalType.ORDINAL);
         column.setDescription("Tech Indicator Add This");
@@ -44,7 +45,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setDisplayName("Remove This");
         column.setDataType("NVARCHAR(100)");
         column.setMatchDestination("HGData");
-        column.setTagList(Collections.singletonList("LeadEnrichment"));
+        column.setTagList(Collections.singletonList(Tag.EXTERNAL));
         column.setFundamentalType(FundamentalType.ALPHA);
         column.setStatisticalType(StatisticalType.INTERVAL);
         column.setDescription("Tech Indicator Remove This");

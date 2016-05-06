@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.propdata.manage;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Access;
@@ -29,6 +30,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -58,15 +65,16 @@ public class ExternalColumn implements HasPid, Serializable {
     @Column(name = "DisplayName", nullable = true)
     private String displayName;
 
-    @Column(name = "Category", nullable = true, length = 50)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Category", nullable = false, length = 50)
+    private Category category;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "StatisticalType", nullable = true, length = 50)
     private StatisticalType statisticalType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "FundamentalType", nullable = true, length = 50)
+    @Column(name = "FundamentalType", nullable = false, length = 50)
     private FundamentalType fundamentalType;
 
     @Column(name = "ApprovedUsage", nullable = true)
@@ -146,12 +154,12 @@ public class ExternalColumn implements HasPid, Serializable {
     }
 
     @JsonProperty("Category")
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
     @JsonProperty("Category")
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
@@ -298,6 +306,21 @@ public class ExternalColumn implements HasPid, Serializable {
             tokens.add(tag);
         }
         this.tags = StringUtils.join(tokens, ",");
+    }
+
+    public ColumnMetadata toColumnMetadata() {
+        ColumnMetadata metadata = new ColumnMetadata();
+        metadata.setColumnName(getDefaultColumnName());
+        metadata.setDescription(getDescription());
+        metadata.setDataType(getDataType());
+        metadata.setDisplayName(getDisplayName());
+        metadata.setCategory(getCategory());
+        metadata.setStatisticalType(getStatisticalType());
+        metadata.setFundamentalType(getFundamentalType());
+        metadata.setApprovedUsageList(getApprovedUsageList());
+        metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
+        metadata.setDiscretizationStrategy(getDiscretizationStrategy());
+        return metadata;
     }
 
 }

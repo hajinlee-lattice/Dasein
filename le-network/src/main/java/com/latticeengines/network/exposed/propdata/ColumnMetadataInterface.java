@@ -2,7 +2,7 @@ package com.latticeengines.network.exposed.propdata;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public interface ColumnMetadataInterface {

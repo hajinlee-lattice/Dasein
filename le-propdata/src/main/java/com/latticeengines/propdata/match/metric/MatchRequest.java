@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.match.metric;
 
 import com.latticeengines.common.exposed.metric.Measurement;
+import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
+import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 
 public class MatchRequest extends BaseMeasurement<MatchInput, MatchInput>
@@ -20,6 +22,11 @@ public class MatchRequest extends BaseMeasurement<MatchInput, MatchInput>
 
     public void setMatchInput(MatchInput matchInput) {
         this.matchInput = matchInput;
+    }
+
+    @Override
+    public RetentionPolicy getRetentionPolicy() {
+        return RetentionPolicyImpl.ONE_WEEK;
     }
 
     @Override

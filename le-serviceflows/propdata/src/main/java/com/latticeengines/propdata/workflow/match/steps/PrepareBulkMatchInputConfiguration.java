@@ -40,6 +40,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @NotNull
     private ColumnSelection.Predefined predefinedSelection;
 
+    private String yarnQueue;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -118,6 +120,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @JsonProperty("average_block_size")
     public void setAverageBlockSize(Integer averageBlockSize) {
         this.averageBlockSize = averageBlockSize;
+    }
+
+    @JsonProperty("yarn_queue")
+    public String getYarnQueue() {
+        return yarnQueue;
+    }
+
+    @JsonProperty("yarn_queue")
+    public void setYarnQueue(String yarnQueue) {
+        this.yarnQueue = yarnQueue;
     }
 }
 

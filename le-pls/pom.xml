@@ -22,6 +22,7 @@
         <le.swlib.version>2.0.30-SNAPSHOT</le.swlib.version>
         <le.testfwk.version>2.0.30-SNAPSHOT</le.testfwk.version>
         <le.workflow.version>2.0.30-SNAPSHOT</le.workflow.version>
+        <le.scheduler.version>2.0.30-SNAPSHOT</le.scheduler.version>
         <le.serviceflows.prospectdiscovery.version>2.0.30-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>2.0.30-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.30-SNAPSHOT</le.proxy.version>
@@ -340,6 +341,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
             <version>${le.monitor.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scheduler</artifactId>
+            <version>${le.scheduler.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scheduler</artifactId>
+            <version>${le.scheduler.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

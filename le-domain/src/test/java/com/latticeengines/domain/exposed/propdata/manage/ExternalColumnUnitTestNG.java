@@ -8,10 +8,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
-import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
-import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
 
 public class ExternalColumnUnitTestNG {
 

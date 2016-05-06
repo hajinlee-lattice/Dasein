@@ -61,6 +61,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
         MatchInput matchInput = new MatchInput();
+        matchInput.setYarnQueue(getConfiguration().getMatchQueue());
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);

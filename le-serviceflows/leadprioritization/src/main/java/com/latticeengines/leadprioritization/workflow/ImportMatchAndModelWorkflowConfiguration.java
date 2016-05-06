@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
@@ -170,6 +171,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
+            match.setMatchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission());
 
             configuration.add(importData);
             configuration.add(registerReport);

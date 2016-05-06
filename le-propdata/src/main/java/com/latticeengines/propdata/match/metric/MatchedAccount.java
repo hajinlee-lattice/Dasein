@@ -5,8 +5,10 @@ import java.util.Collection;
 
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.MetricStore;
+import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
+import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
@@ -29,8 +31,8 @@ public class MatchedAccount extends BaseMeasurement<Matched, InputAccount>
     }
 
     @Override
-    public Collection<MetricStore> getMetricStores() {
-        return Arrays.asList((MetricStore) MetricStoreImpl.INFLUX_DB, MetricStoreImpl.SPLUNK_LOG);
+    public RetentionPolicy getRetentionPolicy() {
+        return RetentionPolicyImpl.ONE_WEEK;
     }
 
     @Override

@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMapping;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.core.service.SourceService;
@@ -40,7 +40,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         List<ColumnMetadata> columnMetadataList = new ArrayList<>();
         for (ExternalColumn externalColumn : externalColumns) {
             try {
-                ColumnMetadata columnMetadata = new ColumnMetadata(externalColumn);
+                ColumnMetadata columnMetadata = externalColumn.toColumnMetadata();
                 if (externalColumn.getColumnMappings() != null && !externalColumn.getColumnMappings().isEmpty()) {
                     ColumnMapping maxPriorityCM = Collections.max(externalColumn.getColumnMappings(),
                             new Comparator<ColumnMapping>() {
@@ -83,8 +83,8 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
             if (StringUtils.isNotEmpty(columnMetadata.getDescription())) {
                 fieldBuilder = fieldBuilder.prop("Description", columnMetadata.getDescription());
             }
-            if (StringUtils.isNotEmpty(columnMetadata.getCategory())) {
-                fieldBuilder = fieldBuilder.prop("Category", columnMetadata.getCategory());
+            if (columnMetadata.getCategory() != null) {
+                fieldBuilder = fieldBuilder.prop("Category", columnMetadata.getCategory().getName());
             }
             if (columnMetadata.getFundamentalType() != null) {
                 fieldBuilder = fieldBuilder.prop("FundamentalType", columnMetadata.getFundamentalType().getName());

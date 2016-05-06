@@ -82,7 +82,6 @@ public class BulkMatchServiceImpl implements BulkMatchService {
     public MatchCommand match(MatchInput input, String hdfsPodId) {
         MatchInputValidator.validateBulkInput(input, yarnConfiguration);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
-        matchPlanner.generateInputMetric(input);
 
         String uuid = UUID.randomUUID().toString().toUpperCase();
 

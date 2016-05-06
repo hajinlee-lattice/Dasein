@@ -13,17 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
-import com.latticeengines.propdata.match.metric.MatchedAccount;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.DisposableEmailService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
@@ -285,7 +281,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
      @MatchStep
      protected void generateAccountMetric(MatchContext matchContext) {
-        try {
+         // no need to push this metric to influxdb now.
+         // will figure out another way to dump match history.
+         /*
+         try {
             MatchInput input = matchContext.getInput();
             List<MatchedAccount> accountMeasurements = new ArrayList<>();
             List<InternalOutputRecord> recordList = matchContext.getInternalResults();
@@ -304,6 +303,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         } catch (Exception e) {
             log.warn("Failed to extract account based metric.", e);
         }
+        */
     }
 
     private boolean isDomainSource(String sourceName) {

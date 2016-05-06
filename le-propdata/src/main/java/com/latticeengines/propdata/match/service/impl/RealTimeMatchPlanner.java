@@ -26,7 +26,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
-        generateInputMetric(input);
         return context;
     }
 

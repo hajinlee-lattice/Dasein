@@ -23,6 +23,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String appName;
     private Boolean singleBlock;
     private Boolean returnUnmatched;
+    private String yarnQueue;
 
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
@@ -142,6 +143,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("return_unmatched")
     public void setReturnUnmatched(Boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    @JsonProperty("yarn_queue")
+    public String getYarnQueue() {
+        return yarnQueue;
+    }
+
+    @JsonProperty("yarn_queue")
+    public void setYarnQueue(String yarnQueue) {
+        this.yarnQueue = yarnQueue;
     }
 
     @Override

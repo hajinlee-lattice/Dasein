@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,7 @@ public enum ApprovedUsage {
     MODEL("Model"),
     MODEL_ALLINSIGHTS("ModelAndAllInsights"),
     MODEL_MODELINSIGHTS("ModelAndModelInsights"),
+    LEAD_ENRICHMENT("LeadEnrichment"),
     NONE("None");
 
     private final String name;
@@ -27,7 +28,11 @@ public enum ApprovedUsage {
     public String getName() { return this.name; }
 
     public static ApprovedUsage fromName(String name) {
-        return nameMap.get(name);
+        if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else  {
+            throw new IllegalArgumentException("Cannot find a ApprovedUsage with name " + name);
+        }
     }
 }
 

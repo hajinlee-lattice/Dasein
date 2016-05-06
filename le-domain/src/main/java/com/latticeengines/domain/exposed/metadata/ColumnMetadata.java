@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ public class ColumnMetadata {
     private String description;
     private String dataType;
     private String displayName;
-    private String category;
+    private Category category;
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
     private String approvedUsage;
@@ -63,16 +63,6 @@ public class ColumnMetadata {
     @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    @JsonProperty("Category")
-    public String getCategory() {
-        return category;
-    }
-
-    @JsonProperty("Category")
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     @JsonIgnore
@@ -198,43 +188,52 @@ public class ColumnMetadata {
         setApprovedUsageList(approvedUsages);
     }
 
+    @JsonProperty("Category")
+    public String getCategoryAsString() {
+        if (category != null) {
+            return category.getName();
+        } else {
+            return null;
+        }
+    }
+
+    @JsonProperty("Category")
+    public void setCategoryByString(String categoryName) {
+        setCategory(Category.fromName(categoryName));
+    }
+
+    @JsonIgnore
+    public Category getCategory() {
+        return category;
+    }
+
+    @JsonIgnore
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @JsonProperty("Tags")
-    public List<String> getTagList() {
-        List<String> tags = new ArrayList<>();
+    public List<Tag> getTagList() {
+        List<Tag> tags = new ArrayList<>();
         if (StringUtils.isEmpty(this.tags)) {
             return tags;
         }
-        tags = Arrays.asList(this.tags.split(","));
+        for (String tagName: Arrays.asList(this.tags.split(","))) {
+            if (Tag.availableNames().contains(tagName)) {
+                tags.add(Tag.fromName(tagName));
+            }
+        }
         return tags;
     }
 
     @JsonProperty("Tags")
-    public void setTagList(List<String> tags) {
+    public void setTagList(List<Tag> tags) {
         List<String> tokens = new ArrayList<>();
         if (tags == null) { tags = new ArrayList<>(); }
-        for (String tag : tags) {
-            tokens.add(tag);
+        for (Tag tag : tags) {
+            tokens.add(tag.getName());
         }
         this.tags = StringUtils.join(tokens, ",");
     }
 
-    public ColumnMetadata() {
-
-    }
-
-    public ColumnMetadata(ExternalColumn externalColumn) {
-        this.setColumnName(externalColumn.getDefaultColumnName());
-        this.setDescription(externalColumn.getDescription());
-        this.setDataType(externalColumn.getDataType());
-        this.setDisplayName(externalColumn.getDisplayName());
-        this.setCategory(externalColumn.getCategory());
-        this.setStatisticalType(externalColumn.getStatisticalType());
-        this.setFundamentalType(externalColumn.getFundamentalType());
-        this.setApprovedUsageList(externalColumn.getApprovedUsageList());
-        List<String> tags = new ArrayList<String>();
-        tags.add("External");
-        tags.addAll(externalColumn.getTagList());
-        this.setTagList(tags);
-        this.setDiscretizationStrategy(externalColumn.getDiscretizationStrategy());
-    }
 }
