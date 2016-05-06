@@ -11,7 +11,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ratio'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def std_length(n):

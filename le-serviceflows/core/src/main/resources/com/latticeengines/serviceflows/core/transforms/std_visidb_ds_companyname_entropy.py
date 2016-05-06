@@ -12,7 +12,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ratio'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def argument_length(n):

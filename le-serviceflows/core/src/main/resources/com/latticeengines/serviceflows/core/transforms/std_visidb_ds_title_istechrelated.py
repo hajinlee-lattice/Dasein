@@ -14,7 +14,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'StatisticalType' : 'ordinal'
             , 'FundamentalType' : 'boolean'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def std_visidb_ds_title_istechrelated(n):

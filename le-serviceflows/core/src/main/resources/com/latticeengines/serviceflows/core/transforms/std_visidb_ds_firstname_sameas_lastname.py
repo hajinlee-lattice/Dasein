@@ -12,7 +12,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'boolean'
             , 'StatisticalType' : 'nominal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def std_visidb_ds_firstname_sameas_lastname(firstname, lastname):

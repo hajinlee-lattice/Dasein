@@ -14,7 +14,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'alpha'
             , 'StatisticalType' : 'nominal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def std_visidb_ds_industry_group(n):

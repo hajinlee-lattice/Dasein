@@ -87,6 +87,10 @@ class PredictorGenerator(State):
         if colname in configMetadata:
             metadata = configMetadata[colname]
             predictor["Tags"] = metadata["Tags"]
+            if "InternalTransform" in metadata["Tags"]:
+                predictor["Tags"] = ["Internal"]
+            elif "ExternalTransform" in metadata["Tags"]:
+                predictor["Tags"] = ["External"]
             predictor["DataType"] = metadata["DataType"]
             predictor["DisplayName"] = metadata["DisplayName"]
             predictor["Description"] = metadata["Description"]

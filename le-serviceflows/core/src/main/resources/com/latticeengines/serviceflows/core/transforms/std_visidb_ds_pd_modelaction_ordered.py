@@ -12,7 +12,7 @@ def metadata():
             , 'Category'        : 'Firmographics'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ordinal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'ExternalTransform' }
 
 
 def std_visidb_ds_pd_modelaction_ordered(n):

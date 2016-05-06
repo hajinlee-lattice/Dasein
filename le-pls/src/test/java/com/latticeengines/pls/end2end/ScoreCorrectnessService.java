@@ -125,6 +125,11 @@ public class ScoreCorrectnessService {
         System.out.println("PercentDifference:" + percentDifference);
         Assert.assertTrue(percentDifference <= ACCEPTABLE_PERCENT_DIFFERENCE, "percent different " + percentDifference
                 + " exceeds the maximum allowance " + ACCEPTABLE_PERCENT_DIFFERENCE);
+        double percentScored = (double) scoreResponses.size() / (double) numRecordsToScore * 100.0;
+        log.info("Percent Scored:" + percentScored);
+        Assert.assertTrue(percentScored >= 90.0,
+                String.format("Actual scored records less than 90 percent, actual:%d, expected:%d", scoreResponses.size(),
+                        numRecordsToScore));
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {

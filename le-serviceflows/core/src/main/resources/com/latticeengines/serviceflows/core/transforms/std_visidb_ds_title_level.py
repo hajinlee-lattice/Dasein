@@ -15,7 +15,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ordinal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 

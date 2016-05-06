@@ -16,7 +16,7 @@ def metadata():
             , 'Category'              : 'Online Presence'
             , 'FundamentalType'       : 'numeric'
             , 'StatisticalType'       : 'ratio'
-            , 'Tags'                  : 'Internal' }
+            , 'Tags'                  : 'ExternalTransform' }
 
 
 def std_visidb_alexa_monthssinceonline(date):

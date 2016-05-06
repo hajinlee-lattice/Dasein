@@ -18,6 +18,8 @@ public class ModelingMetadata {
     public static final String MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE = "ModelAndAllInsights";
     public static final String INTERNAL_TAG = "Internal";
     public static final String EXTERNAL_TAG = "External";
+    public static final String INTERNAL_TRANSFORM_TAG = "InternalTransform";
+    public static final String EXTERNAL_TRANSFORM_TAG = "ExternalTransform";
     public static final String NOMINAL_STAT_TYPE = "nominal";
     public static final String ORDINAL_STAT_TYPE = "ordinal";
     public static final String INTERVAL_STAT_TYPE = "interval";

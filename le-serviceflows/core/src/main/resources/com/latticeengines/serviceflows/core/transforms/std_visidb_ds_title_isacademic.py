@@ -15,7 +15,7 @@ def metadata():
             , 'Category'        : 'Lead Information'
             , 'FundamentalType' : 'boolean'
             , 'StatisticalType' : 'nominal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def std_visidb_ds_title_isacademic(n):

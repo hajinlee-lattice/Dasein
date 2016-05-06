@@ -10,4 +10,7 @@ def length(value):
 
 # Metadata for this method
 def metadata():
-    return { "type": "INTEGER", "ApprovedUsage": "Model", "StatisticalType": "ratio" }
+    return { "type": "INTEGER"
+            , "ApprovedUsage": "Model"
+            , "StatisticalType": "ratio"
+            , "Tags" : 'InternalTransform' }

@@ -11,7 +11,7 @@ def metadata():
             , 'Category'        : 'Online Presence'
             , 'FundamentalType' : 'numeric'
             , 'StatisticalType' : 'ratio'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'ExternalTransform' }
 
 
 def std_visidb_ds_pd_alexa_relatedlinks_count(n):

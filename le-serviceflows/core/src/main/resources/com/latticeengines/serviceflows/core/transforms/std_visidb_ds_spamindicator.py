@@ -18,7 +18,7 @@ def metadata():
             , 'DisplayName'     : 'Spam Lead'
             , 'Category'        : 'Lead Information'
             , 'StatisticalType' : 'nominal'
-            , 'Tags'            : 'Internal' }
+            , 'Tags'            : 'InternalTransform' }
 
 
 def ds_company_isunusual(n):
