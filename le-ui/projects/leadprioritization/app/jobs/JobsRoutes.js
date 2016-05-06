@@ -67,11 +67,12 @@ angular
             .state('home.jobs.status.csv', {
                 url: '/csv/:jobId',
                 resolve: {
-                    JobResult: function($q, $stateParams, JobsService) {
+                    JobResult: function($q, $stateParams, JobsStore, ServiceErrorUtility) {
                         var deferred = $q.defer();
 
-                        JobsService.getJobStatus($stateParams.jobId).then(function(result) {
-                            deferred.resolve(result.resultObj);
+                        JobsStore.getJob($stateParams.jobId).then(function(result) {
+                            ServiceErrorUtility.check({ data: result, config: { headers: { ErrorDisplayMethod: 'banner' } } });
+                            deferred.resolve(result);
                         });
 
                         return deferred.promise;

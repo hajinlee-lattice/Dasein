@@ -44,9 +44,9 @@ angular
         }
     };
 
-    this.showSupressed = function (response) {
-
-    };  
+    this.hideBanner = function (elementQuery) {
+        $(elementQuery || "#mainInfoView").html('');
+    };
 
     this.showBanner = function (response, elementQuery) {
         $http.get('/app/modules/ServiceError/ServiceErrorBanner.html', { cache: $templateCache }).success(function (html) {

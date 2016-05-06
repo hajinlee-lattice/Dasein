@@ -6,7 +6,65 @@ angular.module('pd.jobs', [
     'pd.navigation.pagination',
     'mainApp.core.utilities.BrowserStorageUtility',
 ])
+.service('JobsStore', function($q, JobsService) {
+    var JobsStore = this;
+    this.jobs = [];
+    this.models = {};
+    this.jobsMap = {};
 
+    this.getJob = function(jobId) {
+        var deferred = $q.defer(),
+            job = this.jobsMap[jobId];
+        
+        if (typeof job == 'object') {
+            deferred.resolve(job);
+        } else {
+            JobsService.getJobStatus(jobId).then(function(response) {
+                deferred.resolve(response.resultObj);
+            });
+        }
+
+        return deferred.promise;
+    };
+
+    this.getJobs = function(use_cache, modelId) {
+        var deferred = $q.defer();
+        var jobs = modelId ? this.models[modelId] : this.jobs;
+        if (use_cache) {
+            if (jobs && jobs.length > 0) {
+                deferred.resolve(jobs);
+            } else {
+                this.models[modelId] = [];
+                deferred.resolve([]);
+            }
+        } else {
+            JobsService.getAllJobs().then(function(response) {
+                var response = response.resultObj;
+
+                modelId 
+                    ? JobsStore.models[modelId] = jobs = response 
+                    : JobsStore.jobs = jobs = response;
+
+                for (var i=0; i<jobs.length; i++) {
+                    var job = jobs[i];
+                    JobsStore.addJob(job.id, job);
+                }
+
+                deferred.resolve(jobs);
+            });
+        }
+
+        return deferred.promise;
+    };
+
+    this.addJob = function(jobId, job) {
+        this.jobsMap[jobId] = job;
+    };
+
+    this.removeJob = function(jobId) {
+        delete this.jobsMap[jobId];
+    };
+})
 .service('JobsService', function($http, $q, _, $stateParams) {
 
     var stepsNameDictionary = { 
@@ -144,16 +202,30 @@ angular.module('pd.jobs', [
                 };
                 
                 jobs = _.sortBy(jobs, 'startTimestamp');
-                result.resultObj = _.map(jobs, function(rawObj) {
+                result.resultObj = _.map(jobs, function(job) {
+                    var stepRunning = getStepRunning(job);
+                    var stepsCompleted = getStepsCompleted(job);
+                    var stepFailed = getStepFailed(job);
+                    
                     return {
-                        id: rawObj.id,
-                        timestamp: rawObj.startTimestamp,
-                        jobType: rawObj.jobType,
-                        status: rawObj.jobStatus,
-                        source: rawObj.inputs.SOURCE_DISPLAY_NAME,
-                        user: rawObj.user
+                        id: job.id,
+                        timestamp: job.startTimestamp,
+                        errorCode: job.errorCode,
+                        errorMsg: job.errorMsg,
+                        jobType: job.jobType,
+                        status: job.jobStatus,
+                        source: job.inputs.SOURCE_DISPLAY_NAME,
+                        user: job.user,
+                        jobStatus: job.jobStatus,
+                        startTimestamp: job.startTimestamp,
+                        stepRunning: stepRunning,
+                        stepsCompleted: stepsCompleted,
+                        stepFailed: stepFailed,
+                        completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                        reports: job.reports
                     };
                 });
+
                 deferred.resolve(result);
             }, function onError(response) {
 
@@ -177,31 +249,31 @@ angular.module('pd.jobs', [
         }).then(
             function onSuccess(response) {
                 clearNumSteps();
-                var jobInfo = response.data;
-                var stepRunning = getStepRunning(jobInfo);
-                var stepsCompleted = getStepsCompleted(jobInfo);
-                var stepFailed = getStepFailed(jobInfo);
+                var job = response.data;
+                var stepRunning = getStepRunning(job);
+                var stepsCompleted = getStepsCompleted(job);
+                var stepFailed = getStepFailed(job);
 
                 result = {
                     success: true,
                     resultObj:
                         {
-                            id: jobInfo.id,
-                            user: jobInfo.user,
-                            jobType: jobInfo.jobType,
-                            jobStatus: jobInfo.jobStatus,
-                            startTimestamp: jobInfo.startTimestamp,
+                            id: job.id,
+                            user: job.user,
+                            errorCode: job.errorCode,
+                            errorMsg: job.errorMsg,
+                            jobType: job.jobType,
+                            jobStatus: job.jobStatus,
+                            startTimestamp: job.startTimestamp,
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
                             stepFailed: stepFailed,
-                            completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted),
-                            reports: jobInfo.reports
+                            completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                            reports: job.reports
                         }
                 };
 
                 deferred.resolve(result);
-            }, function onError(response) {
-                console.log("getting job failed: " + jobId);
             }
         );
         return deferred.promise;
@@ -222,10 +294,8 @@ angular.module('pd.jobs', [
             }
         }).then(
             function onSuccess(response) {
-                console.log('success',response);
                 deferred.resolve(result);
             }, function onError(response) {
-                console.log('error',response);
                 result.success = false;
                 deferred.resolve(result);
             }
@@ -234,6 +304,9 @@ angular.module('pd.jobs', [
     };
     
     function getCompletedStepTimes(job, runningStep, completedSteps) {
+        if (!runningStep) {
+            return;
+        }
         var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
                 "create_global_model": null, "create_global_target_market": null };
         var currStepIndex = 0;
@@ -274,11 +347,13 @@ angular.module('pd.jobs', [
     }
 
     function getStepFailed(job) {
-        for (var i = 0; i < job.steps.length; i++) {
-            var stepRunning = getDictionaryValue(job, i);
+        if (job.steps) {
+            for (var i = 0; i < job.steps.length; i++) {
+                var stepRunning = getDictionaryValue(job, i);
 
-            if (stepRunning && job.steps[i].stepStatus == "Failed") {
-                return stepRunning;
+                if (stepRunning && job.steps[i].stepStatus == "Failed") {
+                    return stepRunning;
+                }
             }
         }
         return null;
@@ -288,10 +363,10 @@ angular.module('pd.jobs', [
         if (job.jobStatus != "Running") {
             //return null;
         }
-        if (job.jobType == "modelAndEmailWorkflow") {
+
+        if (!job.steps || job.jobType == "modelAndEmailWorkflow") {
             return;
         }
-        
         for (var i = 0; i < job.steps.length; i++) {
             var stepRunning = getDictionaryValue(job, i);
 
@@ -341,7 +416,7 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsService, BrowserStorageUtility) {
+.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsStore, JobsService, BrowserStorageUtility) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
@@ -350,13 +425,14 @@ angular.module('pd.jobs', [
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
     $scope.hideCreationMessage = true;
+    var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 
 
-    function getAllJobs() {
-        JobsService.getAllJobs().then(function(result) {
-            $scope.jobs = result.resultObj;
+    function getAllJobs(use_cache) {
+        JobsStore.getJobs(use_cache, modelId).then(function(result) {
+            $scope.jobs = result;
 
-            if ($scope.jobs == null || $scope.jobs.length == 0) {
+            if (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache) {
                 $scope.showEmptyJobsMessage = true
             } else {
                 $scope.showEmptyJobsMessage = false;
@@ -366,8 +442,13 @@ angular.module('pd.jobs', [
     
     var TIME_BETWEEN_JOB_LIST_REFRESH = 20 * 1000;
     var REFRESH_JOBS_LIST_ID;
-    
+
+    // use cache if available
+    getAllJobs(true);
+
+    // but still do a xhr because cache may be old
     getAllJobs();
+
     REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
 
     $scope.$on("JobCompleted", function() {

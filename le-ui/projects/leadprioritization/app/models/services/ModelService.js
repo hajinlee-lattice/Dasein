@@ -7,7 +7,9 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.services.ModelSummaryValidationService'
 ])
 .service('ModelStore', function($q, ModelService) {
-    this.models = {};
+    var ModelStore = this;
+    this.models = [];
+    this.modelsMap = {};
 
     // checks if items matching args exists, performs XHR to fetch if they don't
     this.getModel = function(modelId) {
@@ -17,23 +19,48 @@ angular.module('mainApp.models.services.ModelService', [
         if (typeof model == 'object') {
             deferred.resolve(model);
         } else {
-            (function(self) {
-                ModelService.GetModelById(modelId).then(function(result) {
-                    if (result != null && result.success === true) {
-                        deferred.resolve(result.resultObj);
-                        self.models[modelId] = result.resultObj;
-                    } else {
-                        deferred.reject(result.resultObj);
-                    }
-                });
-            })(this);
+            ModelService.GetModelById(modelId).then(function(result) {
+                if (result != null && result.success === true) {
+                    ModelStore.addModel(modelId, result.resultObj);
+                    deferred.resolve(result.resultObj);
+                } else {
+                    deferred.reject(result.resultObj);
+                }
+            });
         }
 
         return deferred.promise;
     };
 
+    this.getModels = function(use_cache) {
+        var deferred = $q.defer();
+
+        if (use_cache) {
+            if (ModelStore.models && ModelStore.models.length > 0) {
+                deferred.resolve(ModelStore.models);
+            } else {
+                ModelStore.models = [];
+                deferred.resolve([]);
+            }
+        } else {
+            ModelService.GetAllModels().then(function(response) {
+                var models = response.resultObj;
+
+                ModelStore.models = models;
+
+                deferred.resolve(models);
+            });
+        }
+
+        return deferred.promise;
+    };
+
+    this.addModel = function(modelId, model) {
+        this.modelsMap[modelId] = model;
+    };
+
     this.removeModel = function(modelId) {
-        delete this.models[modelId];
+        delete this.modelsMap[modelId];
     };
 })
 .service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {

@@ -19,7 +19,7 @@ angular.module('mainApp.create.csvReport', [
         if (!JobReport) {
             return;
         }
-        console.log(JobReport, JobResult);
+        
         $scope.report = JobReport;
         $scope.data = data = JSON.parse(JobReport.json.Payload);
         $scope.data.total_records = data.imported_records + data.ignored_records;

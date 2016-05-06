@@ -1,8 +1,6 @@
 angular
 .module('mainApp')
-
-// add ability to redirect with redirectTo
-.run(['$rootScope', '$state', 'ResourceUtility', function($rootScope, $state, ResourceUtility) {
+.run(['$rootScope', '$state', 'ResourceUtility', 'ServiceErrorUtility', function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
 
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
         var LoadingString = ResourceUtility.getString("");
@@ -13,15 +11,12 @@ angular
         }
 
         ShowSpinner(LoadingString);
+        ServiceErrorUtility.hideBanner();
     });
-    /*
+    
     $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
-        console.log('END');
     });
-    */
 }])
-
-// define routes for PD application.
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     var ModelDependencies = {
             Model: function($q, $stateParams, ModelStore) {

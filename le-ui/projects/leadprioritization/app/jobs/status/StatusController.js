@@ -13,9 +13,8 @@ angular
                 expanded: '=',
                 cancelling: '='
             },
-            controller: ['$http', '$scope', '$rootScope', '$state', 'JobsService', function ($http, $scope, $rootScope, $state, JobsService) {
+            controller: ['$http', '$scope', '$rootScope', '$state', 'JobsStore', 'JobsService', function ($http, $scope, $rootScope, $state, JobsStore, JobsService) {
                 var job = $scope.job;
-
                 $scope.showProgress = false;
                 $scope.jobType = job.jobType ? job.jobType : 'placeholder';
                 $scope.jobRunning = false;
@@ -68,16 +67,11 @@ angular
                     $scope.expanded[job.id] = true;
 
                     if (! isCompleted() && $scope.job.id != null) {
-                        JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
-                            if (jobStatus.success) {
-                                updateStatesBasedOnJobStatus(jobStatus.resultObj);
-                            }
+                        JobsStore.getJob($scope.job.id).then(function(result) {
+                            updateStatesBasedOnJobStatus(job);
                         });
                     }
                 };
-
-
-
 
                 // Use this in JobStatusRow.html
                 // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
@@ -88,7 +82,7 @@ angular
                     }).then(
                         function onSuccess(response) {
                             var jobId = $scope.job.id;
-                            JobsService.getJobStatus(jobId);
+                            JobsStore.getJob(jobId);
                         }, function onError(response) {
                             console.log("error");
                         }
@@ -152,11 +146,11 @@ angular
                         $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
                         $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
                     }
-
+                    
                     $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                     var stepFailed = jobStatus.stepFailed;
-                    if (stepFailed) {
+                    if (stepFailed && $scope.stepsCompletedTimes) {
                         $scope.jobStepsRunningStates[stepFailed] = false;
                         $scope.jobStepsCompletedStates[stepFailed] = false;
 
@@ -192,7 +186,7 @@ angular
 
                 function queryJobStatusAndSetStatesVariables(jobId) {
 
-                    JobsService.getJobStatus(jobId).then(function(response) {
+                    JobsStore.getJob(jobId).then(function(response) {
                         if (response.success) {
                             var jobStatus = response.resultObj.jobStatus;
                             if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {

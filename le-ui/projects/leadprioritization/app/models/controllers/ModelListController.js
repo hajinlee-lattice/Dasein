@@ -6,7 +6,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService, ModelService) {
+.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 
@@ -25,26 +25,31 @@ angular.module('mainApp.models.controllers.ModelListController', [
     }
 
     $scope.showNoModels = false;
-    ModelService.GetAllModels(true).then(function(result) {
-        $scope.loading = false;
-        if (result != null && result.success === true) {
-            var modelList = result.resultObj;
-            if (modelList == null || modelList.length === 0) {
+    function getModels(use_cache) {
+        ModelStore.getModels(use_cache).then(function(result) {
+            $scope.loading = false;
+            if (result && result.length > 0) {
+                var modelList = result;
+                if (modelList == null || modelList.length === 0) {
+                    $scope.showNoModels = true;
+                } else {
+                    $scope.length = modelList.length;
+                    var contentContainer = $('#modelListContainer');
+                    WidgetFrameworkService.CreateWidget({
+                        element: contentContainer,
+                        widgetConfig: screenWidgetConfig,
+                        metadata: null,
+                        data: modelList,
+                        parentData: modelList
+                    });
+                }
+            } else if (result.resultErrors === "NO TENANT FOUND") {
                 $scope.showNoModels = true;
-            } else {
-                $scope.length = modelList.length;
-                var contentContainer = $('#modelListContainer');
-                WidgetFrameworkService.CreateWidget({
-                    element: contentContainer,
-                    widgetConfig: screenWidgetConfig,
-                    metadata: null,
-                    data: modelList,
-                    parentData: modelList
-                });
             }
-        } else if (result.resultErrors === "NO TENANT FOUND") {
-            $scope.showNoModels = true;
-        }
-    });
+        });
+    }
+
+    getModels(true);
+    getModels();
 
 });
