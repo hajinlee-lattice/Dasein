@@ -1,12 +1,9 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -35,27 +32,26 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Oauth2AccessToken> findAll() {
-        return super.findAll();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Oauth2AccessToken get(String tenantId) {
-        List<Oauth2AccessToken> tokens = super.findAll();
-        if (tokens.size() == 1) {
-            Oauth2AccessToken token = tokens.get(0);
-            token.setAccessToken(CipherUtils.decrypt(token.getAccessToken()));
-            return token;
-        }
-        Oauth2AccessToken token = new Oauth2AccessToken();
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
         }
+        Oauth2AccessToken token = findByTenant(tenant);
+        if (token != null) {
+            token.setAccessToken(CipherUtils.decrypt(token.getAccessToken()));
+            return token;
+        }
+        token = new Oauth2AccessToken();
         token.setTenant(tenant);
         token.setAccessToken("");
         return token;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Oauth2AccessToken findByTenant(Tenant tenant) {
+        return oauth2AccessTokenDao.findByField("tenantId", tenant.getPid());
     }
 
     @Override

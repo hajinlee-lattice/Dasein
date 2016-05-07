@@ -53,28 +53,27 @@ public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBas
         tenant1.setId("TENANT1");
         tenant1.setName("TENANT1");
         tenantEntityMgr.create(tenant1);
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "");
 
         Tenant tenant2 = new Tenant();
         tenant2.setId("TENANT2");
         tenant2.setName("TENANT2");
         tenantEntityMgr.create(tenant2);
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId()).getAccessToken(), "");
 
-        setupSecurityContext(tenant1);
         Oauth2AccessToken token1 = new Oauth2AccessToken();
         token1.setAccessToken("somevalue1");
         oauth2AccessTokenEntityMgr.createOrUpdate(token1, tenant1.getId());
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "somevalue1");
 
-        setupSecurityContext(tenant2);
         Oauth2AccessToken token2 = new Oauth2AccessToken();
         token2.setAccessToken("somevalue2");
         oauth2AccessTokenEntityMgr.createOrUpdate(token2, tenant2.getId());
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId()).getAccessToken(), "somevalue2");
 
-        setupSecurityContext(tenant1);
-        assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
         Oauth2AccessToken token3 = oauth2AccessTokenEntityMgr.get(tenant1.getId());
         token3.setAccessToken("somevalue3");
         oauth2AccessTokenEntityMgr.createOrUpdate(token3, tenant1.getId());
-        assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
         assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "somevalue3");
     }
 }
