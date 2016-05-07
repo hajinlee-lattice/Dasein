@@ -48,7 +48,7 @@ public class MatchResource implements MatchInterface {
         try {
             return realTimeMatchService.match(input);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, e, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed.",  e);
         }
     }
 
@@ -64,7 +64,7 @@ public class MatchResource implements MatchInterface {
         try {
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, e, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed.",  e);
         }
     }
 
