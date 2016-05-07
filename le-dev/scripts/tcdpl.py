@@ -61,8 +61,9 @@ def deployApp(app, modules):
     webappWar = 'ROOT.war'
     webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName, webappWar)
 
-    copyfile(os.path.join(moduleDir, moduleWar), webappDir + ".copy")
+    copyfile(os.path.join(targetDir, appWar), webappDir + ".copy")
     os.rename(webappDir + ".copy", webappDir)
+
     print 'deployed %s to %s\n' % (appWar, webappDir)
 
 
