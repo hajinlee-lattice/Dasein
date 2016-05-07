@@ -27,6 +27,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         if (!parameters.isDebuggingEnabled()) {
             fieldsToDiscard.add(ScoreResultField.RawScore.name());
         }
+        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(InterfaceName.InternalId.name()), 1);
         return combinedResultTable.discard(new FieldList(fieldsToDiscard));
     }
 

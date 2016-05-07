@@ -2,17 +2,11 @@ package com.latticeengines.leadprioritization.dataflow;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.IOUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
-
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
@@ -35,19 +29,16 @@ public class CombineInputTableWithScoreTestNG extends ServiceFlowsDataFlowFuncti
 
     @Test(groups = "functional")
     public void execute() throws Exception {
-        InputStream is = ClassLoader.getSystemResourceAsStream("combineInputTableWithScore/Result/scored.txt");
-        List<String> lines = IOUtils.readLines(is);
-        Map<String, Double> scores = new HashMap<>();
-        for (String line : lines) {
-            String[] arr = line.split(",");
-            scores.put(arr[0], Double.valueOf(arr[1]));
-        }
+        List<GenericRecord> inputRecords = readInput(ClassLoader.getSystemResource(
+                String.format("%s/%s/part-m-00000.avro", //
+                        getFlowBeanName(),getStandardParameters().getInputTableName())) //
+                        .getPath());
 
         executeDataFlow(getStandardParameters());
 
-        List<GenericRecord> records = readOutput();
-        assertEquals(records.size(), scores.size());
-        for (GenericRecord record : records) {
+        List<GenericRecord> outputRecords = readOutput();
+        assertEquals(outputRecords.size(), inputRecords.size());
+        for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.Id.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.RawScore.name()));
