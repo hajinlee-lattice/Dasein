@@ -35,7 +35,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 metadataList.add(metadata);
             }
         } catch (IOException e) {
-            return new ArrayList<>();
+            throw new RuntimeException(e);
         }
         return metadataList;
     }

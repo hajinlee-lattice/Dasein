@@ -22,12 +22,14 @@ export PROPDATA_PROPDIR=$WSHOME/le-propdata/conf/env/dev
 export JOB_PROPDIR=$WSHOME/le-job/conf/env/dev
 export DELLEBI_PROPDIR=$WSHOME/le-dellebi/conf/env/dev
 export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
+export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
 
-export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n -XX:MaxPermSize=2g"
-export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=2g"
+export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
+export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=1g -Xmx4g"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=${WSHOME}/le-security/certificates/laca-ldap.dev.lattice.local.jks"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1098"
 export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_COMMON_JAR
 
 $CATALINA_HOME/bin/catalina.sh run

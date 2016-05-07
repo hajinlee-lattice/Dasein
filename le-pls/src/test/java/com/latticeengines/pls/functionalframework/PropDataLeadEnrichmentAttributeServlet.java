@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.domain.exposed.metadata.Category;
 import org.eclipse.jetty.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -19,7 +20,6 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Tag;
 
-@WebServlet("/propdata/metadata/predefined/leadenrichment")
 public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6068276954643550403L;
@@ -39,6 +39,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setStatisticalType(StatisticalType.ORDINAL);
         column.setDescription("Tech Indicator Add This");
         column.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL));
+        column.setCategory(Category.WEBSITE_PROFILE);
         columns[0] = column;
         column = new ColumnMetadata();
         column.setColumnName("TechIndicator_RemoveThis");
@@ -50,6 +51,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setStatisticalType(StatisticalType.INTERVAL);
         column.setDescription("Tech Indicator Remove This");
         column.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_MODELINSIGHTS));
+        column.setCategory(Category.WEBSITE_PROFILE);
         columns[1] = column;
         String json = JsonUtils.serialize(columns);
         resp.getWriter().write(json);

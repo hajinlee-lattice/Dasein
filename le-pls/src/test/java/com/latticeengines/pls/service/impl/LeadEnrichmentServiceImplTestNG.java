@@ -30,7 +30,7 @@ public class LeadEnrichmentServiceImplTestNG extends PlsFunctionalTestNGBaseDepr
     public void setup() throws Exception {
         columnMetadataProxy.setMicroserviceHostPort("http://localhost:8082");
         httpServer = new StandaloneHttpServer();
-        httpServer.init();
+        httpServer.init(8082);
         httpServer.addServlet(new PropDataLeadEnrichmentAttributeServlet(),
                 "/propdata/metadata/predefined/" + ColumnSelection.Predefined.LeadEnrichment);
         httpServer.start();
