@@ -35,7 +35,7 @@ public class HdfsPathBuilder {
     private static final String AVRO_SCHEMA_FILE_EXTENSION = ".avsc";
     private static final String WORK_FLOWS = "WorkFlows";
     private static final String SNAPSHOT = "Snapshot";
-    private static final String INGESTION_FIREHOSE = "IngestionFirehose";
+    private static final String INGESTION = "Ingestion";
     private static final String SOURCES = "Sources";
     private static final String PATH_SEPARATOR = "/";
     private static final String PROP_DATA = "PropData";
@@ -202,7 +202,7 @@ public class HdfsPathBuilder {
 
     public Path constructIngestionDir(String ingestionName) {
         String partialPath = constructPartialPath(ingestionName);
-        return propDataDir().append(INGESTION_FIREHOSE).append(partialPath);
+        return propDataDir().append(INGESTION).append(partialPath);
     }
 
     public Path constructIngestionDir(String ingestionName, String version) {
