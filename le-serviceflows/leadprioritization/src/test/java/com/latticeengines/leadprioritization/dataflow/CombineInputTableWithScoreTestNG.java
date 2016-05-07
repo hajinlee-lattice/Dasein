@@ -29,7 +29,7 @@ public class CombineInputTableWithScoreTestNG extends ServiceFlowsDataFlowFuncti
 
     @Test(groups = "functional")
     public void execute() throws Exception {
-        List<GenericRecord> inputRecords = readInput(ClassLoader.getSystemResource(
+        List<GenericRecord> inputRecords = AvroUtils.readFromLocalFile(ClassLoader.getSystemResource(
                 String.format("%s/%s/part-m-00000.avro", //
                         getFlowBeanName(),getStandardParameters().getInputTableName())) //
                         .getPath());
