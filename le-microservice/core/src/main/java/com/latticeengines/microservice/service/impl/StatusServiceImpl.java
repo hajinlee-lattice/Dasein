@@ -44,7 +44,7 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.scoringapi.health.url}")
     private String scoringapiHealthUrl;
 
-    @Value("${microservice.admin.health.url}")
+    @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
     private RestTemplate restTemplate = new RestTemplate();
