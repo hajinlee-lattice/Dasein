@@ -24,11 +24,7 @@ public enum StatisticalType {
     public String getName() { return this.name; }
 
     public static StatisticalType fromName(String name) {
-        if (nameMap.containsKey(name)) {
-            return nameMap.get(name);
-        } else  {
-            throw new IllegalArgumentException("Cannot find a StatisticalType with name " + name);
-        }
+        return nameMap.get(name);
     }
 
 }

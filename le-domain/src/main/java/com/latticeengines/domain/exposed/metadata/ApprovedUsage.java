@@ -31,7 +31,7 @@ public enum ApprovedUsage {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else  {
-            throw new IllegalArgumentException("Cannot find a ApprovedUsage with name " + name);
+            return ApprovedUsage.NONE;
         }
     }
 }
