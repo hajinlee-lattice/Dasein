@@ -30,7 +30,6 @@ import cascading.operation.Function;
 @Component("bomboraDepivotFlow")
 public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowParameters> {
     private static final Log LOG = LogFactory.getLog(BomboraDepivotFlow.class);
-    private static final String LE_TIMESTAMP = "LE_Last_Upload_Date";
     private static final String SCHEMA_BOMBORA_FIREHOSE = "classpath:schema/BomboraFirehoseAvroSchema.avsc";
 
     @Autowired
@@ -57,7 +56,7 @@ public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowP
         setSchemaToNode(node);
 
         node = node.depivot(targetFields, sourceFieldTuples);
-        node = node.addTimestamp(LE_TIMESTAMP);
+        node = node.addTimestamp(parameters.getTimestampField(), parameters.getTimestamp());
         node = addTruncateLogic(node, parameters.getColumns());
         return node;
     }

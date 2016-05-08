@@ -2,6 +2,7 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +95,11 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
 
         DepivotDataFlowParameters parameters = new DepivotDataFlowParameters();
         parameters.setTimestampField(source.getTimestampField());
+        try {
+            parameters.setTimestamp(HdfsPathBuilder.dateFormat.parse(baseVersion));
+        } catch (ParseException e) {
+            throw new LedpException(LedpCode.LEDP_25012, e, new String[] { source.getSourceName(), e.getMessage() });
+        }
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource));
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());

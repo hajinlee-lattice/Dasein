@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -282,6 +283,12 @@ public class Node {
     public Node addTimestamp(String timestampField) {
         return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
                 timestampField))), builder);
+    }
+
+    public Node addTimestamp(String timestampField, Date timestamp) {
+        return new Node(builder.register(
+                new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, timestamp))),
+                builder);
     }
 
     public Table getSourceSchema() {

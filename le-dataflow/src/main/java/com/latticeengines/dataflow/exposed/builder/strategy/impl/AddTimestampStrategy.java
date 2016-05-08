@@ -1,15 +1,20 @@
 package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import cascading.tuple.TupleEntry;
 
 public class AddTimestampStrategy extends AddFieldStrategyBase {
-
-
     private static final long serialVersionUID = -2625708547865490421L;
 
-    public static int UNIFORM = 0;      // all records have the same timestamp
-    public static int SEQUENTIAL = 1;   // each record has a slightly different timestamp
+    private static final Log log = LogFactory.getLog(AddTimestampStrategy.class);
+
+    public static int UNIFORM = 0; // all records have the same timestamp
+    public static int SEQUENTIAL = 1; // each record has a slightly different
+                                      // timestamp
 
     private int mode;
     private long timestamp;
@@ -22,6 +27,15 @@ public class AddTimestampStrategy extends AddFieldStrategyBase {
         super(fieldName, Long.class);
         this.timestamp = System.currentTimeMillis();
         this.mode = mode;
+    }
+
+    public AddTimestampStrategy(String fieldName, Date date) {
+        super(fieldName, Long.class);
+        this.timestamp = date.getTime();
+        log.info("Setting timestamp: " //
+                + "Epoch Time - " + date.getTime() //
+                + ", date - " + date.toGMTString());
+        this.mode = UNIFORM;
     }
 
     @Override
