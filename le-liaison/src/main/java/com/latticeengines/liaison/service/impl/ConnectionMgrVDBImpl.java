@@ -101,7 +101,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
                     if (!allowedExtensions.contains(kv.getKey())) {
                         continue;
                     }
-                    metadata.put(kv.getKey(), kv.getValue());
+                    metadata.put(kv.getKey(), (String) kv.getValue());
                 }
             }
             if (!metadata.containsKey("Category")) {
