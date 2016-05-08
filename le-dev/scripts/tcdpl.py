@@ -26,11 +26,17 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 
 def cleanupWars():
     print 'clean up existing wars ...'
-    for dirName, subdirList, fileList in os.walk(CATALINA_HOME):
+    for dirName, subdirList, fileList in os.walk(os.path.join(CATALINA_HOME, "webapps")):
         for file in fileList:
-            if file[-4:] == '.war':
+            if file[-4:] == '.war' or file == 'ROOT':
                 print 'removing %s from %s' % (file, dirName)
                 os.remove(dirName + "/" + file)
+
+    for module in MS_MODULES:
+        dirName = os.path.join(CATALINA_HOME, "webapps", "ms")
+        if (os.path.isdir(dirName + "/" + module)):
+            print 'removing %s from %s' % (module, dirName)
+            os.remove(dirName + "/" + module)
 
     print 'clean up workspace ...'
     for dir_name in os.listdir(os.path.join(CATALINA_HOME, "work")):
@@ -39,7 +45,6 @@ def cleanupWars():
             print 'cleaning up working directory %s ' % dir_path
             rmtree(dir_path)
     print ''
-
 
 def deployApp(app, modules):
     if app == 'microservice':
