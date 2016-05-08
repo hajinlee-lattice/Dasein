@@ -17,6 +17,7 @@ public class StatusDocument {
     private String status;
 
     // for JSON constructor
+    @SuppressWarnings("unused")
     private StatusDocument() {}
 
     public StatusDocument(String status) {
