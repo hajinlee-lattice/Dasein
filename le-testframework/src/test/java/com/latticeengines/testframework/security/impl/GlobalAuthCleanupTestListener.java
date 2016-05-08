@@ -100,7 +100,15 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
     }
 
     public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-        fields.addAll(Arrays.asList(type.getDeclaredFields()));
+        if (type != null) {
+            try {
+                if (type.getDeclaredFields() != null && type.getDeclaredFields().length > 0) {
+                    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
 
         if (type.getSuperclass() != null) {
             fields = getAllFields(fields, type.getSuperclass());
