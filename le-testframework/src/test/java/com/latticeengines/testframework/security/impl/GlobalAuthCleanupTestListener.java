@@ -3,6 +3,7 @@ package com.latticeengines.testframework.security.impl;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,7 +69,7 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
     }
 
     private GlobalAuthTestBed getTestBedFromContext(ITestContext context) {
-        Set<ITestResult> resultSet = context.getPassedTests().getAllResults();
+        Set<ITestResult> resultSet = new HashSet<>(context.getPassedTests().getAllResults());
         resultSet.addAll(context.getFailedTests().getAllResults());
 
         if (resultSet.isEmpty()) {
