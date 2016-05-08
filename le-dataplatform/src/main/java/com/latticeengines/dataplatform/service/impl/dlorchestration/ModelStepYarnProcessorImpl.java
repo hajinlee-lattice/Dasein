@@ -130,8 +130,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     private List<ApplicationId> load(String customer, ModelCommand modelCommand,
             ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD,
-                customer, modelCommand, commandParameters));
+        ApplicationId unpivotedAppId = modelingService
+                .loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, modelCommand, commandParameters));
         appIds.add(unpivotedAppId);
         // No LR for now.
         // ApplicationId pivotedAppId =
@@ -186,8 +186,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         // ApplicationId lrAppId =
         // modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION,
         // customer, commandParameters));
-        ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(
-                DataSetType.STANDARD, customer, modelCommand, commandParameters));
+        ApplicationId unpivotedAppId = modelingService.createSamples(
+                generateSamplingConfiguration(DataSetType.STANDARD, customer, modelCommand, commandParameters));
 
         return Arrays.asList(/* lrAppId, */unpivotedAppId);
     }
@@ -231,10 +231,11 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setTable(modelCommand.getEventTable());
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
-        if(commandParameters.getNumSamples() > 1)
+        if (commandParameters.getNumSamples() > 1) {
             config.setSamplePrefix(constructSampleName(getSamplePercentage(commandParameters.getNumSamples())));
-        else
-        	config.setSamplePrefix(constructSampleName(100));
+        } else {
+            config.setSamplePrefix(constructSampleName(100));
+        }
         config.setTargets(commandParameters.getModelTargets());
         ApplicationId appId = modelingService.profileData(config);
 
@@ -244,8 +245,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     private List<ApplicationId> submitModel(String customer, ModelCommand modelCommand,
             ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD,
-                customer, modelCommand, commandParameters));
+        List<ApplicationId> unpivotedModelAppIds = modelingService
+                .submitModel(generateModel(DataSetType.STANDARD, customer, modelCommand, commandParameters));
         appIds.addAll(unpivotedModelAppIds);
 
         return appIds;
@@ -291,8 +292,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             algorithm.resetAlgorithmProperties();
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
-            algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY="
-                    + priority);
+            algorithm.setContainerProperties(
+                    "VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
             if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
                 algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
             }
@@ -334,25 +335,27 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode featuresThresholdNode = null;
         try {
-            Document document = getFeatureThresholdConfigDocumentDirectory(CustomerSpace.parse(deploymentExternalId).toString());
+            Document document = getFeatureThresholdConfigDocumentDirectory(
+                    CustomerSpace.parse(deploymentExternalId).toString());
             String featuresThresholdDocument = document.getData();
             featuresThresholdNode = mapper.readTree(featuresThresholdDocument);
             int featureThreshold = featuresThresholdNode.asInt();
-            if(featureThreshold < 1) {
-                //-1 is a special value for features threshold. -1 instructs the model to use all features
-                //This if block checks if the value has been set to 0 or <1, and in that case, sets it to the special value of -1.
+            if (featureThreshold < 1) {
+                // -1 is a special value for features threshold. -1 instructs
+                // the model to use all features
+                // This if block checks if the value has been set to 0 or <1,
+                // and in that case, sets it to the special value of -1.
                 model.setFeaturesThreshold(-1);
             } else if (featureThreshold < 50) {
                 model.setFeaturesThreshold(-1);
-            }
-            else {
+            } else {
                 model.setFeaturesThreshold(featureThreshold);
             }
         } catch (JsonProcessingException e) {
             log.error("Could not parse Features Threshold from JSON:" + featuresThresholdNode + e.toString());
         } catch (IOException e) {
             log.error("IO Error getting features threshold:" + featuresThresholdNode + e.toString());
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error getting features threshold:" + featuresThresholdNode + e.toString());
         }
     }
@@ -365,7 +368,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             docPath = docPath.append(FEATURES_THRESHOLD);
             return camille.get(docPath);
         } catch (Exception e) {
-            log.error("Error getting features threshold configs from Cusomter Space:" + customerSpace);
+            log.error("Error getting features threshold configs from Customer Space:" + customerSpace);
             return null;
         }
     }
@@ -401,15 +404,17 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @VisibleForTesting
     int generateFeatureThreshold(ModelCommandParameters commandParameters) {
         int featureThreshold = -1;
-        if(commandParameters == null || commandParameters.getAlgorithmProperties() == null ||
-            commandParameters.getAlgorithmProperties().trim().length() == 0 )
+        if (commandParameters == null || commandParameters.getAlgorithmProperties() == null
+                || commandParameters.getAlgorithmProperties().trim().length() == 0) {
             return featureThreshold;
+        }
 
         String[] properties = commandParameters.getAlgorithmProperties().split("\\s+");
-        for(String prop: properties) {
-            if(prop.toLowerCase().startsWith(ModelCommandParameters.FEATURE_THRESHOLD.toLowerCase())) {
-                if(prop.split("=").length == 2) {
-                    featureThreshold = Integer.parseInt(prop.split("=")[1]);
+        for (String prop : properties) {
+            if (prop.toLowerCase().startsWith(ModelCommandParameters.FEATURE_THRESHOLD.toLowerCase())) {
+                String[] tokens = prop.split("="); 
+                if (tokens.length == 2) {
+                    featureThreshold = Integer.parseInt(tokens[1]);
                     break;
                 }
             }
@@ -420,7 +425,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @VisibleForTesting
     int getSamplePercentage(int numberOfSamples) {
         int samplePercentage = 100;
-        if(numberOfSamples <= 1) {
+        if (numberOfSamples <= 1) {
             return samplePercentage;
         } else {
             List<Integer> samplesList = calculateSamplePercentages(numberOfSamples);

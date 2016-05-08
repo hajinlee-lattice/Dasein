@@ -67,9 +67,6 @@ class ColumnTransform(object):
                 if self.uniqueColumnTransformKey not in value:
                     testPass = False
                     missingRequiredKey = self.uniqueColumnTransformKey
-                if self.mainMethodNameKey not in value:
-                    testPass = False
-                    missingRequiredKey = self.mainMethodNameKey
                 if self.uniqueColumnTransformNameKey not in value:
                     testPass = False
                     missingRequiredKey = self.uniqueColumnTransformNameKey
@@ -92,99 +89,110 @@ class ColumnTransform(object):
             logger.exception("Caught Exception while checking Configurable Pipeline JSON for correctness")
             return False
 
-    def buildPipelineFromFile(self, stringColumns = None, 
+    def buildPipelineFromFile(self, pipelinePath="./lepipeline.tar.gz",
+                                       stringColumns=None, 
                                        categoricalColumns=None, 
                                        continuousColumns=None, 
                                        targetColumn=None, 
-                                       columnsToTransform=None):
+                                       columnsToTransform=None,
+                                       profile=None):
         # Return Array that holds functions loaded from file
         pipelineAsArrayOfTransformClasses = []
+        pipelineName = []
 
         try:
             jsonToProcess = self.pipelineFileAsJson;
             if jsonToProcess is None:
-                logger.info("JsonToProcess is Empty. No transforms could be created")
+                logger.info("JsonToProcess is Empty. No transforms could be created.")
                 return pipelineAsArrayOfTransformClasses
 
             if self.checkJsonForCorrectness(jsonToProcess) == False:
-                logger.info("Couldn't validate JSON file %s for configurable pipeline" % jsonToProcess)
+                logger.info("Couldn't validate JSON file %s for configurable pipeline." % jsonToProcess)
                 return pipelineAsArrayOfTransformClasses
 
             for _, value in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
                 columnTransformObject = {}
-                columnTransformObject[self.mainMethodNameKey] = value[self.mainMethodNameKey]
                 columnTransformObject[self.uniqueColumnTransformNameKey] = value[self.uniqueColumnTransformNameKey]
 
                 sourceFilePathLowerCased = str(value[self.columnTransformFilePathKey]).lower()
                 columnTransformObject[self.columnTransformFilePathKey] = sourceFilePathLowerCased
 
                 logger.info("Configurable Pipeline Current Path: %s" % str(os.getcwd()))
-                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, \
-                                                                    ['./lepipeline.tar.gz', './configurablepipelinetransformsfromfile'])
+                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, [pipelinePath])
                 columnTransformObject[self.loadedModuleKey] = imp.load_module(uniqueColumnTransformName, fileObject, pathname, description)
                 logger.info("Loaded %s for Configurable Pipeline " % uniqueColumnTransformName) 
 
                 mainClassName = value[self.mainClassNameKey]
-                args = []
                 namedParameterList = value[self.namedParameterListToInitKey]
                 kwargs = self.buildKwArgs(namedParameterList = namedParameterList, \
                                           stringColumns = stringColumns, \
                                           categoricalColumns=categoricalColumns, \
                                           continuousColumns=continuousColumns, \
                                           targetColumn=targetColumn, \
-                                          columnsToTransform=columnsToTransform)
-                loadedObject = getattr(columnTransformObject[self.loadedModuleKey], mainClassName)(*args, **kwargs)
+                                          columnsToTransform=columnsToTransform,
+                                          profile=profile)
+                loadedObject = getattr(columnTransformObject[self.loadedModuleKey], mainClassName)(**kwargs)
                 columnTransformObject[self.loadedObjectKey] = loadedObject
 
-                functionName = value[self.mainMethodNameKey]
-                loadedModule = getattr(loadedObject, functionName)(*args, **kwargs)
+                loadedModule = getattr(loadedObject, "__init__")(**kwargs)
                 columnTransformObject[self.resultOfCallingMainMethodNameKey] = loadedModule
 
+                pipelineName.append(uniqueColumnTransformName)
                 pipelineAsArrayOfTransformClasses.append(loadedObject)
 
             logger.info("Finished Loading Configurable Pipeline")
 
-            return pipelineAsArrayOfTransformClasses
+            return (pipelineName, pipelineAsArrayOfTransformClasses)
         except Exception as e:
             logger.exception("Caught Exception while building Configurable Pipeline %s" % str(e))
             return None
 
-    def buildKwArgs(self, namedParameterList=None, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None):
+    def buildKwArgs(self, namedParameterList=None, 
+                            stringColumns=None,
+                            categoricalColumns=None,
+                            continuousColumns=None,
+                            targetColumn=None,
+                            columnsToTransform=None,
+                            profile=None):
         kwargs = {}
         try:
             value = None
 
-            for namedArgument, namedArgumentDataType in namedParameterList.iteritems():
-                if namedArgumentDataType.lower() == "orderedDictContinuousColumns".lower():
+            for namedArgument, namedArgumentDataTypeOrValue in namedParameterList.iteritems():
+                t = type(namedArgumentDataTypeOrValue)
+                if t is not str and t is not unicode:
+                    value = namedArgumentDataTypeOrValue
+                elif namedArgumentDataTypeOrValue.lower() == "orderedDictContinuousColumns".lower():
                     if continuousColumns is None:
                         value = None
                     else:
                         value = OrderedDict(continuousColumns)
-                elif namedArgumentDataType.lower() == "emptyDictionary".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "emptyDictionary".lower():
                     value = {}
-                elif namedArgumentDataType.lower() == "categoricalColumns".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "categoricalColumns".lower():
                     value = categoricalColumns
-                elif namedArgumentDataType.lower() == "emptyList".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "emptyList".lower():
                     value = []
-                elif namedArgumentDataType.lower() == "targetColumn".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "targetColumn".lower():
                     value = targetColumn
-                elif namedArgumentDataType.lower() == "numericalColumn".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "numericalColumns".lower():
                     value = continuousColumns
-                elif namedArgumentDataType.lower() == "columnsToTransform".lower():
+                elif namedArgumentDataTypeOrValue.lower() == "dataprofile".lower():
+                    value = profile
+                elif namedArgumentDataTypeOrValue.lower() == "columnsToTransform".lower():
                     if categoricalColumns is not None and stringColumns is not None:
                         value = set(stringColumns - set(categoricalColumns.keys()))
                     else:
                         value = None
                 else:
-                    logger.error("Unknown ColumnType: %s. Assigning List as DataType" % namedArgument)
-                    value = []
+                    value = namedArgumentDataTypeOrValue
 
                 if namedArgument not in kwargs:
                     kwargs[namedArgument] = value
                 else:
-                    logger.warning("Warning: NamedArgument %s has already been assigned to kwargs" % namedArgument)
+                    logger.warning("Warning: NamedArgument %s has already been assigned to kwargs." % namedArgument)
 
             return kwargs
         except Exception:

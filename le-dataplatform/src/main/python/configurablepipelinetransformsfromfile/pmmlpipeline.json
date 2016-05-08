@@ -1,0 +1,19 @@
+{
+  "columnTransformFiles": {
+    "PivotStep": {
+      "KeyWhenSortingByAscending": "1",
+      "Name": "pivotstep",
+      "MainClassName": "PivotStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": { 
+        "columnsToPivot": "emptyDictionary", 
+        "categoricalColumns": "categoricalColumns",
+        "dataprofile": "dataprofile",
+        "pvalueThreshold": 0.10,
+        "minCategoricalCount": 5,
+        "maxCategoricalCount": 10
+      },
+      "ColumnTransformFilePath": "pivotstep.py"
+    }
+}

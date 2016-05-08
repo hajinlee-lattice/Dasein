@@ -10,7 +10,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
     def testPipelineColumnTransform(self):
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
-        pipeline = colTransform.buildPipelineFromFile()
+        pipeline = colTransform.buildPipelineFromFile()[1]
 
         self.assertLengthOfPipeline(pipeline)
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
@@ -20,7 +20,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
-        pipeline = colTransform.buildPipelineFromFile()
+        pipeline = colTransform.buildPipelineFromFile()[1]
 
         self.assertLengthOfEVPipeline(pipeline)
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
@@ -30,11 +30,11 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfEVPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 5, "Pipeline should have 5 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 5, "Pipeline should have 5 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
@@ -51,9 +51,10 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 columnTransformObject = {}
 
                 try:
-                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, value["ColumnTransformFilePath"])
-                except Exception as E:
-                    print "Caught Exception:",E, "while RUNNING class initialization from pipeline"
+                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, 
+                                                                            "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
+                except Exception as e:
+                    print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
                     raise
 
                 mainClassName = value["MainClassName"]
@@ -76,7 +77,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
                 , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
-        colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
+        colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
 
         with open(pipelineFilePath[0]) as pipelineFile:
             pipelineFileAsJSON = json.load(pipelineFile)
@@ -88,9 +89,10 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 columnTransformObject = {}
 
                 try:
-                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, value["ColumnTransformFilePath"])
-                except Exception as E:
-                    print "Caught Exception:",E, "while RUNNING class initialization from pipeline"
+                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, 
+                                                                            "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
+                except Exception as e:
+                    print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
                     raise
 
                 mainClassName = value["MainClassName"]

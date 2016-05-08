@@ -32,7 +32,7 @@ def encodeCategoricalColumnsForMetadata(metadata):
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.encode(value["hashValue"])
    
-def setupPipeline(pipelineDriver, metadata, stringColumns, targetColumn):
+def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata

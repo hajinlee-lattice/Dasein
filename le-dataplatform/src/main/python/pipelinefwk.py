@@ -37,8 +37,7 @@ class Pipeline(object):
     def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
         for step in self.pipelineSteps:
             step.learnParameters(trainingDataFrame, testDataFrame, configMetadata)
-        
-    
+
 class PipelineStep(object):
     modelStep = False
     props = {}
@@ -131,3 +130,5 @@ class ModelStep(PipelineStep):
             outputFrame[columnName] = pd.Series(dataFrame[columnName].values, index=outputFrame.index)
              
         return outputFrame
+    
+    

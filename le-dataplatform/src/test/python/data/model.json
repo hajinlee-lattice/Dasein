@@ -126,5 +126,6 @@
   "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
   "pipeline_driver":"/app/dataplatform/scripts/pipeline/pipeline.json",
   "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",
+  "pipeline_properties":"pivotstep.minCategoricalCount=4",
   "name": "Model_Submission1"
 }

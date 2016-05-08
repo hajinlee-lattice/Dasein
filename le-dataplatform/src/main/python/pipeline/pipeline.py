@@ -26,20 +26,38 @@ def encodeCategoricalColumnsForMetadata(metadata):
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.encode(value["hashValue"])
    
-def setupPipeline(pipelineDriver, metadata, stringColumns, targetColumn):
+def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
 
-    pipelineFilePaths = [pipelineDriver]
-    colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePaths)
-    steps = colTransform.buildPipelineFromFile(stringColumns=stringColumns, \
+    colTransform = columntransform.ColumnTransform(pathToPipelineFiles=[pipelineDriver])
+    (names, steps) = colTransform.buildPipelineFromFile(pipelinePath="./" + pipelineLib, \
+                                               stringColumns=stringColumns, \
                                                categoricalColumns=categoricalColumns, \
                                                continuousColumns=continuousColumns, \
                                                targetColumn=targetColumn, \
-                                               columnsToTransform=columnsToTransform)
+                                               columnsToTransform=columnsToTransform, \
+                                               profile=metadata)
+
+    # If properties are empty, don't try and set values
+    if pipelineProps:
+        try:
+            props = dict((u.split("=")[0], u.split("=")[1]) for u in pipelineProps.split(" "))
+            stepMap = dict((names[i], steps[i]) for i in xrange(len(steps)))
+            for prop, value in props.iteritems():
+                try:
+                    tokens = prop.split(".")
+                    step = stepMap[tokens[0]]
+                    if step is not None:
+                        currentValue = getattr(step, tokens[1])
+                        setattr(step, tokens[1], (type(currentValue))(value))
+                except Exception as propError:
+                    logger.error(str(propError))
+        except Exception as e:
+            logger.error(str(e))
 
     pipeline = Pipeline(steps)
 

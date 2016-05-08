@@ -127,6 +127,8 @@ class LearningExecutor(Executor):
         configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None 
         stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
         pipelineDriver = params["schema"]["pipeline_driver"]
+        pipelineLib = params["schema"]["python_pipeline_lib"]
+        pipelineProps = params["schema"]["pipeline_properties"] if "pipeline_properties" in params["schema"] else ""
         
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
@@ -137,7 +139,12 @@ class LearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
         # Create the data pipeline
-        pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, metadata[0], stringColumns, params["parser"].target)
+        pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, \
+                                                               pipelineLib, \
+                                                               metadata[0], \
+                                                               stringColumns, \
+                                                               params["parser"].target, \
+                                                               pipelineProps)
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
         pipeline.learnParameters(params["training"], params["test"], configMetadata)

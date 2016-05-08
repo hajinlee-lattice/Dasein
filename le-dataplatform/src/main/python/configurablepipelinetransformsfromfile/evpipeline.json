@@ -4,61 +4,55 @@
         "KeyWhenSortingByAscending": "0",
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {"columns":"categoricalColumns"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/enumeratedcolumntransformstep.py"
+        "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
     "columntypeconversionstep": {
         "KeyWhenSortingByAscending": "1",
         "Name": "columntypeconversionstep",
         "MainClassName": "ColumnTypeConversionStep",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Weird"],
         "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
+        "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "imputationstepevpipeline":{
         "KeyWhenSortingByAscending": "3",
         "Name": "imputationstepevpipeline",
         "MainClassName": "ImputationStep",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Numerical"],
         "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns", "imputationValues": "emptyDictionary", "scalingArray": "emptyList", "meanColumn": "emptyList", "componentMatrix": "emptyList", "targetCol":"targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstepevpipeline.py"
+        "ColumnTransformFilePath": "imputationstepevpipeline.py"
     },
     "revenuecolumntransformstep": {
         "KeyWhenSortingByAscending": "2",
         "Name": "revenuecolumntransformstep",
         "MainClassName": "RevenueColumnTransformStep",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Numerical"],
         "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/revenuecolumntransformstep.py"
+        "ColumnTransformFilePath": "revenuecolumntransformstep.py"
     },
     "CleanCategoricalColumn":{
         "KeyWhenSortingByAscending": "5",
         "Name": "cleancategoricalcolumn",
         "MainClassName": "CleanCategoricalColumn",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/cleancategoricalcolumn.py"
+        "ColumnTransformFilePath": "cleancategoricalcolumn.py"
     }, 
     "AssignConversionRateToCategoricalColumns":{
         "KeyWhenSortingByAscending": "6",
         "Name": "assignconversionratetocategoricalcolumns",
         "MainClassName": "AssignConversionRateToCategoricalColumns",
-        "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/assignconversionratetocategoricalcolumns.py"
+        "ColumnTransformFilePath": "assignconversionratetocategoricalcolumns.py"
     }
   }
 }

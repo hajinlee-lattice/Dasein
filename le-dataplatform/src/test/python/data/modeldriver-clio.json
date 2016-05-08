@@ -203,8 +203,7 @@
     "TotalParticipantsSOY",
     "Twitter_Followers",
     "UCCFilings",
-    "UCCFilingsPresent",
-    "Primary_Legal_Practice_Area__c"
+    "UCCFilingsPresent"
   ],
   "targets": [
     "Event: P1_Event",

@@ -145,7 +145,12 @@ def getSchema():
         "type" : [ "int", "null" ],
         "columnName" : "nullCount",
         "sqlType" : "4"
-      }  ],
+      }, {
+        "name" : "positiveEventCount",
+        "type" : [ "int", "null" ],
+        "columnName" : "positiveEventCount",
+        "sqlType" : "4"
+      }],
       "tableName" : "EventMetadata"
     }"""
     return schema.parse(metadataSchema)
@@ -254,7 +259,6 @@ def retrieveOtherMetadata(columnsMetadata, attributeStats):
     return otherMetadata
 
 def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFromSchema):
-    categoricalMetadata = set(categoricalMetadataFromSchema)
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
         return categoricalMetadataFromSchema
     else:
@@ -434,6 +438,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         valueVector = map(lambda x: 1 if x == value else 0, columnVector)
         valueCount = sum(valueVector)
         datum = {}
+        (numPosEvents, lift) = getLift(avgProbability, valueCount, valueVector, eventVector)
         datum["id"] = index
         datum["barecolumnname"] = colName
         datum["displayname"] = otherMetadata[0]
@@ -450,10 +455,11 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["kurtosis"] = None
         datum["skewness"] = None
         datum["count"] = valueCount
-        datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
+        datum["lift"] = lift
         datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[value], entropyValue)
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
+        datum["positiveEventCount"] = numPosEvents
         index = index + 1
         dataWriter.append(datum)
 
@@ -489,6 +495,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         # Replace np.inf with None value
         band = map(lambda x: None if np.isinf(x) else x, [bands[i], bands[i + 1]])
         datum = {}
+        (numPosEvents, lift) = getLift(avgProbability, bandCount, bandVector, eventVector)
         datum["id"] = index
         datum["barecolumnname"] = colName
         datum["displayname"] = otherMetadata[0]
@@ -505,10 +512,11 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["kurtosis"] = kurtosis
         datum["skewness"] = skewness
         datum["count"] = bandCount
-        datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
+        datum["lift"] = lift
         datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[bands[i]], entropyValue)
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
+        datum["positiveEventCount"] = numPosEvents
         index = index + 1
         dataWriter.append(datum)
 
@@ -541,6 +549,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
         return index
     
     datum = {}
+    (numPosEvents, lift) = getLift(avgProbability, bandCount, bandVector, eventVector)
     datum["id"] = index
     datum["barecolumnname"] = colName
     datum["displayname"] = otherMetadata[0]
@@ -557,10 +566,11 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     datum["kurtosis"] = None
     datum["skewness"] = None
     datum["count"] = bandCount
-    datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
+    datum["lift"] = lift
     datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[None], entropyValue) if None in componentMi else None
     datum["discreteNullBucket"] = not continuous
     datum["continuousNullBucket"] = continuous
+    datum["positiveEventCount"] = numPosEvents
     index = index + 1
     dataWriter.append(datum)
     return index
@@ -634,8 +644,9 @@ def getLift(avgProbability, valueCount, valueVector, eventVector):
         Lift value
     '''
     if (avgProbability * valueCount) == 0:
-        return None
-    return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
+        return (0, None)
+    countWhereEventIsOne = getCountWhereEventIsOne(valueVector, eventVector) 
+    return (countWhereEventIsOne, countWhereEventIsOne / float(avgProbability * valueCount))
 
 def uncertaintyCoefficient(mi, entropy):
     if mi == None or entropy == 0:
