@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,12 +26,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
