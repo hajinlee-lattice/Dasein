@@ -32,12 +32,12 @@ public class TransformRetriever implements InitializingBean {
     }
 
     String getRTSClassFromPythonName(String version, String pythonModuleName) {
-        if(version == null)
+        if (version == null) {
             version = "v2_0_25";
+        }
 
         String[] tokens = pythonModuleName.split("_");
-        StringBuilder sb = new StringBuilder("com.latticeengines.transform."
-                + version + ".functions.");
+        StringBuilder sb = new StringBuilder("com.latticeengines.transform." + version + ".functions.");
 
         for (String token : tokens) {
             sb.append(StringUtils.capitalize(token));
@@ -47,22 +47,18 @@ public class TransformRetriever implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        log.info("Instantiating transformer cache with max size "
-                + transformerCacheMaxSize);
+        log.info("Instantiating transformer cache with max size " + transformerCacheMaxSize);
         cache = CacheBuilder.newBuilder().maximumSize(transformerCacheMaxSize) //
                 .expireAfterAccess(30, TimeUnit.MINUTES) //
                 .build(new CacheLoader<TransformId, RealTimeTransform>() {
                     @SuppressWarnings("unchecked")
                     @Override
-                    public RealTimeTransform load(TransformId key)
-                            throws Exception {
+                    public RealTimeTransform load(TransformId key) throws Exception {
                         log.info("Loading transform " + key.moduleName);
 
                         Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class
-                                .forName(getRTSClassFromPythonName(key.version,
-                                        key.moduleName));
-                        Constructor<RealTimeTransform> ctor = c
-                                .getConstructor(String.class);
+                                .forName(getRTSClassFromPythonName(key.version, key.moduleName));
+                        Constructor<RealTimeTransform> ctor = c.getConstructor(String.class);
                         return ctor.newInstance(new Object[] { key.modelPath });
                     }
                 });
