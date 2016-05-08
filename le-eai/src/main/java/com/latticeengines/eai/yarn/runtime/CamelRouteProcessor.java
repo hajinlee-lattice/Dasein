@@ -20,8 +20,8 @@ import com.latticeengines.eai.service.CamelRouteService;
 import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
 
 @Component("camelRouteProcessor")
-public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
-        ItemProcessor<ImportConfiguration, String> {
+public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
+        implements ItemProcessor<ImportConfiguration, String> {
 
     private static final Long timeout = TimeUnit.HOURS.toMillis(48);
     private static final Log log = LogFactory.getLog(CamelRouteProcessor.class);
@@ -32,8 +32,8 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
         if (!ImportConfiguration.ImportType.CamelRoute.equals(importConfig.getImportType())) {
-            throw new IllegalArgumentException("An import of type " + importConfig.getImportType()
-                    + " was directed to " + this.getClass().getSimpleName());
+            throw new IllegalArgumentException("An import of type " + importConfig.getImportType() + " was directed to "
+                    + this.getClass().getSimpleName());
         }
 
         System.out.println(JsonUtils.serialize(importConfig.getCamelRouteConfiguration()));
@@ -45,7 +45,8 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
         if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
             camelRouteService = sftpToHdfsRouteService;
         } else {
-            throw new UnsupportedOperationException(camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
+            throw new UnsupportedOperationException(
+                    camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
         }
 
         RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
@@ -55,10 +56,10 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
         camelContext.stop();
 
         return null;
-     }
+    }
 
     private void waitForRouteToFinish(CamelRouteService<?> camelRouteService,
-                                      CamelRouteConfiguration camelRouteConfiguration) {
+            CamelRouteConfiguration camelRouteConfiguration) {
         Long startTime = System.currentTimeMillis();
         Integer errorTimes = 0;
         while (System.currentTimeMillis() - startTime < timeout) {
@@ -67,14 +68,18 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
                     setProgress(0.95f);
                     return;
                 } else {
+                    String msg = "Waiting for the camel route to finish";
                     Double progress = camelRouteService.getProgress(camelRouteConfiguration);
-                    setProgress(progress.floatValue());
-                    log.info("Waiting for the camel route to finish: " + progress * 100 + " %");
+                    if (progress != null) {
+                        setProgress(progress.floatValue());
+                        msg += ": " + progress * 100 + "%";
+                    }
+                    log.info(msg);
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 if (++errorTimes >= 10) {
-                    throw new RuntimeException("Max error times exceeded: encountered " + errorTimes + " errors.");
+                    throw new RuntimeException("Max error times exceeded: encountered " + errorTimes + " errors.", e);
                 }
             } finally {
                 try {

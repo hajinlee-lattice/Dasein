@@ -43,9 +43,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     private YarnClient yarnClient;
 
-    private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(90);
-
-    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
+    private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.HOURS.toMillis(6);
+    private static final long MAX_MILLIS_TO_WAIT = TimeUnit.HOURS.toMillis(5);
 
     @Override
     public void execute() {
@@ -54,8 +53,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             progress = getConfiguration().getIngestionProgress();
             HdfsPodContext.changeHdfsPodId(progress.getHdfsPod());
             Ingestion ingestion = getConfiguration().getIngestion();
-            ProviderConfiguration providerConfiguration = getConfiguration()
-                    .getProviderConfiguration();
+            ProviderConfiguration providerConfiguration = getConfiguration().getProviderConfiguration();
             ingestion.setProviderConfiguration(providerConfiguration);
             progress.setIngestion(ingestion);
             initializeYarnClient();
@@ -73,10 +71,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     }
 
     private void ingestionByCamelRoute() throws Exception {
-        CamelRouteConfiguration camelRouteConfig = ingestionProgressService
-                .createCamelRouteConfiguration(progress);
-        ImportConfiguration importConfig = ImportConfiguration
-                .createForCamelRouteConfiguration(camelRouteConfig);
+        CamelRouteConfiguration camelRouteConfig = ingestionProgressService.createCamelRouteConfiguration(progress);
+        ImportConfiguration importConfig = ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfig);
         Path hdfsDir = new Path(progress.getDestination()).getParent();
         if (HdfsUtils.fileExists(yarnConfiguration, progress.getDestination())) {
             HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
@@ -94,11 +90,10 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         log.info("EAI Service ApplicationId: " + eaiAppId);
         FinalApplicationStatus status = waitForStatus(eaiAppId, WORKFLOW_WAIT_TIME_IN_MILLIS,
                 FinalApplicationStatus.SUCCEEDED);
-        if (status == FinalApplicationStatus.SUCCEEDED
-                && waitForFileToBeDownloaded(progress.getDestination())) {
+        if (status == FinalApplicationStatus.SUCCEEDED && waitForFileToBeDownloaded(progress.getDestination())) {
             Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
-            progress = ingestionProgressService.updateProgress(progress).size(size)
-                    .status(ProgressStatus.FINISHED).commit(true);
+            progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
+                    .commit(true);
             if (HdfsUtils.fileExists(yarnConfiguration, downloadFlag.toString())) {
                 try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
                     fs.rename(downloadFlag, successFlag);
@@ -106,8 +101,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             }
             log.info("Ingestion finished. Progress: " + progress.toString());
         } else {
-            progress = ingestionProgressService.updateProgress(progress)
-                    .status(ProgressStatus.FAILED).commit(true);
+            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
             log.error("Ingestion failed. Progress: " + progress.toString());
         }
     }
@@ -133,8 +127,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         long start = System.currentTimeMillis();
 
         done: do {
-            ApplicationReport report = yarnClient
-                    .getApplicationReport(ConverterUtils.toApplicationId(applicationId));
+            ApplicationReport report = yarnClient.getApplicationReport(ConverterUtils.toApplicationId(applicationId));
             status = report.getFinalApplicationStatus();
             if (status == null) {
                 break;

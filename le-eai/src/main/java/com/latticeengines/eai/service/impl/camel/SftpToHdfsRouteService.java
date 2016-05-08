@@ -32,6 +32,7 @@ import com.latticeengines.eai.service.CamelRouteService;
 public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRouteConfiguration> {
 
     private static final String OPEN_SUFFIX = SftpToHdfsRouteConfiguration.OPEN_SUFFIX;
+    private static final String CAMEL_TEMP_FILE_SUFFIX = "inprogress";
     private static final Log log = LogFactory.getLog(SftpToHdfsRouteService.class);
 
     @Autowired
@@ -63,8 +64,8 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
             fsType = FsType.LOCAL;
             log.info("The file system defined in yarnConfiguration is local.");
         } else {
-            throw new IllegalArgumentException("Unknown protocol from fs.defaultFS: "
-                    + yarnConfiguration.get("fs.defaultFS"));
+            throw new IllegalArgumentException(
+                    "Unknown protocol from fs.defaultFS: " + yarnConfiguration.get("fs.defaultFS"));
         }
     }
 
@@ -79,32 +80,39 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
             sftpDir = "/" + sftpDir;
         }
 
-        final String sftpUrl = String.format("sftp://%s:%d%s?noop=true&fileName=%s&username=%s&password=%s",
-                config.getSftpHost(), config.getSftpPort(), sftpDir, config.getFileName(),
-                config.getSftpUserName(), CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
+        final String sftpUrl = String.format(
+                "sftp://%s:%d%s?" //
+                        + "noop=true&" //
+                        + "fileName=%s&" //
+                        + "username=%s&" //
+                        + "password=%s&" //
+                        + "stepwise=false&" //
+                        + "localWorkDirectory=%s",
+                config.getSftpHost(), config.getSftpPort(), sftpDir, config.getFileName(), config.getSftpUserName(),
+                CipherUtils.decrypt(config.getSftpPasswordEncrypted()), getTempDirectory());
 
         switch (fsType) {
-            case LOCAL:
-                final String fileUrl = String.format("file:%s?tempFileName={file:name}.%s",
-                        cleanDirPath(config.getHdfsDir()), OPEN_SUFFIX);
-                log.info("Downloading file to " + fileUrl.substring(0, fileUrl.lastIndexOf("?")));
-                return new RouteBuilder() {
-                    @Override
-                    public void configure() throws Exception {
-                        from(sftpUrl).to(fileUrl);
-                    }
-                };
-            case HDFS:
-            default:
-                final String hdfsUrl = String.format(hdfsHostPort + "%s?openedSuffix=%s",
-                        cleanDirPath(config.getHdfsDir()), OPEN_SUFFIX);
-                log.info("Downloading file to " + hdfsUrl.substring(0, hdfsUrl.lastIndexOf("?")));
-                return new RouteBuilder() {
-                    @Override
-                    public void configure() throws Exception {
-                        from(sftpUrl).to(hdfsUrl);
-                    }
-                };
+        case LOCAL:
+            final String fileUrl = String.format("file:%s?tempFileName={file:name}.%s",
+                    cleanDirPath(config.getHdfsDir()), OPEN_SUFFIX);
+            log.info("Downloading file to " + fileUrl.substring(0, fileUrl.lastIndexOf("?")));
+            return new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from(sftpUrl).to(fileUrl);
+                }
+            };
+        case HDFS:
+        default:
+            final String hdfsUrl = String.format(hdfsHostPort + "%s?openedSuffix=%s", cleanDirPath(config.getHdfsDir()),
+                    OPEN_SUFFIX);
+            log.info("Downloading file to " + hdfsUrl.substring(0, hdfsUrl.lastIndexOf("?")));
+            return new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from(sftpUrl).to(hdfsUrl);
+                }
+            };
         }
     }
 
@@ -114,16 +122,16 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
             SftpToHdfsRouteConfiguration config = (SftpToHdfsRouteConfiguration) camelRouteConfiguration;
             String fullPath = cleanDirPath(config.getHdfsDir()) + config.getFileName();
             switch (fsType) {
-                case LOCAL:
-                    return FileUtils.waitFor(new File(fullPath), 1);
-                case HDFS:
-                default:
-                    if(HdfsUtils.fileExists(yarnConfiguration, fullPath)) {
-                        log.info("Successfully downloaded a file of size " + checkDestFileSize(config) + "  bytes.");
-                        return true;
-                    } else {
-                        return false;
-                    }
+            case LOCAL:
+                return FileUtils.waitFor(new File(fullPath), 1);
+            case HDFS:
+            default:
+                if (HdfsUtils.fileExists(yarnConfiguration, fullPath)) {
+                    log.info("Successfully downloaded a file of size " + checkDestFileSize(config) + "  bytes.");
+                    return true;
+                } else {
+                    return false;
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -143,6 +151,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
                 sourceFileSize.set(checkSourceFileSize(config));
             }
         } catch (Exception e) {
+            log.error("Error in checking source file size: " + e.getMessage(), e);
             sourceFileSize.set(null);
         }
 
@@ -152,12 +161,15 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
             // ignore
         }
 
-        if (sourceFileSize.get() == 0) {
+        if (sourceFileSize.get() == null || sourceFileSize.get() == 0) {
             throw new IllegalStateException("Source file size is zero.");
         }
 
         if (destFileSize.get() != null && sourceFileSize.get() != null) {
-            progress.set(destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue());
+            Double percentage = destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue();
+            // keep only two decimal digit
+            percentage = Math.round(percentage * 100.0) / 100.0;
+            progress.set(percentage);
         }
 
         return progress.get();
@@ -178,34 +190,52 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
     }
 
     private Long checkSourceFileSize(SftpToHdfsRouteConfiguration config) {
+        String path = "";
         try {
             String sftpUserName = config.getSftpUserName();
             String sftpHost = config.getSftpHost();
             Integer sftpPort = config.getSftpPort();
             String sftpPassword = CipherUtils.decrypt(config.getSftpPasswordEncrypted());
             String fileName = config.getFileName();
+            String sftpDir = config.getSftpDir();
+            if (StringUtils.isEmpty(sftpDir)) {
+                sftpDir = "/";
+            }
+            if (!sftpDir.startsWith("/")) {
+                sftpDir = "/" + sftpDir;
+            }
 
             JSch jsch = new JSch();
             Session session = jsch.getSession(sftpUserName, sftpHost, sftpPort);
             session.setConfig("StrictHostKeyChecking", "no");
+            session.setConfig("stepwise", Boolean.FALSE.toString());
             session.setPassword(sftpPassword);
             session.connect();
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
+            path = sftpChannel.pwd() + sftpDir + "/" + fileName;
 
-            SftpATTRS attrs = sftpChannel.stat(sftpChannel.pwd() + "/" + fileName);
+            SftpATTRS attrs = sftpChannel.stat(path);
             Long fileSize = attrs.getSize();
 
             sftpChannel.exit();
             session.disconnect();
             return fileSize;
         } catch (JSchException | SftpException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     private Long checkDestFileSize(SftpToHdfsRouteConfiguration config) {
+        try {
+            return doLocalFileBasedCheck(config);
+        } catch (Exception ex) {
+            return doHdfsBasedCheck(config);
+        }
+    }
+
+    private Long doHdfsBasedCheck(SftpToHdfsRouteConfiguration config) {
         try {
             String fileName = config.getFileName() + "." + OPEN_SUFFIX;
             String hdfsDir = cleanDirPath(config.getHdfsDir());
@@ -219,6 +249,21 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Long doLocalFileBasedCheck(SftpToHdfsRouteConfiguration config) {
+        String fileName = config.getFileName() + "." + CAMEL_TEMP_FILE_SUFFIX;
+        String localTempDir = getTempDirectory();
+        File tempFile = new File(localTempDir + File.separator + fileName);
+        if (tempFile.exists()) {
+            return tempFile.length();
+        } else {
+            throw new RuntimeException("Could not find local temp file: " + fileName);
+        }
+    }
+
+    private String getTempDirectory() {
+        return System.getProperty("java.io.tmpdir");
     }
 
 }
