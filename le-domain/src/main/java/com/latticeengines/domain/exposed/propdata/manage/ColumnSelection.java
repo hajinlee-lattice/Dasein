@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,8 @@ public class ColumnSelection {
         public String getJsonFileName(String version) {
             return getName() + "_" + version + ".json";
         }
+
+        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns);
 
     }
 

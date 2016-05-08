@@ -1,13 +1,8 @@
 package com.latticeengines.propdata.match.metric;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import com.latticeengines.common.exposed.metric.Measurement;
-import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
-import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;

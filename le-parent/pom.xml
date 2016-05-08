@@ -32,8 +32,9 @@
         <jetty.version>9.1.1.v20140108</jetty.version>
         <spring.version>4.0.0.RELEASE</spring.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <hsqldb.version>2.3.2</hsqldb.version>
-        <aspectj.version>1.8.2</aspectj.version>
+        <h2.version>1.4.191</h2.version>
+        <c3p0.version>0.9.5.2</c3p0.version>
+        <aspectj.version>1.8.7</aspectj.version>
         <reflections.version>0.9.9</reflections.version>
 
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>

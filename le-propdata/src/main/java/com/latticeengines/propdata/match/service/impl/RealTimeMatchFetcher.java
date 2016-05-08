@@ -109,7 +109,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         Long startTime = System.currentTimeMillis();
         do {
             try {
-                Thread.sleep(200L);
+                Thread.sleep(100L);
             } catch (Exception e) {
                 log.error("Interrupted when waiting for fetch result. RootOperationUID=" + rootUid, e);
             }
@@ -131,7 +131,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                     fetcherActivity.put(name, System.currentTimeMillis());
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
-                        int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 1));
+                        int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
                         int inGroup = 0;
 
                         while (inGroup < thisGroupSize && !queue.isEmpty()) {
@@ -139,7 +139,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                                 MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
                                     matchContextList.add(matchContext);
-                                    inGroup++;
+                                    inGroup += matchContext.getInput().getData().size();
                                 }
                             } catch (InterruptedException e) {
                                 // skip

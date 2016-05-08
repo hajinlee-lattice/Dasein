@@ -124,7 +124,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
 
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
-        return new Object[][] { { 1, 1, 1 }, { 1, 10, 1 }, { 4, 10, 1.5 }, { 32, 10, 2.0 }, { 128, 10, 3.0 } };
+        return new Object[][] { { 1, 1, 1 }, { 1, 10, 1 }, { 4, 10, 1.5 }, { 32, 10, 2.0 }, { 64, 10, 2.0 }, { 128, 10, 3.0 }, { 256, 10, 3.0 } };
     }
 
     private void warmUp() {

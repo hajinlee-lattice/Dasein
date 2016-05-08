@@ -12,9 +12,13 @@ public class StatusDocument {
     public static final String ONLINE = "online";
     public static final String DOWN = "DOWN";
     public static final String UP = "UP";
+    public static final String OK = "OK";
 
     private String status;
-    private String error;
+
+    public StatusDocument(String status) {
+        this.status = status;
+    }
 
     @JsonProperty("status")
     public String getStatus() {
@@ -26,22 +30,20 @@ public class StatusDocument {
         this.status = status;
     }
 
+    public static StatusDocument ok() {
+        return new StatusDocument(OK);
+    }
+
     public static StatusDocument online() {
-        StatusDocument doc = new StatusDocument();
-        doc.setStatus(ONLINE);
-        return doc;
+        return new StatusDocument(ONLINE);
     }
 
     public static StatusDocument up() {
-        StatusDocument doc = new StatusDocument();
-        doc.setStatus(UP);
-        return doc;
+        return new StatusDocument(UP);
     }
 
     public static StatusDocument down() {
-        StatusDocument doc = new StatusDocument();
-        doc.setStatus(DOWN);
-        return doc;
+        return new StatusDocument(DOWN);
     }
 
     @Override

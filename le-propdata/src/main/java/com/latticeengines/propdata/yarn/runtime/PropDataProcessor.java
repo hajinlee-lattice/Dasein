@@ -316,7 +316,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             String matchOutputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
             generateOutputFiles();
             matchCommandService.update(rootOperationUid).progress(1f).status(MatchStatus.FINISHED)
-                    .resultLocation(matchOutputDir).commit();
+                    .resultLocation(matchOutputDir).rowsMatched(count.intValue()).commit();
         } else {
             setProgress(1f);
         }

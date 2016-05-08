@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.aspect;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -30,43 +31,35 @@ public class MatchStepAspect {
 
     private Object logMatchStepMetrics(ProceedingJoinPoint joinPoint) throws Throwable {
         Long startTime = System.currentTimeMillis();
+        String signature = joinPoint.getSignature().toShortString();
+        if (log.isDebugEnabled()) {
+            log.debug("Entering " + signature);
+        }
 
         Object retVal = joinPoint.proceed();
-
         Long elapsedTime = System.currentTimeMillis() - startTime;
-
-        Object[] allObjs = combineArgsAndReturn(joinPoint.getArgs(), retVal);
-
-        String logMsg = String.format("MatchStep=%s TimeElapsedMills=%d", joinPoint.getSignature().toShortString(),
-                elapsedTime);
-
-        String tenantId = getTenantId(allObjs);
-        if (tenantId != null) {
-            logMsg += " TenantId=" + tenantId;
-        }
-
-        Integer rows = getRequestedRows(allObjs);
-        if (rows != null) {
-            logMsg += " RowsRequested=" + rows;
-        }
-
-        MatchContext.MatchEngine matchEngine = getMatchEngine(allObjs);
-        if (matchEngine != null) {
-            logMsg += " MatchEngine=" + matchEngine.getName();
-        }
+        String logMsg = String.format("MatchStep=%s TimeElapsedMs=%d", signature, elapsedTime);
 
         String trackId = tracker.get();
+        Object[] allObjs = combineArgsAndReturn(joinPoint.getArgs(), retVal);
         String uid = getRootOperationUID(allObjs);
-        if (uid != null && !uid.equals(tenantId)) {
+        if (uid != null && uid != trackId) {
             trackId = uid;
         }
+
         if (trackId != null) {
             logMsg += " RootOperationUID=" + trackId;
             tracker.set(trackId);
         }
+        log.info(logMsg);
 
-        log.debug(logMsg);
-
+        if (log.isDebugEnabled()) {
+            logMsg = String.format("MatchStep=%s TimeElapsedMs2=%d", signature, System.currentTimeMillis() - startTime);
+            if (trackId != null) {
+                logMsg += " RootOperationUID=" + trackId;
+            }
+            log.debug(logMsg);
+        }
         return retVal;
     }
 
@@ -84,64 +77,17 @@ public class MatchStepAspect {
             if (arg instanceof MatchContext) {
                 MatchContext matchContext = (MatchContext) arg;
                 return matchContext.getOutput().getRootOperationUID();
-            }
-        }
-        return null;
-    }
-
-    private MatchContext.MatchEngine getMatchEngine(Object[] args) {
-        for (Object arg : args) {
-            if (arg instanceof MatchContext) {
-                MatchContext matchContext = (MatchContext) arg;
-                return matchContext.getMatchEngine();
-            }
-        }
-        return null;
-    }
-
-    private Integer getRequestedRows(Object[] args) {
-        try {
-            for (Object arg : args) {
-                if (arg instanceof MatchContext) {
-                    MatchContext matchContext = (MatchContext) arg;
-                    if (matchContext.getOutput() != null && matchContext.getOutput().getStatistics() != null) {
-                        return matchContext.getOutput().getStatistics().getRowsRequested();
-                    }
-                } else if (arg instanceof MatchInput) {
-                    MatchInput matchInput = (MatchInput) arg;
-                    if (matchInput.getData() != null) {
-                        return matchInput.getData().size();
-                    } else if (matchInput.getNumRows() != null){
-                        return matchInput.getNumRows();
-                    }
-                } else if (arg instanceof MatchOutput) {
-                    MatchOutput matchOutput = (MatchOutput) arg;
-                    if (matchOutput.getStatistics() != null) {
-                        return matchOutput.getStatistics().getRowsRequested();
-                    }
+            } else if (arg instanceof MatchOutput) {
+                MatchOutput output = (MatchOutput) arg;
+                if (StringUtils.isNotEmpty(output.getRootOperationUID())) {
+                    return output.getRootOperationUID();
+                }
+            } else if (arg instanceof MatchInput) {
+                MatchInput input = (MatchInput) arg;
+                if (input.getUuid() != null) {
+                    return input.getUuid().toString().toUpperCase();
                 }
             }
-        } catch (Exception e) {
-            log.warn("Failed to parse number of input from arguments", e);
-        }
-        return null;
-    }
-
-    private String getTenantId(Object[] args) {
-        try {
-            for (Object arg : args) {
-                if (arg instanceof MatchInput) {
-                    MatchInput matchInput = (MatchInput) arg;
-                    return matchInput.getTenant().getId();
-                } else if (arg instanceof MatchContext) {
-                    MatchContext matchContext = (MatchContext) arg;
-                    if (matchContext.getOutput() != null ) {
-                        return matchContext.getOutput().getSubmittedBy().getId();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to parse TenantId from arguments", e);
         }
         return null;
     }

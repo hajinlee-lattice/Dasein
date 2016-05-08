@@ -141,6 +141,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         jobConfiguration.setAvroPath(inputAvro);
         jobConfiguration.setAppName(String.format("PropDataMatch[%s]~" + customerSpace.toString(), uuid));
         jobConfiguration.setSingleBlock(true);
+        jobConfiguration.setYarnQueue(input.getYarnQueue());
 
         copyInputData(input, uuid);
 

@@ -8,4 +8,10 @@
 
     <task:scheduler id="monitorScheduler" pool-size="4"/>
 
+    <task:executor id="monitorExecutor"
+                   pool-size="8-16"
+                   queue-capacity="1000"
+                   keep-alive="1"
+                   rejection-policy="CALLER_RUNS" />
+
 </beans>

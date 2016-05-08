@@ -20,7 +20,6 @@ import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
@@ -107,7 +106,7 @@ public class SqoopJobServiceImpl {
         cmds.add("export");
         if (exporter.getHadoopArgs() != null) {
             for (String option : exporter.getHadoopArgs()) {
-                cmds.add(option);
+                cmds.add(overwriteQueueInHadoopOpt(option));
             }
         }
         cmds.add("--connect");
@@ -193,7 +192,7 @@ public class SqoopJobServiceImpl {
         cmds.add("import");
         if (importer.getHadoopArgs() != null) {
             for (String option : importer.getHadoopArgs()) {
-                cmds.add(option);
+                cmds.add(overwriteQueueInHadoopOpt(option));
             }
         }
         cmds.add("--connect");
@@ -487,5 +486,15 @@ public class SqoopJobServiceImpl {
         }
 
         return translatedQueue;
+    }
+
+    protected String overwriteQueueInHadoopOpt(String hadoopOpt) {
+        String[] tokens = hadoopOpt.split("=");
+        if (tokens[0].contains("mapreduce.job.queuename")) {
+            String queue = overwriteQueue(tokens[1]);
+            return "-Dmapreduce.job.queuename=" + queue;
+        } else {
+            return hadoopOpt;
+        }
     }
 }

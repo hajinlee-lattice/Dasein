@@ -3,8 +3,6 @@ package com.latticeengines.monitor.metric.service.impl;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
@@ -12,7 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -29,13 +29,16 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
     private static final Log log = LogFactory.getLog(SplunkLogMetricWriter.class);
     private boolean enabled = true;
-    private static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Autowired
     private VersionManager versionManager;
 
     @Value("${monitor.influxdb.environment:Local}")
     private String environment;
+
+    @Autowired
+    @Qualifier("monitorExecutor")
+    private ThreadPoolTaskExecutor monitorExecutor;
 
     private String logPrefix;
 
@@ -53,7 +56,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            executor.submit(new MetricRunnable<>(db, measurements));
+            monitorExecutor.submit(new MetricRunnable<>(db, measurements));
         }
     }
 
@@ -79,7 +82,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
         public void run() {
             for (Measurement<F, D> measurement : measurements) {
                 if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                    log.debug(logPrefix + "MetricDB=\"" + metricDb + "\" " + MetricUtils.toLogMessage(measurement));
+                    log.info(logPrefix + "MetricDB=\"" + metricDb + "\" " + MetricUtils.toLogMessage(measurement));
                 }
             }
         }

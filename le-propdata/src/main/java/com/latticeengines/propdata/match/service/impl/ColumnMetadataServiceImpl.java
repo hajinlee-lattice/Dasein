@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -25,18 +34,55 @@ import com.latticeengines.propdata.match.service.ExternalColumnService;
 @Component
 public class ColumnMetadataServiceImpl implements ColumnMetadataService {
 
+    private static final Log log = LogFactory.getLog(ColumnMetadataServiceImpl.class);
+
     @Autowired
     private SourceService sourceService;
 
     @Autowired
     private ExternalColumnService externalColumnService;
 
-    public List<ColumnMetadata> fromPredefinedSelection (ColumnSelection.Predefined selectionName) {
+    private ConcurrentMap<ColumnSelection.Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
+
+    @Autowired
+    @Qualifier("matchScheduler")
+    private ThreadPoolTaskScheduler matchScheduler;
+
+    @PostConstruct
+    private void postConstruct() {
+        loadCache();
+        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                loadCache();
+            }
+        }, TimeUnit.MINUTES.toMillis(1));
+    }
+
+    @Override
+    public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined) {
+        try {
+            if (ColumnSelection.Predefined.Model.equals(predefined)
+                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+                return predefinedMetaDataCache.get(predefined);
+            } else {
+                throw new UnsupportedOperationException("Only support selection " + ColumnSelection.Predefined.Model
+                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+            }
+        } catch (Exception e) {
+            log.warn("Failed to find metadata for selection " + predefined + " in cache");
+            List<ColumnMetadata> metadatas = fromExternalColumnService(predefined);
+            predefinedMetaDataCache.put(predefined, metadatas);
+            return metadatas;
+        }
+    }
+
+    private List<ColumnMetadata> fromExternalColumnService(ColumnSelection.Predefined selectionName) {
         List<ExternalColumn> externalColumns = externalColumnService.columnSelection(selectionName);
         return toColumnMetadata(externalColumns);
     }
 
-    public List<ColumnMetadata> toColumnMetadata(List<ExternalColumn> externalColumns) {
+    private List<ColumnMetadata> toColumnMetadata(List<ExternalColumn> externalColumns) {
         List<ColumnMetadata> columnMetadataList = new ArrayList<>();
         for (ExternalColumn externalColumn : externalColumns) {
             try {
@@ -56,8 +102,9 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
                 }
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to extract metadata from ExternalColumn ["
-                        + externalColumn.getExternalColumnID() + "]", e);
+                throw new RuntimeException(
+                        "Failed to extract metadata from ExternalColumn [" + externalColumn.getExternalColumnID() + "]",
+                        e);
             }
         }
         return columnMetadataList;
@@ -72,7 +119,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(recordName);
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
-        for (ColumnMetadata columnMetadata: columnMetadatas) {
+        for (ColumnMetadata columnMetadata : columnMetadatas) {
             String fieldName = columnMetadata.getColumnName();
             fieldBuilder = fieldAssembler.name(StringUtils.strip(fieldName));
             fieldBuilder = fieldBuilder.prop("Tags", "External");
@@ -102,8 +149,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         return fieldAssembler.endRecord();
     }
 
-
-    public static Schema.Type getAvroTypeFromSqlServerDataType(String dataType) {
+    private static Schema.Type getAvroTypeFromSqlServerDataType(String dataType) {
         if (StringUtils.isEmpty(dataType)) {
             return null;
         }
@@ -146,6 +192,16 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
 
         throw new RuntimeException("Unknown avro type for sql server data type " + dataType);
 
+    }
+
+    private void loadCache() {
+        for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.supportedSelections) {
+            try {
+                predefinedMetaDataCache.put(selection, fromExternalColumnService(selection));
+            } catch (Exception e) {
+                log.error(e);
+            }
+        }
     }
 
 }

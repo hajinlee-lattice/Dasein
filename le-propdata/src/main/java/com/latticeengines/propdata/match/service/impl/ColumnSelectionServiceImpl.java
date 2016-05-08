@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -12,11 +13,10 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
@@ -31,23 +31,22 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Autowired
     private ExternalColumnService externalColumnService;
 
-    private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> sourceColumnMapCache;
-    private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache;
+    private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> sourceColumnMapCache = new ConcurrentHashMap<>();
+    private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache = new ConcurrentHashMap<>();
+
+    @Autowired
+    @Qualifier("matchScheduler")
+    private ThreadPoolTaskScheduler matchScheduler;
 
     @PostConstruct
     private void postConstruct() {
-        buildSourceColumnMapCache();
-        buildColumnPriorityMapCache();
-
-        // warm up the caches
-        try {
-            getSourceColumnMap(ColumnSelection.Predefined.Model);
-            getColumnPriorityMap(ColumnSelection.Predefined.Model);
-            getSourceColumnMap(ColumnSelection.Predefined.DerivedColumns);
-            getColumnPriorityMap(ColumnSelection.Predefined.DerivedColumns);
-        } catch (Exception e) {
-            log.error("Failed to preload caches using LDC_ManageDB", e);
-        }
+        loadCaches();
+        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                loadCaches();
+            }
+        }, TimeUnit.MINUTES.toMillis(1));
     }
 
     @Override
@@ -63,34 +62,36 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined) {
         try {
-            if (ColumnSelection.Predefined.Model.equals(predefined) ||
-                    ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+            if (ColumnSelection.Predefined.Model.equals(predefined)
+                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
                 return sourceColumnMapCache.get(predefined);
             } else {
-                throw new UnsupportedOperationException(
-                        "Only support selection " + ColumnSelection.Predefined.Model
-                                + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+                throw new UnsupportedOperationException("Only support selection " + ColumnSelection.Predefined.Model
+                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
             }
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             log.warn("Failed to find sourceColumnMap for selection " + predefined + " in cache");
-            return getSourceColumnMapForSelection(predefined);
+            Map<String, List<String>> value = getSourceColumnMapForSelection(predefined);
+            sourceColumnMapCache.put(predefined, value);
+            return value;
         }
     }
 
     @Override
     public Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined) {
         try {
-            if (ColumnSelection.Predefined.Model.equals(predefined) ||
-                    ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+            if (ColumnSelection.Predefined.Model.equals(predefined)
+                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
                 return columnPriorityMapCache.get(predefined);
             } else {
-                throw new UnsupportedOperationException(
-                        "Only support selections " + ColumnSelection.Predefined.Model
-                                + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+                throw new UnsupportedOperationException("Only support selections " + ColumnSelection.Predefined.Model
+                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
             }
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             log.warn("Failed to find columnPriorityMap for selection " + predefined + " in cache");
-            return getColumnPriorityMapForSelection(predefined);
+            Map<String, List<String>> value = getColumnPriorityMapForSelection(predefined);
+            columnPriorityMapCache.put(predefined, value);
+            return value;
         }
     }
 
@@ -117,34 +118,19 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         return map;
     }
 
-    private void buildSourceColumnMapCache() {
-        sourceColumnMapCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<ColumnSelection.Predefined, Map<String, List<String>>>() {
-                    public Map<String, List<String>> load(ColumnSelection.Predefined key) {
-                        if (ColumnSelection.Predefined.Model.equals(key) ||
-                                ColumnSelection.Predefined.DerivedColumns.equals(key)) {
-                            return getSourceColumnMapForSelection(key);
-                        } else {
-                            return new HashMap<>();
-                        }
-                    }
-                });
-    }
-
-    private void buildColumnPriorityMapCache() {
-        columnPriorityMapCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<ColumnSelection.Predefined, Map<String, List<String>>>() {
-                    public Map<String, List<String>> load(ColumnSelection.Predefined key) {
-                        if (ColumnSelection.Predefined.Model.equals(key) ||
-                                ColumnSelection.Predefined.DerivedColumns.equals(key)) {
-                            return getColumnPriorityMapForSelection(key);
-                        } else {
-                            return new HashMap<>();
-                        }
-                    }
-                });
+    private void loadCaches() {
+        for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.supportedSelections) {
+            try {
+                sourceColumnMapCache.put(selection, getSourceColumnMapForSelection(selection));
+            } catch (Exception e) {
+                log.error(e);
+            }
+            try {
+                columnPriorityMapCache.put(selection, getColumnPriorityMapForSelection(selection));
+            } catch (Exception e) {
+                log.error(e);
+            }
+        }
     }
 
 }

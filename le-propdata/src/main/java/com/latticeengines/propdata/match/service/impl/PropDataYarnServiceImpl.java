@@ -62,14 +62,15 @@ public class PropDataYarnServiceImpl implements PropDataYarnService {
         propDataJob.setClient("propdataClient");
         propDataJob.setCustomer(customer);
 
-        String queue = jobConfiguration.getYarnQueue();
-        if (StringUtils.isEmpty(queue)) {
-            queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        String queueName = jobConfiguration.getYarnQueue();
+        if (StringUtils.isEmpty(queueName)) {
+            queueName = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         }
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), queue);
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), queueName);
+
         if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
             appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
         }

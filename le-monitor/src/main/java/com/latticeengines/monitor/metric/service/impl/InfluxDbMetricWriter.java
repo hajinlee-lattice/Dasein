@@ -21,8 +21,9 @@ import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -72,6 +73,10 @@ public class InfluxDbMetricWriter implements MetricWriter {
     @Value("${monitor.influxdb.log.level:NONE}")
     private InfluxDB.LogLevel logLevel;
 
+    @Autowired
+    @Qualifier("monitorExecutor")
+    private ThreadPoolTaskExecutor monitorExecutor;
+
     private Boolean enabled = false;
     private Boolean forceDisabled = false;
     private static String hostname;
@@ -117,7 +122,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            writeAsync(db, measurements);
+            monitorExecutor.execute(new MetricRunnable<>(db, measurements));
         } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
             postConstruct();
         }
@@ -196,22 +201,33 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 });
     }
 
-    @Async("monitorExecutor")
-    private <F extends Fact, D extends Dimension> void writeAsync(MetricDB metricDb,
-                                                                  Collection<? extends Measurement<F, D>> measurements) {
-        boolean needToWrite = false;
-        for (Measurement<F, D> measurement : measurements) {
-            if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
-                needToWrite = true;
-                break;
-            }
+    private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
+
+        private MetricDB metricDb;
+        private Collection<? extends Measurement<F, D>> measurements;
+
+        MetricRunnable(MetricDB metricDb, Collection<? extends Measurement<F, D>> measurements) {
+            this.metricDb = metricDb;
+            this.measurements = measurements;
         }
-        if (needToWrite) {
-            try {
-                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-                getInfluxDB().write(batchPoints);
-            } catch (Exception e) {
-                log.error(e);
+
+        @Override
+        public void run() {
+            boolean needToWrite = false;
+            for (Measurement<F, D> measurement : measurements) {
+                if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
+                    needToWrite = true;
+                    break;
+                }
+            }
+            if (needToWrite) {
+                try {
+                    BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
+                    getInfluxDB().write(batchPoints);
+                    log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
+                } catch (Exception e) {
+                    log.error(e);
+                }
             }
         }
     }

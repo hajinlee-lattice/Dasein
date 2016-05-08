@@ -83,6 +83,10 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Empty list of fields.");
         }
 
+        return resolveKeyMap(input);
+    }
+
+    private static Map<MatchKey, List<String>> resolveKeyMap(MatchInput input) {
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
         if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
             for (Map.Entry<MatchKey, List<String>> entry: input.getKeyMap().entrySet()) {
@@ -109,8 +113,7 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Must specify predefined or custom column selection.");
         }
 
-        if (!ColumnSelection.Predefined.Model.equals(input.getPredefinedSelection()) &&
-                !ColumnSelection.Predefined.DerivedColumns.equals(input.getPredefinedSelection())) {
+        if (!ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
             throw new UnsupportedOperationException(
                     "Only Predefined selection " + ColumnSelection.Predefined.Model
                             + " and " + ColumnSelection.Predefined.DerivedColumns + " are supported at this time.");

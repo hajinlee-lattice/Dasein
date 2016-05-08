@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
@@ -119,6 +120,7 @@ public class MatchContext implements Fact, Dimension {
         this.matchEngine = matchEngine;
     }
 
+    @JsonIgnore
     @MetricTag(tag = "MatchEngine")
     public String getMatchEngineAsString() {
         return matchEngine.getName();

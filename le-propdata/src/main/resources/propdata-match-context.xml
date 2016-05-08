@@ -15,6 +15,7 @@
     <import resource="classpath:dataflow-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
+    <import resource="classpath:propdata-match-embedded-context.xml" />
 
     <bean id="externalColumnDao" class="com.latticeengines.propdata.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
@@ -24,6 +25,12 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
-    <task:scheduler id="matchScheduler" pool-size="1" />
+    <task:scheduler id="matchScheduler" pool-size="4" />
+
+    <task:executor id="matchExecutor"
+                   pool-size="8-32"
+                   queue-capacity="1000"
+                   keep-alive="1"
+                   rejection-policy="CALLER_RUNS" />
 
 </beans>

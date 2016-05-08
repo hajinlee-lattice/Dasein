@@ -45,7 +45,7 @@ public class MatchInput implements Fact, Dimension {
     private String matchEngine;
     private Integer numSelectedColumns;
 
-    // only applicable to bulk match
+    // only applicable for bulk match
     private String yarnQueue;
 
     private UUID uuid;

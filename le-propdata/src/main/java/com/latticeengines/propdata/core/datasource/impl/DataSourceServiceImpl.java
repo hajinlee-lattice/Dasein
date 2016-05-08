@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.core.datasource.impl;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +20,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     private Log log = LogFactory.getLog(this.getClass());
 
-    private static int roundRobinPos = 0;
+    private final AtomicInteger roundRobinPos = new AtomicInteger(0);
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
@@ -27,8 +28,11 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public JdbcTemplate getJdbcTemplateFromDbPool(DataSourcePool pool) {
         List<DataSourceConnection> connectionList = zkConfigurationService.getConnectionsInPool(pool);
-        DataSourceConnection connection = connectionList.get(roundRobinPos);
-        roundRobinPos = (roundRobinPos + 1) % connectionList.size();
+        synchronized (roundRobinPos) {
+            Integer nextPos = (roundRobinPos.get() + 1) % connectionList.size();
+            roundRobinPos.set(nextPos);
+        }
+        DataSourceConnection connection = connectionList.get(roundRobinPos.get());
         return DataSourceUtils.getJdbcTemplate(connection);
     }
 

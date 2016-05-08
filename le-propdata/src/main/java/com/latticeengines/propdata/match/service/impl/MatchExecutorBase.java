@@ -279,7 +279,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         throw new RuntimeException("Cannot find the requested metadata.");
     }
 
-     @MatchStep
      protected void generateAccountMetric(MatchContext matchContext) {
          // no need to push this metric to influxdb now.
          // will figure out another way to dump match history.
@@ -299,7 +298,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 accountMeasurements.add(measurement);
             }
 
-            metricService.write(MetricDB.LDC_Match, accountMeasurements);
+            // influxdb cannot host history of this, so it is not useful to dump this to infuxdb.
+            // metricService.write(MetricDB.LDC_Match, accountMeasurements);
         } catch (Exception e) {
             log.warn("Failed to extract account based metric.", e);
         }
