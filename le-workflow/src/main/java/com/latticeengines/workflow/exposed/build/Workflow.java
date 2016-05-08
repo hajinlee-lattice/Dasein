@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.latticeengines.workflow.listener.LEJobListener;
-import org.springframework.batch.core.JobExecutionListener;
 
 public class Workflow {
 
