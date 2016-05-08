@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -151,7 +152,7 @@ public class EmbeddedDbServiceImpl implements EmbeddedDbService {
         }
     }
 
-    private void loadInternal(Integer numRows) throws Exception {
+    private void loadInternal(Integer numRows) {
 
         truncateMatchKeyCache();
 
@@ -176,31 +177,43 @@ public class EmbeddedDbServiceImpl implements EmbeddedDbService {
         List<Future<String>> futures = new ArrayList<>();
         while (startId < MAX_ID.get() && COUNT.get() < numRows && LOADING.equals(STATUS.get())) {
             if (futures.size() >= numThreads) {
-                for (Future<String> future : futures) {
-                    String sql = future.get();
-                    if (StringUtils.isNotEmpty(sql)) {
-                        jdbcTemplate.execute(sql);
-                        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MATCH_KEY_CACHE,
-                                Integer.class);
-                        log.info("Loaded " + count + " rows.");
-                        COUNT.set(count);
-                        if (count >= CAPACITY.get() || !LOADING.equals(STATUS.get())) {
-                            break;
-                        }
-                    }
-                }
+                unloadFutures(futures);
                 futures = new ArrayList<>();
-            } else {
-                endId = startId + chunckSize - 1;
-                JdbcTemplate jdbc = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-                Future<String> future = executor.submit(new QueryingCallable(jdbc, startId, endId));
-                futures.add(future);
-                startId = endId + 1;
             }
+            endId = startId + chunckSize - 1;
+            JdbcTemplate jdbc = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
+            Future<String> future = executor.submit(new QueryingCallable(jdbc, startId, endId));
+            futures.add(future);
+            startId = endId + 1;
         }
+
+        if (!futures.isEmpty()) {
+            unloadFutures(futures);
+        }
+
         log.info("Finished. Loaded " + COUNT.get() + " out of " + CAPACITY.get() + " rows in total. Current Status is LOADING = "
                 + LOADING.equals(STATUS.get()));
         executor.shutdown();
+    }
+
+    private void unloadFutures (List<Future<String>> futures) {
+        for (Future<String> future : futures) {
+            try {
+                String sql = future.get();
+                if (StringUtils.isNotEmpty(sql)) {
+                    jdbcTemplate.execute(sql);
+                    Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MATCH_KEY_CACHE,
+                            Integer.class);
+                    log.info("Loaded " + count + " rows.");
+                    COUNT.set(count);
+                    if (count >= CAPACITY.get() || !LOADING.equals(STATUS.get())) {
+                        break;
+                    }
+                }
+            } catch (InterruptedException|ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private class QueryingCallable implements Callable<String> {
