@@ -15,6 +15,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
             initValues();
 
             var displayOrder = ["Email", "CompanyName", "State", "Country", "Website", "FirstName", "LastName"];
+            var oldFieldsValuesHash = {};
 
             $scope.modelChanged = function ($event) {
                 if ($event != null) {
@@ -25,8 +26,9 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     initValues();
                 } else {
                     $scope.fieldsLoading = true;
-                    $scope.fields = [];
                     $scope.showFieldsLoadingError = false;
+                    storeOldFieldsValues();
+                    $scope.fields = [];
                     // Note: Consider access token will be available in 24 hours, we store it in storage.
                     // If user login one account in different browsers, the saved access token in prior browser will invalid.
                     var token = BrowserStorageUtility.getOAuthAccessToken();
@@ -44,6 +46,15 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     }
                 }
             };
+
+            function storeOldFieldsValues() {
+                oldFieldsValuesHash = {};
+                for (var i = 0; i < $scope.fields.length; i++) {
+                    if ($scope.fields[i] != null && $scope.fields[i].value != null) {
+                        oldFieldsValuesHash[$scope.fields[i].name] = $scope.fields[i].value;
+                    }
+                }
+            }
 
             function initValues() {
                 $scope.showFields = false;
@@ -73,6 +84,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                             if (fields[j].name != 'FirstName' && fields[j].name != 'LastName') {
                                 fields[j].mandatory = true;
                             }
+                            fields[j].value = oldFieldsValuesHash[fields[j].name];
                             $scope.fields.push(fields[j]);
                             fields.splice(j, 1);
                         }
@@ -80,6 +92,9 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 }
 
                 fields = _.sortBy(fields, 'name');
+                for (var i = 0; i < fields.length; i++) {
+                    fields[i].value = oldFieldsValuesHash[fields[i].name];
+                }
                 $scope.fields = $scope.fields.concat(fields);
             }
 
@@ -192,11 +207,17 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 APIConsoleService.GetScoreRecord(token, scoreRequest).then(function (result) {
                     var end = new Date();
                     $scope.timeElapsed = (end.getTime() - start.getTime()) + ' MS';
+                    /**
                     if (result.ResultObj != null) {
                         $scope.jsonData = JSON.stringify(result.ResultObj, null, "    ");
                     }
+                    */
                     if (result.Success) {
                         $scope.score = result.ResultObj.score;
+                        $scope.warnings = result.ResultObj.warnings;
+                        $scope.scoreId = result.ResultObj.scoreId;
+                        $scope.scoreTimestamp = result.ResultObj.timestamp;
+
                         $scope.scoringRequestError = null;
                         deferred.resolve(scoringResult);
                     } else {
@@ -207,6 +228,10 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 });
 
                 return deferred.promise;
+            }
+
+            function stringDivider(str, width, spaceReplacer) {
+
             }
         }]
     };

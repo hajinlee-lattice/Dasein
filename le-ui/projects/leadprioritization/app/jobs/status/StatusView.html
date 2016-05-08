@@ -1,6 +1,6 @@
 <div data-ng-controller="JobsCtrl" class="container">
     <div data-ng-if="succeeded" class="job-success-message">
-        <div>Success! Modeling job has completed.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
+        <div>{{successMsg}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
         <span>Analytics are now available.</span>
     </div>
     <div data-ng-if="!hideCreationMessage && jobCreationSuccess" class="job-success-message">

@@ -13,7 +13,7 @@ angular
                 redirectTo: 'jobs.status'
             })
             .state('home.model.jobs', {
-                url: '/jobs',
+                url: '/jobs/:{jobCreationSuccess}',
                 views: {
                     "summary@": {
                         resolve: {

@@ -453,6 +453,11 @@ angular.module('pd.jobs', [
 
     $scope.$on("JobCompleted", function() {
         $scope.succeeded = true;
+        if ($scope.state == 'model') {
+            $scope.successMsg = 'Success! Scoring job has completed.';
+        } else {
+            $scope.successMsg = 'Success! Modeling job has completed.';
+        }
     });
 
     $scope.$on("$destroy", function() {

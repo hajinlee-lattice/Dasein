@@ -38,6 +38,10 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
     model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
     model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
+
+    // UI BAND-AID for DP-2854 here
+    combineInternalAndExternalAttributesDups(model.InternalAttributes.categories, model.ExternalAttributes.categories);
+
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
     var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
     model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
@@ -59,7 +63,23 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 
 
     $compile($('#ModelDetailsArea').html('<div data-model-details-widget></div>'))($scope);
-    
+
+    /**
+    ATTENTION: this function is due to we have issues where certain predictor categories show up on both left and right side
+    of the donut chart on the model details page. This is caused by the 'Tag' attribute is set to internal where it should
+    be external (DP-2854). This is an UI BAND-AID until the back end change is in page.
+    */
+    function combineInternalAndExternalAttributesDups(internalAttr, externalAttr) {
+        for (var j = 0; j < externalAttr.length; j++) {
+            for (var i = 0; i < internalAttr.length; i++) {
+                if (externalAttr[j].name == internalAttr[i].name) {
+                    externalAttr[j].count += internalAttr[i].count;
+                    internalAttr.splice(i, 1);
+                }
+            }
+        }
+    }
+
     function filterHighScoresInBottomLeads(bottomLeads) {
         if (bottomLeads === null) {
             return bottomLeads;

@@ -97,13 +97,13 @@
     .local-error i {
         margin-right: 6px;
     }
-    .resonse-json {
+    .response-json {
         margin: 16px 0;
         border: 1px solid #CCC;
         padding: 8px 16px;
     }
-    .resonse-json pre {
-        overflow: auto;
+    .response-json div {
         max-height: 600px;
+        word-wrap: break-word;
     }
 }

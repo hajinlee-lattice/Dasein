@@ -22,8 +22,23 @@
                 </div>
             </label>
         </div>
-        <div data-ng-show="jsonData != null" class="resonse-json">
-            <pre>{{jsonData}}</pre>
+        <div ng-if="score != null" class="response-json">
+            <div>
+                <span style="font-weight: bold">Score:</span>
+                <span>{{score}}</span>
+            </div>
+            <div ng-if="warnings != null">
+                <span style="font-weight: bold">Warnings:</span>
+                <span>{{warnings}}</span>
+            </div>
+            <div ng-if="scoreId != null">
+                <span style="font-weight: bold">Score Id:</span>
+                <span>{{scoreId}}</span>
+            </div>
+            <div ng-if="scoreTimestamp != null">
+                <span style="font-weight: bold">Score Timestamp:</span>
+                <span>{{scoreTimestamp}}</span>
+            </div>
         </div>
         <div data-ng-show="timeElapsed != null">
             <label>{{ResourceUtility.getString('API_CONSOLE_LABEL_TIME_ELAPSED')}}</label>&nbsp;<span>{{timeElapsed}}</span>
