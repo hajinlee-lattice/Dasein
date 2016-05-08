@@ -16,6 +16,9 @@ public class StatusDocument {
 
     private String status;
 
+    // for JSON constructor
+    private StatusDocument() {}
+
     public StatusDocument(String status) {
         this.status = status;
     }
