@@ -11,15 +11,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     
     private static final String PATH = "com/latticeengines/pls/service/impl/metadatafileuploadserviceimpl/rfpmml.xml";
     
@@ -28,8 +29,12 @@ public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
         setupMarketoEloquaTestEnvironment();
+    }
+    
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", eloquaTenant.getName()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "uploadFile" })

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -18,10 +19,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 
-public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
     
     @Autowired
     private Configuration yarnConfiguration;
@@ -31,10 +32,13 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant2", contractId));
         setupMarketoEloquaTestEnvironment();
         switchToSuperAdmin();
+    }
+
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", eloquaTenant.getName()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "uploadFile" })
