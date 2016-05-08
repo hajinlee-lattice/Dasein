@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.workflow.listener.LEJobListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -14,7 +13,6 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +24,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;
+import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("updateFailedMatchListener")
 public class UpdateFailedMatchListener extends LEJobListener {
