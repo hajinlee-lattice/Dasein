@@ -14,6 +14,7 @@ import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "embedded db management", description = "REST resource for embedded H2 db")
 @RestController
@@ -25,6 +26,7 @@ public class EmbeddedResource extends InternalResourceBase {
 
     @RequestMapping(value = "/matchkeys", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Check if embedded db is loaded with match keys.")
     public StatusDocument matchKeysAreReady(HttpServletRequest request) {
         checkHeader(request);
@@ -36,6 +38,7 @@ public class EmbeddedResource extends InternalResourceBase {
 
     @RequestMapping(value = "/matchkeys", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Invalid embedded db to force using match keys on remote SQL server.")
     public StatusDocument invalidateMatchKeys(HttpServletRequest request) {
         checkHeader(request);
@@ -45,6 +48,7 @@ public class EmbeddedResource extends InternalResourceBase {
 
     @RequestMapping(value = "/matchkeys", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Asynchronously refresh match keys stored in embedded db.")
     public StatusDocument refreshMatchKeys(HttpServletRequest request) {
         checkHeader(request);
