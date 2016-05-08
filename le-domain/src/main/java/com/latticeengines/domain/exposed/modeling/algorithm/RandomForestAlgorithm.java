@@ -21,6 +21,7 @@ public class RandomForestAlgorithm extends AlgorithmBase {
         setPipelineDriver("/app/dataplatform/scripts/pipeline.json");
         setPipelineScript("/app/dataplatform/scripts/pipeline.py");
         setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
+        setPipelineProperties(StringUtils.join(getPipelinePropertyArray(), " "));
     }
     
     @Override
@@ -40,6 +41,14 @@ public class RandomForestAlgorithm extends AlgorithmBase {
                 "max_depth=8", //
                 "bootstrap=True", //
                 "random_state=" + new Random().nextInt(100000)
+        };
+    }
+
+    @JsonIgnore
+    @Transient
+    private String[] getPipelinePropertyArray() {
+        return new String[] { //
+                "pivotstep.minCategoricalCount=100" //
         };
     }
 }

@@ -7,7 +7,7 @@ public enum ArtifactType {
     
     PMML("pmmlfile", "PMMLFiles", "xml"),
     PivotMapping("pivotmapping", "PivotMappings", "csv"),
-    PythonModule("pythonmodule", "PythonModules", "py");
+    Function("pythonmodule", "PythonModules", "py");
     
     private String code;
     private String pathToken;

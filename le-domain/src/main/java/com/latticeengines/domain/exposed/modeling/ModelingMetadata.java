@@ -40,17 +40,18 @@ public class ModelingMetadata {
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
-    public static class KV implements Map.Entry<String, String> {
+    public static class KV implements Map.Entry<String, Object> {
         private String key;
-        private String value;
+        private Object value;
 
         public KV() {
         }
 
-        public KV(String key, String value) {
+        public KV(String key, Object value) {
             this.key = key;
             this.value = value;
         }
+
 
         @JsonProperty("Key")
         public String getKey() {
@@ -63,13 +64,13 @@ public class ModelingMetadata {
         }
 
         @JsonProperty("Value")
-        public String getValue() {
+        public Object getValue() {
             return value;
         }
 
         @JsonProperty("Value")
-        public String setValue(String value) {
-            String oldValue = this.value;
+        public Object setValue(Object value) {
+            Object oldValue = this.value;
             this.value = value;
             return oldValue;
         }

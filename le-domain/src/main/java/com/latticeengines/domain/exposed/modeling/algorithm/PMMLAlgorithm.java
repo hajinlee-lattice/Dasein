@@ -9,8 +9,10 @@ public class PMMLAlgorithm extends AlgorithmBase {
 
     public PMMLAlgorithm() {
         setName("PMML");
-        setScript("/app/dataplatform/scripts/algorithm/do_nothing.py");
+        setScript("/app/dataplatform/scripts/algorithm/pmml_model_skeleton.py");
         setAlgorithmProperties("");
-        setPipelineScript("configurablepipeline.py");
+        setPipelineDriver("/app/dataplatform/scripts/pmmlpipeline.json");
+        setPipelineScript("/app/dataplatform/scripts/pipeline.py");
+        setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
     }
 }
