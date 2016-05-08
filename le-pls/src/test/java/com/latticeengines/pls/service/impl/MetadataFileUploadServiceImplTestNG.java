@@ -46,7 +46,7 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
     @Test(groups = "functional", dependsOnMethods = { "uploadFile" })
     public void getArtifacts() {
         List<Artifact> artifacts = metadataFileUploadService.getArtifacts("module2",
-                ArtifactType.PythonModule.getUrlToken());
+                ArtifactType.Function.getUrlToken());
         assertEquals(artifacts.size(), 1);
     }
 
@@ -88,7 +88,7 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
                 new Object[] { "unknowntype", null, null, null, true, //
                         LedpException.buildMessage(LedpCode.LEDP_18090, new String[] { "unknowntype" })
                 },
-                new Object[] { ArtifactType.PythonModule.getUrlToken(), //
+                new Object[] { ArtifactType.Function.getUrlToken(), //
                         "module2", //
                         "transform1", //
                         getInputStreamFromResource("a.py"), //
