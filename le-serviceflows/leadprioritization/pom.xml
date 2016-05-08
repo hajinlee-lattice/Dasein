@@ -272,6 +272,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.jpmml</groupId>
+            <artifactId>pmml-model</artifactId>
+            <version>${jpmml.version}</version>
+        </dependency>
+
         <!-- TEST dependencies -->
 
         <dependency>
