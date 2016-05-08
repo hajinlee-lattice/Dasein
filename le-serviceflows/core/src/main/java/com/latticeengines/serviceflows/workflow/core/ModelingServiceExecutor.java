@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
@@ -43,15 +42,15 @@ public class ModelingServiceExecutor {
 
     private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
 
-    private Builder builder;
+    protected Builder builder;
 
-    private String modelingServiceHostPort;
+    protected String modelingServiceHostPort;
 
-    private String modelingServiceHdfsBaseDir;
+    protected String modelingServiceHdfsBaseDir;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = new RestTemplate();
 
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     public ModelingServiceExecutor(Builder builder) {
         this.builder = builder;
@@ -201,59 +200,15 @@ public class ModelingServiceExecutor {
         }
     }
 
-    public String modelForPMML() throws Exception {
-        PMMLAlgorithm pmmlAlgorithm = new PMMLAlgorithm();
-        pmmlAlgorithm.setPriority(0);
-        pmmlAlgorithm.setSampleName("all");
-
-        ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("PMML");
-        modelDef.addAlgorithms(Collections.singletonList((Algorithm) pmmlAlgorithm));
-
-        Model model = new Model();
-        model.setModelDefinition(modelDef);
-        model.setName(builder.getModelName());
-        model.setTable(builder.getTable());
-        model.setMetadataTable(builder.getMetadataTable());
-        model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
-        model.setDataFormat("avro");
-        String provenanceProperties = "Event_Table_Name=" + builder.getEventTableTable();
-        provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
-
-        model.setProvenanceProperties(provenanceProperties);
-
-        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
-        model.setTargetsList(targetAndFeatures.getKey());
-        model.setFeaturesList(targetAndFeatures.getValue());
-
-        AppSubmission submission = restTemplate.postForObject(
-                modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
-        String appId = submission.getApplicationIds().get(0);
-        log.info(String.format("App id for modeling: %s", appId));
-        JobStatus status = waitForModelingAppId(appId);
-        // Wait for 30 seconds before retrieving the result directory
-        Thread.sleep(30 * 1000L);
-        String resultDir = status.getResultDirectory();
-
-        if (resultDir != null) {
-            return appId;
-        } else {
-            log.warn(String.format("No result directory for modeling job %s", appId));
-            System.out.println(String.format("No result directory for modeling job %s", appId));
-            throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
-        }
-    }
-
-    private JobStatus waitForAppId(String appId) throws Exception {
+    protected JobStatus waitForAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
     }
 
-    private JobStatus waitForModelingAppId(String appId) throws Exception {
+    protected JobStatus waitForModelingAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getModelingJobStatusUrl());
     }
 
-    private JobStatus waitForAppId(String appId, String jobStatusUrl) throws Exception {
+    protected JobStatus waitForAppId(String appId, String jobStatusUrl) throws Exception {
         JobStatus status;
         int maxTries = MAX_SECONDS_WAIT_FOR_MODELING;
         int i = 0;
@@ -300,6 +255,7 @@ public class ModelingServiceExecutor {
         private String keyColumn;
         private String[] profileExcludeList;
         private String[] targets;
+        private String[] featureList;
         private String modelingServiceHostPort;
         private String modelingServiceHdfsBaseDir;
         private Configuration yarnConfiguration;
@@ -376,6 +332,11 @@ public class ModelingServiceExecutor {
 
         public Builder profileExcludeList(String... profileExcludeList) {
             this.setProfileExcludeList(profileExcludeList);
+            return this;
+        }
+        
+        public Builder featureList(String... featureList) {
+            this.setFeatureList(featureList);
             return this;
         }
 
@@ -573,6 +534,14 @@ public class ModelingServiceExecutor {
 
         public void setProfileExcludeList(String... profileExcludeList) {
             this.profileExcludeList = profileExcludeList;
+        }
+        
+        public String[] getFeatureList() {
+            return featureList;
+        }
+        
+        public void setFeatureList(String... featureList) {
+            this.featureList = featureList;
         }
 
         public String[] getTargets() {
