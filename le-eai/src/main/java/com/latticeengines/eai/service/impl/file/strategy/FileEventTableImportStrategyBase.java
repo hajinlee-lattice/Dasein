@@ -185,7 +185,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
                     createLatticeCSVFilePath(hdfsFileToImport, fileName));
             return fileName;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18068, e, new String[] { hdfsFileToImport });
+            throw new LedpException(LedpCode.LEDP_00002, e, new String[] { hdfsFileToImport });
         } finally {
             try {
                 parser.close();
