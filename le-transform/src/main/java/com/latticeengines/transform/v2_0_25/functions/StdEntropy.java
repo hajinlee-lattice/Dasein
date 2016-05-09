@@ -5,19 +5,29 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdEntropy implements RealTimeTransform {
 
+    private static final long serialVersionUID = 6713249049950936319L;
+
+    public StdEntropy() {
+    }
+
     public StdEntropy(String modelPath) {
     }
 
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
         String n = String.valueOf(record.get(column));
 
-        if(n.equals("null"))
+        if (n.equals("null"))
             return null;
 
         return calculateStdEntropy(n);
@@ -49,5 +59,16 @@ public class StdEntropy implements RealTimeTransform {
         }
 
         return e / s.length();
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        Attribute attr = new Attribute();
+        attr.setApprovedUsage(ApprovedUsage.MODEL);
+        attr.setCategory(Category.LEAD_INFORMATION);
+        attr.setFundamentalType(FundamentalType.NUMERIC);
+        attr.setStatisticalType(StatisticalType.RATIO);
+        attr.setTags(Tag.INTERNAL_TRANSFORM);
+        return attr;
     }
 }

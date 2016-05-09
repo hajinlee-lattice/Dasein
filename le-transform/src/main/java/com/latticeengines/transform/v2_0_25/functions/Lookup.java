@@ -10,7 +10,9 @@ import org.apache.commons.io.FileUtils;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-public class Lookup implements RealTimeTransform {
+public abstract class Lookup implements RealTimeTransform {
+
+    private static final long serialVersionUID = -3604199243412683523L;
 
     static enum LookupType {
         StringToValue, //
@@ -18,6 +20,9 @@ public class Lookup implements RealTimeTransform {
     }
 
     protected Map<String, Object> lookupMap = new HashMap<>();
+
+    public Lookup() {
+    }
 
     public Lookup(String file, LookupType lookupType) {
         buildLookup(file, lookupType);
@@ -53,8 +58,7 @@ public class Lookup implements RealTimeTransform {
     }
 
     @Override
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         throw new UnsupportedOperationException();
     }
 

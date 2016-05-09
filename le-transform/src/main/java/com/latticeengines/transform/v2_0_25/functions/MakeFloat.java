@@ -5,18 +5,23 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class MakeFloat implements RealTimeTransform {
 
+    private static final long serialVersionUID = -44152688011926836L;
+
     private static final Log log = LogFactory.getLog(MakeFloat.class);
+
+    public MakeFloat() {
+    }
 
     public MakeFloat(String modelPath) {
     }
 
     @Override
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
         Object o = record.get(column);
         if (o == null) {
@@ -28,6 +33,11 @@ public class MakeFloat implements RealTimeTransform {
             log.error("Failed to cast " + o + " to Double.");
             return null;
         }
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        return null;
     }
 
 }

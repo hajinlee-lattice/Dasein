@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 /* This class re-implements the Python2 function encoder.py which is defined in the following places
@@ -12,6 +13,10 @@ import com.latticeengines.transform.exposed.RealTimeTransform;
  */
 
 public class Encoder implements RealTimeTransform {
+
+    private static final long serialVersionUID = 9104503413595249740L;
+
+    public Encoder() {}
 
     public Encoder(String modelPath) {
     }
@@ -84,4 +89,8 @@ public class Encoder implements RealTimeTransform {
         return code;
     }
 
+    @Override
+    public Attribute getMetadata() {
+        return null;
+    }
 }

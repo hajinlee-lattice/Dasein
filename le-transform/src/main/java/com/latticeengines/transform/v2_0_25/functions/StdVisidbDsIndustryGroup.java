@@ -5,21 +5,30 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsIndustryGroup implements RealTimeTransform {
 
+    private static final long serialVersionUID = -5157087545940247272L;
+
+    public StdVisidbDsIndustryGroup() {
+    }
+
     public StdVisidbDsIndustryGroup(String modelPath) {
     }
 
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
         String s = column == null ? null : String.valueOf(record.get(column));
 
-        if(s.equals("null"))
+        if (s.equals("null"))
             return null;
-
 
         return calculateStdVisidbDsIndustryGroup(s);
     }
@@ -30,28 +39,17 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
 
         industryGroup = industryGroup.trim().toLowerCase();
 
-        if (Pattern
-                .matches(
-                        "(.*?\\b)credit(.*?\\b)|(.*?\\b)financial(.*?\\b)|(.*?\\b)bank(.*?\\b)",
-                        industryGroup))
+        if (Pattern.matches("(.*?\\b)credit(.*?\\b)|(.*?\\b)financial(.*?\\b)|(.*?\\b)bank(.*?\\b)", industryGroup))
             return "Finance";
-        else if (Pattern.matches("(.*)tech(.*)|(.*?\\b)tele(.*?\\b)",
-                industryGroup))
+        else if (Pattern.matches("(.*)tech(.*)|(.*?\\b)tele(.*?\\b)", industryGroup))
             return "Tech";
-        else if (Pattern
-                .matches(
-                        "(.*?\\b)health(.*?\\b)|(.*?\\b)medical(.*?\\b)|(.*?\\b)pharm(.*?\\b)",
-                        industryGroup))
+        else if (Pattern.matches("(.*?\\b)health(.*?\\b)|(.*?\\b)medical(.*?\\b)|(.*?\\b)pharm(.*?\\b)", industryGroup))
             return "Health Care";
-        else if (Pattern.matches(
-                "(.*?\\b)real(.*?\\b)|(.*?\\b)property(.*?\\b)", industryGroup))
+        else if (Pattern.matches("(.*?\\b)real(.*?\\b)|(.*?\\b)property(.*?\\b)", industryGroup))
             return "Real Estate/Property Mgmt";
-        else if (Pattern.matches("(.*?\\b)staff(.*?\\b)|(.*?\\b)hr(.*?\\b)",
-                industryGroup))
+        else if (Pattern.matches("(.*?\\b)staff(.*?\\b)|(.*?\\b)hr(.*?\\b)", industryGroup))
             return "HR/Staffing";
-        else if (Pattern.matches(
-                "(.*?\\b)services(.*?\\b)|(.*?\\b)consulting(.*?\\b)",
-                industryGroup))
+        else if (Pattern.matches("(.*?\\b)services(.*?\\b)|(.*?\\b)consulting(.*?\\b)", industryGroup))
             return "Business Service";
         else if (Pattern.matches("(.*?\\b)education(.*?\\b)", industryGroup))
             return "Education";
@@ -63,8 +61,7 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
             return "Retail";
         else if (Pattern.matches("(.*?\\b)transport(.*?\\b)", industryGroup))
             return "Transportation";
-        else if (Pattern.matches(
-                "(.*?\\b)account(.*?\\b)|(.*?\\b)legal(.*?\\b)", industryGroup))
+        else if (Pattern.matches("(.*?\\b)account(.*?\\b)|(.*?\\b)legal(.*?\\b)", industryGroup))
             return "Accounting/Legal";
         else if (Pattern.matches("(.*?\\b)construction(.*?\\b)", industryGroup))
             return "Construction";
@@ -76,5 +73,18 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
             return "Manufacturing";
 
         return "Other";
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        Attribute attr = new Attribute();
+        attr.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attr.setCategory(Category.LEAD_INFORMATION);
+        attr.setFundamentalType(FundamentalType.ALPHA);
+        attr.setStatisticalType(StatisticalType.NOMINAL);
+        attr.setTags(Tag.INTERNAL_TRANSFORM);
+        attr.setDescription("Rollup of Industry field from Marketing Automation");
+        attr.setDisplayName("Industry Rollup");
+        return attr;
     }
 }

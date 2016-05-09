@@ -26,6 +26,9 @@ public class ModelingMetadata {
     public static final String RATIO_STAT_TYPE = "ratio";
     public static final String CATEGORY_EXTENSION = "Category";
     public static final String CATEGORY_LEAD_INFORMATION = "Lead Information";
+    public static final String CATEGORY_ONLINE_PRESENCE = "Online Presence";
+    public static final String CATEGORY_GROWTH_TRENDS = "Growth Trends";
+    public static final String CATEGORY_FIRMOGRAPHICS = "Firmographics";
     public static final String FT_ALPHA = "alpha";
     public static final String FT_BOOLEAN = "boolean";
     public static final String FT_CURRENCY = "currency";

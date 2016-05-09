@@ -2,9 +2,12 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
+
+    private static final long serialVersionUID = -2544730034184720534L;
 
     public StdVisidbDsEmailIsInvalid(String modelPath) {
 
@@ -27,5 +30,10 @@ public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
             return true;
 
         return false;
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        return null;
     }
 }

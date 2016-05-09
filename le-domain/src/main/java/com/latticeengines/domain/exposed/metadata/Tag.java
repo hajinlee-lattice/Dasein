@@ -7,14 +7,16 @@ import java.util.Set;
 
 public enum Tag {
     INTERNAL("Internal"), //
-    EXTERNAL("External");
+    EXTERNAL("External"), //
+    INTERNAL_TRANSFORM("InternalTransform"), //
+    EXTERNAL_TRANSFORM("ExternalTransform");
 
     private final String name;
     private static Map<String, Tag> nameMap;
 
     static {
         nameMap = new HashMap<>();
-        for (Tag tag: Tag.values()) {
+        for (Tag tag : Tag.values()) {
             nameMap.put(tag.getName(), tag);
         }
     }
@@ -23,7 +25,9 @@ public enum Tag {
         this.name = name;
     }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
     public static Set<String> availableNames() {
         return new HashSet<>(nameMap.keySet());
@@ -32,7 +36,7 @@ public enum Tag {
     public static Tag fromName(String name) {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);
-        } else  {
+        } else {
             throw new IllegalArgumentException("Cannot find a Tag with name " + name);
         }
     }

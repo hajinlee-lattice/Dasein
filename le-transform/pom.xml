@@ -11,6 +11,10 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
+    <properties>
+        <le.domain.version>2.0.31-SNAPSHOT</le.domain.version>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -32,9 +36,16 @@
         </dependency>
 
         <dependency>
-           <groupId>commons-io</groupId>
+            <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
         </dependency>
 
     </dependencies>

@@ -2,9 +2,12 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsNamelength implements RealTimeTransform {
+
+    private static final long serialVersionUID = 1437270491579294595L;
 
     public StdVisidbDsNamelength(String modelPath) {
 
@@ -24,5 +27,10 @@ public class StdVisidbDsNamelength implements RealTimeTransform {
             lastName = "";
 
         return firstName.toString().length() + lastName.toString().length();
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        return null;
     }
 }

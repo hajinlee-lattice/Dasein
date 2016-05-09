@@ -6,9 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsStateIsInGreatLakes implements RealTimeTransform {
+
+    private static final long serialVersionUID = -6195602149089977682L;
 
     static HashSet<String> valueMap = new HashSet<String>(Arrays.asList("OH", "MI", "IL", "WI", "IN"));
 
@@ -32,5 +35,11 @@ public class StdVisidbDsStateIsInGreatLakes implements RealTimeTransform {
             return false;
 
         return valueMap.contains(state);
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

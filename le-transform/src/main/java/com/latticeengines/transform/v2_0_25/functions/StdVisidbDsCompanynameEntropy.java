@@ -5,19 +5,29 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsCompanynameEntropy implements RealTimeTransform {
 
+    private static final long serialVersionUID = 2750700447132245597L;
+
+    public StdVisidbDsCompanynameEntropy() {
+    }
+
     public StdVisidbDsCompanynameEntropy(String modelPath) {
     }
 
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
         String companyName = column == null ? null : String.valueOf(record.get(column));
 
-        if(companyName.equals("null"))
+        if (companyName.equals("null"))
             return null;
 
         return calculateStdVisidbDsCompanynameEntropy(companyName);
@@ -59,5 +69,16 @@ public class StdVisidbDsCompanynameEntropy implements RealTimeTransform {
         if (s.length() > 30)
             return 30;
         return s.length();
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        Attribute attr = new Attribute();
+        attr.setApprovedUsage(ApprovedUsage.MODEL);
+        attr.setCategory(Category.LEAD_INFORMATION);
+        attr.setFundamentalType(FundamentalType.NUMERIC);
+        attr.setStatisticalType(StatisticalType.RATIO);
+        attr.setTags(Tag.INTERNAL_TRANSFORM);
+        return attr;
     }
 }

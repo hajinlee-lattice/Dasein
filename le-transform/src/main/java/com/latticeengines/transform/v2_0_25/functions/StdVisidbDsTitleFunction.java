@@ -5,11 +5,13 @@ import java.util.Map;
 import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.LinkedMap;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
 public class StdVisidbDsTitleFunction implements RealTimeTransform {
 
+    private static final long serialVersionUID = -8208353638753982691L;
     private static OrderedMap mapTitleFunction = null;
 
     public StdVisidbDsTitleFunction(String modelPath) {
@@ -50,6 +52,12 @@ public class StdVisidbDsTitleFunction implements RealTimeTransform {
         String s = (String) o;
 
         return DSUtils.valueReturn(s, mapTitleFunction);
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

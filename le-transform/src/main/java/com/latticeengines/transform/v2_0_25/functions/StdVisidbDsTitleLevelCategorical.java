@@ -4,10 +4,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
 public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
+
+    private static final long serialVersionUID = 8526302676390701013L;
 
     public StdVisidbDsTitleLevelCategorical(String modelPath) {
     }
@@ -43,5 +46,11 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
             return "Manager";
 
         return "Staff";
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

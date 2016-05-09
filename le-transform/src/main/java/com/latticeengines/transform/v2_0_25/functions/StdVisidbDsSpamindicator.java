@@ -5,9 +5,20 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsSpamindicator implements RealTimeTransform {
+
+    private static final long serialVersionUID = 2222617772602907048L;
+
+    public StdVisidbDsSpamindicator() {
+    }
 
     private static Pattern pattern = Pattern.compile("(^|\\s+)[\\[]*(none|no|not|delete|"
             + "asd|sdf|unknown|undisclosed|" + "null|dont|don\'t|n/a|n.a" + "|abc|xyz|noname|nocompany)($|\\s+)");
@@ -92,5 +103,18 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         }
 
         return 0;
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        Attribute attr = new Attribute();
+        attr.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS);
+        attr.setCategory(Category.LEAD_INFORMATION);
+        attr.setDisplayName("Spam Lead");
+        attr.setFundamentalType(FundamentalType.BOOLEAN);
+        attr.setStatisticalType(StatisticalType.NOMINAL);
+        attr.setTags(Tag.INTERNAL_TRANSFORM);
+        attr.setDescription("Indicator for spam leads");
+        return attr;
     }
 }

@@ -29,12 +29,14 @@ import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenameOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenamePipeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class Node {
     private String identifier;
@@ -233,6 +235,10 @@ public class Node {
             FieldMetadata targetField) {
         return new Node(builder.register(new JythonFunctionOperation(opInput(identifier), packageName, moduleName,
                 functionName, fieldsToApply, targetField)), builder);
+    }
+
+    public Node addTransformFunction(String packageName, TransformDefinition definition) {
+        return new Node(builder.register(new TransformFunctionOperation(opInput(identifier), packageName, definition)), builder);
     }
 
     public Node renamePipe(String newname) {

@@ -36,20 +36,20 @@ public class RecordTransformer {
                 RealTimeTransform transform = transformRetriever.getTransform(id);
                 Object value = transform.transform(entry.arguments, result);
 
-                if(value == null) {
+                if (value == null) {
                     value = null;
                 } else if (entry.type.type() == Double.class) {
-                    try{
-                        if(value.toString().toLowerCase().equals("true") == true) {
+                    try {
+                        if (value.toString().toLowerCase().equals("true") == true) {
                             value = entry.type.type().cast(Double.valueOf("1.0"));
-                        } else if(value.toString().toLowerCase().equals("false") == true) {
+                        } else if (value.toString().toLowerCase().equals("false") == true) {
                             value = entry.type.type().cast(Double.valueOf("0.0"));
-                        } else if(value.toString().equals("null") == false && value.toString().equals("None") == false) {
+                        } else if (value.toString().equals("null") == false && value.toString().equals("None") == false) {
                             value = entry.type.type().cast(Double.valueOf(value.toString()));
                         } else {
                             value = null;
                         }
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         log.warn(String.format("Problem casting Transform value to Java Double"), e);
                     }
                 }
@@ -80,8 +80,7 @@ public class RecordTransformer {
                     value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                     successfulInvocation = true;
                     if (numTries > 1) {
-                        log.warn(
-                                String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
+                        log.warn(String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
                     }
                     break;
                 } catch (Exception e) {

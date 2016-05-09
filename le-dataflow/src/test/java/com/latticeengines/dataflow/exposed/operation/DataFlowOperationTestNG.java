@@ -33,6 +33,8 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyIm
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
 public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBase {
 
@@ -383,6 +385,22 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
+    public void testTransformEncoder() throws Exception {
+        final TransformDefinition definition = TransformationPipeline.stdLengthCompanyName;
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node lead = addSource("Lead2");
+                return lead.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
+            }
+        });
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record : output) {
+            Assert.assertNotNull(record.get(definition.output));
+        }
+    }
+
+    @Test(groups = "functional")
     public void testDepivot() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
@@ -392,13 +410,9 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource("Feature");
-                String[] targetFields = new String[]{ "Topic", "Score" };
-                String[][] sourceFieldTuples = new String[][]{
-                        { "Topic1", "Score1" },
-                        { "Topic2", "Score2" },
-                        { "Topic3", "Score3" },
-                        { "Topic4", "Score4" }
-                };
+                String[] targetFields = new String[] { "Topic", "Score" };
+                String[][] sourceFieldTuples = new String[][] { { "Topic1", "Score1" }, { "Topic2", "Score2" },
+                        { "Topic3", "Score3" }, { "Topic4", "Score4" } };
                 return node.depivot(targetFields, sourceFieldTuples);
             }
         });
@@ -456,8 +470,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void prepareDepivotData(String avroDir, String fileName) {
         Object[][] data = new Object[][] {
                 { "dom1.com", "topic1", 1.0, "topic2", 2.0, "topic3", 3.0, "topic4", 4.0, 123L },
-                { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L }
-        };
+                { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L } };
 
         uploadDepivotAvro(data, avroDir, fileName);
     }

@@ -6,11 +6,13 @@ import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
 public class StdVisidbDsTitleRole implements RealTimeTransform {
 
+    private static final long serialVersionUID = -2648663303512664149L;
     private static OrderedMap mapTitleRole = null;
 
     public StdVisidbDsTitleRole(String modelPath) {
@@ -53,6 +55,12 @@ public class StdVisidbDsTitleRole implements RealTimeTransform {
         String s = (String) o;
 
         return DSUtils.valueReturn(s, mapTitleRole);
+    }
+
+    @Override
+    public Attribute getMetadata() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

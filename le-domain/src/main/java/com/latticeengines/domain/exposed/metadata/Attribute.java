@@ -25,10 +25,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.python.google.common.collect.Iterables;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.api.client.util.Lists;
+import com.google.common.base.Function;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -99,6 +101,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonProperty("display_name")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+        setPropertyValue("DisplayName", displayName);
     }
 
     @Column(name = "LENGTH", nullable = true)
@@ -403,7 +406,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public void setApprovedUsage(ApprovedUsage... approvedUsages) {
+        properties.put("ApprovedUsage", getStringValuesFromEnums(approvedUsages));
+    }
+
+    @Transient
+    @JsonIgnore
     public void setApprovedUsage(List<String> approvedUsage) {
+        properties.put("ApprovedUsage", approvedUsage);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setApprovedUsageFromEnumList(List<ApprovedUsage> approvedUsage) {
         properties.put("ApprovedUsage", approvedUsage);
     }
 
@@ -425,6 +440,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public void setStatisticalType(StatisticalType statisticalType) {
+        properties.put("StatisticalType", statisticalType.name());
+    }
+
+    @Transient
+    @JsonIgnore
     public String getStatisticalType() {
         return (String) properties.get("StatisticalType");
     }
@@ -436,6 +457,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setFundamentalType(String fundamentalType) {
         properties.put("FundamentalType", fundamentalType);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setFundamentalType(FundamentalType fundamentalType) {
+        properties.put("FundamentalType", fundamentalType.name());
     }
 
     @Transient
@@ -516,6 +543,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public void setTags(Tag... tags) {
+        properties.put("Tags", getStringValuesFromEnums(tags));
+    }
+
+    @Transient
+    @JsonIgnore
     public void setTags(List<String> tags) {
         properties.put("Tags", tags);
     }
@@ -546,6 +579,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setCategory(String category) {
         setPropertyValue("Category", category);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setCategory(Category category) {
+        setPropertyValue("Category", category.name());
     }
 
     @Transient
@@ -641,4 +680,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return name;
     }
 
+    @SuppressWarnings("unchecked")
+    public <Enum> List<String> getStringValuesFromEnums(Enum... enums) {
+        List<String> strs = new ArrayList<>();
+        for (Enum en : enums) {
+            strs.add(en.toString());
+        }
+        return strs;
+    }
 }
