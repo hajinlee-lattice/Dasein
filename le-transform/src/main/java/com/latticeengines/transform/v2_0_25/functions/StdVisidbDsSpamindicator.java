@@ -10,15 +10,12 @@ import com.latticeengines.transform.exposed.RealTimeTransform;
 public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
     private static Pattern pattern = Pattern.compile("(^|\\s+)[\\[]*(none|no|not|delete|"
-            + "asd|sdf|unknown|undisclosed|"
-            + "null|dont|don\'t|n/a|n.a"
-            + "|abc|xyz|noname|nocompany)($|\\s+)");
+            + "asd|sdf|unknown|undisclosed|" + "null|dont|don\'t|n/a|n.a" + "|abc|xyz|noname|nocompany)($|\\s+)");
 
     public StdVisidbDsSpamindicator(String modelPath) {
     }
 
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column1 = (String) arguments.get("column1");
         String column2 = (String) arguments.get("column2");
         String column3 = (String) arguments.get("column3");
@@ -31,26 +28,23 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         String phone = column4 == null ? null : String.valueOf(record.get(column4));
         String companyName = column5 == null ? null : String.valueOf(record.get(column5));
 
-        if(firstName.equals("null"))
+        if (firstName.equals("null"))
             firstName = "";
-        if(lastName.equals("null"))
+        if (lastName.equals("null"))
             lastName = "";
-        if(title.equals("null"))
+        if (title.equals("null"))
             title = "";
-        if(phone.equals("null"))
+        if (phone.equals("null"))
             phone = "";
-        if(companyName.equals("null"))
+        if (companyName.equals("null"))
             companyName = "";
 
-        return calculateStdVisidbDsSpamindicator(firstName, lastName, title,
-                phone, companyName);
+        return calculateStdVisidbDsSpamindicator(firstName, lastName, title, phone, companyName);
     }
 
-    public static int calculateStdVisidbDsSpamindicator(String firstName,
-            String lastName, String title, String phone, String companyName) {
-        if (StdVisidbDsFirstnameSameasLastname
-                .calcualteStdVisidbDsFirstnameSameasLastname(firstName,
-                        lastName))
+    public static int calculateStdVisidbDsSpamindicator(String firstName, String lastName, String title, String phone,
+            String companyName) {
+        if (StdVisidbDsFirstnameSameasLastname.calcualteStdVisidbDsFirstnameSameasLastname(firstName, lastName))
             return 1;
 
         int score = 0;
@@ -59,8 +53,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         if (StdLength.calculateStdLength(companyName) < 5)
             score += 1;
 
-        Double companyNameEntropy = StdVisidbDsCompanynameEntropy
-                .calculateStdVisidbDsCompanynameEntropy(companyName);
+        Double companyNameEntropy = StdVisidbDsCompanynameEntropy.calculateStdVisidbDsCompanynameEntropy(companyName);
 
         if (companyNameEntropy != null && companyNameEntropy <= 0.03)
             score += 1;
@@ -85,7 +78,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
         companyName = companyName.toLowerCase();
 
-        if (Pattern.matches(".*[\"#$%+:<=>?@\\^_`{}~].*", companyName) == true)
+        if (Pattern.matches(".*[\"#$%+:<=>?@\\^_`{}~].*", companyName))
             return 1;
 
         if (pattern.matcher(companyName).find())
