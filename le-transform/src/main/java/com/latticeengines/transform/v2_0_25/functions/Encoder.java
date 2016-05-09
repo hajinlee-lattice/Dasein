@@ -1,5 +1,6 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Map;
 
@@ -16,8 +17,7 @@ public class Encoder implements RealTimeTransform {
     }
 
     @Override
-    public Object transform(Map<String, Object> arguments,
-            Map<String, Object> record) {
+    public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
         Object value = record.get(column);
 
@@ -50,8 +50,7 @@ public class Encoder implements RealTimeTransform {
 
         if (value.getClass() == Integer.class //
                 || value.getClass() == Long.class //
-                || value.getClass() == Float.class
-                || value.getClass() == Double.class) {
+                || value.getClass() == Float.class || value.getClass() == Double.class) {
             if (valueAsString.matches("^-?\\d+$") //
                     || valueAsString.matches("^-?\\d+.\\d+$") //
                     || valueAsString.equals("false") //
@@ -70,10 +69,15 @@ public class Encoder implements RealTimeTransform {
         }
 
         BigInteger code = BigInteger.ZERO;
-        for (int i = 0; i < valueAsString.length(); i++) {
-            code = BigInteger.valueOf(valueAsString.charAt(i))
-                    .add(code.shiftLeft(6)).add(code.shiftLeft(16))
-                    .subtract(code);
+        byte[] bytes;
+        try {
+            bytes = valueAsString.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Use default encoding
+            bytes = valueAsString.getBytes();
+        }
+        for (int i = 0; i < valueAsString.getBytes().length; i++) {
+            code = BigInteger.valueOf((bytes[i] & 0xffl)).add(code.shiftLeft(6)).add(code.shiftLeft(16)).subtract(code);
         }
         code = code.and(BigInteger.valueOf(4294967295l));
 
