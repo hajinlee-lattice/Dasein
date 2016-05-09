@@ -54,7 +54,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
     // expected lines in data set to output to csv after bulk scoring
-    private static final int TOTAL_QUALIFIED_LINES = 4161;
+    private static final int TOTAL_QUALIFIED_LINES = 4162;
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -152,6 +152,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             assertTrue(csvHeaders.contains("Phone"));
             assertTrue(csvHeaders.contains("Some Column"));
             assertTrue(csvHeaders.contains("Score"));
+            assertTrue(csvHeaders.contains("BusinessCountry"));
+
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
                 assertTrue(StringUtils.isNotEmpty(record.get("Score")));

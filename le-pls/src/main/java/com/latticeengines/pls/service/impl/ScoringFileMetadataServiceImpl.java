@@ -125,6 +125,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             }
         });
 
+        // Don't dedup on primary key for scoring
+        table.setPrimaryKey(null);
+
         table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
