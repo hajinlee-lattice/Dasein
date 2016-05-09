@@ -36,6 +36,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -135,6 +136,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private VersionManager versionManager;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -416,6 +420,7 @@ public class InternalResource extends InternalResourceBase {
     public Map<String, String> getActiveStack() {
         Map<String, String> response = new HashMap<>();
         response.put("CurrentStack", currentStack);
+        response.put("ArtifactVersion", versionManager.getCurrentVersion());
         return response;
     }
 
