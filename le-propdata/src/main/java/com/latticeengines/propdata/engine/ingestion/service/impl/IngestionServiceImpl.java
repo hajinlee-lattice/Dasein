@@ -267,7 +267,8 @@ public class IngestionServiceImpl implements IngestionService {
 
     }
 
-    private List<String> getSftpFiles(SftpConfiguration config) {
+    @SuppressWarnings("unchecked")
+	private List<String> getSftpFiles(SftpConfiguration config) {
         try {
             JSch jsch = new JSch();
             Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
@@ -279,7 +280,7 @@ public class IngestionServiceImpl implements IngestionService {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
             sftpChannel.cd("." + config.getSftpDir());
-            Vector files = sftpChannel.ls(".");
+            Vector<ChannelSftp.LsEntry> files = sftpChannel.ls(".");
             List<String> fileSources = new ArrayList<String>();
             for (int i = 0; i < files.size(); i++) {
                 ChannelSftp.LsEntry file = (ChannelSftp.LsEntry) files.get(i);

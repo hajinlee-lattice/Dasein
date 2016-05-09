@@ -13,10 +13,11 @@ import cascading.tuple.coerce.Coercions.Coerce;
 
 @Component
 public class BomboraFirehoseFieldMapping implements CsvToAvroFieldMapping, Serializable {
-    private List<FieldTuple> fieldTuples;
+    private static final long serialVersionUID = -4870380826193940885L;
+	private List<FieldTuple> fieldTuples;
     private Map<String, String> csvToAvroFieldMap;
     private Map<String, String> avroToCsvFieldMap;
-    private Map<String, Coerce> csvFieldToTypeMap;
+    private Map<String, Coerce<?>> csvFieldToTypeMap;
 
     public BomboraFirehoseFieldMapping() {
         initTuples();
@@ -62,7 +63,7 @@ public class BomboraFirehoseFieldMapping implements CsvToAvroFieldMapping, Seria
     private void initMaps() {
         csvToAvroFieldMap = new HashMap<String, String>();
         avroToCsvFieldMap = new HashMap<String, String>();
-        csvFieldToTypeMap = new HashMap<String, Coerce>();
+        csvFieldToTypeMap = new HashMap<String, Coerce<?>>();
 
         populateMaps();
     }
@@ -86,16 +87,17 @@ public class BomboraFirehoseFieldMapping implements CsvToAvroFieldMapping, Seria
     }
 
     @Override
-    public Coerce getFieldType(String csvFieldName) {
+    public Coerce<?> getFieldType(String csvFieldName) {
         return csvFieldToTypeMap.get(csvFieldName);
     }
 
     class FieldTuple implements Serializable {
-        private String csvFieldName;
+        private static final long serialVersionUID = 8195760208322606390L;
+		private String csvFieldName;
         private String avroFieldName;
-        private Coerce fieldType;
+        private Coerce<?> fieldType;
 
-        public FieldTuple(String csvFieldName, String avroFieldName, Coerce fieldType) {
+        public FieldTuple(String csvFieldName, String avroFieldName, Coerce<?> fieldType) {
             this.csvFieldName = csvFieldName;
             this.avroFieldName = avroFieldName;
             this.fieldType = fieldType;
@@ -109,7 +111,7 @@ public class BomboraFirehoseFieldMapping implements CsvToAvroFieldMapping, Seria
             return avroFieldName;
         }
 
-        public Coerce getFieldType() {
+        public Coerce<?> getFieldType() {
             return fieldType;
         }
     }

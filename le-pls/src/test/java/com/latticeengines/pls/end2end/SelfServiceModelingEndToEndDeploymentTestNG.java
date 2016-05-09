@@ -55,7 +55,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -66,9 +65,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Autowired
     private WorkflowProxy workflowProxy;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     private Tenant tenantToAttach;
     private SourceFile sourceFile;

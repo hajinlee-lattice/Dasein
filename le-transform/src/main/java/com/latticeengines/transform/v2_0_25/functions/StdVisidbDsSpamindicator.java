@@ -92,7 +92,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
             return 1;
 
         try {
-            Float f = Float.valueOf(companyName);
+            Float.valueOf(companyName);
             return 1;
         } catch (Exception e) {
             // pass

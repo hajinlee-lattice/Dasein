@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -26,9 +25,6 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
     @Autowired
     private FileUploadService fileUploadService;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     @Autowired
     private Configuration yarnConfiguration;

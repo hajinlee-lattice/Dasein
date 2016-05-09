@@ -112,7 +112,6 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
             sb.append(" FROM " + matchTableName + " WHERE $CONDITIONS");
         }
         String hdfsTargetPath = getTargetPath() + "/" + matchTableName;
-        String url = String.format("%s/modeling/dataloads", configuration.getMicroServiceHostPort());
         LoadConfiguration config = new LoadConfiguration();
         config.setCreds(dbCreds);
         config.setQuery(sb.toString());

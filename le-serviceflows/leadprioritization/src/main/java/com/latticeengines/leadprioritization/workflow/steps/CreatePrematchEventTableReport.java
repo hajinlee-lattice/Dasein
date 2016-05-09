@@ -1,6 +1,5 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
@@ -9,11 +8,11 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseDataFlowReportStep;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("createPrematchEventTableReport")
 public class CreatePrematchEventTableReport extends BaseDataFlowReportStep<CreatePrematchEventTableReportConfiguration> {
-    private static final Logger log = Logger.getLogger(CreatePrematchEventTableReport.class);
 
     @Override
     protected ReportPurpose getPurpose() {

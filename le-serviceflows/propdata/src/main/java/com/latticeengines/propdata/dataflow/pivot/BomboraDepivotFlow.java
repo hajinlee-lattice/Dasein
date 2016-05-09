@@ -7,8 +7,6 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,6 @@ import cascading.operation.Function;
 
 @Component("bomboraDepivotFlow")
 public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowParameters> {
-    private static final Log LOG = LogFactory.getLog(BomboraDepivotFlow.class);
     private static final String SCHEMA_BOMBORA_FIREHOSE = "classpath:schema/BomboraFirehoseAvroSchema.avsc";
 
     @Autowired

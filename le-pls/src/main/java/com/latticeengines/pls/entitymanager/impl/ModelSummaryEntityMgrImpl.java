@@ -235,21 +235,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
 
-    private boolean newModelNameIsValid(ModelSummary summary, String name) {
-        if (name == null) {
-            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
-        }
-        String oldName = summary.getName();
-        if (name.equals(oldName)) {
-            return true;
-        }
-
-        if (modelSummaryDao.findByModelName(name) != null) {
-            throw new LedpException(LedpCode.LEDP_18014, new String[] { name });
-        }
-        return true;
-    }
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,

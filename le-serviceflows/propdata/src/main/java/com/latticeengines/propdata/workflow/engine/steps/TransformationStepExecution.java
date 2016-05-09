@@ -58,7 +58,6 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
             TransformationConfiguration transformationConfiguration = (TransformationConfiguration) JsonUtils
                     .deserialize(transformationConfigurationStr, configurationClass);
             if (transformationService.isNewDataAvailable(transformationConfiguration)) {
-                String creator = (String) executionContext.get(CREATOR);
                 String podId = prepareTransformationConfiguration.getHdfsPodId();
                 HdfsPodContext.changeHdfsPodId(podId);
 

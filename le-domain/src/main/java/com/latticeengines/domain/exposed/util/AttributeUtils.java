@@ -31,8 +31,8 @@ public class AttributeUtils {
                 Object destValue = getValue(dest, descriptor);
                 if (!isPropertyBag(descriptor)) {
                     boolean sourceEmpty = sourceValue == null
-                            || (sourceValue instanceof List && ((List) sourceValue).size() == 0)
-                            || (sourceValue instanceof Set && ((Set) sourceValue).size() == 0);
+                            || (sourceValue instanceof List && ((List<?>) sourceValue).size() == 0)
+                            || (sourceValue instanceof Set && ((Set<?>) sourceValue).size() == 0);
                     if (includeEmptySourceValues || !sourceEmpty) {
                         setValue(dest, descriptor, sourceValue);
                         log.info(String.format("Setting property %s to be %s from source.  Value was previously %s",

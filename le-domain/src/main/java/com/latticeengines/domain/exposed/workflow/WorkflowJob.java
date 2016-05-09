@@ -143,7 +143,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         if (inputContextString == null) {
             setInputContext(new HashMap<String, String>());
         }
-        Map raw = JsonUtils.deserialize(inputContextString, Map.class);
+        Map<?, ?> raw = JsonUtils.deserialize(inputContextString, Map.class);
         return JsonUtils.convertMap(raw, String.class, String.class);
     }
 

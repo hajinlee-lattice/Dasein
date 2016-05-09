@@ -85,7 +85,6 @@ public class IngestionProgressDaoImpl extends
         query.executeUpdate();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean isIngestionTriggered(Ingestion ingestion) {
         Session session = getSessionFactory().getCurrentSession();

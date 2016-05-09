@@ -7,6 +7,6 @@ public interface CsvToAvroFieldMapping {
 
     String getCsvFieldName(String avroFieldName);
 
-    Coerce getFieldType(String csvFieldName);
+    Coerce<?> getFieldType(String csvFieldName);
 
 }

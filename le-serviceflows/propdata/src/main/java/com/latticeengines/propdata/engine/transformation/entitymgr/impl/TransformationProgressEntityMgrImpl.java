@@ -3,8 +3,6 @@ package com.latticeengines.propdata.engine.transformation.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +21,6 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     private static final long TIME_24_HOUR_IN_MILLISECONDS = 24 * 60 * 60 * 1000L;
     private static final int MAX_RETRIES = 3;
-
-    private static final Log log = LogFactory.getLog(TransformationProgressEntityMgrImpl.class);
 
     @Autowired
     private TransformationProgressDao progressDao;

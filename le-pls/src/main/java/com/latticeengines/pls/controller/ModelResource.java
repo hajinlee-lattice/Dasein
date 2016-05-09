@@ -20,7 +20,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,9 +36,6 @@ public class ModelResource {
 
     @Autowired
     private ModelWorkflowSubmitter modelWorkflowSubmitter;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

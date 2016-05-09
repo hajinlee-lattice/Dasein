@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,14 +48,8 @@ public class ModelingFileUploadResource {
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
 
-    @Autowired
-    private Configuration yarnConfiguration;
-
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
-
-    @Autowired
-    private EaiProxy eaiProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody

@@ -2,7 +2,6 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.SourceFileDao;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -30,12 +28,6 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @Override
     public BaseDao<SourceFile> getDao() {

@@ -21,7 +21,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -48,7 +47,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 
 public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -68,12 +66,6 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     private String fileName;
 
     private SourceFile sourceFile;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {

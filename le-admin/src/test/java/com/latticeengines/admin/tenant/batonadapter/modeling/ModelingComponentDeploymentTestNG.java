@@ -2,8 +2,6 @@ package com.latticeengines.admin.tenant.batonadapter.modeling;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -22,8 +20,6 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     @Autowired
     private TenantService tenantService;
-
-    private final static Log log = LogFactory.getLog(ModelingComponentDeploymentTestNG.class);
 
     private int userFeaturesThreshold = 10;
     private int defaultFeaturesThreshold = -1;

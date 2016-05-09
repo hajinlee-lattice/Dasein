@@ -92,16 +92,14 @@ public abstract class AbstractTransformationService extends TransformationServic
     protected void writeTransformationConfig(TransformationConfiguration transformationConfiguration,
             TransformationProgress progress) throws IOException {
         transformationConfiguration.setRootOperationId(progress.getRootOperationUID());
-        HdfsUtils hdfsUtil = new HdfsUtils();
-        hdfsUtil.writeToFile(getYarnConfiguration(),
+        HdfsUtils.writeToFile(getYarnConfiguration(),
                 getWorkflowDirForConf(getSource(), progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF,
                 JsonUtils.serialize(transformationConfiguration));
     }
 
     protected TransformationConfiguration readTransformationConfig(TransformationProgress progress) throws IOException {
-        HdfsUtils hdfsUtil = new HdfsUtils();
         String confFilePath = getWorkflowDirForConf(getSource(), progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF;
-        String confStr = hdfsUtil.getHdfsFileContents(getYarnConfiguration(), confFilePath);
+        String confStr = HdfsUtils.getHdfsFileContents(getYarnConfiguration(), confFilePath);
         return readTransformationConfigurationObject(confStr);
     }
 

@@ -473,7 +473,7 @@ public class AvroUtils {
         Schema schema = null;
         Resource schemaResource = resourceLoader.getResource(resourcePath);
         try (InputStream is = schemaResource.getInputStream()) {
-            schema = Schema.parse(is);
+            schema = new Schema.Parser().parse(is);
         }
         return schema;
     }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -27,9 +26,6 @@ public class HdfsHelper {
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     private Configuration yarnConfiguration;

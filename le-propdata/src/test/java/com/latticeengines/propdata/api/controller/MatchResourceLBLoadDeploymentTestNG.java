@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -35,6 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
@@ -72,6 +72,11 @@ public class MatchResourceLBLoadDeploymentTestNG extends PropDataApiDeploymentTe
 
     @Test(groups = "load.temp", dataProvider = "loadTestDataProvider")
     public void testRealTimeMatchUnderLoad(int numThreads, int accountsPerRequest, String msHostPort) {
+        if (StringUtils.isEmpty(msHostPort)) {
+            log.info("Skip test case due to empty msHostPort");
+            return;
+        }
+
         log.info("Change microservice host port to " + msHostPort);
         matchProxy.setMicroserviceHostPort(msHostPort);
         warmUp();

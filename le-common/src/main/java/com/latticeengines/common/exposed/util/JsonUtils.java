@@ -107,7 +107,7 @@ public class JsonUtils {
         return new ObjectMapper().convertValue(rawField, clazz);
     }
 
-    public static <T> List<T> convertList(List raw, Class<T> elementClazz) {
+    public static <T> List<T> convertList(List<?> raw, Class<T> elementClazz) {
         List<T> output = new ArrayList<>();
         for (Object elt : raw) {
             output.add(convertValue(elt, elementClazz));
@@ -116,7 +116,7 @@ public class JsonUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> convertMap(Map raw, Class<K> keyClazz, Class<V> valueClazz) {
+    public static <K, V> Map<K, V> convertMap(Map<?, ?> raw, Class<K> keyClazz, Class<V> valueClazz) {
         Map<K, V> output = new HashMap<>();
         for (Object entry : raw.entrySet()) {
             Map.Entry<Object, Object> casted = (Map.Entry<Object, Object>) entry;

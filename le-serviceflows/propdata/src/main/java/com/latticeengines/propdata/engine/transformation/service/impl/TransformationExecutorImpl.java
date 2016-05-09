@@ -105,6 +105,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                     .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
             AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
             ApplicationId appId = ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));
+            log.info("Submitted workflow " + appId);
             break;
         case FINISHED:
             transformationProgress = transformationService.finish(transformationProgress);

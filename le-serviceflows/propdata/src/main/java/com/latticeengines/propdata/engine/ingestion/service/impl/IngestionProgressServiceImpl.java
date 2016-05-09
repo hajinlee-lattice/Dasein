@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,6 @@ import com.latticeengines.propdata.engine.ingestion.service.IngestionProgressUpd
 
 @Component("ingestionProgressService")
 public class IngestionProgressServiceImpl implements IngestionProgressService {
-    private static Log log = LogFactory.getLog(IngestionProgressServiceImpl.class);
 
     @Autowired
     IngestionProgressEntityMgr ingestionProgressEntityMgr;

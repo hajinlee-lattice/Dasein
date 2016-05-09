@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.match.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +10,6 @@ import com.latticeengines.propdata.match.service.MatchPlanner;
 
 @Component("realTimeMatchPlanner")
 public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlanner {
-
-    private static final Log log = LogFactory.getLog(RealTimeMatchPlanner.class);
 
     @Value("${propdata.match.realtime.max.input:1000}")
     private int maxRealTimeInput;

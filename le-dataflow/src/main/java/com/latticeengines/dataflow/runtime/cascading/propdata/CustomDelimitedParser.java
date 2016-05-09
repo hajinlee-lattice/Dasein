@@ -6,7 +6,8 @@ import cascading.scheme.util.DelimitedParser;
 import cascading.scheme.util.FieldTypeResolver;
 
 public class CustomDelimitedParser extends DelimitedParser {
-    private CsvToAvroFieldMapping fieldMap;
+    private static final long serialVersionUID = -1832800305799711109L;
+	private CsvToAvroFieldMapping fieldMap;
 
     public CustomDelimitedParser(CsvToAvroFieldMapping fieldMap, String delimiter, String quote, boolean strict,
             boolean safe, FieldTypeResolver fieldTypeResolver) {

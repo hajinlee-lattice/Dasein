@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -26,8 +24,6 @@ import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
-
-    private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
 
     @Autowired
     private ColumnMetadataService columnMetadataService;

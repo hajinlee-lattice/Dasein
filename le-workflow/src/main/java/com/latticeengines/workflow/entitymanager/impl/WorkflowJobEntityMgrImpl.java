@@ -21,9 +21,6 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Autowired
     private WorkflowJobDao workflowJobDao;
 
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
     @Override
     public BaseDao<WorkflowJob> getDao() {
         return workflowJobDao;

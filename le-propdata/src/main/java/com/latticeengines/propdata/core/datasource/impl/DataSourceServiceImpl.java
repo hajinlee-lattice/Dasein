@@ -3,8 +3,6 @@ package com.latticeengines.propdata.core.datasource.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -17,8 +15,6 @@ import com.latticeengines.propdata.core.service.ZkConfigurationService;
 
 @Component
 public class DataSourceServiceImpl implements DataSourceService {
-
-    private Log log = LogFactory.getLog(this.getClass());
 
     private final AtomicInteger roundRobinPos = new AtomicInteger(0);
 

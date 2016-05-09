@@ -13,8 +13,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.mockito.Mockito;
 import org.springframework.http.HttpEntity;
@@ -50,8 +48,6 @@ import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListe
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
-
-    private static final Log log = LogFactory.getLog(PlsAbstractTestNGBase.class);
 
     protected static final Quota QUOTA = new Quota();
     protected static final String TEST_QUOTA_ID = "TEST_QUOTA_ID";

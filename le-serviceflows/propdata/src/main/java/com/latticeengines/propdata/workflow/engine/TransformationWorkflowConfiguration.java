@@ -10,7 +10,6 @@ import com.latticeengines.propdata.workflow.engine.steps.TransformationStepExecu
 public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
 
     public static class Builder {
-        private JsonUtils om = new JsonUtils();
         private TransformationWorkflowConfiguration configuration = new TransformationWorkflowConfiguration();
         private PrepareTransformationStepInputConfiguration prepareConfig = new PrepareTransformationStepInputConfiguration();
         private TransformationStepExecutionConfiguration parallelExecConfig = new TransformationStepExecutionConfiguration();
@@ -29,7 +28,7 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setRootOperationUid(rootOperationUid);
             prepareConfig.setHdfsPodId(hdfsPodId);
             prepareConfig.setInternalResourceHostPort(internalResourceHostPort);
-            prepareConfig.setTransformationConfiguration(om.serialize(transformationConfiguration));
+            prepareConfig.setTransformationConfiguration(JsonUtils.serialize(transformationConfiguration));
 
             prepareConfig.setServiceBeanName(serviceBeanName);
             prepareConfig

@@ -21,10 +21,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class TransformationProceedProgressStepExecution
         extends BaseWorkflowStep<TransformationStepExecutionConfiguration> {
     private static final String VERSION = "VERSION";
-
     private static final String TRANSFORMATION_CONFIGURATION = "TRANSFORMATION_CONFIGURATION";
-
-    private static final String CREATOR = "CREATOR";
 
     private static Log log = LogFactory.getLog(TransformationProceedProgressStepExecution.class);
 
@@ -32,12 +29,7 @@ public class TransformationProceedProgressStepExecution
     @Qualifier("bomboraFirehoseIngestionService")
     private TransformationService transformationService;
 
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
     private YarnClient yarnClient;
-
-    private String rootOperationUid;
 
     @Override
     public void execute() {
@@ -45,7 +37,6 @@ public class TransformationProceedProgressStepExecution
             log.info("Inside TransformationStepExecution execute()");
             initializeYarnClient();
             if (transformationService.isNewDataAvailable(null)) {
-                String creator = (String) executionContext.get(CREATOR);
                 TransformationConfiguration transformationConfiguration = (TransformationConfiguration) executionContext
                         .get(TRANSFORMATION_CONFIGURATION);
                 log.info("Processing version: " + transformationConfiguration.getSourceConfigurations().get(VERSION));
