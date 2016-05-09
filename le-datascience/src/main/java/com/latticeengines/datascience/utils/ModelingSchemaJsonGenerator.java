@@ -30,7 +30,11 @@ public class ModelingSchemaJsonGenerator {
     }
     
     static Class<?>[] getClassesToGenerate() {
-        return new Class[] { AlgorithmBase.class, LoadConfiguration.class,
-                SamplingConfiguration.class, SamplingElement.class, DataProfileConfiguration.class, Model.class };
+        return new Class[] { AlgorithmBase.class, //
+                LoadConfiguration.class, //
+                SamplingConfiguration.class, //
+                SamplingElement.class, //
+                DataProfileConfiguration.class, //
+                Model.class };
     }
 }
