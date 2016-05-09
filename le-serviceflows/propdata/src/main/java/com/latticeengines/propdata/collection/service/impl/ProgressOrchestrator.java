@@ -23,10 +23,10 @@ import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
-import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.source.DataImportedFromDB;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("progressOrchestrator")
@@ -79,7 +79,7 @@ public class ProgressOrchestrator {
     public synchronized void executeRefresh() {
         executorService = Executors.newFixedThreadPool(executorMap.size());
         for (Source source : sourceService.getSources()) {
-            if (serviceFlowsZkConfigService.refreshJobEnabled(source) && (!dryrun)) {
+            if ((!dryrun) && serviceFlowsZkConfigService.refreshJobEnabled(source)) {
                 try {
                     if (source instanceof DataImportedFromDB) {
                         submitProgress(findArchiveProgressToProceed((DataImportedFromDB) source));
@@ -89,15 +89,15 @@ public class ProgressOrchestrator {
                 } catch (Exception e) {
                     log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
                 }
-            }
-            if (source instanceof DerivedSource) {
-                try {
-                    RefreshService refreshService = refreshServiceMap.get(source);
-                    if (refreshService != null) {
-                        refreshService.purgeOldVersions();
+                if (source instanceof DerivedSource) {
+                    try {
+                        RefreshService refreshService = refreshServiceMap.get(source);
+                        if (refreshService != null) {
+                            refreshService.purgeOldVersions();
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to purge old versions of " + source.getSourceName(), e);
                     }
-                } catch (Exception e) {
-                    log.error("Failed to purge old versions of " + source.getSourceName(), e);
                 }
             }
         }

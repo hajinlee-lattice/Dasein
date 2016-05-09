@@ -15,7 +15,6 @@
             <map>
                 <entry key="orchestrator" value-ref="progressOrchestrator" />
                 <entry key="scheduler" value-ref="propDataScheduler" />
-                <entry key="dryrun" value="${propdata.job.schedule.dryrun:true}" />
             </map>
         </property>
     </bean>
