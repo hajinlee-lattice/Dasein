@@ -98,7 +98,7 @@ public class PropDataScheduler {
         if (service != null) {
             JobDetail job = JobBuilder.newJob(jobClass).usingJobData("dryrun", dryrun).build();
             job.getJobDataMap().put(serviceName, service);
-            job.getJobDataMap().put("zkConfigurationService", serviceFlowsZkConfigService);
+            job.getJobDataMap().put("serviceFlowsZkConfigService", serviceFlowsZkConfigService);
 
             scheduler.scheduleJob(job, cronTriggerForSource(source));
         }
