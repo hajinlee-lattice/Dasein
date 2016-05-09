@@ -102,11 +102,17 @@ def waitForLastPushToScoring(tenant, conn_mgr):
     while attempts > 0:
         ptstimestr = conn_mgr.getLoadGroupStatus('PushToScoringDB')['LastSuccessDate']
         ptstime = datetime.datetime.strptime(ptstimestr[:19], '%Y-%m-%dT%H:%M:%S') - datetime.timedelta(hours=3)
+
+        crmstatus = conn_mgr.getLoadGroupStatus('Nested_LoadCRMData')
+        crmproc = crmstatus['ProcessStatus']
+        crmtimestr = crmstatus['LastSuccessDate']
+        crmtime = datetime.datetime.strptime(crmtimestr[:19], '%Y-%m-%dT%H:%M:%S') - datetime.timedelta(hours=3)
+
         ptldstatus = conn_mgr.getLoadGroupStatus('PushToLeadDestination')
         ptldproc = ptldstatus['ProcessStatus']
         ptldtimestr = ptldstatus['LastSuccessDate']
         ptldtime = datetime.datetime.strptime(ptldtimestr[:19], '%Y-%m-%dT%H:%M:%S') - datetime.timedelta(hours=3)
-        if ptstime > ptldtime and ptldproc != 'InProcess':
+        if ptstime > ptldtime and ptstime > crmtime and ptldproc != 'InProcess' and crmproc != 'InProcess':
             return True
         time.sleep(60)
         attempts -= 1

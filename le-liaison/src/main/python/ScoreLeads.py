@@ -7,8 +7,11 @@ import multiprocessing
 import subprocess
 import hashlib
 
-PLS_ENDPOINT = 'https://app3.lattice-engines.com/pls'
-SCORING_ENDPOINT = 'https://api3.lattice-engines.com/score'
+#PLS_ENDPOINT = 'https://app3.lattice-engines.com/pls'
+#SCORING_ENDPOINT = 'https://api3.lattice-engines.com/score'
+PLS_ENDPOINT = 'https://bodcprodsvipa111.prod.lattice.local:8081/pls'
+SCORING_ENDPOINT = 'https://bodcprodsvipa111.prod.lattice.local:8073/score/'
+
 #SCORING_ENDPOINT = 'http://10.41.1.180:8080/score'
 #OAUTH2_ENDPOINT = 'https://app3.lattice-engines.com/pls/oauth2'
 #OAUTH2_ENDPOINT = 'http://10.41.0.52:8080/pls/oauth2'
@@ -28,7 +31,7 @@ def getAuthenticationToken(tenant, username, password):
     url = PLS_ENDPOINT + '/login'
     body_login = {"Username": username, "Password": password}
     header_login = {"Content-Type": "application/json"}
-    response = requests.post(url, headers=header_login, data=json.dumps(body_login))
+    response = requests.post(url, headers=header_login, data=json.dumps(body_login), verify=False)
     assert response.status_code == 200, 'Request failed for logging in to LP.\n' + response.content
     results = json.loads(response.text)
     auth_token = results["Uniqueness"] + '.' + results["Randomness"]
@@ -36,7 +39,7 @@ def getAuthenticationToken(tenant, username, password):
     url_attach = PLS_ENDPOINT + '/attach'
     body_attach = {"Identifier": '%s' % tenantID, "DisplayName": tenant}
     header_attach = {"Content-Type": "application/json", "Authorization": auth_token}
-    response_attach = requests.post(url_attach, headers=header_attach, data=json.dumps(body_attach))
+    response_attach = requests.post(url_attach, headers=header_attach, data=json.dumps(body_attach), verify=False)
 
     assert response_attach.status_code == 200, 'Request failed for logging in to LP.\n' + response_attach.content
     # print 'got the auth token: ' + auth_token
@@ -47,16 +50,15 @@ def getAccessToken(tenant, authorization):
     tenantID = '{0}.{0}.Production'.format(tenant)
     url = PLS_ENDPOINT + '/oauth2/accesstoken?tenantId={0}'.format(tenantID)
     header = {'Authorization': '{0}'.format(authorization)}
-    response = requests.get(url, headers=header)
+    response = requests.get(url, headers=header, verify=False)
     return response.content
 
 
 def getModelGUID(token):
     url = SCORING_ENDPOINT + '/models/CONTACT'
     header = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer {0}'.format(token)}
-    response = requests.get(url, headers=header)
+    response = requests.get(url, headers=header, verify=False)
     models = response.json()
-    print models
 
     print ''
     print 'Available Models:'
@@ -98,7 +100,7 @@ def getModelGUID(token):
 def getRequiredFields(token, modelGUID):
     url = SCORING_ENDPOINT + '/models/{0}/fields'.format(modelGUID)
     header = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer {0}'.format(token)}
-    response = requests.get(url, headers=header)
+    response = requests.get(url, headers=header, verify=False)
     requiredFieldNames = []
     fields = response.json()['fields']
     print ''
@@ -125,8 +127,9 @@ def scoreLeadFile(token, modelGUID, leadFileName, requiredFieldNames):
         fileReader = csv.DictReader(utf_8_encoder(leadFile))
 
         for row in fileReader:
-
             nLeads += 1
+            #if nLeads > 1000:
+            #    break
             row['CreatedDate'] = int(time.mktime(datetime.strptime(row['CreatedDate'], '%Y-%m-%d %H:%M:%S').timetuple()))
             requiredFields = {}
             for f in requiredFieldNames:
@@ -144,7 +147,7 @@ def scoreLeadFile(token, modelGUID, leadFileName, requiredFieldNames):
     print ''
     print '{0} leads scored in {1} seconds'.format(nLeads, int(duration))
 
-    with open('scores.csv', 'w') as scoreFile:
+    with open(leadFileName[:-4]+'_SCORES.csv', 'wb') as scoreFile:
         columnNames = ['ID', 'Percentile']
         writer = csv.DictWriter(scoreFile, fieldnames=columnNames)
 
@@ -152,14 +155,19 @@ def scoreLeadFile(token, modelGUID, leadFileName, requiredFieldNames):
 
         for s in scores[0]:
             (ID, score) = s
-            writer.writerow({'ID': ID, 'Percentile': int(score)})
+            if ID != '0':
+                writer.writerow({'ID': ID, 'Percentile': int(score)})
 
 
 def scoreLead(postdata):
     (url, header, record) = postdata
-    response = requests.post(url, headers=header, data=record)
-    score = response.json()['score']
-    Id = response.json()['id']
+    (Id, score) = ('0', 0.0)
+    try:
+        response = requests.post(url, headers=header, data=record, verify=False)
+        score = response.json()['score']
+        Id = response.json()['id']
+    except:
+        print 'Scoring Error for record:\n{0}'.format(record)
     return (Id, score)
 
 

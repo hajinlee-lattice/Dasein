@@ -48,7 +48,9 @@ def generateLeadDatasets(tenants):
         except TenantNotMappedToURL:
             print 'Not on LP DataLoader; skipping'
             continue
-
+        dt = datetime.datetime.now()
+        writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
+        exit(0)
         template_type = 'Unknown'
         template_version = 'Unknown'
 
@@ -101,10 +103,10 @@ def generateLeadDatasets(tenants):
             continue
 
         filterModel = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NOT"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Like"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"), LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}"))))), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpressionConstantScalar("0|5", DataTypeVarChar(3)))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}")))))'.format(entityname))
-        q_pls_modeling.getFilters().append(filterModel)
+        #q_pls_modeling.getFilters().append(filterModel)
         q_pls_modeling.setName("Q_LP3_Modeling")
         conn_mgr.setQuery(q_pls_modeling)
-        q_pls_modeling.getFilters().remove(filterModel)
+        #q_pls_modeling.getFilters().remove(filterModel)
 
 
         colnames_exclude = []
@@ -153,10 +155,10 @@ def generateLeadDatasets(tenants):
         dt = datetime.datetime.now()
 
         writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
-        writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_AllRows', dt)
-        writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_OneLeadPerDomain', dt)
+        #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_AllRows', dt)
+        #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_OneLeadPerDomain', dt)
 
-        executeModelBuild(conn_mgr)
+        #executeModelBuild(conn_mgr)
 
 
 def adjustQuerySFDC(conn_mgr, q_pls_modeling, filterModel):
@@ -236,7 +238,7 @@ def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDat
     q_pls_modeling.renameColumn('LeadID', 'Id')
     q_pls_modeling.renameColumn('Company', 'CompanyName')
 
-    q_pls_modeling.getFilters().append(filterModel)
+    #q_pls_modeling.getFilters().append(filterModel)
     q_pls_modeling.setName("Q_LP3_ModelingLead_OneLeadPerDomain")
     conn_mgr.setQuery(q_pls_modeling)
 
@@ -246,14 +248,14 @@ def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDat
         lasmspec += sep+f.definition()
         sep = ', '
 
-    q_pls_modeling.getFilters().remove(filterModel)
+    #q_pls_modeling.getFilters().remove(filterModel)
 
     filterSample = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Like"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"), LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}"))))), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpressionConstantScalar("0|5", DataTypeVarChar(3))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}")))))'.format(entityname))
 
-    q_pls_modeling.getFilters().append(filterSample)
+    #q_pls_modeling.getFilters().append(filterSample)
     q_pls_modeling.setName("Q_LP3_ScoringLead")
     conn_mgr.setQuery(q_pls_modeling)
-    q_pls_modeling.getFilters().remove(filterSample)
+    #q_pls_modeling.getFilters().remove(filterSample)
 
     filtersToRemove = []
     for f in q_pls_modeling.getFilters():
@@ -270,7 +272,7 @@ def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDat
     q_pls_modeling.getFilters().append(filterIsConsideredForModeling)
     q_pls_modeling.getFilters().append(filterAllInSample)
     q_pls_modeling.setName("Q_LP3_ModelingLead_AllRows")
-    conn_mgr.setQuery(q_pls_modeling)
+    #conn_mgr.setQuery(q_pls_modeling)
 
     filterAllInSampleSpec = 'SpecLatticeNamedElements((SpecLatticeNamedElement(SpecLatticeAliasDeclaration(\
                                LatticeAddressSetFcn(\
@@ -300,7 +302,7 @@ def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDat
                                , LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{2}"))))\
                                )\
                              ), ContainerElementName("LP3AllInSampleLeadsByPropDataID"))))'.format(mapTable, colPropDataID, entityname, lasmspec)
-    conn_mgr.setSpec('LP3AllInSampleLeadsByPropDataID', filterAllInSampleSpec)
+    #conn_mgr.setSpec('LP3AllInSampleLeadsByPropDataID', filterAllInSampleSpec)
 
 
 def executeModelBuild(conn_mgr):

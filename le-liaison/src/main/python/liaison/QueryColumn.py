@@ -63,7 +63,7 @@ class QueryColumn(object):
         return self.statistical_type_
 
     def setStatisticalType(self, st):
-        if st is not None and st.lower() not in [ 'nominal', 'ratio', 'ordinal', 'interval' ]:
+        if st is not None and st.lower() not in [ 'nominal', 'ratio', 'ordinal', 'interval', 'boolean' ]:
             raise UnknownMetadataValue(st)
         self.statistical_type_ = st if not st else st.lower()
 
