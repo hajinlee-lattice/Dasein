@@ -35,7 +35,6 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
 import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -54,9 +53,6 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private MatchCommandProxy matchCommandProxy;
 
     @Autowired
     private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
