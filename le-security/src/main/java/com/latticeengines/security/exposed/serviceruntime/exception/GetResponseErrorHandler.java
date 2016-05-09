@@ -32,6 +32,7 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
         IOUtils.copy(response.getBody(), baos);
         String body = new String(baos.toByteArray());
         if (!interpretAndThrowException(response.getStatusCode(), body)) {
+            log.error("Could not interpret exception response: " + body);
             throw new RuntimeException(body);
         }
     }
