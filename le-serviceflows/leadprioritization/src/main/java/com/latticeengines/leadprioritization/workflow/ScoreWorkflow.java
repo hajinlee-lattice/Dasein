@@ -4,9 +4,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
-import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
+import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesViaJavaFunction;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
@@ -22,7 +21,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Autowired
-    private AddStandardAttributes addStandardAttributes;
+    private AddStandardAttributesViaJavaFunction addStandardAttributesViaJavaFunction;
 
     @Autowired
     private ScoreEventTable score;
@@ -44,7 +43,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(matchDataCloudWorkflow) //
-                .next(addStandardAttributes) //
+                .next(addStandardAttributesViaJavaFunction) //
                 .next(score) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
