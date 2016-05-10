@@ -40,7 +40,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
 
     // UI BAND-AID for DP-2854 here
-    combineInternalAndExternalAttributesDups(model.InternalAttributes.categories, model.ExternalAttributes.categories);
+    combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
 
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
     var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
@@ -70,11 +70,18 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     be external (DP-2854). This is an UI BAND-AID until the back end change is in page.
     */
     function combineInternalAndExternalAttributesDups(internalAttr, externalAttr) {
-        for (var j = 0; j < externalAttr.length; j++) {
-            for (var i = 0; i < internalAttr.length; i++) {
-                if (externalAttr[j].name == internalAttr[i].name) {
-                    externalAttr[j].count += internalAttr[i].count;
-                    internalAttr.splice(i, 1);
+        var internalCategories = internalAttr.categories;
+        var externalCategories = externalAttr.categories;
+
+        for (var j = 0; j < externalCategories.length; j++) {
+            for (var i = 0; i < internalCategories.length; i++) {
+                if (externalCategories[j].name == internalCategories[i].name) {
+                    externalAttr.total += internalCategories[i].count;
+                    internalAttr.total -= internalCategories[i].count;
+
+                    externalCategories[j].count += internalCategories[i].count;
+
+                    internalCategories.splice(i, 1);
                 }
             }
         }
