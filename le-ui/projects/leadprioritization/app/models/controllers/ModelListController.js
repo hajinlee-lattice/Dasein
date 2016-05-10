@@ -25,6 +25,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
     }
 
     $scope.showNoModels = false;
+    $scope.length = 0;
     function getModels(use_cache) {
         ModelStore.getModels(use_cache).then(function(result) {
             $scope.loading = false;
