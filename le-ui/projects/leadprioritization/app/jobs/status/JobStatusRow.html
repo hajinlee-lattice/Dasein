@@ -3,8 +3,8 @@
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state == 'model'">{{job.source}}</span>
-        <span class="columns three" ng-if="state != 'model'">{{job.displayName}}</span>
-        <span class="columns one {{job.status}}">{{job.status}}</span>
+        <span class="columns two" ng-if="state != 'model'">{{job.displayName}}</span>
+        <span class="columns two {{job.status}}">{{job.status}}</span>
         <span class="columns three">
             <span ng-if="(jobCompleted || jobFailed) && job.id != null">
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
