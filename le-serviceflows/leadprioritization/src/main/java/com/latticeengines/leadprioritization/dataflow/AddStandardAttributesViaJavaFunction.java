@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 @Component("addStandardAttributesViaJavaFunction")
 public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(AddStandardAttributes.class);
 
     @Override
@@ -32,12 +31,21 @@ public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilde
         .arguments.put("column", emailOrWebsite.getName());
 
         for (Map.Entry<String, TransformDefinition> entry : definitions.entrySet()) {
-            last = addFunction(last, entry.getValue());
+            last = addFunction(last, eventTable, entry.getValue());
         }
         return last;
     }
 
-    private Node addFunction(Node last, TransformDefinition definition) {
+    private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {
+        for (Object value : definition.arguments.values()) {
+            Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
+            if (attr == null) {
+                log.info(String.format(
+                        "Excluding field %s (function %s) because some source columns are not available",
+                        definition.output, definition.name));
+                return last;
+            }
+        }
         return last.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
     }
 }
