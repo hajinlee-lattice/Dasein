@@ -5,13 +5,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.login.services.LoginService',
     'mainApp.core.services.FeatureFlagService'
 ])
-.controller('MainHeaderController', function ($scope, $rootScope, $location, $routeParams, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('MainHeaderController', function ($scope, $rootScope, $routeParams, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+    
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
-        $scope.userDisplayName = clientSession.displayName;
+        $scope.userDisplayName = clientSession.DisplayName;
     }
+    console.log($scope.userDisplayName);
     $scope.showProfileNav = false;
 
     
