@@ -61,7 +61,7 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
 
         String metricsToLog = getDefaultMetrics(joinPoint.getSignature(), elapsedTime, trackId)
                 + getLogRestApiSpecificMetrics(joinPoint);
-        log.debug(metricsToLog);
+        log.info(metricsToLog);
 
         return retVal;
     }
@@ -78,7 +78,7 @@ public class BaseMetricsAspectImpl implements MetricsAspect {
 
         String metricsToLog = getDefaultMetrics(joinPoint.getSignature(), elapsedTime, trackId)
                 + getLogRestApiCallSpecificMetrics(joinPoint);
-        log.debug(metricsToLog);
+        log.info(metricsToLog);
 
         return retVal;
     }
