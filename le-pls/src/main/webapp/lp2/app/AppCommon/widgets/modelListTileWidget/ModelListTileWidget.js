@@ -100,7 +100,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             return;
         }
 
-        ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
+        ModelService.ChangeModelDisplayName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
             if (result.Success) {
                 $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
             } else {
