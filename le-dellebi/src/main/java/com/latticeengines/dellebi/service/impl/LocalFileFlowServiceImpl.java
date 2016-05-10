@@ -99,7 +99,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
     @Override
     public String getTargetDB(String type) {
-        if (type.equals(FileType.QUOTE.getType()))
+        if (type.equalsIgnoreCase(FileType.QUOTE.getType()))
             return localTargetDB;
         else
             return stageFinalTargetDB;

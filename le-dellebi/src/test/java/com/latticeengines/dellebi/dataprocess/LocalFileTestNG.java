@@ -33,7 +33,8 @@ public class LocalFileTestNG extends DellEbiTestNGBase {
     @Test(groups = "manual")
     public void process() {
 
-        String typesStr = "order_detail";
+        String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"
+                + "SKU_Itm_Cls_Code,Calendar,Channel,quote,Account_Cust";
         String[] typesList = typesStr.split(",");
         DataFlowContext context = dailyFlow.doDailyFlow(typesList);
         context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
