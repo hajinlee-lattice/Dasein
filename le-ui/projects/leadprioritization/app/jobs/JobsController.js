@@ -203,6 +203,7 @@ angular.module('pd.jobs', [
                 
                 jobs = _.sortBy(jobs, 'startTimestamp');
                 result.resultObj = _.map(jobs, function(job) {
+                    clearNumSteps();
                     var stepRunning = getStepRunning(job);
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
