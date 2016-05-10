@@ -123,7 +123,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 $scope.jsonData = null;
                 $scope.timeElapsed = null;
 
-                var scoreRequest = { modelId: $scope.modelId, record: {} };
+                var scoreRequest = { modelId: $scope.modelId, source: 'APIConsole', record: {} };
                 for (var i = 0; i < $scope.fields.length; i++) {
                     if ($scope.fields[i].value != null) {
                         if ($scope.fields[i].fieldType.toUpperCase() == 'FLOAT') {
