@@ -30,5 +30,6 @@ public class PythonModelingMapper extends PythonMapperBase {
     public void writeToContext(Context context) throws IOException, InterruptedException {
         Text value = new Text(super.getHdfsOutputDir());
         context.write(new Text(FileAggregator.MODEL_PICKLE), value);
+        context.write(new Text(FileAggregator.FEATURE_IMPORTANCE_TXT), value);
     }
 }
