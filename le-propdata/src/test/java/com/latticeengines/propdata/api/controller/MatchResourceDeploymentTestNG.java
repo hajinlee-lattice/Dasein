@@ -154,7 +154,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private MatchInput createAvroBulkMatchInput(boolean useDir) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

@@ -66,8 +66,8 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
                     || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
                 return predefinedMetaDataCache.get(predefined);
             } else {
-                throw new UnsupportedOperationException("Only support selection " + ColumnSelection.Predefined.Model
-                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+                throw new UnsupportedOperationException("Only support selection "
+                        + ColumnSelection.Predefined.supportedSelections + " now");
             }
         } catch (Exception e) {
             log.warn("Failed to find metadata for selection " + predefined + " in cache");

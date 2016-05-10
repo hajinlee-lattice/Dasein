@@ -74,8 +74,10 @@ public abstract class MatchFetcherBase {
 
     private QueryExecutor getQueryExecutor(String sourceName, List<String> targetColumns, MatchContext matchContext) {
         JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-        if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)) {
-            CachedMatchQueryExecutor callable = new CachedMatchQueryExecutor("Domain", "Name", "Country", "State", "City");
+        if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)
+                || MatchConstants.RTS.equals(sourceName)) {
+            CachedMatchQueryExecutor callable = new CachedMatchQueryExecutor("Domain", "Name", "Country", "State",
+                    "City");
             callable.setSourceName(sourceName);
             callable.setTargetColumns(targetColumns);
             callable.setJdbcTemplate(jdbcTemplate);
@@ -99,7 +101,7 @@ public abstract class MatchFetcherBase {
         private String cityField;
 
         CachedMatchQueryExecutor(String domainField, String nameField, String countryField, String stateField,
-                            String cityField) {
+                String cityField) {
             this.domainField = domainField;
             this.nameField = nameField;
             this.countryField = countryField;
@@ -130,7 +132,7 @@ public abstract class MatchFetcherBase {
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains,
-                                         Collection<NameLocation> nameLocations) {
+                Collection<NameLocation> nameLocations) {
 
             List<String> columnsToQuery = new ArrayList<>();
             Set<String> columnsInTable;
@@ -223,7 +225,8 @@ public abstract class MatchFetcherBase {
         }
 
         protected String getSourceTableName() {
-            if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)) {
+            if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)
+                    || MatchConstants.RTS.equals(sourceName)) {
                 return MatchConstants.CACHE_TABLE;
             } else {
                 return null;
@@ -233,7 +236,5 @@ public abstract class MatchFetcherBase {
         protected abstract List<Map<String, Object>> query();
 
     }
-
-
 
 }

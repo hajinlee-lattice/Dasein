@@ -62,6 +62,10 @@ do
 done
 wait
 
+echo "Update propdata DB"
+bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+processErrors
+
 echo "Success!!!"
 
 

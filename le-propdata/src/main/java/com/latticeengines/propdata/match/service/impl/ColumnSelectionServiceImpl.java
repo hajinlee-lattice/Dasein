@@ -66,8 +66,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
                     || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
                 return sourceColumnMapCache.get(predefined);
             } else {
-                throw new UnsupportedOperationException("Only support selection " + ColumnSelection.Predefined.Model
-                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+                throw new UnsupportedOperationException(
+                        "Only support selections are " + ColumnSelection.Predefined.supportedSelections);
             }
         } catch (Exception e) {
             log.warn("Failed to find sourceColumnMap for selection " + predefined + " in cache");
@@ -84,8 +84,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
                     || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
                 return columnPriorityMapCache.get(predefined);
             } else {
-                throw new UnsupportedOperationException("Only support selections " + ColumnSelection.Predefined.Model
-                        + " and " + ColumnSelection.Predefined.DerivedColumns + " now");
+                throw new UnsupportedOperationException(
+                        "Only support selections are " + ColumnSelection.Predefined.supportedSelections);
             }
         } catch (Exception e) {
             log.warn("Failed to find columnPriorityMap for selection " + predefined + " in cache");

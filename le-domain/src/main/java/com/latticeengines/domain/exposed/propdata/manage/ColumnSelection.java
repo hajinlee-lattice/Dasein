@@ -75,7 +75,10 @@ public class ColumnSelection {
     }
 
     public enum Predefined implements Dimension {
-        LeadEnrichment("LeadEnrichment"), DerivedColumns("DerivedColumns"), Model("Model");
+        LeadEnrichment("LeadEnrichment"), //
+        DerivedColumns("DerivedColumns"), //
+        Model("Model"), //
+        RTS("RTS");
 
         private final String name;
         private static Map<String, Predefined> nameMap;
@@ -104,7 +107,7 @@ public class ColumnSelection {
             return getName() + "_" + version + ".json";
         }
 
-        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns);
+        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS);
 
     }
 

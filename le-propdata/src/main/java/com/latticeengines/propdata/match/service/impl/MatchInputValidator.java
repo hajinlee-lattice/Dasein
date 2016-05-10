@@ -57,13 +57,14 @@ class MatchInputValidator {
 
         List<String> inputFields;
         switch (input.getInputBuffer().getBufferType()) {
-            case AVRO:
-                inputFields = validateInputAvroAndGetFieldNames(input.getInputBuffer(), yarnConfiguration);
-                break;
-            case SQL:
-                throw new UnsupportedOperationException("SQL buffer has not been implemented yet.");
-            default:
-                throw new IllegalArgumentException("Unknown type of input buffer " + input.getInputBuffer().getBufferType());
+        case AVRO:
+            inputFields = validateInputAvroAndGetFieldNames(input.getInputBuffer(), yarnConfiguration);
+            break;
+        case SQL:
+            throw new UnsupportedOperationException("SQL buffer has not been implemented yet.");
+        default:
+            throw new IllegalArgumentException(
+                    "Unknown type of input buffer " + input.getInputBuffer().getBufferType());
         }
         input.setFields(inputFields);
         input.setNumRows(input.getInputBuffer().getNumRows().intValue());
@@ -89,7 +90,7 @@ class MatchInputValidator {
     private static Map<MatchKey, List<String>> resolveKeyMap(MatchInput input) {
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
         if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
-            for (Map.Entry<MatchKey, List<String>> entry: input.getKeyMap().entrySet()) {
+            for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
                 log.debug("Overwriting key map entry " + JsonUtils.serialize(entry));
                 keyMap.put(entry.getKey(), entry.getValue());
             }
@@ -97,9 +98,10 @@ class MatchInputValidator {
 
         for (List<String> fields : keyMap.values()) {
             if (fields != null && !fields.isEmpty()) {
-                for (String field: fields) {
+                for (String field : fields) {
                     if (!input.getFields().contains(field)) {
-                        throw new IllegalArgumentException("Cannot find target field " + field + " in claimed field list.");
+                        throw new IllegalArgumentException(
+                                "Cannot find target field " + field + " in claimed field list.");
                     }
                 }
             }
@@ -114,9 +116,8 @@ class MatchInputValidator {
         }
 
         if (!ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
-            throw new UnsupportedOperationException(
-                    "Only Predefined selection " + ColumnSelection.Predefined.Model
-                            + " and " + ColumnSelection.Predefined.DerivedColumns + " are supported at this time.");
+            throw new UnsupportedOperationException("Only Predefined selection "
+                    + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
         }
 
     }
@@ -156,7 +157,7 @@ class MatchInputValidator {
 
             Schema schema = extractSchema(avroDir, yarnConfiguration);
             List<String> fieldNames = new ArrayList<>();
-            for (Schema.Field field: schema.getFields()) {
+            for (Schema.Field field : schema.getFields()) {
                 fieldNames.add(field.name());
             }
             return fieldNames;

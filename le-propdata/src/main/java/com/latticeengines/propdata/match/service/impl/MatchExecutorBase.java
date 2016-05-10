@@ -266,8 +266,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Override
     public MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection.Predefined selection) {
-        if (ColumnSelection.Predefined.Model.equals(selection)
-                || ColumnSelection.Predefined.DerivedColumns.equals(selection)) {
+        if (ColumnSelection.Predefined.supportedSelections.contains(selection)) {
             List<ColumnMetadata> metadata = columnMetadataService.fromPredefinedSelection(selection);
             matchOutput.setMetadata(metadata);
             return matchOutput;
@@ -275,31 +274,25 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         throw new RuntimeException("Cannot find the requested metadata.");
     }
 
-     protected void generateAccountMetric(MatchContext matchContext) {
-         // no need to push this metric to influxdb now.
-         // will figure out another way to dump match history.
-         /*
-         try {
-            MatchInput input = matchContext.getInput();
-            List<MatchedAccount> accountMeasurements = new ArrayList<>();
-            List<InternalOutputRecord> recordList = matchContext.getInternalResults();
-            for (InternalOutputRecord record : recordList) {
-                if (record.isFailed()) {
-                    continue;
-                }
-                MatchKeyDimension keyDimension =
-                        new MatchKeyDimension(record.getParsedDomain(), record.getParsedNameLocation());
-                MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
-                        record.isMatched());
-                accountMeasurements.add(measurement);
-            }
-
-            // influxdb cannot host history of this, so it is not useful to dump this to infuxdb.
-            // metricService.write(MetricDB.LDC_Match, accountMeasurements);
-        } catch (Exception e) {
-            log.warn("Failed to extract account based metric.", e);
-        }
-        */
+    protected void generateAccountMetric(MatchContext matchContext) {
+        // no need to push this metric to influxdb now.
+        // will figure out another way to dump match history.
+        /*
+         * try { MatchInput input = matchContext.getInput();
+         * List<MatchedAccount> accountMeasurements = new ArrayList<>();
+         * List<InternalOutputRecord> recordList =
+         * matchContext.getInternalResults(); for (InternalOutputRecord record :
+         * recordList) { if (record.isFailed()) { continue; } MatchKeyDimension
+         * keyDimension = new MatchKeyDimension(record.getParsedDomain(),
+         * record.getParsedNameLocation()); MatchedAccount measurement = new
+         * MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
+         * record.isMatched()); accountMeasurements.add(measurement); }
+         * 
+         * // influxdb cannot host history of this, so it is not useful to dump
+         * this to infuxdb. // metricService.write(MetricDB.LDC_Match,
+         * accountMeasurements); } catch (Exception e) { log.warn(
+         * "Failed to extract account based metric.", e); }
+         */
     }
 
     private boolean isDomainSource(String sourceName) {
@@ -307,7 +300,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     private boolean isCachedSource(String sourceName) {
-        return MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName);
+        return MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)
+                || MatchConstants.RTS.equals(sourceName);
     }
 
     private String getDomainField(String sourceName) {

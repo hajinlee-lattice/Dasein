@@ -257,7 +257,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
         private Future<MatchOutput> singleRun(List<Object> row, ExecutorService executor) {
             final MatchInput input = new MatchInput();
             input.setReturnUnmatched(true);
-            input.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+            input.setPredefinedSelection(ColumnSelection.Predefined.RTS);
             input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
             input.setData(Collections.singletonList(row));
@@ -338,7 +338,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
             MatchInput matchInput = new MatchInput();
             matchInput.setReturnUnmatched(true);
             matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-            matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+            matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
             AvroInputBuffer inputBuffer = new AvroInputBuffer();
             inputBuffer.setAvroDir(AVRO_DIR);
             matchInput.setInputBuffer(inputBuffer);
