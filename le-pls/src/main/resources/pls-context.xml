@@ -16,6 +16,7 @@
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:common-jmx-component-context.xml"/>
+    <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:pls-monitor-aspects-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
