@@ -7,15 +7,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 
@@ -35,27 +31,27 @@ public class FeatureImportanceAggregator implements FileAggregator {
 		for(String path : localPaths) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
             line = reader.readLine();
-            
+
             while ((line = reader.readLine()) != null) {
             	int commaIndex = line.indexOf(",");
             	String feature = line.substring(0, commaIndex).trim();
             	double importance = Double.parseDouble(line.substring(commaIndex+1).trim());
-                
+
             	if(FeatureImportanceValues.containsKey(feature)){
             		FeatureImportanceValues.put(feature, FeatureImportanceValues.get(feature) + importance);
             	}
             	else{
             		FeatureImportanceValues.put(feature, importance);
             	}
-            }            
+            }
             reader.close();
         }
-		
+
         int N = localPaths.size();
         for (String feature : FeatureImportanceValues.keySet()) {
         	FeatureImportanceValues.put(feature, FeatureImportanceValues.get(feature)/N);
         }
-        
+
         return FeatureImportanceValues;
 	}
 
@@ -71,12 +67,12 @@ public class FeatureImportanceAggregator implements FileAggregator {
         bwriter.flush();
         fwriter.flush();
 	}
-	
+
     private void copyToHdfs(Configuration config) throws Exception {
         String hdfsPath = config.get(MapReduceProperty.OUTPUT.name());
         HdfsUtils.copyLocalToHdfs(config, getName(), hdfsPath);
     }
-    
+
     @Override
     public String getName() {
         return FileAggregator.FEATURE_IMPORTANCE_TXT;

@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -28,9 +31,6 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scores/fileuploads", description = "REST resource for uploading csv files for scoring")
 @RestController

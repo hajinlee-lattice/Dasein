@@ -58,6 +58,7 @@ public class TestScoreDeploymentTestNG extends ScoringApiControllerDeploymentTes
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
                 ScoreResponse.class);
 
+        @SuppressWarnings("unused")
         ScoreResponse scoreResponse = response.getBody();
     }
 
