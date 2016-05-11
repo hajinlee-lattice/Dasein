@@ -90,6 +90,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactMap.put("SfdcContactID", contactArray[8]);
                         contactList.add(contactMap);
                         record.put("Contacts", contactList);
+                        
+                        // On recommendation record as well.
+                        record.put("SfdcContactID", contactArray[8]);
                     }
 
                 }
