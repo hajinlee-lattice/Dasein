@@ -71,11 +71,33 @@ public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTe
         assertEquals(attribute.getTags().size(), 1);
         assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
         assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
+        assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);
             assertEquals(a.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
             assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         }
+
+        ColumnTypeMapping additionalCol1 = new ColumnTypeMapping();
+        additionalCol1.setColumnName("additionalCol1");
+        additionalCol1.setColumnType("boolean");
+        ColumnTypeMapping additionalCol2 = new ColumnTypeMapping();
+        additionalCol2.setColumnName("additionalCol2");
+        additionalCol2.setColumnType("Double");
+        mappings.add(additionalCol1);
+        mappings.add(additionalCol2);
+        strategy = new UserDefinedMetadataResolutionStrategy(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                mappings, yarnConfiguration);
+        strategy.calculate();
+        table = strategy.getMetadata();
+        attribute = table.getAttribute("additionalCol1");
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);
+        assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
+        attribute = table.getAttribute("additionalCol2");
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_NUMERIC);
+        assertEquals(attribute.getStatisticalType(), ModelingMetadata.RATIO_STAT_TYPE);
+
     }
 
     @AfterClass(groups = "functional")

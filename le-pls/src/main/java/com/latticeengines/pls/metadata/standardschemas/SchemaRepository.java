@@ -331,7 +331,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "No. of Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
-                .fundamentalType(ModelingMetadata.FT_ENUM) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());

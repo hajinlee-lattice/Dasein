@@ -27,4 +27,19 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         assertTrue(!headers.isEmpty());
         assertEquals(headers.size(), 17);
     }
+
+    @Test(groups = "unit")
+    public void testValidateCSVFileHeader() throws FileNotFoundException {
+        URL topPredictorCSVFileUrl = ClassLoader.getSystemResource("com/latticeengines/pls/util/wrong_format_file.csv");
+        File csvFile = new File(topPredictorCSVFileUrl.getFile());
+        InputStream stream = new FileInputStream(csvFile);
+        boolean thrownNotException = true;
+        try {
+            ValidateFileHeaderUtils.validateCSVHeaderFormat(stream);
+            thrownNotException = false;
+        } catch (Exception e) {
+            assertTrue(thrownNotException, "Should have thrown exception");
+        }
+
+    }
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.log4j.Logger;
 
@@ -41,4 +42,15 @@ public class ValidateFileHeaderUtils {
         }
     }
 
+    public static void validateCSVHeaderFormat(InputStream stream) {
+        try {
+            String headerStr = IOUtils.toString(stream, "UTF-8");
+            if (headerStr.indexOf(',') == -1) {
+                throw new LedpException(LedpCode.LEDP_19111);
+            }
+        } catch (IOException e) {
+            log.error(e);
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+    }
 }

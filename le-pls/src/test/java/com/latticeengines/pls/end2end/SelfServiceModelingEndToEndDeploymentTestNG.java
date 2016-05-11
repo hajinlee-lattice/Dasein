@@ -114,6 +114,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         @SuppressWarnings("unchecked")
         List<LinkedHashMap<String, String>> unknownColumns = new ObjectMapper().convertValue(response.getResult(),
                 List.class);
+
+        System.out.println("the unknown columsn are: " + unknownColumns);
+        log.info("the unknown columsn are: " + unknownColumns);
         if (unknownColumnHandler != null) {
             unknownColumnHandler.apply(unknownColumns);
         }
@@ -208,7 +211,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(errors.length() > 0);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = {"retrieveModelSummary"})
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
     public void cloneAndRemodel() {
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
@@ -298,8 +301,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }));
 
         // Look up the model summary with details
-        Object rawSummary = restTemplate.getForObject(String.format("%s/pls/modelsummaries/%s",
-                getRestAPIHostPort(), found.getId()), Object.class);
+        Object rawSummary = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), found.getId()), Object.class);
         return JsonUtils.convertValue(rawSummary, ModelSummary.class);
     }
 
@@ -332,7 +335,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation,
-                               Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName)
+            Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName)
             throws InterruptedException {
         if (!StringUtils.isBlank(fileName)) {
             this.fileName = fileName;

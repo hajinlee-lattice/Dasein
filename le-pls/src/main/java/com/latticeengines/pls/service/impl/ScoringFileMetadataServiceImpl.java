@@ -63,6 +63,13 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             stream = new BufferedInputStream(stream);
         }
         stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+        ValidateFileHeaderUtils.validateCSVHeaderFormat(stream);
+        try {
+            stream.reset();
+        } catch (IOException e) {
+            log.error(e);
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
         Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, leCsvParser);
         try {
             stream.reset();

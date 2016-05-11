@@ -32,7 +32,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     private String csvPath;
     private SchemaInterpretation schema;
     private List<ColumnTypeMapping> additionalColumns;
-    private Configuration yarnConfiguration;
+    private static Configuration yarnConfiguration;
 
     private static class Result {
         public List<ColumnTypeMapping> unknownColumns;
@@ -151,7 +151,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         // If there are any unknown columns, the metadata is not fully defined.
     }
 
-    private Attribute generateAttributeBasedOnColumnTypeMapping(ColumnTypeMapping ctm) {
+    Attribute generateAttributeBasedOnColumnTypeMapping(ColumnTypeMapping ctm) {
         Attribute attribute = new Attribute();
         attribute.setName(ctm.getColumnName().replaceAll("[^A-Za-z0-9_]", "_"));
         attribute.setPhysicalDataType(ctm.getColumnType());
@@ -163,6 +163,17 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         attribute.setNullable(true);
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
         return attribute;
+    }
+
+    public static void main(String[] args) {
+        UserDefinedMetadataResolutionStrategy userDefinedMetadataResolutionStrategy = new UserDefinedMetadataResolutionStrategy(
+                "phf", SchemaInterpretation.SalesforceAccount, null, yarnConfiguration);
+        ColumnTypeMapping mp = new ColumnTypeMapping();
+        mp.setColumnName("jha");
+        mp.setColumnType("String");
+        Attribute attribute = userDefinedMetadataResolutionStrategy.generateAttributeBasedOnColumnTypeMapping(mp);
+        System.out.println(attribute.getFundamentalType());
+        System.out.println(attribute.getStatisticalType());
     }
 
     private String generateFundamentalTypeBasedOnColumnType(String columnType) {
