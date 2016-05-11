@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
@@ -191,22 +192,23 @@ public class LedpCSVToAvroImportMapper extends
                 }
             case STRING:
                 return fieldCsvValue;
-            case BOOLEAN:
-                if (fieldCsvValue.equals("1")) {
-                    return Boolean.TRUE;
-                } else if (fieldCsvValue.equals("0")) {
-                    return Boolean.FALSE;
-                }
-                return Boolean.valueOf(fieldCsvValue);
             case ENUM:
                 return fieldCsvValue;
+            case BOOLEAN:
+                if (fieldCsvValue.equals("1") || fieldCsvValue.equalsIgnoreCase("true")) {
+                    return Boolean.TRUE;
+                } else if (fieldCsvValue.equals("0") || fieldCsvValue.equalsIgnoreCase("false")) {
+                    return Boolean.FALSE;
+                } else if (StringUtils.isEmpty(fieldCsvValue)) {
+                    return null;
+                }
             default:
-                fieldMalFormed = true;
-                throw new RuntimeException("Not supported Field, avroType:" + avroType + ", physicalDatalType:"
+                throw new IllegalArgumentException("Not supported Field, avroType:" + avroType + ", physicalDatalType:"
                         + attr.getPhysicalDataType());
             }
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
+            LOG.error(e);
             throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType + ".");
         } catch (Exception e) {
             fieldMalFormed = true;
