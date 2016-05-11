@@ -165,17 +165,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         return attribute;
     }
 
-    public static void main(String[] args) {
-        UserDefinedMetadataResolutionStrategy userDefinedMetadataResolutionStrategy = new UserDefinedMetadataResolutionStrategy(
-                "phf", SchemaInterpretation.SalesforceAccount, null, yarnConfiguration);
-        ColumnTypeMapping mp = new ColumnTypeMapping();
-        mp.setColumnName("jha");
-        mp.setColumnType("String");
-        Attribute attribute = userDefinedMetadataResolutionStrategy.generateAttributeBasedOnColumnTypeMapping(mp);
-        System.out.println(attribute.getFundamentalType());
-        System.out.println(attribute.getStatisticalType());
-    }
-
     private String generateFundamentalTypeBasedOnColumnType(String columnType) {
         String fundamentalType = null;
         switch (columnType.toUpperCase()) {
