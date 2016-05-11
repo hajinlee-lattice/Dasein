@@ -766,6 +766,14 @@
   box-shadow: none;
 }
 
+#validateFieldsCheckbox {
+  input {
+    margin-right: 5px;
+  }
+
+  margin-top: 10px;
+}
+
 #saveLeadEnrichmentAttributesButton {
   float: right;
   margin-top: 10px;

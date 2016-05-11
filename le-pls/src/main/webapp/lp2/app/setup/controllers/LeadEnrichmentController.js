@@ -11,6 +11,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
 
 .controller('LeadEnrichmentController', function ($scope, $rootScope, $http, _, ResourceUtility, BrowserStorageUtility, NavUtility, SessionService, LeadEnrichmentAttributesDetailsModel, SaveAttributesModel, LeadEnrichmentService) {
     $scope.ResourceUtility = ResourceUtility;
+    $scope.validateFields = true;
     if (BrowserStorageUtility.getClientSession() == null) { return; }
 
     load(false);

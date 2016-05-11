@@ -58,6 +58,7 @@
                             data-ng-mousedown="attributeItemMouseDown($event, false)"
                             fn="{{a.FieldName}}">{{a.DisplayName}}&nbsp;({{a.DataSource}})</li>
                     </ul>
+                    <label id="validateFieldsCheckbox"><input type="checkbox" id="cbox1" data-ng-model="validateFields" checked> Validate Fields </label>
                     <button id="saveLeadEnrichmentAttributesButton" data-ng-click="saveAttributesButtonClicked($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
                 </div>
             </div>
