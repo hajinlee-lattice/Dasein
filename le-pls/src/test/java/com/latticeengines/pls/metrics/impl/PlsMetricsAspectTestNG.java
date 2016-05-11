@@ -68,7 +68,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 logs.add((String) params[0]);
                 return logs;
             }
-        }).when(newLog).debug(any());
+        }).when(newLog).info(any());
 
         TicketAuthenticationToken auth = new TicketAuthenticationToken("", "Uniqueness.Randomness");
         Session session = new Session();
@@ -79,16 +79,16 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
         modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
 
         modelSummaryResource.delete("1");
-        verify(newLog, times(1)).debug(anyString());
+        verify(newLog, times(1)).info(anyString());
         Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
         Assert.assertTrue(logs.get(0).contains("Track Id="));
         Assert.assertTrue(logs.get(0).contains("User=bnguyen@lattice-engines.com"));
 
         modelSummaryResource.getModelSummaries(null);
-        verify(newLog, times(2)).debug(anyString());
+        verify(newLog, times(2)).info(anyString());
 
         modelSummaryResource.getModelSummaryEntityMgr();
-        verify(newLog, times(2)).debug(anyString());
+        verify(newLog, times(2)).info(anyString());
 
         String passwd = DigestUtils.sha256Hex(adminPassword);
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
