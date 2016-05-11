@@ -26,7 +26,7 @@ public class RandomForestAlgorithm extends AlgorithmBase {
     
     @Override
     public void resetAlgorithmProperties() {
-    	setAlgorithmProperties(StringUtils.join(getAlgorithmPropertyArray(), " "));
+        setAlgorithmProperties(StringUtils.join(getAlgorithmPropertyArray(), " "));
     }
     
     @JsonIgnore

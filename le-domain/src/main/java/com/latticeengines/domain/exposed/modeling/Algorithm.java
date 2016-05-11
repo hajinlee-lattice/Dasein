@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 @JsonTypeInfo(
@@ -19,7 +20,8 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 @JsonSubTypes({
     @JsonSubTypes.Type(value = LogisticRegressionAlgorithm.class, name = "logisticRegressionAlgorithm"),
     @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "decisionTreeAlgorithm"),
-    @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm")
+    @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm"),
+    @JsonSubTypes.Type(value = PMMLAlgorithm.class, name = "pmmlAlgorithm")
 })
 @Embeddable
 public interface Algorithm extends HasName, HasPid {

@@ -194,7 +194,7 @@ public class AlgorithmBase implements Algorithm {
     public String getMapperSize() {
         return this.mapperSize;
     }
-    
+
     @JsonIgnore
     public void setMapperSize(String mapperSize) {
         this.mapperSize = mapperSize;
@@ -221,16 +221,11 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
-    @Override
     @JsonProperty("pipeline_driver")
     public void setPipelineDriver(String pipelineDriver) {
         this.pipelineDriver = pipelineDriver;
     }
-    
+
     @Override
     @JsonProperty("pipeline_driver")
     @Column(name = "PIPELINE_DRIVER", nullable = true)
@@ -239,8 +234,12 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-	public void resetAlgorithmProperties() {
-	}
+    public void resetAlgorithmProperties() {
+    }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 
 }
