@@ -77,6 +77,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 if (contacts != null) {
                     String[] contactArray = contacts.split("[|]", -1);
                     if (contactArray.length >= 9) {
+                        // On recommendation record as well.
+                        record.put("SfdcContactID", contactArray[8]);
+                        
                         List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
                         contactMap.put("Name", contactArray[0]);
@@ -91,8 +94,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactList.add(contactMap);
                         record.put("Contacts", contactList);
                         
-                        // On recommendation record as well.
-                        record.put("SfdcContactID", contactArray[8]);
                     }
 
                 }
