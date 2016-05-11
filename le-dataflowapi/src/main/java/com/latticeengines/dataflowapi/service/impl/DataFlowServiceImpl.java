@@ -14,7 +14,6 @@ import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowJob;
-import com.latticeengines.domain.exposed.dataflow.DataFlowProperty;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dataFlowService")
@@ -22,10 +21,10 @@ public class DataFlowServiceImpl implements DataFlowService {
 
     @Autowired
     private DataTransformationService dataTransformationService;
-    
+
     @Autowired
     private JobEntityMgr jobEntityMgr;
-    
+
     @Autowired
     private JobService jobService;
 
@@ -37,7 +36,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         jobEntityMgr.create(dataFlowJob);
         return appId;
     }
-    
+
     private DataFlowJob createJob(DataFlowConfiguration dataFlowConfig) {
         DataFlowJob dataFlowJob = new DataFlowJob();
 
@@ -50,7 +49,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getDataflowQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
-        containerProperties.put(DataFlowProperty.DATAFLOWCONFIG, dataFlowConfig.toString());
+        containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
@@ -59,5 +58,5 @@ public class DataFlowServiceImpl implements DataFlowService {
         dataFlowJob.setContainerPropertiesObject(containerProperties);
         return dataFlowJob;
     }
-    
+
 }

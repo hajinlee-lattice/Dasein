@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -110,15 +111,15 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         sources.put("Opportunity", MetadataConverter.getTable(config, opportunity));
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCETABLES", sources);
-        ctx.setProperty("CUSTOMER", "customer1");
-        ctx.setProperty("TARGETPATH", "/tmp/EventTable");
-        ctx.setProperty("TARGETTABLENAME", "EventTable");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "SampleDataFlow-Lead*Oppty");
-        ctx.setProperty("CHECKPOINT", true);
-        ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", engine);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer1");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/EventTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "EventTable");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "SampleDataFlow-Lead*Oppty");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, true);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
+        ctx.setProperty(DataFlowProperty.ENGINE, engine);
         Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
 
         verifyMetadata(table, "/tmp/EventTable");
@@ -189,15 +190,15 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         sources.put("Source", table);
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCETABLES", sources);
-        ctx.setProperty("CUSTOMER", "customer2");
-        ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
-        ctx.setProperty("TARGETTABLENAME", "CombinedImportTable");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer2");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/CombinedImportTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "CombinedImportTable");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "TableWithExtractsDataFlow");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
+        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
     }
@@ -209,15 +210,15 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         sourceTables.put("Source", table);
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCETABLES", sourceTables);
-        ctx.setProperty("CUSTOMER", "customer2");
-        ctx.setProperty("TARGETPATH", "/tmp/CombinedImportTable");
-        ctx.setProperty("TARGETTABLENAME", "CombinedImportTable");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "TableWithExtractsDataFlow");
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sourceTables);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer2");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/CombinedImportTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "CombinedImportTable");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "TableWithExtractsDataFlow");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
+        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
 
         boolean exception = false;
         try {

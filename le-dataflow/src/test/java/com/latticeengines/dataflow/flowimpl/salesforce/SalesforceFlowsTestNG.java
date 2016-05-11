@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,37 +83,37 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
         // Execute the first flow
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("CUSTOMER", "customer1");
-        ctx.setProperty("SOURCES", sources);
-        ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
-        ctx.setProperty("TARGETTABLENAME", "TmpEventTable");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
-        ctx.setProperty("CHECKPOINT", checkpoint);
-        ctx.setProperty("HADOOPCONF", config);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer1");
+        ctx.setProperty(DataFlowProperty.SOURCES, sources);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/TmpEventTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "TmpEventTable");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "CreateInitialEventTable");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
+        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 
         // Execute the second flow, with the output of the first flow as input
         // into the second
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
-        ctx.setProperty("TARGETPATH", "/tmp/PDTable");
-        ctx.setProperty("TARGETTABLENAME", "PDTable");
-        ctx.setProperty("FLOWNAME", "CreatePropDataInput");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/PDTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "PDTable");
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
         verifyNumRows(config, "/tmp/PDTable", 106);
 
         // Execute the third flow, with the output of the first flow as input
         // into the third
         sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
-        ctx.setProperty("TARGETPATH", "/tmp/EventTable");
-        ctx.setProperty("TARGETTABLENAME", "EventTable");
-        ctx.setProperty("FLOWNAME", "CreateFinalEventTable");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/EventTable");
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "EventTable");
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "CreateFinalEventTable");
 
-        ctx.setProperty("EVENTDEFNEXPR", "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
-        ctx.setProperty("EVENTDEFNCOLS", new String[] { "StageName" });
-        ctx.setProperty("APPLYMETADATAPRUNING", true);
+        ctx.setProperty(DataFlowProperty.EVENTDEFNEXPR, "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
+        ctx.setProperty(DataFlowProperty.EVENTDEFNCOLS, new String[] { "StageName" });
+        ctx.setProperty(DataFlowProperty.APPLYMETADATAPRUNING, true);
 
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }

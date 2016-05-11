@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.joda.time.DateTime;
@@ -111,16 +112,16 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
         Map<String, Table> sources = new HashMap<>();
         sources.put("ExtractFilterTest", table);
 
-        ctx.setProperty("SOURCETABLES", sources);
-        ctx.setProperty("CUSTOMER", "customer1");
-        ctx.setProperty("TARGETPATH", OUTPUT_PATH);
-        ctx.setProperty("TARGETTABLENAME", "ExtractFilterTest");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "extractFilterBuilder");
-        ctx.setProperty("CHECKPOINT", true);
-        ctx.setProperty("HADOOPCONF", configuration);
-        ctx.setProperty("ENGINE", "TEZ");
-        ctx.setProperty("EXTRACTFILTERS", extractFilters);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer1");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, OUTPUT_PATH);
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "ExtractFilterTest");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "extractFilterBuilder");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, true);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
+        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        ctx.setProperty(DataFlowProperty.EXTRACTFILTERS, extractFilters);
 
         Table output = dataTransformationService.executeNamedTransformation(ctx, "extractFilterBuilder");
     }

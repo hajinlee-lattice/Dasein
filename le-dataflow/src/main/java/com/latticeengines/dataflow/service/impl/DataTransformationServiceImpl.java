@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,13 +115,13 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private void overwriteYarnQueueAssignment(DataFlowContext dataFlowContext) {
         if ("default".equals(yarnQueueScheme)) {
-            dataFlowContext.setProperty("QUEUE", LedpQueueAssigner.getDefaultQueueNameForSubmission());
+            dataFlowContext.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getDefaultQueueNameForSubmission());
         } else if ("legacy".equals(yarnQueueScheme)) {
             String queue = dataFlowContext.getProperty("QUEUE", String.class);
             if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
-                dataFlowContext.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
+                dataFlowContext.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
             }
         }
     }

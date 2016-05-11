@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -85,23 +86,23 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         }
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("TARGETTABLENAME", dataFlowConfig.getTargetTableName());
-        ctx.setProperty("CUSTOMER", dataFlowConfig.getCustomerSpace().toString());
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, dataFlowConfig.getTargetTableName());
+        ctx.setProperty(DataFlowProperty.CUSTOMER, dataFlowConfig.getCustomerSpace().toString());
 
-        ctx.setProperty("SOURCETABLES", sourceTables);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sourceTables);
         Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 dataFlowConfig.getCustomerSpace());
         String targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
         log.info(String.format("Target path is %s", targetPath));
-        ctx.setProperty("EXTRACTFILTERS", getExtractFilters(dataFlowConfig));
-        ctx.setProperty("TARGETPATH", targetPath);
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());
-        ctx.setProperty("CHECKPOINT", checkpoint);
-        ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", engine);
-        ctx.setProperty("APPCTX", appContext);
-        ctx.setProperty("PARAMETERS", dataFlowConfig.getDataFlowParameters());
+        ctx.setProperty(DataFlowProperty.EXTRACTFILTERS, getExtractFilters(dataFlowConfig));
+        ctx.setProperty(DataFlowProperty.TARGETPATH, targetPath);
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, dataFlowConfig.getDataFlowBeanName());
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        ctx.setProperty(DataFlowProperty.APPCTX, appContext);
+        ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
         log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
@@ -108,15 +109,15 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         builder.setLocal(LOCAL);
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCETABLES", getSources());
-        ctx.setProperty("CUSTOMER", "Customer");
-        ctx.setProperty("TARGETPATH", TARGET_PATH);
-        ctx.setProperty("TARGETTABLENAME", "Output");
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("FLOWNAME", "Flow");
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", configuration);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, getSources());
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "Customer");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, TARGET_PATH);
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "Output");
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
+        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, builder);
     }
 

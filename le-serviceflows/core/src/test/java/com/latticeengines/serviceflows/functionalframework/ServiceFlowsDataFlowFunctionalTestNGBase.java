@@ -31,6 +31,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -171,16 +172,16 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
 
     protected DataFlowContext createDataFlowContext(DataFlowParameters parameters) {
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
-        ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", engine);
-        ctx.setProperty("TARGETPATH", getTargetDirectory());
-        ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
-        ctx.setProperty("FLOWNAME", getFlowBeanName());
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("SOURCETABLES", getSources());
-        ctx.setProperty("CUSTOMER", "customer");
-        ctx.setProperty("PARAMETERS", parameters);
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, getTargetDirectory());
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, getFlowBeanName());
+        ctx.setProperty(DataFlowProperty.FLOWNAME, getFlowBeanName());
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, getSources());
+        ctx.setProperty(DataFlowProperty.CUSTOMER, "customer");
+        ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         return ctx;
     }
 

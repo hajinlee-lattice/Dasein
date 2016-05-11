@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
-        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
 
@@ -111,7 +112,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         parameters.setHasSqlPresence(source instanceof HasSqlPresence);
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
-        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + "-" + flowName);
         if (StringUtils.isEmpty(flowBean)) {
             flowBean = "pivotFlow";
         }
@@ -128,7 +129,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         sources.put("Source", baseTable);
 
         DataFlowContext ctx = dataFlowContext(hgData, sources, new DataFlowParameters(), targetPath);
-        ctx.setProperty("FLOWNAME", hgData.getSourceName() + "-" + flowName);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, hgData.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "hgDataRefreshFlow");
     }
 
@@ -137,22 +138,22 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         if ("mr".equalsIgnoreCase(cascadingPlatform)) {
-            ctx.setProperty("ENGINE", "MR");
+            ctx.setProperty(DataFlowProperty.ENGINE, "MR");
         } else {
-            ctx.setProperty("ENGINE", "TEZ");
+            ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
         }
 
-        ctx.setProperty("PARAMETERS", parameters);
-        ctx.setProperty("SOURCETABLES", sources);
-        ctx.setProperty("CUSTOMER", sourceName);
-        ctx.setProperty("RECORDNAME", sourceName);
-        ctx.setProperty("TARGETTABLENAME", sourceName);
-        ctx.setProperty("TARGETPATH", outputDir);
+        ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);
+        ctx.setProperty(DataFlowProperty.RECORDNAME, sourceName);
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
 
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("JOBPROPERTIES", new Properties());
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, new Properties());
         return ctx;
     }
 

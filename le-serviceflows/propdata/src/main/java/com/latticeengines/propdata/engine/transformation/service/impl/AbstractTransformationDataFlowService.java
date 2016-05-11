@@ -3,6 +3,7 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.util.Map;
 import java.util.Properties;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -29,19 +30,19 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         // } else {
         // ctx.setProperty("ENGINE", "TEZ");
         // }
-        ctx.setProperty("ENGINE", "MR");
+        ctx.setProperty(DataFlowProperty.ENGINE, "MR");
 
-        ctx.setProperty("PARAMETERS", parameters);
-        ctx.setProperty("SOURCETABLES", sources);
-        ctx.setProperty("CUSTOMER", sourceName);
-        ctx.setProperty("RECORDNAME", sourceName);
-        ctx.setProperty("TARGETTABLENAME", sourceName);
-        ctx.setProperty("TARGETPATH", outputDir);
+        ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);
+        ctx.setProperty(DataFlowProperty.RECORDNAME, sourceName);
+        ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
 
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", getYarnConfiguration());
-        ctx.setProperty("JOBPROPERTIES", new Properties());
+        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, getYarnConfiguration());
+        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, new Properties());
         return ctx;
     }
 }
