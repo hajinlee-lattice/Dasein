@@ -69,6 +69,7 @@ import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -150,17 +151,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (sourceTable == null) {
             throw new RuntimeException(String.format("Could not find source with name %s", sourceTableName));
         }
-
         validateTableForSource(sourceTable);
 
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
 
-        List<Extract> extracts = sourceTable.getExtracts();
+        List<Extract> extracts = filterExtracts(sourceTable.getName(), sourceTable.getExtracts());
 
         Map<String, Field> allColumns = new HashMap<>();
         Schema[] allSchemas = new Schema[extracts.size()];
         int i = 0;
         for (Extract extract : extracts) {
+
             String path = null;
             try {
                 log.info(String.format("Retrieving extract for table %s located at %s", sourceTableName,
@@ -322,6 +323,28 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         return register(new Pipe(sourceName), fields, sourceName);
+    }
+
+    private List<Extract> filterExtracts(String sourceTableName, List<Extract> original) {
+        @SuppressWarnings("unchecked")
+        Map<String, List<ExtractFilter>> extractFilters = getDataFlowCtx().getProperty("EXTRACTFILTERS", Map.class);
+
+        List<Extract> filtered = new ArrayList<>();
+        for (Extract extract : original) {
+            List<ExtractFilter> filters = extractFilters.get(sourceTableName);
+            if (filters != null) {
+                boolean allowed = false;
+                for (ExtractFilter filter : filters) {
+                    if (filter.allows(extract)) {
+                        filtered.add(extract);
+                    }
+                }
+            } else {
+                filtered.add(extract);
+            }
+        }
+
+        return filtered;
     }
 
     protected String joinFieldName(String identifier, String fieldName) {

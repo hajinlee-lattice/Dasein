@@ -20,8 +20,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -68,48 +67,33 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
         List<DataFlowSource> dataFlowSources = dataFlowConfig.getDataSources();
 
-        boolean usesTables = false;
-        boolean usesPaths = false;
         for (DataFlowSource dataFlowSource : dataFlowSources) {
             String name = dataFlowSource.getName();
 
-            if (dataFlowSource.getRawDataPath() != null) {
-                sources.put(name, dataFlowSource.getRawDataPath());
-                usesPaths = true;
-            } else {
-                log.info(String.format("Retrieving source table %s for customer space %s", name,
-                        dataFlowConfig.getCustomerSpace()));
-                Table sourceTable = metadataProxy.getTable(dataFlowConfig.getCustomerSpace().toString(), name);
-                if (sourceTable == null) {
-                    log.error("Source table " + name + " retrieved from the metadata service is null.");
-                    continue;
-                }
-                if (sourceTable.getExtracts().size() > 0) {
-                    log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
-                            .getExtracts().get(0).getPath()));
-                }
-                sourceTables.put(name, sourceTable);
-                usesTables = true;
+            log.info(String.format("Retrieving source table %s for customer space %s", name,
+                    dataFlowConfig.getCustomerSpace()));
+            Table sourceTable = metadataProxy.getTable(dataFlowConfig.getCustomerSpace().toString(), name);
+            if (sourceTable == null) {
+                log.error("Source table " + name + " retrieved from the metadata service is null.");
+                continue;
             }
-        }
-
-        if (usesPaths && usesTables) {
-            throw new LedpException(LedpCode.LEDP_27005);
+            if (sourceTable.getExtracts().size() > 0) {
+                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
+                        .getExtracts().get(0).getPath()));
+            }
+            sourceTables.put(name, sourceTable);
         }
 
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("TARGETTABLENAME", dataFlowConfig.getTargetTableName());
         ctx.setProperty("CUSTOMER", dataFlowConfig.getCustomerSpace().toString());
 
-        if (usesTables) {
-            ctx.setProperty("SOURCETABLES", sourceTables);
-        } else {
-            ctx.setProperty("SOURCES", sources);
-        }
+        ctx.setProperty("SOURCETABLES", sourceTables);
         Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 dataFlowConfig.getCustomerSpace());
         String targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
         log.info(String.format("Target path is %s", targetPath));
+        ctx.setProperty("EXTRACTFILTERS", getExtractFilters(dataFlowConfig));
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());
@@ -124,6 +108,17 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
         purgeSources(dataFlowConfig);
         return null;
+    }
+
+    private Map<String, List<ExtractFilter>> getExtractFilters(DataFlowConfiguration dataFlowConfiguration) {
+        Map<String, List<ExtractFilter>> extractFilters = new HashMap<>();
+        for (DataFlowSource source : dataFlowConfiguration.getDataSources()) {
+            if (source.getExtractFilters() != null && source.getExtractFilters().size() > 0) {
+                extractFilters.put(source.getName(), source.getExtractFilters());
+            }
+        }
+
+        return extractFilters;
     }
 
     private void purgeSources(DataFlowConfiguration dataFlowConfig) {
