@@ -271,7 +271,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         if (fileUrlProperties != null && fileUrlProperties.size() > 0) {
             List<String> props = new ArrayList<>();
-            props.add(String.format("%s=%s", CsvDriver.MISSING_VALUE, "''"));
+            props.add(String.format("%s=%s", CsvDriver.MISSING_VALUE, "\"\""));
             props.add(String.format("%s=%s", CsvDriver.CHARSET, "UTF-8"));
             for (Map.Entry<String, String> entry : fileUrlProperties.entrySet()) {
                 props.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
