@@ -55,6 +55,7 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
@@ -325,21 +326,24 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(new Pipe(sourceName), fields, sourceName);
     }
 
+    @SuppressWarnings("unchecked")
     private List<Extract> filterExtracts(String sourceTableName, List<Extract> original) {
-        @SuppressWarnings("unchecked")
-        Map<String, List<ExtractFilter>> extractFilters = getDataFlowCtx().getProperty("EXTRACTFILTERS", Map.class);
+        Map extractFilters = getDataFlowCtx().getProperty(DataFlowProperty.EXTRACTFILTERS, Map.class);
 
         List<Extract> filtered = new ArrayList<>();
         for (Extract extract : original) {
-            List<ExtractFilter> filters = extractFilters.get(sourceTableName);
-            if (filters != null) {
-                boolean allowed = false;
-                for (ExtractFilter filter : filters) {
-                    if (filter.allows(extract)) {
-                        filtered.add(extract);
+            boolean allowed = true;
+
+            if (extractFilters != null) {
+                List<ExtractFilter> filters = (List<ExtractFilter>) extractFilters.get(sourceTableName);
+                if (filters != null) {
+                    for (ExtractFilter filter : filters) {
+                        allowed = allowed && filter.allows(extract);
                     }
                 }
-            } else {
+            }
+
+            if (allowed) {
                 filtered.add(extract);
             }
         }
