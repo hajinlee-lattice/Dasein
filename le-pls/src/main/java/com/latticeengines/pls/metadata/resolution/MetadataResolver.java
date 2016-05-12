@@ -28,11 +28,11 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
-public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStrategy {
+public class MetadataResolver {
     private String csvPath;
     private SchemaInterpretation schema;
     private List<ColumnTypeMapping> additionalColumns;
-    private static Configuration yarnConfiguration;
+    private Configuration yarnConfiguration;
 
     private static class Result {
         public List<ColumnTypeMapping> unknownColumns;
@@ -41,12 +41,8 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
     private Result result;
 
-    // Interaction with front end:
-    // - FE -> BE: uploadFile
-    // - FE -> BE: getUnknownColumns(SourceFile)
-    // - FE -> BE: resolveMetadata(SourceFile, unknowncolumns)
-    public UserDefinedMetadataResolutionStrategy(String csvPath, SchemaInterpretation schema,
-            List<ColumnTypeMapping> additionalColumns, Configuration yarnConfiguration) {
+    public MetadataResolver(String csvPath, SchemaInterpretation schema, List<ColumnTypeMapping> additionalColumns,
+            Configuration yarnConfiguration) {
         this.csvPath = csvPath;
         this.schema = schema;
         this.additionalColumns = additionalColumns != null ? additionalColumns : new ArrayList<ColumnTypeMapping>();
@@ -55,7 +51,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
     }
 
-    @Override
     public void calculateBasedOnExistingMetadata(Table metadataTable) {
         result.metadata = metadataTable;
         result.metadata.getExtracts().clear();
@@ -63,7 +58,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         calculateHelper();
     }
 
-    @Override
     public void calculate() {
         SchemaRepository repository = SchemaRepository.instance();
         result.metadata = repository.getSchema(schema);
@@ -75,7 +69,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         // Get header
         Set<String> headerFields = getHeaderFields();
 
-        // Shed columns from metadata that are not in the csv
+        // Shed columns from metadata that are not in the uploaded file
         Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = result.metadata.getAttributes();
         Iterator<Attribute> attrIterator = attributes.iterator();
@@ -227,7 +221,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         }
     }
 
-    @Override
     public List<ColumnTypeMapping> getUnknownColumns() {
         if (result == null) {
             return new ArrayList<>();
@@ -235,7 +228,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         return result.unknownColumns;
     }
 
-    @Override
     public boolean isMetadataFullyDefined() {
         if (result == null) {
             return false;
@@ -243,7 +235,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         return result.unknownColumns.isEmpty();
     }
 
-    @Override
     public Table getMetadata() {
         if (result == null) {
             return null;

@@ -3,14 +3,11 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,8 +28,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
-import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
-import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -57,7 +53,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     private ModelMetadataService modelMetadataService;
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFileds,
+    public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFields,
             CloseableResourcePool leCsvParser, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -77,27 +73,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        Set<String> missingRequiredFields = new HashSet<>();
-        Iterator<Attribute> attrIterator = requiredFileds.iterator();
-
-        iterateAttr: while (attrIterator.hasNext()) {
-            Attribute attribute = attrIterator.next();
-            Iterator<String> headerIterator = headerFields.iterator();
-
-            while (headerIterator.hasNext()) {
-                String header = headerIterator.next();
-                if (attribute.getDisplayName().equals(header) || attribute.getName().equals(header)) {
-                    attrIterator.remove();
-                    headerIterator.remove();
-                    continue iterateAttr;
-                }
-            }
-            missingRequiredFields.add(attribute.getDisplayName());
-        }
-        if (!requiredFileds.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[] { StringUtils.join(missingRequiredFields, ","), displayName });
-        }
+        ValidateFileHeaderUtils.checkForDuplicateHeaders(requiredFields, displayName, headerFields);
+        ValidateFileHeaderUtils.checkForMissingRequiredFields(requiredFields, displayName, headerFields, false);
 
         return stream;
     }
@@ -115,14 +92,13 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
         Table table = modelMetadataService.getTrainingTableFromModelId(modelId);
-        MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
-                schemaInterpretation, null, yarnConfiguration);
-        strategy.calculateBasedOnExistingMetadata(table);
-        if (!strategy.isMetadataFullyDefined()) {
-            List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
-            strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(), schemaInterpretation, unknown,
-                    yarnConfiguration);
-            strategy.calculateBasedOnExistingMetadata(table);
+        MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
+                yarnConfiguration);
+        resolver.calculateBasedOnExistingMetadata(table);
+        if (!resolver.isMetadataFullyDefined()) {
+            List<ColumnTypeMapping> unknown = resolver.getUnknownColumns();
+            resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, unknown, yarnConfiguration);
+            resolver.calculateBasedOnExistingMetadata(table);
         }
 
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {

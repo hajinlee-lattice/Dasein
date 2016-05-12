@@ -34,11 +34,13 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_missing_required_fields.csv").getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        boolean thrown = false;
         try {
             modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
                     closeableResourcePool, dataFile.getName());
             closeableResourcePool.close();
         } catch (Exception e) {
+            thrown = true;
             assertTrue(e instanceof LedpException);
             assertTrue(e.getMessage().contains(InterfaceName.Id.name()));
             assertTrue(e.getMessage().contains(InterfaceName.Website.name()));
@@ -46,6 +48,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18087);
         } finally {
             closeableResourcePool.close();
+            assertTrue(thrown);
         }
     }
 
@@ -55,14 +58,18 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_empty_header.csv").getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        boolean thrown = false;
+
         try {
             modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
                     closeableResourcePool, dataFile.getName());
         } catch (Exception e) {
+            thrown = true;
             assertTrue(e instanceof LedpException);
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18096);
         } finally {
             closeableResourcePool.close();
+            assertTrue(thrown);
         }
     }
 
@@ -79,5 +86,43 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
 
         closeableResourcePool.close();
 
+    }
+
+    @Test(groups = "functional")
+    public void uploadFileWithDuplicateHeaders1() throws Exception {
+        dataFile = new File(ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_duplicate_headers1.csv").getPath());
+        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        boolean thrown = false;
+        try {
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
+                    closeableResourcePool, dataFile.getName());
+        } catch (Exception e) {
+            thrown = true;
+        } finally {
+            closeableResourcePool.close();
+            assertTrue(thrown);
+        }
+    }
+
+    @Test(groups = "functional")
+    public void uploadFileWithDuplicateHeaders2() throws Exception {
+        dataFile = new File(ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_duplicate_headers2.csv").getPath());
+        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        boolean thrown = false;
+        try {
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
+                    closeableResourcePool, dataFile.getName());
+        } catch (Exception e) {
+            thrown = true;
+            assertTrue(e instanceof LedpException);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18107);
+        } finally {
+            closeableResourcePool.close();
+            assertTrue(thrown);
+        }
     }
 }

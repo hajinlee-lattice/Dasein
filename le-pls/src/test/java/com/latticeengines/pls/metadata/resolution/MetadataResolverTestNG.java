@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -43,22 +43,22 @@ public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTe
 
     @Test(groups = "functional")
     public void getUnknownColumns() {
-        UserDefinedMetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(hdfsPath,
+        MetadataResolver resolver = new MetadataResolver(hdfsPath,
                 SchemaInterpretation.SalesforceAccount, null, yarnConfiguration);
-        strategy.calculate();
+        resolver.calculate();
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column" });
-        List<ColumnTypeMapping> mappings = strategy.getUnknownColumns();
+        List<ColumnTypeMapping> mappings = resolver.getUnknownColumns();
         assertEquals(mappings.size(), expectedUnknownColumns.size());
         for (ColumnTypeMapping mapping : mappings) {
             assertTrue(expectedUnknownColumns.contains(mapping.getColumnName()));
             assertEquals(mapping.getColumnType(), Type.STRING.name());
         }
 
-        strategy = new UserDefinedMetadataResolutionStrategy(hdfsPath, SchemaInterpretation.SalesforceAccount,
+        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
                 mappings, yarnConfiguration);
-        strategy.calculate();
-        Table table = strategy.getMetadata();
+        resolver.calculate();
+        Table table = resolver.getMetadata();
 
         assertEquals(table.getAttribute(InterfaceName.Id).getDisplayName(), "Account ID");
         assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "Website");
@@ -87,16 +87,21 @@ public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTe
         additionalCol2.setColumnType("Double");
         mappings.add(additionalCol1);
         mappings.add(additionalCol2);
-        strategy = new UserDefinedMetadataResolutionStrategy(hdfsPath, SchemaInterpretation.SalesforceAccount,
+        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
                 mappings, yarnConfiguration);
-        strategy.calculate();
-        table = strategy.getMetadata();
+        resolver.calculate();
+        table = resolver.getMetadata();
         attribute = table.getAttribute("additionalCol1");
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
         attribute = table.getAttribute("additionalCol2");
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_NUMERIC);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.RATIO_STAT_TYPE);
+
+    }
+
+    @Test(groups = "functional")
+    public void testDuplicateHeadersFail() {
 
     }
 

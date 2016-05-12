@@ -3,12 +3,9 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
-import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
-import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -47,17 +43,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public List<ColumnTypeMapping> getUnknownColumns(String sourceFileName) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolutionStrategy strategy = getResolutionStrategy(sourceFile, null);
-        strategy.calculate();
-        return strategy.getUnknownColumns();
+        MetadataResolver resolver = getMetadataResolver(sourceFile, null);
+        resolver.calculate();
+        return resolver.getUnknownColumns();
     }
 
     @Override
     public void resolveMetadata(String sourceFileName, List<ColumnTypeMapping> additionalColumns) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolutionStrategy strategy = getResolutionStrategy(sourceFile, additionalColumns);
-        strategy.calculate();
-        if (!strategy.isMetadataFullyDefined()) {
+        MetadataResolver resolver = getMetadataResolver(sourceFile, additionalColumns);
+        resolver.calculate();
+        if (!resolver.isMetadataFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
 
@@ -67,7 +63,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
         }
 
-        Table table = strategy.getMetadata();
+        Table table = resolver.getMetadata();
         table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
         metadataProxy.createTable(customerSpace, table.getName(), table);
         sourceFile.setTableName(table.getName());
@@ -91,43 +87,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-
         SchemaRepository repository = SchemaRepository.instance();
         Table metadata = repository.getSchema(schema);
-
-        Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = metadata.getAttributes();
-        Iterator<Attribute> attrIterator = attributes.iterator();
 
-        iterateAttr: while (attrIterator.hasNext()) {
-            Attribute attribute = attrIterator.next();
-            Iterator<String> headerIterator = headerFields.iterator();
-
-            while (headerIterator.hasNext()) {
-                String header = headerIterator.next();
-                if (attribute.getAllowedDisplayNames().contains(header)) {
-                    attrIterator.remove();
-                    headerIterator.remove();
-                    continue iterateAttr;
-                }
-            }
-            if (!attribute.isNullable()) {
-                missingRequiredFields.add(attribute.getName());
-            }
-        }
-        if (!missingRequiredFields.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
-        }
-
-        for (final String field : headerFields) {
-            if (StringUtils.isEmpty(field)) {
-                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
-            }
-        }
-
+        ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
+        ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
         return stream;
-
     }
 
     private SourceFile getSourceFile(String sourceFileName) {
@@ -138,9 +104,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return sourceFile;
     }
 
-    private MetadataResolutionStrategy getResolutionStrategy(SourceFile sourceFile,
-            List<ColumnTypeMapping> additionalColumns) {
-        return new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(), //
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, List<ColumnTypeMapping> additionalColumns) {
+        return new MetadataResolver(sourceFile.getPath(), //
                 sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
     }
 }

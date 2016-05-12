@@ -31,8 +31,7 @@ import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflo
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
-import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
-import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -89,16 +88,16 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             sourceFile.setState(SourceFileState.Uploaded);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
-            MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
+            MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(),
                     sourceFile.getSchemaInterpretation(), null, yarnConfiguration);
-            strategy.calculate();
-            if (!strategy.isMetadataFullyDefined()) {
-                List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
-                strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
-                        sourceFile.getSchemaInterpretation(), unknown, yarnConfiguration);
-                strategy.calculate();
+            metadataResolver.calculate();
+            if (!metadataResolver.isMetadataFullyDefined()) {
+                List<ColumnTypeMapping> unknown = metadataResolver.getUnknownColumns();
+                metadataResolver = new MetadataResolver(sourceFile.getPath(), sourceFile.getSchemaInterpretation(),
+                        unknown, yarnConfiguration);
+                metadataResolver.calculate();
             }
-            Table table = strategy.getMetadata();
+            Table table = metadataResolver.getMetadata();
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
             metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
