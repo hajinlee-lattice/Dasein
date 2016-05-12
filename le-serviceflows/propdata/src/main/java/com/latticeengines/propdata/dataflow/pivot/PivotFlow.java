@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.dataflow.common.FlowUtils;

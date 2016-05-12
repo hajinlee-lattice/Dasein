@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("createFinalEventTable")
 public class CreateFinalEventTable extends CascadingDataFlowBuilder {

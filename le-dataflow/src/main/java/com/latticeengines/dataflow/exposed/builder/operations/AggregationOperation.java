@@ -10,7 +10,7 @@ import cascading.pipe.assembly.CountBy;
 import cascading.tuple.Fields;
 
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class AggregationOperation extends Operation {
     public AggregationOperation(Input lhs, Aggregation aggregation) {

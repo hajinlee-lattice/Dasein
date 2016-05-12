@@ -27,6 +27,8 @@ public enum ApprovedUsage {
 
     public String getName() { return this.name; }
 
+    public String toString() { return this.name; }
+
     public static ApprovedUsage fromName(String name) {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);

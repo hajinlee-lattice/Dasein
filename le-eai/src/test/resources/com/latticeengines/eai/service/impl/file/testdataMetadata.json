@@ -221,8 +221,8 @@
       },
       "StatisticalType": null,
       "Tags": null
-    },    
-     {
+    },
+    {
       "ApprovedUsage": [
         "None"
       ],
@@ -258,8 +258,64 @@
       },
       "StatisticalType": null,
       "Tags": null
-    },    
-     {
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "kickboxDisposable",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "Boolean",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "kickboxDisposable",
+      "Extensions": [],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
+      "ColumnName": "string_column",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "String",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "string column",
+      "Extensions": [],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
       "ApprovedUsage": [
         "None"
       ],
@@ -296,5 +352,5 @@
       "StatisticalType": null,
       "Tags": null
     }
- ]
+  ]
 }

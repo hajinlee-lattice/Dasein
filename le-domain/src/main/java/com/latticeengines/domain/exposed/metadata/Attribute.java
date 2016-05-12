@@ -23,9 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.api.client.util.Lists;
@@ -99,7 +97,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonProperty("display_name")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-        setPropertyValue("DisplayName", displayName);
     }
 
     @Column(name = "LENGTH", nullable = true)
@@ -112,10 +109,17 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @Column(name = "NULLABLE", nullable = false)
+    @JsonIgnore
     public Boolean isNullable() {
         return nullable;
     }
 
+    @JsonProperty("nullable")
+    public Boolean getNullable() {
+        return nullable;
+    }
+
+    @JsonProperty("nullable")
     public void setNullable(Boolean nullable) {
         this.nullable = nullable;
     }
@@ -439,7 +443,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setStatisticalType(StatisticalType statisticalType) {
-        properties.put("StatisticalType", statisticalType.name());
+        properties.put("StatisticalType", statisticalType.getName());
     }
 
     @Transient
@@ -460,7 +464,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
-        properties.put("FundamentalType", fundamentalType.name());
+        properties.put("FundamentalType", fundamentalType.getName());
     }
 
     @Transient
@@ -582,7 +586,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setCategory(Category category) {
-        setPropertyValue("Category", category.name());
+        setPropertyValue("Category", category.getName());
     }
 
     @Transient
@@ -678,7 +682,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return name;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "hiding" })
     public <Enum> List<String> getStringValuesFromEnums(Enum... enums) {
         List<String> strs = new ArrayList<>();
         for (Enum en : enums) {

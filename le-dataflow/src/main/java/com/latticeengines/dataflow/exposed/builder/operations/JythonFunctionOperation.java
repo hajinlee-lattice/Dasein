@@ -7,9 +7,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class JythonFunctionOperation extends Operation {
     private static JythonEngine engine = new JythonEngine(null);

@@ -11,7 +11,7 @@ import cascading.tuple.Fields;
 
 import com.google.api.client.util.Lists;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class GroupByAndBufferOperation extends Operation {
     @SuppressWarnings("rawtypes")

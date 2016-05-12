@@ -7,8 +7,8 @@ import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
 
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class RenameOperation extends Operation {
     public RenameOperation(Input prior, FieldList previousNames, FieldList newNames) {

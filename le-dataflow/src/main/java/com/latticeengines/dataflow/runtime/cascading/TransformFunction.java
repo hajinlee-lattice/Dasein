@@ -44,11 +44,11 @@ public class TransformFunction extends BaseOperation implements Function {
         Map<String, Object> record = new HashMap<>();
         for (int i = 0; i < fields.size(); i++) {
             Object value = tuple.getObject(i);
-            record.put(String.valueOf(fields.get(i)), String.valueOf(value));
+            record.put(String.valueOf(fields.get(i)), value);
         }
 
         Map<String, Object> arguments = definition.arguments;
-
+        log.info(String.format("Starting %s transform with argument %s", definition.name, arguments));
         Object value = transform.transform(arguments, record);
         if (value == null) {
             value = null;

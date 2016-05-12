@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 
@@ -37,6 +39,47 @@ public class AttributeUtils {
                         setValue(dest, descriptor, sourceValue);
                         log.info(String.format("Setting property %s to be %s from source.  Value was previously %s",
                                 descriptor.getName(), sourceValue, destValue));
+                    } else {
+                        log.debug(String.format("Ignoring property %s because it is null/empty on source",
+                                descriptor.getName()));
+                    }
+                }
+            }
+        }
+    }
+
+    public static void setFieldMetadataFromAttribute(Attribute source, FieldMetadata fm) {
+        setFieldMetadataFromAttribute(source, fm, true);
+    }
+
+    public static void setFieldMetadataFromAttribute(Attribute source, FieldMetadata fm,
+            boolean includeEmptySourceValues) {
+        PropertyDescriptor[] descriptors = getPropertyDescriptors();
+
+        for (PropertyDescriptor descriptor : descriptors) {
+            if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
+                Object sourceValue = getValue(source, descriptor);
+                if (!isPropertyBag(descriptor)) {
+                    boolean sourceEmpty = sourceValue == null
+                            || (sourceValue instanceof List && ((List<?>) sourceValue).size() == 0)
+                            || (sourceValue instanceof Set && ((Set<?>) sourceValue).size() == 0);
+                    if (includeEmptySourceValues || !sourceEmpty) {
+                        String key = StringUtils.substringAfter(descriptor.getWriteMethod().getName(), "set");
+                        String metadataValue = String.valueOf(sourceValue);
+                        String avroValue = fm.getPropertyValue(key);
+
+                        if (avroValue != null && metadataValue != null && !avroValue.equals(metadataValue.toString())) {
+                            log.warn(String
+                                    .format("Property collision for field %s in Attribute %s. " //
+                                            + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
+                                            key, source.getName(), avroValue, metadataValue));
+                        }
+                        //FieldMetadata should already have a name
+                        if (!key.equals("Name")) {
+                            fm.setPropertyValue(key, metadataValue);
+                        }
+                        log.info(String.format("Setting property %s to be %s from source.", descriptor.getName(),
+                                sourceValue));
                     } else {
                         log.debug(String.format("Ignoring property %s because it is null/empty on source",
                                 descriptor.getName()));

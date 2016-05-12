@@ -9,11 +9,12 @@ import org.apache.commons.logging.LogFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.TransformFunction;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class TransformFunctionOperation extends Operation {
@@ -37,9 +38,7 @@ public class TransformFunctionOperation extends Operation {
         }
 
         Attribute attr = transform.getMetadata();
-        for (Map.Entry<String, Object> entry : attr.getProperties().entrySet()) {
-            targetField.setPropertyValue(entry.getKey(), String.valueOf(entry.getValue()));
-        }
+        AttributeUtils.setFieldMetadataFromAttribute(attr, targetField, false);
         // For now, assume that all Java functions are to be used within RTS
         setRTSProperties(targetField, definition.name, definition.arguments);
         Operation base = new FunctionOperation(

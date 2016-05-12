@@ -6,7 +6,7 @@ import java.util.List;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public abstract class Operation {
     public static class Input {

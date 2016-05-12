@@ -1,20 +1,20 @@
-LEAD,Country,Company,Email,City,DS CompanyName Length,DS CompanyName Entropy,Last Modified Date
-9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,3
-12609604,Singapore,,,,1,,10/10/04
-10996868,China,Husor,sun,ze,5,0.464385619,10/23/04
-,Australia,SMS MANAGEMENT & TECHNOLOGY LIMITED,Murali,Ganti,30,0.1276334577,10/10/04 12:00 AM
-,China,thit 北京清软英泰?,Lin,zhang 张家林,12,0.2848579862,10/10/04
-3390874,India,Hexaware,Amar,Deo,8,dfds3rer,10/10/04
-10725022,Malaysia,AMD,Seng Ping,Gan,asdb,0.5283208336,10/10/04
-6935640,India,Aithent,Chandrasekar,Kuppuswamy,7,0.3602343766,10/10/04
-12546989,China,上海睿民互联网科技有限公司,力辉,王,13,0.2846492091,10/10/04
-3652167,China,China ITS (Holdings) 中国智能交通系统,Chen,Chen陈晨,29,0.149074523,10/10/04
-12839150,China,bsoft,yongjie,范,5,0.464385619,JOS/DJF1O23JD/0DFJW
-1704104,Australia,DHL Supply Chain,Kasi,kolla,16,0.21875,10/10/04
-,India,Coca Cola,Fatehbhanu,Solanki,9,0.2441288582,10/10/04
-12882862,India,Sony India Software Center,,,26,0.141933092,10/10/04
-11239854,China,HUST ITEC,龚,逸凌,9,0.327522531,10/10/04
-10364388,Australia,n/a,Johan,Swanepoel,3,0.5283208336,2014-03-06
-11330434,New Zealand,Orion Health,Geethika,,12,0.2709690973,2004-01-03
-11625974,Vietnam,,Dat,Nguyen,13,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00
-6200258,China,n/a,Guo,Peihui 郭培辉,3,0.5283208336,03/14/14 07:20 PM
+LEAD,Country,Company,Email,City,DS CompanyName Length,DS CompanyName Entropy,Last Modified Date,kickboxDisposable,string column
+9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,0,,3
+12609604,Singapore,,,,1,,10/10/04,1,
+10996868,China,Husor,sun,ze,5,0.464385619,10/23/04,0,
+,Australia,SMS MANAGEMENT & TECHNOLOGY LIMITED,Murali,Ganti,30,0.1276334577,10/10/04 12:00 AM,FALSE,
+,China,thit 北京清软英泰?,Lin,zhang 张家林,12,0.2848579862,10/10/04,,
+3390874,India,Hexaware,Amar,Deo,8,dfds3rer,10/10/04,,
+10725022,Malaysia,AMD,Seng Ping,Gan,asdb,0.5283208336,10/10/04,,
+6935640,India,Aithent,Chandrasekar,Kuppuswamy,7,0.3602343766,10/10/04,1,
+12546989,China,上海睿民互联网科技有限公司,力辉,王,13,0.2846492091,10/10/04,TRUE,
+3652167,China,China ITS (Holdings) 中国智能交通系统,Chen,Chen陈晨,29,0.149074523,10/10/04,,
+12839150,China,bsoft,yongjie,范,5,0.464385619,JOS/DJF1O23JD/0DFJW,,
+1704104,Australia,DHL Supply Chain,Kasi,kolla,16,0.21875,10/10/04,FALSE,
+,India,Coca Cola,Fatehbhanu,Solanki,9,0.2441288582,10/10/04,,
+12882862,India,Sony India Software Center,,,26,0.141933092,10/10/04,,
+11239854,China,HUST ITEC,龚,逸凌,9,0.327522531,10/10/04,,
+10364388,Australia,n/a,Johan,Swanepoel,3,0.5283208336,2014-03-06,abc,
+11330434,New Zealand,Orion Health,Geethika,,12,0.2709690973,2004-01-03,2,
+11625974,Vietnam,,Dat,Nguyen,13,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00,TRUE,
+6200258,China,n/a,Guo,Peihui 郭培辉,3,0.5283208336,03/14/14 07:20 PM,FALSE,

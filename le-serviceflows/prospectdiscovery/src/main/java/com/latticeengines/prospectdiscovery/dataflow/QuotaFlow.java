@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +14,9 @@ import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;

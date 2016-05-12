@@ -9,10 +9,10 @@ import java.util.Map;
 import cascading.pipe.Each;
 import cascading.tuple.Fields;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.SimpleDepivotStragegyImpl;
 import com.latticeengines.dataflow.runtime.cascading.DepivotFunction;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class DepivotOperation extends Operation {
 

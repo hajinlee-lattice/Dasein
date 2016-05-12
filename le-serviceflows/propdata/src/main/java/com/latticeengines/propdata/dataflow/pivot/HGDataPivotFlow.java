@@ -7,15 +7,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+
 import org.springframework.stereotype.Component;
 
 import cascading.operation.Buffer;
 
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataBothBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataNewTechBuffer;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.dataflow.common.FlowUtils;

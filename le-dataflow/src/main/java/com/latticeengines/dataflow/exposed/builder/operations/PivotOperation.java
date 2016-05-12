@@ -10,9 +10,9 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Fields;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.PivotBuffer;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class PivotOperation extends Operation {
 

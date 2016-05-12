@@ -29,6 +29,10 @@ public enum Tag {
         return this.name;
     }
 
+    public String toString() {
+        return this.name;
+    }
+
     public static Set<String> availableNames() {
         return new HashSet<>(nameMap.keySet());
     }

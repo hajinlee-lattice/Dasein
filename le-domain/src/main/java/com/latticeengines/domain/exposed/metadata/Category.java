@@ -29,6 +29,8 @@ public enum Category {
 
     public String getName() { return this.name; }
 
+    public String toString() { return this.name; }
+
     public static Category fromName(String name) {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);

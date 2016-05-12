@@ -5,7 +5,7 @@ import java.io.Serializable;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public interface AddFieldStrategy extends Serializable {
 

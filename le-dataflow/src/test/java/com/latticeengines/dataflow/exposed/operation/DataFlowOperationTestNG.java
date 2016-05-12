@@ -385,7 +385,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
-    public void testTransformEncoder() throws Exception {
+    public void testTransformCompanyNameLength() throws Exception {
         final TransformDefinition definition = TransformationPipeline.stdLengthCompanyName;
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
             @Override
@@ -398,6 +398,20 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         for (GenericRecord record : output) {
             Assert.assertNotNull(record.get(definition.output));
         }
+    }
+
+    @Test(groups = "functional")
+    public void testTransformFundingStage() throws Exception {
+        final TransformDefinition definition = TransformationPipeline.stdVisidbDsPdFundingstageOrdered;
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node lead = addSource("Lead2");
+                return lead.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
+            }
+        });
+        List<GenericRecord> output = readOutput();
+        Assert.assertEquals(output.size(), 4826);
     }
 
     @Test(groups = "functional")

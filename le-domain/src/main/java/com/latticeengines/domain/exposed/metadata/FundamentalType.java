@@ -32,6 +32,8 @@ public enum FundamentalType {
 
     public String getName() { return this.name; }
 
+    public String toString() { return this.name; }
+
     public static FundamentalType fromName(String name) {
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);

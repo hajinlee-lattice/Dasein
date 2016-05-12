@@ -170,6 +170,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                 attr.setInterfaceName(InterfaceName.Id);
                 attr.setPhysicalDataType(Type.STRING.name());
                 attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Id.name()));
+                attr.setNullable(false);
             }
             if (attr.getDisplayName().equals("Country")) {
                 attr.setName(InterfaceName.Country.name());
@@ -206,6 +207,12 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                 attr.setName(InterfaceName.LastModifiedDate.name());
                 attr.setPhysicalDataType(Type.LONG.name());
                 attr.setLogicalDataType(LogicalDataType.Date);
+            }if(attr.getDisplayName().equals("kickboxDisposable")){
+                attr.setName("kickboxDisposable");
+                attr.setPhysicalDataType(Type.BOOLEAN.name());
+            }if(attr.getDisplayName().equals("string column")){
+                attr.setName("string_column");
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             file.addAttribute(attr);
         }

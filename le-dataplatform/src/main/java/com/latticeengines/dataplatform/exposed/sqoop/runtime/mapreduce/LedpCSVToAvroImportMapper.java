@@ -199,10 +199,9 @@ public class LedpCSVToAvroImportMapper extends
                     return Boolean.TRUE;
                 } else if (fieldCsvValue.equals("0") || fieldCsvValue.equalsIgnoreCase("false")) {
                     return Boolean.FALSE;
-                } else if (StringUtils.isEmpty(fieldCsvValue)) {
-                    return null;
                 }
             default:
+                LOG.info("size is:" + fieldCsvValue.length());
                 throw new IllegalArgumentException("Not supported Field, avroType:" + avroType + ", physicalDatalType:"
                         + attr.getPhysicalDataType());
             }

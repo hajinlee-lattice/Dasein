@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
@@ -33,6 +32,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionO
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;

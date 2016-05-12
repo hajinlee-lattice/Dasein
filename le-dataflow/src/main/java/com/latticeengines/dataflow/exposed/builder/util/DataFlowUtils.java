@@ -22,8 +22,8 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 

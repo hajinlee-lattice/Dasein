@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.exposed.builder.common;
+package com.latticeengines.domain.exposed.dataflow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class FieldMetadata {
     private String fieldName;
     private Schema.Field avroField;
     private Map<String, String> properties = new HashMap<>();
-    
+
     @SuppressWarnings("unused")
     private List<Attribute> ancestors = new ArrayList<>();
 

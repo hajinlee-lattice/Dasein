@@ -9,17 +9,18 @@ import java.util.Map;
 import java.util.Scanner;
 
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import cascading.operation.Buffer;
 
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaIndustryBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 
 @Component("alexaRefreshFlow")

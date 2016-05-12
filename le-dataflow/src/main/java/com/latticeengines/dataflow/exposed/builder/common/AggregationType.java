@@ -2,6 +2,8 @@ package com.latticeengines.dataflow.exposed.builder.common;
 
 import org.apache.avro.Schema;
 
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
 public enum AggregationType {
     MAX, //
     MIN, //
