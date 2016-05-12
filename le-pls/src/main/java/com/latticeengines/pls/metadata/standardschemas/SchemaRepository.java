@@ -66,6 +66,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Website) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -131,6 +132,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -139,6 +141,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -198,6 +201,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Email) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -292,6 +296,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LeadSource", "Lead Source" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LeadSource) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -323,6 +328,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -331,6 +337,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "No. of Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
