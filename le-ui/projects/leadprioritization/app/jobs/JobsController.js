@@ -305,9 +305,6 @@ angular.module('pd.jobs', [
     };
     
     function getCompletedStepTimes(job, runningStep, completedSteps) {
-        if (!runningStep) {
-            return;
-        }
         var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
                 "create_global_model": null, "create_global_target_market": null };
         var currStepIndex = 0;
@@ -351,8 +348,7 @@ angular.module('pd.jobs', [
         if (job.steps) {
             for (var i = 0; i < job.steps.length; i++) {
                 var stepRunning = getDictionaryValue(job, i);
-
-                if (stepRunning && job.steps[i].stepStatus == "Failed") {
+                if (stepRunning && (job.steps[i].stepStatus == "Failed" || job.steps[i].stepStatus == "Cancelled")) {
                     return stepRunning;
                 }
             }

@@ -54,12 +54,19 @@ angular
                     $scope.jobStepsRunningStates = $scope.statuses[job.id].running;
                     $scope.jobStepsCompletedStates = $scope.statuses[job.id].completed;
                     $scope.stepsCompletedTimes = $scope.statuses[job.id].completedTimes;
+                    $scope.stepFailed = $scope.statuses[job.id].stepFailed;
                 }
                 if ($scope.job.status == "Running") {
                     $scope.jobRunning = true;
                     periodicQueryJobStatus($scope.job.id);
                 } else if ($scope.job.status == "Completed") {
                     $scope.jobCompleted = true;
+                } else if ($scope.stepFailed) {
+                    $scope.jobStepsRunningStates[$scope.stepFailed] = false;
+                    $scope.jobStepsCompletedStates[$scope.stepFailed] = false;
+                    if ($scope.stepsCompletedTimes[$scope.stepFailed]) {
+                        delete $scope.stepsCompletedTimes[$scope.stepFailed];
+                    }
                 }
                 
                 $scope.expandJobStatus = function() {
@@ -150,9 +157,10 @@ angular
                     $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                     var stepFailed = jobStatus.stepFailed;
-                    if (stepFailed && $scope.stepsCompletedTimes) {
+                    if (stepFailed) {
                         $scope.jobStepsRunningStates[stepFailed] = false;
                         $scope.jobStepsCompletedStates[stepFailed] = false;
+                        $scope.stepFailed = stepFailed;
 
                         if ($scope.stepsCompletedTimes[stepFailed]) {
                             delete $scope.stepsCompletedTimes[stepFailed];
@@ -166,6 +174,9 @@ angular
                         $scope.jobCompleted = true;
                     } else if (jobStatus.jobStatus == "Failed" || jobStatus.jobStatus == "Cancelled") {
                         $scope.jobRunning = false;
+                        for (var jobState in $scope.jobStepsRunningStates) {
+                            $scope.jobStepsRunningStates[jobState] = false;
+                        }
                     }
                 }
 
@@ -176,6 +187,7 @@ angular
                     $scope.statuses[job.id]["running"] = $scope.jobStepsRunningStates;
                     $scope.statuses[job.id]["completed"] = $scope.jobStepsCompletedStates;
                     $scope.statuses[job.id]["completedTimes"] = $scope.stepsCompletedTimes;
+                    $scope.statuses[job.id]["stepFailed"] = $scope.stepFailed;
                 }
 
                 function periodicQueryJobStatus(jobId) {
