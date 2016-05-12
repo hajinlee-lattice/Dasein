@@ -66,6 +66,7 @@ public class ValidateFileHeaderUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void checkForDuplicateHeaders(List<Attribute> attributes, String fileDisplayName,
             Set<String> headerFields) {
         Map<String, List<String>> duplicates = new HashMap<>();
