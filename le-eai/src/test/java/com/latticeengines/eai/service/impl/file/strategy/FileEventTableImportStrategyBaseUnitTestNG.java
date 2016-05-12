@@ -27,6 +27,6 @@ public class FileEventTableImportStrategyBaseUnitTestNG {
         assertTrue(url.contains("dateFormat=MM-DD-YYYY"));
         assertTrue(url.contains("timestampFormat=HH:mm:ss"));
         assertTrue(url.contains("charset=UTF-8"));
-        assertTrue(url.contains("missingValue=''"));
+        assertTrue(url.contains("missingValue=\"\""));
     }
 }

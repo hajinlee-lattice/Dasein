@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.util;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -31,7 +34,7 @@ public class AttributeUtilsUnitTestNG {
 
         AttributeUtils.copyPropertiesFromAttribute(source, dest, false);
         assertEquals(dest.getDisplayName(), "foo");
-        assertEquals(dest.isNullable(), Boolean.FALSE);
+        assertEquals(dest.isNullable(), Boolean.TRUE);
         assertEquals(dest.getCategory(), "Internal");
         assertEquals(dest.getLogicalDataType(), LogicalDataType.Reference);
         assertEquals(dest.getDataQuality(), "Foo");
