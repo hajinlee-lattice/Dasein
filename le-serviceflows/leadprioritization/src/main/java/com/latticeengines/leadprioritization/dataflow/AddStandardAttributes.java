@@ -101,6 +101,79 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         fm = new FieldMetadata("Industry_Group", String.class);
         last = addFunction(last, "std_visidb_ds_industry_group", fm, //
                 eventTable.getSourceAttribute(InterfaceName.Industry));
+        
+        fm = new FieldMetadata("EmailIsInvalid", Boolean.class);
+        last = addFunction(last, "StdVisidbDsEmailIsInvalid", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Email));
+        
+        fm = new FieldMetadata("EmailLength", Integer.class);
+        last = addFunction(last, "StdVisidbDsEmailLength", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Email));
+        
+        fm = new FieldMetadata("EmailPrefixlength", Integer.class);
+        last = addFunction(last, "StdVisidbDsEmailPrefixlength", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Email));
+        
+        fm = new FieldMetadata("NameLength", Integer.class);
+        last = addFunction(last, "StdVisidbDsNamelength", fm, 
+                eventTable.getSourceAttribute(InterfaceName.FirstName),
+                eventTable.getSourceAttribute(InterfaceName.LastName));
+        
+        fm = new FieldMetadata("TitleChannel", String.class);
+        last = addFunction(last, "StdVisidbDsTitleChannel", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Title));
+        
+        fm = new FieldMetadata("TitleFunction", String.class);
+        last = addFunction(last, "StdVisidbDsTitleFunction", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Title));
+        
+        fm = new FieldMetadata("TitleLevelCategorical", String.class);
+        last = addFunction(last, "StdVisidbDsTitleLevelCategorical", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Title));
+        
+        fm = new FieldMetadata("TitleRole", String.class);
+        last = addFunction(last, "StdVisidbDsTitleRole", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Title));
+        
+        fm = new FieldMetadata("TitleScope", String.class);
+        last = addFunction(last, "StdVisidbDsTitleScope", fm, 
+                eventTable.getSourceAttribute(InterfaceName.Title));
+        
+        fm = new FieldMetadata("StateIsCanadianProvince", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsCanadianProvince", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInFarWest", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInFarWest", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInGreatLakes", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInGreatLakes", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInMidAtlantic", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInMidAtlantic", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInNewEngland", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInNewEngland", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInPlains", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInPlains", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInRockyMountains", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInRockyMountains", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInSouthEast", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInSouthEast", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
+        
+        fm = new FieldMetadata("StateIsInSouthWest", Boolean.class);
+        last = addFunction(last, "StdVisidbDsStateIsInSouthWest", fm, 
+                eventTable.getSourceAttribute(InterfaceName.State));
 
         return last;
     }
