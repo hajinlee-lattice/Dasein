@@ -4,7 +4,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
@@ -12,6 +17,10 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
 
     private static final long serialVersionUID = 8526302676390701013L;
 
+    public StdVisidbDsTitleLevelCategorical() {
+        
+    }
+    
     public StdVisidbDsTitleLevelCategorical(String modelPath) {
     }
 
@@ -20,7 +29,7 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
         Object n = record.get(column);
 
         if (n == null)
-            return "";
+            return 0.0;
 
         String s = n.toString().toLowerCase();
 
@@ -50,7 +59,14 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.ALPHA);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Title Category");
+        attribute.setDisplayName("Title Category");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

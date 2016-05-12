@@ -2,13 +2,22 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsEmailLength implements RealTimeTransform {
 
     private static final long serialVersionUID = -5855758219670055293L;
 
+    public StdVisidbDsEmailLength() {
+        
+    }
+    
     public StdVisidbDsEmailLength(String modelPath) {
 
     }
@@ -28,6 +37,14 @@ public class StdVisidbDsEmailLength implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.NUMERIC);
+        attribute.setStatisticalType(StatisticalType.ORDINAL);
+        attribute.setDescription("Email Length");
+        attribute.setDisplayName("Email Length");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

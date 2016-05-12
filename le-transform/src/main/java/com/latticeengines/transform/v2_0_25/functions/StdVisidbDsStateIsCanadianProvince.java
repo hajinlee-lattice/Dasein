@@ -6,7 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsStateIsCanadianProvince implements RealTimeTransform {
@@ -15,6 +20,10 @@ public class StdVisidbDsStateIsCanadianProvince implements RealTimeTransform {
     static HashSet<String> valueMap = new HashSet<String>(
             Arrays.asList("ON", "AB", "NL", "MB", "NB", "BC", "YT", "SK", "QC", "PE", "NS", "NT", "NU"));
 
+    public StdVisidbDsStateIsCanadianProvince() {
+        
+    }
+    
     public StdVisidbDsStateIsCanadianProvince(String modelPath) {
     }
 
@@ -39,6 +48,14 @@ public class StdVisidbDsStateIsCanadianProvince implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Region: Canadian Province");
+        attribute.setDisplayName("Region: Canadian Province");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

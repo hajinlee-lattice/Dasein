@@ -5,7 +5,12 @@ import java.util.Map;
 import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.LinkedMap;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
@@ -14,6 +19,10 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
     private static final long serialVersionUID = -6009982200973336493L;
     private static OrderedMap mapTitleScope = null;
 
+    public StdVisidbDsTitleScope() {
+        
+    }
+    
     public StdVisidbDsTitleScope(String modelPath) {
 
     }
@@ -25,7 +34,7 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
         Object o = record.get(column);
 
         if (o == null)
-            return "Null";
+            return 0.0;
 
         if (mapTitleScope == null) {
             mapTitleScope = new LinkedMap();
@@ -42,8 +51,15 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.ALPHA);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Title Scope");
+        attribute.setDisplayName("Title Scope");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 
 }

@@ -6,7 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsStateIsInMidAtlantic implements RealTimeTransform {
@@ -14,6 +19,10 @@ public class StdVisidbDsStateIsInMidAtlantic implements RealTimeTransform {
     private static final long serialVersionUID = -8673647767633981243L;
     static HashSet<String> valueMap = new HashSet<String>(Arrays.asList("MD", "NJ", "DE", "DC", "NY", "PA"));
 
+    public StdVisidbDsStateIsInMidAtlantic() {
+        
+    }
+    
     public StdVisidbDsStateIsInMidAtlantic(String modelPath) {
     }
 
@@ -38,7 +47,14 @@ public class StdVisidbDsStateIsInMidAtlantic implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Region: Mid-Atlantic");
+        attribute.setDisplayName("Region: Mid-Atlantic");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

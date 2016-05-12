@@ -6,7 +6,12 @@ import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
@@ -15,6 +20,10 @@ public class StdVisidbDsTitleRole implements RealTimeTransform {
     private static final long serialVersionUID = -2648663303512664149L;
     private static OrderedMap mapTitleRole = null;
 
+    public StdVisidbDsTitleRole() {
+        
+    }
+    
     public StdVisidbDsTitleRole(String modelPath) {
 
     }
@@ -26,7 +35,7 @@ public class StdVisidbDsTitleRole implements RealTimeTransform {
         Object o = record.get(column);
 
         if (o == null)
-            return "Null";
+            return 0.0;
 
         if (StringUtils.isEmpty(String.valueOf(o)))
             return "";
@@ -59,8 +68,15 @@ public class StdVisidbDsTitleRole implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.ALPHA);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Title Role");
+        attribute.setDisplayName("Title Role");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 
 }

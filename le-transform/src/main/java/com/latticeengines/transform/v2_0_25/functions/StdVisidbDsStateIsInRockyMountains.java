@@ -6,7 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsStateIsInRockyMountains implements RealTimeTransform {
@@ -14,6 +19,10 @@ public class StdVisidbDsStateIsInRockyMountains implements RealTimeTransform {
     private static final long serialVersionUID = -1428998608448491827L;
     static HashSet<String> valueMap = new HashSet<String>(Arrays.asList("MT", "CO", "ID", "WY", "UT"));
 
+    public StdVisidbDsStateIsInRockyMountains() {
+        
+    }
+    
     public StdVisidbDsStateIsInRockyMountains(String modelPath) {
     }
 
@@ -38,7 +47,14 @@ public class StdVisidbDsStateIsInRockyMountains implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Region: Rocky Mountain");
+        attribute.setDisplayName("Region: Rocky Mountain");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

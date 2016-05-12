@@ -6,7 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsStateIsInNewEngland implements RealTimeTransform {
@@ -14,6 +19,10 @@ public class StdVisidbDsStateIsInNewEngland implements RealTimeTransform {
     private static final long serialVersionUID = -6044120647859842967L;
     static HashSet<String> valueMap = new HashSet<String>(Arrays.asList("ME", "NH", "MA", "VT", "RI", "CT"));
 
+    public StdVisidbDsStateIsInNewEngland() {
+        
+    }
+    
     public StdVisidbDsStateIsInNewEngland(String modelPath) {
     }
 
@@ -38,7 +47,14 @@ public class StdVisidbDsStateIsInNewEngland implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        // TODO Auto-generated method stub
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Region: New England");
+        attribute.setDisplayName("Region: New England");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }

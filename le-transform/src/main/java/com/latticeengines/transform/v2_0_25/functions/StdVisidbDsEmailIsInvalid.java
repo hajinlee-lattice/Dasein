@@ -2,13 +2,22 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
 
     private static final long serialVersionUID = -2544730034184720534L;
 
+    public StdVisidbDsEmailIsInvalid() {
+        
+    }
+    
     public StdVisidbDsEmailIsInvalid(String modelPath) {
 
     }
@@ -34,6 +43,14 @@ public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
 
     @Override
     public Attribute getMetadata() {
-        return null;
+        Attribute attribute = new Attribute();
+        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        attribute.setCategory(Category.LEAD_INFORMATION);
+        attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setStatisticalType(StatisticalType.NOMINAL);
+        attribute.setDescription("Invalid Email");
+        attribute.setDisplayName("Invalid Email");
+        attribute.setTags(Tag.INTERNAL_TRANSFORM);
+        return attribute;
     }
 }
