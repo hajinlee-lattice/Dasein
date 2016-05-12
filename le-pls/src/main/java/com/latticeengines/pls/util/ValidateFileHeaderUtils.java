@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -48,18 +47,6 @@ public class ValidateFileHeaderUtils {
             headerFields = parser.getHeaderMap().keySet();
             return headerFields;
 
-        } catch (IOException e) {
-            log.error(e);
-            throw new LedpException(LedpCode.LEDP_00002, e);
-        }
-    }
-
-    public static void validateCSVHeaderFormat(InputStream stream) {
-        try {
-            String headerStr = IOUtils.toString(stream, "UTF-8");
-            if (headerStr.indexOf(',') == -1) {
-                throw new LedpException(LedpCode.LEDP_19111);
-            }
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -132,6 +119,12 @@ public class ValidateFileHeaderUtils {
             if (StringUtils.isEmpty(field)) {
                 throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
             }
+        }
+    }
+
+    public static void checkForHeaderFormat(Set<String> headerFields) {
+        if (headerFields.size() == 1) {
+            throw new LedpException(LedpCode.LEDP_19111);
         }
     }
 }

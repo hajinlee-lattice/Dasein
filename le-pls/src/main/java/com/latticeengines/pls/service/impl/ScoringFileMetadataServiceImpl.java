@@ -54,25 +54,19 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFields,
-            CloseableResourcePool leCsvParser, String displayName) {
+            CloseableResourcePool closeableResourcePool, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
         stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
-        ValidateFileHeaderUtils.validateCSVHeaderFormat(stream);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, leCsvParser);
-        try {
-            stream.reset();
-        } catch (IOException e) {
-            log.error(e);
-            throw new LedpException(LedpCode.LEDP_00002, e);
-        }
+        ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(requiredFields, displayName, headerFields);
         ValidateFileHeaderUtils.checkForMissingRequiredFields(requiredFields, displayName, headerFields, false);
 

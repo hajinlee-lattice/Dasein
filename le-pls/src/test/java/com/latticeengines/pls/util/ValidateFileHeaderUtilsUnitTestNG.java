@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Set;
@@ -26,6 +27,11 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         assertTrue(!headers.isEmpty());
         assertEquals(headers.size(), 17);
+        try {
+            closeableResourcePool.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Problem when closing the pool", e);
+        }
     }
 
     @Test(groups = "unit")
@@ -33,13 +39,19 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         URL topPredictorCSVFileUrl = ClassLoader.getSystemResource("com/latticeengines/pls/util/wrong_format_file.csv");
         File csvFile = new File(topPredictorCSVFileUrl.getFile());
         InputStream stream = new FileInputStream(csvFile);
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         boolean thrownNotException = true;
         try {
-            ValidateFileHeaderUtils.validateCSVHeaderFormat(stream);
+            ValidateFileHeaderUtils.checkForHeaderFormat(headers);
             thrownNotException = false;
         } catch (Exception e) {
             assertTrue(thrownNotException, "Should have thrown exception");
         }
-
+        try {
+            closeableResourcePool.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Problem when closing the pool", e);
+        }
     }
 }
