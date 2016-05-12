@@ -13,7 +13,7 @@ html, body {
 $gutter:    percentage(20px/940px);
 $one-column:                6.3829787%;
 $columns-break-point:          481px !default;
-$container-max-width:          auto !default;
+$container-max-width:          1200px !default;
 $flexbox-support: 			  true !default;
 
 $column-list:    (2, "two") (3, "three", "one-fourth") (4, "four", "one-third") (5, "five") (6, "six", "one-half") (7, "seven") (8, "eight", "two-thirds") (9, "nine", "three-fourths") (10, "ten") (11, "eleven") (12, "twelve", "full") !default;

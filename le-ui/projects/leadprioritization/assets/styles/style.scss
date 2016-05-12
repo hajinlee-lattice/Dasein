@@ -588,7 +588,7 @@ Model List
     background-color: #fff;
     background-repeat: no-repeat;
     background-position: center center;
-    background-size: 190px;
+    background-size: 150px;
     border: #e0e3e6 solid 2px;
     position: relative;
     min-height: 300px;
@@ -632,6 +632,21 @@ Model List
         margin-right: 1%;
     }
     .model-list > div > div > div > div > div > div > div:nth-child(3n) .model {
+        margin-right: 0;
+    }
+}
+@media (min-width: 1024px) {
+    .model{
+        width: 24%;
+        margin-right: 1%;
+    }
+    .model-list > div > div > div > div > div > div > div:nth-child(2n) .model {
+        margin-right: 1%;
+    }
+    .model-list > div > div > div > div > div > div > div:nth-child(3n) .model {
+        margin-right: 1%;
+    }
+    .model-list > div > div > div > div > div > div > div:nth-child(4n) .model {
         margin-right: 0;
     }
 }
