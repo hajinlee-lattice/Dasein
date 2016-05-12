@@ -29,7 +29,7 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
         Object n = record.get(column);
 
         if (n == null)
-            return 0.0;
+            return "0.0";
 
         String s = n.toString().toLowerCase();
 

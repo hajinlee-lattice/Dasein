@@ -34,7 +34,7 @@ public class StdVisidbDsTitleChannel implements RealTimeTransform {
         Object o = record.get(column);
 
         if (o == null)
-            return 0.0;
+            return "0.0";
 
         if (mapTitleChannel == null) {
             mapTitleChannel = new LinkedMap();
