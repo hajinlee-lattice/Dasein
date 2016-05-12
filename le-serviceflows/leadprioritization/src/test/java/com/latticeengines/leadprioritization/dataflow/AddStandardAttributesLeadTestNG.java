@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 @ContextConfiguration(locations = {"classpath:serviceflows-leadprioritization-context.xml"})
 public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
@@ -25,6 +26,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
     public void test() {
         AddStandardAttributesParameters parameters = new AddStandardAttributesParameters("EventTable");
         Table table = executeDataFlow(parameters);
+        System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Title_Level");
         assertNotEquals(attribute.getDisplayName(), attribute.getName());
         assertNotNull(attribute.getName());
@@ -55,7 +57,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
 
     @Override
     protected String getFlowBeanName() {
-        return "addStandardAttributes";
+        return "addStandardAttributesViaJavaFunction";
     }
 
     @Override

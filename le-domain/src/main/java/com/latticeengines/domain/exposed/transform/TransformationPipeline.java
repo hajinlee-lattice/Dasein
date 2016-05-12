@@ -67,12 +67,21 @@ public class TransformationPipeline {
 
     static {
         stdVisidbDsCompanynameEntropy.arguments.put("column", InterfaceName.CompanyName.name());
+
         stdLengthTitle.arguments.put("column", InterfaceName.Title.name());
+        stdLengthTitle.outputDisplayName = "Length of Title";
+
         stdLengthCompanyName.arguments.put("column", InterfaceName.CompanyName.name());
-        // need to set stdLengthDomain
+        stdLengthCompanyName.outputDisplayName = "Length of Company Name";
+
+        // need to set stdLengthDomain arguments
+        stdLengthDomain.outputDisplayName = "Length of Domain Name";
 
         stdVisidbDsPdAlexaRelatedlinksCount.arguments.put("column", "AlexaRelatedLinks");
+
         stdPhoneEntropy.arguments.put("column", InterfaceName.PhoneNumber.name());
+        stdPhoneEntropy.outputDisplayName = "Entropy of Phone Number";
+
         stdVisidbAlexaMonthssinceonline.arguments.put("column", "AlexaOnlineSince");
         stdVisidbDsPdModelactionOrdered.arguments.put("column", "ModelAction");
 

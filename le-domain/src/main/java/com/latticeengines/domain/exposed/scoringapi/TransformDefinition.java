@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class TransformDefinition implements Serializable{
+public class TransformDefinition implements Serializable {
 
     private static final long serialVersionUID = 1812638246579109675L;
 
@@ -33,6 +33,8 @@ public class TransformDefinition implements Serializable{
 
     // Any arguments to the transformation function.
     public Map<String, Object> arguments;
+
+    public String outputDisplayName;
 
     @Override
     public int hashCode() {

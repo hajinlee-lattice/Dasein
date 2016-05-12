@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,6 +40,9 @@ public class TransformFunctionOperation extends Operation {
 
         Attribute attr = transform.getMetadata();
         AttributeUtils.setFieldMetadataFromAttribute(attr, targetField, false);
+        if (StringUtils.isNotEmpty(definition.outputDisplayName)) {
+            targetField.setPropertyValue("DisplayName", definition.outputDisplayName);
+        }
         // For now, assume that all Java functions are to be used within RTS
         setRTSProperties(targetField, definition.name, definition.arguments);
         Operation base = new FunctionOperation(
