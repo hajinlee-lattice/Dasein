@@ -1,22 +1,31 @@
 .model-summary {
+	padding: 20px 0;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     & > div {
         margin: 7px;
         min-height: auto;
     }
 }
 
-@media (max-width: 757px) {
+@media (min-width: 470px) {
 	.model-summary {
+		padding: 40px 0;
+	    flex-direction: row;
+	    flex-wrap: wrap;
 		& > div {
-			min-height: 165px;
+			width: 46%;
 		}
-		.stats-group dl {
-			border-left: none;
-			padding: 0;
-			float: none;
-			margin-bottom: 4px;
-    	}
-    }
+	}
+}
+
+
+@media (min-width: 740px) {
+	.model-summary {
+		flex-wrap: nowrap;
+		& > div {
+			width: inherit;
+		}
+	}
 }
