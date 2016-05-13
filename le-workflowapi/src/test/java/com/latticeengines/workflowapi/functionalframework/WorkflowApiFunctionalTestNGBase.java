@@ -101,7 +101,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Autowired
     private YarnClient defaultYarnClient;
