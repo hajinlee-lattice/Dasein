@@ -5,7 +5,9 @@ import static org.testng.Assert.assertNotNull;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -50,10 +52,11 @@ public class CreatePMMLModelUnitTestNG {
 
     @Test(groups = "unit")
     public void getPmmlFields() throws Exception {
+        PivotValuesLookup pivotValues = createPMMLModel.getPivotValues();
         List<PmmlField> fields = createPMMLModel.getPmmlFields();
-        assertEquals(fields.size(), 116);
-        String[] features = createPMMLModel.getFeaturesAndTarget(fields).getKey();
-        assertEquals(features.length, 116);
+        assertEquals(fields.size(), 117);
+        String[] features = createPMMLModel.getFeaturesAndTarget(fields, pivotValues).getKey();
+        assertEquals(features.length, 108);
     }
     
     @SuppressWarnings("rawtypes")
@@ -82,8 +85,26 @@ public class CreatePMMLModelUnitTestNG {
         String datacompositionStr = createPMMLModel.getDataCompositionContents(pmmlFields, pivotValues);
         DataComposition datacomposition = JsonUtils.deserialize(datacompositionStr, DataComposition.class);
         assertNotNull(datacomposition);
-        FieldSchema fieldSchema = datacomposition.fields.get("PD_DA_JobTitle"); 
+        FieldSchema fieldSchema = datacomposition.fields.get("PD_DA_JobTitle");
         assertNotNull(fieldSchema);
         assertEquals(fieldSchema.type, FieldType.STRING);
+    }
+
+    @Test(groups = "unit")
+    public void getAvroSchema() throws Exception {
+        PivotValuesLookup pivotValues = createPMMLModel.getPivotValues();
+        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        String avroSchemaStr = createPMMLModel.getAvroSchema(pmmlFields, pivotValues);
+        Schema schema = new Schema.Parser().parse(avroSchemaStr);
+        assertNotNull(schema);
+    }
+    
+    @Test(groups = "unit")
+    public void getFeaturesAndTarget() throws Exception {
+        PivotValuesLookup pivotValues = createPMMLModel.getPivotValues();
+        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        Map.Entry<String[], String> featuresAndTarget = createPMMLModel.getFeaturesAndTarget(pmmlFields, pivotValues);
+        assertNotNull(featuresAndTarget.getValue());
+
     }
 }

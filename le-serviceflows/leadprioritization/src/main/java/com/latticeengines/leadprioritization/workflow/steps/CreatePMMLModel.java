@@ -28,6 +28,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
@@ -40,6 +41,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -52,6 +55,8 @@ import com.latticeengines.leadprioritization.workflow.steps.pmml.PMMLModelingSer
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PivotValuesLookup;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PmmlField;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.SkipFilter;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 
@@ -59,6 +64,12 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreatePMMLModel.class);
+    
+    @Autowired
+    private JobProxy jobProxy;
+    
+    @Autowired
+    private ModelProxy modelProxy;
 
     @Override
     public void execute() {
@@ -66,6 +77,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
 
         try {
             PMMLModelingServiceExecutor executor = new PMMLModelingServiceExecutor(createModelingServiceExecutorBuilder(configuration));
+            executor.writeMetadataFiles();
+            executor.writeDataFiles();
             executor.model();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28019, new String[] { configuration.getPmmlArtifactPath() });
@@ -79,9 +92,11 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         
         String metadataContents = getMetadataContents(pmmlFields, pivotValues);
         String datacompositionContents = getDataCompositionContents(pmmlFields, pivotValues);
+        String avroSchema = getAvroSchema(pmmlFields, pivotValues);
         
-        Map.Entry<String[], String> featuresAndTarget = getFeaturesAndTarget(pmmlFields);
+        Map.Entry<String[], String> featuresAndTarget = getFeaturesAndTarget(pmmlFields, pivotValues);
         PMMLModelingServiceExecutor.Builder bldr = new PMMLModelingServiceExecutor.Builder();
+        String tableName = "PMMLDummyTable-" + System.currentTimeMillis();
         bldr.modelingServiceHostPort(modelStepConfiguration.getMicroServiceHostPort()) //
             .modelingServiceHdfsBaseDir(modelStepConfiguration.getModelingServiceHdfsBaseDir()) //
             .customer(modelStepConfiguration.getCustomerSpace().toString()) //
@@ -89,21 +104,67 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             .dataCompositionContents(datacompositionContents) //
             .featureList(featuresAndTarget.getKey()) //
             .targets(featuresAndTarget.getValue()) //
+            .jobProxy(jobProxy) //
+            .modelProxy(modelProxy) //
+            .modelName(modelStepConfiguration.getModelName()) //
+            .table(tableName) //
+            .metadataTable(String.format("%s-%s-Metadata", tableName, featuresAndTarget.getValue())) //
+            .avroSchema(avroSchema) //
             .yarnConfiguration(yarnConfiguration);
 
         return bldr;
     }
     
     @VisibleForTesting
-    final AbstractMap.Entry<String[], String> getFeaturesAndTarget(List<PmmlField> pmmlFields) throws Exception {
+    final String getAvroSchema(List<PmmlField> pmmlFields, PivotValuesLookup pivotValues) throws Exception {
+        DataSchema dataSchema = new DataSchema();
+        dataSchema.setName("PMMLDummyTableSchema");
+        dataSchema.setType("record");
+        
+        Map<String, AbstractMap.Entry<String, List<String>>> pivotValuesByTargetColumn = pivotValues.pivotValuesByTargetColumn;
+        Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = pivotValues.pivotValuesBySourceColumn;
+        Map<String, UserDefinedType> sourceColumnTypes = pivotValues.sourceColumnToUserType;
+
+        for (PmmlField pmmlField : pmmlFields) {
+            DataField dataField = pmmlField.dataField;
+            
+            if (dataField == null) {
+                continue;
+            }
+            String name = dataField.getName().getValue(); 
+            if (pivotValuesByTargetColumn.containsKey(name)) {
+                continue;
+            }
+            Field field = new Field();
+            field.setName(name);
+            FieldType fieldType = getFieldType(pmmlField.dataField.getDataType());
+            field.setType(Arrays.asList(fieldType.avroTypes()[0]));
+            
+            dataSchema.addField(field);
+        }
+
+        for (Map.Entry<String, List<AbstractMap.Entry<String, String>>> entry : pivotValuesBySourceColumn.entrySet()) {
+            String name = entry.getKey();
+            UserDefinedType userType = sourceColumnTypes.get(name);
+            Field field = new Field();
+            field.setName(name);
+            field.setType(Arrays.asList(new String[] { userType.getAvroType().toString() }));
+        }
+        return JsonUtils.serialize(dataSchema);
+    }
+    
+    @VisibleForTesting
+    final AbstractMap.Entry<String[], String> getFeaturesAndTarget(List<PmmlField> pmmlFields, PivotValuesLookup pivotValues) throws Exception {
         List<String> features = new ArrayList<>(pmmlFields.size());
         String event = null;
+        Map<String, AbstractMap.Entry<String, List<String>>> pivotValuesByTargetColumn = pivotValues.pivotValuesByTargetColumn;
         for (PmmlField pmmlField : pmmlFields) {
             MiningField field = pmmlField.miningField;
-            if (field.getUsageType() == FieldUsageType.ACTIVE) {
-                features.add(field.getName().getValue());
+            String name = field.getName().getValue();
+            if (field.getUsageType() == FieldUsageType.ACTIVE && !pivotValuesByTargetColumn.containsKey(name)) {
+                features.add(name);
             } else if (field.getUsageType() == FieldUsageType.PREDICTED) {
-                event = field.getName().getValue();
+                event = name;
             }
         }
         String[] f = new String[features.size()];
@@ -181,6 +242,10 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         Map<String, UserDefinedType> sourceType = pivotValues.sourceColumnToUserType;
         Map<String, FieldSchema> fields = new HashMap<>();
         for (PmmlField pmmlField : pmmlFields) {
+            if (pmmlField.dataField == null) {
+                continue;
+            }
+
             MiningField field = pmmlField.miningField;
             String columnName = field.getName().getValue();
             
@@ -297,7 +362,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         for (MiningField miningField : miningFields) {
             DataField f = dataFields.get(miningField.getName().getValue());
             
-            if (f == null) {
+            if (f == null && miningField.getUsageType() != FieldUsageType.PREDICTED) {
                 continue;
             }
             pmmlFields.add(new PmmlField(miningField, f));

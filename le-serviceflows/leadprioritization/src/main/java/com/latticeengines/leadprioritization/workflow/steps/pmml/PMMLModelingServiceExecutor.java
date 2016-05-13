@@ -1,11 +1,18 @@
 package com.latticeengines.leadprioritization.workflow.steps.pmml;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -44,9 +51,9 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         model.setDataFormat("avro");
         model.setTargetsList(Arrays.asList(builder.getTargets()));
         model.setFeaturesList(Arrays.asList(builder.getFeatureList()));
+        model.setSchemaContents(builder.getSchemaContents());
 
-        AppSubmission submission = restTemplate.postForObject(
-                modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
+        AppSubmission submission = modelProxy.submit(model);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
         JobStatus status = waitForModelingAppId(appId);
@@ -63,6 +70,31 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
+    
+    public void writeDataFiles() throws Exception {
+        File localFile = createDummyTrainingAndTestData(builder.getSchemaContents());
+        String trainingDataHdfsPath = String.format("%s/%s/data/%s/samples/allTraining.avro", //
+                modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable());
+        String testDataHdfsPath = String.format("%s/%s/data/%s/samples/allTest.avro", //
+                modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable());
+        
+        try {
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), trainingDataHdfsPath);
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), testDataHdfsPath);
+        } finally {
+            FileUtils.deleteQuietly(localFile);
+        }
+    }
+
+    private File createDummyTrainingAndTestData(String schemaContents) throws Exception {
+        Schema schema = new Schema.Parser().parse(schemaContents);
+        File f = new File("PMMLDummyFile-" + System.currentTimeMillis() + ".avro");
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>(schema))) {
+            dataFileWriter.create(schema, f);
+        }
+        return f;
+    }
+    
 
 
 }
