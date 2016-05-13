@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.31-SNAPSHOT</version>
+        <version>2.0.32-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
-        <le.domain.version>2.0.31-SNAPSHOT</le.domain.version>
+        <le.domain.version>2.0.32-SNAPSHOT</le.domain.version>
     </properties>
 
     <dependencies>
