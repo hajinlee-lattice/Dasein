@@ -13,7 +13,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -31,7 +30,8 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
-import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
 import com.latticeengines.serviceflows.workflow.modeling.ProvenanceProperties;
 
@@ -47,8 +47,10 @@ public class ModelingServiceExecutor {
     protected String modelingServiceHostPort;
 
     protected String modelingServiceHdfsBaseDir;
+    
+    protected JobProxy jobProxy;
 
-    protected RestTemplate restTemplate = new RestTemplate();
+    protected ModelProxy modelProxy;
 
     protected Configuration yarnConfiguration;
 
@@ -57,7 +59,8 @@ public class ModelingServiceExecutor {
         this.modelingServiceHostPort = builder.getModelingServiceHostPort();
         this.modelingServiceHdfsBaseDir = builder.getModelingServiceHdfsBaseDir();
         this.yarnConfiguration = builder.getYarnConfiguration();
-        this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        this.jobProxy = builder.getJobProxy();
+        this.modelProxy = builder.getModelProxy();
     }
 
     public void init() throws Exception {
@@ -101,8 +104,7 @@ public class ModelingServiceExecutor {
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
         config.setKeyCols(Collections.singletonList(builder.getKeyColumn()));
-        AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + builder.getLoadSubmissionUrl(),
-                config, AppSubmission.class);
+        AppSubmission submission = modelProxy.loadData(config);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for load: %s", appId));
         waitForAppId(appId);
@@ -118,8 +120,7 @@ public class ModelingServiceExecutor {
         samplingConfig.setCustomer(builder.getCustomer());
         samplingConfig.setTable(builder.getTable());
         samplingConfig.setHdfsDirPath(builder.getHdfsDirToSample());
-        AppSubmission submission = restTemplate.postForObject(
-                modelingServiceHostPort + builder.getSampleSubmissionUrl(), samplingConfig, AppSubmission.class);
+        AppSubmission submission = modelProxy.createSamples(samplingConfig);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
@@ -134,8 +135,7 @@ public class ModelingServiceExecutor {
         config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
         config.setTargets(Arrays.asList(builder.getTargets()));
-        AppSubmission submission = restTemplate.postForObject(
-                modelingServiceHostPort + builder.getProfileSubmissionUrl(), config, AppSubmission.class);
+        AppSubmission submission = modelProxy.profile(config);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
@@ -182,8 +182,7 @@ public class ModelingServiceExecutor {
         model.setTargetsList(targetAndFeatures.getKey());
         model.setFeaturesList(targetAndFeatures.getValue());
 
-        AppSubmission submission = restTemplate.postForObject(
-                modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
+        AppSubmission submission = modelProxy.submit(model);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
         JobStatus status = waitForModelingAppId(appId);
@@ -201,20 +200,25 @@ public class ModelingServiceExecutor {
     }
 
     protected JobStatus waitForAppId(String appId) throws Exception {
-        return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
+        return waitForAppId(appId, false);
     }
 
     protected JobStatus waitForModelingAppId(String appId) throws Exception {
-        return waitForAppId(appId, builder.getModelingJobStatusUrl());
+        return waitForAppId(appId, true);
     }
 
-    protected JobStatus waitForAppId(String appId, String jobStatusUrl) throws Exception {
+    protected JobStatus waitForAppId(String appId, boolean modeling) throws Exception {
         JobStatus status;
         int maxTries = MAX_SECONDS_WAIT_FOR_MODELING;
         int i = 0;
         do {
-            String url = String.format(modelingServiceHostPort + jobStatusUrl, appId);
-            status = restTemplate.getForObject(url, JobStatus.class);
+            
+            if (modeling) {
+                status = modelProxy.getJobStatus(appId);
+            } else {
+                status = jobProxy.getJobStatus(appId);
+            }
+            
             Thread.sleep(1000L);
             i++;
 
@@ -236,8 +240,7 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        StringList features = restTemplate.postForObject(modelingServiceHostPort + builder.getRetrieveFeaturesUrl(),
-                model, StringList.class);
+        StringList features = modelProxy.getFeatures(model);
         return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
     }
 
@@ -261,6 +264,7 @@ public class ModelingServiceExecutor {
         private Configuration yarnConfiguration;
         private String metadataContents;
         private String dataCompositionContents;
+        private String schemaContents;
         private String modelName;
         private String displayName;
         private String eventTableName;
@@ -276,6 +280,9 @@ public class ModelingServiceExecutor {
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
         private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
+        
+        private ModelProxy modelProxy;
+        private JobProxy jobProxy;
 
         public Builder() {
         }
@@ -369,6 +376,11 @@ public class ModelingServiceExecutor {
             this.setDataCompositionContents(dataCompositionContents);
             return this;
         }
+        
+        public Builder avroSchema(String avroSchema) {
+            this.setSchemaContents(avroSchema);
+            return this;
+        }
 
         public Builder modelName(String modelName) {
             this.setModelName(modelName);
@@ -437,6 +449,16 @@ public class ModelingServiceExecutor {
 
         public Builder productType(String productType) {
             this.setProductType(productType);
+            return this;
+        }
+        
+        public Builder modelProxy(ModelProxy modelProxy) {
+            this.setModelProxy(modelProxy);
+            return this;
+        }
+
+        public Builder jobProxy(JobProxy jobProxy) {
+            this.setJobProxy(jobProxy);
             return this;
         }
 
@@ -591,6 +613,14 @@ public class ModelingServiceExecutor {
         public void setDataCompositionContents(String dataCompositionContents) {
             this.dataCompositionContents = dataCompositionContents;
         }
+        
+        public String getSchemaContents() {
+            return schemaContents;
+        }
+        
+        public void setSchemaContents(String schemaContents) {
+            this.schemaContents = schemaContents;
+        }
 
         public String getModelName() {
             return modelName;
@@ -688,6 +718,10 @@ public class ModelingServiceExecutor {
             return sourceSchemaInterpretation;
         }
 
+        public void setProductType(String productType) {
+            this.productType = productType;
+        }
+        
         public String getProductType() {
             if (productType == null) {
                 productType = ProductType.LP.name();
@@ -695,8 +729,20 @@ public class ModelingServiceExecutor {
             return productType;
         }
 
-        public void setProductType(String productType) {
-            this.productType = productType;
+        public void setModelProxy(ModelProxy modelProxy) {
+            this.modelProxy = modelProxy;
+        }
+        
+        public ModelProxy getModelProxy() {
+            return modelProxy;
+        }
+        
+        public void setJobProxy(JobProxy jobProxy) {
+            this.jobProxy = jobProxy;
+        }
+        
+        public JobProxy getJobProxy() {
+            return jobProxy;
         }
 
     }

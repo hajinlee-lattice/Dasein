@@ -31,6 +31,8 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -64,6 +66,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Autowired
     protected Configuration yarnConfiguration;
+    
+    @Autowired
+    protected ModelProxy modelProxy;
+    
+    @Autowired
+    protected JobProxy jobProxy;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
@@ -147,6 +155,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 .yarnConfiguration(yarnConfiguration) //
                 .hdfsDirToSample(getHdfsDir(eventTable.getExtracts().get(0).getPath())) //
                 .table(eventTable.getName()) //
+                .modelProxy(modelProxy) //
+                .jobProxy(jobProxy) //
                 .productType(modelStepConfiguration.getProductType());
 
         return bldr;
