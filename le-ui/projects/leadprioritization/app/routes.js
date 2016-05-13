@@ -422,6 +422,88 @@ angular
                 }   
             }
         })
+        .state('home.eloquasettings', {
+            url: '/eloquasettings',
+            redirectto: 'eloquasettings.apikey',
+            resolve: {
+                urls: function($q, $http) {
+                    var deferred = $q.defer();
+
+                    $http({
+                        'method': "GET",
+                        'url': "/pls/sureshot/urls",
+                        'params': {
+                            'crmType': "eloqua"
+                        }
+                    }).then(
+                        function onSuccess(response) {
+                            if (response.data.Success) {
+                                deferred.resolve(response.data.Result);
+                            } else {
+                                deferred.reject(response.data.Errors);
+                            }
+                        }, function onError(response) {
+                            deferred.reject(response.data.Errors);
+                        }
+                    );
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/EloquaSettingsView.html'
+                },
+                "summary@": {
+                    template: ''
+                },
+                "main@": {
+                    template: ''
+                }
+            }
+        })
+        .state('home.eloquasettings.apikey', {
+            url: '/apikey',
+            views: {
+                "summary@": {
+                    resolve: {
+                        ResourceString: function() {
+                            return 'SUMMARY_ELOQUA_APIKEY';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                    },
+                    template: '<div id="sureshot_iframe_container"></div>'
+                }
+            }
+        })
+        .state('home.eloquasettings.models', {
+            url: '/models',
+            views: {
+                "summary@": {
+                    resolve: {
+                        ResourceString: function() {
+                            return 'SUMMARY_ELOQUA_MODELS';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                    },
+                    template: '<div id="sureshot_iframe_container"></div>'
+                }
+            }
+        })
         .state('home.apiconsole', {
             url: '/apiconsole',
             views: {
