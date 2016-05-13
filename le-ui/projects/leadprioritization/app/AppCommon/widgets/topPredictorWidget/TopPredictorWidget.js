@@ -31,6 +31,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
     var chartData = data.ChartData;
+
+    // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
+    for (var i = 0; i < chartData.children.length; i++) {
+        if (chartData.children[i].children.length == 0) {
+            chartData.children.splice(i, 1);
+        }
+    }
+
     $scope.backToSummaryView = false;
     $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     
