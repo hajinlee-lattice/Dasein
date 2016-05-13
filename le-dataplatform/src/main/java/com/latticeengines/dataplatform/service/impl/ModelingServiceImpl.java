@@ -48,6 +48,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.DispatchService;
+import com.latticeengines.dataplatform.service.ModelValidationService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -100,9 +101,6 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-
-    @Value("${dataplatform.modeling.row.threshold:50}")
-    private int rowSizeThreshold;
 
     @Value("${dataplatform.container.virtualcores}")
     private int virtualCores;
@@ -316,20 +314,12 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     private void validateModelInputData(Model model) throws Exception {
-        String diagnosticsPath = model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE;
-
-        if (!HdfsUtils.fileExists(yarnConfiguration, diagnosticsPath)) {
-            throw new LedpException(LedpCode.LEDP_15004);
+        try {
+            ModelValidationService validator = ModelValidationService.get(model.getModelDefinition().getAlgorithms().get(0).getName());
+            validator.validate(model);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        // Parse diagnostics file
-        long sampleSize = dispatchService.getSampleSize(yarnConfiguration, diagnosticsPath,
-                model.isParallelEnabled());
-
-        if (sampleSize < rowSizeThreshold) {
-            throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
-        }
-
-        return;
     }
     
     private void setDefaultValues(Algorithm algorithm) {
@@ -374,9 +364,13 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setPipelineProperties(algorithm.getPipelineProperties());
         classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
-        classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
+        
+        if (algorithm.hasDataDiagnostics()) {
+            classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
+        }
 
         String samplePrefix = algorithm.getSampleName();
+
         String trainingFile = dispatchService.getTrainingFile(samplePrefix, model.isParallelEnabled());
         String trainingPath = getAvroFileHdfsPath(trainingFile, model.getSampleHdfsPath());
 
@@ -391,6 +385,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
         classifier.setTrainingDataHdfsPath(trainingPath);
         classifier.setTestDataHdfsPath(testPath);
+
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
     }
@@ -434,15 +429,20 @@ public class ModelingServiceImpl implements ModelingService {
 
     private String createSchemaInHdfs(String avroFilePath, Model model) {
         String dataPath = model.getDataHdfsPath();
-        try {
+        String schemaContents = model.getSchemaContents();
+        if (schemaContents == null) {
             Schema avroSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFilePath));
+            schemaContents = avroSchema.toString(true);
+        }
+        try {
             dataPath += "/" + model.getTable() + ".avsc";
             if (!HdfsUtils.fileExists(yarnConfiguration, dataPath)) {
-                HdfsUtils.writeToFile(yarnConfiguration, dataPath, avroSchema.toString(true));
+                HdfsUtils.writeToFile(yarnConfiguration, dataPath, schemaContents);
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_15000, e);
         }
+
         return dataPath;
     }
 
