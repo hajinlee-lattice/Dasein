@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -26,9 +25,6 @@ public class EaiServiceImpl implements EaiService {
 
     @Autowired
     private CamelRouteJobService camelRouteJobService;
-
-    @Autowired
-    private JobService jobService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
