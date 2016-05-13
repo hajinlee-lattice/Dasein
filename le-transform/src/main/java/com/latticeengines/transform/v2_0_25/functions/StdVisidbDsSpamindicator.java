@@ -5,13 +5,13 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
@@ -106,15 +106,15 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS);
-        attr.setCategory(Category.LEAD_INFORMATION);
-        attr.setDisplayName("Spam Lead");
-        attr.setFundamentalType(FundamentalType.BOOLEAN);
-        attr.setStatisticalType(StatisticalType.NOMINAL);
-        attr.setTags(Tag.INTERNAL_TRANSFORM);
-        attr.setDescription("Indicator for spam leads");
-        return attr;
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setDisplayName("Spam Lead");
+        metadata.setFundamentalType(FundamentalType.BOOLEAN);
+        metadata.setStatisticalType(StatisticalType.NOMINAL);
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        metadata.setDescription("Indicator for spam leads");
+        return metadata;
     }
 }

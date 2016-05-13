@@ -13,10 +13,9 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.TransformFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class TransformFunctionOperation extends Operation {
 
@@ -38,8 +37,8 @@ public class TransformFunctionOperation extends Operation {
             throw new RuntimeException(e1);
         }
 
-        Attribute attr = transform.getMetadata();
-        AttributeUtils.setFieldMetadataFromAttribute(attr, targetField, false);
+        TransformMetadata metadata = transform.getMetadata();
+        targetField.addProperties(metadata.getProperties());
         if (StringUtils.isNotEmpty(definition.outputDisplayName)) {
             targetField.setPropertyValue("DisplayName", definition.outputDisplayName);
         }

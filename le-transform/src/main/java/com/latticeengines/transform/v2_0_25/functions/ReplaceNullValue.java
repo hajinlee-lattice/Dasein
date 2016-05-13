@@ -1,8 +1,7 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
-
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class ReplaceNullValue extends Lookup {
 
@@ -26,7 +25,7 @@ public class ReplaceNullValue extends Lookup {
     }
 
     @Override
-    public Attribute getMetadata() {
+    public TransformMetadata getMetadata() {
         return null;
     }
 

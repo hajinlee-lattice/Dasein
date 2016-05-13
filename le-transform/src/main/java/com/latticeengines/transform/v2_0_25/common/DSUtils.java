@@ -1,11 +1,10 @@
 package com.latticeengines.transform.v2_0_25.common;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
-import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +36,8 @@ public class DSUtils {
         return false;
     }
 
-    public static String valueReturn(String x, OrderedMap mappingList) {
+    @SuppressWarnings("rawtypes")
+    public static String valueReturn(String x, LinkedHashMap mappingList) {
         if (StringUtils.isEmpty(x))
             return "Null";
 

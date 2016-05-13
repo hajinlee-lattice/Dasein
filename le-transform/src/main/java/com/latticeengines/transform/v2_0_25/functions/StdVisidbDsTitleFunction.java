@@ -1,33 +1,32 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.collections.OrderedMap;
-import org.apache.commons.collections.map.LinkedMap;
-
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
 public class StdVisidbDsTitleFunction implements RealTimeTransform {
 
     private static final long serialVersionUID = -8208353638753982691L;
-    private static OrderedMap mapTitleFunction = null;
-    
+    @SuppressWarnings("rawtypes")
+    private static LinkedHashMap mapTitleFunction = null;
+
     public StdVisidbDsTitleFunction() {
-        
+
     }
 
     public StdVisidbDsTitleFunction(String modelPath) {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
@@ -37,7 +36,7 @@ public class StdVisidbDsTitleFunction implements RealTimeTransform {
             return "0.0";
 
         if (mapTitleFunction == null) {
-            mapTitleFunction = new LinkedMap();
+            mapTitleFunction = new LinkedHashMap();
             mapTitleFunction.put("IT", "it,information technology,database,network,middleware,security");
             mapTitleFunction.put("Engineering", "quality,system,engineer,develope,software,testing,unix,linux,product");
             mapTitleFunction.put("Finance", "financ,accounting,treasurer,tax,loan,risk,purchasing");
@@ -64,16 +63,16 @@ public class StdVisidbDsTitleFunction implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attribute = new Attribute();
-        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-        attribute.setCategory(Category.LEAD_INFORMATION);
-        attribute.setFundamentalType(FundamentalType.ALPHA);
-        attribute.setStatisticalType(StatisticalType.NOMINAL);
-        attribute.setDescription("Title Function");
-        attribute.setDisplayName("Title Function");
-        attribute.setTags(Tag.INTERNAL_TRANSFORM);
-        return attribute;
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setFundamentalType(FundamentalType.ALPHA);
+        metadata.setStatisticalType(StatisticalType.NOMINAL);
+        metadata.setDescription("Title Function");
+        metadata.setDisplayName("Title Function");
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        return metadata;
     }
 
 }

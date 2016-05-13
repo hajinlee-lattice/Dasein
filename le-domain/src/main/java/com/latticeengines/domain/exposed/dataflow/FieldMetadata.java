@@ -82,6 +82,10 @@ public class FieldMetadata {
         properties.put(key, value);
     }
 
+    public void addProperties(Map<String, String> properties) {
+        this.properties.putAll(properties);
+    }
+
     public Set<Map.Entry<String, String>> getEntries() {
         return properties.entrySet();
     }

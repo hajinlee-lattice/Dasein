@@ -10,13 +10,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
 
@@ -70,18 +70,18 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-        attr.setDataType(Integer.class.getSimpleName());
-        attr.setDisplayDiscretizationStrategy("{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100," //
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setDataType(Integer.class.getSimpleName());
+        metadata.setDisplayDiscretizationStrategy("{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100," //
                 + "\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}");
-        attr.setCategory(Category.ONLINE_PRESENCE);
-        attr.setDisplayName("Months Since Online");
-        attr.setFundamentalType(FundamentalType.NUMERIC);
-        attr.setStatisticalType(StatisticalType.RATIO);
-        attr.setTags(Tag.EXTERNAL_TRANSFORM);
-        attr.setDescription("Number of months since online presence was established");
-        return attr;
+        metadata.setCategory(Category.ONLINE_PRESENCE);
+        metadata.setDisplayName("Months Since Online");
+        metadata.setFundamentalType(FundamentalType.NUMERIC);
+        metadata.setStatisticalType(StatisticalType.RATIO);
+        metadata.setTags(Tag.EXTERNAL_TRANSFORM);
+        metadata.setDescription("Number of months since online presence was established");
+        return metadata;
     }
 }

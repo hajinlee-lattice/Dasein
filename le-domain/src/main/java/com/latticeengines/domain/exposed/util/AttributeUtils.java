@@ -74,10 +74,6 @@ public class AttributeUtils {
                                             + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
                                             key, source.getName(), avroValue, metadataValue));
                         }
-                        //FieldMetadata should already have a name
-                        if (!key.equals("Name")) {
-                            fm.setPropertyValue(key, metadataValue);
-                        }
                         log.info(String.format("Setting property %s to be %s from source.", descriptor.getName(),
                                 sourceValue));
                     } else {

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.sun.tools.classfile.Annotation.element_value;
 
 public class TransformationPipeline {
 
@@ -65,78 +64,177 @@ public class TransformationPipeline {
 
     public static TransformDefinition stdVisidbDsIndustryGroup = new TransformDefinition("StdVisidbDsIndustryGroup",
             "Industry_Group", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
+
     public static TransformDefinition stdVisidbEmailIsInvalid = new TransformDefinition("StdVisidbDsEmailIsInvalid",
             "EmailIsInvalid", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-            
+
     public static TransformDefinition stdVisidbEmailLength = new TransformDefinition("StdVisidbDsEmailLength",
             "EmailLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbEmailPrefixLength = new TransformDefinition("StdVisidbDsEmailPrefixlength",
-            "EmailPrefixLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
-    
+
+    public static TransformDefinition stdVisidbEmailPrefixLength = new TransformDefinition(
+            "StdVisidbDsEmailPrefixlength", "EmailPrefixLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
+
     public static TransformDefinition stdVisidbNameLength = new TransformDefinition("StdVisidbDsNamelength",
             "NameLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
-    
+
     public static TransformDefinition stdVisidbTitleChannel = new TransformDefinition("StdVisidbDsTitleChannel",
             "TitleChannel", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
+
     public static TransformDefinition stdVisidbTitleFunction = new TransformDefinition("StdVisidbDsTitleFunction",
             "TitleFunction", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbTitleLevelCategorical = new TransformDefinition("StdVisidbDsTitleLevelCategorical",
-            "TitleLevelCategorical", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbTitleRole = new TransformDefinition("StdVisidbDsTitleRole",
-            "TitleRole", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
+
+    public static TransformDefinition stdVisidbTitleLevelCategorical = new TransformDefinition(
+            "StdVisidbDsTitleLevelCategorical", "TitleLevelCategorical", FieldType.STRING,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbTitleRole = new TransformDefinition("StdVisidbDsTitleRole", "TitleRole",
+            FieldType.STRING, new LinkedHashMap<String, Object>());
+
     public static TransformDefinition stdVisidbTitleScope = new TransformDefinition("StdVisidbDsTitleScope",
             "TitleScope", FieldType.STRING, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsCanadianProvince = new TransformDefinition("StdVisidbDsStateIsCanadianProvince",
-            "StateIsCanadianProvince", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInFarWest = new TransformDefinition("StdVisidbDsStateIsInFarWest",
-            "StateIsInFarWest", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInGreatLakes = new TransformDefinition("StdVisidbDsStateIsInGreatLakes",
-            "StateIsInGreatLakes", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInMidAtlantic = new TransformDefinition("StdVisidbDsStateIsInMidAtlantic",
-            "StateIsInMidAtlantic", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInNewEngland = new TransformDefinition("StdVisidbDsStateIsInNewEngland",
-            "StateIsInNewEngland", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
+
+    public static TransformDefinition stdVisidbStateIsCanadianProvince = new TransformDefinition(
+            "StdVisidbDsStateIsCanadianProvince", "StateIsCanadianProvince", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInFarWest = new TransformDefinition(
+            "StdVisidbDsStateIsInFarWest", "StateIsInFarWest", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInGreatLakes = new TransformDefinition(
+            "StdVisidbDsStateIsInGreatLakes", "StateIsInGreatLakes", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInMidAtlantic = new TransformDefinition(
+            "StdVisidbDsStateIsInMidAtlantic", "StateIsInMidAtlantic", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInNewEngland = new TransformDefinition(
+            "StdVisidbDsStateIsInNewEngland", "StateIsInNewEngland", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
     public static TransformDefinition stdVisidbStateIsInPlains = new TransformDefinition("StdVisidbDsStateIsInPlains",
             "StateIsInPlains", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInRockyMountain = new TransformDefinition("StdVisidbDsStateIsInRockyMountains",
-            "StateIsInRockyMountains", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInSouthEast = new TransformDefinition("StdVisidbDsStateIsInSouthEast",
-            "StateIsInSouthEast", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    public static TransformDefinition stdVisidbStateIsInSouthWest = new TransformDefinition("StdVisidbDsStateIsInSouthWest",
-            "StateIsInSouthWest", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
-    
-    
+
+    public static TransformDefinition stdVisidbStateIsInRockyMountain = new TransformDefinition(
+            "StdVisidbDsStateIsInRockyMountains", "StateIsInRockyMountains", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInSouthEast = new TransformDefinition(
+            "StdVisidbDsStateIsInSouthEast", "StateIsInSouthEast", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition stdVisidbStateIsInSouthWest = new TransformDefinition(
+            "StdVisidbDsStateIsInSouthWest", "StateIsInSouthWest", FieldType.BOOLEAN,
+            new LinkedHashMap<String, Object>());
+
     static {
+        setArguments();
+        setDisplayName();
+        setPocTransformFlag();
+
+        definitions = ImmutableMap
+                .<String, TransformDefinition> builder()
+                .put(stdVisidbDsCompanynameEntropy.name + "_" + stdVisidbDsCompanynameEntropy.output, //
+                        stdVisidbDsCompanynameEntropy)
+
+                .put(stdLengthTitle.name + "_" + stdLengthTitle.output, stdLengthTitle)
+
+                .put(stdLengthCompanyName.name + "_" + stdLengthCompanyName.output, stdLengthCompanyName)
+
+                .put(stdLengthDomain.name + "_" + stdLengthDomain.output, stdLengthDomain)
+
+                .put(stdVisidbDsPdAlexaRelatedlinksCount.name + "_" + stdVisidbDsPdAlexaRelatedlinksCount.output, //
+                        stdVisidbDsPdAlexaRelatedlinksCount)
+
+                .put(stdPhoneEntropy.name + "_" + stdPhoneEntropy.output, stdPhoneEntropy)
+
+                .put(stdVisidbAlexaMonthssinceonline.name + "_" + stdVisidbAlexaMonthssinceonline.output, //
+                        stdVisidbAlexaMonthssinceonline)
+
+                .put(stdVisidbDsPdModelactionOrdered.name + "_" + stdVisidbDsPdModelactionOrdered.output, //
+                        stdVisidbDsPdModelactionOrdered)
+
+                .put(stdVisidbDsSpamindicator.name + "_" + stdVisidbDsSpamindicator.output, stdVisidbDsSpamindicator)
+
+                .put(stdVisidbDsTitleLevel.name + "_" + stdVisidbDsTitleLevel.output, stdVisidbDsTitleLevel)
+
+                .put(stdVisidbDsTitleIstechrelated.name + "_" + stdVisidbDsTitleIstechrelated.output, //
+                        stdVisidbDsTitleIstechrelated)
+
+                .put(stdVisidbDsPdJobstrendstringOrdered.name + "_" + stdVisidbDsPdJobstrendstringOrdered.output, //
+                        stdVisidbDsPdJobstrendstringOrdered)
+
+                .put(stdVisidbDsPdFundingstageOrdered.name + "_" + stdVisidbDsPdFundingstageOrdered.output, //
+                        stdVisidbDsPdFundingstageOrdered)
+
+                .put(stdVisidbDsTitleIsacademic.name + "_" + stdVisidbDsTitleIsacademic.output, //
+                        stdVisidbDsTitleIsacademic)
+
+                .put(stdVisidbDsFirstnameSameasLastname.name + "_" + stdVisidbDsFirstnameSameasLastname.output, //
+                        stdVisidbDsFirstnameSameasLastname)
+
+                .put(stdVisidbDsIndustryGroup.name + "_" + stdVisidbDsIndustryGroup.output, stdVisidbDsIndustryGroup)
+
+                .put(stdVisidbTitleChannel.name + "_" + stdVisidbTitleChannel.output, stdVisidbTitleChannel)
+
+                .put(stdVisidbTitleFunction.name + "_" + stdVisidbTitleFunction.output, stdVisidbTitleFunction)
+
+                .put(stdVisidbTitleLevelCategorical.name + "_" + stdVisidbTitleLevelCategorical.output, //
+                        stdVisidbTitleLevelCategorical)
+
+                .put(stdVisidbTitleRole.name + "_" + stdVisidbTitleRole.output, stdVisidbTitleRole)
+
+                .put(stdVisidbTitleScope.name + "_" + stdVisidbTitleScope.output, stdVisidbTitleScope)
+
+                .put(stdVisidbNameLength.name + "_" + stdVisidbNameLength.output, stdVisidbNameLength)
+
+                .put(stdVisidbEmailIsInvalid.name + "_" + stdVisidbEmailIsInvalid.output, stdVisidbEmailIsInvalid)
+
+                .put(stdVisidbEmailLength.name + "_" + stdVisidbEmailLength.output, stdVisidbEmailLength)
+
+                .put(stdVisidbEmailPrefixLength.name + "_" + stdVisidbEmailPrefixLength.output,
+                        stdVisidbEmailPrefixLength)
+
+                .put(stdVisidbStateIsCanadianProvince.name + "_" + stdVisidbStateIsCanadianProvince.output,
+                        stdVisidbStateIsCanadianProvince)
+
+                .put(stdVisidbStateIsInFarWest.name + "_" + stdVisidbStateIsInFarWest.output, stdVisidbStateIsInFarWest)
+
+                .put(stdVisidbStateIsInGreatLakes.name + "_" + stdVisidbStateIsInGreatLakes.output,
+                        stdVisidbStateIsInGreatLakes)
+
+                .put(stdVisidbStateIsInMidAtlantic.name + "_" + stdVisidbStateIsInMidAtlantic.output,
+                        stdVisidbStateIsInMidAtlantic)
+
+                .put(stdVisidbStateIsInNewEngland.name + "_" + stdVisidbStateIsInNewEngland.output,
+                        stdVisidbStateIsInNewEngland)
+
+                .put(stdVisidbStateIsInPlains.name + "_" + stdVisidbStateIsInPlains.output, stdVisidbStateIsInPlains)
+
+                .put(stdVisidbStateIsInRockyMountain.name + "_" + stdVisidbStateIsInRockyMountain.output,
+                        stdVisidbStateIsInRockyMountain)
+
+                .put(stdVisidbStateIsInSouthEast.name + "_" + stdVisidbStateIsInSouthEast.output,
+                        stdVisidbStateIsInSouthEast)
+
+                .put(stdVisidbStateIsInSouthWest.name + "_" + stdVisidbStateIsInSouthWest.output,
+                        stdVisidbStateIsInSouthWest)
+
+                .build();
+    }
+
+    public static void setArguments() {
         stdVisidbDsCompanynameEntropy.arguments.put("column", InterfaceName.CompanyName.name());
 
         stdLengthTitle.arguments.put("column", InterfaceName.Title.name());
-        stdLengthTitle.outputDisplayName = "Length of Title";
 
         stdLengthCompanyName.arguments.put("column", InterfaceName.CompanyName.name());
-        stdLengthCompanyName.outputDisplayName = "Length of Company Name";
 
         // need to set stdLengthDomain arguments
-        stdLengthDomain.outputDisplayName = "Length of Domain Name";
 
         stdVisidbDsPdAlexaRelatedlinksCount.arguments.put("column", "AlexaRelatedLinks");
 
         stdPhoneEntropy.arguments.put("column", InterfaceName.PhoneNumber.name());
-        stdPhoneEntropy.outputDisplayName = "Entropy of Phone Number";
 
         stdVisidbAlexaMonthssinceonline.arguments.put("column", "AlexaOnlineSince");
         stdVisidbDsPdModelactionOrdered.arguments.put("column", "ModelAction");
@@ -157,20 +255,23 @@ public class TransformationPipeline {
         stdVisidbDsFirstnameSameasLastname.arguments.put("column2", InterfaceName.LastName.name());
 
         stdVisidbDsIndustryGroup.arguments.put("column", InterfaceName.Industry.name());
-        
+
         stdVisidbEmailIsInvalid.arguments.put("column", InterfaceName.Email.name());
+
         stdVisidbEmailLength.arguments.put("column", InterfaceName.Email.name());
+
         stdVisidbEmailPrefixLength.arguments.put("column", InterfaceName.Email.name());
-        
+
         stdVisidbNameLength.arguments.put("column1", InterfaceName.FirstName.name());
         stdVisidbNameLength.arguments.put("column2", InterfaceName.LastName.name());
-        
+
         stdVisidbTitleChannel.arguments.put("column", InterfaceName.Title.name());
+
         stdVisidbTitleFunction.arguments.put("column", InterfaceName.Title.name());
         stdVisidbTitleLevelCategorical.arguments.put("column", InterfaceName.Title.name());
         stdVisidbTitleRole.arguments.put("column", InterfaceName.Title.name());
         stdVisidbTitleScope.arguments.put("column", InterfaceName.Title.name());
-        
+
         stdVisidbStateIsCanadianProvince.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInFarWest.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInGreatLakes.arguments.put("column", InterfaceName.State.name());
@@ -180,87 +281,45 @@ public class TransformationPipeline {
         stdVisidbStateIsInRockyMountain.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthEast.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthWest.arguments.put("column", InterfaceName.State.name());
+    }
 
-        definitions = ImmutableMap
-                .<String, TransformDefinition> builder()
-                //
-                .put(stdVisidbDsCompanynameEntropy.name + "_" + stdVisidbDsCompanynameEntropy.output,
-                        stdVisidbDsCompanynameEntropy) //
+    public static void setDisplayName() {
+        stdLengthTitle.outputDisplayName = "Length of Title";
 
-                .put(stdLengthTitle.name + "_" + stdLengthTitle.output, stdLengthTitle) //
+        stdLengthCompanyName.outputDisplayName = "Length of Company Name";
 
-                .put(stdLengthCompanyName.name + "_" + stdLengthCompanyName.output, stdLengthCompanyName) //
+        stdLengthDomain.outputDisplayName = "Length of Domain Name";
 
-                .put(stdLengthDomain.name + "_" + stdLengthDomain.output, stdLengthDomain) //
+        stdPhoneEntropy.outputDisplayName = "Entropy of Phone Number";
+    }
 
-                .put(stdVisidbDsPdAlexaRelatedlinksCount.name + "_" + stdVisidbDsPdAlexaRelatedlinksCount.output,
-                        stdVisidbDsPdAlexaRelatedlinksCount) //
+    public static void setPocTransformFlag() {
+        stdVisidbEmailIsInvalid.isPocTransform = Boolean.TRUE;
 
-                .put(stdPhoneEntropy.name + "_" + stdPhoneEntropy.output, stdPhoneEntropy) //
+        stdVisidbEmailLength.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbAlexaMonthssinceonline.name + "_" + stdVisidbAlexaMonthssinceonline.output,
-                        stdVisidbAlexaMonthssinceonline) //
+        stdVisidbEmailPrefixLength.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsPdModelactionOrdered.name + "_" + stdVisidbDsPdModelactionOrdered.output,
-                        stdVisidbDsPdModelactionOrdered) //
+        stdVisidbNameLength.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsSpamindicator.name + "_" + stdVisidbDsSpamindicator.output, stdVisidbDsSpamindicator) //
+        stdVisidbTitleChannel.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsTitleLevel.name + "_" + stdVisidbDsTitleLevel.output, stdVisidbDsTitleLevel) //
+        stdVisidbTitleFunction.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsTitleIstechrelated.name + "_" + stdVisidbDsTitleIstechrelated.output,
-                        stdVisidbDsTitleIstechrelated) //
+        stdVisidbTitleLevelCategorical.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsPdJobstrendstringOrdered.name + "_" + stdVisidbDsPdJobstrendstringOrdered.output,
-                        stdVisidbDsPdJobstrendstringOrdered) //
+        stdVisidbTitleRole.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsPdFundingstageOrdered.name + "_" + stdVisidbDsPdFundingstageOrdered.output,
-                        stdVisidbDsPdFundingstageOrdered) //
+        stdVisidbTitleScope.isPocTransform = Boolean.TRUE;
 
-                .put(stdVisidbDsTitleIsacademic.name + "_" + stdVisidbDsTitleIsacademic.output,
-                        stdVisidbDsTitleIsacademic) //
-
-                .put(stdVisidbDsFirstnameSameasLastname.name + "_" + stdVisidbDsFirstnameSameasLastname.output,
-                        stdVisidbDsFirstnameSameasLastname) //
-
-                .put(stdVisidbDsIndustryGroup.name + "_" + stdVisidbDsIndustryGroup.output, stdVisidbDsIndustryGroup) //
-                
-                .put(stdVisidbTitleChannel.name + "_" + stdVisidbTitleChannel.output, stdVisidbTitleChannel) 
-                
-                .put(stdVisidbTitleFunction.name + "_" + stdVisidbTitleFunction.output, stdVisidbTitleFunction)
-                
-                .put(stdVisidbTitleLevelCategorical.name + "_" + stdVisidbTitleLevelCategorical.output, stdVisidbTitleLevelCategorical)
-                
-                .put(stdVisidbTitleRole.name + "_" + stdVisidbTitleRole.output, stdVisidbTitleRole)
-                
-                .put(stdVisidbTitleScope.name + "_" + stdVisidbTitleScope.output, stdVisidbTitleScope)
-                
-                .put(stdVisidbNameLength.name + "_" + stdVisidbNameLength.output, stdVisidbNameLength)                                
-                
-                .put(stdVisidbEmailIsInvalid.name + "_" + stdVisidbEmailIsInvalid.output, stdVisidbEmailIsInvalid)
-                
-                .put(stdVisidbEmailLength.name + "_" + stdVisidbEmailLength.output, stdVisidbEmailLength)
-                
-                .put(stdVisidbEmailPrefixLength.name + "_" + stdVisidbEmailPrefixLength.output, stdVisidbEmailPrefixLength)
-                
-                .put(stdVisidbStateIsCanadianProvince.name + "_" + stdVisidbStateIsCanadianProvince.output, stdVisidbStateIsCanadianProvince)
-                
-                .put(stdVisidbStateIsInFarWest.name + "_" + stdVisidbStateIsInFarWest.output, stdVisidbStateIsInFarWest)
-                
-                .put(stdVisidbStateIsInGreatLakes.name + "_" + stdVisidbStateIsInGreatLakes.output, stdVisidbStateIsInGreatLakes)
-                
-                .put(stdVisidbStateIsInMidAtlantic.name + "_" + stdVisidbStateIsInMidAtlantic.output, stdVisidbStateIsInMidAtlantic)
-                
-                .put(stdVisidbStateIsInNewEngland.name + "_" + stdVisidbStateIsInNewEngland.output, stdVisidbStateIsInNewEngland)
-                
-                .put(stdVisidbStateIsInPlains.name + "_" + stdVisidbStateIsInPlains.output, stdVisidbStateIsInPlains)
-                
-                .put(stdVisidbStateIsInRockyMountain.name + "_" + stdVisidbStateIsInRockyMountain.output, stdVisidbStateIsInRockyMountain)
-                
-                .put(stdVisidbStateIsInSouthEast.name + "_" + stdVisidbStateIsInSouthEast.output, stdVisidbStateIsInSouthEast)
-                
-                .put(stdVisidbStateIsInSouthWest.name + "_" + stdVisidbStateIsInSouthWest.output, stdVisidbStateIsInSouthWest)
-                
-                .build();
+        stdVisidbStateIsCanadianProvince.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInFarWest.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInGreatLakes.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInMidAtlantic.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInNewEngland.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInPlains.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInRockyMountain.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInSouthEast.isPocTransform = Boolean.TRUE;
+        stdVisidbStateIsInSouthWest.isPocTransform = Boolean.TRUE;
     }
 }

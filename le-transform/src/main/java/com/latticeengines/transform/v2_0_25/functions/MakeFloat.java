@@ -1,12 +1,10 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class MakeFloat implements RealTimeTransform {
 
@@ -36,7 +34,7 @@ public class MakeFloat implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
+    public TransformMetadata getMetadata() {
         return null;
     }
 

@@ -2,13 +2,13 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
 
@@ -42,15 +42,15 @@ public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attribute = new Attribute();
-        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-        attribute.setCategory(Category.LEAD_INFORMATION);
-        attribute.setFundamentalType(FundamentalType.BOOLEAN);
-        attribute.setStatisticalType(StatisticalType.NOMINAL);
-        attribute.setDescription("Invalid Email");
-        attribute.setDisplayName("Invalid Email");
-        attribute.setTags(Tag.INTERNAL_TRANSFORM);
-        return attribute;
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setFundamentalType(FundamentalType.BOOLEAN);
+        metadata.setStatisticalType(StatisticalType.NOMINAL);
+        metadata.setDescription("Invalid Email");
+        metadata.setDisplayName("Invalid Email");
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        return metadata;
     }
 }

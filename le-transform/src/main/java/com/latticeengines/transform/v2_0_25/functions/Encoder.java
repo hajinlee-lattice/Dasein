@@ -3,9 +3,8 @@ package com.latticeengines.transform.v2_0_25.functions;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Map;
-
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 /* This class re-implements the Python2 function encoder.py which is defined in the following places
  * 1. /le-scoring/src/test/resources/com/latticeengines/scoring/models/supportedFiles/encoder.py
@@ -16,7 +15,8 @@ public class Encoder implements RealTimeTransform {
 
     private static final long serialVersionUID = 9104503413595249740L;
 
-    public Encoder() {}
+    public Encoder() {
+    }
 
     public Encoder(String modelPath) {
     }
@@ -90,7 +90,7 @@ public class Encoder implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
+    public TransformMetadata getMetadata() {
         return null;
     }
 }

@@ -1,33 +1,31 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.commons.collections.OrderedMap;
-import org.apache.commons.collections.map.LinkedMap;
-
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 import com.latticeengines.transform.v2_0_25.common.DSUtils;
 
 public class StdVisidbDsTitleScope implements RealTimeTransform {
 
     private static final long serialVersionUID = -6009982200973336493L;
-    private static OrderedMap mapTitleScope = null;
+    @SuppressWarnings("rawtypes")
+    private static LinkedHashMap mapTitleScope = null;
 
     public StdVisidbDsTitleScope() {
-        
+
     }
-    
+
     public StdVisidbDsTitleScope(String modelPath) {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
@@ -37,7 +35,7 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
             return "0.0";
 
         if (mapTitleScope == null) {
-            mapTitleScope = new LinkedMap();
+            mapTitleScope = new LinkedHashMap();
             mapTitleScope.put("Continental", "north america,emea,asia,africa,europ,south america");
             mapTitleScope.put("Global", "global,internaltional,worldwide");
             mapTitleScope.put("National", "us,national");
@@ -50,16 +48,16 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attribute = new Attribute();
-        attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-        attribute.setCategory(Category.LEAD_INFORMATION);
-        attribute.setFundamentalType(FundamentalType.ALPHA);
-        attribute.setStatisticalType(StatisticalType.NOMINAL);
-        attribute.setDescription("Title Scope");
-        attribute.setDisplayName("Title Scope");
-        attribute.setTags(Tag.INTERNAL_TRANSFORM);
-        return attribute;
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setFundamentalType(FundamentalType.ALPHA);
+        metadata.setStatisticalType(StatisticalType.NOMINAL);
+        metadata.setDescription("Title Scope");
+        metadata.setDisplayName("Title Scope");
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        return metadata;
     }
 
 }

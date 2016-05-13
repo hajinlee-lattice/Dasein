@@ -5,13 +5,13 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsIndustryGroup implements RealTimeTransform {
 
@@ -76,15 +76,15 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-        attr.setCategory(Category.LEAD_INFORMATION);
-        attr.setFundamentalType(FundamentalType.ALPHA);
-        attr.setStatisticalType(StatisticalType.NOMINAL);
-        attr.setTags(Tag.INTERNAL_TRANSFORM);
-        attr.setDescription("Rollup of Industry field from Marketing Automation");
-        attr.setDisplayName("Industry Rollup");
-        return attr;
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setFundamentalType(FundamentalType.ALPHA);
+        metadata.setStatisticalType(StatisticalType.NOMINAL);
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        metadata.setDescription("Rollup of Industry field from Marketing Automation");
+        metadata.setDisplayName("Industry Rollup");
+        return metadata;
     }
 }

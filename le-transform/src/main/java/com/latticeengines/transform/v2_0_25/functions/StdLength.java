@@ -1,17 +1,16 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
-
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdLength implements RealTimeTransform {
 
@@ -43,15 +42,15 @@ public class StdLength implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL);
-        attr.setCategory(Category.LEAD_INFORMATION);
-        attr.setFundamentalType(FundamentalType.NUMERIC);
-        attr.setStatisticalType(StatisticalType.RATIO);
-        attr.setTags(Tag.INTERNAL_TRANSFORM);
-        attr.setDisplayDiscretizationStrategy("{\"linear\": { \"minValue\":0,\"stepSize\":1,\"minSamples\":100," //
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL);
+        metadata.setCategory(Category.LEAD_INFORMATION);
+        metadata.setFundamentalType(FundamentalType.NUMERIC);
+        metadata.setStatisticalType(StatisticalType.RATIO);
+        metadata.setTags(Tag.INTERNAL_TRANSFORM);
+        metadata.setDisplayDiscretizationStrategy("{\"linear\": { \"minValue\":0,\"stepSize\":1,\"minSamples\":100," //
                 + "\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}");
-        return attr;
+        return metadata;
     }
 }

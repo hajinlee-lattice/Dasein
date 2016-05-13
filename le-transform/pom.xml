@@ -11,12 +11,7 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
-    <properties>
-        <le.domain.version>2.0.32-SNAPSHOT</le.domain.version>
-    </properties>
-
     <dependencies>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
@@ -40,13 +35,5 @@
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-
     </dependencies>
 </project>

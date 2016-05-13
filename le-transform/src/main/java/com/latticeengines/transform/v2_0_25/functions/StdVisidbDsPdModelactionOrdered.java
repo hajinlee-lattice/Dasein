@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsPdModelactionOrdered implements RealTimeTransform {
 
@@ -54,17 +54,17 @@ public class StdVisidbDsPdModelactionOrdered implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL);
-        attr.setCategory(Category.FIRMOGRAPHICS);
-        attr.setFundamentalType(FundamentalType.NUMERIC);
-        attr.setStatisticalType(StatisticalType.ORDINAL);
-        attr.setTags(Tag.EXTERNAL_TRANSFORM);
-        attr.setDisplayDiscretizationStrategy("{\"linear\": { \"minValue\":0,\"stepSize\":1,\"minSamples\":100," //
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL);
+        metadata.setCategory(Category.FIRMOGRAPHICS);
+        metadata.setFundamentalType(FundamentalType.NUMERIC);
+        metadata.setStatisticalType(StatisticalType.ORDINAL);
+        metadata.setTags(Tag.EXTERNAL_TRANSFORM);
+        metadata.setDisplayDiscretizationStrategy("{\"linear\": { \"minValue\":0,\"stepSize\":1,\"minSamples\":100," //
                 + "\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}");
-        attr.setDescription("Represents company\'s hiring activity within last 60 days. Values range from 1 (Moderately Hiring) to 3 (Aggressively Hiring)");
-        attr.setDisplayName("Credit Risk Level");
-        return attr;
+        metadata.setDescription("Represents company\'s hiring activity within last 60 days. Values range from 1 (Moderately Hiring) to 3 (Aggressively Hiring)");
+        metadata.setDisplayName("Credit Risk Level");
+        return metadata;
     }
 }

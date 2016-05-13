@@ -4,13 +4,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
+import com.latticeengines.transform.exposed.metadata.Category;
+import com.latticeengines.transform.exposed.metadata.FundamentalType;
+import com.latticeengines.transform.exposed.metadata.StatisticalType;
+import com.latticeengines.transform.exposed.metadata.Tag;
+import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsPdAlexaRelatedlinksCount implements RealTimeTransform {
 
@@ -42,15 +42,15 @@ public class StdVisidbDsPdAlexaRelatedlinksCount implements RealTimeTransform {
     }
 
     @Override
-    public Attribute getMetadata() {
-        Attribute attr = new Attribute();
-        attr.setApprovedUsage(ApprovedUsage.MODEL);
-        attr.setCategory(Category.ONLINE_PRESENCE);
-        attr.setFundamentalType(FundamentalType.NUMERIC);
-        attr.setStatisticalType(StatisticalType.RATIO);
-        attr.setTags(Tag.EXTERNAL_TRANSFORM);
-        attr.setDisplayDiscretizationStrategy("{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100," //
+    public TransformMetadata getMetadata() {
+        TransformMetadata metadata = new TransformMetadata();
+        metadata.setApprovedUsage(ApprovedUsage.MODEL);
+        metadata.setCategory(Category.ONLINE_PRESENCE);
+        metadata.setFundamentalType(FundamentalType.NUMERIC);
+        metadata.setStatisticalType(StatisticalType.RATIO);
+        metadata.setTags(Tag.EXTERNAL_TRANSFORM);
+        metadata.setDisplayDiscretizationStrategy("{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100," //
                 + "\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}");
-        return attr;
+        return metadata;
     }
 }

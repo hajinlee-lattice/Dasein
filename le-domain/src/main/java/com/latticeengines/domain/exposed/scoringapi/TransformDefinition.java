@@ -36,6 +36,8 @@ public class TransformDefinition implements Serializable {
 
     public String outputDisplayName;
 
+    public boolean isPocTransform = Boolean.FALSE;
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
