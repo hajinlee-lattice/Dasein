@@ -24,7 +24,7 @@ public class Classifier implements HasName {
     private String provenanceProperties;
     private String dataProfileHdfsPath;
     private String configMetadataHdfsPath;
-    private String dataDiagnosticsPath;
+    private String dataDiagnosticsPath = "";
     private String pythonPipelineLibHdfsPath;
     private String pythonPipelineScriptHdfsPath;
     private String pythonMRConfigHdfsPath;

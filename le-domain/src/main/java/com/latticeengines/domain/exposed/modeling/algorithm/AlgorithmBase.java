@@ -234,12 +234,19 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
+    @JsonIgnore
     public void resetAlgorithmProperties() {
     }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean hasDataDiagnostics() {
+        return true;
     }
 
 }

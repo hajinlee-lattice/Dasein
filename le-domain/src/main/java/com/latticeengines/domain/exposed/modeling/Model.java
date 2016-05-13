@@ -50,6 +50,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private String provenanceProperties;
     private boolean parallelEnabled;
     private int featuresThreshold;
+    private String schemaContents;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -354,13 +355,15 @@ public class Model implements HasName, HasPid, HasId<String> {
      */
     @Override
     public boolean equals(Object obj) {
-
-        if (obj == null)
+        if (obj == null) {
             return false;
-        if (obj == this)
+        }
+        if (obj == this) {
             return true;
-        if (!obj.getClass().equals(this.getClass()))
+        }
+        if (!obj.getClass().equals(this.getClass())) {
             return false;
+        }
 
         Model model = (Model) obj;
 
@@ -372,5 +375,16 @@ public class Model implements HasName, HasPid, HasId<String> {
                 .append(customer, model.getCustomer()).append(table, model.getTable())
                 .append(metadataTable, model.getMetadataTable()).isEquals();
 
+    }
+
+    @JsonProperty("schema_contents")
+    @Transient
+    public String getSchemaContents() {
+        return schemaContents;
+    }
+
+    @JsonProperty("schema_contents")
+    public void setSchemaContents(String schemaContents) {
+        this.schemaContents = schemaContents;
     }
 }

@@ -79,4 +79,6 @@ public interface Algorithm extends HasName, HasPid {
     String getPipelineDriver();
     
     void resetAlgorithmProperties();
+    
+    boolean hasDataDiagnostics();
 }
