@@ -15,9 +15,6 @@ Logo
   width: 110px;
   margin-top: 12px;
 }
-.open-nav .no-nav-logo {
-  display: none;
-}
 
 /*
 Main Content & Page Header
@@ -36,6 +33,10 @@ Page Summary / Sub-Nav Headers
   padding: 40px 0;
   text-align: center;
   background: $palladium;
+  &.create-model-summary {
+    padding: 10px 0 0;
+    text-align: left;
+  }
   &.blue-steel, &.blue-fire {
     background-size: cover;
     background-repeat: no-repeat;

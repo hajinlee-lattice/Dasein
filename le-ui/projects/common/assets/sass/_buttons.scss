@@ -200,3 +200,50 @@ input::-moz-focus-inner {
   box-shadow: none;
 }
 
+
+
+
+
+/*
+Angled Buttons
+
+Use this structure for angled buttons:
+<a class="button angled-button">
+  <span>Create a model</span>
+</a>
+============================================================ */
+.button.angled-button {
+  background: rgba(255, 255, 255, 0.2);
+  transform: skewX(20deg);
+    -ms-transform:skewX(20deg);
+    -webkit-transform:skewX(20deg);
+  text-transform: uppercase;
+  padding: 6px 20px;
+  span {
+    display: inline-block;
+    transform: skewX(-20deg);
+    -ms-transform:skewX(-20deg);
+    -webkit-transform:skewX(-20deg);
+    color: #fff;
+    letter-spacing: 2px;
+  }
+  &.active {
+    background: rgba(255, 255, 255, 1);
+    span {
+      color: #333;
+    }
+  }
+}
+.create-model-summary a.first-child:before {
+  z-index: -1;
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: skew(20deg, 0deg);
+  -ms-transform: skew(20deg, 0deg);
+  -webkit-transform: skew(20deg, 0deg);
+}
+
+
+

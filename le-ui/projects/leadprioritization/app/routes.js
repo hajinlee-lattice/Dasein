@@ -102,13 +102,7 @@ angular
             url: '/import',
             views: {
                 "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_IMPORT_MODEL_CSV_UPLOAD';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
                 },
                 "main@": {
                     templateUrl: 'app/create/views/CSVImportView.html'
