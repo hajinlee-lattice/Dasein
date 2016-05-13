@@ -1,9 +1,9 @@
 package com.latticeengines.scoringapi.exposed;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class Field {
 
@@ -12,17 +12,15 @@ public class Field {
     private String fieldName;
 
     @JsonProperty("fieldType")
-    @ApiModelProperty(required = true, value = "Data type of the field", allowableValues = "BOOLEAN,INTEGER,FLOAT,STRING,TEMPORAL,LONG")
+    @ApiModelProperty(required = true, value = "Data type of the field")
     private FieldType fieldType;
 
-    @ApiModelProperty(required = true, value = "Value of the field")
-    @JsonProperty("fieldValue")
-    private Object fieldValue;
-
     public Field() {
+        super();
     }
 
     public Field(String fieldName, FieldType fieldType) {
+        this();
         this.fieldName = fieldName;
         this.fieldType = fieldType;
     }

@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -12,14 +15,19 @@ import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.scoringapi.exposed.BulkRecordScoreRequest;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
+import com.latticeengines.scoringapi.exposed.Record;
+import com.latticeengines.scoringapi.exposed.Record.IdType;
+import com.latticeengines.scoringapi.exposed.RecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
@@ -99,5 +107,56 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
     }
 
+    @Test(groups = "deployment", enabled = true)
+    public void scoreRecords() throws IOException {
+        String url = apiHostPort + "/score/records";
 
+        testScore(url, 1);
+        testScore(url, 2);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void testScore(String url, int n) throws IOException {
+        long timeDuration = System.currentTimeMillis();
+        BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n);
+        ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+        Assert.assertEquals(response.getBody().size(), n);
+
+        List<RecordScoreResponse> results = new ArrayList<>();
+        ObjectMapper om = new ObjectMapper();
+        for (Object res : response.getBody()) {
+            RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
+            Assert.assertEquals(result.getScores().get(0).getScore(), 99.0d);
+        }
+    }
+
+    private BulkRecordScoreRequest getBulkScoreRequest(int n) throws IOException {
+        BulkRecordScoreRequest bulkRequest = new BulkRecordScoreRequest();
+        bulkRequest.setRule("Dummy Rule");
+        bulkRequest.setSource("Dummy Source");
+
+        List<Record> records = generateRecords(n);
+
+        bulkRequest.setRecords(records);
+
+        return bulkRequest;
+    }
+
+    private List<Record> generateRecords(int n) throws IOException {
+        List<Record> records = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            Record record = new Record();
+            record.setIdType(IdType.LATTICE);
+            List<String> modelIds = new ArrayList<>();
+            modelIds.add(MODEL_ID);
+            record.setModelIds(modelIds);
+            record.setRecordId(UUID.randomUUID().toString());
+            ScoreRequest scoreRequest = getScoreRequest();
+            Map<String, Object> attributeValues = scoreRequest.getRecord();
+            record.setAttributeValues(attributeValues);
+            record.setPerformEnrichment(true);
+            records.add(record);
+        }
+        return records;
+    }
 }

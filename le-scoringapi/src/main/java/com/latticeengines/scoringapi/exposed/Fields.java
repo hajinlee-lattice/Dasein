@@ -1,10 +1,10 @@
 package com.latticeengines.scoringapi.exposed;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class Fields {
 
@@ -13,8 +13,18 @@ public class Fields {
     private String modelId;
 
     @JsonProperty("fields")
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = true, value = "List of field")
     private List<Field> fields;
+
+    public Fields() {
+        super();
+    }
+
+    public Fields(String modelId, List<Field> fields) {
+        this();
+        this.modelId = modelId;
+        this.fields = fields;
+    }
 
     public String getModelId() {
         return modelId;
