@@ -36,7 +36,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         //WorkflowExecutionId workflowId = workflowService.restart(new WorkflowExecutionId(18L));
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
-        assertEquals(status, BatchStatus.FAILED);
+        assertEquals(status, BatchStatus.COMPLETED);
     }
 
 }
