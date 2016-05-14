@@ -225,6 +225,10 @@ class ArgumentParser(object):
         self.__populateSchemaWithMetadata(self.getSchema(), self)
 
         dataFrameColumns = reservedFields + includedNames if postProcessClf else includedNames
+        
+        if len(tmpData) == 0:
+            return pd.DataFrame(columns=dataFrameColumns)
+        
         return pd.DataFrame(tmpData, columns=dataFrameColumns)
 
     def __populateSchemaWithMetadata(self, schema, parser):
