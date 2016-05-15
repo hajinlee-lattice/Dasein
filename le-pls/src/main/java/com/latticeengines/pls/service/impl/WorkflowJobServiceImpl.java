@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -35,8 +36,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public WorkflowStatus getWorkflowStatusFromApplicationId(String appId) {
-        return workflowProxy.getWorkflowStatusFromApplicationId(appId);
+    public JobStatus getJobStatusFromApplicationId(String appId) {
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
+        return job.getJobStatus();
     }
 
 }

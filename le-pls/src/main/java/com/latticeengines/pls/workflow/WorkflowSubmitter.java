@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -36,13 +37,13 @@ public abstract class WorkflowSubmitter {
         if (appId == null) {
             return false;
         }
-        WorkflowStatus status = null;
+        JobStatus status = null;
         try {
-            status = workflowJobService.getWorkflowStatusFromApplicationId(appId);
+            status = workflowJobService.getJobStatusFromApplicationId(appId);
         } catch (Exception e) {
             // Ignore any errors since this means that any associated workflow
             // must be problematic so let it continue
         }
-        return status != null && status.getStatus().isRunning();
+        return status != null && !Job.TERMINAL_JOB_STATUS.contains(status);
     }
 }

@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -92,24 +91,6 @@ public class WorkflowResource implements WorkflowInterface {
     @Override
     public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
         return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
-    }
-
-    @RequestMapping(value = "/yarnapps/status/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
-    @Override
-    public WorkflowStatus getWorkflowStatusFromApplicationId(@PathVariable String applicationId) {
-        WorkflowExecutionId workflowId = getWorkflowIdFromAppId(applicationId);
-        WorkflowStatus status = null;
-        if (workflowId != null) {
-            status = workflowService.getStatus(workflowId);
-            log.info("Found workflowId " + workflowId.getId() + " for app " + applicationId + " status="
-                    + status.getStatus());
-        } else {
-            status = new WorkflowStatus();
-            status.setStatus(BatchStatus.STARTING);
-        }
-        return status;
     }
 
     @RequestMapping(value = "/yarnapps/jobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

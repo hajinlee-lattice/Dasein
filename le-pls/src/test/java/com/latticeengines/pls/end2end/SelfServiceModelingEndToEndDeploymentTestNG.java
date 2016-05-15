@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -52,8 +51,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -157,8 +156,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         assertTrue(thrown);
 
-        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
+        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
@@ -246,8 +245,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
-        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
+        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
@@ -306,24 +305,24 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return JsonUtils.convertValue(rawSummary, ModelSummary.class);
     }
 
-    private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
+    private JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
+
         int retryOnException = 4;
-        WorkflowStatus status = null;
+        Job job = null;
 
         while (true) {
             try {
-                status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
             } catch (Exception e) {
-                log.info(String.format("Workflow status exception: %s", e.getMessage()));
+                System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
 
-                status = null;
+                job = null;
                 if (--retryOnException == 0)
                     throw new RuntimeException(e);
             }
 
-            if ((status != null)
-                    && ((running && status.getStatus().isRunning()) || (!running && !status.getStatus().isRunning()))) {
-                return status;
+            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
+                return job.getJobStatus();
             }
 
             try {

@@ -23,5 +23,5 @@ public interface WorkflowContainerService {
 
     List<Job> getJobsByTenant(long tenantPid);
 
-    Job getJobStatusFromWorkflowJobAndYarn(WorkflowJob workflowJob);
+    Job getJobFromWorkflowJobAndYarn(WorkflowJob workflowJob);
 }

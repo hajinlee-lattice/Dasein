@@ -133,7 +133,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
+            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
             return job;
         }
         return workflowService.getJob(workflowId);
@@ -153,7 +153,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                             "bulkMatchWorkflow")) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
                 if (workflowId == null) {
-                    com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
+                    com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
                     workflowIds.add(workflowId);
@@ -172,7 +172,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobStatusFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         Map<String, String> inputProperties = workflowJob.getInputContext();
         job.setInputs(inputProperties);

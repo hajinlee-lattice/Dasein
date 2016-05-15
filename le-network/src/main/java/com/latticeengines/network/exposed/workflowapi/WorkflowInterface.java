@@ -18,8 +18,6 @@ public interface WorkflowInterface {
 
     WorkflowStatus getWorkflowStatus(String workflowId);
 
-    WorkflowStatus getWorkflowStatusFromApplicationId(String applicationId);
-
     Job getWorkflowJobFromApplicationId(String applicationId);
 
     Job getWorkflowExecution(String workflowId);

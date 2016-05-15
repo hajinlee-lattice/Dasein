@@ -45,7 +45,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJob.setStartTimeInMillis(100000000L);
         workflowJobEntityMgr.create(workflowJob);
 
-        Job job = workflowContainerService.getJobStatusFromWorkflowJobAndYarn(workflowJob);
+        Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));
@@ -77,7 +77,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
                 });
 
         ((WorkflowContainerServiceImpl) workflowContainerService).setJobProxy(jobProxy);
-        Job job = workflowContainerService.getJobStatusFromWorkflowJobAndYarn(workflowJob);
+        Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));

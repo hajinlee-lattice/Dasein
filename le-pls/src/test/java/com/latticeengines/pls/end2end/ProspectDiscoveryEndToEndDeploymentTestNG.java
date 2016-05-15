@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -20,8 +19,9 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -95,8 +95,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     public void createDefaultTargetMarket() throws Exception {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, TargetMarket.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(
-                getRestAPIHostPort() + PLS_TARGETMARKET_URL + TargetMarket.DEFAULT_NAME, TargetMarket.class);
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
 
         System.out.println("Workflow app id = " + targetMarket.getApplicationId());
@@ -110,8 +110,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         }
         assertTrue(exception);
 
-        WorkflowStatus completedStatus = waitForWorkflowStatus(targetMarket.getApplicationId(), false);
-        assertEquals(completedStatus.getStatus().name(), BatchStatus.COMPLETED.name());
+        JobStatus completedStatus = waitForWorkflowStatus(targetMarket.getApplicationId(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
 
         List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
 
@@ -126,25 +126,24 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         }
     }
 
-    private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
+    private JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
+
         int retryOnException = 4;
-        WorkflowStatus status = null;
+        Job job = null;
 
         while (true) {
             try {
-                status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
             } catch (Exception e) {
-                System.out.println(String.format("Workflow status exception: %s", e.getMessage()));
+                System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
 
-                status = null;
+                job = null;
                 if (--retryOnException == 0)
                     throw new RuntimeException(e);
             }
 
-            if ((status != null) &&
-               ((running && status.getStatus().isRunning()) ||
-                (!running && !status.getStatus().isRunning()))) {
-                return status;
+            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
+                return job.getJobStatus();
             }
 
             try {

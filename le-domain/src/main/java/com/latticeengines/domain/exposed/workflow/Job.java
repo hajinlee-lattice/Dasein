@@ -5,6 +5,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -191,4 +194,9 @@ public class Job implements HasId<Long>, HasName {
         return JsonUtils.serialize(this);
     }
 
+    @Transient
+    @JsonIgnore
+    public boolean isRunning() {
+        return !TERMINAL_JOB_STATUS.contains(getJobStatus());
+    }
 }

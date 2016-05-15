@@ -5,14 +5,13 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 
@@ -24,11 +23,9 @@ public class WorkflowSubmitterUnitTestNG {
     public void submitFitWorkflow() {
         TargetMarket targetMarket = mock(TargetMarket.class);
         WorkflowJobService workflowJobService = mock(WorkflowJobService.class);
-        WorkflowStatus workflowStatus = mock(WorkflowStatus.class);
         when(targetMarket.getApplicationId()).thenReturn("application_xyz_123");
 
-        when(workflowJobService.getWorkflowStatusFromApplicationId("application_xyz_123")).thenReturn(workflowStatus);
-        when(workflowStatus.getStatus()).thenReturn(BatchStatus.STARTED);
+        when(workflowJobService.getJobStatusFromApplicationId("application_xyz_123")).thenReturn(JobStatus.RUNNING);
 
         ReflectionTestUtils.setField(fitWorkflowSubmitter, "workflowJobService", workflowJobService);
 
