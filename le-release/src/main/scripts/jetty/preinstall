@@ -1,3 +1,0 @@
-#!/bin/bash
-rm -rf /opt/jetty/*
-rm -f /etc/init.d/jetty
