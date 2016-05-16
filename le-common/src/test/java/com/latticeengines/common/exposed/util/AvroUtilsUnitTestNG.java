@@ -8,6 +8,7 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.avro.Schema;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -48,6 +49,18 @@ public class AvroUtilsUnitTestNG {
         Schema schema = Schema.parse(avscFile);
         String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", schema);
         System.out.println(hiveTableDDL);
+    }
+
+    @Test(groups = "unit")
+    public void testGetType() throws Exception {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
+                + "\"fields\":[" + "{\"name\":\"Field1\",\"type\":\"int\"},"
+                + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
+        for (Schema.Field field: schema.getFields()) {
+            Assert.assertEquals(AvroUtils.getType(field), Schema.Type.INT);
+        }
+
     }
 
     @DataProvider(name = "avscFileProvider")

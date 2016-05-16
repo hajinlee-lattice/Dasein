@@ -244,15 +244,19 @@ public class AvroUtils {
     }
 
     public static Type getType(Field field) {
-        Type bestType = Type.NULL;
-        for (Schema schema : field.schema().getTypes()) {
-            Type type = schema.getType();
-            if (!Type.NULL.equals(type)) {
-                bestType = type;
-                break;
+        if (Type.UNION.equals(field.schema().getType())) {
+            Type bestType = Type.NULL;
+            for (Schema schema : field.schema().getTypes()) {
+                Type type = schema.getType();
+                if (!Type.NULL.equals(type)) {
+                    bestType = type;
+                    break;
+                }
             }
+            return bestType;
+        } else {
+            return field.schema().getType();
         }
-        return bestType;
     }
 
     private static void setValues(GenericRecord r, Schema s, Schema combined, ModifiableRecordBuilder recordBldr,

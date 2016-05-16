@@ -40,6 +40,7 @@ class BlockDivider {
 
     private void readSchema() {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+        log.info("Got input schema: " + schema.toString());
         fields = new ArrayList<>();
         fieldTypes = new ArrayList<>();
         for (Schema.Field field: schema.getFields()) {
