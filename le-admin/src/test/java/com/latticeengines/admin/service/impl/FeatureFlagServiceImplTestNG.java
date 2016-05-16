@@ -53,9 +53,9 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         FeatureFlagDefinition createDefaultFeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         Assert.assertNotNull(createDefaultFeatureFlag);
-        FeatureFlagDefinition enablePOCtransformFeatureFlag = defaultFeatureFlagMap
+        FeatureFlagDefinition enablePocTransformFeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName());
-        Assert.assertNotNull(enablePOCtransformFeatureFlag);
+        Assert.assertNotNull(enablePocTransformFeatureFlag);
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -70,10 +70,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && createDefaultFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
                 && createDefaultFeatureFlag.getDisplayName() != null
                 && createDefaultFeatureFlag.getDocumentation() != null);
-        Assert.assertTrue(enablePOCtransformFeatureFlag.getConfigurable()
-                && enablePOCtransformFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enablePOCtransformFeatureFlag.getDisplayName() != null
-                && enablePOCtransformFeatureFlag.getDocumentation() != null);
+        Assert.assertTrue(enablePocTransformFeatureFlag.getConfigurable()
+                && enablePocTransformFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enablePocTransformFeatureFlag.getDisplayName() != null
+                && enablePocTransformFeatureFlag.getDocumentation() != null);
 
     }
 

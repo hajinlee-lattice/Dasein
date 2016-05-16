@@ -104,8 +104,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         targetMarketProdSet.add(LatticeProduct.PD);
         Set<LatticeProduct> verifySourceCredentialProdSet = new HashSet<LatticeProduct>();
         verifySourceCredentialProdSet.add(LatticeProduct.PD);
-        Set<LatticeProduct> enablePOCtransformProdSet = new HashSet<LatticeProduct>();
-        enablePOCtransformProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> enablePocTransformProdSet = new HashSet<LatticeProduct>();
+        enablePocTransformProdSet.add(LatticeProduct.LPA3);
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
         FeatureFlagDefinition quotaFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA.getName(),
@@ -116,16 +116,16 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition verifySourceCredentialFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(),
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getDocumentation(), verifySourceCredentialProdSet, false);
-        FeatureFlagDefinition enablePOCtransformFeatureFlag = createDefaultFeatureFlag(
+        FeatureFlagDefinition enablePocTransformFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName(),
-                LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getDocumentation(), enablePOCtransformProdSet, true);
+                LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getDocumentation(), enablePocTransformProdSet, true);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.TARGET_MARKET.getName(), targetMarketFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(),
                 verifySourceCredentialFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName(),
-                enablePOCtransformFeatureFlag);
+                enablePocTransformFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,

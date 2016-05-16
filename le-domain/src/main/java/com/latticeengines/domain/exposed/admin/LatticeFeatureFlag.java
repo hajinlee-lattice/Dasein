@@ -11,7 +11,7 @@ public enum LatticeFeatureFlag {
     QUOTA("Quota", "Quota"), //
     TARGET_MARKET("TargetMarket", "Target Market"), //
     USE_EAI_VALIDATE_CREDENTIAL("ValidateCredsUsingEai", "Use Eai to valiate source credentials"), //
-    ENABLE_POC_TRANSFORM("EnablePOCtransform", "enable POC in data transform");
+    ENABLE_POC_TRANSFORM("EnablePocTransform", "enable POC in data transform");
 
     private String name;
     private String documentation;
