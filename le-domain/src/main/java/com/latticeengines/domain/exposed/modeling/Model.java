@@ -332,6 +332,17 @@ public class Model implements HasName, HasPid, HasId<String> {
         return this.provenanceProperties;
     }
 
+    @JsonProperty(value = "schema_contents", required = false)
+    @Transient
+    public String getSchemaContents() {
+        return schemaContents;
+    }
+
+    @JsonProperty(value = "schema_contents", required = false)
+    public void setSchemaContents(String schemaContents) {
+        this.schemaContents = schemaContents;
+    }
+
     /**
      * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
      * classes.html#persistent-classes-equalshashcode
@@ -377,14 +388,4 @@ public class Model implements HasName, HasPid, HasId<String> {
 
     }
 
-    @JsonProperty("schema_contents")
-    @Transient
-    public String getSchemaContents() {
-        return schemaContents;
-    }
-
-    @JsonProperty("schema_contents")
-    public void setSchemaContents(String schemaContents) {
-        this.schemaContents = schemaContents;
-    }
 }
