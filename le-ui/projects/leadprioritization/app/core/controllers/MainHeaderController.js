@@ -13,7 +13,6 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     if (clientSession != null) {
         $scope.userDisplayName = clientSession.DisplayName;
     }
-    console.log($scope.userDisplayName);
     $scope.showProfileNav = false;
 
     

@@ -36,6 +36,11 @@ Page Summary / Sub-Nav Headers
   &.create-model-summary {
     padding: 10px 0 0;
     text-align: left;
+    p {
+      float: right;
+      margin-right: 20px;
+      font-style: italic;
+    }
   }
   &.blue-steel, &.blue-fire {
     background-size: cover;
