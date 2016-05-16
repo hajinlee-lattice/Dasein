@@ -27,6 +27,10 @@ class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
                          ,'Activity_Count_Interesting_Moment_Webinar'
                          ,'Activity_Count_Interesting_Moment_key_web_page']
 
+    LP3_ACTIVITY_COLS =  ['Activity_Count_Click_Email','Activity_Count_Email_Bounced_Soft'
+                         ,'Activity_Count_Fill_Out_Form','Activity_Count_Interesting_Moment_Any'
+                         ,'Activity_Count_Open_Email','Activity_Count_Unsubscribe_Email','Activity_Count_Visit_Webpage']
+
 
     def __init__(self, forceApply=False):
         super(LPMigration_LP3ModelingQuery1MoActivity, self).__init__(forceApply)
@@ -45,13 +49,15 @@ class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
         conn_mgr = appseq.getConnectionMgr()
 
         q_lp3_modeling = conn_mgr.getQuery('Q_LP3_ModelingLead_OneLeadPerDomain')
-        colnames_modeling = deepcopy(q_lp3_modeling.getColumnNames())
+        for cname in self.STD_ACTIVITY_COLS:
+            c = q_lp3_modeling.getColumn(cname)
+            if c is not None:
+                if c in LP3_ACTIVITY_COLS:
+                    fcnNameOrig = c.getExpression().FcnName()
+                    c.setExpression(ExpressionVDBImplFactory.parse(fcnNameOrig+'_1mo'))
+                else:
+                    q_lp3_modeling.removeColumn(cname)
 
-        for c in colnames_modeling:
-            if c in self.STD_ACTIVITY_COLS:
-                q_lp3_modeling.removeColumn(c)
+        conn_mgr.setQuery(q_lp3_modeling)
 
-        
-
-        
         return True

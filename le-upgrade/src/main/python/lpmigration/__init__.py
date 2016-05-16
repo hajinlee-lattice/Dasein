@@ -11,3 +11,4 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'..','..','..','..','..',
 
 from .LPMigration_1MoActivityForModeling import LPMigration_1MoActivityForModeling
 from .LPMigration_LP3ModelingQuery import LPMigration_LP3ModelingQuery
+from .LPMigration_LP3ModelingQuery1MoActivity import LPMigration_LP3ModelingQuery1MoActivity
