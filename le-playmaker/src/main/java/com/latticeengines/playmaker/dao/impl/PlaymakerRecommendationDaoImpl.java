@@ -59,7 +59,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     protected String getSfdcContactID() {
-        return " + '|' + ISNULL(T.[External_id], '') ";
+        return " + '|' ";
     }
 
     protected String getMonetaryValue() {
