@@ -35,7 +35,7 @@ public class StdVisidbDsTitleRole implements RealTimeTransform {
         Object o = record.get(column);
 
         if (o == null)
-            return 0.0;
+            return "Null";
 
         if (StringUtils.isEmpty(String.valueOf(o)))
             return "";

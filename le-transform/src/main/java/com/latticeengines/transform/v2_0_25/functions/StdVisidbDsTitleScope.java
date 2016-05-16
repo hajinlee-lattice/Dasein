@@ -32,7 +32,7 @@ public class StdVisidbDsTitleScope implements RealTimeTransform {
         Object o = record.get(column);
 
         if (o == null)
-            return "0.0";
+            return "Null";
 
         if (mapTitleScope == null) {
             mapTitleScope = new LinkedHashMap();
