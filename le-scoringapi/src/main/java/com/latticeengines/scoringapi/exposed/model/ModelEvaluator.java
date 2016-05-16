@@ -7,19 +7,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.bind.JAXBException;
-
+import javax.xml.transform.Source;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
-import org.jpmml.evaluator.ClassificationMap;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
-import org.jpmml.manager.PMMLManager;
+import org.jpmml.evaluator.PMMLManager;
+import org.jpmml.evaluator.ProbabilityDistribution;
+import org.jpmml.model.ImportFilter;
+import org.jpmml.model.JAXBUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -41,7 +41,8 @@ public class ModelEvaluator {
     public ModelEvaluator(InputStream is) {
         PMML unmarshalled;
         try {
-            unmarshalled = IOUtil.unmarshal(is);
+            Source source = ImportFilter.apply(new InputSource(is));
+            unmarshalled = JAXBUtil.unmarshalPMML(source);
         } catch (JAXBException | SAXException ex) {
             throw new RuntimeException("Unable to parse PMML file", ex);
         }
@@ -52,8 +53,9 @@ public class ModelEvaluator {
     public ModelEvaluator(Reader pmml) {
         PMML unmarshalled;
         try {
-            unmarshalled = IOUtil.unmarshal(new InputSource(pmml));
-        } catch (SAXException | JAXBException ex) {
+            Source source = ImportFilter.apply(new InputSource(pmml));
+            unmarshalled = JAXBUtil.unmarshalPMML(source);
+        } catch (JAXBException | SAXException ex) {
             throw new RuntimeException("Unable to parse PMML file", ex);
         }
 
@@ -61,7 +63,8 @@ public class ModelEvaluator {
     }
 
     public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation) {
-        Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
+        ModelEvaluatorFactory modelEvaluatorFactory = ModelEvaluatorFactory.newInstance();
+        Evaluator evaluator = modelEvaluatorFactory.newModelManager(manager.getPMML());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
         List<String> nullFields = new ArrayList<>();
@@ -123,9 +126,8 @@ public class ModelEvaluator {
             target = results.keySet().iterator().next().getValue();
         }
 
-        @SuppressWarnings("unchecked")
-        ClassificationMap<FieldName> classification = (ClassificationMap<FieldName>) results.get(new FieldName(target));
-        double predicted = classification.get("1");
+        ProbabilityDistribution classification = (ProbabilityDistribution) results.get(new FieldName(target));
+        double predicted = classification.getProbability("1");
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
         result.put(ScoreType.PROBABILITY, predicted);
