@@ -84,6 +84,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .inputProperties(inputProperties) //
                 .minDedupedRows(minDedupedRows) //
                 .minPositiveEvents(minPositiveEvents) //
+                .transformGroup(getTransformGroupFromZK()) //
                 .build();
         return configuration;
     }

@@ -99,6 +99,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
+                .transformGroup(getTransformGroupFromZK()) //
                 .build();
 
         return importMatchAndScoreWorkflowConfig;

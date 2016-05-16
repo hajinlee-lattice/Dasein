@@ -20,7 +20,7 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
-        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName()));
+        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName(), null));
     }
 
     @Override

@@ -75,6 +75,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
+                .transformGroup(getTransformGroupFromZK()) //
                 .build();
     }
 }

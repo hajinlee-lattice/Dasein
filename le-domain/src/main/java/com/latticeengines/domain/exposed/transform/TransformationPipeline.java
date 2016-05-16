@@ -1,15 +1,13 @@
 package com.latticeengines.domain.exposed.transform;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class TransformationPipeline {
-
-    public final static Map<String, TransformDefinition> definitions;
 
     public static TransformDefinition stdVisidbDsCompanynameEntropy = new TransformDefinition(
             "StdVisidbDsCompanynameEntropy", "CompanyName_Entropy", FieldType.FLOAT,
@@ -130,97 +128,6 @@ public class TransformationPipeline {
     static {
         setArguments();
         setDisplayName();
-        setPocTransformFlag();
-
-        definitions = ImmutableMap
-                .<String, TransformDefinition> builder()
-                .put(stdVisidbDsCompanynameEntropy.name + "_" + stdVisidbDsCompanynameEntropy.output, //
-                        stdVisidbDsCompanynameEntropy)
-
-                .put(stdLengthTitle.name + "_" + stdLengthTitle.output, stdLengthTitle)
-
-                .put(stdLengthCompanyName.name + "_" + stdLengthCompanyName.output, stdLengthCompanyName)
-
-                .put(stdLengthDomain.name + "_" + stdLengthDomain.output, stdLengthDomain)
-
-                .put(stdVisidbDsPdAlexaRelatedlinksCount.name + "_" + stdVisidbDsPdAlexaRelatedlinksCount.output, //
-                        stdVisidbDsPdAlexaRelatedlinksCount)
-
-                .put(stdPhoneEntropy.name + "_" + stdPhoneEntropy.output, stdPhoneEntropy)
-
-                .put(stdVisidbAlexaMonthssinceonline.name + "_" + stdVisidbAlexaMonthssinceonline.output, //
-                        stdVisidbAlexaMonthssinceonline)
-
-                .put(stdVisidbDsPdModelactionOrdered.name + "_" + stdVisidbDsPdModelactionOrdered.output, //
-                        stdVisidbDsPdModelactionOrdered)
-
-                .put(stdVisidbDsSpamindicator.name + "_" + stdVisidbDsSpamindicator.output, stdVisidbDsSpamindicator)
-
-                .put(stdVisidbDsTitleLevel.name + "_" + stdVisidbDsTitleLevel.output, stdVisidbDsTitleLevel)
-
-                .put(stdVisidbDsTitleIstechrelated.name + "_" + stdVisidbDsTitleIstechrelated.output, //
-                        stdVisidbDsTitleIstechrelated)
-
-                .put(stdVisidbDsPdJobstrendstringOrdered.name + "_" + stdVisidbDsPdJobstrendstringOrdered.output, //
-                        stdVisidbDsPdJobstrendstringOrdered)
-
-                .put(stdVisidbDsPdFundingstageOrdered.name + "_" + stdVisidbDsPdFundingstageOrdered.output, //
-                        stdVisidbDsPdFundingstageOrdered)
-
-                .put(stdVisidbDsTitleIsacademic.name + "_" + stdVisidbDsTitleIsacademic.output, //
-                        stdVisidbDsTitleIsacademic)
-
-                .put(stdVisidbDsFirstnameSameasLastname.name + "_" + stdVisidbDsFirstnameSameasLastname.output, //
-                        stdVisidbDsFirstnameSameasLastname)
-
-                .put(stdVisidbDsIndustryGroup.name + "_" + stdVisidbDsIndustryGroup.output, stdVisidbDsIndustryGroup)
-
-                .put(stdVisidbTitleChannel.name + "_" + stdVisidbTitleChannel.output, stdVisidbTitleChannel)
-
-                .put(stdVisidbTitleFunction.name + "_" + stdVisidbTitleFunction.output, stdVisidbTitleFunction)
-
-                .put(stdVisidbTitleLevelCategorical.name + "_" + stdVisidbTitleLevelCategorical.output, //
-                        stdVisidbTitleLevelCategorical)
-
-                .put(stdVisidbTitleRole.name + "_" + stdVisidbTitleRole.output, stdVisidbTitleRole)
-
-                .put(stdVisidbTitleScope.name + "_" + stdVisidbTitleScope.output, stdVisidbTitleScope)
-
-                .put(stdVisidbNameLength.name + "_" + stdVisidbNameLength.output, stdVisidbNameLength)
-
-                .put(stdVisidbEmailIsInvalid.name + "_" + stdVisidbEmailIsInvalid.output, stdVisidbEmailIsInvalid)
-
-                .put(stdVisidbEmailLength.name + "_" + stdVisidbEmailLength.output, stdVisidbEmailLength)
-
-                .put(stdVisidbEmailPrefixLength.name + "_" + stdVisidbEmailPrefixLength.output,
-                        stdVisidbEmailPrefixLength)
-
-                .put(stdVisidbStateIsCanadianProvince.name + "_" + stdVisidbStateIsCanadianProvince.output,
-                        stdVisidbStateIsCanadianProvince)
-
-                .put(stdVisidbStateIsInFarWest.name + "_" + stdVisidbStateIsInFarWest.output, stdVisidbStateIsInFarWest)
-
-                .put(stdVisidbStateIsInGreatLakes.name + "_" + stdVisidbStateIsInGreatLakes.output,
-                        stdVisidbStateIsInGreatLakes)
-
-                .put(stdVisidbStateIsInMidAtlantic.name + "_" + stdVisidbStateIsInMidAtlantic.output,
-                        stdVisidbStateIsInMidAtlantic)
-
-                .put(stdVisidbStateIsInNewEngland.name + "_" + stdVisidbStateIsInNewEngland.output,
-                        stdVisidbStateIsInNewEngland)
-
-                .put(stdVisidbStateIsInPlains.name + "_" + stdVisidbStateIsInPlains.output, stdVisidbStateIsInPlains)
-
-                .put(stdVisidbStateIsInRockyMountain.name + "_" + stdVisidbStateIsInRockyMountain.output,
-                        stdVisidbStateIsInRockyMountain)
-
-                .put(stdVisidbStateIsInSouthEast.name + "_" + stdVisidbStateIsInSouthEast.output,
-                        stdVisidbStateIsInSouthEast)
-
-                .put(stdVisidbStateIsInSouthWest.name + "_" + stdVisidbStateIsInSouthWest.output,
-                        stdVisidbStateIsInSouthWest)
-
-                .build();
     }
 
     public static void setArguments() {
@@ -293,33 +200,64 @@ public class TransformationPipeline {
         stdPhoneEntropy.outputDisplayName = "Entropy of Phone Number";
     }
 
-    public static void setPocTransformFlag() {
-        stdVisidbEmailIsInvalid.isPocTransform = Boolean.TRUE;
-
-        stdVisidbEmailLength.isPocTransform = Boolean.TRUE;
-
-        stdVisidbEmailPrefixLength.isPocTransform = Boolean.TRUE;
-
-        stdVisidbNameLength.isPocTransform = Boolean.TRUE;
-
-        stdVisidbTitleChannel.isPocTransform = Boolean.TRUE;
-
-        stdVisidbTitleFunction.isPocTransform = Boolean.TRUE;
-
-        stdVisidbTitleLevelCategorical.isPocTransform = Boolean.TRUE;
-
-        stdVisidbTitleRole.isPocTransform = Boolean.TRUE;
-
-        stdVisidbTitleScope.isPocTransform = Boolean.TRUE;
-
-        stdVisidbStateIsCanadianProvince.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInFarWest.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInGreatLakes.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInMidAtlantic.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInNewEngland.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInPlains.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInRockyMountain.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInSouthEast.isPocTransform = Boolean.TRUE;
-        stdVisidbStateIsInSouthWest.isPocTransform = Boolean.TRUE;
+    public static Set<TransformDefinition> getTransforms(TransformationGroup group) {
+        switch (group) {
+        case ALL:
+            return ImmutableSet.<TransformDefinition> builder()//
+                    .addAll(getStandardTransforms()) //
+                    .addAll(getPocTransforms()).build();
+        case POC:
+            return getPocTransforms();
+        case STANDARD:
+        default:
+            return getStandardTransforms();
+        }
     }
+
+    public static Set<TransformDefinition> getStandardTransforms() {
+        Set<TransformDefinition> stdTransformDefinitions = ImmutableSet.<TransformDefinition> builder()
+                .add(stdVisidbDsCompanynameEntropy) //
+                .add(stdLengthTitle) //
+                .add(stdLengthCompanyName) //
+                .add(stdLengthDomain) //
+                .add(stdVisidbDsPdAlexaRelatedlinksCount) //
+                .add(stdPhoneEntropy) //
+                .add(stdVisidbAlexaMonthssinceonline) //
+                .add(stdVisidbDsPdModelactionOrdered) //
+                .add(stdVisidbDsSpamindicator) //
+                .add(stdVisidbDsTitleLevel) //
+                .add(stdVisidbDsTitleIstechrelated) //
+                .add(stdVisidbDsPdJobstrendstringOrdered) //
+                .add(stdVisidbDsPdFundingstageOrdered) //
+                .add(stdVisidbDsTitleIsacademic) //
+                .add(stdVisidbDsFirstnameSameasLastname) //
+                .add(stdVisidbDsIndustryGroup) //
+                .build();
+        return stdTransformDefinitions;
+    }
+
+    public static Set<TransformDefinition> getPocTransforms() {
+        Set<TransformDefinition> pocTransformDefinitions = ImmutableSet.<TransformDefinition> builder()
+                .add(stdVisidbEmailIsInvalid) //
+                .add(stdVisidbEmailLength) //
+                .add(stdVisidbEmailPrefixLength) //
+                .add(stdVisidbNameLength) //
+                .add(stdVisidbTitleChannel) //
+                .add(stdVisidbTitleFunction) //
+                .add(stdVisidbTitleLevelCategorical) //
+                .add(stdVisidbTitleRole) //
+                .add(stdVisidbTitleScope) //
+                .add(stdVisidbStateIsCanadianProvince) //
+                .add(stdVisidbStateIsInFarWest) //
+                .add(stdVisidbStateIsInGreatLakes) //
+                .add(stdVisidbStateIsInMidAtlantic) //
+                .add(stdVisidbStateIsInNewEngland) //
+                .add(stdVisidbStateIsInPlains) //
+                .add(stdVisidbStateIsInRockyMountain) //
+                .add(stdVisidbStateIsInSouthEast) //
+                .add(stdVisidbStateIsInSouthWest) //
+                .build();
+        return pocTransformDefinitions;
+    }
+
 }

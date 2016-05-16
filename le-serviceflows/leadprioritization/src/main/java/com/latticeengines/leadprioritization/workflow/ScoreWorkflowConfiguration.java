@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -116,6 +117,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder matchJoinType(MatchJoinType matchJoinType) {
             match.setMatchJoinType(matchJoinType);
+            return this;
+        }
+
+        public Builder transformGroup(TransformationGroup transformGroup) {
+            addStandardAttributes.setTransformationGroup(transformGroup);
             return this;
         }
 

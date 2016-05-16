@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
@@ -111,6 +112,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder matchJoinType(MatchJoinType matchJoinType) {
             scoreWorkflowConfigurationBuilder.matchJoinType(matchJoinType);
+            return this;
+        }
+
+        public Builder transformGroup(TransformationGroup transformGroup) {
+            scoreWorkflowConfigurationBuilder.transformGroup(transformGroup);
             return this;
         }
 

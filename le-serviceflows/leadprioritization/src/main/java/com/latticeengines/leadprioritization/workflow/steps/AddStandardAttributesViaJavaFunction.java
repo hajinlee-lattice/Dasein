@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -20,7 +21,8 @@ public class AddStandardAttributesViaJavaFunction extends RunDataFlow<AddStandar
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
-        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName()));
+        TransformationGroup transformGroup = configuration.getTransformationGroup();
+        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName(), transformGroup));
     }
 
     @Override

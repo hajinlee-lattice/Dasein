@@ -1,6 +1,6 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -25,13 +25,11 @@ public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilde
         ? eventTable.getSourceAttribute(InterfaceName.Email) //
                 : eventTable.getSourceAttribute(InterfaceName.Website);
 
-        Map<String, TransformDefinition> definitions = TransformationPipeline.definitions;
-        definitions.get(TransformationPipeline.stdLengthDomain.name + "_" //
-                + TransformationPipeline.stdLengthDomain.output) //
-        .arguments.put("column", emailOrWebsite.getName());
+        Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformGroup);
+        TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
 
-        for (Map.Entry<String, TransformDefinition> entry : definitions.entrySet()) {
-            last = addFunction(last, eventTable, entry.getValue());
+        for (TransformDefinition definition : definitions) {
+            last = addFunction(last, eventTable, definition);
         }
         return last;
     }
