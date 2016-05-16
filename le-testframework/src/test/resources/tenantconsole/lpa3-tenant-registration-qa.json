@@ -67,7 +67,7 @@
       "displayName": "PD_${TENANT}",
       "description": "A PD solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePOCtransform\":false}"
   },
   "TenantInfo": {
     "properties": {

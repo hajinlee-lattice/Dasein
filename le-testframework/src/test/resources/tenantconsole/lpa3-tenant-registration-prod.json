@@ -44,7 +44,7 @@
       "displayName": "LP3_${TENANT}",
       "description": "A LP3 solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePOCtransform\":false}"
   },
   "TenantInfo": {
     "properties": {
