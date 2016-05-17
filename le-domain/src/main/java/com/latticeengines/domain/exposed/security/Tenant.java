@@ -19,7 +19,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -115,7 +115,7 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         this.registeredTime = registeredTime;
     }
 
-    @MetricTag(tag = "TenantId")
+    @MetricField(name = "TenantId", fieldType = MetricField.FieldType.STRING)
     @JsonIgnore
     private String tenantId() {
         return getId();

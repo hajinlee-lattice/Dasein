@@ -20,7 +20,6 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     public MatchContext execute(MatchContext matchContext) {
         matchContext = fetcher.fetch(matchContext);
         matchContext = complete(matchContext);
-        generateAccountMetric(matchContext);
         return matchContext;
     }
 

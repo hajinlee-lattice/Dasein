@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -128,7 +129,7 @@ public class MatchInput implements Fact, Dimension {
         this.numRows = numRows;
     }
 
-    @MetricTagGroup
+    @MetricFieldGroup
     @JsonProperty("Tenant")
     public Tenant getTenant() {
         return tenant;

@@ -52,7 +52,6 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
                     MatchContext localContext = JsonUtils.deserialize(JsonUtils.serialize(matchContext), MatchContext.class);
                     MatchResponse response = new MatchResponse(localContext);
                     metricService.write(MetricDB.LDC_Match, response);
-                    generateAccountMetric(localContext);
                 } catch (Exception e) {
                     log.warn("Failed to extract output metric.", e);
                 }
