@@ -3,21 +3,19 @@ package com.latticeengines.domain.exposed.transform;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-
 public enum TransformationGroup {
 
     STANDARD("standard"), //
-    POC("poc"), // 
+    POC("poc"), //
     ALL("all"); //
 
     private final String name;
-    private static Map<String, FundamentalType> nameMap;
+    private static Map<String, TransformationGroup> nameMap;
 
     static {
         nameMap = new HashMap<>();
-        for (FundamentalType fundamentalType : FundamentalType.values()) {
-            nameMap.put(fundamentalType.getName(), fundamentalType);
+        for (TransformationGroup transformationGroup : TransformationGroup.values()) {
+            nameMap.put(transformationGroup.getName(), transformationGroup);
         }
     }
 
