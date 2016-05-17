@@ -31,6 +31,6 @@
     "angular-resource": "^1.4.9",
     "angular-route": "^1.4.9",
     "oclazyload": "^1.0.9",
-    "pako": "^1.0.1",
+    "pako": "^1.0.1"
   }
 }

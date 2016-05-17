@@ -1,7 +1,7 @@
 <section class="container setup-import">
 <form name="uploadForm" ng-controller="csvImportController as vm" novalidate>
   <div class="row">
-    <div class="columns six offset-three">
+    <div class="columns eight offset-two">
       <h2>Settings</h2>
       <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
         <label for="loadfile">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}<span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
@@ -9,7 +9,7 @@
             <div 
               id="csvFileProgressBar" 
               ng-if="vm.uploading || vm.uploaded" 
-              style="background:{{vm.percent > 0 ? 'palegreen' : vm.uploaded ? 'greenyellow' : '#f2f2f2'}};width:{{vm.uploaded || vm.percent == 0 ? '100' : vm.percent}}%"></div>
+              style="background:{{vm.percent > 0 ? '#a2e264' : vm.uploaded ? '#8ed162' : '#f2f2f2'}};width:{{vm.uploaded || vm.percent == 0 ? '100' : vm.percent}}%"></div>
             <span>{{vm.csvFileDisplayName}}</span>
             <input
               id="uploadBtn"
@@ -26,7 +26,7 @@
             <i class="fa fa-close" ng-click="vm.cancelClicked()" ng-if="vm.uploading && vm.percent > 0"></i>
             <i class="fa fa-check" ng-click="vm.cancelClicked()" ng-if="vm.uploaded"></i>
         </div>
-        <p id="csvFileUploadMessage">{{vm.message}}<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
+        <p id="csvFileUploadMessage">{{vm.message}}&nbsp;<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
         <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
       </div>
 
@@ -37,6 +37,7 @@
           class="form-control" 
           id="modelDisplayName"
           name="modelDisplayName"
+          ng-disabled="vm.uploaded || vm.uploading"
           ng-value="vm.modelDisplayName"
           ng-minlength="1"
           ng-maxlength="50"
@@ -61,33 +62,30 @@
           cols="30"
           name="modelDescription" 
           ng-model="vm.modelDescription" 
+          ng-disabled="vm.uploaded || vm.uploading"
           id="modelDescription" 
           class="form-control" />
       </div>
 
+      <div class="row form-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                ui-sref="home.models"
+                class="button white-button block-button">
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+        </div>
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button orange-button block-button"
+                ng-disabled="uploadForm.$invalid || (vm.uploading || vm.uploaded)"
+                ng-click="vm.uploadFile()">
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+            </button>
+        </div>
+      </div>
     </div><!-- End .six.columns -->
   </div><!-- End .container.row -->
-
-  <div class="row form-actions">
-    <div class="three columns offset-three">
-        <button 
-            type="button" 
-            ui-sref="home.models"
-            class="button gray-button block-button">
-          {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
-    </div>
-    <div class="three columns">
-        <button 
-            type="button" 
-            class="button orange-button block-button"
-            ng-disabled="uploadForm.$invalid || (vm.uploading && !vm.uploaded)"
-            ng-click="vm.uploadFile()">
-          {{ vm.uploaded 
-              ? vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_FIELD_MAPPING')
-              : vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_UPLOAD_FILE')}}
-        </button>
-    </div>
-  </div>
-
 </form>
 </section>

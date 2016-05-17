@@ -378,11 +378,11 @@ angular.module('mainApp.create.csvImport', [
         vm.showImportSuccess = false;
         vm.accountLeadCheck = true;
         vm.ResourceUtility = ResourceUtility;
-        vm.csvFileDisplayName = 'Choose File';
+        vm.csvFileDisplayName = '';
         vm.modelDisplayName = '';
         vm.importErrorMsg = '';
         vm.modelDescription = '';
-        vm.message = '';
+        vm.message = 'Choose a CSV file';
 
         vm.uploadFile = function() {
             vm.showImportError = false;
@@ -458,11 +458,16 @@ angular.module('mainApp.create.csvImport', [
 
                     setTimeout(function() {
                         $state.go('home.models.import.columns', { csvFileName: fileName });
-                    }, 1000);
+                    }, 1500);
                 } else {
                     vm.percent = 0;
                     vm.percentage = '';
-                    vm.message = 'Transfer aborted.';
+                    vm.message = 'Transfer aborted';
+
+                    setTimeout(function() {
+                        vm.message = 'Choose a CSV file';
+                    }, 1500);
+
                     console.log('# Upload Aborted', result);
 
                     var errorCode = result.errorCode || 'LEDP_ERR';
