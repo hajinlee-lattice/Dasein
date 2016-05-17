@@ -36,6 +36,10 @@ angular.module('mainApp.create.csvImport', [
             formData.append('modelId', params.modelId);
         }
         
+        if (params.description) {
+            formData.append('description', params.description);
+        }
+        
         if (params.displayName) {
             var name = params.displayName.replace('C:\\fakepath\\','');
             formData.append('displayName', name);
@@ -77,41 +81,62 @@ angular.module('mainApp.create.csvImport', [
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
         }
 
-        xhr.setRequestHeader("ServiceErrorMethod", (options.ServiceErrorMethod || 'modal|home.models'));
+        xhr.setRequestHeader("ErrorDisplayMethod", (options.ErrorDisplayMethod || 'banner'));
         xhr.setRequestHeader("Content-Encoding", "gzip");
 
+        csvImportStore.Set('cancelXHR', xhr, true);
+
         if (params.compressed) {
-            var FR = new FileReader();
-
-            FR.onload = function(){
-                console.log('filereader onload');
-                var convertedData = new Uint8Array(FR.result);
-
-                // Zipping Uint8Array to Uint8Array
-                var zippedResult = pako.gzip(convertedData, { to : "Uint8Array" });
-
-                // Need to convert back Uint8Array to ArrayBuffer for blob
-                var convertedZipped = zippedResult.buffer;
-
-                var arrayBlob = new Array(1);
-                arrayBlob[0] = convertedZipped;
+            this.gzipFile(options.file).then(function(result) {
+                var zipped = result.data,
+                    array = new Array(zipped),
+                    blob = new Blob(array);
 
                 // Creating a blob file with array of ArrayBuffer
-                var oMyBlob = new Blob(arrayBlob); // the blob (we need to set file.type if not it defaults to application/octet-stream since it's a gzip, up to you)
-                formData.append('file', oMyBlob);
+                formData.append('file', blob);
+                formData.append('compressed', params.compressed);
+
                 xhr.send(formData);
-                console.log('filereader onload send', formData, name || params.displayName);
-            };
-
-            FR.readAsArrayBuffer(options.file);
-
-            formData.append('compressed', params.compressed);
+            });
         } else {
             formData.append('file', options.file);
             xhr.send(formData);
         }
+        
+        return deferred.promise;
+    };
 
-        csvImportStore.Set('cancelXHR', xhr, true);
+    this.gzipFile = function(file) {
+        var deferred = $q.defer(),
+            FR = new FileReader();
+
+        FR.onload = function() {
+            var convertedData = new Uint8Array(FR.result);
+
+            // Workers must exist in external files.  This fakes that.
+            var blob = new Blob([
+                "onmessage = function(e) {" +
+                "   importScripts(e.data.url + '/lib/js/pako_deflate.min.js');" +
+                "   postMessage(pako.gzip(e.data.file, { to : 'Uint8Array' }));" +
+                "}"
+            ]);
+
+            // Obtain a blob URL reference to our fake worker 'file'.
+            var blobURL = window.URL.createObjectURL(blob);
+            var worker = new Worker(blobURL);
+
+            worker.onmessage = function(e) {
+                deferred.resolve(e);
+            };
+
+            // pass the file and absolute URL to the worker
+            worker.postMessage(
+                { url: document.location.origin, file: convertedData }, 
+                [ convertedData.buffer ]
+            );
+        };
+
+        FR.readAsArrayBuffer(file);
 
         return deferred.promise;
     };
@@ -294,7 +319,45 @@ angular.module('mainApp.create.csvImport', [
             var modelSetter = model.assign;
 
             element.bind('change', function(){
+                scope.vm.cancelClicked();
+
+                var input = this;
+                
                 scope.$apply(function(){
+                    var fileName = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+                        ? input.value
+                        : input.value.substring(12);
+
+                    scope.vm.csvFileDisplayName = fileName;
+
+                    if (!scope.vm.modelDisplayName) {
+                        var date = new Date(),
+                            day = date.getDate(),
+                            year = date.getFullYear(),
+                            month = (date.getMonth() + 1),
+                            seconds = Math.floor(date / 1000),
+                            minutes = Math.floor(seconds / 60),
+                            hours = Math.floor(minutes / 60),
+                            seconds = seconds % 60,
+                            minutes = minutes % 60,
+                            hours = hours % 24,
+                            month = (month < 10 ? '0' + month : month),
+                            day = (day < 10 ? '0' + day : day),
+                            minutes = (minutes < 10 ? '0' + minutes : minutes),
+                            timestamp = year +''+ month +''+ day +'-'+ hours +''+ minutes,
+                            displayName = fileName.replace('.csv','');
+
+                        if (scope.vm.modelDisplayName.indexOf(displayName) < 0) {
+                            scope.vm.modelDisplayName = timestamp + '_' + displayName;
+                        }
+
+                        $('#modelDisplayName').focus();
+                        
+                        setTimeout(function() {
+                            $('#modelDisplayName').select();
+                        }, 1);
+                    }
+
                     modelSetter(scope, element[0].files[0]);
                     ngModel.$setViewValue(element.val());
                     ngModel.$render();
@@ -304,43 +367,61 @@ angular.module('mainApp.create.csvImport', [
     };
 }])
 .controller('csvImportController', [
-    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'StringUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
-    function($scope, $rootScope, ModelService, ResourceUtility, StringUtility, csvImportService, csvImportStore, $state, $q) {
-        $scope.showImportError = false;
-        $scope.importErrorMsg = "";
-        $scope.importing = false;
-        $scope.showImportSuccess = false;
-        $scope.ResourceUtility = ResourceUtility;
-        $scope.accountLeadCheck = true;
+    '$scope', 'ModelService', 'ResourceUtility', 'StringUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
+    function($scope, ModelService, ResourceUtility, StringUtility, csvImportService, csvImportStore, $state, $q) {
+        var vm = this;
 
-        $scope.uploadFile = function() {
-            $scope.showImportError = false;
-            $scope.importErrorMsg = "";
-            $scope.importing = true;
+        vm.uploading = false;
+        vm.uploaded = false;
+        vm.compressed = true;
+        vm.showImportError = false;
+        vm.showImportSuccess = false;
+        vm.accountLeadCheck = true;
+        vm.ResourceUtility = ResourceUtility;
+        vm.csvFileDisplayName = 'Choose File';
+        vm.modelDisplayName = '';
+        vm.importErrorMsg = '';
+        vm.modelDescription = '';
+        vm.message = '';
 
-            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+        vm.uploadFile = function() {
+            vm.showImportError = false;
+            vm.importErrorMsg = "";
+            vm.uploading = true;
+            vm.percent = 0;
+            vm.message = 'Preparing file...'
+
+            var fileType = vm.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+                modelName = vm.modelDisplayName = vm.modelDisplayName || vm.csvFileName,
                 startTime = new Date();
             
             this.cancelDeferred = cancelDeferred = $q.defer();
-
             csvImportService.Upload({
-                file: $scope.csvFile, 
+                file: vm.csvFile, 
                 url: '/pls/models/fileuploads/unnamed',
                 params: {
                     schema: fileType,
-                    displayName: $scope.csvFileName,
-                    compressed: true
+                    displayName: vm.csvFileName,
+                    description: vm.modelDescription,
+                    compressed: vm.compressed
                 },
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {
                         xhr.abort();
                         $('div.loader').css({'display':'none'});
 
-                        html = 'ERROR: Over file size limit.  File must be below 486MB';
+                        $('#fileUploadCancelBtn').html('ERROR: Over file size limit.  File must be below 486MB');
                     } else {
-                        var done = e.loaded / 1024,
+                        var format = function(num, type) {
+                                if (num > 0) {
+                                    return num + ' ' + (num == 1 ? type : type+'s') + ' ';
+                                } else {
+                                    return '';
+                                }
+                            },
+                            done = e.loaded / 1024,
                             total = e.total / 1024,
-                            percent = Math.round(done / total * 100),
+                            percent = vm.percent = Math.round(done / total * 100),
                             currentTime = new Date(),
                             seconds = Math.floor((currentTime - startTime) / 1000),
                             minutes = Math.floor(seconds / 60),
@@ -349,56 +430,60 @@ angular.module('mainApp.create.csvImport', [
                             seconds = seconds % 60,
                             minutes = minutes % 60,
                             hours = hours % 24,
-                            seconds = (seconds < 10 ? '0' + seconds : seconds),
-                            minutes = (minutes < 10 ? '0' + minutes : minutes),
                             r = Math.round;
 
-                        if (percent < 100) {
-                            var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
-                                        '<div style="width:' + percent + '%;height:100%;background:lightgreen;"></div></div>';
-                        } else {
-                            var html =  'Processing...';
+                        if (vm.uploading) {
+                            vm.message = format(hours, 'hour') + format(minutes, 'minute') + format(seconds, 'second');
+                            vm.percentage = percent;
+                            $scope.$apply();
                         }
                     }
-
-                    $('#file_progress').html(html);
                 }
             }).then(function(result) {
+                vm.uploading = false;
+
                 if (result.Success && result.Result) {
                     var fileName = result.Result.name,
                         metaData = result.Result,
-                        displayName = $scope.modelDisplayName,
-                        modelName = StringUtility.SubstituteAllSpecialCharsWithDashes($scope.modelDisplayName);
+                        displayName = vm.modelDisplayName,
+                        modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.modelDisplayName);
 
+                    vm.percent = 0;
+                    vm.uploaded = true;
+                    vm.message = 'Done.';
                     metaData.modelName = modelName;
                     metaData.displayName = displayName;
 
                     csvImportStore.Set(fileName, metaData);
 
-                    $state.go('home.models.import.columns', { csvFileName: fileName })
+                    setTimeout(function() {
+                        $state.go('home.models.import.columns', { csvFileName: fileName });
+                    }, 1000);
                 } else {
-                    console.log('# Upload Error', result);
-                    $('div.loader').css({'display':'none'});
+                    vm.percent = 0;
+                    vm.percentage = '';
+                    vm.message = 'Transfer aborted.';
+                    console.log('# Upload Aborted', result);
 
                     var errorCode = result.errorCode || 'LEDP_ERR';
                     var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
-
-                    html = '<span style="display:block;margin:4em auto 0.5em;max-width:27em;">' + errorMsg + '</span><span style="margin-bottom:3em;display:block;font-size:8pt;color:#666;">' + errorCode + '</span>';
-                    $('#file_progress').html(html);
                 }
             });
 
-            $('#mainSummaryView .summary>h1').html('Uploading File');
-            $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
-
-            ShowSpinner('<div><h6 id="file_progress">Compressing...<br>This may take a moment.</h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
-
-            $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
+            $('#fileUploadCancelBtn').on('click', vm.cancelClicked.bind(this));
         };
 
-        $scope.cancelClicked = function() {
-            csvImportStore.Get('cancelXHR', true).abort();
-            $state.go('home.models');
+        vm.cancelClicked = function() {
+            vm.uploading = false;
+            vm.uploaded = false;
+            vm.percentage = '';
+            vm.percent = 0;
+            vm.message = '';
+            var xhr = csvImportStore.Get('cancelXHR', true);
+            
+            if (xhr) {
+                xhr.abort();
+            }
         };
     }
 ]);

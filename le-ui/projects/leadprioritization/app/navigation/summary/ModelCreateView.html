@@ -1,5 +1,11 @@
 <div class="summary blue-fire create-model-summary">
-	<div class="button angled-button active"><span>Settings</span></div>
-	<div class="button angled-button"><span>Field Mapping</span></div>
-	<div class="button angled-button"><span>Build Model</span></duv>
+	<div class="button angled-button" ui-sref-active-eq="active">
+        <a ui-sref="home.models.import" style="pointer-events:none"><span>Settings</span></a>
+    </div>
+	<div class="button angled-button" ui-sref-active="active">
+        <a ui-sref="home.models.import.columns" style="pointer-events:none"><span>Field Mapping</span></a>
+    </div>
+	<div class="button angled-button" ui-sref-active="active">
+        <a ui-sref="home.jobs.import.ready" style="pointer-events:none"><span>Build Model</span></a>
+    </div>
 </div>

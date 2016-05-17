@@ -5,14 +5,14 @@ angular
 .factory('ServiceErrorInterceptor', function ($q, $injector) {
     return {
         response: function(response) {
-            //console.log('response', response.status, response);
+            console.log('response', response.status, response);
             var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
             ServiceErrorUtility.check(response);
 
             return response || $q.when(response);
         },
         responseError: function(rejection) {
-            //console.log('responseError', rejection.status, rejection);
+            console.log('responseError', rejection.status, rejection);
             var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
             ServiceErrorUtility.check(rejection);
 
@@ -27,11 +27,11 @@ angular
     this.check = function (response) {
         if (response && response.data && (response.data.errorCode || response.data.errorMsg)) {
             var config = response.config || { headers: {} },
-                params = (config.headers.ErrorDisplayMethod || 'modal').split('|'),
+                params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
                 method = params[0],
                 state = params[1] || null; // state or elementQuery
                 stateParams = params[2] || null;
-
+console.log(params, method, state, stateParams, response)
             switch (method) {
                 case 'none': break;
                 case 'popup': this.showModal(response, false, state, stateParams); break;

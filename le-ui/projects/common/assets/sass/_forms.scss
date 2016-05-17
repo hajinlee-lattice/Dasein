@@ -754,9 +754,45 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
     display: block;
   }
   & > .form-control {
-    width: 55%;
-    height: 43px;
-    display: inline-block;
+    color: #888;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 3em;
+    height: 2.4em;
+    position: relative;
+    margin: 5px 0;
+
+    span {
+      display: block;
+      margin-top: 2px;
+      position: absolute;
+      right: 2em;
+      left: 0.4em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #csvFileProgressBar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+ 
+    i {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 2.1em;
+      padding: 0.6em;
+    }
+    i.fa.fa-close {
+      color: #f16a22;
+    } 
+    i.fa.fa-check {
+      color: darkolivegreen;
+    } 
   }
   div {
       position: relative;
@@ -770,8 +806,8 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
         bottom: 0;
         margin: 0;
         padding: 0;
-        width: 140px;
-        height: 42px;
+        width: 100%;
+        /*height: 42px;*/
         font-size: 20px;
         cursor: pointer;
         opacity: 0;

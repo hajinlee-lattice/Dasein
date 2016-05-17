@@ -127,13 +127,7 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_IMPORT_MODEL_CSV_COLUMNS';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
                 },
                 "main@": {
                     controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
