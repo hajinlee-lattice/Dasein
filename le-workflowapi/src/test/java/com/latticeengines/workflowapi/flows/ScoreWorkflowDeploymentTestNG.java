@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflow;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
@@ -114,7 +115,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
 
     private void score(String modelId, String tableToScore) throws Exception {
         ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
-                tableToScore);
+                tableToScore, TransformationGroup.STANDARD);
         WorkflowExecutionId workflowId = workflowService.start(scoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

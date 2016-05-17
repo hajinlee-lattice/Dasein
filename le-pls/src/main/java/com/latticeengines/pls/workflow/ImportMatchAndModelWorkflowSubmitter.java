@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
@@ -39,7 +40,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls.modeling.validation.min.eventrows:50}")
     private long minPositiveEvents;
 
-    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
+    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters,
+            TransformationGroup transformGroup) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
@@ -84,14 +86,16 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .inputProperties(inputProperties) //
                 .minDedupedRows(minDedupedRows) //
                 .minPositiveEvents(minPositiveEvents) //
-                .transformGroup(getTransformGroupFromZK()) //
+                .transformGroup(transformGroup) //
                 .build();
         return configuration;
     }
 
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
-        ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
+
+        TransformationGroup transformGroup = getTransformGroupFromZK();
+        ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters, transformGroup);
 
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());

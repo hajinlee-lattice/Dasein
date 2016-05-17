@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
@@ -108,9 +109,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         }
     }
 
-    protected void model(ModelingParameters parameters) throws Exception {
+    protected void model(ModelingParameters parameters, TransformationGroup transformGroup) throws Exception {
         ImportMatchAndModelWorkflowConfiguration configuration = importMatchAndModelWorkflowSubmitter
-                .generateConfiguration(parameters);
+                .generateConfiguration(parameters, transformGroup);
         WorkflowExecutionId workflowId = workflowService.start(importMatchAndModelWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

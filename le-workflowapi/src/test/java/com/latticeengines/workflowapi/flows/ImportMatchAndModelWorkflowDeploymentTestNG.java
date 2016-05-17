@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
@@ -32,7 +33,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         ModelingParameters params = new ModelingParameters();
         params.setFilename(sourceFile.getName());
         params.setName("testWorkflowAccount");
-        model(params);
+        model(params, TransformationGroup.STANDARD);
         String summary = getModelSummary(params.getName());
         JsonNode json = JsonUtils.deserialize(summary, JsonNode.class);
         JsonNode percentiles = json.get("PercentileBuckets");
@@ -45,7 +46,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         ModelingParameters params = new ModelingParameters();
         params.setFilename(sourceFile.getName());
         params.setName("testWorkflowLead");
-        model(params);
+        model(params, TransformationGroup.STANDARD);
     }
 
 }

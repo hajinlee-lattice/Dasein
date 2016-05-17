@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
@@ -62,7 +63,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
-        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName());
+        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(), getTransformGroupFromZK());
 
         log.info(String
                 .format("Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
@@ -73,7 +74,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ImportMatchAndScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
-            String sourceDisplayName) {
+            String sourceDisplayName, TransformationGroup transformGroup) {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
@@ -99,7 +100,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
-                .transformGroup(getTransformGroupFromZK()) //
+                .transformGroup(transformGroup) //
                 .build();
 
         return importMatchAndScoreWorkflowConfig;

@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
@@ -36,12 +37,12 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
-        score(summary.getId(), sourceFile.getName());
+        score(summary.getId(), sourceFile.getName(), TransformationGroup.STANDARD);
     }
 
-    private void score(String modelId, String tableToScore) throws Exception {
-        ImportMatchAndScoreWorkflowConfiguration configuration = importMatchAndScoreWorkflowSubmitter.generateConfiguration(
-                modelId, sourceFile, "Testing Data");
+    private void score(String modelId, String tableToScore, TransformationGroup transformGroup) throws Exception {
+        ImportMatchAndScoreWorkflowConfiguration configuration = importMatchAndScoreWorkflowSubmitter
+                .generateConfiguration(modelId, sourceFile, "Testing Data", transformGroup);
         WorkflowExecutionId workflowId = workflowService.start(importMatchAndScoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

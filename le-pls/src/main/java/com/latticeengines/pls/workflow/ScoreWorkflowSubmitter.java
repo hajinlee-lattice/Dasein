@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -40,7 +41,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format(
                 "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
                 tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName);
+        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName, getTransformGroupFromZK());
 
         if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
@@ -54,7 +55,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
-            String sourceDisplayName) {
+            String sourceDisplayName, TransformationGroup transformGroup) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
@@ -75,7 +76,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
-                .transformGroup(getTransformGroupFromZK()) //
+                .transformGroup(transformGroup) //
                 .build();
     }
 }
