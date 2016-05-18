@@ -15,4 +15,6 @@ public interface ColumnSelectionService {
     Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined);
 
     Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined);
+
+    String getCurrentVersion(ColumnSelection.Predefined predefined);
 }

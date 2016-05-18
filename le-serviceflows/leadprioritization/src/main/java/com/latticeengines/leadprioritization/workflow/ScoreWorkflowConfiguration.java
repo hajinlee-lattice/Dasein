@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
@@ -122,6 +123,30 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder transformGroup(TransformationGroup transformGroup) {
             addStandardAttributes.setTransformationGroup(transformGroup);
+            return this;
+        }
+
+        /**
+         * You can provide a full column selection object or the name of a predefined selection.
+         * When both are present, predefined one will be used.
+         * @param customizedColumnSelection
+         * @return
+         */
+        public Builder columnSelection(ColumnSelection customizedColumnSelection) {
+            match.setCustomizedColumnSelection(customizedColumnSelection);
+            return this;
+        }
+
+        /**
+         * You can provide a full column selection object or the name of a predefined selection.
+         * When both are present, predefined one will be used.
+         * If selectionVersion is empty, will use current version.
+         * @param predefinedColumnSelection
+         * @return
+         */
+        public Builder columnSelection(ColumnSelection.Predefined predefinedColumnSelection, String selectionVersion) {
+            match.setPredefinedColumnSelection(predefinedColumnSelection);
+            match.setPredefinedSelectionVersion(selectionVersion);
             return this;
         }
 

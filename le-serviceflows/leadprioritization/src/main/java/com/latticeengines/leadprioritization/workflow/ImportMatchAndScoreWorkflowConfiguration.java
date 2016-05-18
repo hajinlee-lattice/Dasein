@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
@@ -87,6 +88,16 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder matchDestTables(String destTables) {
             scoreWorkflowConfigurationBuilder.matchDestTables(destTables);
+            return this;
+        }
+
+        public Builder matchColumnSelection(ColumnSelection customizedColumnSelection) {
+            scoreWorkflowConfigurationBuilder.columnSelection(customizedColumnSelection);
+            return this;
+        }
+
+        public Builder matchColumnSelection(ColumnSelection.Predefined predefinedColumnSelection, String selectionVersion) {
+            scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 

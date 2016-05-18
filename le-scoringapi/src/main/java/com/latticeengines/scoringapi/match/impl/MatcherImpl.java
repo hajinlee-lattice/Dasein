@@ -57,6 +57,8 @@ public class MatcherImpl implements Matcher {
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         matchInput.setKeyMap(keyMap);
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+        // the version here should be read from model
+        matchInput.setPredefinedVersion("1.0");
         matchInput.setTenant(new Tenant(space.toString()));
         List<String> fields = new ArrayList<>();
         List<List<Object>> data = new ArrayList<>();

@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
@@ -40,6 +41,11 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull
     private String inputTableName;
+
+    private ColumnSelection.Predefined predefinedColumnSelection;
+    private String predefinedSelectionVersion;
+
+    private ColumnSelection customizedColumnSelection;
 
     private String matchQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
 
@@ -141,5 +147,35 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("match_queue")
     public void setMatchQueue(String matchQueue) {
         this.matchQueue = matchQueue;
+    }
+
+    @JsonProperty("predefined_col_selection")
+    public ColumnSelection.Predefined getPredefinedColumnSelection() {
+        return predefinedColumnSelection;
+    }
+
+    @JsonProperty("predefined_col_selection")
+    public void setPredefinedColumnSelection(ColumnSelection.Predefined predefinedColumnSelection) {
+        this.predefinedColumnSelection = predefinedColumnSelection;
+    }
+
+    @JsonProperty("predefined_selection_version")
+    public String getPredefinedSelectionVersion() {
+        return predefinedSelectionVersion;
+    }
+
+    @JsonProperty("predefined_selection_version")
+    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
+        this.predefinedSelectionVersion = predefinedSelectionVersion;
+    }
+
+    @JsonProperty("customized_col_selection")
+    public ColumnSelection getCustomizedColumnSelection() {
+        return customizedColumnSelection;
+    }
+
+    @JsonProperty("customized_col_selection")
+    public void setCustomizedColumnSelection(ColumnSelection customizedColumnSelection) {
+        this.customizedColumnSelection = customizedColumnSelection;
     }
 }

@@ -9,7 +9,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
@@ -57,24 +56,38 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     private void match(Table preMatchEventTable) {
         MatchInput input = prepareMatchInput(preMatchEventTable);
         matchCommand = matchProxy.matchBulk(input, "");
-        waitForMatchCommand();    }
+        waitForMatchCommand();
+    }
 
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
         MatchInput matchInput = new MatchInput();
         matchInput.setYarnQueue(getConfiguration().getMatchQueue());
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+
+        if (getConfiguration().getCustomizedColumnSelection() == null
+                && getConfiguration().getPredefinedColumnSelection() == null) {
+            throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
+        }
+
+        if (getConfiguration().getPredefinedColumnSelection() != null) {
+            matchInput.setPredefinedSelection(getConfiguration().getPredefinedColumnSelection());
+            matchInput.setPredefinedVersion(getConfiguration().getPredefinedSelectionVersion());
+            log.info("Using predefined column selection " + getConfiguration().getPredefinedColumnSelection()
+                    + " at version " + getConfiguration().getPredefinedSelectionVersion());
+        } else {
+            matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
+        }
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         switch (configuration.getMatchJoinType()) {
-            case INNER_JOIN:
-                matchInput.setReturnUnmatched(false);
-                break;
-            case OUTER_JOIN:
-                matchInput.setReturnUnmatched(true);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown join type " + configuration.getMatchJoinType());
+        case INNER_JOIN:
+            matchInput.setReturnUnmatched(false);
+            break;
+        case OUTER_JOIN:
+            matchInput.setReturnUnmatched(true);
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown join type " + configuration.getMatchJoinType());
         }
 
         String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);

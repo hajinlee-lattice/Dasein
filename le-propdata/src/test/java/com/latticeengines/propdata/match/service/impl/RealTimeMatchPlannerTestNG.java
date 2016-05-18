@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +29,9 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
     @Autowired
     @Qualifier("realTimeMatchPlanner")
     MatchPlanner matchPlanner;
+
+    @Autowired
+    private ColumnSelectionService columnSelectionService;
 
     @Test(groups = "functional")
     public void testPrepareOutput() {
@@ -55,6 +59,8 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
         }
 
         MatchContext context = matchPlanner.plan(input);
+        Assert.assertEquals(context.getInput().getPredefinedVersion(),
+                columnSelectionService.getCurrentVersion(ColumnSelection.Predefined.Model));
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 
         for (InternalOutputRecord record : context.getInternalResults()) {

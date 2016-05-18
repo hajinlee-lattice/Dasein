@@ -43,6 +43,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private MetricService metricService;
 
+    protected void assignColumnSelectionVersion(MatchInput input) {
+        if (input.getPredefinedSelection() != null && StringUtils.isEmpty(input.getPredefinedVersion())) {
+            String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
+            log.info("Assign version " + version + " to column selection " + input.getPredefinedSelection());
+            input.setPredefinedVersion(version);
+        }
+    }
+
     @MatchStep
     protected MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
