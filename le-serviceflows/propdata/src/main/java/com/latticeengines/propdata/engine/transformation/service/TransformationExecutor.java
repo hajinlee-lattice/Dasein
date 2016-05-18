@@ -7,8 +7,6 @@ public interface TransformationExecutor {
 
     TransformationProgress kickOffNewProgress(TransformationProgressEntityMgr transformationProgressEntityMgr);
 
-    void proceedProgress(TransformationProgress progress);
-
     void purgeOldVersions();
 
 }

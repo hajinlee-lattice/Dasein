@@ -27,8 +27,6 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Scope("prototype")
 public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
         implements ApplicationContextAware {
-    private static final String CREATOR = "CREATOR";
-
     private static Log log = LogFactory.getLog(TransformationStepExecution.class);
 
     private TransformationService transformationService;
