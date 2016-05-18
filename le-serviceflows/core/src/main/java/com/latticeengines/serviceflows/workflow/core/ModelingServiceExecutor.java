@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
