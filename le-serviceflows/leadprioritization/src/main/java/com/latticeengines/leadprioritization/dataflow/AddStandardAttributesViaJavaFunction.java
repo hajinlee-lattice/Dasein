@@ -25,7 +25,7 @@ public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilde
         ? eventTable.getSourceAttribute(InterfaceName.Email) //
                 : eventTable.getSourceAttribute(InterfaceName.Website);
 
-        Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformGroup);
+        Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
         TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
 
         for (TransformDefinition definition : definitions) {

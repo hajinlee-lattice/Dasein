@@ -126,8 +126,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder transformGroup(TransformationGroup transformGroup) {
-            scoreWorkflowConfigurationBuilder.transformGroup(transformGroup);
+        public Builder transformationGroup(TransformationGroup transformationGroup) {
+            scoreWorkflowConfigurationBuilder.transformationGroup(transformationGroup);
             return this;
         }
 

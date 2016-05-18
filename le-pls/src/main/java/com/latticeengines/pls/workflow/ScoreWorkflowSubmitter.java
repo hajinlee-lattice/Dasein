@@ -56,7 +56,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
-            String sourceDisplayName, TransformationGroup transformGroup) {
+            String sourceDisplayName, TransformationGroup transformationGroup) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
@@ -78,7 +78,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
-                .transformGroup(transformGroup) //
+                .transformationGroup(transformationGroup) //
                 .build();
     }
 }

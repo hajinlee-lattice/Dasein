@@ -194,8 +194,8 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder transformGroup(TransformationGroup transformGroup) {
-            addStandardAttributes.setTransformationGroup(transformGroup);
+        public Builder transformationGroup(TransformationGroup transformationGroup) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
             return this;
         }
 

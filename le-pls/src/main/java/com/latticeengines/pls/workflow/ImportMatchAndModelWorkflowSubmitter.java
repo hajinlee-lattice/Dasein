@@ -42,7 +42,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     private long minPositiveEvents;
 
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters,
-            TransformationGroup transformGroup) {
+            TransformationGroup transformationGroup) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
@@ -88,7 +88,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .inputProperties(inputProperties) //
                 .minDedupedRows(minDedupedRows) //
                 .minPositiveEvents(minPositiveEvents) //
-                .transformGroup(transformGroup) //
+                .transformationGroup(transformationGroup) //
                 .build();
         return configuration;
     }
@@ -96,8 +96,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
-        TransformationGroup transformGroup = getTransformGroupFromZK();
-        ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters, transformGroup);
+        TransformationGroup transformationGroup = gettransformationGroupFromZK();
+        ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters, transformationGroup);
 
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());

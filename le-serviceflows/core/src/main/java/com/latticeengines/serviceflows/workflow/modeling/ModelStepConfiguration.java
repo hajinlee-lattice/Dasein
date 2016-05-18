@@ -25,6 +25,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String trainingTableName;
 
+    private String transformationGroupName;
+
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
         return modelingServiceHdfsBaseDir;
@@ -85,5 +87,13 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setTrainingTableName(String trainingTableName) {
         this.trainingTableName = trainingTableName;
+    }
+
+    public String getTransformationGroupName() {
+        return transformationGroupName;
+    }
+
+    public void setTransformationGroupName(String transformationGroupName) {
+        this.transformationGroupName = transformationGroupName;
     }
 }

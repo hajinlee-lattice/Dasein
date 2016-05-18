@@ -76,7 +76,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ImportMatchAndScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
-            String sourceDisplayName, TransformationGroup transformGroup) {
+            String sourceDisplayName, TransformationGroup transformationGroup) {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
@@ -103,7 +103,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
-                .transformGroup(transformGroup) //
+                .transformationGroup(transformationGroup) //
                 .build();
 
         return importMatchAndScoreWorkflowConfig;

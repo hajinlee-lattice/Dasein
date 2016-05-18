@@ -178,8 +178,6 @@ public class ModelingServiceExecutor {
         }
         if (builder.getTransformationGroupName() != null) {
             props.add("Transformation_Group_Name=" + builder.getTransformationGroupName());
-        } else {
-            props.add("Transformation_Group_Name=" + TransformationGroup.STANDARD.getName());
         }
         if (builder.getPredefinedColumnSelection() != null) {
             props.add("Predefined_ColumnSelection_Name=" + builder.getPredefinedColumnSelection().getName());

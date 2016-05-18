@@ -21,8 +21,8 @@ public class AddStandardAttributesViaJavaFunction extends RunDataFlow<AddStandar
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
-        TransformationGroup transformGroup = configuration.getTransformationGroup();
-        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName(), transformGroup));
+        TransformationGroup transformationGroup = configuration.getTransformationGroup();
+        configuration.setDataFlowParams(new AddStandardAttributesParameters(eventTable.getName(), transformationGroup));
     }
 
     @Override

@@ -54,15 +54,15 @@ public abstract class WorkflowSubmitter {
         return status != null && !Job.TERMINAL_JOB_STATUS.contains(status);
     }
 
-    public TransformationGroup getTransformGroupFromZK() {
-        TransformationGroup transformGroup = TransformationGroup.STANDARD;
+    public TransformationGroup gettransformationGroupFromZK() {
+        TransformationGroup transformationGroup = TransformationGroup.STANDARD;
 
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
                 .toString());
         if (flags.containsKey(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName()))) {
-            transformGroup = TransformationGroup.ALL;
+            transformationGroup = TransformationGroup.ALL;
         }
-        return transformGroup;
+        return transformationGroup;
     }
 }

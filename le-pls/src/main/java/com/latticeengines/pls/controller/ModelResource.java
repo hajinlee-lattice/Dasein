@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -68,10 +70,15 @@ public class ModelResource {
                 parameters.getAttributes());
 
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
+        String transformationGroupName = modelSummary.getTransformationGroupName();
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { parameters.getSourceModelSummaryId() });
+        }
 
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(), parameters.getDisplayName(),
-                        modelSummary.getSourceSchemaInterpretation(), modelSummary.getTrainingTableName()).toString());
+                        modelSummary.getSourceSchemaInterpretation(), modelSummary.getTrainingTableName(),
+                        transformationGroupName).toString());
     }
 
 }

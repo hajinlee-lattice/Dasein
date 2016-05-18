@@ -1,7 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
 import java.util.Map;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -72,6 +71,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
+        public Builder transformationGroupName(String transformationGroupName) {
+            model.setTransformationGroupName(transformationGroupName);
             return this;
         }
 

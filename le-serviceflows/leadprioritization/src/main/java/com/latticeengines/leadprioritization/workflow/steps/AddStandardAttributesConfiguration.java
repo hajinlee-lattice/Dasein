@@ -5,7 +5,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 
 public class AddStandardAttributesConfiguration extends DataFlowStepConfiguration {
 
-    private TransformationGroup transformGroup;
+    private TransformationGroup transformationGroup;
 
     public AddStandardAttributesConfiguration() {
         setPurgeSources(true);
@@ -14,10 +14,10 @@ public class AddStandardAttributesConfiguration extends DataFlowStepConfiguratio
     }
 
     public TransformationGroup getTransformationGroup() {
-        return transformGroup;
+        return transformationGroup;
     }
 
-    public void setTransformationGroup(TransformationGroup transformGroup) {
-        this.transformGroup = transformGroup;
+    public void setTransformationGroup(TransformationGroup transformationGroup) {
+        this.transformationGroup = transformationGroup;
     }
 }

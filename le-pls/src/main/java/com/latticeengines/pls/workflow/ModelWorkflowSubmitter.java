@@ -20,7 +20,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
     public ApplicationId submit(String eventTableName, String modelName, String displayName,
-            String sourceSchemaInterpretation, String trainingTableName) {
+            String sourceSchemaInterpretation, String trainingTableName, String transformationGroupName) {
         Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), eventTableName);
 
         if (eventTable == null) {
@@ -42,6 +42,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .inputProperties(inputProperties) //
                 .trainingTableName(trainingTableName) //
+                .transformationGroupName(transformationGroupName) //
                 .build();
         return workflowJobService.submit(configuration);
     }
