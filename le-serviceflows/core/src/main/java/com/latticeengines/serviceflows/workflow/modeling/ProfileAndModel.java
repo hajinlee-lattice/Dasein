@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
@@ -60,6 +61,14 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         return executionContext.getString(TRANSFORMATION_GROUP_NAME);
     }
 
+    private ColumnSelection.Predefined getPredefinedSelection() {
+        return (ColumnSelection.Predefined) executionContext.get(MATCH_PREDEFINED_SELECTION);
+    }
+
+    private String getPredefinedSelectionVersion() {
+        return executionContext.getString(MATCH_PREDEFINED_SELECTION_VERSION);
+    }
+
     private Map<String, String> profileAndModel(Table eventTable) throws Exception {
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
@@ -94,6 +103,9 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .trainingTableName(getConfiguration().getTrainingTableName()) //
                     .transformationGroupName(getTransformationGroupName()) //
                     .productType(configuration.getProductType());
+            if (getPredefinedSelection() != null) {
+                bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
+            }
             if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");
             }

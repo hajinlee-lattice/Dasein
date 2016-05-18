@@ -318,6 +318,7 @@ public enum LedpCode {
     LEDP_25017("Failed to scan ingestion progress"), //
     LEDP_25018("Could not find schema"), //
     LEDP_25019("Could not find java type for Avro type {0}"), //
+    LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

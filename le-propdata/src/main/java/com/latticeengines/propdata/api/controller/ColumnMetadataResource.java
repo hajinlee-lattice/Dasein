@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +28,9 @@ public class ColumnMetadataResource implements ColumnMetadataInterface {
     @Autowired
     private ColumnMetadataService columnMetadataService;
 
+    @Autowired
+    private ColumnSelectionService columnSelectionService;
+
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
@@ -36,6 +40,18 @@ public class ColumnMetadataResource implements ColumnMetadataInterface {
              return columnMetadataService.fromPredefinedSelection(selectName);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25006, e, new String[]{ selectName.getName() });
+        }
+    }
+
+    @RequestMapping(value = "/predefined/{selectName}/currentversion", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get current version of predefine selection")
+    @Override
+    public String selectionCurrentVersion(@PathVariable ColumnSelection.Predefined selectName) {
+        try {
+            return columnSelectionService.getCurrentVersion(selectName);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25020, e, new String[]{ selectName.getName() });
         }
     }
 

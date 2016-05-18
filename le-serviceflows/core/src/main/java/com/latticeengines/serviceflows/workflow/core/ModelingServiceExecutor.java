@@ -15,6 +15,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
@@ -179,6 +181,12 @@ public class ModelingServiceExecutor {
         } else {
             props.add("Transformation_Group_Name=" + TransformationGroup.STANDARD.getName());
         }
+        if (builder.getPredefinedColumnSelection() != null) {
+            props.add("Predefined_ColumnSelection_Name=" + builder.getPredefinedColumnSelection().getName());
+            props.add("Predefined_ColumnSelection_Version=" + builder.getPredefinedSelectionVersion());
+        } else if (builder.getCustomizedColumnSelection() != null) {
+            props.add("Customized_ColumnSelection=" + JsonUtils.serialize(builder.getCustomizedColumnSelection()));
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
 
@@ -278,6 +286,9 @@ public class ModelingServiceExecutor {
         private String trainingTableName;
         private String productType;
         private String transformationGroupName;
+        private ColumnSelection.Predefined predefinedColumnSelection;
+        private String predefinedSelectionVersion;
+        private ColumnSelection customizedColumnSelection;
 
         private String loadSubmissionUrl = "/rest/load";
         private String modelSubmissionUrl = "/rest/submit";
@@ -471,6 +482,12 @@ public class ModelingServiceExecutor {
 
         public Builder jobProxy(JobProxy jobProxy) {
             this.setJobProxy(jobProxy);
+            return this;
+        }
+
+        public Builder predefinedColumnSelection(ColumnSelection.Predefined predefined, String version) {
+            this.setPredefinedColumnSelection(predefined);
+            this.setPredefinedSelectionVersion(version);
             return this;
         }
 
@@ -747,6 +764,30 @@ public class ModelingServiceExecutor {
                 productType = ProductType.LP.name();
             }
             return productType;
+        }
+
+        public ColumnSelection getCustomizedColumnSelection() {
+            return customizedColumnSelection;
+        }
+
+        public void setCustomizedColumnSelection(ColumnSelection customizedColumnSelection) {
+            this.customizedColumnSelection = customizedColumnSelection;
+        }
+
+        public ColumnSelection.Predefined getPredefinedColumnSelection() {
+            return predefinedColumnSelection;
+        }
+
+        public void setPredefinedColumnSelection(ColumnSelection.Predefined predefinedColumnSelection) {
+            this.predefinedColumnSelection = predefinedColumnSelection;
+        }
+
+        public String getPredefinedSelectionVersion() {
+            return predefinedSelectionVersion;
+        }
+
+        public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
+            this.predefinedSelectionVersion = predefinedSelectionVersion;
         }
 
         public void setModelProxy(ModelProxy modelProxy) {

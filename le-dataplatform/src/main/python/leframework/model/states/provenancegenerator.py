@@ -1,8 +1,8 @@
-from collections import OrderedDict
 import logging
-
+from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.state import State
+
 
 class ProvenanceGenerator(State):
 
@@ -30,6 +30,11 @@ class ProvenanceGenerator(State):
                 self.result["TrainingTableName"] = properties["Training_Table_Name"]
             if "Transformation_Group_Name" in properties.keys():
                 self.result["Transformation_Group_Name"] = properties["Transformation_Group_Name"]
+            if "Predefined_ColumnSelection_Name" in properties.keys():
+                self.result["Predefined_ColumnSelection_Name"] = properties["Predefined_ColumnSelection_Name"]
+                self.result["Predefined_ColumnSelection_Version"] = properties["Predefined_ColumnSelection_Version"]
+            elif "Customized_ColumnSelection" in properties.keys():
+                self.result["Customized_ColumnSelection"] = properties["Customized_ColumnSelection"]
         else:
             self.logger.error("Provenance property is null.")
             self.result = OrderedDict()

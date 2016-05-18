@@ -7,4 +7,5 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public interface ColumnMetadataInterface {
     List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName);
+    String selectionCurrentVersion(ColumnSelection.Predefined selectName);
 }

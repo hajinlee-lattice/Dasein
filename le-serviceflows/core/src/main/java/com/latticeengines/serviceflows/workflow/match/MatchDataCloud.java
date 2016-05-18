@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.match;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
@@ -18,6 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -32,6 +35,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     private MatchCommand matchCommand;
 
@@ -68,13 +74,25 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
         }
 
-        if (getConfiguration().getPredefinedColumnSelection() != null) {
-            matchInput.setPredefinedSelection(getConfiguration().getPredefinedColumnSelection());
-            matchInput.setPredefinedVersion(getConfiguration().getPredefinedSelectionVersion());
-            log.info("Using predefined column selection " + getConfiguration().getPredefinedColumnSelection()
-                    + " at version " + getConfiguration().getPredefinedSelectionVersion());
+        ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
+        if (predefined != null) {
+            matchInput.setPredefinedSelection(predefined);
+            String version = getConfiguration().getPredefinedSelectionVersion();
+            if (StringUtils.isEmpty(version)) {
+                version = columnMetadataProxy.selectionCurrentVersion(predefined);
+                getConfiguration().setPredefinedSelectionVersion(version);
+            }
+            matchInput.setPredefinedVersion(version);
+
+            executionContext.put(MATCH_PREDEFINED_SELECTION, predefined);
+            executionContext.putString(MATCH_PREDEFINED_SELECTION_VERSION, version);
+
+            log.info("Using predefined column selection " + predefined + " at version " + version);
         } else {
             matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
+
+            executionContext.put(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
+
         }
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
@@ -100,7 +118,11 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private void waitForMatchCommand() {
         String rootUid = matchCommand.getRootOperationUid();
-        log.info(String.format("Waiting for match command %s to complete", rootUid));
+        String appId = matchCommand.getApplicationId();
+        if (StringUtils.isEmpty(appId)) {
+            appId = "null";
+        }
+        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete", rootUid, appId));
 
         MatchStatus status = null;
         do {
@@ -109,7 +131,11 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             if (status == null) {
                 throw new LedpException(LedpCode.LEDP_28024, new String[] { rootUid });
             }
-            String logMsg = "Match Status = " + status;
+            appId = matchCommand.getApplicationId();
+            if (StringUtils.isEmpty(appId)) {
+                appId = "null";
+            }
+            String logMsg = "[ApplicationId=" + appId + "] Match Status = " + status;
             if (MatchStatus.MATCHING.equals(status)) {
                 Float progress = matchCommand.getProgress();
                 logMsg += String.format(": %.2f %%", progress * 100);

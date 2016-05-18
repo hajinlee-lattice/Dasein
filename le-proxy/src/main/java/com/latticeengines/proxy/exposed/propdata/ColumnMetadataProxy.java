@@ -40,4 +40,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return metadataList;
     }
 
+    @Override
+    public String selectionCurrentVersion(ColumnSelection.Predefined selectName) {
+        String url = constructUrl("/predefined/{selectName}/currentversion", String.valueOf(selectName.name()));
+        return get("selectionCurrentVersion", url, String.class);
+    }
+
 }
