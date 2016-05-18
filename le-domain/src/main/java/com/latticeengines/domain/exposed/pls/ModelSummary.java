@@ -435,7 +435,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @JsonProperty("TransformationGroupName")
-    @Column(name = "TRANSFORMATION_GROUP_NAME", nullable = false)
+    @Column(name = "TRANSFORMATION_GROUP_NAME", nullable = true)
     public String getTransformationGroupName() {
         return transformationGroupName;
     }
