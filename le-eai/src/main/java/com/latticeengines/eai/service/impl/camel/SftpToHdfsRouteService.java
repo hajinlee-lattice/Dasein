@@ -256,6 +256,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         String localTempDir = getTempDirectory();
         File tempFile = new File(localTempDir + File.separator + fileName);
         if (tempFile.exists()) {
+            log.info("Downloading to local file: " + tempFile.getAbsolutePath());
             return tempFile.length();
         } else {
             throw new RuntimeException("Could not find local temp file: " + fileName);
@@ -263,7 +264,9 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
     }
 
     private String getTempDirectory() {
-        return System.getProperty("java.io.tmpdir");
+        // use current directory as it is already set as per
+        // yarn.nodemanager.local-dirs configuration
+        return ".";
     }
 
 }
