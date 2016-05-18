@@ -40,9 +40,9 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
         score(summary.getId(), sourceFile.getName(), TransformationGroup.STANDARD);
     }
 
-    private void score(String modelId, String tableToScore, TransformationGroup transformGroup) throws Exception {
+    private void score(String modelId, String tableToScore, TransformationGroup transformationGroup) throws Exception {
         ImportMatchAndScoreWorkflowConfiguration configuration = importMatchAndScoreWorkflowSubmitter
-                .generateConfiguration(modelId, sourceFile, "Testing Data", transformGroup);
+                .generateConfiguration(modelId, sourceFile, "Testing Data", transformationGroup);
         WorkflowExecutionId workflowId = workflowService.start(importMatchAndScoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

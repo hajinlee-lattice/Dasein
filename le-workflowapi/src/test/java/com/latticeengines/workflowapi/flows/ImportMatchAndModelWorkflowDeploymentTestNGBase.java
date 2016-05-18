@@ -109,9 +109,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         }
     }
 
-    protected void model(ModelingParameters parameters, TransformationGroup transformGroup) throws Exception {
+    protected void model(ModelingParameters parameters, TransformationGroup transformationGroup) throws Exception {
         ImportMatchAndModelWorkflowConfiguration configuration = importMatchAndModelWorkflowSubmitter
-                .generateConfiguration(parameters, transformGroup);
+                .generateConfiguration(parameters, transformationGroup);
         WorkflowExecutionId workflowId = workflowService.start(importMatchAndModelWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);
