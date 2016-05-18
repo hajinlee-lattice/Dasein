@@ -52,7 +52,7 @@ class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
         for cname in self.STD_ACTIVITY_COLS:
             c = q_lp3_modeling.getColumn(cname)
             if c is not None:
-                if c in LP3_ACTIVITY_COLS:
+                if cname in self.LP3_ACTIVITY_COLS:
                     fcnNameOrig = c.getExpression().FcnName()
                     c.setExpression(ExpressionVDBImplFactory.parse(fcnNameOrig+'_1mo'))
                 else:

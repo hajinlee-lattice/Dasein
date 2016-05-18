@@ -157,6 +157,9 @@ class LPMigration_LP3ModelingQuery(StepBase):
         mapTable = 'Map_LeadID_PropDataID'
         colPropDataID = 'MKTO_LeadRecord_PropDataID'
 
+        spec_email = 'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IF"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"), LatticeFunctionIdentifier(ContainerElementName("Email_Domain_IsPublic")), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Cat"), LatticeFunctionExpressionConstant("publicdomain@", DataTypeVarChar(13)), LatticeFunctionIdentifier(ContainerElementName("MKTO_LeadRecord_PropDataID"))), LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("MKTO_LeadRecord")), ContainerElementName("Email"))))'
+        q_pls_modeling.getColumn('Email').setExpression(ExpressionVDBImplFactory.create(spec_email))
+
         self._adjustQueryCommon(conn_mgr, q_pls_modeling, cols)
 
 
