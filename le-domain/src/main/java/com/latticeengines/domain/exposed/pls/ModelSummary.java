@@ -76,6 +76,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String eventTableName;
     private String sourceSchemaInterpretation;
     private String trainingTableName;
+    private String transformationGroupName;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -431,5 +432,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     public void setTrainingTableName(String trainingTableName) {
         this.trainingTableName = trainingTableName;
+    }
+
+    @JsonProperty("TransformationGroupName")
+    @Column(name = "TRANSFORMATION_GROUP_NAME", nullable = false)
+    public String getTransformationGroupName() {
+        return transformationGroupName;
+    }
+
+    @JsonProperty("TransformationGroupName")
+    public void setTransformationGroupName(String transformationGroupName) {
+        this.transformationGroupName = transformationGroupName;
     }
 }

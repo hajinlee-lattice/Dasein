@@ -30,6 +30,7 @@ public class AddStandardAttributesViaJavaFunction extends RunDataFlow<AddStandar
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
+        executionContext.putString(TRANSFORMATION_GROUP_NAME, configuration.getTransformationGroup().getName());
     }
 
 }

@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
@@ -47,7 +48,7 @@ public class ModelingServiceExecutor {
     protected String modelingServiceHostPort;
 
     protected String modelingServiceHdfsBaseDir;
-    
+
     protected JobProxy jobProxy;
 
     protected ModelProxy modelProxy;
@@ -173,6 +174,11 @@ public class ModelingServiceExecutor {
         if (builder.getTrainingTableName() != null) {
             props.add("Training_Table_Name=" + builder.getTrainingTableName());
         }
+        if (builder.getTransformationGroupName() != null) {
+            props.add("Transformation_Group_Name=" + builder.getTransformationGroupName());
+        } else {
+            props.add("Transformation_Group_Name=" + TransformationGroup.STANDARD.getName());
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
 
@@ -212,13 +218,13 @@ public class ModelingServiceExecutor {
         int maxTries = MAX_SECONDS_WAIT_FOR_MODELING;
         int i = 0;
         do {
-            
+
             if (modeling) {
                 status = modelProxy.getJobStatus(appId);
             } else {
                 status = jobProxy.getJobStatus(appId);
             }
-            
+
             Thread.sleep(1000L);
             i++;
 
@@ -271,6 +277,7 @@ public class ModelingServiceExecutor {
         private String sourceSchemaInterpretation;
         private String trainingTableName;
         private String productType;
+        private String transformationGroupName;
 
         private String loadSubmissionUrl = "/rest/load";
         private String modelSubmissionUrl = "/rest/submit";
@@ -280,11 +287,16 @@ public class ModelingServiceExecutor {
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
         private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
-        
+
         private ModelProxy modelProxy;
         private JobProxy jobProxy;
 
         public Builder() {
+        }
+
+        public Builder transformationGroupName(String transformationGroupName) {
+            this.setTransformationGroupName(transformationGroupName);
+            return this;
         }
 
         public Builder dataSourceHost(String host) {
@@ -341,7 +353,7 @@ public class ModelingServiceExecutor {
             this.setProfileExcludeList(profileExcludeList);
             return this;
         }
-        
+
         public Builder featureList(String... featureList) {
             this.setFeatureList(featureList);
             return this;
@@ -376,7 +388,7 @@ public class ModelingServiceExecutor {
             this.setDataCompositionContents(dataCompositionContents);
             return this;
         }
-        
+
         public Builder avroSchema(String avroSchema) {
             this.setSchemaContents(avroSchema);
             return this;
@@ -451,7 +463,7 @@ public class ModelingServiceExecutor {
             this.setProductType(productType);
             return this;
         }
-        
+
         public Builder modelProxy(ModelProxy modelProxy) {
             this.setModelProxy(modelProxy);
             return this;
@@ -557,11 +569,11 @@ public class ModelingServiceExecutor {
         public void setProfileExcludeList(String... profileExcludeList) {
             this.profileExcludeList = profileExcludeList;
         }
-        
+
         public String[] getFeatureList() {
             return featureList;
         }
-        
+
         public void setFeatureList(String... featureList) {
             this.featureList = featureList;
         }
@@ -613,11 +625,11 @@ public class ModelingServiceExecutor {
         public void setDataCompositionContents(String dataCompositionContents) {
             this.dataCompositionContents = dataCompositionContents;
         }
-        
+
         public String getSchemaContents() {
             return schemaContents;
         }
-        
+
         public void setSchemaContents(String schemaContents) {
             this.schemaContents = schemaContents;
         }
@@ -718,10 +730,18 @@ public class ModelingServiceExecutor {
             return sourceSchemaInterpretation;
         }
 
+        public String getTransformationGroupName() {
+            return transformationGroupName;
+        }
+
+        public void setTransformationGroupName(String transformationGroupName) {
+            this.transformationGroupName = transformationGroupName;
+        }
+
         public void setProductType(String productType) {
             this.productType = productType;
         }
-        
+
         public String getProductType() {
             if (productType == null) {
                 productType = ProductType.LP.name();
@@ -732,15 +752,15 @@ public class ModelingServiceExecutor {
         public void setModelProxy(ModelProxy modelProxy) {
             this.modelProxy = modelProxy;
         }
-        
+
         public ModelProxy getModelProxy() {
             return modelProxy;
         }
-        
+
         public void setJobProxy(JobProxy jobProxy) {
             this.jobProxy = jobProxy;
         }
-        
+
         public JobProxy getJobProxy() {
             return jobProxy;
         }

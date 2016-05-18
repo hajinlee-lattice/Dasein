@@ -28,6 +28,8 @@ class ProvenanceGenerator(State):
                 self.result["SourceSchemaInterpretation"] = properties["Source_Schema_Interpretation"]
             if "Training_Table_Name" in properties.keys():
                 self.result["TrainingTableName"] = properties["Training_Table_Name"]
+            if "Transformation_Group_Name" in properties.keys():
+                self.result["Transformation_Group_Name"] = properties["Transformation_Group_Name"]
         else:
             self.logger.error("Provenance property is null.")
             self.result = OrderedDict()

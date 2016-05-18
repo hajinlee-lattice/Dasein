@@ -201,6 +201,7 @@ public enum LedpCode {
     LEDP_18105("Model {0} does not have attribuets in the event tableName."), //
     LEDP_18106("Model {0} does not have schemaInterpretation in the modelsummary."), //
     LEDP_18107("CSV header validations failed:\n {0}"), //
+    LEDP_18108("Could not find transformation group name from model {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

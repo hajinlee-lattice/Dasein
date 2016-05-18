@@ -30,4 +30,12 @@ public enum TransformationGroup {
     public String toString() {
         return this.name;
     }
+
+    public static TransformationGroup fromName(String name) {
+        if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else {
+            throw new IllegalArgumentException("Cannot find a TransformationGroup with name " + name);
+        }
+    }
 }

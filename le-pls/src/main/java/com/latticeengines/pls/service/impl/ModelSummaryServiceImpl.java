@@ -106,4 +106,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         List<Predictor> predictors = summary.getPredictors();
         modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
     }
+
+    @Override
+    public ModelSummary getModelSummaryByModelId(String modelId){
+        return modelSummaryEntityMgr.getByModelId(modelId);
+    }
 }

@@ -13,4 +13,6 @@ public interface ModelSummaryService {
 
     void updatePredictors(String modelId, AttributeMap attrMap);
 
+    ModelSummary getModelSummaryByModelId(String modelId);
+
 }

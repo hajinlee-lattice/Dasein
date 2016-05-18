@@ -63,13 +63,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
     protected static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     protected static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
+    protected static final String TRANSFORMATION_GROUP_NAME = "TRANSFORMATION_GROUP_NAME";
 
     @Autowired
     protected Configuration yarnConfiguration;
-    
+
     @Autowired
     protected ModelProxy modelProxy;
-    
+
     @Autowired
     protected JobProxy jobProxy;
 

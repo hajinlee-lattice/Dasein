@@ -56,6 +56,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         }
     }
 
+    public String getTransformationGroupName() {
+        return executionContext.getString(TRANSFORMATION_GROUP_NAME);
+    }
+
     private Map<String, String> profileAndModel(Table eventTable) throws Exception {
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
@@ -88,6 +92,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .eventTableName(getEventTable().getName()) //
                     .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                     .trainingTableName(getConfiguration().getTrainingTableName()) //
+                    .transformationGroupName(getTransformationGroupName()) //
                     .productType(configuration.getProductType());
             if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @Component("modelSummaryParser")
@@ -136,6 +137,9 @@ public class ModelSummaryParser {
                     eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
             summary.setTrainingTableName(JsonUtils.getOrDefault(eventTableProvenance.get("TrainingTableName"),
                     String.class, ""));
+            summary.setTransformationGroupName(JsonUtils.getOrDefault(
+                    eventTableProvenance.get("TransformationGroupName"), String.class,
+                    TransformationGroup.STANDARD.getName()));
         }
 
         // the Id will be used to find hdfs path, make sure they are in sync.

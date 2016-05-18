@@ -57,7 +57,7 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for modeling: %s", appId));
         JobStatus status = waitForModelingAppId(appId);
-        
+
         // Wait for 30 seconds before retrieving the result directory
         Thread.sleep(30 * 1000L);
         String resultDir = status.getResultDirectory();

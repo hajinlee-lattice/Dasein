@@ -11,15 +11,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
@@ -38,7 +38,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ModelSummaryService modelSummaryService;
 
     @Autowired
     private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
@@ -51,7 +51,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String scoreTrainingData(String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
@@ -60,12 +60,24 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
         }
 
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data").toString();
+        String transformationGroupName = modelSummary.getTransformationGroupName();
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+        }
+
+        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data",
+                TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     @Override
     public String scoreTestingData(String modelId, String fileName) {
-        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName).toString();
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        String transformationGroupName = modelSummary.getTransformationGroupName();
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+        }
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
+                TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     @Override
