@@ -5,17 +5,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
+import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
@@ -40,13 +44,16 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
 
     @Autowired
-    private SqoopSyncJobService propDataJobService;
-
-    @Autowired
     private PropDataMadisonDataFlowService propDataMadisonDataFlowService;
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    private SqoopSyncJobService propDataJobService;
+
+    @Autowired
+    protected SqoopService sqoopService;
 
     @Value("${propdata.madison.datasource.url}")
     private String sourceJdbcUrl;
@@ -150,9 +157,17 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     .setCustomer(getJobName() + "-Progress Id-" + dailyProgress.getPid())
                     .setSplitColumn(splitColumns.split(",")[0])
                     .setNumMappers(numMappers)
-                    .setSync(true)
+                    .setSync(false)
                     .build();
-            propDataJobService.importData(importer);
+
+            ApplicationId appId = sqoopService.importTable(importer);
+            FinalApplicationStatus status =
+                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                throw new IllegalStateException("The final state of " + appId + " is not "
+                        + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+            }
+
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -278,9 +293,15 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .setCustomer(getJobName() + "-schema")
                         .setSplitColumn("DomainID")
                         .setNumMappers(1)
-                        .setSync(true)
+                        .setSync(false)
                         .build();
-                propDataJobService.importData(importer);
+                ApplicationId appId = sqoopService.importTable(importer);
+                FinalApplicationStatus status =
+                        YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+                if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                    throw new IllegalStateException("The final state of " + appId + " is not "
+                            + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+                }
 
                 log.info("Finished getting targetTable's schema file=" + schemaPath);
             }
@@ -391,13 +412,19 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .setQueue(assignedQueue)
                 .setCustomer(getJobName())
                 .setNumMappers(numMappers)
-                .setSync(true)
+                .setSync(false)
                 .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
                 .addHadoopArg("-Dexport.statements.per.transaction=1")
                 .addExtraOption("--batch")
                 .build();
 
-        propDataJobService.exportData(exporter);
+        ApplicationId appId = sqoopService.exportTable(exporter);
+        FinalApplicationStatus status =
+                YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+        if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+            throw new IllegalStateException("The final state of " + appId + " is not "
+                    + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+        }
 
         swapTargetTables(assignedQueue);
     }
@@ -444,7 +471,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         propDataJobService.eval("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
-                + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
+                        + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
                 connectionString);
         propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
@@ -458,13 +485,20 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .setQueue(assignedQueue)
                 .setCustomer(getJobName())
                 .setNumMappers(numMappers)
-                .setSync(true)
+                .setSync(false)
                 .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
                 .addHadoopArg("-Dexport.statements.per.transaction=1")
                 .addExtraOption("--batch")
                 .build();
 
-        propDataJobService.exportData(exporter);
+        ApplicationId appId = sqoopService.exportTable(exporter);
+        FinalApplicationStatus status =
+                YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+        if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+            throw new IllegalStateException("The final state of " + appId + " is not "
+                    + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+        }
+
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
                 + "-uploadRawDataMergeTable", connectionString);
 
