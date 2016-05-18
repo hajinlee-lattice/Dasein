@@ -61,7 +61,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         if (configuration.getEventTableName() != null) {
             return configuration.getTransformationGroupName();
         } else {
-            return executionContext.getString(TRANSFORMATION_GROUP_NAME);
+            return getStringValueFromContext(TRANSFORMATION_GROUP_NAME);
         }
     }
 
