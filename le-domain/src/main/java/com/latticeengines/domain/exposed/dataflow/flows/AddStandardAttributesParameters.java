@@ -9,11 +9,11 @@ public class AddStandardAttributesParameters extends DataFlowParameters {
     public String eventTable;
 
     @JsonProperty("transform_group")
-    public TransformationGroup transformGroup;
+    public TransformationGroup transformationGroup;
 
-    public AddStandardAttributesParameters(String eventTable, TransformationGroup transformGroup) {
+    public AddStandardAttributesParameters(String eventTable, TransformationGroup transformationGroup) {
         this.eventTable = eventTable;
-        this.transformGroup = transformGroup;
+        this.transformationGroup = transformationGroup;
     }
 
     /**
