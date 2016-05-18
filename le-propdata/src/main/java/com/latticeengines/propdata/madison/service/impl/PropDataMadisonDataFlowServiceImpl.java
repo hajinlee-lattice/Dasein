@@ -92,6 +92,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         if (useDefaultProperties) {
             return jobProperties;
         }
+        jobProperties.put("cascading.flow.runtime.gather.partitions.num", "32");
         jobProperties.put("mapred.reduce.tasks", "72");
         jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
         jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "8");
