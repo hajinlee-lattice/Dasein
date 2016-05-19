@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -36,7 +37,11 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDep
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final String SALESFORCE = "SALESFORCE";
-    private static final int MAX_FOLD_FOR_TIME_TAKEN = 5;
+    private static final int MAX_FOLD_FOR_TIME_TAKEN = 7;
+    // allow atleast 30 seconds of upper bound for bulk scoring api to make sure
+    // that this testcase can work if performance is fine. If performance
+    // degrades a lot in future then this limit will correctly fail the testcase
+    private static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(30);
     private static final double EXPECTED_SCORE_99 = 99.0d;
     private static final int MAX_THREADS = 2;
     private volatile Throwable exception = null;
@@ -124,14 +129,21 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                 try {
                     long timeTaken = 0;
                     long baselineTimeForOneEntry = testScore(url, 1, timeTaken);
-                    testScore(url, 4, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 8, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 12, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 16, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 20, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 40, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 100, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
-                    testScore(url, 200, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+
+                    long upperBoundForBulkScoring = baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN;
+                    if (upperBoundForBulkScoring < MIN_UPPER_BOUND) {
+                        upperBoundForBulkScoring = MIN_UPPER_BOUND;
+                    }
+
+                    System.out.println(upperBoundForBulkScoring);
+                    testScore(url, 4, upperBoundForBulkScoring);
+                    testScore(url, 8, upperBoundForBulkScoring);
+                    testScore(url, 12, upperBoundForBulkScoring);
+                    testScore(url, 16, upperBoundForBulkScoring);
+                    testScore(url, 20, upperBoundForBulkScoring);
+                    testScore(url, 40, upperBoundForBulkScoring);
+                    testScore(url, 100, upperBoundForBulkScoring);
+                    testScore(url, 200, upperBoundForBulkScoring);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
