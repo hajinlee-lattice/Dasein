@@ -35,7 +35,7 @@ import com.latticeengines.propdata.match.service.MatchFetcher;
 public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetcher {
 
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
-    private static final Integer QUEUE_SIZE = 1000;
+    private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE = 10;
     private static AtomicBoolean inspectionRegistered = new AtomicBoolean(false);
 
@@ -91,7 +91,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private void scanQueue() {
         int numNewFetchers = 0;
         synchronized (fetcherActivity) {
-            for (Map.Entry<String, Long> entry: fetcherActivity.entrySet()) {
+            for (Map.Entry<String, Long> entry : fetcherActivity.entrySet()) {
                 if (System.currentTimeMillis() - entry.getValue() > TimeUnit.HOURS.toMillis(1)) {
                     log.warn("Fetcher " + entry.getKey() + " has no activity for 1 hour. Spawn a new one");
                     fetcherActivity.remove(entry.getKey());
@@ -231,4 +231,65 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     }
 
+    @Override
+    public List<String> enqueue(List<MatchContext> matchContexts) {
+        queue.addAll(matchContexts);
+        if (!inspectionRegistered.get()) {
+            inspectionRegistered.set(true);
+            statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
+        }
+
+        List<String> rootUids = new ArrayList<>(matchContexts.size());
+
+        for (MatchContext context : matchContexts) {
+            rootUids.add(context.getOutput().getRootOperationUID());
+        }
+
+        return rootUids;
+    }
+
+    @Override
+    public List<MatchContext> waitForResult(List<String> rootUids) {
+        Map<String, MatchContext> intermediateResults = new HashMap<>();
+
+        int foundResultCount = 0;
+        log.debug("Waiting for results of RootOperationUIDs=" + rootUids);
+        Long startTime = System.currentTimeMillis();
+        do {
+            try {
+                Thread.sleep(100L);
+            } catch (Exception e) {
+                log.error("Interrupted when waiting for fetch result. RootOperationUID=" + rootUids, e);
+            }
+
+            for (String rootUid : rootUids) {
+                MatchContext storedResult = intermediateResults.get(rootUid);
+
+                if (storedResult == null) {
+                    log.debug("Check for " + rootUid);
+                }
+
+                if (storedResult == null && map.containsKey(rootUid)) {
+                    log.debug(foundResultCount + ", \nFound fetch result for RootOperationUID=" + rootUid);
+                    intermediateResults.put(rootUid, map.remove(rootUid));
+                    foundResultCount++;
+
+                    if (foundResultCount >= rootUids.size()) {
+                        return convertResultMapToList(rootUids, intermediateResults);
+                    }
+                }
+
+            }
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE));
+        throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUids);
+    }
+
+    private List<MatchContext> convertResultMapToList(List<String> rootUids,
+            Map<String, MatchContext> intermediateResults) {
+        List<MatchContext> results = new ArrayList<>(rootUids.size());
+        for (String rootUid : rootUids) {
+            results.add(intermediateResults.get(rootUid));
+        }
+        return results;
+    }
 }

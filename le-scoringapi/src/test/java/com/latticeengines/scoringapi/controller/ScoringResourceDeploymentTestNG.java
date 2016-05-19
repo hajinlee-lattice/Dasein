@@ -2,6 +2,8 @@ package com.latticeengines.scoringapi.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -32,6 +34,12 @@ import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
+
+    private static final String SALESFORCE = "SALESFORCE";
+    private static final int MAX_FOLD_FOR_TIME_TAKEN = 5;
+    private static final double EXPECTED_SCORE_99 = 99.0d;
+    private static final int MAX_THREADS = 2;
+    private volatile Throwable exception = null;
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
@@ -70,9 +78,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         scoreRequest.setModelId(MODEL_ID);
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
                 ScoreResponse.class);
-
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -84,7 +91,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                 DebugScoreResponse.class);
 
         DebugScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
         Assert.assertTrue(difference < 0.1);
     }
@@ -102,30 +109,110 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
         DebugScoreResponse scoreResponse = response.getBody();
         System.out.println(JsonUtils.serialize(scoreResponse));
-        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void scoreRecords() throws IOException {
-        String url = apiHostPort + "/score/records";
+    public void scoreRecords() throws IOException, InterruptedException {
+        final String url = apiHostPort + "/score/records";
 
-        testScore(url, 1);
-        testScore(url, 2);
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    long timeTaken = 0;
+                    long baselineTimeForOneEntry = testScore(url, 1, timeTaken);
+                    testScore(url, 4, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 8, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 12, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 16, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 20, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 40, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 100, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                    testScore(url, 200, baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; i < MAX_THREADS; i++) {
+            Thread th = new Thread(runnable);
+            th.start();
+            threads.add(th);
+        }
+
+        for (Thread th : threads) {
+            th.join();
+        }
+
+        if (exception != null) {
+            Assert.assertNull(exception, "Got exception in one of the thread: " + getExceptionTrace(exception));
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    private void testScore(String url, int n) throws IOException {
-        long timeDuration = System.currentTimeMillis();
-        BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n);
-        ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
-        Assert.assertEquals(response.getBody().size(), n);
+    private String getExceptionTrace(Throwable exception2) {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        exception.printStackTrace(printWriter);
+        printWriter.flush();
 
-        List<RecordScoreResponse> results = new ArrayList<>();
-        ObjectMapper om = new ObjectMapper();
-        for (Object res : response.getBody()) {
-            RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
-            Assert.assertEquals(result.getScores().get(0).getScore(), 99.0d);
+        String stackTrace = writer.toString();
+        return stackTrace.toString();
+    }
+
+    private long testScore(String url, int n, long maxTime) throws IOException {
+        try {
+            BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n);
+            ObjectMapper om = new ObjectMapper();
+            long timeDuration = System.currentTimeMillis();
+            ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+            timeDuration = System.currentTimeMillis() - timeDuration;
+            Assert.assertEquals(response.getBody().size(), n);
+
+            int idx = 0;
+            for (Object res : response.getBody()) {
+                RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
+                if (idx % 2 == 1) {
+                    Assert.assertEquals(result.getScores().size(), 2);
+                    Assert.assertEquals(result.getScores().get(1).getScore(), EXPECTED_SCORE_99);
+                    Assert.assertEquals(result.getScores().get(1).getModelId(), MODEL_ID);
+                } else {
+                    Assert.assertEquals(result.getScores().size(), 1);
+                }
+                Assert.assertEquals(result.getScores().get(0).getScore(), EXPECTED_SCORE_99);
+                Assert.assertEquals(result.getScores().get(0).getModelId(), MODEL_ID);
+
+                Record record = bulkScoreRequest.getRecords().get(idx++);
+                if (Record.LATTICE_ID.equals(record.getIdType())) {
+                    Assert.assertEquals(result.getLatticeId(), record.getRecordId());
+                } else {
+                    Assert.assertNotEquals(result.getLatticeId(), record.getRecordId());
+                }
+
+                Assert.assertEquals(result.getId(), record.getRecordId());
+
+                if (record.isPerformEnrichment()) {
+                    Assert.assertNotNull(result.getEnrichmentAttributeValues());
+                    Assert.assertTrue(result.getEnrichmentAttributeValues().size() > 0);
+                } else {
+                    Assert.assertNull(result.getEnrichmentAttributeValues());
+                }
+
+            }
+
+            if (maxTime > 0) {
+                Assert.assertTrue(maxTime >= timeDuration,
+                        "Time taken " + timeDuration + " for " + n + " records should be less than " + maxTime);
+            }
+            return timeDuration;
+        } catch (Throwable ex) {
+            exception = ex;
+            throw ex;
         }
     }
 
@@ -145,15 +232,19 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         List<Record> records = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             Record record = new Record();
-            record.setIdType("LATTICE");
-            List<String> modelIds = new ArrayList<>();
-            modelIds.add(MODEL_ID);
-            record.setModelIds(modelIds);
             record.setRecordId(UUID.randomUUID().toString());
             ScoreRequest scoreRequest = getScoreRequest();
             Map<String, Object> attributeValues = scoreRequest.getRecord();
             record.setAttributeValues(attributeValues);
-            record.setPerformEnrichment(true);
+            List<String> modelIds = new ArrayList<>();
+            modelIds.add(MODEL_ID);
+            record.setIdType(SALESFORCE);
+            if (i % 2 == 1) {
+                record.setIdType(Record.LATTICE_ID);
+                record.setPerformEnrichment(true);
+                modelIds.add(MODEL_ID);
+            }
+            record.setModelIds(modelIds);
             records.add(record);
         }
         return records;

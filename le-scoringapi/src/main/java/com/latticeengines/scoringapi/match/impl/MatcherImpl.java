@@ -1,9 +1,11 @@
 package com.latticeengines.scoringapi.match.impl;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,6 +20,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
+import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -88,9 +92,15 @@ public class MatcherImpl implements Matcher {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
         }
 
+        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput);
+        return record;
+    }
+
+    private void getRecordFromMatchOutput(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
+            MatchInput matchInput, MatchOutput matchOutput) {
         if (matchOutput.getResult().isEmpty()) {
-            warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
-                    JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
+            warnings.addWarning(new Warning(WarningCode.NO_MATCH,
+                    new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
         } else {
             List<String> matchFieldNames = matchOutput.getOutputFields();
             OutputRecord outputRecord = matchOutput.getResult().get(0);
@@ -98,27 +108,68 @@ public class MatcherImpl implements Matcher {
             if (outputRecord.getMatchedNameLocation() != null) {
                 nameLocationStr = JsonUtils.serialize(outputRecord.getMatchedNameLocation());
             }
-            String errorMessages = outputRecord.getErrorMessages() == null ? "" : Joiner.on(",").join(
-                    outputRecord.getErrorMessages());
+            String errorMessages = outputRecord.getErrorMessages() == null ? ""
+                    : Joiner.on(",").join(outputRecord.getErrorMessages());
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()),
-                        nameLocationStr, errorMessages));
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()), nameLocationStr,
+                        errorMessages));
             }
 
             mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
             if (!outputRecord.isMatched()) {
-                warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
-                        JsonUtils.serialize(matchInput.getKeyMap()),
-                        Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
+                warnings.addWarning(
+                        new Warning(WarningCode.NO_MATCH, new String[] { JsonUtils.serialize(matchInput.getKeyMap()),
+                                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
             }
         }
         if (log.isDebugEnabled()) {
             log.debug(JsonUtils.serialize(record));
         }
-        return record;
+    }
+
+    @Override
+    public List<Map<String, Object>> matchAndJoin(CustomerSpace space,
+            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
+            Map<String, Map<String, FieldSchema>> fieldSchemasMap) {
+        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsList);
+        if (log.isDebugEnabled()) {
+            log.debug("matchInput:" + JsonUtils.serialize(matchInput));
+        }
+        BulkMatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+        if (log.isDebugEnabled()) {
+            log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
+        }
+
+        List<Map<String, Object>> results = new ArrayList<>();
+        if (matchOutput != null) {
+            int idx = -1;
+            List<MatchOutput> outputList = matchOutput.getOutputList();
+            for (MatchOutput output : outputList) {
+                idx++;
+                Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.values().iterator().next();
+
+                Map<String, Object> record = new HashMap<>();
+                getRecordFromMatchOutput(fieldSchemas, record, matchInput.getInputList().get(idx), output);
+                results.add(record);
+            }
+        }
+        return results;
+    }
+
+    private BulkMatchInput buildMatchInput(CustomerSpace space,
+            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList) {
+        BulkMatchInput bulkInput = new BulkMatchInput();
+        List<MatchInput> matchInputList = new ArrayList<>();
+        bulkInput.setInputList(matchInputList);
+        bulkInput.setRequestId(UUID.randomUUID().toString());
+        for (SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields : parsedRecordAndInterpretedFieldsList) {
+            matchInputList.add(buildMatchInput(space, parsedRecordAndInterpretedFields.getValue(),
+                    parsedRecordAndInterpretedFields.getKey()));
+        }
+        return bulkInput;
     }
 
     private void mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
@@ -126,8 +177,8 @@ public class MatcherImpl implements Matcher {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
         if (matchFieldNames.size() != matchFieldValues.size()) {
-            throw new LedpException(LedpCode.LEDP_31005, new String[] { String.valueOf(matchFieldNames.size()),
-                    String.valueOf(matchFieldValues.size()) });
+            throw new LedpException(LedpCode.LEDP_31005,
+                    new String[] { String.valueOf(matchFieldNames.size()), String.valueOf(matchFieldValues.size()) });
         }
 
         for (int i = 0; i < matchFieldNames.size(); i++) {
@@ -144,8 +195,8 @@ public class MatcherImpl implements Matcher {
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (isPublicDomain) {
-                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
-                                .nullToEmpty(outputRecord.getMatchedDomain()) }));
+                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
+                                new String[] { Strings.nullToEmpty(outputRecord.getMatchedDomain()) }));
                     }
                 }
             }
@@ -166,4 +217,5 @@ public class MatcherImpl implements Matcher {
         }
         keyFields.add(field);
     }
+
 }

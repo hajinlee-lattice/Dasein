@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +34,27 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     @MatchStep
     public MatchContext execute(MatchContext matchContext) {
         matchContext = fetcher.fetch(matchContext);
-        matchContext = complete(matchContext);
-        matchContext = appendMetadataToContext(matchContext);
+        matchContext = doPostProcessing(matchContext);
         generateOutputMetric(matchContext);
         return matchContext;
+    }
+
+    private MatchContext doPostProcessing(MatchContext matchContext) {
+        matchContext = complete(matchContext);
+        matchContext = appendMetadataToContext(matchContext);
+        return matchContext;
+    }
+
+    @Override
+    @MatchStep
+    public List<MatchContext> execute(List<MatchContext> matchContexts) {
+        List<String> rootUids = fetcher.enqueue(matchContexts);
+        matchContexts = fetcher.waitForResult(rootUids);
+        for (MatchContext matchContext : matchContexts) {
+            doPostProcessing(matchContext);
+        }
+        generateOutputMetric(matchContexts);
+        return matchContexts;
     }
 
     public MatchContext appendMetadataToContext(MatchContext matchContext) {
@@ -48,15 +67,29 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         matchExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    MatchContext localContext = JsonUtils.deserialize(JsonUtils.serialize(matchContext), MatchContext.class);
-                    MatchResponse response = new MatchResponse(localContext);
-                    metricService.write(MetricDB.LDC_Match, response);
-                } catch (Exception e) {
-                    log.warn("Failed to extract output metric.", e);
+                generateMetric(matchContext);
+            }
+        });
+    }
+
+    private void generateOutputMetric(final List<MatchContext> matchContexts) {
+        matchExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (MatchContext context : matchContexts) {
+                    generateMetric(context);
                 }
             }
         });
     }
 
+    private void generateMetric(final MatchContext matchContext) {
+        try {
+            MatchContext localContext = JsonUtils.deserialize(JsonUtils.serialize(matchContext), MatchContext.class);
+            MatchResponse response = new MatchResponse(localContext);
+            metricService.write(MetricDB.LDC_Match, response);
+        } catch (Exception e) {
+            log.warn("Failed to extract output metric.", e);
+        }
+    }
 }

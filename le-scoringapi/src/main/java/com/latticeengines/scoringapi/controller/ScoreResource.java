@@ -2,7 +2,6 @@ package com.latticeengines.scoringapi.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,9 +30,7 @@ import com.latticeengines.scoringapi.exposed.BulkRecordScoreRequest;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelDetail;
-import com.latticeengines.scoringapi.exposed.Record;
 import com.latticeengines.scoringapi.exposed.RecordScoreResponse;
-import com.latticeengines.scoringapi.exposed.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
@@ -202,9 +199,6 @@ public class ScoreResource {
         }
     }
 
-    // NOTE: This is simple implementation and has no optimization.
-    // This change is just to make new rest endpoint functional and check it
-    // in SVN. In future check-ins, optimizations will be done.
     private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
             boolean isDebug) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
@@ -214,40 +208,20 @@ public class ScoreResource {
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 
-        int idx = 0;
-        List<RecordScoreResponse> responseList = new ArrayList<>();
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            httpStopWatch.split("getTenantFromOAuth");
+            if (log.isInfoEnabled()) {
+                log.info(JsonUtils.serialize(scoreRequests));
+            }
+            List<RecordScoreResponse> response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug);
 
-        for (Record record : scoreRequests.getRecords()) {
-            ScoreRequest scoreRequest = prepareScoreRecord(scoreRequests, idx, record.getAttributeValues(),
-                    record.getModelIds().get(0));
-            ScoreResponse response = scoreRecord(request, scoreRequest, isDebug);
-            RecordScoreResponse scoreResponse = new RecordScoreResponse();
-            scoreResponse.setEnrichmentAttributeValues(response.getEnrichmentAttributeValues());
-            scoreResponse.setId(response.getId());
-            scoreResponse.setLatticeId(response.getLatticeId());
-            scoreResponse.setTimestamp(response.getTimestamp());
-            scoreResponse.setWarnings(response.getWarnings());
-            List<ScoreModelTuple> scoreModelTuples = new ArrayList<>();
-            ScoreModelTuple scoreModelTuple = new ScoreModelTuple();
-            scoreModelTuple.setModelId(scoreRequests.getRecords().get(idx).getModelIds().get(0));
-            scoreModelTuple.setScore(response.getScore());
-            scoreModelTuples.add(scoreModelTuple);
-            scoreResponse.setScores(scoreModelTuples);
-            responseList.add(scoreResponse);
-            idx++;
+            if (log.isInfoEnabled()) {
+                log.info(JsonUtils.serialize(response));
+            }
+
+            return response;
         }
-
-        return responseList;
-    }
-
-    private ScoreRequest prepareScoreRecord(BulkRecordScoreRequest scoreRequests, int idx, Map<String, Object> record,
-            String modelId) {
-        ScoreRequest scoreRequest = new ScoreRequest();
-        scoreRequest.setModelId(modelId);
-        scoreRequest.setRule(scoreRequest.getRule());
-        scoreRequest.setSource(scoreRequests.getSource());
-        scoreRequest.setRecord(record);
-        return scoreRequest;
     }
 
     private ModelDetail prepareModelDetail(CustomerSpace customerSpace, Model model) {

@@ -19,6 +19,10 @@ public class BulkRecordScoreRequest {
     @ApiModelProperty(value = "List of records", required = true)
     private List<Record> records;
 
+    private String rootOperationId;
+
+    private String requestTimestamp;
+
     public String getSource() {
         return source;
     }
@@ -41,6 +45,22 @@ public class BulkRecordScoreRequest {
 
     public void setRecords(List<Record> records) {
         this.records = records;
+    }
+
+    public String getRootOperationId() {
+        return rootOperationId;
+    }
+
+    public void setRootOperationId(String rootOperationId) {
+        this.rootOperationId = rootOperationId;
+    }
+
+    public String getRequestTimestamp() {
+        return requestTimestamp;
+    }
+
+    public void setRequestTimestamp(String requestTimestamp) {
+        this.requestTimestamp = requestTimestamp;
     }
 
 }

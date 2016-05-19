@@ -8,6 +8,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Record {
+    public static final String LATTICE_ID = "LATTICE";
+
     @JsonProperty("recordId")
     @ApiModelProperty(value = "Record ID")
     private String recordId;
@@ -27,6 +29,10 @@ public class Record {
     @JsonProperty("attributeValues")
     @ApiModelProperty(value = "Attribute values")
     private Map<String, Object> attributeValues;
+
+    private String rootOperationId;
+
+    private String requestTimestamp;
 
     public String getRecordId() {
         return recordId;
@@ -68,4 +74,19 @@ public class Record {
         this.attributeValues = attributeValues;
     }
 
+    public String getRootOperationId() {
+        return rootOperationId;
+    }
+
+    public void setRootOperationId(String rootOperationId) {
+        this.rootOperationId = rootOperationId;
+    }
+
+    public String getRequestTimestamp() {
+        return requestTimestamp;
+    }
+
+    public void setRequestTimestamp(String requestTimestamp) {
+        this.requestTimestamp = requestTimestamp;
+    }
 }
