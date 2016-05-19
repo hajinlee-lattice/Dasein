@@ -1,0 +1,14 @@
+{
+  "columnTransformFiles": {
+    "AnonymousLeadRule": {
+      "KeyWhenSortingByAscending": "1",
+      "Name": "anonymousleadrule",
+      "MainClassName": "AnonymousLeadRule",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+      },
+      "ColumnTransformFilePath": "anonymousleadrule.py"
+    }
+  }
+}
