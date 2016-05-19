@@ -30,10 +30,6 @@
         <value>512</value>
     </property>
     <property>
-        <name>yarn.scheduler.maximum-allocation-mb</name>
-        <value>4096</value>
-    </property>
-    <property>
         <name>yarn.nodemanager.resource.cpu-vcores</name>
         <value>24</value>
     </property>
@@ -62,44 +58,40 @@
         <value>false</value>
     </property>
     <property>
+        <name>yarn.resourcemanager.bind-host</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>localhost</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.hostname</name>
-        <value>localhost</value>
-    </property>
-    <property>
-        <name>yarn.timeline-service.hostname</name>
-        <value>localhost</value>
+        <value>0.0.0.0</value>
     </property>
     <property>
         <name>yarn.resourcemanager.admin.address</name>
-        <value>localhost:8141</value>
+        <value>${yarn.resourcemanager.hostname}:8141</value>
     </property>
     <property>
         <name>yarn.resourcemanager.address</name>
-        <value>localhost:8050</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.address</name>
-        <value>localhost:45454</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.webapp.address</name>
-        <value>localhost:8042</value>
+        <value>${yarn.resourcemanager.hostname}:8050</value>
     </property>
     <property>
         <name>yarn.resourcemanager.scheduler.address</name>
-        <value>localhost:8030</value>
+        <value>${yarn.resourcemanager.hostname}:8030</value>
     </property>
     <property>
         <name>yarn.resourcemanager.resource-tracker.address</name>
-        <value>localhost:8025</value>
+        <value>${yarn.resourcemanager.hostname}:8025</value>
     </property>
     <property>
         <name>yarn.resourcemanager.webapp.address</name>
-        <value>localhost:8088</value>
+        <value>${yarn.resourcemanager.hostname}:8088</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.hostname</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.address</name>
+        <value>${yarn.nodemanager.hostname}:45454</value>
     </property>
     <property>
         <name>yarn.log.server.url</name>
