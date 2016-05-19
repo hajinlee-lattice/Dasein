@@ -26,7 +26,6 @@ import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.Record;
-import com.latticeengines.scoringapi.exposed.Record.IdType;
 import com.latticeengines.scoringapi.exposed.RecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
@@ -146,7 +145,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         List<Record> records = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             Record record = new Record();
-            record.setIdType(IdType.LATTICE);
+            record.setIdType("LATTICE");
             List<String> modelIds = new ArrayList<>();
             modelIds.add(MODEL_ID);
             record.setModelIds(modelIds);

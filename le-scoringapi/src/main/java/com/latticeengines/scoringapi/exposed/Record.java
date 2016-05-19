@@ -1,11 +1,11 @@
 package com.latticeengines.scoringapi.exposed;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 public class Record {
     @JsonProperty("recordId")
@@ -14,7 +14,7 @@ public class Record {
 
     @JsonProperty("idType")
     @ApiModelProperty(value = "Type of record ID")
-    private IdType idType;
+    private String idType;
 
     @JsonProperty("modelIds")
     @ApiModelProperty(value = "List of model ID")
@@ -36,11 +36,11 @@ public class Record {
         this.recordId = recordId;
     }
 
-    public IdType getIdType() {
+    public String getIdType() {
         return idType;
     }
 
-    public void setIdType(IdType idType) {
+    public void setIdType(String idType) {
         this.idType = idType;
     }
 
@@ -68,8 +68,4 @@ public class Record {
         this.attributeValues = attributeValues;
     }
 
-    public static enum IdType {
-        LATTICE, //
-        SALESFORCE;
-    }
 }
