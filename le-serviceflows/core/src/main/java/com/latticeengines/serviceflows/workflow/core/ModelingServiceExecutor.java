@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -298,6 +300,7 @@ public class ModelingServiceExecutor {
 
         private ModelProxy modelProxy;
         private JobProxy jobProxy;
+        private Map<ArtifactType, String> metadataArtifacts;
 
         public Builder() {
         }
@@ -485,6 +488,11 @@ public class ModelingServiceExecutor {
         public Builder predefinedColumnSelection(ColumnSelection.Predefined predefined, String version) {
             this.setPredefinedColumnSelection(predefined);
             this.setPredefinedSelectionVersion(version);
+            return this;
+        }
+        
+        public Builder metadataArtifacts(Map<ArtifactType, String> metadataArtifacts) {
+            this.setMetadataArtifacts(metadataArtifacts);
             return this;
         }
 
@@ -801,6 +809,14 @@ public class ModelingServiceExecutor {
 
         public JobProxy getJobProxy() {
             return jobProxy;
+        }
+        
+        public void setMetadataArtifacts(Map<ArtifactType, String> metadataArtifacts) {
+            this.metadataArtifacts = metadataArtifacts;
+        }
+        
+        public Map<ArtifactType, String> getMetadataArtifacts() {
+            return metadataArtifacts;
         }
 
     }
