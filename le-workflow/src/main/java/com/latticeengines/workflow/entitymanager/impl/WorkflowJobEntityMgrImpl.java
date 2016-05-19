@@ -11,7 +11,6 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 

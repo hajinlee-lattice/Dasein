@@ -1,10 +1,15 @@
 package com.latticeengines.scoringapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +21,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringapi.exposed.BulkRecordScoreRequest;
@@ -34,14 +43,12 @@ import com.latticeengines.scoringapi.exposed.RecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
+import com.latticeengines.scoringapi.exposed.context.RequestMetrics;
+import com.latticeengines.scoringapi.exposed.context.SingleRecordMeasurement;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.wordnik.swagger.annotations.ApiParam;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
@@ -56,6 +63,9 @@ public class ScoreResource {
 
     @Autowired
     private HttpStopWatch httpStopWatch;
+
+    @Autowired
+    private MetricService metricService;
 
     @Autowired
     private ModelRetriever modelRetriever;
@@ -101,7 +111,8 @@ public class ScoreResource {
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
-    public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
+    public List<ModelDetail> getPaginatedModels(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = true) @RequestParam(value = "start", required = true) String start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -112,7 +123,8 @@ public class ScoreResource {
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
-    public int getModelCount(HttpServletRequest request,
+    public int getModelCount(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = true) @RequestParam(value = "start", required = true) String start,
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus) {
         return fetchModelCount(request, start, considerAllStatus);
@@ -159,10 +171,42 @@ public class ScoreResource {
             requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));
             requestInfo.put("HasError", Boolean.toString(false));
             requestInfo.put("Score", String.valueOf(response.getScore()));
+
             requestInfo.logSummary();
+
+            RequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace);
+            SingleRecordMeasurement measurement = new SingleRecordMeasurement(metrics);
+            metricService.write(MetricDB.SCORING, measurement);
 
             return response;
         }
+    }
+
+    private RequestMetrics generateMetrics(ScoreRequest scoreRequest, ScoreResponse response,
+            CustomerSpace customerSpace) {
+        RequestMetrics metrics = new RequestMetrics();
+        metrics.setHasWarning(warnings.hasWarnings());
+        metrics.setScore((int) response.getScore());
+        metrics.setSource(StringUtils.trimToEmpty(scoreRequest.getSource()));
+        metrics.setRule(StringUtils.trimToEmpty(scoreRequest.getRule()));
+        metrics.setTenantId(customerSpace.toString());
+        metrics.setModelId(scoreRequest.getModelId());
+
+        Map<String, String> splits = httpStopWatch.getSplits();
+        metrics.setGetTenantFromOAuthDurationMS(getSplit(splits, "getTenantFromOAuthDurationMS"));
+        metrics.setMatchRecordDurationMS(getSplit(splits, "matchRecordDurationMS"));
+        metrics.setParseRecordDurationMS(getSplit(splits, "parseRecordDurationMS"));
+        metrics.setRequestDurationMS(getSplit(splits, "requestDurationMS"));
+        metrics.setRequestPreparationDurationMS(getSplit(splits, "requestPreparationDurationMS"));
+        metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
+        metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
+        metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
+
+        return metrics;
+    }
+
+    private int getSplit(Map<String, String> splits, String key) {
+        return Integer.valueOf(splits.get(key));
     }
 
     // NOTE: This is simple implementation and has no optimization.
@@ -204,7 +248,7 @@ public class ScoreResource {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
-                            new Integer(MAX_ALLOWED_RECORDS).toString(),
+                    new Integer(MAX_ALLOWED_RECORDS).toString(),
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 
