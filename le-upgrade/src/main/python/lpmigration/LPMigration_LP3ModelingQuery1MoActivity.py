@@ -54,7 +54,8 @@ class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
             if c is not None:
                 if cname in self.LP3_ACTIVITY_COLS:
                     fcnNameOrig = c.getExpression().FcnName()
-                    c.setExpression(ExpressionVDBImplFactory.parse(fcnNameOrig+'_1mo'))
+                    if fcnNameOrig[-4:] != '_1mo':
+                        c.setExpression(ExpressionVDBImplFactory.parse(fcnNameOrig+'_1mo'))
                 else:
                     q_lp3_modeling.removeColumn(cname)
 
