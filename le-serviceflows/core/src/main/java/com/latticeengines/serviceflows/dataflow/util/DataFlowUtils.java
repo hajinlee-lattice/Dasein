@@ -18,7 +18,7 @@ public class DataFlowUtils {
     public static Node extractDomain(Node last, String columnName) {
 
         if (last.getFieldNames().contains(InterfaceName.Domain.toString())) {
-            last = last.rename(new FieldList(InterfaceName.Domain.toString()), new FieldList(columnName));
+            last = DataFlowUtils.normalizeDomain(last, InterfaceName.Domain.toString(), columnName);
         } else if (last.getFieldNames().contains(InterfaceName.Website.toString())) {
             last = DataFlowUtils.normalizeDomain(last, InterfaceName.Website.toString(), columnName);
         } else if (last.getFieldNames().contains(InterfaceName.Email.toString())) {

@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import java.util.UUID;
+
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
@@ -8,8 +10,8 @@ import cascading.tuple.Fields;
 public class MergeOperation extends Operation {
 
     public MergeOperation(Input lhs, Input rhs) {
-        Pipe lhsPipe = lhs.pipe;
-        Pipe rhsPipe = rhs.pipe;
+        Pipe lhsPipe = new RenamePipeOperation(lhs, UUID.randomUUID().toString()).pipe;
+        Pipe rhsPipe = new RenamePipeOperation(rhs, UUID.randomUUID().toString()).pipe;
 
         Pipe merged = new Merge(lhsPipe, rhsPipe);
         // NOTE: This works around what appears to be a cascading bug in merge

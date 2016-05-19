@@ -122,6 +122,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder dedupFlowExtraSources(Map<String, String> extraSources) {
+            dedupEventTable.setExtraSources(extraSources);
+            return this;
+        }
+
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;

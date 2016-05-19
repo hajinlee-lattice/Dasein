@@ -17,6 +17,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
@@ -238,7 +239,8 @@ public class Node {
     }
 
     public Node addTransformFunction(String packageName, TransformDefinition definition) {
-        return new Node(builder.register(new TransformFunctionOperation(opInput(identifier), packageName, definition)), builder);
+        return new Node(builder.register(new TransformFunctionOperation(opInput(identifier), packageName, definition)),
+                builder);
     }
 
     public Node renamePipe(String newname) {
@@ -292,9 +294,12 @@ public class Node {
     }
 
     public Node addTimestamp(String timestampField, Date timestamp) {
-        return new Node(builder.register(
-                new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, timestamp))),
-                builder);
+        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
+                timestampField, timestamp))), builder);
+    }
+
+    public Node debug(int printFieldsEvery) {
+        return new Node(builder.register(new DebugOperation(opInput(identifier), printFieldsEvery)), builder);
     }
 
     public Table getSourceSchema() {

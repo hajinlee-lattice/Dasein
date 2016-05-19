@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -27,6 +29,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -302,15 +305,26 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 
-    protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {
+    protected Map<Object, Integer> histogram(List<GenericRecord> records, final String column) {
+        return histogram(records, new Function<GenericRecord, Object>() {
+
+            @Nullable
+            @Override
+            public Object apply(@Nullable GenericRecord input) {
+                return input.get(column);
+            }
+        });
+    }
+
+    protected Map<Object, Integer> histogram(List<GenericRecord> records, Function<GenericRecord, Object> keyProvider) {
         Map<Object, Integer> results = new HashMap<>();
         for (GenericRecord record : records) {
-            Object value = record.get(column);
-            Integer count = results.get(value);
+            Object key = keyProvider.apply(record);
+            Integer count = results.get(key);
             if (count == null) {
-                results.put(value, 1);
+                results.put(key, 1);
             } else {
-                results.put(value, count + 1);
+                results.put(key, count + 1);
             }
         }
 

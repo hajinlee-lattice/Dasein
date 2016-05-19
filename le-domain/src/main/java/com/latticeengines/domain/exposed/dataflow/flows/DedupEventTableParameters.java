@@ -7,8 +7,12 @@ public class DedupEventTableParameters extends DataFlowParameters {
     @JsonProperty("event_table")
     public String eventTable;
 
-    public DedupEventTableParameters(String eventTable) {
+    @JsonProperty("public_domain")
+    public String publicDomain;
+
+    public DedupEventTableParameters(String eventTable, String publicDomain) {
         this.eventTable = eventTable;
+        this.publicDomain = publicDomain;
     }
 
     /**

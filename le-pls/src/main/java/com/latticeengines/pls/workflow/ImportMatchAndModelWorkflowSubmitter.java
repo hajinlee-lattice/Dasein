@@ -41,6 +41,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls.modeling.validation.min.eventrows:50}")
     private long minPositiveEvents;
 
+    @Value("${pls.fitflow.stoplist.path}")
+    private String stoplistPath;
+
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters,
             TransformationGroup transformationGroup) {
 
@@ -65,6 +68,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndModelWorkflow");
 
+        Map<String, String> extraSources = new HashMap<>();
+        extraSources.put("PublicDomain", stoplistPath);
+
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -74,7 +80,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .importReportName(sourceFile.getName() + "_Report") //
                 .eventTableReportName(sourceFile.getName() + "_EventTableReport") //
                 .dedupDataFlowBeanName("dedupEventTable") //
-                .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName())) //
+                .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain")) //
+                .dedupFlowExtraSources(extraSources) //
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchClientDocument) //
