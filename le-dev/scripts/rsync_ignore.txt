@@ -1,0 +1,13 @@
+*.iml
+*.pyc
+*.pyo
+*.project
+*.classpath
+*.diff
+*.idea
+*/.svn
+*/.dot
+*/.settings
+*/target
+*/node_modules
+*/bower_components
