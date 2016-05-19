@@ -107,7 +107,7 @@ public class ScoringMapperValidateUtil {
                     continue;
                 }
                 if (datatype.get(name).asLong() != type) {
-                    String msg = String.format("Column %s has type %d in %s which does not match with %d from event table", name,
+                    String msg = String.format("Column %s has type %d in %s which does not match with %d from event table. (0 means non-string type and 1 means string type.)", name,
                             type, modelGuid, datatype.get(name).asLong());
                     toReturn.add(msg);
                 }
