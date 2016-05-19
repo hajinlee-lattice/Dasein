@@ -32,6 +32,8 @@ public abstract class AbstractTransformationService extends TransformationServic
 
     private static final String TRANSFORMATION_CONF = "_CONF";
 
+    private static final String AVRO_REGEX = "*.avro";
+
     protected static final String HDFS_PATH_SEPARATOR = "/";
 
     @Autowired
@@ -196,41 +198,53 @@ public abstract class AbstractTransformationService extends TransformationServic
 
     protected boolean doPostProcessing(TransformationProgress progress, String workflowDir) {
         String avroWorkflowDir = workflowAvroDir(progress);
-
-        // extract schema
         try {
-            extractSchema(progress, avroWorkflowDir);
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to extract schema of " + getSource().getSourceName() + " avsc.", e);
-            return false;
-        }
 
-        // copy result to source version dir
-        try {
-            String sourceDir = sourceVersionDirInHdfs(progress);
-            deleteFSEntry(progress, sourceDir);
-            String currentMaxVersion = null;
-            HdfsUtils.copyFiles(yarnConfiguration, avroWorkflowDir, sourceDir);
+            // extract schema
             try {
-                currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource());
+                extractSchema(progress, avroWorkflowDir);
             } catch (Exception e) {
-                // We can log this exception and ignore this error as probably
-                // file does not even exists
-                LOG.debug("Could not read version file", e);
-            }
-            // overwrite max version if progress's version is higher
-            if (currentMaxVersion == null || progress.getVersion().compareTo(currentMaxVersion) > 0) {
-                hdfsSourceEntityMgr.setCurrentVersion(getSource(), progress.getVersion());
+                updateStatusToFailed(progress, "Failed to extract schema of " + getSource().getSourceName() + " avsc.",
+                        e);
+                return false;
             }
 
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
-            return false;
+            // copy result to source version dir
+            try {
+                String sourceDir = sourceVersionDirInHdfs(progress);
+                deleteFSEntry(progress, sourceDir);
+                String currentMaxVersion = null;
+
+                for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
+                        avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
+                    String avroFileName = avroFilePath.substring(avroFilePath.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
+                    HdfsUtils.copyFiles(yarnConfiguration, avroFilePath,
+                            sourceDir + HDFS_PATH_SEPARATOR + avroFileName);
+                }
+
+                try {
+                    currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource());
+                } catch (Exception e) {
+                    // We can log this exception and ignore this error as
+                    // probably file does not even exists
+                    LOG.debug("Could not read version file", e);
+                }
+                // overwrite max version if progress's version is higher
+                if (currentMaxVersion == null || progress.getVersion().compareTo(currentMaxVersion) > 0) {
+                    hdfsSourceEntityMgr.setCurrentVersion(getSource(), progress.getVersion());
+                }
+
+                HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
+            } catch (Exception e) {
+                updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
+                return false;
+            }
+
+        } finally {
+            // delete intermediate data
+            deleteFSEntry(progress, avroWorkflowDir);
+            deleteFSEntry(progress, workflowDir);
         }
-
-        // delete intermediate data
-        deleteFSEntry(progress, avroWorkflowDir);
-        deleteFSEntry(progress, workflowDir);
 
         return false;
     }
