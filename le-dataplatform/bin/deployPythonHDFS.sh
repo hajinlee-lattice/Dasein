@@ -25,6 +25,7 @@ cp target/evpipeline.tar.gz /tmp/app/playmaker/evmodel
 cp target/lepipeline.tar.gz /tmp/app/dataplatform/scripts
 cp src/main/python/launcher.py /tmp/app/dataplatform/scripts 
 cp src/main/python/pipelinefwk.py /tmp/app/dataplatform/scripts 
+cp src/main/python/rulefwk.py /tmp/app/dataplatform/scripts 
 cp src/main/python/pipeline/pipeline.py /tmp/app/dataplatform/scripts
 cp src/main/python/configurablepipelinetransformsfromfile/pipeline.json /tmp/app/dataplatform/scripts
 cp src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json /tmp/app/dataplatform/scripts

@@ -31,6 +31,17 @@
             </excludes>
         </fileSet>
         <fileSet>
+            <directory>src/main/python/datarules</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>**/*.py</include>
+                <include>**/*.json</include>
+            </includes>
+            <excludes>
+                <exclude>rulepipeline.json</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
             <directory>src/main/python/</directory>
             <outputDirectory>.</outputDirectory>
             <includes>

@@ -47,7 +47,7 @@ public class PythonMRUtils {
 
         return setupCacheFiles(paths, classifier, version);
     }
-    
+
     private static String getScriptPathWithVersion(String script, String version) {
         String afterPart = StringUtils.substringAfter(script, "/app");
         return "/app/" + version + afterPart;
@@ -57,20 +57,21 @@ public class PythonMRUtils {
         paths.add(String.format("/app/%s/dataplatform/hadoop-metrics2.properties", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
+        paths.add(String.format("/app/%s/dataplatform/scripts/rulefwk.py", version));
         paths.add("/datascientist/modelpredictorextraction.py");
         paths.add(classifier.getTestDataHdfsPath());
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());
         paths.add(classifier.getPythonPipelineScriptHdfsPath());
-        
+
         String pipelineDriver = classifier.getPipelineDriver();
-        
+
         if (StringUtils.isEmpty(pipelineDriver)) {
             pipelineDriver = new RandomForestAlgorithm().getPipelineDriver();
             pipelineDriver = getScriptPathWithVersion(pipelineDriver, version);
         }
         paths.add(pipelineDriver);
-        
+
         String script = new AggregationAlgorithm().getScript();
         String afterPart = StringUtils.substringAfter(script, "/app");
         script = "/app/" + version + afterPart;

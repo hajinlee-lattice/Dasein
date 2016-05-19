@@ -316,6 +316,9 @@
                                     <location>src/main/python/pipelinefwk.py</location>
                                 </source>
                                 <source>
+                                    <location>src/main/python/rulefwk.py</location>
+                                </source>
+                                <source>
                                     <location>src/main/python/pipeline/pipeline.py</location>
                                 </source>
                                 <source>
@@ -323,6 +326,9 @@
                                 </source>
                                 <source>
                                     <location>src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json</location>
+                                </source>                                
+                                <source>
+                                    <location>src/main/python/datarules/rulepipeline.json</location>
                                 </source>
                             </sources>
                         </mapping>
