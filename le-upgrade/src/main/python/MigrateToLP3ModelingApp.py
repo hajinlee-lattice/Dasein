@@ -17,6 +17,7 @@ timestamp = datetime.datetime.now()
 (checkOnly, tenantFileName, resultsFileName) = appsequence.AppArgs.get(sys.argv)
 sequence = []
 sequence.append(appsequence.LPCheckVersion('0.0.0',forceApply=True))
+sequence.append(lpmigration.LPMigration_ModelingUpdates())
 sequence.append(lpmigration.LPMigration_1MoActivityForModeling())
 sequence.append(lpmigration.LPMigration_LP3ModelingQuery())
 sequence.append(lpmigration.LPMigration_LP3ModelingQuery1MoActivity())
