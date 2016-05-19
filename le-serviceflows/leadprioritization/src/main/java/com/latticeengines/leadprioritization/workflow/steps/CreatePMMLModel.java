@@ -28,6 +28,7 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
+import org.python.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
@@ -40,6 +41,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
@@ -110,6 +112,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             .table(tableName) //
             .metadataTable(String.format("%s-%s-Metadata", tableName, featuresAndTarget.getValue())) //
             .avroSchema(avroSchema) //
+            .metadataArtifacts(ImmutableMap.of(ArtifactType.PMML, configuration.getPmmlArtifactPath())) //
             .yarnConfiguration(yarnConfiguration);
 
         return bldr;
@@ -128,17 +131,24 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         for (PmmlField pmmlField : pmmlFields) {
             DataField dataField = pmmlField.dataField;
             
-            if (dataField == null) {
+            if (dataField == null && pmmlField.miningField.getUsageType() != FieldUsageType.PREDICTED) {
                 continue;
             }
-            String name = dataField.getName().getValue(); 
-            if (pivotValuesByTargetColumn.containsKey(name)) {
-                continue;
-            }
+
             Field field = new Field();
-            field.setName(name);
-            FieldType fieldType = getFieldType(pmmlField.dataField.getDataType());
-            field.setType(Arrays.asList(fieldType.avroTypes()[0]));
+            if (dataField != null) {
+                String name = dataField.getName().getValue(); 
+                if (pivotValuesByTargetColumn.containsKey(name)) {
+                    continue;
+                }
+
+                field.setName(name);
+                FieldType fieldType = getFieldType(pmmlField.dataField.getDataType());
+                field.setType(Arrays.asList(fieldType.avroTypes()[0]));
+            } else {
+                field.setName(pmmlField.miningField.getName().getValue());
+                field.setType(Arrays.asList(new String[] { "boolean" }));
+            }
             
             dataSchema.addField(field);
         }
@@ -148,7 +158,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             UserDefinedType userType = sourceColumnTypes.get(name);
             Field field = new Field();
             field.setName(name);
-            field.setType(Arrays.asList(new String[] { userType.getAvroType().toString() }));
+            field.setType(Arrays.asList(new String[] { userType.getAvroType().toString().toLowerCase() }));
+            dataSchema.addField(field);
         }
         return JsonUtils.serialize(dataSchema);
     }
@@ -158,6 +169,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         List<String> features = new ArrayList<>(pmmlFields.size());
         String event = null;
         Map<String, AbstractMap.Entry<String, List<String>>> pivotValuesByTargetColumn = pivotValues.pivotValuesByTargetColumn;
+        Map<String, UserDefinedType> sourceType = pivotValues.sourceColumnToUserType;
         for (PmmlField pmmlField : pmmlFields) {
             MiningField field = pmmlField.miningField;
             String name = field.getName().getValue();
@@ -166,6 +178,10 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             } else if (field.getUsageType() == FieldUsageType.PREDICTED) {
                 event = name;
             }
+        }
+        
+        for (Map.Entry<String, UserDefinedType> entry : sourceType.entrySet()) {
+            features.add(entry.getKey());
         }
         String[] f = new String[features.size()];
         features.toArray(f);

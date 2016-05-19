@@ -2,12 +2,14 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -56,7 +58,16 @@ public class CreatePMMLModelUnitTestNG {
         List<PmmlField> fields = createPMMLModel.getPmmlFields();
         assertEquals(fields.size(), 117);
         String[] features = createPMMLModel.getFeaturesAndTarget(fields, pivotValues).getKey();
-        assertEquals(features.length, 108);
+        
+        boolean found = false;
+        for (String feature : features) {
+            if (feature.equals("PD_DA_JobTitle")) {
+                found = true;
+            }
+        }
+        
+        assertTrue(found, "PD_DA_JobTitle not found.");
+        assertEquals(features.length, 109);
     }
     
     @SuppressWarnings("rawtypes")
@@ -97,6 +108,22 @@ public class CreatePMMLModelUnitTestNG {
         String avroSchemaStr = createPMMLModel.getAvroSchema(pmmlFields, pivotValues);
         Schema schema = new Schema.Parser().parse(avroSchemaStr);
         assertNotNull(schema);
+        
+        boolean foundPivotColumn = false;
+        boolean foundEvent = false;
+        for (Field f : schema.getFields()) {
+            
+            if (f.name().equals("PD_DA_JobTitle")) {
+                foundPivotColumn = true;
+            }
+            
+            if (f.name().equals("P1_Event")) {
+                foundEvent = true;
+            }
+        }
+        
+        assertTrue(foundPivotColumn, "PD_DA_JobTitle not found.");
+        assertTrue(foundEvent, "P1_Event not found.");
     }
     
     @Test(groups = "unit")

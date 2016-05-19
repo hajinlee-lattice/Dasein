@@ -1,14 +1,17 @@
 package com.latticeengines.leadprioritization.workflow.steps.pmml;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,6 +20,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
@@ -52,6 +56,7 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         model.setTargetsList(Arrays.asList(builder.getTargets()));
         model.setFeaturesList(Arrays.asList(builder.getFeatureList()));
         model.setSchemaContents(builder.getSchemaContents());
+        model.setProvenanceProperties(getProvenanceProperties());
 
         AppSubmission submission = modelProxy.submit(model);
         String appId = submission.getApplicationIds().get(0);
@@ -69,6 +74,15 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
             System.out.println(String.format("No result directory for modeling job %s", appId));
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
+    }
+    
+    private String getProvenanceProperties() {
+        List<String> props = new ArrayList<>();
+        if (builder.getMetadataArtifacts() != null) {
+            String path = builder.getMetadataArtifacts().get(ArtifactType.PMML);
+            props.add("PMML_File=" + path);
+        }
+        return StringUtils.join(props, " ");
     }
     
     public void writeDataFiles() throws Exception {
