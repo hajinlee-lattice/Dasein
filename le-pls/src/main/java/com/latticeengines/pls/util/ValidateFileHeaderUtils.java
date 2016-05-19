@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +30,7 @@ public class ValidateFileHeaderUtils {
 
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
+    public static final int MAX_NUM_FIELDS = 100;
 
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
@@ -53,9 +50,31 @@ public class ValidateFileHeaderUtils {
         }
     }
 
+    public static List<String> getCSVColumnFields(String columnHeaderName, InputStream stream, CloseableResourcePool closeableResourcePool) {
+        try {
+            List<String> columnFields = new ArrayList<>();
+            InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
+                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                    StandardCharsets.UTF_8);
+            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+            CSVParser parser = new CSVParser(reader, format);
+            List<CSVRecord> csvRecords = parser.getRecords();
+            int numFieldsToAdd = csvRecords.size() < MAX_NUM_FIELDS ? csvRecords.size() : MAX_NUM_FIELDS;
+
+            for (int i = 0; i < numFieldsToAdd; i++) {
+                columnFields.add(csvRecords.get(i).get(columnHeaderName));
+            }
+
+            return columnFields;
+        } catch (IOException e) {
+            log.error(e);
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static void checkForDuplicateHeaders(List<Attribute> attributes, String fileDisplayName,
-            Set<String> headerFields) {
+                                                Set<String> headerFields) {
         Map<String, List<String>> duplicates = new HashMap<>();
         for (final Attribute attribute : attributes) {
             final List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
@@ -85,6 +104,16 @@ public class ValidateFileHeaderUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static void checkForEmptyHeaders(String fileDisplayName, Set<String> headerFields) {
+        for (final String field : headerFields) {
+            if (StringUtils.isEmpty(field)) {
+                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
+            }
+        }
+    }
+
+    // UNUSED
     public static void checkForMissingRequiredFields(List<Attribute> attributes, String fileDisplayName,
             Set<String> headerFields, boolean respectNullability) {
 
@@ -115,11 +144,7 @@ public class ValidateFileHeaderUtils {
                     new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
         }
 
-        for (final String field : headerFields) {
-            if (StringUtils.isEmpty(field)) {
-                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
-            }
-        }
+        checkForEmptyHeaders(fileDisplayName, headerFields);
     }
 
     public static void checkForHeaderFormat(Set<String> headerFields) {

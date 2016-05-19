@@ -183,6 +183,48 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
+    this.GetFieldDocument = function(csvFile) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/models/' + csvFile.name + '/fieldmappings',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+            console.log('VALIDATION SUCCESS', status, data);
+            if (data == null || !data.Success) {
+                if (data && data.Errors.length > 0) {
+                    var errors = data.Errors.join('\n');
+                }
+                result = {
+                    Success: false,
+                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    Result: null
+                };
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: data.Errors,
+                    Result: data.Result
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            console.log('VALIDATION ERROR', status, data);
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.SetUnknownColumns = function(csvMetaData, csvUnknownColumns) {
         var deferred = $q.defer();
 
@@ -223,6 +265,10 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
+    this.SaveFieldDocuments = function(csvMetaData, mappingsDocument) {
+
+    }
+
     this.StartModeling = function(csvMetaData) {
         var deferred = $q.defer();
         console.log('StartModeling', csvMetaData)
@@ -230,7 +276,7 @@ angular.module('mainApp.create.csvImport', [
             method: 'POST',
             url: '/pls/models/' + csvMetaData.modelName,
             data: {
-                'description': 'Self-service Model',
+                'description': 'Self-service Model', // csvMetaData.description,
                 'filename': csvMetaData.name,
                 'name': csvMetaData.modelName,
                 'displayName': csvMetaData.displayName
@@ -398,7 +444,8 @@ angular.module('mainApp.create.csvImport', [
             this.cancelDeferred = cancelDeferred = $q.defer();
             csvImportService.Upload({
                 file: vm.csvFile, 
-                url: '/pls/models/fileuploads/unnamed',
+                // url: '/pls/models/fileuploads/unnamed',
+                url: '/pls/models/uploadfile/unnamed',
                 params: {
                     schema: fileType,
                     displayName: vm.csvFileName,
@@ -453,6 +500,7 @@ angular.module('mainApp.create.csvImport', [
                     vm.message = 'Done.';
                     metaData.modelName = modelName;
                     metaData.displayName = displayName;
+                    // metaData.description = description;
 
                     csvImportStore.Set(fileName, metaData);
 

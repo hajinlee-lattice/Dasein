@@ -119,6 +119,7 @@ angular
                     var deferred = $q.defer();
 
                     csvImportService.GetUnknownColumns(csvMetaData).then(function(result) {
+                    // csvImportService.GetFieldDocument(csvMetaData).then(function(result) {
                         deferred.resolve(result);
                     });
 

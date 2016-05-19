@@ -3,9 +3,12 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.pls.metadata.resolution.NewMetadataResolver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +74,39 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
+    public FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName) {
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, null);
+        return resolver.getFieldMappingsDocumentBestEffort();
+    }
+
+    @Override
+    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, fieldMappingDocument);
+
+        if (! resolver.isFieldMappingDocumentFullyDefined()) {
+            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
+        }
+        resolver.resolveBasedOnFieldMappingDocument();
+
+        String customerSpace = MultiTenantContext.getTenant().getId().toString();
+
+        if (sourceFile.getTableName() != null) {
+            metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
+        }
+
+        Table table = resolver.getMetadata();
+        table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
+        metadataProxy.createTable(customerSpace, table.getName(), table);
+        sourceFile.setTableName(table.getName());
+        sourceFileService.update(sourceFile);
+    }
+
+
+    @Override
     public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
-            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
+                                            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -96,6 +130,63 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return stream;
     }
 
+    @Override
+    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
+                                            String fileDisplayName) {
+
+        if (!stream.markSupported()) {
+            stream = new BufferedInputStream(stream);
+        }
+
+        stream.mark(1024 * 500);
+
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        try {
+            stream.reset();
+        } catch (IOException e) {
+            log.error(e);
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+
+        ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
+        return stream;
+    }
+
+    @Override
+    public Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields() {
+        Map<SchemaInterpretation, List<LatticeSchemaField>> schemaToLatticeSchemaFields = new HashMap<>();
+
+        List<Attribute> accountAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount).getAttributes();
+        List<LatticeSchemaField> latticeAccountSchemaFields = new ArrayList<>();
+        for (Attribute accountAttribute : accountAttributes) {
+            latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
+        }
+        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceAccount, latticeAccountSchemaFields);
+
+        List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead).getAttributes();
+        List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
+        for (Attribute leadAttribute : leadAttributes) {
+            latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
+        }
+        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceLead, latticeLeadSchemaFields);
+
+        return schemaToLatticeSchemaFields;
+    }
+
+    private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {
+        LatticeSchemaField latticeSchemaField = new LatticeSchemaField();
+
+        latticeSchemaField.setName(attribute.getName());
+        latticeSchemaField.setFieldType(attribute.getDataType());
+        if (! attribute.getNullable()) {
+            latticeSchemaField.setRequiredType(RequiredType.Required);
+        } else {
+            latticeSchemaField.setRequiredType(RequiredType.NotRequired);
+        }
+        return latticeSchemaField;
+
+    }
+
     private SourceFile getSourceFile(String sourceFileName) {
         SourceFile sourceFile = sourceFileService.findByName(sourceFileName);
         if (sourceFile == null) {
@@ -107,5 +198,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, List<ColumnTypeMapping> additionalColumns) {
         return new MetadataResolver(sourceFile.getPath(), //
                 sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
+    }
+
+    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument) {
+        return  new NewMetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
     }
 }
