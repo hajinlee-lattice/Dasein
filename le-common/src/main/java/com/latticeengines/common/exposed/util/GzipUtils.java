@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
@@ -83,6 +83,14 @@ public class GzipUtils {
         try {
             GzipCompressorInputStream zipStream = new GzipCompressorInputStream(stream);
             return zipStream;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void copyAndCompressStream(InputStream input, OutputStream output) {
+        try (GzipCompressorOutputStream gzip = new GzipCompressorOutputStream(output)) {
+            IOUtils.copyLarge(input, gzip);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,8 +113,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Map<String, String> map = (Map) response.get(0);
 
         String modelId = map.get("Id");
-        restTemplate.execute(getRestAPIHostPort() + "/pls/datafiles/" + fileType + "?modelId=" + modelId, HttpMethod.GET,
-                new RequestCallback() {
+        restTemplate.execute(getRestAPIHostPort() + "/pls/datafiles/" + fileType + "?modelId=" + modelId,
+                HttpMethod.GET, new RequestCallback() {
                     @Override
                     public void doWithRequest(ClientHttpRequest request) throws IOException {
                     }
@@ -133,15 +135,15 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvider() {
-        return new Object[][] { { "modeljson", "application/json" }, //
-                { "diagnosticsjson", "application/json" }, //
-                { "metadataavsc", "application/json" }, //
+        return new Object[][] { { "modeljson", MediaType.APPLICATION_JSON }, //
+                { "diagnosticsjson", MediaType.APPLICATION_JSON }, //
+                { "metadataavsc", MediaType.APPLICATION_JSON }, //
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //
-                { "scorecsv", "text/plain" }, //
+                { "scorecsv", MediaType.TEXT_PLAIN }, //
                 { "explorercsv", "application/csv" }, //
-                { "rfmodelcsv", "text/plain" }, //
-                { "postmatcheventtablecsv/training", "application/csv" }, //
-                { "postmatcheventtablecsv/test", "application/csv" } };
+                { "rfmodelcsv", MediaType.TEXT_PLAIN }, //
+                { "postmatcheventtablecsv/training", MediaType.APPLICATION_OCTET_STREAM }, //
+                { "postmatcheventtablecsv/test", MediaType.APPLICATION_OCTET_STREAM } };
     }
 }

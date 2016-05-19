@@ -13,6 +13,7 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -164,15 +165,15 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
 
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvier() {
-        return new Object[][] { { "application/json", "modelsummary.json" }, //
-                { "application/json", "diagnostics.json" }, //
+        return new Object[][] { { MediaType.APPLICATION_JSON, "modelsummary.json" }, //
+                { MediaType.APPLICATION_JSON, "diagnostics.json" }, //
                 { "application/csv", ".*_model.csv" }, //
                 { "application/csv", ".*_readoutsample.csv" }, //
-                { "text/plain", ".*_scored.txt" }, //
+                { MediaType.TEXT_PLAIN, ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
-                { "text/plain", "rf_model.txt" }, //
-                { "application/csv", "postMatchEventTable.*Training.*.csv" }, //
-                { "application/csv", "postMatchEventTable.*Test.*.csv" } };
+                { MediaType.TEXT_PLAIN, "rf_model.txt" }, //
+                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Training.*.csv" }, //
+                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv" } };
     }
 
     @DataProvider(name = "dataFileProviderNotFound")

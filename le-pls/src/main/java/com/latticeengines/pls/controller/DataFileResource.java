@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +35,7 @@ public class DataFileResource {
     public void getModelJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "modelsummary.json");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "modelsummary.json");
     }
 
     @RequestMapping(value = "/diagnosticsjson", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -43,7 +44,7 @@ public class DataFileResource {
     public void getDiagnosticsJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "diagnostics.json");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "diagnostics.json");
     }
 
     @RequestMapping(value = "/metadataavsc", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -52,7 +53,7 @@ public class DataFileResource {
     public void getMetadataAvscFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "metadata.avsc");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "metadata.avsc");
     }
 
     @RequestMapping(value = "/predictorcsv", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -79,7 +80,7 @@ public class DataFileResource {
     public void getScoreCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "text/plain", ".*_scored.txt");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.TEXT_PLAIN, ".*_scored.txt");
     }
 
     @RequestMapping(value = "/explorercsv", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -97,20 +98,20 @@ public class DataFileResource {
     public void getRfModelCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "text/plain", ".*rf_model.txt");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.TEXT_PLAIN, ".*rf_model.txt");
     }
 
-    @RequestMapping(value = "/postmatcheventtablecsv/{eventTableType}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/postmatcheventtablecsv/{eventTableType}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Post Match Event Table csv file for specific model summary")
     public void getPostMatchTrainingEventTableCsvFile(@RequestParam(value = "modelId") String modelId,
             @PathVariable String eventTableType, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         if (eventTableType.equalsIgnoreCase("training")) {
-            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*Training.*.csv");
         } else if (eventTableType.equalsIgnoreCase("test")) {
-            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*Test.*.csv");
         }
     }
