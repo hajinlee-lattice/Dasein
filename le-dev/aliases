@@ -45,7 +45,7 @@ alias msbld='pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package 
 alias swlibdpl='hadoop fs -rm -r /app/swlib || true && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar'
 
 alias runtest='python $WSHOME/le-dev/scripts/runtest.py'
-alias pytests='mvn -Pcc-python clean test'
+alias pytests='mvn -Ppython clean verify'
 alias mdstests='mvn -Pfunctional -DargLine="" verify'
 alias dftests='mvn -Pfunctional -DargLine="" verify'
 alias dfapitests='mvn -Pfunctional -DargLine="" verify'
