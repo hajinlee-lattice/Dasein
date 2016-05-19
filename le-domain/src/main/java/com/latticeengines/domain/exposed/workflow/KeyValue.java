@@ -12,7 +12,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.latticeengines.domain.exposed.pls.ModelSummary;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.Filter;
@@ -21,11 +21,12 @@ import org.hibernate.annotations.Index;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
@@ -85,9 +86,17 @@ public class KeyValue implements HasTenantId, HasPid {
     @JsonProperty("Payload")
     @Transient
     public String getPayload() {
-        byte[] uncompressedData = CompressionUtils.decompressByteArray(getData());
-        JsonElement root = new JsonParser().parse(new String(uncompressedData));
-        return root.toString();
+        String uncompressedData = new String(CompressionUtils.decompressByteArray(getData()));
+        try {
+            if (StringUtils.isNotEmpty(uncompressedData)) {
+                JsonNode root = new ObjectMapper().readValue(uncompressedData, JsonNode.class);
+                return root.toString();
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to deserialize payload [" + uncompressedData + "]", e);
+        }
     }
 
     @JsonProperty("Payload")
@@ -105,7 +114,7 @@ public class KeyValue implements HasTenantId, HasPid {
             byte[] compressedData = CompressionUtils.compressByteArray(payloadData);
             setData(compressedData);
         } catch (IOException e) {
-            log.error(e);
+            log.error("Failed to compress payload [" + payload + "]", e);
         }
     }
 

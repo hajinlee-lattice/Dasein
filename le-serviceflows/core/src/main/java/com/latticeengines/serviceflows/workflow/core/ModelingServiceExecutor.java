@@ -496,6 +496,15 @@ public class ModelingServiceExecutor {
             return this;
         }
 
+        public Builder customizedColumnSelection(ColumnSelection columnSelection) {
+            if (this.getPredefinedColumnSelection() != null) {
+                log.warn("When both predefined and customized column selections are provided, " +
+                        "customized one will be ignored");
+            }
+            this.setCustomizedColumnSelection(columnSelection);
+            return this;
+        }
+
         public void setHdfsDirToSample(String hdfsDirToSample) {
             this.hdfsDirToSample = hdfsDirToSample;
         }

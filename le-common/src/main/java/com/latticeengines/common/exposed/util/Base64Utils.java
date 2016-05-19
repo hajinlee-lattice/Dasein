@@ -26,4 +26,12 @@ public class Base64Utils {
     public static String encodeBase64WithDefaultTrim(String input) {
         return encodeBase64(input, true, DEFAULT_TRIM_LENGTH);
     }
+
+    public static String encodeBase64(byte[] bytes) {
+        return org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(bytes);
+    }
+
+    public static byte[] decodeBase64(String base64) {
+        return org.apache.commons.codec.binary.Base64.decodeBase64(base64);
+    }
 }

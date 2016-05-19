@@ -69,16 +69,12 @@ public class ModelResource {
         Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
                 parameters.getAttributes());
 
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
-        String transformationGroupName = modelSummary.getTransformationGroupName();
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { parameters.getSourceModelSummaryId() });
-        }
-
+        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(parameters.getSourceModelSummaryId(), false,
+                true, true);
         return ResponseDocument.successResponse( //
-                modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(), parameters.getDisplayName(),
-                        modelSummary.getSourceSchemaInterpretation(), modelSummary.getTrainingTableName(),
-                        transformationGroupName).toString());
+                modelWorkflowSubmitter
+                        .submit(clone.getName(), parameters.getName(), parameters.getDisplayName(), modelSummary)
+                        .toString());
     }
 
 }

@@ -19,4 +19,13 @@ public class Base64UtilsUnitTestNG {
         System.out.println("Encrypted: " + encrypted);
         Assert.assertEquals(encrypted, "bGF0dGlj");
     }
+
+    @Test(groups = "unit")
+    public void testEncodeDecodeBytes() {
+        String source = "{\"Message\":\"I am great\"}";
+        String base64 = Base64Utils.encodeBase64(source.getBytes());
+        byte[] decoded = Base64Utils.decodeBase64(base64);
+        Assert.assertEquals(decoded, source.getBytes());
+    }
+
 }

@@ -179,7 +179,7 @@ public class ModelSummaryResource {
 
     @RequestMapping(value = "/predictors/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Update predictors of a modelSummary for the use of BuyerInsights")
+    @ApiOperation(value = "Update predictors of a sourceModelSummary for the use of BuyerInsights")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean updatePredictors(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
         modelSummaryService.updatePredictors(modelId, attrMap);

@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
@@ -26,6 +27,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String trainingTableName;
 
     private String transformationGroupName;
+
+    private ModelSummary sourceModelSummary;
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
@@ -95,5 +98,13 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setTransformationGroupName(String transformationGroupName) {
         this.transformationGroupName = transformationGroupName;
+    }
+
+    public ModelSummary getSourceModelSummary() {
+        return sourceModelSummary;
+    }
+
+    public void setSourceModelSummary(ModelSummary sourceModelSummary) {
+        this.sourceModelSummary = sourceModelSummary;
     }
 }

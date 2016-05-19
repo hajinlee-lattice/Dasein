@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -77,6 +79,9 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String sourceSchemaInterpretation;
     private String trainingTableName;
     private String transformationGroupName;
+    private String predefinedSelectionName;
+    private String predefinedSelectionVersion;
+    private ColumnSelection customizedColumnSelection;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -444,4 +449,57 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setTransformationGroupName(String transformationGroupName) {
         this.transformationGroupName = transformationGroupName;
     }
+
+    @Transient
+    @JsonProperty("PredefinedSelectionName")
+    private String getPredefinedSelectionName() {
+        return predefinedSelectionName;
+    }
+
+    @Transient
+    @JsonProperty("PredefinedSelectionName")
+    private void setPredefinedSelectionName(String predefinedSelectionName) {
+        this.predefinedSelectionName = predefinedSelectionName;
+    }
+
+    @Transient
+    @JsonProperty("PredefinedSelectionVersion")
+    public String getPredefinedSelectionVersion() {
+        return predefinedSelectionVersion;
+    }
+
+    @Transient
+    @JsonProperty("PredefinedSelectionVersion")
+    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
+        this.predefinedSelectionVersion = predefinedSelectionVersion;
+    }
+
+    @Transient
+    @JsonProperty("CustomizedColumnSelection")
+    public ColumnSelection getCustomizedColumnSelection() {
+        return customizedColumnSelection;
+    }
+
+    @Transient
+    @JsonProperty("CustomizedColumnSelection")
+    public void setCustomizedColumnSelection(ColumnSelection customizedColumnSelection) {
+        this.customizedColumnSelection = customizedColumnSelection;
+    }
+
+    @Transient
+    @JsonIgnore
+    public ColumnSelection.Predefined getPredefinedSelection() {
+        if (StringUtils.isNotEmpty(getPredefinedSelectionName())) {
+            return ColumnSelection.Predefined.fromName(getPredefinedSelectionName());
+        } else  {
+            return null;
+        }
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+        this.setPredefinedSelectionName(predefinedSelection.getName());
+    }
+
 }

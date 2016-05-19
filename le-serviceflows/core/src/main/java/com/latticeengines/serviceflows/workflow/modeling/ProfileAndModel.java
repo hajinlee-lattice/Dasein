@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -34,6 +36,22 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
     @Override
     public void execute() {
         log.info("Inside ProfileAndModel execute()");
+
+        ModelSummary sourceSummary = configuration.getSourceModelSummary();
+        if (sourceSummary!=null) {
+            try {
+                String indented = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(sourceSummary);
+                log.info("Found source model summary in configuration\n " + indented);
+            } catch (Exception e) {
+                // ignore
+            }
+            if (sourceSummary.getPredefinedSelection() != null) {
+                executionContext.put(MATCH_PREDEFINED_SELECTION, sourceSummary.getPredefinedSelection());
+                executionContext.put(MATCH_PREDEFINED_SELECTION_VERSION, sourceSummary.getPredefinedSelectionVersion());
+            } else {
+                executionContext.put(MATCH_CUSTOMIZED_SELECTION, sourceSummary.getCustomizedColumnSelection());
+            }
+        }
 
         Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn;
@@ -73,6 +91,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         return executionContext.getString(MATCH_PREDEFINED_SELECTION_VERSION);
     }
 
+    private ColumnSelection getCustomizedSelection() {
+        return (ColumnSelection) executionContext.get(MATCH_CUSTOMIZED_SELECTION);
+    }
+
     private Map<String, String> profileAndModel(Table eventTable) throws Exception {
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
@@ -109,6 +131,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .productType(configuration.getProductType());
             if (getPredefinedSelection() != null) {
                 bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
+            } else if (getCustomizedSelection() != null) {
+                bldr = bldr.customizedColumnSelection(getCustomizedSelection());
+            } else {
+                log.warn("Neither PredefinedSelection nor CustomizedSelection is provided.");
             }
             if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");

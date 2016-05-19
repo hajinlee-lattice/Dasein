@@ -23,7 +23,7 @@ public class PredictorDaoImpl extends BaseDaoImpl<Predictor> implements Predicto
     public List<Predictor> findByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Predictor> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where modelSummary. = '%s'", entityClz.getSimpleName(), modelId);
+        String queryStr = String.format("from %s where sourceModelSummary. = '%s'", entityClz.getSimpleName(), modelId);
         Query query = session.createQuery(queryStr);
         return query.list();
     }
