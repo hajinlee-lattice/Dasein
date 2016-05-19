@@ -7,6 +7,7 @@ from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 
+
 class SummaryGenerator(State, JsonGenBase):
 
     def __init__(self):
@@ -23,7 +24,7 @@ class SummaryGenerator(State, JsonGenBase):
         rocScore = mediator.rocscore
 
         if rocScore is not None:
-            self.summary["RocScore"] = rocScore 
+            self.summary["RocScore"] = rocScore
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
         self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties, mediator.allDataPreTransform.shape[0])
         self.summary["ConstructionInfo"] = self.__getConstructionInfo()

@@ -206,15 +206,14 @@ class Launcher(object):
             for filename in filter(lambda e: executor.accept(e), filenames):
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
  
-            # Copy the enhanced model data files from local to hdfs?
+            # Copy the enhanced model data files from local to hdfs
             # Get hdfs model enhancements dir
             modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
  
-            if self.clf != None:
-                hdfs.mkdir(modelEnhancementsHdfsDir)
-                (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
-                for filename in filter(lambda e: executor.accept(e), filenames):
-                    hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
+            hdfs.mkdir(modelEnhancementsHdfsDir)
+            (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
+            for filename in filter(lambda e: executor.accept(e), filenames):
+                hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
  
 def traverse(directory):
     (dirpath, directories, filenames) = os.walk(directory).next()

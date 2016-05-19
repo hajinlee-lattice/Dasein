@@ -4,6 +4,7 @@ import logging
 from leframework.codestyle import overrides
 from leframework.model.state import State
 
+
 class EnhancedSummaryGenerator(State):
 
     def __init__(self):
@@ -14,12 +15,23 @@ class EnhancedSummaryGenerator(State):
     def execute(self):
         self.result = OrderedDict()
 
-        self.result["Segmentations"] = self.mediator.segmentations
-        self.result["Predictors"] = self.mediator.predictors
-        self.result["ModelDetails"] = self.mediator.modeldetails
-        self.result["TopSample"] = self.mediator.topsample
-        self.result["BottomSample"] = self.mediator.bottomsample
-        self.result["EventTableProvenance"] = self.mediator.eventtableprovenance
+        if hasattr(self.mediator, "segmentations"):
+            self.result["Segmentations"] = self.mediator.segmentations
+        
+        if hasattr(self.mediator, "predictors"):
+            self.result["Predictors"] = self.mediator.predictors
+        
+        if hasattr(self.mediator, "modeldetails"):
+            self.result["ModelDetails"] = self.mediator.modeldetails
+            
+        if hasattr(self.mediator, "topsample"):
+            self.result["TopSample"] = self.mediator.topsample
+        
+        if hasattr(self.mediator, "bottomsample"):
+            self.result["BottomSample"] = self.mediator.bottomsample
+        
+        if hasattr(self.mediator, "eventtableprovenance"):
+            self.result["EventTableProvenance"] = self.mediator.eventtableprovenance
 
         if "cross_validation" in self.mediator.algorithmProperties:
             self.result["CrossValidatedMeanOfModelAccuracy"] = self.mediator.crossValidatedModelMean

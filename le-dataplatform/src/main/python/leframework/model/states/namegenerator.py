@@ -1,14 +1,16 @@
 import logging
 import time
+
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
+
 
 class NameGenerator(State, JsonGenBase):
 
     def __init__(self):
         State.__init__(self, "NameGenerator")
-        self.logger = logging.getLogger(name = 'NameGenerator')
+        self.logger = logging.getLogger(name = 'namegenerator')
     
     @overrides(State)
     def execute(self):

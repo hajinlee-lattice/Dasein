@@ -108,7 +108,8 @@
     "PD_DA_LastSocialActivity_Units_seconds",
     "BusinessVCFunded_False",
     "BusinessECommerceSite_False",
-    "BusinessVCFunded__1"
+    "BusinessVCFunded__1",
+    "PD_DA_JobTitle"
   ],
   "targets": [
     "P1_Event"
@@ -124,7 +125,7 @@
   ],
   "data_format": "avro",
   "algorithm_properties": "",
-  "provenance_properties": "",
+  "provenance_properties": "PMML_File=/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Metadata/module1/PMMLFiles/rfpmml.xml Lattice_Version=2.0.22-SNAPSHOT",
   "data_profile": "/user/s-analytics/customers/DemoContract.DemoTenant.Production/data/PMMLDummyTable-1463158707468-P1_Event-Metadata",
   "config_metadata": "/user/s-analytics/customers/DemoContract.DemoTenant.Production/data/PMMLDummyTable-1463158707468-P1_Event-Metadata/metadata-pmml.avsc",
   "diagnostics_path": "",

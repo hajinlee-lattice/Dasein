@@ -11,6 +11,7 @@ from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 from pipelinefwk import Pipeline
 
+
 class ModelGenerator(State, JsonGenBase):
     
     def __init__(self):

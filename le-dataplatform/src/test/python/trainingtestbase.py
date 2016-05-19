@@ -56,6 +56,7 @@ class TrainingTestBase(TestBase):
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
+        os.symlink("../../main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
         os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)

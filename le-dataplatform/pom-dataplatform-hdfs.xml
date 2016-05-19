@@ -321,6 +321,9 @@
                                 <source>
                                     <location>src/main/python/configurablepipelinetransformsfromfile/pipeline.json</location>
                                 </source>
+                                <source>
+                                    <location>src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

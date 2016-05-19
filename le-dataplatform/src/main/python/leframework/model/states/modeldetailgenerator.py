@@ -1,10 +1,11 @@
-from collections import OrderedDict
 import calendar
+from collections import OrderedDict
 import logging
 import time
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
+
 
 class ModelDetailGenerator(State):
 
@@ -34,8 +35,11 @@ class ModelDetailGenerator(State):
         result["TestingConversions"] = int(mediator.data[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
 
-        if self.mediator.rocscore is not None:
-            result["RocScore"] = self.mediator.rocscore
+        try:
+            if self.mediator.rocscore is not None:
+                result["RocScore"] = self.mediator.rocscore
+        except AttributeError:
+            result["RocScore"] = -1
 
         result["ConstructionTime"] = self.now()
         result["TemplateVersion"] = mediator.templateVersion
