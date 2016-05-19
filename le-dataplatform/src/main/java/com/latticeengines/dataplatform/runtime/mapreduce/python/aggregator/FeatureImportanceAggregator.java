@@ -55,17 +55,20 @@ public class FeatureImportanceAggregator implements FileAggregator {
         return FeatureImportanceValues;
 	}
 
-	private void writeToLocal(HashMap<String, Double> FeatureImportanceValues) throws IOException{
-		FileWriter fwriter = new FileWriter(getName());
-        BufferedWriter bwriter = new BufferedWriter(fwriter);
-
-        bwriter.write("Column Name, Feature Importance\n");
-        for (String feature : FeatureImportanceValues.keySet()){
-        	String FIValue = BigDecimal.valueOf(FeatureImportanceValues.get(feature)).toPlainString();
-        	bwriter.write(feature + ", " + FIValue.substring(0, Math.min(FIValue.length(), 8)) +"\n");
-        }
-        bwriter.flush();
-        fwriter.flush();
+	private void writeToLocal(HashMap<String, Double> FeatureImportanceValues){
+		try {
+			FileWriter fwriter = new FileWriter(getName());
+			BufferedWriter bwriter = new BufferedWriter(fwriter);
+		        bwriter.write("Column Name, Feature Importance\n");
+		        for (String feature : FeatureImportanceValues.keySet()){
+		        	String FIValue = BigDecimal.valueOf(FeatureImportanceValues.get(feature)).toPlainString();
+		        	bwriter.write(feature + ", " + FIValue.substring(0, Math.min(FIValue.length(), 8)) +"\n");
+		        }
+		        bwriter.close();
+		        fwriter.close();
+		} catch(IOException ex) {
+			System.out.println("There was a problem in writing to local feature importance aggregation file.");
+		}
 	}
 
     private void copyToHdfs(Configuration config) throws Exception {
