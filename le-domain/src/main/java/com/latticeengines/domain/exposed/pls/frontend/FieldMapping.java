@@ -8,7 +8,7 @@ public class FieldMapping {
     private String userField;
 
     @JsonProperty
-    private String mappedLatticeField;
+    private String mappedField;
 
     @JsonProperty
     private String fieldType;
@@ -25,11 +25,11 @@ public class FieldMapping {
     }
 
     public void setMappedField(String mappedField) {
-        this.mappedLatticeField = mappedField;
+        this.mappedField = mappedField;
     }
 
     public String getMappedField() {
-        return this.mappedLatticeField;
+        return this.mappedField;
     }
 
     public void setFieldType(String fieldType) {
