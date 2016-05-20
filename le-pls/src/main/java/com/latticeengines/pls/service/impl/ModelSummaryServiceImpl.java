@@ -115,8 +115,10 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Override
     public ModelSummary getModelSummaryEnrichedByDetails(String modelId) {
         ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, true, true);
-        summary.setPredictors(new ArrayList<Predictor>());
-        summary.setDetails(null);
+        if (summary != null) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
+        }
         return summary;
     }
 
