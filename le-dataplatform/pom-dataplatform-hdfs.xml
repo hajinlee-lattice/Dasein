@@ -324,9 +324,9 @@
                                 <source>
                                     <location>src/main/python/configurablepipelinetransformsfromfile/pipeline.json</location>
                                 </source>
-                                <source>
+                                  <source>
                                     <location>src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json</location>
-                                </source>                                
+                                </source>
                                 <source>
                                     <location>src/main/python/datarules/rulepipeline.json</location>
                                 </source>
