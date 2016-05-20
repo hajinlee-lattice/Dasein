@@ -68,7 +68,7 @@ public class PythonMRJobUnitTestNG {
         assertNotNull(conf.get(MapReduceProperty.INPUT.name()));
         assertEquals(conf.get(MRPathFilter.INPUT_FILE_PATTERN), PythonMRJobType.CONFIG_FILE);
 
-        assertEquals(job.getCacheFiles().length, 12);
+        assertEquals(job.getCacheFiles().length, 13);
         assertEquals(job.getCacheArchives().length, 2);
         assertEquals(job.getInputFormatClass(), NLineInputFormat.class);
 
