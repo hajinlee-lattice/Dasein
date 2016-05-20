@@ -121,14 +121,14 @@ html input[disabled] {
   &.blue-button, &.orange-button,
   &.white-button, &.gray-button {
     cursor: default;
-    border: #e2e2e4 solid 1px;
-    background-color: #fff;
-    color: #c2c2c2;
+    border: #b7b7b7 solid 1px;
+    background-color: #e7e7e7;
+    color: #b7b7b7;
     &:hover {
-      background-color: #fff;
+      background-color: #e7e7e7;
     }
     &:active {
-      background-color: #fff;
+      background-color: #e7e7e7;
     }
   }
 }
@@ -221,6 +221,7 @@ Use this structure for angled buttons:
     -webkit-transform:skewX(20deg);
   text-transform: uppercase;
   padding: 10px 30px 8px;
+  margin-right: 2px;
   span {
     display: inline-block;
     transform: skewX(-20deg);

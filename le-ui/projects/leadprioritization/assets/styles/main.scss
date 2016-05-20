@@ -617,29 +617,68 @@ Create Model: Custom Fields Page
 ================================================================== */
 .main-content section.custom-fields {
   margin-top: 80px;
-  .unstyled {
-    margin-top: 20px;
-    td, th {
-      width: 50%;
-      padding: 0 0 4px;
-      vertical-align: top;
-      display: inline-block;
-      word-wrap: break-word;
-      &:first-child {
-        padding-right: 4px;
-        width: 70%;
-      }
-      &:last-child {
-        padding-left: 4px;
-        width: 29%;
-      }
+  h2, h3 {
+    text-align: center;
+  }
+  h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  h3 {
+    font-size: 20px;
+    font-weight: normal;
+    text-transform: none;
+    margin-bottom: 40px;
+  }
+  thead {
+    border-bottom: #333 solid 1px;
+  }
+  th {
+    padding: 8px 12px 10px;
+    &:first-child {
+      text-align: right;
+      border-right: #b0b0b0 solid 1px;
+    }
+    &:nth-child(3) {
+      font-style: italic;
+      color: #b0b0b0;
     }
   }
-  input {
-    height: 43px;;
+  td {
+    padding: 7px 16px;
+    &:first-child {
+      text-align: right;
+      border-right: #b0b0b0 solid 1px;
+    }
+    &:nth-child(3) {
+      width: 137px;
+      padding-right: 0;
+    }
+    select {
+      display: inline-block;
+      font-size: 14px;
+      height: 35px;
+      border-radius: 0;
+      -moz-border-radius: 0;
+      -webkit-border-radius: 0;
+      &:nth-child(1) {
+        width:40%;
+        margin-right: 3%;
+      }
+      &:nth-child(2) {
+        width: 56%;
+      }
+    }
+    input {
+      margin-top: 2px;
+      display: inline-block;
+    }
   }
-  .custom-select:not([class*="col-"]):not([class*="form-control"]):not(input-group-btn) {
-    width: 100%;
+  .actions {
+    padding-top: 20px;
+    margin-top: 50px;
+    border-top: #b0b0b0 solid 1px;
   }
 }
 

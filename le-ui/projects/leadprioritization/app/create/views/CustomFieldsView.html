@@ -1,10 +1,4 @@
 <style type="text/css">
-	section.custom-fields td select {
-	    font-size: 1.3em;
-	    border: 1px solid #bbb;
-	    color: #666;
-	    padding: 6px;
-	}
 	div.error-message {
 	    width: 600px;
 	    margin: 0 auto 2em;
@@ -16,62 +10,115 @@
 	    padding: 0.5em;
 	}
 </style>
-<section class="container row custom-fields">
-	<div class="error-message text-center" ng-show="vm.errors">
-		<div>{{ vm.errors }}</div>
+<section class="container custom-fields">
+
+	<div class="row">
+		<div class="error-message text-center" ng-show="vm.errors">
+			<div>{{ vm.errors }}</div>
+		</div>
 	</div>
 
-	<div class="six columns offset-three">
+	<div class="row">
+		<div class="ten columns offset-one">
+			<h2>Field Mapping</h2>
+			<h3>You must map to Lattice Fields: <br/><span class="orange-text">email</span>, <span class="orange-text">website</span>, <span class="orange-text">record ID</span></h3>
+		</div>
+	</div>
 
-		<p ng-hide="vm.errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING', [vm.data.length])}}</p>
+	<div class="row">
+		<div class="ten columns offset-one">
 
-		<table ng-hide="vm.errors" class="unstyled">
-			<thead>
-				<tr>
-					<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDNAME')}}</th>
-					<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="item in vm.data">
-					<td>
-						<label class="form-control" for="columnType_{{$index}}">{{ item.columnName }}</label>
-					</td>
-					<td>
-						<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
-							<option value="STRING" selected>Text</option>
-							<option value="DOUBLE">Number</option>
-							<option value="BOOLEAN">Boolean</option>
-						</select>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+			<!-- <p ng-hide="vm.errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING', [vm.data.length])}}</p> -->
 
-		<div class="row">
-			<div class="six columns offset-two" ng-if="vm.errors">
-				<button ui-sref="home.models.import" class="button gray-button block-button" type="button">
+			<table ng-hide="vm.errors" class="unstyled">
+				<thead>
+					<tr>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDNAME')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>CustomerEmail</td>
+						<td>
+							<select class="form-control" name="" value="">
+								<option value="" selected>Map to Lattice Data Cloud</option>
+								<option value="">Custom Field</option>
+								<option value="">Ignore this field</option>
+							</select>
+							<select class="form-control" name="" value="">
+								<option value="" selected>Select Field</option>
+								<option value="">Lorem</option>
+								<option value="">Lorem</option>
+							</select>
+						</td>
+						<td>
+							<input type="text" id="" class="form-control" value="VarChar" />
+						</td>
+					</tr>
+					<tr>
+						<td>CustomerEmail</td>
+						<td>
+							<select class="form-control" name="" value="">
+								<option value="" selected>Map to Lattice Data Cloud</option>
+								<option value="">Custom Field</option>
+								<option value="">Ignore this field</option>
+							</select>
+							<select class="form-control" name="" value="">
+								<option value="" selected>Select Field</option>
+								<option value="">Lorem</option>
+								<option value="">Lorem</option>
+							</select>
+						</td>
+						<td>
+							<input type="text" id="" class="form-control" value="VarChar" />
+						</td>
+					</tr>					
+<!-- 					<tr ng-repeat="item in vm.data">
+						<td>
+							<label class="form-control" for="columnType_{{$index}}">{{ item.columnName }}</label>
+						</td>
+						<td>
+							<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
+								<option value="STRING" selected>Text</option>
+								<option value="DOUBLE">Number</option>
+								<option value="BOOLEAN">Boolean</option>
+							</select>
+						</td>
+					</tr> -->
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="ten columns offset-one actions">
+			<div class="pull-left" ng-if="vm.errors">
+				<button ui-sref="home.models.import" class="button gray-button" type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
 				</button>
 			</div>
-			<div class="six columns" ng-hide="vm.errors">
-				<button ui-sref="home.models.import" class="button gray-button block-button" type="button">
+			<div class="pull-left" ng-hide="vm.errors">
+				<button ui-sref="home.models.import" class="button gray-button" type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
 				</button>
 			</div>
-			<div class="six columns" ng-hide="vm.errors">
-				<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">
+			<div class="pull-right" ng-hide="vm.errors">
+				<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button" type="button" disabled>
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
 				</button>
 			</div>
 		</div>
-
 	</div>
+
+
 </section>
-<!--
+<!-- 
 <script>
   $( document ).ready(function() {
     $(".custom-select").selectpicker();
   });
 </script>
--->
+ -->
