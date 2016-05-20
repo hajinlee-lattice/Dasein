@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
@@ -40,7 +41,7 @@ import com.latticeengines.scoringapi.match.Matcher;
 @Component("matcher)")
 public class MatcherImpl implements Matcher {
 
-    public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+    private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final Log log = LogFactory.getLog(MatcherImpl.class);
 
     @Autowired
@@ -49,7 +50,8 @@ public class MatcherImpl implements Matcher {
     @Autowired
     private Warnings warnings;
 
-    private MatchInput buildMatchInput(CustomerSpace space, InterpretedFields interpreted, Map<String, Object> record) {
+    private MatchInput buildMatchInput(CustomerSpace space, InterpretedFields interpreted, Map<String, Object> record,
+            ModelSummary modelSummary) {
         MatchInput matchInput = new MatchInput();
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
@@ -60,9 +62,15 @@ public class MatcherImpl implements Matcher {
         addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         matchInput.setKeyMap(keyMap);
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
-        // the version here should be read from model
-        matchInput.setPredefinedVersion("1.0");
+
+        if (modelSummary != null && modelSummary.getPredefinedSelection() != null) {
+            matchInput.setPredefinedSelection(modelSummary.getPredefinedSelection());
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
+                matchInput.setPredefinedVersion(modelSummary.getPredefinedSelectionVersion());
+            }
+        } else {
+            matchInput.setPredefinedSelection(ColumnSelection.Predefined.getLegacyDefaultSelection());
+        }
         matchInput.setTenant(new Tenant(space.toString()));
         List<String> fields = new ArrayList<>();
         List<List<Object>> data = new ArrayList<>();
@@ -82,8 +90,8 @@ public class MatcherImpl implements Matcher {
 
     @Override
     public Map<String, Object> matchAndJoin(CustomerSpace space, InterpretedFields interpreted,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
-        MatchInput matchInput = buildMatchInput(space, interpreted, record);
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelSummary modelSummary) {
+        MatchInput matchInput = buildMatchInput(space, interpreted, record, modelSummary);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
@@ -133,8 +141,8 @@ public class MatcherImpl implements Matcher {
     @Override
     public List<Map<String, Object>> matchAndJoin(CustomerSpace space,
             List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
-            Map<String, Map<String, FieldSchema>> fieldSchemasMap) {
-        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsList);
+            Map<String, Map<String, FieldSchema>> fieldSchemasMap, List<ModelSummary> modelSummaryList) {
+        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsList, modelSummaryList);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
@@ -160,14 +168,18 @@ public class MatcherImpl implements Matcher {
     }
 
     private BulkMatchInput buildMatchInput(CustomerSpace space,
-            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList) {
+            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
+                                           List<ModelSummary> modelSummaryList) {
         BulkMatchInput bulkInput = new BulkMatchInput();
         List<MatchInput> matchInputList = new ArrayList<>();
         bulkInput.setInputList(matchInputList);
         bulkInput.setRequestId(UUID.randomUUID().toString());
+        Integer idx = 0;
         for (SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields : parsedRecordAndInterpretedFieldsList) {
+            ModelSummary modelSummary = modelSummaryList.get(idx);
             matchInputList.add(buildMatchInput(space, parsedRecordAndInterpretedFields.getValue(),
-                    parsedRecordAndInterpretedFields.getKey()));
+                    parsedRecordAndInterpretedFields.getKey(), modelSummary));
+            idx++;
         }
         return bulkInput;
     }

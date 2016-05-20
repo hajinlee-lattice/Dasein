@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -13,6 +14,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
@@ -52,7 +54,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
         }
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName()) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                sourceFile.getTableName()) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
@@ -67,10 +70,10 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
                 transformationGroup);
 
-        log.info(String
-                .format("Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
-                        modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
-                        sourceFile.getDisplayName()));
+        log.info(String.format(
+                "Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
+                modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
+                sourceFile.getDisplayName()));
         return workflowJobService.submit(configuration);
 
     }
@@ -85,7 +88,18 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndScoreWorkflow");
 
-        ImportMatchAndScoreWorkflowConfiguration importMatchAndScoreWorkflowConfig = new ImportMatchAndScoreWorkflowConfiguration.Builder()
+        ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
+
+        ColumnSelection.Predefined selection = ColumnSelection.Predefined.getLegacyDefaultSelection();
+        String selectionVersion = null;
+        if (summary != null && summary.getPredefinedSelection() != null) {
+            selection = summary.getPredefinedSelection();
+            if (StringUtils.isNotEmpty(summary.getPredefinedSelectionVersion())) {
+                selectionVersion = summary.getPredefinedSelectionVersion();
+            }
+        }
+
+        return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .sourceFileName(sourceFile.getName()) //
@@ -98,14 +112,12 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(ColumnSelection.Predefined.DerivedColumns, "1.0") // the version here should be read from model
+                .matchColumnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //
                 .build();
-
-        return importMatchAndScoreWorkflowConfig;
     }
 }

@@ -62,15 +62,14 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
     @Override
     public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined) {
         try {
-            if (ColumnSelection.Predefined.Model.equals(predefined)
-                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
                 return predefinedMetaDataCache.get(predefined);
             } else {
                 throw new UnsupportedOperationException("Only support selection "
                         + ColumnSelection.Predefined.supportedSelections + " now");
             }
         } catch (Exception e) {
-            log.warn("Failed to find metadata for selection " + predefined + " in cache");
+            log.warn("Failed to find metadata for selection " + predefined + " in cache", e);
             List<ColumnMetadata> metadatas = fromExternalColumnService(predefined);
             predefinedMetaDataCache.put(predefined, metadatas);
             return metadatas;

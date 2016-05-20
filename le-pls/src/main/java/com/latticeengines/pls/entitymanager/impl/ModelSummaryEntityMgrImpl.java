@@ -1,5 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -121,6 +125,30 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             summary.setDetails(kv);
         }
         kv.setTenantId(summary.getTenantId());
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode details = objectMapper.readTree(summary.getDetails().getPayload());
+            JsonNode provenance = details.get("EventTableProvenance");
+            if (provenance != null) {
+                String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
+                if (org.apache.commons.lang.StringUtils.isNotEmpty(predefinedSelectionName)) {
+                    ColumnSelection.Predefined predefined = ColumnSelection.Predefined
+                            .fromName(predefinedSelectionName);
+                    String predefinedSelectionVersion = provenance.get("Predefined_ColumnSelection_Version")
+                            .asText();
+                    summary.setPredefinedSelection(predefined);
+                    summary.setPredefinedSelectionVersion(predefinedSelectionVersion);
+                } else {
+                    ColumnSelection selection = objectMapper
+                            .treeToValue(provenance.get("Customized_ColumnSelection"), ColumnSelection.class);
+                    summary.setCustomizedColumnSelection(selection);
+                }
+            }
+        } catch (IOException e) {
+            log.error("Failed to parse model details KeyValue", e);
+        }
+
     }
 
     private void inflatePredictors(ModelSummary summary) {

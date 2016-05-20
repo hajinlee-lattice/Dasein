@@ -15,4 +15,6 @@ public interface ModelSummaryService {
 
     ModelSummary getModelSummaryByModelId(String modelId);
 
+    ModelSummary getModelSummaryEnrichedByDetails(String modelId);
+
 }

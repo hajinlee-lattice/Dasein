@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -40,11 +41,11 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
-import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoringapi.controller.ScoreResource;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
@@ -116,7 +117,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         split("parseRecord");
 
         Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
-                fieldSchemas, parsedRecordAndInterpretedFields.getKey());
+                fieldSchemas, parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary());
         addMissingFields(fieldSchemas, matchedRecord);
         split("matchRecord");
 
@@ -154,7 +155,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         split("parseRecord");
 
         List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedList = extractParsedList(parsedTupleList);
-        List<Map<String, Object>> matchedRecords = matcher.matchAndJoin(space, parsedList, fieldSchemasMap);
+        List<ModelSummary> modelSummaryList = extractModelSummaries(parsedTupleList, scoringArtifactsMap);
+        List<Map<String, Object>> matchedRecords = matcher.matchAndJoin(space, parsedList, fieldSchemasMap, modelSummaryList);
         addMissingFields(fieldSchemasMap, matchedRecords, parsedTupleList);
         split("matchRecord");
 
@@ -178,6 +180,20 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             parsedRecordAndInterpretedFieldsList.add(tuple.getParsedData());
         }
         return parsedRecordAndInterpretedFieldsList;
+    }
+
+    private List<ModelSummary> extractModelSummaries(List<Tuple> parsedTupleList, Map<String, ScoringArtifacts> scoringArtifactsMap) {
+        List<ModelSummary> modelSummaryList = new ArrayList<>();
+        for (Tuple tuple: parsedTupleList) {
+            String modelId = getModelId(tuple);
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelId)) {
+                ModelSummary modelSummary = scoringArtifactsMap.get(modelId).getModelSummary();
+                modelSummaryList.add(modelSummary);
+            } else {
+                modelSummaryList.add(null);
+            }
+        }
+        return modelSummaryList;
     }
 
     private List<RecordScoreResponse> generateDebugScoreResponse(Map<String, ScoringArtifacts> scoringArtifactsMap,

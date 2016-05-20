@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
@@ -64,6 +66,16 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "scoreWorkflow");
 
+        ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
+        ColumnSelection.Predefined selection = ColumnSelection.Predefined.getLegacyDefaultSelection();
+        String selectionVersion = null;
+        if (summary != null && summary.getPredefinedSelection() != null) {
+            selection = summary.getPredefinedSelection();
+            if (StringUtils.isNotEmpty(summary.getPredefinedSelectionVersion())) {
+                selectionVersion = summary.getPredefinedSelectionVersion();
+            }
+        }
+
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
@@ -74,7 +86,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .columnSelection(ColumnSelection.Predefined.DerivedColumns, "1.0") // the version here should be read from model
+                .columnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //

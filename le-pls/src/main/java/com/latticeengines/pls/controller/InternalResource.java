@@ -338,12 +338,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, false, true);
-        if (summary != null) {
-            summary.setPredictors(new ArrayList<Predictor>());
-            summary.setDetails(null);
-        }
-        return summary;
+        return modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")

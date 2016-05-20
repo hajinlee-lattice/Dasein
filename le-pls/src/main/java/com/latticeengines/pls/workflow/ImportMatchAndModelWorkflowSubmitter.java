@@ -87,7 +87,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(ColumnSelection.Predefined.DerivedColumns, null) // version null means current version
+                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null means latest
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //

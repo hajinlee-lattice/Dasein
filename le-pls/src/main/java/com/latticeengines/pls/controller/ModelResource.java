@@ -12,14 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
 
@@ -41,6 +40,9 @@ public class ModelResource {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
 
     @Autowired
     private ModelMetadataService modelMetadataService;
@@ -68,9 +70,8 @@ public class ModelResource {
         log.info(String.format("cloneAndRemodel called with parameters %s", parameters.toString()));
         Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
                 parameters.getAttributes());
-
-        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(parameters.getSourceModelSummaryId(), false,
-                true, true);
+        ModelSummary modelSummary = modelSummaryService
+                .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter
                         .submit(clone.getName(), parameters.getName(), parameters.getDisplayName(), modelSummary)

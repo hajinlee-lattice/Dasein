@@ -62,8 +62,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined) {
         try {
-            if (ColumnSelection.Predefined.Model.equals(predefined)
-                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
                 return sourceColumnMapCache.get(predefined);
             } else {
                 throw new UnsupportedOperationException(
@@ -80,8 +79,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined) {
         try {
-            if (ColumnSelection.Predefined.Model.equals(predefined)
-                    || ColumnSelection.Predefined.DerivedColumns.equals(predefined)) {
+            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
                 return columnPriorityMapCache.get(predefined);
             } else {
                 throw new UnsupportedOperationException(

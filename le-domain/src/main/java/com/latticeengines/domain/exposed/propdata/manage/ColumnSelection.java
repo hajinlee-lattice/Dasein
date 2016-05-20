@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,6 @@ public class ColumnSelection {
 
         private final String name;
         private static Map<String, Predefined> nameMap;
-
         static {
             nameMap = new HashMap<>();
             for (Predefined predefined : Predefined.values()) {
@@ -108,6 +108,16 @@ public class ColumnSelection {
         }
 
         public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS);
+
+        public static Predefined getLegacyDefaultSelection() {
+            return DerivedColumns;
+        }
+
+        public static Predefined getDefaultSelection() { return RTS; }
+
+        public static List<String> getNames() {
+            return new ArrayList<>(nameMap.keySet());
+        }
 
     }
 
