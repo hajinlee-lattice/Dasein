@@ -1,6 +1,6 @@
 package com.latticeengines.dellebi.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +15,7 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -32,6 +33,9 @@ public class ExportAndReportService {
 
     @Value("${dellebi.customer}")
     private String customer;
+
+    @Value("${dellebi.sqoopexporter.mapper.number}")
+    private int numMappers;
 
     @Value("${dellebi.output.hdfsdata.remove}")
     private boolean doRemove;
@@ -57,7 +61,7 @@ public class ExportAndReportService {
     @Value("${dellebi.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
-    private String targetColumns;
+    private List<String> targetColumns;
 
     @Autowired
     private MailSender mailSender;
@@ -101,16 +105,17 @@ public class ExportAndReportService {
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
-        targetColumns = dellEbiFlowService.getTargetColumns(context);
+        targetColumns = Arrays.asList(dellEbiFlowService.getTargetColumns(context));
         String optionalEnclosurePara = "--fields-terminated-by";
         String optionalEnclosureValue = "\t";
-        List<String> options = new ArrayList<>();
-        options.add(optionalEnclosurePara);
-        options.add(optionalEnclosureValue);
+
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setDbCreds(creds)
+                .setSourceDir(sourceDir).setQueue(queue).setCustomer(customer).setNumMappers(numMappers)
+                .setExportColumns(targetColumns).addExtraOption(optionalEnclosurePara)
+                .addExtraOption(optionalEnclosureValue).build();
 
         try {
-            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8, null, targetColumns,
-                    options);
+            sqoopSyncJobService.exportData(exporter);
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();
