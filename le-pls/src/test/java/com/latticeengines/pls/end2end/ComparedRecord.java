@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.latticeengines.scoringapi.exposed.warnings.Warning;
+import com.latticeengines.domain.exposed.scoringapi.Warning;
 
 public class ComparedRecord {
 
