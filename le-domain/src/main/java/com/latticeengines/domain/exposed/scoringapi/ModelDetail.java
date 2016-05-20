@@ -1,9 +1,9 @@
-package com.latticeengines.scoringapi.exposed;
+package com.latticeengines.domain.exposed.scoringapi;
+
+import io.swagger.annotations.ApiModelProperty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-
-import io.swagger.annotations.ApiModelProperty;
 
 public class ModelDetail {
     @JsonProperty("model")

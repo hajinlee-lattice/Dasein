@@ -247,6 +247,13 @@ public enum LedpCode {
     LEDP_20025("Invalid Unique key column"), //
     LEDP_20026("Invalid Model Guids"), //
     LEDP_20027("Maximum {0} records are allowed for bulk scoring but found {1} records"), //
+    LEDP_20028("The metadata table is not configured in the RTS bulk scoring configuation: {0}"), //
+    LEDP_20029("The metadata table with PID {0} does not have extracts."), //
+    LEDP_20030("The extract table with PID {0} does not have valid path."), //
+    LEDP_20031("The uploaded file does not have model Id column."), //
+    LEDP_20032("The uploaded file does not have record Id column."), //
+    LEDP_20033("This row of the uploaded file had empty valie for model Id column."), //
+    LEDP_20034("This row of the uploaded file had empty valie for record Id column."), //
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //

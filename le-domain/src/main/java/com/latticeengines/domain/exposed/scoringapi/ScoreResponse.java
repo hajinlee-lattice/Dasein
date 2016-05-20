@@ -1,15 +1,14 @@
-package com.latticeengines.scoringapi.exposed;
+package com.latticeengines.domain.exposed.scoringapi;
+
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.scoringapi.exposed.warnings.Warning;
 
-import io.swagger.annotations.ApiModelProperty;
-
-public class RecordScoreResponse {
+public class ScoreResponse {
     @JsonProperty("id")
     @ApiModelProperty(value = "Record ID", required = true)
     private String id = "";
@@ -18,9 +17,9 @@ public class RecordScoreResponse {
     @ApiModelProperty(value = "Lattice ID for record", required = true)
     private String latticeId;
 
-    @JsonProperty("scoreModelTuple")
-    @ApiModelProperty(value = "List of score and model tuple")
-    private List<ScoreModelTuple> scores;
+    @JsonProperty("score")
+    @ApiModelProperty(value = "Score")
+    private double score;
 
     @JsonProperty("enrichmentAttributeValues")
     @ApiModelProperty(value = "Enrichment attribute values")
@@ -49,12 +48,12 @@ public class RecordScoreResponse {
         this.latticeId = latticeId;
     }
 
-    public List<ScoreModelTuple> getScores() {
-        return scores;
+    public double getScore() {
+        return score;
     }
 
-    public void setScores(List<ScoreModelTuple> scores) {
-        this.scores = scores;
+    public void setScore(double score) {
+        this.score = score;
     }
 
     public Map<String, Object> getEnrichmentAttributeValues() {
@@ -79,31 +78,5 @@ public class RecordScoreResponse {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public static class ScoreModelTuple {
-        @JsonProperty("modelId")
-        @ApiModelProperty(value = "Model ID")
-        private String modelId;
-
-        @JsonProperty("score")
-        @ApiModelProperty(value = "Score")
-        private double score;
-
-        public String getModelId() {
-            return modelId;
-        }
-
-        public void setModelId(String modelId) {
-            this.modelId = modelId;
-        }
-
-        public double getScore() {
-            return score;
-        }
-
-        public void setScore(double score) {
-            this.score = score;
-        }
     }
 }

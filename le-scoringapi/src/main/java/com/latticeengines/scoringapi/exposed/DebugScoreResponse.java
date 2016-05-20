@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 
 public class DebugScoreResponse extends ScoreResponse {
 

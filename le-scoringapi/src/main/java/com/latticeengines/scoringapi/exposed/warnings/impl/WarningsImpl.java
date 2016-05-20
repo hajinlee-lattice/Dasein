@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.latticeengines.scoringapi.exposed.warnings.Warning;
-import com.latticeengines.scoringapi.exposed.warnings.Warnings;
+import com.latticeengines.domain.exposed.scoringapi.Warning;
+import com.latticeengines.domain.exposed.scoringapi.Warnings;
 
 @Component("warnings")
 public class WarningsImpl implements Warnings {

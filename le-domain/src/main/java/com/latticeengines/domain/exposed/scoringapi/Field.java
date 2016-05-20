@@ -1,7 +1,6 @@
-package com.latticeengines.scoringapi.exposed;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.scoringapi.FieldType;
 
 import io.swagger.annotations.ApiModelProperty;
 

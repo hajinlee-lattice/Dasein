@@ -39,22 +39,22 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.Fields;
+import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.scoringapi.exposed.Field;
-import com.latticeengines.scoringapi.exposed.Fields;
+import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
-import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
-import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {

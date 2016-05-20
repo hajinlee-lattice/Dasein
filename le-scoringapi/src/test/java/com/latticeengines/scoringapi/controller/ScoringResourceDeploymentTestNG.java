@@ -21,17 +21,17 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
-import com.latticeengines.scoringapi.exposed.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.Fields;
+import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.Record;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
-import com.latticeengines.scoringapi.exposed.Field;
-import com.latticeengines.scoringapi.exposed.Fields;
-import com.latticeengines.scoringapi.exposed.Model;
-import com.latticeengines.scoringapi.exposed.Record;
-import com.latticeengines.scoringapi.exposed.RecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
-import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {

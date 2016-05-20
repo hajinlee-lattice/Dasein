@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exposed;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import java.util.List;
 
