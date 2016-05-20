@@ -17,8 +17,10 @@ class ExportDataFrameStep(PipelineStep):
     def transform(self, dataFrame, configMetadata, test):
         if test == False or "DEBUG" not in os.environ or os.environ["DEBUG"] != "true":
             return dataFrame
-        
+
         columns = list(dataFrame.columns.values)
         columns = [x for x in columns if not x.startswith("###")]
-        dataFrame.to_csv("exportdfstep.csv", sep=',', encoding='utf-8', columns=columns)
+
+        logger.info('Exporting these columns to exportdfstep.csv: [ "' + '", "'.join(columns) + '" ]')
+        dataFrame.to_csv("exportdfstep.csv", sep=',', encoding='utf-8', cols=columns, index=False)
         return dataFrame
