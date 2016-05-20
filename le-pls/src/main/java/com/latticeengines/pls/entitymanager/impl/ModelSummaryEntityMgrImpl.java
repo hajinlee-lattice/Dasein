@@ -131,15 +131,17 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             JsonNode details = objectMapper.readTree(summary.getDetails().getPayload());
             JsonNode provenance = details.get("EventTableProvenance");
             if (provenance != null) {
-                String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
-                if (org.apache.commons.lang.StringUtils.isNotEmpty(predefinedSelectionName)) {
+                if (provenance.has("Predefined_ColumnSelection_Name")) {
+                    String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
                     ColumnSelection.Predefined predefined = ColumnSelection.Predefined
                             .fromName(predefinedSelectionName);
-                    String predefinedSelectionVersion = provenance.get("Predefined_ColumnSelection_Version")
-                            .asText();
                     summary.setPredefinedSelection(predefined);
-                    summary.setPredefinedSelectionVersion(predefinedSelectionVersion);
-                } else {
+                    if (provenance.has("Predefined_ColumnSelection_Version")) {
+                        String predefinedSelectionVersion = provenance.get("Predefined_ColumnSelection_Version")
+                                .asText();
+                        summary.setPredefinedSelectionVersion(predefinedSelectionVersion);
+                    }
+                } else if (provenance.has("Customized_ColumnSelection")) {
                     ColumnSelection selection = objectMapper
                             .treeToValue(provenance.get("Customized_ColumnSelection"), ColumnSelection.class);
                     summary.setCustomizedColumnSelection(selection);
