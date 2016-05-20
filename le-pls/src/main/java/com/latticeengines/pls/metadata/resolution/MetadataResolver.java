@@ -81,11 +81,12 @@ public class MetadataResolver {
             boolean foundMatchingAttribute = false;
             while (headerIterator.hasNext()) {
                 String header = headerIterator.next();
-                if (attribute.getAllowedDisplayNames() != null && attribute.getAllowedDisplayNames().contains(header)) {
+                if (attribute.getAllowedDisplayNames() != null
+                        && attribute.getAllowedDisplayNames().contains(header.toUpperCase())) {
                     headerIterator.remove();
                     attribute.setDisplayName(header);
                     foundMatchingAttribute = true;
-                } else if (attribute.getDisplayName().equals(header)) {
+                } else if (attribute.getDisplayName().equalsIgnoreCase(header)) {
                     headerIterator.remove();
                     foundMatchingAttribute = true;
                 }

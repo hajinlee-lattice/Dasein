@@ -82,8 +82,8 @@ public class ValidateFileHeaderUtils {
                 Iterable<String> filtered = Iterables.filter(headerFields, new Predicate<String>() {
                     @Override
                     public boolean apply(@Nullable String input) {
-                        return allowedDisplayNames.contains(input)
-                                || (input != null && input.equals(attribute.getDisplayName()));
+                        return allowedDisplayNames.contains(input.toUpperCase())
+                                || (input != null && input.equalsIgnoreCase(attribute.getDisplayName()));
                     }
                 });
 
@@ -126,9 +126,10 @@ public class ValidateFileHeaderUtils {
 
             while (headerIterator.hasNext()) {
                 String header = headerIterator.next();
-                if (attribute.getAllowedDisplayNames() != null && attribute.getAllowedDisplayNames().contains(header)) {
+                if (attribute.getAllowedDisplayNames() != null
+                        && attribute.getAllowedDisplayNames().contains(header.toUpperCase())) {
                     continue iterateAttr;
-                } else if (attribute.getDisplayName().equals(header)) {
+                } else if (attribute.getDisplayName().equalsIgnoreCase(header)) {
                     continue iterateAttr;
                 }
             }

@@ -43,8 +43,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getUnknownColumns() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath,
-                SchemaInterpretation.SalesforceAccount, null, yarnConfiguration);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, null,
+                yarnConfiguration);
         resolver.calculate();
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column" });
@@ -55,16 +55,15 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             assertEquals(mapping.getColumnType(), Type.STRING.name());
         }
 
-        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                mappings, yarnConfiguration);
+        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, mappings, yarnConfiguration);
         resolver.calculate();
         Table table = resolver.getMetadata();
 
-        assertEquals(table.getAttribute(InterfaceName.Id).getDisplayName(), "Account ID");
-        assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "Website");
+        assertEquals(table.getAttribute(InterfaceName.Id).getDisplayName(), "Account iD");
+        assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "website");
         assertEquals(table.getAttribute(InterfaceName.Event).getDisplayName(), "Event");
         assertEquals(table.getAttribute(InterfaceName.Country).getDisplayName(), "Billing Country");
-        assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "Account Name");
+        assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "ACCOUNT Name");
         assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(), "Last Modified Date");
         assertNull(table.getAttribute(InterfaceName.AnnualRevenue));
         Attribute attribute = table.getAttribute("Some_Column");
@@ -87,8 +86,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         additionalCol2.setColumnType("Double");
         mappings.add(additionalCol1);
         mappings.add(additionalCol2);
-        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                mappings, yarnConfiguration);
+        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, mappings, yarnConfiguration);
         resolver.calculate();
         table = resolver.getMetadata();
         attribute = table.getAttribute("additionalCol1");

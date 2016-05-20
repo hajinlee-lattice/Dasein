@@ -53,7 +53,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Id", "ACCOUNT", "Account ID" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "ACCOUNT", "ACCOUNT ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Id) //
@@ -62,7 +62,7 @@ public class SchemaRepository {
                 .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Website") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Website" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Website) //
@@ -72,7 +72,7 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build());
         table.addAttribute(attr("Event") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON" })) //
                 .type(Schema.Type.BOOLEAN) //
                 .required() //
                 .interfaceName(InterfaceName.Event) //
@@ -82,7 +82,7 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Account Name" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANYNAME", "ACCOUNT NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator(InterfaceName.Website.name()) //
@@ -90,7 +90,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "City", "Billing City" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY", "BILLING CITY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
                 .withValidator(InterfaceName.Website.name()) //
@@ -98,7 +98,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Billing State", "Billing Province" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .withValidator(InterfaceName.Website.name()) //
@@ -106,7 +106,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Country", "Billing Country" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY", "BILLING COUNTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
                 .withValidator(InterfaceName.Website.name()) //
@@ -114,7 +114,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "PostalCode", "Billing Zip", "Postal Code" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE", "BILLING ZIP", "POSTAL CODE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -122,14 +122,14 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("Industry") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Industry" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "INDUSTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -138,7 +138,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "Employees" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -147,7 +147,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "CreatedDate", "Created Date" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
@@ -155,7 +155,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastModifiedDate", "Last Modified Date" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
@@ -163,7 +163,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("YearStarted") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "YearStarted", "Year Started" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "YEARSTARTED", "YEAR STARTED" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.YearStarted) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
@@ -172,7 +172,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Phone", "PhoneNumber" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONENUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -188,7 +188,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Id", "LEAD", "Lead ID" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "LEAD", "LEAD ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Id) //
@@ -197,7 +197,7 @@ public class SchemaRepository {
                 .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Email") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Email" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "EMAIL" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Email) //
@@ -208,7 +208,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON" })) //
                 .required().interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -216,7 +216,7 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Company", "Account" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANYNAME", "COMPANY", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator(InterfaceName.Email.name()) //
@@ -224,7 +224,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "City" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
                 .withValidator(InterfaceName.Email.name()) //
@@ -232,7 +232,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Province" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .withValidator(InterfaceName.Email.name()) //
@@ -240,7 +240,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Country" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
                 .withValidator(InterfaceName.Email.name()) //
@@ -248,7 +248,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "PostalCode", "Zip", "Postal Code" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE", "ZIP", "POSTAL CODE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -256,7 +256,7 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CreatedDate") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "CreatedDate", "Created Date" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
@@ -264,7 +264,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastModifiedDate", "Last Modified Date" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
@@ -272,28 +272,28 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("FirstName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "FirstName", "First Name" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "FIRSTNAME", "FIRST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.FirstName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastName", "Last Name" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTNAME", "LAST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Title") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Title" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "TITLE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Title) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("LeadSource") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "LeadSource", "Lead Source" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LEADSOURCE", "LEAD SOURCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LeadSource) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -302,7 +302,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("IsClosed") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "IsClosed", "Closed" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ISCLOSED", "CLOSED" })) //
                 .type(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.IsClosed) //
                 .logicalType(LogicalDataType.Opportunity) //
@@ -310,7 +310,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("StageName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "StageName", "Stage" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STAGENAME", "STAGE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .logicalType(LogicalDataType.Opportunity) //
@@ -318,14 +318,14 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Phone", "PhoneNumber" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONENUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -334,7 +334,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "No. of Employees" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NO. OF EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -343,7 +343,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Industry") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "Industry" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "INDUSTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
