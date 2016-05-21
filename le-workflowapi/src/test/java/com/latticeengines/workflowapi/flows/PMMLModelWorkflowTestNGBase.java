@@ -17,17 +17,17 @@ import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalT
 
 public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
 
-    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
+    protected static final CustomerSpace PMML_CUSTOMERSPACE = CustomerSpace.parse("PmmlContract.PmmlTenant.Production");
     
     private String pmmlHdfsPath = null;
     private String pivotValuesHdfsPath = null;
 
     protected void setupForPMMLModel() throws Exception {
-        setupTenant(DEMO_CUSTOMERSPACE);
-        setupUsers(DEMO_CUSTOMERSPACE);
-        setupCamille(DEMO_CUSTOMERSPACE);
-        setupHdfs(DEMO_CUSTOMERSPACE);
-        setupFiles(DEMO_CUSTOMERSPACE);
+        setupTenant(PMML_CUSTOMERSPACE);
+        setupUsers(PMML_CUSTOMERSPACE);
+        setupCamille(PMML_CUSTOMERSPACE);
+        setupHdfs(PMML_CUSTOMERSPACE);
+        setupFiles(PMML_CUSTOMERSPACE);
     }
     
     private void setupFiles(CustomerSpace customerSpace) throws Exception {
@@ -52,7 +52,7 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
         PMMLModelWorkflowConfiguration workflowConfig = new PMMLModelWorkflowConfiguration.Builder() //
                 .podId(CamilleEnvironment.getPodId()) //
                 .microServiceHostPort(microServiceHostPort) //
-                .customer(DEMO_CUSTOMERSPACE) //
+                .customer(PMML_CUSTOMERSPACE) //
                 .workflow("pmmlModelWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName("PMMLModel-" + System.currentTimeMillis()) //
