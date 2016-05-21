@@ -28,7 +28,6 @@ import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
-import org.python.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
@@ -99,6 +98,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         Map.Entry<String[], String> featuresAndTarget = getFeaturesAndTarget(pmmlFields, pivotValues);
         PMMLModelingServiceExecutor.Builder bldr = new PMMLModelingServiceExecutor.Builder();
         String tableName = "PMMLDummyTable-" + System.currentTimeMillis();
+       
         bldr.modelingServiceHostPort(modelStepConfiguration.getMicroServiceHostPort()) //
             .modelingServiceHdfsBaseDir(modelStepConfiguration.getModelingServiceHdfsBaseDir()) //
             .customer(modelStepConfiguration.getCustomerSpace().toString()) //
@@ -112,10 +112,16 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             .table(tableName) //
             .metadataTable(String.format("%s-%s-Metadata", tableName, featuresAndTarget.getValue())) //
             .avroSchema(avroSchema) //
-            .metadataArtifacts(ImmutableMap.of(ArtifactType.PMML, configuration.getPmmlArtifactPath())) //
+            .metadataArtifacts(getMetadataArtifacts()) //
             .yarnConfiguration(yarnConfiguration);
 
         return bldr;
+    }
+    
+    private Map<ArtifactType, String> getMetadataArtifacts() {
+        Map<ArtifactType, String> metadataArtifacts = new HashMap<>();
+        metadataArtifacts.put(ArtifactType.PMML, configuration.getPmmlArtifactPath());
+        return metadataArtifacts;
     }
     
     @VisibleForTesting
