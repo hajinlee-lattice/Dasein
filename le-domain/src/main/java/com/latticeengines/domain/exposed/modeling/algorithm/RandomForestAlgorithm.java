@@ -48,7 +48,8 @@ public class RandomForestAlgorithm extends AlgorithmBase {
     @Transient
     private String[] getPipelinePropertyArray() {
         return new String[] { //
-                "pivotstep.minCategoricalCount=100" //
+                "pivotstep.minCategoricalCount=300", //
+                "pivotstep.maxCategoricalCount=500" //
         };
     }
 }
