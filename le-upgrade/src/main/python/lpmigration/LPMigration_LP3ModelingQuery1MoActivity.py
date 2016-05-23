@@ -37,8 +37,14 @@ class LPMigration_LP3ModelingQuery1MoActivity(StepBase):
 
 
     def getApplicability(self, appseq):
+        try:
+            q = appseq.getConnectionMgr().getQuery('Q_LP3_ModelingLead_OneLeadPerDomain')
+        except UnknownVisiDBSpec:
+            return Applicability.cannotApplyFail
+
         if appseq.getText('template_type') == 'MKTO':
             return Applicability.canApply
+
         return Applicability.cannotApplyPass
 
 

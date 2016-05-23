@@ -48,6 +48,7 @@ class WriteQueryToCSV(StepBase):
 
         print '.'
         csvFileName = self._queryname.replace('Q_',conn_mgr.getTenantName()+'_') + '_' + self._timestamp.strftime('%Y%m%d_%H%M%S') + '.csv'
+        nRowsRead = 0
         with codecs.open(csvFileName, encoding = 'utf-8', mode = 'w') as csvFile:
             csvFile.write(self._createUnicodeDelimited(queryResult.columnNames(), u',') + u'\n')
 
@@ -57,7 +58,9 @@ class WriteQueryToCSV(StepBase):
                     break
                 for row in queryRows:
                     csvFile.write(self._createUnicodeDelimited(row, u',') + u'\n')
+                    nRowsRead += 1
 
+        print '\n      => Query returned {0} rows, and they were written to \"{1}\"'.format(nRowsRead, csvFileName),
         return True
 
 

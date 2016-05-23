@@ -21,6 +21,11 @@ class LPMigration_ModelingUpdates(StepBase):
 
 
     def getApplicability(self, appseq):
+        try:
+            e = appseq.getConnectionMgr().getNamedExpression('Const_DaysFromLeadCreationDate')
+        except UnknownVisiDBSpec:
+            return Applicability.cannotApplyFail
+
         return Applicability.canApply
 
 

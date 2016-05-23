@@ -47,6 +47,12 @@ class LPMigration_LP3ModelingQuery(StepBase):
 
 
     def getApplicability(self, appseq):
+        try:
+            q = appseq.getConnectionMgr().getQuery('Q_PLS_Modeling')
+            t = appseq.getConnectionMgr().getTable('PD_DerivedColumns')
+        except UnknownVisiDBSpec:
+            return Applicability.cannotApplyFail
+
         return Applicability.canApply
 
 
