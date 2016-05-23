@@ -40,10 +40,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
     private static final String SALESFORCE = "SALESFORCE";
     private static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
-    // allow atleast 30 seconds of upper bound for bulk scoring api to make sure
+    // allow atleast 80 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
     // degrades a lot in future then this limit will correctly fail the testcase
-    private static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(50);
+    private static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(80);
+    private static final long MAX_UPPER_BOUND = TimeUnit.SECONDS.toMillis(120);
     private static final double EXPECTED_SCORE_99 = 99.0d;
     private static final int MAX_THREADS = 1;
     private static final int RECORD_MODEL_CARDINALITY = 2;
@@ -153,8 +154,12 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                     if (upperBoundForBulkScoring < MIN_UPPER_BOUND) {
                         upperBoundForBulkScoring = MIN_UPPER_BOUND;
                     }
+                    if (upperBoundForBulkScoring > MAX_UPPER_BOUND) {
+                        upperBoundForBulkScoring = MAX_UPPER_BOUND;
+                    }
 
-                    System.out.println(upperBoundForBulkScoring);
+                    System.out.println("Max time upper bound for bulk scoring: " + upperBoundForBulkScoring);
+
                     testScore(url, 4, upperBoundForBulkScoring, modelList);
                     testScore(url, 8, upperBoundForBulkScoring, modelList);
                     testScore(url, 12, upperBoundForBulkScoring, modelList);
