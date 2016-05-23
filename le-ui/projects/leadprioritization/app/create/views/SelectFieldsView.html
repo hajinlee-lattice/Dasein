@@ -1,0 +1,29 @@
+<div class="modal-dialog modal-sm" data-ng-controller="SelectFieldsController">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">{{ResourceUtility.getString('MAP_FIELD_TITLE')}}</h4>
+        </div>
+        <div class="modal-body">
+            <div>{{ResourceUtility.getString('UPLOADED_FIELD_NAME')}}</div>
+            <div>{{fieldName}}</div>
+            <div></div>
+            <div class="row">
+                <table class="unstyled">
+                    <thead>
+                        <tr>
+                            <th>{{ResourceUtility.getString('SELECT_FIELDS_FIELD_NAME')}}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="latticeSchemaField in latticeSchemaFields" ng-click="mapLatticeField(latticeSchemaField)">
+                            <td>{{latticeSchemaField.name}}</td>
+                            <td>{{getRequiredType(latticeSchemaField)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

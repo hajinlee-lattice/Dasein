@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
@@ -85,7 +88,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SourceFile sourceFile = getSourceFile(sourceFileName);
         NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, fieldMappingDocument);
 
-        if (! resolver.isFieldMappingDocumentFullyDefined()) {
+        if (!resolver.isFieldMappingDocumentFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
         resolver.resolveBasedOnFieldMappingDocument();
@@ -166,7 +169,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead).getAttributes();
         List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
         for (Attribute leadAttribute : leadAttributes) {
-            latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
+            latticeLeadSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
         }
         schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceLead, latticeLeadSchemaFields);
 
@@ -180,11 +183,31 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         latticeSchemaField.setFieldType(attribute.getDataType());
         if (! attribute.getNullable()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
+        } else if (!attribute.getValidatorWrappers().isEmpty()) {
+            String requiredIfNoField = getRequiredIfNoField(attribute.getValidatorWrappers());
+            if (requiredIfNoField != null) {
+                latticeSchemaField.setRequiredType(RequiredType.RequiredIfOtherFieldIsEmpty);
+                latticeSchemaField.setRequiredIfNoField(requiredIfNoField);
+            } else {
+                latticeSchemaField.setRequiredType(RequiredType.NotRequired);
+            }
         } else {
             latticeSchemaField.setRequiredType(RequiredType.NotRequired);
         }
-        return latticeSchemaField;
 
+        return latticeSchemaField;
+    }
+
+    private String getRequiredIfNoField(List<InputValidatorWrapper> inputValidatorWrappers) {
+        for (InputValidatorWrapper inputValidatorWrapper : inputValidatorWrappers) {
+            InputValidator inputValidator = inputValidatorWrapper.getValidator();
+
+            if (inputValidator.getClass() == RequiredIfOtherFieldIsEmpty.class) {
+                return ((RequiredIfOtherFieldIsEmpty) inputValidator).otherField;
+            }
+        }
+
+        return null;
     }
 
     private SourceFile getSourceFile(String sourceFileName) {

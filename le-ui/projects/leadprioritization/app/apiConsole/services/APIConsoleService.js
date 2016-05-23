@@ -158,7 +158,8 @@ angular.module('pd.apiconsole.APIConsoleService', [
             apiUrl += '/score';
         }
 
-        return apiUrl;
+        // return apiUrl;
+        return 'http://api.lattice.local/score';
     }
 
 });

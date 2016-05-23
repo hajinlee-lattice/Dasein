@@ -30,7 +30,7 @@ public class ValidateFileHeaderUtils {
 
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
-    public static final int MAX_NUM_FIELDS = 100;
+    public static final int MAX_NUM_ROWS = 100;
 
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
@@ -50,7 +50,7 @@ public class ValidateFileHeaderUtils {
         }
     }
 
-    public static List<String> getCSVColumnFields(String columnHeaderName, InputStream stream, CloseableResourcePool closeableResourcePool) {
+    public static List<String> getCSVColumnValues(String columnHeaderName, InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
             List<String> columnFields = new ArrayList<>();
             InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
@@ -59,7 +59,7 @@ public class ValidateFileHeaderUtils {
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
             CSVParser parser = new CSVParser(reader, format);
             List<CSVRecord> csvRecords = parser.getRecords();
-            int numFieldsToAdd = csvRecords.size() < MAX_NUM_FIELDS ? csvRecords.size() : MAX_NUM_FIELDS;
+            int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
 
             for (int i = 0; i < numFieldsToAdd; i++) {
                 columnFields.add(csvRecords.get(i).get(columnHeaderName));

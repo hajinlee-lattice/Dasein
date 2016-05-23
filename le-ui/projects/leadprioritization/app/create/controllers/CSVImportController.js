@@ -183,12 +183,32 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
+    this.GetSchemaToLatticeFields = function() {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/models/uploadfile/latticeschema',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+
+            deferred.resolve(data.Result);
+        })
+        .error(function(data, status, headers, config) {
+
+            deferred.resolve(data.Result);
+        });
+
+        return deferred.promise;
+    }
+
     this.GetFieldDocument = function(csvFile) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
-            url: '/pls/models/' + csvFile.name + '/fieldmappings',
+            url: '/pls/models/uploadfile/' + csvFile.name + '/fieldmappings',
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
@@ -447,10 +467,10 @@ angular.module('mainApp.create.csvImport', [
             this.cancelDeferred = cancelDeferred = $q.defer();
             csvImportService.Upload({
                 file: vm.csvFile, 
-                // url: '/pls/models/uploadfile/unnamed',
-                url: '/pls/models/fileuploads/unnamed',
+                url: '/pls/models/uploadfile/unnamed',
+                // url: '/pls/models/fileuploads/unnamed',
                 params: {
-                    schema: fileType,
+                    // schema: fileType,
                     displayName: vm.csvFileName,
                     compressed: vm.compressed
                 },

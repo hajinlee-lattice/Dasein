@@ -216,7 +216,7 @@ public class NewMetadataResolver {
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             InputStream is = fs.open(new Path(csvPath));
-            columnFields = ValidateFileHeaderUtils.getCSVColumnFields(columnHeaderName, is, closeableResourcePool);
+            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is, closeableResourcePool);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {

@@ -111,45 +111,12 @@ angular
         })
         .state('home.models.import.columns', {
             url: '/:csvFileName/columns',
-            resolve: {
-                csvMetaData: function($stateParams, csvImportStore) {
-                    return csvImportStore.Get($stateParams.csvFileName);
-                },
-                csvUnknownColumns: function($q, csvImportService, csvMetaData) {
-                    var deferred = $q.defer();
-
-                    csvImportService.GetUnknownColumns(csvMetaData).then(function(result) {
-                    // csvImportService.GetFieldDocument(csvMetaData).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
                 },
                 "main@": {
-                    controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
-                        this.errors = csvUnknownColumns.ResultErrors;
-                        this.data = csvUnknownColumns.Result;
-
-                        this.csvSubmitColumns = function($event) {
-                            ShowSpinner('Saving Changes...');
-
-                            csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
-                                csvImportService.StartModeling(csvMetaData).then(function(result) {
-                                    $state.go('home.jobs.status', {'jobCreationSuccess': result.Success });
-                                });
-                            });
-                        }
-
-                        if (this.data == null || this.data.length == 0) {
-                            this.csvSubmitColumns();
-                        }
-                    },
-                    controllerAs: 'vm',
+                    controller: 'CustomFieldsController',
                     templateUrl: 'app/create/views/CustomFieldsView.html'
                 }   
             }

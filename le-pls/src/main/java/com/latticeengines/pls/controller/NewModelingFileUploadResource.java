@@ -107,7 +107,7 @@ public class NewModelingFileUploadResource {
     @RequestMapping(value="{sourceFileName}/fieldmappings", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Decides if the csv is a lead or model based. Returned the best mapping and unknown columns as well as lattice fields")
-    public FieldMappingDocument getFieldMappings(@PathVariable String sourceFileName) {
+    public ResponseDocument<FieldMappingDocument> getFieldMappings(@PathVariable String sourceFileName) {
         DOCUMENT.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
 
         FIELD_1.setUserField("Email");
@@ -144,7 +144,7 @@ public class NewModelingFileUploadResource {
 
         DOCUMENT.setFieldMappings(Arrays.asList(FIELD_1, FIELD_2, FIELD_3, FIELD_4, FIELD_5, FIELD_6, FIELD_7, FIELD_8));
         DOCUMENT.setIgnoredFields(new ArrayList<String>());
-        return DOCUMENT;
+        return ResponseDocument.successResponse(DOCUMENT);
     }
 
     @RequestMapping(value="fieldmappings", method = RequestMethod.POST)
@@ -158,7 +158,7 @@ public class NewModelingFileUploadResource {
     @RequestMapping(value="latticeschema", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "return a map from account and lead to the lattice attribute fields")
-    public Map<SchemaInterpretation, List<LatticeSchemaField>> getLatticeSchemaFieldMap() {
-        return modelingFileMetadataService.getSchemaToLatticeSchemaFields();
+    public ResponseDocument<Map<SchemaInterpretation, List<LatticeSchemaField>>> getLatticeSchemaFieldMap() {
+        return ResponseDocument.successResponse(modelingFileMetadataService.getSchemaToLatticeSchemaFields());
     }
 }
