@@ -2,14 +2,11 @@ package com.latticeengines.domain.exposed.scoringapi;
 
 import java.io.Serializable;
 import java.util.Map;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class TransformDefinition implements Serializable {
 
     private static final long serialVersionUID = 1812638246579109675L;
@@ -37,6 +34,7 @@ public class TransformDefinition implements Serializable {
     // Any arguments to the transformation function.
     public Map<String, Object> arguments;
 
+    @JsonIgnore
     public String outputDisplayName;
 
     @Override
