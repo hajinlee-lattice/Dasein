@@ -54,13 +54,14 @@ class TrainingTestBase(TestBase):
         enginedir = "/leframework/scoringengine.py"
 
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
+        os.symlink("../../main/python/rulefwk.py", "./rulefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
         os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
-        
+
         for filename in glob.glob(os.path.join("../../main/python/pipeline", "*.py")):
             shutil.copy(filename, pipelinefwkdir)
 
@@ -78,7 +79,7 @@ class TrainingTestBase(TestBase):
         sys.path.append(evpipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
-        scriptDir = "../../main/python/algorithm/" 
+        scriptDir = "../../main/python/algorithm/"
         for f in os.listdir(scriptDir):
             fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
@@ -87,13 +88,13 @@ class TrainingTestBase(TestBase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
-        
+
         self.__unzipSoftwareLibJar()
-    
+
     def __unzipSoftwareLibJar(self):
         with zipfile.ZipFile("data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip") as z:
             z.extractall(self.swlibdir)
-    
+
     def tearDown(self):
         if os.path.exists(self.fwkdir):
             shutil.rmtree(self.fwkdir)
@@ -135,29 +136,29 @@ class TrainingTestBase(TestBase):
         line += "]"
         line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
         return line
-    
+
     def createCSV(self, inputColumns, values):
         with open('./results/test.csv', 'wb') as csvfile:
             csvWriter = csv.writer(csvfile)
             csvWriter.writerow(['id'] + inputColumns)
             for i in range(len(values)):
                 csvWriter.writerow([i + 1] + values[i])
-                
+
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/') + 1:len(fileName)]
-                
-    
+
+
     def createCSVFromModel(self, modelFile, scoringFile, training=False):
         parser = ArgumentParser(modelFile, None)
         schema = parser.getSchema()
-        
+
         if training:
             data = parser.createList(self.stripPath(schema["training_data"]))
         else:
             data = parser.createList(self.stripPath(schema["test_data"]))
         data.reset_index()
         fields = { k['name']:k['type'][0] for k in parser.fields }
-        
+
         with open(scoringFile, "w") as fp:
             i = 1
             for row in data.iterrows():
@@ -175,7 +176,7 @@ class TrainingTestBase(TestBase):
                         line += ","
                     dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' else 'Float'
                     #print ("Row %d Column = %s, Type = %s" % (i, field, type(value)))
-                    
+
                     if row[1][field] is None or (dataType == 'Float' and np.isnan(float(row[1][field]))):
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"%s|\"}}" % (field, dataType)
                     elif dataType == 'String':
@@ -208,10 +209,10 @@ class TrainingTestBase(TestBase):
                 decompressed.write(data)
 
         return decompressed.name
-    
+
     def getModelStep(self, pipeline):
         return [s for s in pipeline.getPipeline() if isinstance(s, ModelStep)][0]
-    
+
     def ignore(self, ignore):
         def _ignore_(path, names):
             ignoredNames = []
