@@ -38,7 +38,9 @@ angular.module('mainApp.setup.modals.SelectFieldsModal', [
     });
 
     $scope.mapLatticeField = function(latticeSchemaField) {
+        $rootScope.$broadcast(NavUtility.MAP_LATTICE_SCHEMA_FIELD_EVENT, { 'userFieldName': $scope.fieldName, 'latticeSchemaField': latticeSchemaField} );
 
+        $("#modalContainer").modal('hide');
     }
 
     $scope.getRequiredType = function(latticeSchemaField) {
