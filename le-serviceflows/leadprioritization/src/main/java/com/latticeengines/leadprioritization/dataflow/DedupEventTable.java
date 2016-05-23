@@ -28,10 +28,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         Node eventTable = addSource(parameters.eventTable);
         List<String> outputColumns = eventTable.getFieldNames();
 
-        Node publicDomain = addSource(parameters.publicDomain);
-        publicDomain = DataFlowUtils.normalizeDomain(publicDomain, InterfaceName.Domain.name(), DOMAIN);
-        publicDomain.discard(new FieldList(InterfaceName.Domain.name()));
-
         Node last = DataFlowUtils.extractDomain(eventTable, DOMAIN);
         last = addSortColumn(last, eventTable, SORT);
 
@@ -41,6 +37,11 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         last = last.filter(String.format("%s != null && !%s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN));
 
         if (!getPublicDomainResolutionFields(last).isEmpty()) {
+
+            Node publicDomain = addSource(parameters.publicDomain);
+            publicDomain = DataFlowUtils.normalizeDomain(publicDomain, InterfaceName.Domain.name(), DOMAIN);
+            publicDomain.discard(new FieldList(InterfaceName.Domain.name()));
+
             Node publicDomains = last.innerJoin(new FieldList(DOMAIN), publicDomain, new FieldList(DOMAIN));
             Node nonPublicDomains = last.stopList(publicDomain, DOMAIN, DOMAIN);
 
