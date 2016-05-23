@@ -86,6 +86,10 @@ public class KeyValue implements HasTenantId, HasPid {
     @JsonProperty("Payload")
     @Transient
     public String getPayload() {
+        if (getData() == null) {
+            return null;
+        }
+        
         String uncompressedData = new String(CompressionUtils.decompressByteArray(getData()));
         try {
             if (StringUtils.isNotEmpty(uncompressedData)) {
