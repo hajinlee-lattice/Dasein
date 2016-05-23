@@ -9,7 +9,7 @@ import java.util.List;
 public class LatticeSchemaDocument {
 
     @JsonProperty
-    Map<SchemaInterpretation, List<LatticeSchemaField>> schemaToLatticeSchemaFields;
+    private Map<SchemaInterpretation, List<LatticeSchemaField>> schemaToLatticeSchemaFields;
 
     public void setSchemaToLatticeSchemaFields(Map<SchemaInterpretation, List<LatticeSchemaField>> schemaToLatticeSchemaFields) {
         this.schemaToLatticeSchemaFields = schemaToLatticeSchemaFields;

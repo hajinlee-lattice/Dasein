@@ -13,6 +13,9 @@ public class LatticeSchemaField {
     @JsonProperty
     private String fieldType;
 
+    @JsonProperty
+    private String requiredIfNoField;
+
     public void setName(String name) {
         this.name = name;
     }
@@ -35,5 +38,13 @@ public class LatticeSchemaField {
 
     public String getFieldType() {
         return this.fieldType;
+    }
+
+    public void setRequiredIfNoField(String requiredIfNoField) {
+        this.requiredIfNoField = requiredIfNoField;
+    }
+
+    public String getRequiredIfNoField() {
+        return this.requiredIfNoField;
     }
 }
