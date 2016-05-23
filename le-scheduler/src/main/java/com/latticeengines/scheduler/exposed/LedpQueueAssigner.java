@@ -50,9 +50,9 @@ public class LedpQueueAssigner {
         if (queue == null) {
             return queue;
         }
-        if (queueScheme.equalsIgnoreCase("default"))
+        if (queueScheme.equalsIgnoreCase("default")) {
             translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
-        else if (queueScheme.equalsIgnoreCase("legacy")) {
+        } else if (queueScheme.equalsIgnoreCase("legacy")) {
             if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
