@@ -63,7 +63,7 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
     return steps
 
 def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps="")
+    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps)
 
     pipeline = Pipeline(steps)
 
@@ -73,7 +73,7 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
     return pipeline, scoringPipeline
 
 def setupRulePipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps="")
+    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps)
 
     pipeline = DataRulePipeline(steps)
 
