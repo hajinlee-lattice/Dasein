@@ -4,8 +4,8 @@ from pipelinefwk import PipelineStep
 
 class DataRulePipeline(Pipeline):
 
-    def __init__(self):
-        super(DataRulePipeline, self).__init__()
+    def __init__(self, pipelineSteps):
+        super(DataRulePipeline, self, pipelineSteps).__init__()
 
     def apply(self, dataFrame, configMetadata):
         for step in self.pipelineSteps:
@@ -23,8 +23,8 @@ class DataRulePipeline(Pipeline):
 
 class DataRule(PipelineStep):
 
-    def __init__(self):
-        super(DataRule, self).__init__()
+    def __init__(self, props):
+        super(DataRule, self, props).__init__()
 
     @abstractmethod
     def apply(self, dataFrame, configMetadata):
@@ -36,8 +36,8 @@ class DataRule(PipelineStep):
 
 class RowRule(DataRule):
 
-    def __init__(self):
-        super(RowRule, self).__init__()
+    def __init__(self, props):
+        super(RowRule, self, props).__init__()
 
     @abstractmethod
     def getRowsToRemove(self):
@@ -45,8 +45,8 @@ class RowRule(DataRule):
 
 class ColumnRule(DataRule):
 
-    def __init__(self):
-        super(ColumnRule, self).__init__()
+    def __init__(self, props):
+        super(ColumnRule, self, props).__init__()
 
     @abstractmethod
     def getColumnsToRemove(self):
@@ -54,8 +54,8 @@ class ColumnRule(DataRule):
 
 class TableRule(DataRule):
 
-    def __init__(self):
-        super(TableRule, self).__init__()
+    def __init__(self, props):
+        super(TableRule, self, props).__init__()
 
     @abstractmethod
     def getRowsToRemove(self):
