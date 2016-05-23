@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.engine.MapReduceExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.engine.TezExecutionEngine;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -48,7 +49,7 @@ public abstract class ExecutionEngine {
     }
     
     protected String getQueue(DataFlowContext dataFlowCtx) {
-        return dataFlowCtx.getProperty("QUEUE", String.class);
+        return dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
     }
     
     public abstract FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties);

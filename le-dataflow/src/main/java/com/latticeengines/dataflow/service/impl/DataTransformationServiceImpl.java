@@ -117,7 +117,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         if ("default".equals(yarnQueueScheme)) {
             dataFlowContext.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getDefaultQueueNameForSubmission());
         } else if ("legacy".equals(yarnQueueScheme)) {
-            String queue = dataFlowContext.getProperty("QUEUE", String.class);
+            String queue = dataFlowContext.getProperty(DataFlowProperty.QUEUE, String.class);
             if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
                     queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
