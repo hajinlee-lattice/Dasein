@@ -35,9 +35,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
 
-    protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME +"_";
+    protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME + "_";
     protected static final String MODEL_NAME = TEST_MODEL_FOLDERNAME;
-    protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME +"/";
+    protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME
+            + "/";
     protected static final String TENANT_ID = "ScoringApiTestTenant.ScoringApiTestTenant.Production";
     protected static final String APPLICATION_ID = "application_1457046993615_3821";
     protected static final String PARSED_APPLICATION_ID = "1457046993615_3821";
@@ -56,7 +57,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Value("${scoringapi.auth.hostport}")
     protected String authHostPort;
 
-    @Value("${scoringapi.playmakerapi.hostport}")
     protected String playMakerApiHostPort;
 
     @Value("${scoringapi.pls.api.hostport}")
@@ -78,6 +78,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected OAuth2RestTemplate oAuth2RestTemplate = null;
 
+    protected Tenant tenant;
+
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
@@ -86,7 +88,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 CLIENT_ID_LP);
         OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
         log.info(accessToken.getValue());
-        Tenant tenant = setupTenantAndModelSummary();
+        tenant = setupTenantAndModelSummary();
         setupHdfsArtifacts(tenant);
     }
 
@@ -150,8 +152,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     private void setupHdfsArtifacts(Tenant tenant) throws IOException {
         String tenantId = tenant.getId();
-        String artifactTableDir = String
-                .format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId, EVENT_TABLE);
+        String artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
+                EVENT_TABLE);
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId, EVENT_TABLE,
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
@@ -172,15 +174,16 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         HdfsUtils.mkdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(), artifactTableDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(), artifactBaseDir
-                + TEST_MODEL_FOLDERNAME + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
+                artifactTableDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
+                artifactBaseDir + TEST_MODEL_FOLDERNAME + "_model.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
+                artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
+                enhancementsDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
+                enhancementsDir + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());

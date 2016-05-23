@@ -7,8 +7,10 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -37,13 +39,15 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDep
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final String SALESFORCE = "SALESFORCE";
-    private static final int MAX_FOLD_FOR_TIME_TAKEN = 7;
+    private static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
     // allow atleast 30 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
     // degrades a lot in future then this limit will correctly fail the testcase
-    private static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(30);
+    private static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(50);
     private static final double EXPECTED_SCORE_99 = 99.0d;
-    private static final int MAX_THREADS = 2;
+    private static final int MAX_THREADS = 1;
+    private static final int RECORD_MODEL_CARDINALITY = 2;
+    private static final int MAX_MODELS = 20;
     private volatile Throwable exception = null;
 
     @Test(groups = "deployment", enabled = true)
@@ -121,6 +125,21 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     @Test(groups = "deployment", enabled = true)
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
+        Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
+        TestRegisterModels modelCreator = new TestRegisterModels();
+
+        for (int i = 0; i < MAX_MODELS; i++) {
+            String testModelFolderName = "3MulesoftAllRows" + i + "20160314_112802";
+            String applicationId = "application_" + i + "1457046993615_3823";
+            String modelVersion = "ba99b36-c222-4f93" + i + "-ab8a-6dcc11ce45e9";
+            TestModelConfiguration modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId,
+                    modelVersion);
+            TestModelArtifactDataComposition modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
+                    plsRest, tenant, modelConfiguration, customerSpace);
+            models.put(modelConfiguration, modelArtifactDataComposition);
+        }
+        final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = new ArrayList<>(
+                models.entrySet());
 
         Runnable runnable = new Runnable() {
 
@@ -128,7 +147,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             public void run() {
                 try {
                     long timeTaken = 0;
-                    long baselineTimeForOneEntry = testScore(url, 1, timeTaken);
+                    long baselineTimeForOneEntry = testScore(url, 1, timeTaken, modelList);
 
                     long upperBoundForBulkScoring = baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN;
                     if (upperBoundForBulkScoring < MIN_UPPER_BOUND) {
@@ -136,14 +155,14 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                     }
 
                     System.out.println(upperBoundForBulkScoring);
-                    testScore(url, 4, upperBoundForBulkScoring);
-                    testScore(url, 8, upperBoundForBulkScoring);
-                    testScore(url, 12, upperBoundForBulkScoring);
-                    testScore(url, 16, upperBoundForBulkScoring);
-                    testScore(url, 20, upperBoundForBulkScoring);
-                    testScore(url, 40, upperBoundForBulkScoring);
-                    testScore(url, 100, upperBoundForBulkScoring);
-                    testScore(url, 200, upperBoundForBulkScoring);
+                    testScore(url, 4, upperBoundForBulkScoring, modelList);
+                    testScore(url, 8, upperBoundForBulkScoring, modelList);
+                    testScore(url, 12, upperBoundForBulkScoring, modelList);
+                    testScore(url, 16, upperBoundForBulkScoring, modelList);
+                    testScore(url, 20, upperBoundForBulkScoring, modelList);
+                    testScore(url, 40, upperBoundForBulkScoring, modelList);
+                    testScore(url, 100, upperBoundForBulkScoring, modelList);
+                    testScore(url, 200, upperBoundForBulkScoring, modelList);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -177,27 +196,26 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         return stackTrace.toString();
     }
 
-    private long testScore(String url, int n, long maxTime) throws IOException {
+    private long testScore(String url, int n, long maxTime,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
         try {
-            BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n);
+            BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList);
             ObjectMapper om = new ObjectMapper();
             long timeDuration = System.currentTimeMillis();
             ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
             timeDuration = System.currentTimeMillis() - timeDuration;
+            System.out.println(n + " => " + timeDuration);
             Assert.assertEquals(response.getBody().size(), n);
 
             int idx = 0;
             for (Object res : response.getBody()) {
                 RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
-                if (idx % 2 == 1) {
-                    Assert.assertEquals(result.getScores().size(), 2);
-                    Assert.assertEquals(result.getScores().get(1).getScore(), EXPECTED_SCORE_99);
-                    Assert.assertEquals(result.getScores().get(1).getModelId(), MODEL_ID);
-                } else {
-                    Assert.assertEquals(result.getScores().size(), 1);
+                Assert.assertEquals(result.getScores().size(), RECORD_MODEL_CARDINALITY);
+                for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
+                    Assert.assertEquals(result.getScores().get(j).getScore(), EXPECTED_SCORE_99);
+                    Assert.assertEquals(result.getScores().get(j).getModelId(),
+                            modelList.get((idx + j) % MAX_MODELS).getKey().getModelId());
                 }
-                Assert.assertEquals(result.getScores().get(0).getScore(), EXPECTED_SCORE_99);
-                Assert.assertEquals(result.getScores().get(0).getModelId(), MODEL_ID);
 
                 Record record = bulkScoreRequest.getRecords().get(idx++);
                 if (Record.LATTICE_ID.equals(record.getIdType())) {
@@ -228,19 +246,21 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         }
     }
 
-    private BulkRecordScoreRequest getBulkScoreRequest(int n) throws IOException {
+    private BulkRecordScoreRequest getBulkScoreRequest(int n,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
         BulkRecordScoreRequest bulkRequest = new BulkRecordScoreRequest();
         bulkRequest.setRule("Dummy Rule");
         bulkRequest.setSource("Dummy Source");
 
-        List<Record> records = generateRecords(n);
+        List<Record> records = generateRecords(n, modelList);
 
         bulkRequest.setRecords(records);
 
         return bulkRequest;
     }
 
-    private List<Record> generateRecords(int n) throws IOException {
+    private List<Record> generateRecords(int n,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
         List<Record> records = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             Record record = new Record();
@@ -249,12 +269,12 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             Map<String, Object> attributeValues = scoreRequest.getRecord();
             record.setAttributeValues(attributeValues);
             List<String> modelIds = new ArrayList<>();
-            modelIds.add(MODEL_ID);
+
             record.setIdType(SALESFORCE);
-            if (i % 2 == 1) {
+            for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
                 record.setIdType(Record.LATTICE_ID);
                 record.setPerformEnrichment(true);
-                modelIds.add(MODEL_ID);
+                modelIds.add(modelList.get((i + j) % MAX_MODELS).getKey().getModelId());
             }
             record.setModelIds(modelIds);
             records.add(record);
