@@ -35,6 +35,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class SqoopJobServiceImpl {
 
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
+
     @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
 
@@ -468,24 +469,7 @@ public class SqoopJobServiceImpl {
     }
 
     protected String overwriteQueue(String queue) {
-        String translatedQueue = queue;
-        if (queue == null) {
-           return queue;
-        }
-        if (queueScheme.equalsIgnoreCase("default"))
-            translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
-        else if (queueScheme.equalsIgnoreCase("legacy")) {
-            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
-                queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
-                queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
-                translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            }
-        }
-        if (!translatedQueue.equals(queue)) {
-            log.info("Overwite queue " + queue + " to " + translatedQueue);
-        }
-
-        return translatedQueue;
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
     }
 
     protected String overwriteQueueInHadoopOpt(String hadoopOpt) {

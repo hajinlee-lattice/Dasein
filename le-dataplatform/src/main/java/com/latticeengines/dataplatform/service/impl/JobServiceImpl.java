@@ -97,21 +97,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private String overwriteQueueInternal(String queue) {
-        String translatedQueue = queue;
-        if (queueScheme.equalsIgnoreCase("default"))
-            translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
-        else if (queueScheme.equalsIgnoreCase("legacy")) {
-            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
-                queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
-                queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
-                translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            }
-        }
-        if (!translatedQueue.equals(queue)) {
-            log.info("Overwite queue " + queue + " to " + translatedQueue);
-        }
-
-        return translatedQueue;
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
     }
 
     private void overwriteAMQueueAssignment(Properties appMasterProperties) {

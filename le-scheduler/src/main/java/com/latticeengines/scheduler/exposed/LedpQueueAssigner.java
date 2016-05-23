@@ -1,9 +1,13 @@
 package com.latticeengines.scheduler.exposed;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class LedpQueueAssigner {
 
     public static final String PRIORITY = "Priority";
+    public static final Log log = LogFactory.getLog(LedpQueueAssigner.class);
 
     private static final String SCORING_QUEUE_NAME = "Scoring";
     private static final String MODELING_QUEUE_NAME = "Modeling";
@@ -40,4 +44,26 @@ public class LedpQueueAssigner {
     public static String getDefaultQueueNameForSubmission() {
         return DEFAULT_QUEUE_NAME;
     }
+
+    public static String overwriteQueueAssignment(String queue, String queueScheme) {
+        String translatedQueue = queue;
+        if (queue == null) {
+            return queue;
+        }
+        if (queueScheme.equalsIgnoreCase("default"))
+            translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
+        else if (queueScheme.equalsIgnoreCase("legacy")) {
+            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
+                    queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
+                    queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
+                translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+            }
+        }
+        if (!translatedQueue.equals(queue)) {
+            log.info("Overwite queue " + queue + " to " + translatedQueue);
+        }
+
+        return translatedQueue;
+    }
+
 }

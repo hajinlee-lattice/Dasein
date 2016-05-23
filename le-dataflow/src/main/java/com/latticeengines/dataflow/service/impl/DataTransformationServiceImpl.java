@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -114,16 +114,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     }
 
     private void overwriteYarnQueueAssignment(DataFlowContext dataFlowContext) {
-        if ("default".equals(yarnQueueScheme)) {
-            dataFlowContext.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getDefaultQueueNameForSubmission());
-        } else if ("legacy".equals(yarnQueueScheme)) {
-            String queue = dataFlowContext.getProperty(DataFlowProperty.QUEUE, String.class);
-            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
-                    queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
-                    queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
-                dataFlowContext.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
-            }
-        }
+        String queue = dataFlowContext.getProperty(DataFlowProperty.QUEUE, String.class);
+        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, yarnQueueScheme);
+        dataFlowContext.setProperty(DataFlowProperty.QUEUE, translatedQueue);
     }
 
     private void validateParameters(DataFlowContext dataFlowCtx) {
