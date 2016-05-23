@@ -156,8 +156,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void provisionMetadataTables(Tenant tenant) {
-        Boolean success = magicRestTemplate.postForObject(microServiceHostPort + "/metadata/admin/provision",
-                tenant, Boolean.class);
+        Boolean success = magicRestTemplate.postForObject(microServiceHostPort + "/metadata/admin/provision", tenant,
+                Boolean.class);
         if (!success) {
             throw new RuntimeException("Failed to provision metadata component");
         }
@@ -219,6 +219,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         targetMarket.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
+        targetMarket.getReports().clear();
 
         restTemplate.put(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, targetMarket);
 
