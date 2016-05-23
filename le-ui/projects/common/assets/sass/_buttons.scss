@@ -99,7 +99,7 @@ button.button, a.button, .button {
   }
 	@include media(">medium") {
     display: inline-block;
-    padding: 0.75em 3em;
+    padding: 0.85em 3em 0.8em;
     &.icon-button {
     	padding: 0.75em 1.5em;
     }

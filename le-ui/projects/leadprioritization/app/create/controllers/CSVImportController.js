@@ -381,20 +381,19 @@ angular.module('mainApp.create.csvImport', [
                             day = date.getDate(),
                             year = date.getFullYear(),
                             month = (date.getMonth() + 1),
-                            seconds = Math.floor(date / 1000),
-                            minutes = Math.floor(seconds / 60),
-                            hours = Math.floor(minutes / 60),
-                            seconds = seconds % 60,
-                            minutes = minutes % 60,
-                            hours = hours % 24,
+                            seconds = date.getSeconds(),
+                            minutes = date.getMinutes(),
+                            hours = date.getHours(),
                             month = (month < 10 ? '0' + month : month),
                             day = (day < 10 ? '0' + day : day),
                             minutes = (minutes < 10 ? '0' + minutes : minutes),
+                            hours = (hours < 10 ? '0' + hours : hours),
                             timestamp = year +''+ month +''+ day +'-'+ hours +''+ minutes,
-                            displayName = fileName.replace('.csv','');
+                            displayName = fileName.replace('.csv',''),
+                            displayName = displayName.substr(0, 50 - (timestamp.length));
 
                         if (scope.vm.modelDisplayName.indexOf(displayName) < 0) {
-                            scope.vm.modelDisplayName = timestamp + '_' + displayName;
+                            scope.vm.modelDisplayName = displayName + '_' + timestamp;
                         }
 
                         $('#modelDisplayName').focus();
@@ -407,6 +406,10 @@ angular.module('mainApp.create.csvImport', [
                     modelSetter(scope, element[0].files[0]);
                     ngModel.$setViewValue(element.val());
                     ngModel.$render();
+                    
+                    if (fileName) {
+                        scope.vm.uploadFile();
+                    }
                 });
             });
         }
@@ -444,12 +447,11 @@ angular.module('mainApp.create.csvImport', [
             this.cancelDeferred = cancelDeferred = $q.defer();
             csvImportService.Upload({
                 file: vm.csvFile, 
-                // url: '/pls/models/fileuploads/unnamed',
-                url: '/pls/models/uploadfile/unnamed',
+                // url: '/pls/models/uploadfile/unnamed',
+                url: '/pls/models/fileuploads/unnamed',
                 params: {
                     schema: fileType,
                     displayName: vm.csvFileName,
-                    description: vm.modelDescription,
                     compressed: vm.compressed
                 },
                 progress: function(e) {
@@ -490,23 +492,16 @@ angular.module('mainApp.create.csvImport', [
                 vm.uploading = false;
 
                 if (result.Success && result.Result) {
-                    var fileName = result.Result.name,
-                        metaData = result.Result,
-                        displayName = vm.modelDisplayName,
-                        modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.modelDisplayName);
+                    var fileName = vm.choosenFileName = result.Result.name,
+                        metaData = vm.metadata = result.Result;
 
                     vm.percent = 0;
                     vm.uploaded = true;
                     vm.message = 'Done.';
-                    metaData.modelName = modelName;
-                    metaData.displayName = displayName;
-                    // metaData.description = description;
 
-                    csvImportStore.Set(fileName, metaData);
+                    /*
 
-                    setTimeout(function() {
-                        $state.go('home.models.import.columns', { csvFileName: fileName });
-                    }, 1500);
+                    */
                 } else {
                     vm.percent = 0;
                     vm.percentage = '';
@@ -525,6 +520,23 @@ angular.module('mainApp.create.csvImport', [
 
             $('#fileUploadCancelBtn').on('click', vm.cancelClicked.bind(this));
         };
+
+        vm.clickNext = function() {
+            var fileName = vm.choosenFileName;
+                metaData = vm.metadata,
+                displayName = vm.modelDisplayName,
+                modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName);
+
+            metaData.modelName = modelName;
+            metaData.displayName = displayName;
+            metaData.description = vm.modelDescription;
+            //console.log(fileName, metaData);
+            csvImportStore.Set(fileName, metaData);
+
+            setTimeout(function() {
+                $state.go('home.models.import.columns', { csvFileName: fileName });
+            }, 1);
+        }
 
         vm.cancelClicked = function() {
             vm.uploading = false;

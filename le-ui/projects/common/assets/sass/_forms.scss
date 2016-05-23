@@ -759,7 +759,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
     overflow: hidden;
     white-space: nowrap;
     padding-right: 3em;
-    height: 2.4em;
+    height: 2.35em;
     position: relative;
     margin: 5px 0;
     color: #222;
@@ -789,7 +789,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
       padding: 0.6em;
     }
     i.fa.fa-close {
-      color: #f16a22;
+      color: #666;
     } 
     i.fa.fa-check {
       color: darkolivegreen;
@@ -1203,6 +1203,12 @@ select[multiple].input-lg {
   color: #a94442;
 }
 .has-error .form-control {
+  border-color: #a94442;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.is-pristine .form-control {
+  border-left-width: 4px;
   border-color: #a94442;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);

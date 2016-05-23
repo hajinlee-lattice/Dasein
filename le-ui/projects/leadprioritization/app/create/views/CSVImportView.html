@@ -3,7 +3,7 @@
   <div class="row">
     <div class="columns eight offset-two">
       <h2>Settings</h2>
-      <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
+      <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
         <label for="loadfile">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}<span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
         <div class="fileUpload button form-control">
             <div 
@@ -26,35 +26,26 @@
             <i class="fa fa-close" ng-click="vm.cancelClicked()" ng-if="vm.uploading && vm.percent > 0"></i>
             <i class="fa fa-check" ng-click="vm.cancelClicked()" ng-if="vm.uploaded"></i>
         </div>
-        <p id="csvFileUploadMessage">{{vm.message}}&nbsp;<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
         <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
+        <p id="csvFileUploadMessage">{{vm.message}}&nbsp;<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
       </div>
 
-      <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelName.$invalid && !uploadForm.modelName.$pristine }">
-        <label>{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELNAME')}}<span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+      <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+        <label>{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELNAME')}}</label>
         <input 
           type="text" 
           class="form-control" 
           id="modelDisplayName"
           name="modelDisplayName"
-          ng-disabled="vm.uploaded || vm.uploading"
+          ng-model="vm.modelDisplayName"
           ng-value="vm.modelDisplayName"
-          ng-minlength="1"
+          ng-minlength="2"
           ng-maxlength="50"
           placeholder="Example: US-Enterprise-model"
           required />
         <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_MODELNAME')}}</p>
       </div>
-      <!--
-      <div class="form-group">
-        <label>Model Type</label>
-        <div class="toggle-check">
-          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}}</label>
-          <input type="checkbox" name="account-lead-check" ng-model="vm.accountLeadCheck" id="account-lead-check" class="toggle-switch" />
-          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}}</label>
-        </div>          
-      </div>
-      -->
+      
       <div class="form-group">
         <label>{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELDESCRIPTION')}} <span>(optional)</span></label>
         <textarea 
@@ -62,11 +53,20 @@
           cols="30"
           name="modelDescription" 
           ng-model="vm.modelDescription" 
-          ng-disabled="vm.uploaded || vm.uploading"
           id="modelDescription" 
           class="form-control" />
       </div>
-
+      <!--
+      <div class="form-group">
+        <label>Model Type</label>
+        <div class="toggle-check">
+          <input type="radio" name="account-lead-check" ng-model="vm.accountLeadCheck" id="account-check" class="" />
+          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}} (default)</label><br>
+          <input type="radio" name="account-lead-check" ng-model="vm.accountLeadCheck" id="lead-check" class="" />
+          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}}</label>
+        </div>          
+      </div>
+      -->
       <div class="row form-actions">
         <div class="pull-left">
             <button 
@@ -79,8 +79,8 @@
             <button 
                 type="button" 
                 class="button orange-button block-button"
-                ng-disabled="uploadForm.$invalid || (vm.uploading || vm.uploaded)"
-                ng-click="vm.uploadFile()">
+                ng-disabled="uploadForm.$invalid || (vm.uploading && !vm.uploaded)"
+                ng-click="vm.clickNext()">
               {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
             </button>
         </div>
