@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.debugtools;
+package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 
@@ -6,14 +6,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
-public class ModelRetrieverDeploymentTestNG extends ScoringApiFunctionalTestNGBase {
+public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(ModelRetrieverDeploymentTestNG.class);
 
@@ -23,11 +25,18 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiFunctionalTestNGBa
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Test(groups = "deployment", enabled = true)
+    public void testRetrieveModelArtifacts() throws Exception {
+        tenant = setupTenantAndModelSummary(false);
+        ScoringArtifacts artifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
+        Assert.notNull(artifacts);
+    }
+
     /**
      * Use this as a tool to download a model into test resources for running scoring tests against.
      * @throws Exception
      */
-    @Test(groups = "deployment.lp", enabled = false)
+    @Test(groups = "deployment", enabled = false)
     public void downloadModelToLocal() throws Exception {
         SSLUtils.turnOffSslChecking();
         String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/NPE/";

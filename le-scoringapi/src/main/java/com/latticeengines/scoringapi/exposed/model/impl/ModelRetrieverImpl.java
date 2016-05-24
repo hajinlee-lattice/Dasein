@@ -277,9 +277,13 @@ public class ModelRetrieverImpl implements ModelRetriever {
      * around that issue.
      */
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
-        String appId = modelSummary.getApplicationId().substring("application_".length());
-        if (!StringUtils.isBlank(appId)) {
-            return appId;
+        String appId = modelSummary.getApplicationId();
+        if (!StringUtils.isBlank(appId) && appId.length() > "application_".length()) {
+            appId = appId.substring("application_".length());
+            if (!StringUtils.isBlank(appId)) {
+                log.info("Parsed appId foldername from modelsummary:" + appId);
+                return appId;
+            }
         }
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
@@ -288,7 +292,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         try {
             List<String> folders = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactAppIdDir);
             if (folders.size() == 1) {
-                appId = folders.get(0);
+                appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
                 throw new LedpException(LedpCode.LEDP_31007,
                         new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
@@ -296,6 +300,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
         }
+        log.info("Found appId foldername by discovery:" + appId);
 
         return appId;
     }

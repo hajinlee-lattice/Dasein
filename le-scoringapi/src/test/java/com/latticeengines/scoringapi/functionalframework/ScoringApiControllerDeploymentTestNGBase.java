@@ -88,7 +88,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 CLIENT_ID_LP);
         OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
         log.info(accessToken.getValue());
-        tenant = setupTenantAndModelSummary();
+        tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
     }
 
@@ -123,7 +123,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         user.setPasswordExpiration(userEntityMgr.getPasswordExpiration(userId));
     }
 
-    private Tenant setupTenantAndModelSummary() throws IOException {
+    protected Tenant setupTenantAndModelSummary(boolean includeApplicationId) throws IOException {
         String tenantId = TENANT_ID;
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
@@ -132,7 +132,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         plsRest.createTenant(tenant);
 
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
-        modelSummary.setApplicationId(APPLICATION_ID);
+        if (includeApplicationId) {
+            modelSummary.setApplicationId(APPLICATION_ID);
+        }
         modelSummary.setEventTableName(EVENT_TABLE);
         modelSummary.setId(MODEL_ID);
         modelSummary.setDisplayName(MODEL_NAME);
