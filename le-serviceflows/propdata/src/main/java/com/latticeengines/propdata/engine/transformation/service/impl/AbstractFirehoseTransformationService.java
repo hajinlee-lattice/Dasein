@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 public abstract class AbstractFirehoseTransformationService extends AbstractTransformationService {
     private static Logger LOG = LogManager.getLogger(AbstractFirehoseTransformationService.class);
@@ -20,14 +21,17 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
     abstract void uploadSourceSchema(String workflowDir) throws IOException;
 
-    protected TransformationProgress transformHook(TransformationProgress progress) {
-        if (!ingestDataFromFirehoseAndUpdateProgress(progress)) {
+    @Override
+    protected TransformationProgress transformHook(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration) {
+        if (!ingestDataFromFirehoseAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
         return null;
     }
 
-    private boolean ingestDataFromFirehoseAndUpdateProgress(TransformationProgress progress) {
+    private boolean ingestDataFromFirehoseAndUpdateProgress(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration) {
         String workflowDir = workflowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
@@ -36,7 +40,7 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
         try {
             uploadSourceSchema(workflowDir);
-            executeDataFlow(progress, workflowDir);
+            executeDataFlow(progress, workflowDir, transformationConfiguration);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform data.", e);
             return false;

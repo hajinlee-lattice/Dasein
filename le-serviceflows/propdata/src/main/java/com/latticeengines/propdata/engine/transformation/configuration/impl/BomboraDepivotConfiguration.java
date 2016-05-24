@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.engine.transformation.configuration.impl;
 
+import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
@@ -12,6 +14,7 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
     private BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig;
     private String serviceBeanName = "bomboraDepivotedService";
     private String rootOperationId;
+    private List<SourceColumn> sourceColumns;
 
     @Override
     public String getSourceName() {
@@ -38,6 +41,16 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
         return serviceBeanName;
     }
 
+    @Override
+    public List<SourceColumn> getSourceColumns() {
+        return sourceColumns;
+    }
+
+    @Override
+    public String getRootOperationId() {
+        return rootOperationId;
+    }
+
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
     }
@@ -54,12 +67,11 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
         this.version = version;
     }
 
-    public String getRootOperationId() {
-        return rootOperationId;
-    }
-
     public void setRootOperationId(String rootOperationId) {
         this.rootOperationId = rootOperationId;
     }
 
+    public void setSourceColumns(List<SourceColumn> sourceColumns) {
+        this.sourceColumns = sourceColumns;
+    }
 }

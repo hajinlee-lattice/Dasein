@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("firehoseTransformationDataFlowService")
 public class FirehoseTransformationDataFlowService extends AbstractTransformationDataFlowService {
@@ -44,6 +46,9 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
+    @Autowired
+    private SourceColumnEntityMgr sourceColumnEntityMgr;
+
     @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;
 
@@ -51,7 +56,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     @Override
     public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
-            String dataFlowBean) {
+            String dataFlowBean, TransformationConfiguration transformationConfiguration) {
         if (StringUtils.isEmpty(dataFlowBean) || fieldTypeMapping == null) {
             throw new LedpException(LedpCode.LEDP_25012,
                     new String[] { source.getSourceName(), (fieldTypeMapping == null
@@ -61,11 +66,9 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         if (source instanceof DataImportedFromHDFS) {
             String inputDir = hdfsPathBuilder.constructIngestionDir(source.getSourceName(), baseVersion).toString();
             String gzHdfsPath = null;
-            String avroSchemaPath = null;
 
             try {
                 gzHdfsPath = scanDir(inputDir, CSV_GZ);
-                avroSchemaPath = scanDir(workflowDir, AVSC);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
@@ -75,7 +78,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
             try {
                 untarGZFile(gzHdfsPath, uncompressedFilePath);
-                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, avroSchemaPath);
+                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
@@ -111,8 +114,8 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     }
 
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String uncompressedFilePath,
-            String avroDirPath, String avroSchemaPath) throws IOException {
-        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, avroSchemaPath);
+            String avroDirPath) throws IOException {
+        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath);
     }
 
     @Override

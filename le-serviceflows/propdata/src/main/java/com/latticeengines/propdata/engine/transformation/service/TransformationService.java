@@ -10,7 +10,8 @@ public interface TransformationService {
 
     TransformationProgress startNewProgress(TransformationConfiguration transformationConfiguration, String creator);
 
-    TransformationProgress transform(TransformationProgress progress);
+    TransformationProgress transform(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration);
 
     TransformationProgress finish(TransformationProgress progress);
 

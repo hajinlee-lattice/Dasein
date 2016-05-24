@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 public abstract class AbstractFixedIntervalTransformationService extends AbstractTransformationService {
     private static Logger LOG = LogManager.getLogger(AbstractFixedIntervalTransformationService.class);
@@ -21,21 +22,24 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
     abstract List<String> compareVersionLists(Source source, List<String> latestBaseVersions,
             List<String> latestVersions, String baseDir);
 
-    protected TransformationProgress transformHook(TransformationProgress progress) {
-        if (!transformDataAndUpdateProgress(progress)) {
+    @Override
+    protected TransformationProgress transformHook(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration) {
+        if (!transformDataAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
         return null;
     }
 
-    private boolean transformDataAndUpdateProgress(TransformationProgress progress) {
+    private boolean transformDataAndUpdateProgress(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration) {
         String workflowDir = workflowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
             return false;
         }
         try {
-            executeDataFlow(progress, workflowDir);
+            executeDataFlow(progress, workflowDir, transformationConfiguration);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform data.", e);
             return false;
@@ -59,7 +63,7 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
                 + ((FixedIntervalSource) source).getDirForBaseVersionLookup();
         Date cutoffDate = getCutoffDate(null);
         String cutoffDateVersion = HdfsPathBuilder.dateFormat.format(cutoffDate);
-        
+
         List<String> latestVersions = null;
         List<String> latestBaseVersions = null;
         try {

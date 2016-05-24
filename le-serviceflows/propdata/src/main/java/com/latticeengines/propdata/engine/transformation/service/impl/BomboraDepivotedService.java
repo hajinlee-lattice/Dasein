@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -30,6 +29,8 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 @Component("bomboraDepivotedService")
 public class BomboraDepivotedService extends AbstractFixedIntervalTransformationService
         implements TransformationService {
+    private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
+
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
 
     private static final String DEPIVOT_FLOW = "DepivotFlow";
@@ -61,9 +62,10 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    protected void executeDataFlow(TransformationProgress progress, String workflowDir) {
+    protected void executeDataFlow(TransformationProgress progress, String workflowDir,
+            TransformationConfiguration transformationConfiguration) {
         transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
-                progress.getRootOperationUID(), "bomboraDepivotFlow");
+                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
@@ -83,15 +85,13 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion) {
+    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+            List<SourceColumn> sourceColumns) {
         BomboraDepivotConfiguration configuration = new BomboraDepivotConfiguration();
         BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig = new BomboraFirehoseInputSourceConfig();
         bomboraFirehoseInputSourceConfig.setVersion(latestBaseVersion.get(0));
         configuration.setBomboraFirehoseInputSourceConfig(bomboraFirehoseInputSourceConfig);
-        configuration.setSourceName(source.getSourceName());
-        Map<String, String> sourceConfigurations = new HashMap<>();
-        configuration.setSourceConfigurations(sourceConfigurations);
-        configuration.setVersion(newLatestVersion);
+        setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
         return configuration;
     }
 

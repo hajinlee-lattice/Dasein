@@ -81,7 +81,8 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
     }
 
     protected TransformationProgress transformData(TransformationProgress progress) {
-        TransformationProgress response = transformationService.transform(progress);
+        TransformationProgress response = transformationService.transform(progress,
+                createTransformationConfiguration());
 
         Assert.assertEquals(response.getStatus(), TransformationProgressStatus.FINISHED);
 

@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,11 +14,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.DepivotDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
@@ -28,13 +29,12 @@ import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("fixedIntervalTransformationDataFlowService")
 public class FixedIntervalTransformationDataFlowService extends AbstractTransformationDataFlowService {
 
     private static final String SOURCETABLES = "SOURCETABLES";
-
-    private static final String SCHEMA_BOMBORA_FIREHOSE_AVRO = "schema/BomboraFirehoseAvroSchema.avsc";
 
     private static final String SPLIT_REGEX = "\\|";
 
@@ -62,7 +62,7 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
 
     @Override
     public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
-            String dataFlowBean) {
+            String dataFlowBean, TransformationConfiguration transformationConfiguration) {
         if (StringUtils.isEmpty(dataFlowBean)) {
             throw new LedpException(LedpCode.LEDP_25012,
                     new String[] { source.getSourceName(), "Name of dataFlowBean cannot be null" });
@@ -75,19 +75,17 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
 
         Map<String, Table> sources = new HashMap<>();
         List<String> baseTables = new ArrayList<>();
+        List<List<SourceColumn>> baseSourceColumnsList = new ArrayList<>();
         String[] versions = baseVersion.split(SPLIT_REGEX);
         int i = 0;
         for (Source baseSource : fixedIntervalSource.getBaseSources()) {
             String version = versions[i];
             Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
-            try (InputStream schemaContent = this.getClass().getClassLoader()
-                    .getResourceAsStream(SCHEMA_BOMBORA_FIREHOSE_AVRO)) {
-                Schema schema = new Schema.Parser().parse(schemaContent);
-                baseTable.setSchema(schema);
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_25012, e,
-                        new String[] { source.getSourceName(), e.getMessage() });
-            }
+            List<SourceColumn> baseSourceColumns = sourceColumnEntityMgr.getSourceColumns(baseSource.getSourceName());
+            baseSourceColumnsList.add(baseSourceColumns);
+            CsvToAvroFieldMapping fieldMapping = new CsvToAvroFieldMappingImpl(baseSourceColumns);
+            Schema schema = fieldMapping.getAvroSchema();
+            baseTable.setSchema(schema);
             sources.put(baseSource.getSourceName(), baseTable);
             baseTables.add(baseSource.getSourceName());
             i++;
@@ -100,7 +98,8 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
         } catch (ParseException e) {
             throw new LedpException(LedpCode.LEDP_25012, e, new String[] { source.getSourceName(), e.getMessage() });
         }
-        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource));
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource.getSourceName()));
+        parameters.setBaseSourceColumns(baseSourceColumnsList);
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());
         parameters.setHasSqlPresence(source instanceof HasSqlPresence);

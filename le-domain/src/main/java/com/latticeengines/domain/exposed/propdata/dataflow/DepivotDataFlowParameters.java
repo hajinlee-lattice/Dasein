@@ -12,6 +12,7 @@ public class DepivotDataFlowParameters extends DataFlowParameters {
     private List<String> baseTables;
     private String[] joinFields;
     private List<SourceColumn> columns;
+    private List<List<SourceColumn>> baseSourceColumns;
     private Boolean hasSqlPresence = true;
     private Date timestamp;
 
@@ -61,5 +62,13 @@ public class DepivotDataFlowParameters extends DataFlowParameters {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public List<List<SourceColumn>> getBaseSourceColumns() {
+        return baseSourceColumns;
+    }
+
+    public void setBaseSourceColumns(List<List<SourceColumn>> baseSourceColumns) {
+        this.baseSourceColumns = baseSourceColumns;
     }
 }

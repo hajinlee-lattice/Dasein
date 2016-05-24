@@ -52,9 +52,8 @@ public class SimpleCascadingExecutor {
     @Value("${dataflow.hdfs.stack:}")
     private String stackName;
 
-    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
-            String avroSchemaPath) throws IOException {
-        Schema schema = new Schema.Parser().parse(HdfsUtils.getHdfsFileContents(yarnConfiguration, avroSchemaPath));
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath) throws IOException {
+        Schema schema = fieldMapping.getAvroSchema();
         Properties properties = new Properties();
         for (Entry<String, String> conf : yarnConfiguration) {
             properties.put(conf.getKey(), conf.getValue());

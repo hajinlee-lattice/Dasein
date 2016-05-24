@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import org.apache.avro.Schema;
+
 import cascading.tuple.coerce.Coercions.Coerce;
 
 public interface CsvToAvroFieldMapping {
@@ -8,5 +10,7 @@ public interface CsvToAvroFieldMapping {
     String getCsvFieldName(String avroFieldName);
 
     Coerce<?> getFieldType(String csvFieldName);
+
+    Schema getAvroSchema();
 
 }

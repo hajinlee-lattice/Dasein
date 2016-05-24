@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 
 public abstract class FirehoseTransformationServiceImplTestNGBase extends TransformationServiceImplTestNGBase {
 
-    @Test(groups = "collection")
+    // @Test(groups = "collection")
     public void testWholeProgress() {
         uploadBaseGZFile();
         TransformationProgress progress = createNewProgress();

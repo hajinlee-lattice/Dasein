@@ -9,11 +9,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.engine.common.dao.SourceColumnDao;
-import com.latticeengines.propdata.core.source.DerivedSource;
 
 @Component
-public class SourceColumnDaoImpl
-        extends BaseDaoWithAssignedSessionFactoryImpl<SourceColumn> implements SourceColumnDao {
+public class SourceColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<SourceColumn>
+        implements SourceColumnDao {
 
     @Override
     protected Class<SourceColumn> getEntityClass() {
@@ -22,8 +21,7 @@ public class SourceColumnDaoImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<SourceColumn> getColumnsOfSource(DerivedSource source) {
-        String sourceName = source.getSourceName();
+    public List<SourceColumn> getColumnsOfSource(String sourceName) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName order by SourceColumnID",
                 getEntityClass().getSimpleName());

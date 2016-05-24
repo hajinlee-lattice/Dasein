@@ -7,20 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
-import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
@@ -32,6 +31,7 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGData;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -106,7 +106,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
         parameters.setTimestampField(source.getTimestampField());
-        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(source));
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(source.getSourceName()));
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());
         parameters.setHasSqlPresence(source instanceof HasSqlPresence);

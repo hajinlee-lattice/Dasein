@@ -160,6 +160,21 @@ public class SourceColumn implements HasPid, Serializable {
     }
 
     public enum Calculation {
-        GROUPBY, PIVOT_ANY, PIVOT_MAX, PIVOT_MIN, PIVOT_SUM, PIVOT_COUNT, PIVOT_EXISTS, AGG_MIN, AGG_MAX, AGG_SUM, AGG_COUNT, OTHER, BUILTWITH_TOPATTR, HGDATA_NEWTECH;
+        GROUPBY, //
+        PIVOT_ANY, //
+        PIVOT_MAX, //
+        PIVOT_MIN, //
+        PIVOT_SUM, //
+        PIVOT_COUNT, //
+        PIVOT_EXISTS, //
+        AGG_MIN, //
+        AGG_MAX, //
+        AGG_SUM, //
+        AGG_COUNT, //
+        OTHER, //
+        BUILTWITH_TOPATTR, //
+        HGDATA_NEWTECH, //
+        DEPIVOT, //
+        COLUMN_NAME_MAPPING;
     }
 }

@@ -68,7 +68,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
                     progress.setStatus(TransformationProgressStatus.TRANSFORMING);
                     progress = transformationProgressEntityMgr.updateProgress(progress);
                 }
-                transformationService.transform(progress);
+                transformationService.transform(progress, transformationConfiguration);
                 progress.setStatus(TransformationProgressStatus.FINISHED);
 
             } else {

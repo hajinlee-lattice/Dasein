@@ -3,7 +3,9 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.log4j.LogManager;
@@ -15,12 +17,14 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
@@ -48,16 +52,21 @@ public abstract class AbstractTransformationService extends TransformationServic
     @Autowired
     protected YarnConfiguration yarnConfiguration;
 
+    @Autowired
+    private SourceColumnEntityMgr sourceColumnEntityMgr;
+
     abstract TransformationProgressEntityMgr getProgressEntityMgr();
 
-    abstract void executeDataFlow(TransformationProgress progress, String workflowDir);
+    abstract void executeDataFlow(TransformationProgress progress, String workflowDir,
+            TransformationConfiguration transformationConfiguration);
 
     abstract Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration);
 
-    abstract TransformationProgress transformHook(TransformationProgress progress);
+    abstract TransformationProgress transformHook(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration);
 
     abstract TransformationConfiguration createNewConfiguration(List<String> latestBaseVersions,
-            String newLatestVersion);
+            String newLatestVersion, List<SourceColumn> sourceColumns);
 
     abstract String getRootBaseSourceDirPath();
 
@@ -110,14 +119,15 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     @Override
-    public TransformationProgress transform(TransformationProgress progress) {
+    public TransformationProgress transform(TransformationProgress progress,
+            TransformationConfiguration transformationConfiguration) {
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
         getProgressEntityMgr().updateStatus(progress, TransformationProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
 
-        transformHook(progress);
+        transformHook(progress, transformationConfiguration);
 
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
         return getProgressEntityMgr().updateStatus(progress, TransformationProgressStatus.FINISHED);
@@ -272,7 +282,17 @@ public abstract class AbstractTransformationService extends TransformationServic
     @Override
     public TransformationConfiguration createTransformationConfiguration(List<String> versionsToProcess) {
         TransformationConfiguration configuration;
-        configuration = createNewConfiguration(versionsToProcess, versionsToProcess.get(0));
+        configuration = createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
+                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
         return configuration;
+    }
+
+    protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns,
+            TransformationConfiguration configuration) {
+        configuration.setSourceName(getSource().getSourceName());
+        Map<String, String> sourceConfigurations = new HashMap<>();
+        configuration.setSourceConfigurations(sourceConfigurations);
+        configuration.setVersion(newLatestVersion);
+        configuration.setSourceColumns(sourceColumns);
     }
 }
