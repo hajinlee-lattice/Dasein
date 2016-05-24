@@ -2,6 +2,7 @@ package com.latticeengines.propdata.match.service.impl;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
@@ -45,7 +47,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public MatchCommand start(MatchInput input, ApplicationId appId, String rootOperationUid) {
         MatchCommand command = new MatchCommand();
-        command.setColumnSelection(input.getPredefinedSelection().getName());
+        command.setColumnSelection(columnSelectionString(input));
         command.setCustomer(input.getTenant().getId());
 
         command.setMatchStatus(MatchStatus.NEW);
@@ -121,6 +123,19 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public MatchCommand getByRootOperationUid(String rootOperationUid) {
         return matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
+    }
+
+    private static String columnSelectionString(MatchInput input) {
+        String version;
+        if (input.getPredefinedSelection() != null) {
+            version = input.getPredefinedSelection().getName();
+            if (StringUtils.isNotEmpty(input.getPredefinedVersion())) {
+                version += "|" + input.getPredefinedVersion();
+            }
+        } else {
+            version = JsonUtils.serialize(input.getCustomSelection());
+        }
+        return version;
     }
 
     public class MatchCommandUpdaterImpl implements MatchCommandUpdater {

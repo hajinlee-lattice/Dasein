@@ -98,6 +98,11 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         return "1.0";
     }
 
+    @Override
+    public Boolean isValidVersion(ColumnSelection.Predefined predefined, String version) {
+        return "1.0".equals(version);
+    }
+
     private Map<String, List<String>> getSourceColumnMapForSelection(ColumnSelection.Predefined selection) {
         List<ExternalColumn> columns = externalColumnService.columnSelection(selection);
         Map<String, List<String>> map = new HashMap<>();

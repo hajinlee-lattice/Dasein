@@ -140,6 +140,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(getConfiguration().getCustomerSpace());
         jobConfiguration.setPredefinedSelection(getConfiguration().getPredefinedSelection());
+        jobConfiguration.setPredefinedSelectionVersion(getConfiguration().getPredefinedSelectionVersion());
+        jobConfiguration.setCustomizedSelection(getConfiguration().getCustomizedSelection());
         jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setGroupSize(groupSize);

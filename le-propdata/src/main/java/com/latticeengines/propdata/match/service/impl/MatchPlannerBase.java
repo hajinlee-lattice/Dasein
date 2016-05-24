@@ -43,11 +43,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private MetricService metricService;
 
-    protected void assignColumnSelectionVersion(MatchInput input) {
-        if (input.getPredefinedSelection() != null && StringUtils.isEmpty(input.getPredefinedVersion())) {
-            String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
-            log.info("Assign version " + version + " to column selection " + input.getPredefinedSelection());
-            input.setPredefinedVersion(version);
+    protected void assignAndValidateColumnSelectionVersion(MatchInput input) {
+        if (input.getPredefinedSelection() != null) {
+            if (StringUtils.isEmpty(input.getPredefinedVersion())) {
+                String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
+                log.info("Assign version " + version + " to column selection " + input.getPredefinedSelection());
+                input.setPredefinedVersion(version);
+            }
+            if (!columnSelectionService.isValidVersion(input.getPredefinedSelection(), input.getPredefinedVersion())) {
+                throw new IllegalArgumentException("The specified version " + input.getPredefinedVersion()
+                        + " is invalid for the selection " + input.getPredefinedSelection());
+            }
         }
     }
 
@@ -135,7 +141,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
                 String cleanDomain = null;
-                for (Integer domainPos: domainPosList) {
+                for (Integer domainPos : domainPosList) {
                     String originalDomain = (String) inputRecord.get(domainPos);
                     cleanDomain = DomainUtils.parseDomain(originalDomain);
                     if (StringUtils.isNotEmpty(cleanDomain)) {
@@ -163,13 +169,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
             try {
                 String originalName = null;
-                for (Integer namePos: namePosList) {
-                    originalName =(String) inputRecord.get(namePos);
+                for (Integer namePos : namePosList) {
+                    originalName = (String) inputRecord.get(namePos);
                 }
                 if (StringUtils.isNotEmpty(originalName)) {
                     String originalCountry = null;
-                    for (Integer countryPos: countryPosList) {
-                        originalCountry =(String) inputRecord.get(countryPos);
+                    for (Integer countryPos : countryPosList) {
+                        originalCountry = (String) inputRecord.get(countryPos);
                     }
                     if (StringUtils.isEmpty(originalCountry)) {
                         originalCountry = LocationUtils.USA;
@@ -177,8 +183,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
 
                     String originalState = null;
-                    for (Integer statePos: statePosList) {
-                        originalState =(String) inputRecord.get(statePos);
+                    for (Integer statePos : statePosList) {
+                        originalState = (String) inputRecord.get(statePos);
                     }
                     String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
 
@@ -189,8 +195,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
                     if (keyPositionMap.containsKey(MatchKey.City)) {
                         String originalCity = null;
-                        for (Integer cityPos: keyPositionMap.get(MatchKey.City)) {
-                            originalCity =(String) inputRecord.get(cityPos);
+                        for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
+                            originalCity = (String) inputRecord.get(cityPos);
                         }
                         nameLocation.setCity(originalCity);
                     }
@@ -217,7 +223,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Map<MatchKey, List<Integer>> posMap = new HashMap<>();
         for (MatchKey key : input.getKeyMap().keySet()) {
             List<Integer> posList = new ArrayList<>();
-            for (String field: input.getKeyMap().get(key)){
+            for (String field : input.getKeyMap().get(key)) {
                 posList.add(fieldPos.get(field.toLowerCase()));
             }
             posMap.put(key, posList);

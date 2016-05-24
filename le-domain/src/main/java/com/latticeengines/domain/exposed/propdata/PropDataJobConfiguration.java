@@ -17,6 +17,8 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private Integer threadPoolSize;
     private String avroPath;
     private ColumnSelection.Predefined predefinedSelection;
+    private String predefinedSelectionVersion;
+    private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private String rootOperationUid;
     private String blockOperationUid;
@@ -83,6 +85,26 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("predefined_selection")
     public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
+    }
+
+    @JsonProperty("predefined_selection_version")
+    public String getPredefinedSelectionVersion() {
+        return predefinedSelectionVersion;
+    }
+
+    @JsonProperty("predefined_selection_version")
+    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
+        this.predefinedSelectionVersion = predefinedSelectionVersion;
+    }
+
+    @JsonProperty("customized_selection")
+    public ColumnSelection getCustomizedSelection() {
+        return customizedSelection;
+    }
+
+    @JsonProperty("customized_selection")
+    public void setCustomizedSelection(ColumnSelection customizedSelection) {
+        this.customizedSelection = customizedSelection;
     }
 
     @JsonProperty("key_map")

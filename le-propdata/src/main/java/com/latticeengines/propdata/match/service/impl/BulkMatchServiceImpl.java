@@ -132,6 +132,8 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(customerSpace);
         jobConfiguration.setPredefinedSelection(input.getPredefinedSelection());
+        jobConfiguration.setPredefinedSelectionVersion(input.getPredefinedVersion());
+        jobConfiguration.setCustomizedSelection(input.getCustomSelection());
         jobConfiguration.setKeyMap(input.getKeyMap());
         jobConfiguration.setRootOperationUid(uuid);
         jobConfiguration.setGroupSize(groupSize);

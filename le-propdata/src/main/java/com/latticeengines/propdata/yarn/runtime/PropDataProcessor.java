@@ -98,6 +98,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private BlockDivider divider;
     private Tenant tenant;
     private ColumnSelection.Predefined predefinedSelection;
+    private String predefinedSelectionVersion;
+    private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
     private String rootOperationUid;
@@ -139,7 +141,11 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
             CustomerSpace space = jobConfiguration.getCustomerSpace();
             tenant = new Tenant(space.toString());
+
             predefinedSelection = jobConfiguration.getPredefinedSelection();
+            predefinedSelectionVersion = jobConfiguration.getPredefinedSelectionVersion();
+            customizedSelection = jobConfiguration.getCustomizedSelection();
+
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
             Integer groupSize = jobConfiguration.getGroupSize();
@@ -219,6 +225,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         matchInput.setReturnUnmatched(returnUnmatched);
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
+        matchInput.setPredefinedVersion(predefinedSelectionVersion);
+        matchInput.setCustomSelection(customizedSelection);
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         matchInput.setFields(divider.getFields());
         matchInput.setKeyMap(keyMap);

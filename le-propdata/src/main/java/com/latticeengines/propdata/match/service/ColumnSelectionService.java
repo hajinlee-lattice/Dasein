@@ -17,4 +17,6 @@ public interface ColumnSelectionService {
     Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined);
 
     String getCurrentVersion(ColumnSelection.Predefined predefined);
+
+    Boolean isValidVersion(ColumnSelection.Predefined predefined, String version);
 }

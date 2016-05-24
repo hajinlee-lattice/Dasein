@@ -13,7 +13,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
     @MatchStep
     public MatchContext plan(MatchInput input) {
         MatchContext context = new MatchContext();
-        assignColumnSelectionVersion(input);
+        assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
         context.setReturnUnmatched(input.getReturnUnmatched());
         context.setMatchEngine(MatchContext.MatchEngine.BULK);

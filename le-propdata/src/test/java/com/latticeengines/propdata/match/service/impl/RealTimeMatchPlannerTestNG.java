@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.latticeengines.propdata.match.service.ColumnSelectionService;
-import com.latticeengines.propdata.match.service.MatchPlanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -21,6 +19,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
+import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
 @Component
@@ -35,24 +35,10 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void testPrepareOutput() {
-        MatchInput input = new MatchInput();
-        input.setUuid(UUID.randomUUID());
-        input.setTenant(new Tenant("PD_Test"));
-        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
-        Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
-        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
-        keyMap.put(MatchKey.City, Collections.singletonList("City"));
-        keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
-        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-        input.setKeyMap(keyMap);
-        input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country"));
-
-        List<List<Object>> mockData = MatchInputValidatorUnitTestNG.generateMockData(100);
-        input.setData(mockData);
+        MatchInput input = prepareMatchInput();
 
         Set<String> uniqueDomains = new HashSet<>();
-        for (List<Object> row : mockData) {
+        for (List<Object> row : input.getData()) {
             String domain = (String) row.get(1);
             Assert.assertTrue(domain.contains("abc@"));
             uniqueDomains.add(domain);
@@ -68,5 +54,37 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
             Assert.assertFalse(record.getParsedDomain().contains("abc@"));
         }
     }
+    @Test(groups = "functional")
+    public void testInvalidSelectionVersion() {
+        MatchInput input = prepareMatchInput();
+        input.setPredefinedVersion("0.0");
+
+        try {
+            matchPlanner.plan(input);
+            Assert.fail("Should throw exception due to invalid selection version.");
+        } catch (IllegalArgumentException e) {
+            // ignore
+        }
+    }
+
+    private MatchInput prepareMatchInput() {
+        MatchInput input = new MatchInput();
+        input.setUuid(UUID.randomUUID());
+        input.setTenant(new Tenant("PD_Test"));
+        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+        keyMap.put(MatchKey.City, Collections.singletonList("City"));
+        keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
+        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
+        input.setKeyMap(keyMap);
+        input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country"));
+
+        List<List<Object>> mockData = MatchInputValidatorUnitTestNG.generateMockData(100);
+        input.setData(mockData);
+        return input;
+    }
+
 
 }
