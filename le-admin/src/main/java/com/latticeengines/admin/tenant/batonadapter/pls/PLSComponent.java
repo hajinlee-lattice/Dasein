@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
+import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -24,7 +24,7 @@ public class PLSComponent extends LatticeComponent {
     private boolean dryrun;
 
     @Autowired
-    private DefaultConfigOverwritter overwritter;
+    private DefaultConfigOverwriter overwriter;
 
     @Autowired
     private TenantService tenantService;
@@ -70,7 +70,7 @@ public class PLSComponent extends LatticeComponent {
             String defaultJson = "pls_default.json";
             String metadataJson = "pls_metadata.json";
             uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-            overwritter.overwriteDefaultConfigInPLS();
+            overwriter.overwriteDefaultConfigInPLS();
         }
 
         return dryrun;

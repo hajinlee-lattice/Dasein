@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
+import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -74,7 +74,7 @@ public class TenantServiceImpl implements TenantService {
     private ComponentOrchestrator orchestrator;
 
     @Autowired
-    private DefaultConfigOverwritter overwritter;
+    private DefaultConfigOverwriter overwriter;
 
     @Value("${pls.api.hostport}")
     private String plsEndHost;
@@ -99,7 +99,7 @@ public class TenantServiceImpl implements TenantService {
             String metadataJson = "space_metadata.json";
             String serviceName = "SpaceConfiguration";
             LatticeComponent.uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, serviceName);
-            overwritter.overwriteDefaultSpaceConfig();
+            overwriter.overwriteDefaultSpaceConfig();
         }
 
     }

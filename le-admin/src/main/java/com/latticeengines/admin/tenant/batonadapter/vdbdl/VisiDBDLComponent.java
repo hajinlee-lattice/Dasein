@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwritter;
+import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -28,7 +28,7 @@ public class VisiDBDLComponent extends LatticeComponent {
     private DataStoreProvider dataStoreProvider;
 
     @Autowired
-    private DefaultConfigOverwritter overwritter;
+    private DefaultConfigOverwriter overwriter;
 
     @Autowired
     private DataLoaderService dataLoaderService;
@@ -51,7 +51,7 @@ public class VisiDBDLComponent extends LatticeComponent {
             String defaultJson = "vdbdl_default.json";
             String metadataJson = "vdbdl_metadata.json";
             uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-            overwritter.overwriteDefaultConfigInVisiDBDL();
+            overwriter.overwriteDefaultConfigInVisiDBDL();
         }
         return true;
     }

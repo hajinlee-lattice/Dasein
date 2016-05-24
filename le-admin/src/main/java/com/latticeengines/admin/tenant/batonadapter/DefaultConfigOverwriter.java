@@ -18,7 +18,7 @@ import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 
 @Component
-public class DefaultConfigOverwritter {
+public class DefaultConfigOverwriter {
 
     private final String listDelimiter = ",";
 
