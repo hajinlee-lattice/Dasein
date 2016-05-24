@@ -5,7 +5,7 @@ from pipelinefwk import PipelineStep
 class DataRulePipeline(Pipeline):
 
     def __init__(self, pipelineSteps):
-        super(DataRulePipeline, self, pipelineSteps).__init__()
+        super(DataRulePipeline, self).__init__(pipelineSteps)
 
     def apply(self, dataFrame, configMetadata):
         for step in self.pipelineSteps:
@@ -24,7 +24,7 @@ class DataRulePipeline(Pipeline):
 class DataRule(PipelineStep):
 
     def __init__(self, props):
-        super(DataRule, self, props).__init__()
+        super(DataRule, self).__init__(props)
 
     @abstractmethod
     def apply(self, dataFrame, configMetadata):
@@ -37,7 +37,7 @@ class DataRule(PipelineStep):
 class RowRule(DataRule):
 
     def __init__(self, props):
-        super(RowRule, self, props).__init__()
+        super(RowRule, self).__init__(props)
 
     @abstractmethod
     def getRowsToRemove(self):
@@ -46,7 +46,7 @@ class RowRule(DataRule):
 class ColumnRule(DataRule):
 
     def __init__(self, props):
-        super(ColumnRule, self, props).__init__()
+        super(ColumnRule, self).__init__(props)
 
     @abstractmethod
     def getColumnsToRemove(self):
@@ -55,7 +55,7 @@ class ColumnRule(DataRule):
 class TableRule(DataRule):
 
     def __init__(self, props):
-        super(TableRule, self, props).__init__()
+        super(TableRule, self).__init__(props)
 
     @abstractmethod
     def getRowsToRemove(self):
