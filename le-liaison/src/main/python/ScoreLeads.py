@@ -134,7 +134,7 @@ def scoreLeadFile(token, modelGUID, leadFileName, requiredFieldNames):
             requiredFields = {}
             for f in requiredFieldNames:
                 requiredFields[f] = row[f]
-            record = json.dumps({'record' : requiredFields, 'modelId' : '{0}'.format(modelGUID)})
+            record = json.dumps({'record' : requiredFields, 'modelId' : '{0}'.format(modelGUID), 'source' : 'Production Validation'})
             postdata = (url, header, record)
             tasks.append(postdata)
 

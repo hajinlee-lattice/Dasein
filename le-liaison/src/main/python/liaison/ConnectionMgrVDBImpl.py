@@ -529,7 +529,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             if self.isVerbose():
                 print 'Failed to get query status for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
-            raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetQueryStatus(): {0}'.format(payload['queryHandle']) )
+            raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.getQueryStatus(): Query could not compile or execute in visiDB with handle {0}'.format(payload['queryHandle']) )
 
         if self.isVerbose():
             print 'Success'

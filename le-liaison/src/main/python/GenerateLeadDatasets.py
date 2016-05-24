@@ -48,9 +48,9 @@ def generateLeadDatasets(tenants):
         except TenantNotMappedToURL:
             print 'Not on LP DataLoader; skipping'
             continue
-        dt = datetime.datetime.now()
-        writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
-        exit(0)
+        #dt = datetime.datetime.now()
+        #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
+        #exit(0)
         template_type = 'Unknown'
         template_version = 'Unknown'
 
@@ -154,7 +154,7 @@ def generateLeadDatasets(tenants):
 
         dt = datetime.datetime.now()
 
-        writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
+        #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ScoringLead', dt)
         #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_AllRows', dt)
         #writeQueryToCSV(conn_mgr, t, 'Q_LP3_ModelingLead_OneLeadPerDomain', dt)
 
