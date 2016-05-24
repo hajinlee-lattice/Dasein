@@ -6,11 +6,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +42,8 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDep
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final String SALESFORCE = "SALESFORCE";
+    private static final String MISSING_FIELD_COUNTRY = "Country";
+    private static final String MISSING_FIELD_FIRSTNAME = "FirstName";
     private static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
     // allow atleast 80 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
@@ -50,6 +55,15 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     private static final int RECORD_MODEL_CARDINALITY = 2;
     private static final int MAX_MODELS = 20;
     private volatile Throwable exception = null;
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final String UTC = "UTC";
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    private Map<String, List<String>> threadPerfMap = new HashMap<>();
+    private boolean shouldPrintPerformanceInfo = true;
+
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
@@ -124,6 +138,42 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     }
 
     @Test(groups = "deployment", enabled = true)
+    public void getModelsCountAll() {
+        getModelCount(1, true, null);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void getModelsCountActive() {
+        getModelCount(1, false, null);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void getModelsCountAfterBulkScoring() {
+        getModelCount(1 + MAX_MODELS, true, null);
+        getModelCount(0, false, new Date());
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
+            "getModelsCountAfterBulkScoring" })
+    public void getModelsCountAfterModelDelete() {
+        TestRegisterModels modelCreator = new TestRegisterModels();
+        modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
+        getModelCount(MAX_MODELS, false, null);
+        getModelCount(0, false, new Date());
+    }
+
+    private void getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime) {
+        String url = apiHostPort + "/score/modeldetails/count?considerAllStatus=" + considerAllStatus;
+        if (lastUpdateTime != null) {
+            url += "&start=" + dateFormat.format(lastUpdateTime);
+        }
+
+        ResponseEntity<Integer> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, Integer.class);
+        int modelsCount = response.getBody();
+        Assert.assertEquals(modelsCount, n);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModelsCountAll", "getModelsCountActive" })
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
@@ -138,6 +188,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             TestModelArtifactDataComposition modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
                     plsRest, tenant, modelConfiguration, customerSpace);
             models.put(modelConfiguration, modelArtifactDataComposition);
+            System.out.println("Registered model: " + testModelFolderName);
         }
         final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = new ArrayList<>(
                 models.entrySet());
@@ -154,6 +205,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                     if (upperBoundForBulkScoring < MIN_UPPER_BOUND) {
                         upperBoundForBulkScoring = MIN_UPPER_BOUND;
                     }
+
                     if (upperBoundForBulkScoring > MAX_UPPER_BOUND) {
                         upperBoundForBulkScoring = MAX_UPPER_BOUND;
                     }
@@ -178,12 +230,22 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
         for (int i = 0; i < MAX_THREADS; i++) {
             Thread th = new Thread(runnable);
+            threadPerfMap.put(th.getName(), new ArrayList<String>());
             th.start();
             threads.add(th);
         }
 
         for (Thread th : threads) {
             th.join();
+        }
+
+        if (shouldPrintPerformanceInfo) {
+            for (String threadName : threadPerfMap.keySet()) {
+                System.out.println(threadName);
+                for (String perf : threadPerfMap.get(threadName)) {
+                    System.out.println(perf);
+                }
+            }
         }
 
         if (exception != null) {
@@ -210,6 +272,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
             timeDuration = System.currentTimeMillis() - timeDuration;
             System.out.println(n + " => " + timeDuration);
+            threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);
             Assert.assertEquals(response.getBody().size(), n);
 
             int idx = 0;
@@ -222,7 +285,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                             modelList.get((idx + j) % MAX_MODELS).getKey().getModelId());
                 }
 
-                Record record = bulkScoreRequest.getRecords().get(idx++);
+                Record record = bulkScoreRequest.getRecords().get(idx);
                 if (Record.LATTICE_ID.equals(record.getIdType())) {
                     Assert.assertEquals(result.getLatticeId(), record.getRecordId());
                 } else {
@@ -238,6 +301,17 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                     Assert.assertNull(result.getEnrichmentAttributeValues());
                 }
 
+                Assert.assertNotNull(result.getWarnings());
+                if (idx == 0) {
+                    Assert.assertEquals(result.getWarnings().size(), RECORD_MODEL_CARDINALITY);
+                    Assert.assertTrue(result.getWarnings().get(0).getDescription().contains(MISSING_FIELD_COUNTRY));
+                } else if (idx == 1) {
+                    Assert.assertEquals(result.getWarnings().size(), RECORD_MODEL_CARDINALITY);
+                    Assert.assertTrue(result.getWarnings().get(0).getDescription().contains(MISSING_FIELD_FIRSTNAME));
+                } else {
+                    Assert.assertEquals(result.getWarnings().size(), 0);
+                }
+                idx++;
             }
 
             if (maxTime > 0) {
@@ -272,6 +346,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             record.setRecordId(UUID.randomUUID().toString());
             ScoreRequest scoreRequest = getScoreRequest();
             Map<String, Object> attributeValues = scoreRequest.getRecord();
+            if (i == 0) {
+                attributeValues.remove(MISSING_FIELD_COUNTRY);
+            } else if (i == 1) {
+                attributeValues.remove(MISSING_FIELD_FIRSTNAME);
+            }
             record.setAttributeValues(attributeValues);
             List<String> modelIds = new ArrayList<>();
 
@@ -282,6 +361,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
                 modelIds.add(modelList.get((i + j) % MAX_MODELS).getKey().getModelId());
             }
             record.setModelIds(modelIds);
+
             records.add(record);
         }
         return records;

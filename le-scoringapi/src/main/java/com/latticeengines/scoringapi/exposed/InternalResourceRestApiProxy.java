@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.exposed;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,6 +86,20 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             restTemplate.delete(url);
         } catch (Exception e) {
             throw new RuntimeException("deleteTenant: Remote call failure", e);
+        }
+    }
+
+    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
+        try {
+            String url = constructUrl("pls/internal/modelsummarydetails/count", customerSpace.toString());
+            url += "?" + "considerAllStatus" + "=" + considerAllStatus;
+            if (!StringUtils.isEmpty(start)) {
+                url += "&" + "start" + "=" + start;
+            }
+            log.debug("Get from " + url);
+            return restTemplate.getForObject(url, Integer.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getModelsCount: Remote call failure: " + e.getMessage(), e);
         }
     }
 

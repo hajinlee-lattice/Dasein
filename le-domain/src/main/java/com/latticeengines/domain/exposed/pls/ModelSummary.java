@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -69,6 +70,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long totalConversionCount;
     private KeyValue details;
     private Long constructionTime;
+    private Long lastUpdateTime;
     private ModelSummaryStatus status = ModelSummaryStatus.INACTIVE;
     private String rawFile;
     private Double top10PercentLift;
@@ -336,6 +338,18 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("ConstructionTime")
     public void setConstructionTime(Long constructionTime) {
         this.constructionTime = constructionTime;
+        this.lastUpdateTime = constructionTime;
+    }
+
+    @JsonProperty("LastUpdateTime")
+    @Column(name = "LAST_UPDATE_TIME", nullable = false)
+    public Long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    @JsonProperty("LastUpdateTime")
+    public void setLastUpdateTime(Long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
     }
 
     @JsonProperty("Status")
@@ -491,7 +505,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public ColumnSelection.Predefined getPredefinedSelection() {
         if (StringUtils.isNotEmpty(getPredefinedSelectionName())) {
             return ColumnSelection.Predefined.fromName(getPredefinedSelectionName());
-        } else  {
+        } else {
             return null;
         }
     }
@@ -500,6 +514,11 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
         this.setPredefinedSelectionName(predefinedSelection.getName());
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastUpdateTime = System.currentTimeMillis();
     }
 
 }

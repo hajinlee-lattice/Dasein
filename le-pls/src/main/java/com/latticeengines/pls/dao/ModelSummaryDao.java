@@ -17,6 +17,8 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> findAllActive();
 
+    int getTotalCount(long lastUpdateTime, boolean considerAllStatus);
+
     ModelSummary findValidByModelId(String modelId);
 
 }

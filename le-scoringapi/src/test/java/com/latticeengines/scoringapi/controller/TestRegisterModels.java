@@ -101,4 +101,8 @@ public class TestRegisterModels {
         return testModelArtifactDataComposition;
     }
 
+    public void deleteModel(InternalResourceRestApiProxy plsRest, CustomerSpace customerSpace, String modelId) {
+        plsRest.deleteModelSummary(modelId, customerSpace);
+    }
+
 }

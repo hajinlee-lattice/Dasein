@@ -1,11 +1,12 @@
 package com.latticeengines.scoringapi.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -50,6 +49,10 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.wordnik.swagger.annotations.ApiParam;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
+
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
 @RequestMapping("")
@@ -60,6 +63,10 @@ public class ScoreResource {
     private static final Log log = LogFactory.getLog(ScoreResource.class);
 
     private static final int MAX_ALLOWED_RECORDS = 200;
+
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+    private static final String UTC = "UTC";
 
     @Autowired
     private HttpStopWatch httpStopWatch;
@@ -81,6 +88,12 @@ public class ScoreResource {
 
     @Autowired
     private Warnings warnings;
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
 
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -111,22 +124,28 @@ public class ScoreResource {
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
-    public List<ModelDetail> getPaginatedModels(
-            HttpServletRequest request,
-            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = true) @RequestParam(value = "start", required = true) String start,
+    public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
+            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus) {
+            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus)
+            throws ParseException {
+        if (!StringUtils.isEmpty(start)) {
+            Date startDate = dateFormat.parse(start);
+        }
         return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus);
     }
 
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
-    public int getModelCount(
-            HttpServletRequest request,
-            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = true) @RequestParam(value = "start", required = true) String start,
-            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus) {
+    public int getModelCount(HttpServletRequest request,
+            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
+            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus)
+            throws ParseException {
+        if (!StringUtils.isEmpty(start)) {
+            Date startDate = dateFormat.parse(start);
+        }
         return fetchModelCount(request, start, considerAllStatus);
     }
 
@@ -234,12 +253,9 @@ public class ScoreResource {
     // This change is just to make new rest endpoint functional and check it
     // in SVN. In future check-ins, optimizations will be done.
     private int fetchModelCount(HttpServletRequest request, String start, boolean considerAllStatus) {
-        ModelType type = ModelType.ACCOUNT;
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            log.info(type);
-            List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
-            return models.size();
+            return modelRetriever.getModelsCount(customerSpace, start, considerAllStatus);
         }
     }
 
@@ -248,7 +264,7 @@ public class ScoreResource {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
-                    new Integer(MAX_ALLOWED_RECORDS).toString(),
+                            new Integer(MAX_ALLOWED_RECORDS).toString(),
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 

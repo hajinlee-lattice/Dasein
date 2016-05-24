@@ -290,8 +290,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (folders.size() == 1) {
                 appId = folders.get(0);
             } else {
-                throw new LedpException(LedpCode.LEDP_31007, new String[] { modelSummary.getId(),
-                        JsonUtils.serialize(folders) });
+                throw new LedpException(LedpCode.LEDP_31007,
+                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
@@ -321,8 +321,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringUtils.isBlank(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + "metadata-"
-                        + DATA_COMPOSITION_FILENAME);
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
+                        localPathToPersist + "metadata-" + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
@@ -458,12 +458,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
                 if (!StringUtils.isBlank(localPathToPersist)) {
-                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
-                            + MODEL_JSON);
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0),
+                            localPathToPersist + MODEL_JSON);
                 }
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
-                        localModelJsonCacheDir });
+                throw new LedpException(LedpCode.LEDP_31002,
+                        new String[] { modelJsonHdfsPath.get(0), localModelJsonCacheDir });
             }
         } else if (modelJsonHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31003, new String[] { hdfsScoreArtifactBaseDir });
@@ -482,8 +482,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Override
     public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, String modelId) {
-        return scoreArtifactCache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace,
-                modelId));
+        return scoreArtifactCache
+                .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
 
     private void instantiateCache() {
@@ -513,8 +513,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             }
         }
         if (idFieldName == null) {
-            throw new LedpException(LedpCode.LEDP_31021,
-                    new String[] { JsonUtils.serialize(fieldSchemas) });
+            throw new LedpException(LedpCode.LEDP_31021, new String[] { JsonUtils.serialize(fieldSchemas) });
         }
         return idFieldName;
     }
@@ -542,6 +541,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
         artifacts.setPathToSamplesAvro(artifactBaseAndEventTableDirs.getRight());
         artifacts.setFieldSchemas(mergedFields);
         return artifacts;
+    }
+
+    @Override
+    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
+        return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus);
     }
 
 }

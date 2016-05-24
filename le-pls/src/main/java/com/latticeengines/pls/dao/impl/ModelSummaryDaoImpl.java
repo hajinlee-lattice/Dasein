@@ -86,12 +86,30 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return query.list();
     }
 
+    @Override
+    public int getTotalCount(long lastUpdateTime, boolean considerAllStatus) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String basicQueryStr = "select count(*) from %s where lastUpdateTime >= :lastUpdateTime ";
+        if (!considerAllStatus) {
+            basicQueryStr += " and status = :statusId ";
+        }
+        String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("lastUpdateTime", lastUpdateTime);
+        if (!considerAllStatus) {
+            query.setInteger("statusId", ModelSummaryStatus.ACTIVE.getStatusId());
+        }
+        return ((Long) query.uniqueResult()).intValue();
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public ModelSummary findValidByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where id = :modelId AND status != :statusId", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where id = :modelId AND status != :statusId",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("modelId", modelId);
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());

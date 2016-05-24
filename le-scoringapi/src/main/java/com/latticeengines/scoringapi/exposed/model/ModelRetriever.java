@@ -22,4 +22,6 @@ public interface ModelRetriever {
     void setLocalPathToPersist(String localPathToPersist);
 
     ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace, String modelId);
+
+    int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus);
 }

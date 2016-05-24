@@ -117,6 +117,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return modelSummaryDao.findAllActive();
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int getTotalCount(long lastUpdateTime, boolean considerAllStatus) {
+        return modelSummaryDao.getTotalCount(lastUpdateTime, considerAllStatus);
+    }
+
     private void inflateDetails(ModelSummary summary) {
         KeyValue kv = summary.getDetails();
         Hibernate.initialize(kv);
@@ -142,8 +148,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
                         summary.setPredefinedSelectionVersion(predefinedSelectionVersion);
                     }
                 } else if (provenance.has("Customized_ColumnSelection")) {
-                    ColumnSelection selection = objectMapper
-                            .treeToValue(provenance.get("Customized_ColumnSelection"), ColumnSelection.class);
+                    ColumnSelection selection = objectMapper.treeToValue(provenance.get("Customized_ColumnSelection"),
+                            ColumnSelection.class);
                     summary.setCustomizedColumnSelection(selection);
                 }
             }

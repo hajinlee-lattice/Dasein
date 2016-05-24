@@ -156,7 +156,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
         List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedList = extractParsedList(parsedTupleList);
         List<ModelSummary> modelSummaryList = extractModelSummaries(parsedTupleList, scoringArtifactsMap);
-        List<Map<String, Object>> matchedRecords = matcher.matchAndJoin(space, parsedList, fieldSchemasMap, modelSummaryList);
+        List<Map<String, Object>> matchedRecords = matcher.matchAndJoin(space, parsedList, fieldSchemasMap,
+                modelSummaryList);
         addMissingFields(fieldSchemasMap, matchedRecords, parsedTupleList);
         split("matchRecord");
 
@@ -182,9 +183,10 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         return parsedRecordAndInterpretedFieldsList;
     }
 
-    private List<ModelSummary> extractModelSummaries(List<Tuple> parsedTupleList, Map<String, ScoringArtifacts> scoringArtifactsMap) {
+    private List<ModelSummary> extractModelSummaries(List<Tuple> parsedTupleList,
+            Map<String, ScoringArtifacts> scoringArtifactsMap) {
         List<ModelSummary> modelSummaryList = new ArrayList<>();
-        for (Tuple tuple: parsedTupleList) {
+        for (Tuple tuple : parsedTupleList) {
             String modelId = getModelId(tuple);
             if (org.apache.commons.lang.StringUtils.isNotEmpty(modelId)) {
                 ModelSummary modelSummary = scoringArtifactsMap.get(modelId).getModelSummary();
@@ -238,6 +240,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
                 scores = new ArrayList<>();
                 recordResp.setScores(scores);
+                recordResp.setWarnings(warnings.getWarnings(recordId));
             } else {
                 RecordScoreResponse recordResp = responseMap.get(recordId);
                 scores = recordResp.getScores();
@@ -304,7 +307,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             int modelIndex = 0;
             for (String modelId : record.getModelIds()) {
                 Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.get(modelId);
-                checkForMissingFields(fieldSchemas, record.getAttributeValues());
+                checkForMissingFields(record.getRecordId(), fieldSchemas, record.getAttributeValues());
                 String latticeId = record.getRecordId();
 
                 if (!Record.LATTICE_ID.equals(record.getIdType())) {
@@ -315,7 +318,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 record.setRequestTimestamp(request.getRequestTimestamp());
 
                 Tuple tuple = new Tuple(request.getRequestTimestamp(), latticeId, record,
-                        parseRecord(fieldSchemas, record.getAttributeValues()), modelIndex++);
+                        parseRecord(record.getRecordId(), fieldSchemas, record.getAttributeValues()), modelIndex++);
                 recordAndFieldList.add(tuple);
             }
         }
@@ -363,6 +366,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+        return parseRecord(null, fieldSchemas, record);
+    }
+
+    private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         Map<String, Object> parsedRecord = new HashMap<String, Object>(record.size());
         parsedRecord.putAll(record);
 
@@ -381,7 +389,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             interpretFields(interpretedFields, fieldName, schema);
         }
         if (!extraFields.isEmpty()) {
-            warnings.addWarning(
+            warnings.addWarning(recordId,
                     new Warning(WarningCode.EXTRA_FIELDS, new String[] { Joiner.on(",").join(extraFields) }));
             for (String extraField : extraFields) {
                 parsedRecord.remove(extraField);
@@ -410,6 +418,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     }
 
     private void checkForMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+        checkForMissingFields(null, fieldSchemas, record);
+    }
+
+    private void checkForMissingFields(String recordId, Map<String, FieldSchema> fieldSchemas,
+            Map<String, Object> record) {
         List<String> missingMatchFields = new ArrayList<>();
         List<String> missingFields = new ArrayList<>();
 
@@ -456,7 +469,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                     new String[] { Joiner.on(",").join(missingMatchFields) });
         }
         if (!missingFields.isEmpty()) {
-            warnings.addWarning(
+            warnings.addWarning(recordId,
                     new Warning(WarningCode.MISSING_COLUMN, new String[] { Joiner.on(",").join(missingFields) }));
         }
     }
