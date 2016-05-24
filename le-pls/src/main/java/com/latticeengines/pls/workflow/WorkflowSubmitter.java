@@ -54,7 +54,7 @@ public abstract class WorkflowSubmitter {
         return status != null && !Job.TERMINAL_JOB_STATUS.contains(status);
     }
 
-    public TransformationGroup gettransformationGroupFromZK() {
+    public TransformationGroup getTransformationGroupFromZK() {
         TransformationGroup transformationGroup = TransformationGroup.STANDARD;
 
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()

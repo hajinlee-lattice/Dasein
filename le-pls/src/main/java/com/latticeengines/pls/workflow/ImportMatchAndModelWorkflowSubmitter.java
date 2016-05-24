@@ -103,7 +103,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
-        TransformationGroup transformationGroup = gettransformationGroupFromZK();
+        TransformationGroup transformationGroup = getTransformationGroupFromZK();
         ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters, transformationGroup);
 
         ApplicationId applicationId = workflowJobService.submit(configuration);
