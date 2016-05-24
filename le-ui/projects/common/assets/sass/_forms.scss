@@ -300,6 +300,33 @@ input[type="search"] {
 
 
 
+
+
+/* Custom Search Menu
+===================================================================== */
+.ng-search {
+  color: #676767;
+  background-color: #fff;
+  border-color: #d0d0d0;
+  border-width: 1px;
+  border-style: solid;
+  display: inline-block;
+  .form-control {
+    display: inline-block;
+    border: none;
+    width: 260px;
+    &:focus {
+      border: none;
+    }
+  }
+  a.button {
+    border-width: 0;
+  }
+}
+
+
+
+
 /* Custom Select Menu
 ===================================================================== */
 

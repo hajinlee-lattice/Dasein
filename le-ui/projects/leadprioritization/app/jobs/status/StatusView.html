@@ -25,10 +25,21 @@
                 <!-- <small>Displaying 1-8 of 12</small> -->
             </div>
             <div class="eight columns text-right">
-                <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
-                <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
-                    <span class="fa fa-search"></span>
-                </a>
+                
+
+
+
+                <div class="ng-search">
+                    <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
+                    <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                        <span class="fa fa-search" ng-show="!ShowSearch"></span>
+                        <span class="fa fa-times" ng-show="ShowSearch"></span>
+                    </a>
+                </div>
+                
+
+
+
                 <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
                     <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
                 </a>
