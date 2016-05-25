@@ -22,37 +22,42 @@
             <filtered>true</filtered>
         </file>
         <file>
-            <source>src/main/script/env/prodcluster/propdata.sh</source>
+            <source>src/main/script/env/prodclustera/propdata.sh</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>conf/env/prodcluster/propdata.properties</source>
+            <source>conf/env/prodclustera/propdata.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-proxy/conf/env/prodcluster/proxy.properties</source>
+            <source>../le-proxy/conf/env/prodclustera/proxy.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-dataplatform/conf/env/prodcluster/dataplatform.properties</source>
+            <source>../le-dataplatform/conf/env/prodclustera/dataplatform.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-dataflow/conf/env/prodcluster/dataflow.properties</source>
+            <source>../le-dataflow/conf/env/prodclustera/dataflow.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-db/conf/env/prodcluster/db.properties</source>
+            <source>../le-db/conf/env/prodclustera/db.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-camille/conf/env/prodcluster/camille.properties</source>
+            <source>../le-camille/conf/env/prodclustera/camille.properties</source>
+            <outputDirectory>.</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>../le-security/conf/env/prodclustera/security.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>

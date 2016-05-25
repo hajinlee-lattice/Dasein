@@ -5,6 +5,7 @@
 
 
     <import resource="classpath:propdata-collection-context.xml" />
+    <import resource="classpath:propdata-zk-runtime-context.xml" />
 
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
@@ -14,6 +15,7 @@
                 <value>file:${DATAFLOW_PROPDIR:.}/dataflow.properties</value>
                 <value>file:${DB_PROPDIR:.}/db.properties</value>
                 <value>file:${CAMILLE_PROPDIR:.}/camille.properties</value>
+                <value>file:${SECURITY_PROPDIR:.}/security.properties</value>
                 <value>file:${PROXY_PROPDIR:.}/proxy.properties</value>
             </list>
         </property>

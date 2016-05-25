@@ -22,37 +22,42 @@
             <filtered>true</filtered>
         </file>
         <file>
-            <source>src/main/script/env/qacluster/propdata.sh</source>
+            <source>src/main/script/env/qaclustera/propdata.sh</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>conf/env/qacluster/propdata.properties</source>
+            <source>conf/env/qacluster/qaclustera.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-proxy/conf/env/prodcluster/proxy.properties</source>
+            <source>../le-proxy/conf/env/qaclustera/proxy.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-dataplatform/conf/env/qacluster/dataplatform.properties</source>
+            <source>../le-dataplatform/conf/env/qaclustera/dataplatform.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-dataflow/conf/env/qacluster/dataflow.properties</source>
+            <source>../le-dataflow/conf/env/qaclustera/dataflow.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-db/conf/env/qacluster/db.properties</source>
+            <source>../le-db/conf/env/qaclustera/db.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../le-camille/conf/env/prodcluster/camille.properties</source>
+            <source>../le-camille/conf/env/qaclustera/camille.properties</source>
+            <outputDirectory>.</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>../le-security/conf/env/qaclustera/security.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
