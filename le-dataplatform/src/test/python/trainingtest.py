@@ -1,16 +1,16 @@
 import filecmp
 import glob
 import json
+import os
 import pickle
 from random import random
 from sklearn.ensemble import RandomForestClassifier
 import sys
-import os
- 
+
 from leframework import scoringengine as se
 from trainingtestbase import TrainingTestBase
- 
- 
+
+
 class TrainingTest(TrainingTestBase):
  
     def testExecuteLearning(self):

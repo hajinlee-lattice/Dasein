@@ -3,6 +3,7 @@ Description:
 
     This step will pivot the list of columns by retrieving the metadata from our config metadata structure
 '''
+import math
 import os
 
 from pipelinefwk import PipelineStep
@@ -46,7 +47,7 @@ class PivotStep(PipelineStep):
         for k, v in self.columnsToPivot.items():
             values = v[1]
             columnsToRemove.add(v[0])
-            dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values))
+            dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values, str(k).endswith("__ISNULL__")))
             self.__appendMetadataEntry(configMetadata, k)
         
         super(PivotStep, self).removeColumns(dataFrame, columnsToRemove)
@@ -89,7 +90,8 @@ class PivotStep(PipelineStep):
                 
     def __getPivotConfig(self, column, values):
         pivotValues = [{"PivotValue": v, \
-                        "PivotColumn": "%s_%s" % (column, ''.join(e for e in v if e.isalnum() or e == '_')) if v is not None else "", \
+                        "PivotColumn": "%s_%s" % (column, ''.join(e for e in v if e.isalnum() or e == '_')) \
+                                    if v is not None else "%s___ISNULL__" % column, \
                         "IsNull": v is None} for v in values]
         return {"Extensions": [{"Key": "PivotValues", "Value": pivotValues}]}
     
@@ -113,7 +115,10 @@ class PivotStep(PipelineStep):
         entry["DataType"] = "Integer"
         super(PivotStep, self).appendMetadataEntry(configMetadata, entry)
     
-    def pivot(self, row, values):
+    def pivot(self, row, values, isNull):
+        if isNull:
+            return 1.0 if row is None or (isinstance(row, float) and math.isnan(row)) else 0.0
+        
         for value in values:
             if row == value:
                 return 1.0
@@ -142,12 +147,14 @@ class PivotStep(PipelineStep):
 
             for pivotValue in pivotValues:
                 pivotColumn = pivotValue["PivotColumn"]
+                isNull = pivotValue["IsNull"] if "IsNull" in pivotValue else False
                 try:
                     pValues = self.columnsToPivot[pivotColumn]
                 except KeyError:
                     pValues = (column, [])
-                        
-                pValues[1].append(pivotValue["PivotValue"])
+
+                if not isNull:
+                    pValues[1].append(pivotValue["PivotValue"])
                 self.columnsToPivot[pivotColumn] = pValues
 
 
