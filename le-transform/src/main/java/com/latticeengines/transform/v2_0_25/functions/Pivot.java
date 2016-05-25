@@ -2,6 +2,7 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.List;
 import java.util.Map;
+
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class Pivot extends Lookup {
@@ -21,6 +22,15 @@ public class Pivot extends Lookup {
         String column = (String) arguments.get("column1");
         String targetColumn = (String) arguments.get("column2");
         List<?> values = (List) lookupMap.get(targetColumn);
+        
+        Object recordValue = record.get(column);
+        if (targetColumn.endsWith("___ISNULL__")) {
+            
+            if (recordValue == null) {
+                return 1.0;
+            }
+            return 0.0;
+        }
 
         if (values != null && values.size() > 0) {
             List<?> pivotValues = (List) values.get(1);
@@ -28,7 +38,7 @@ public class Pivot extends Lookup {
                 if (value == null) {
                     continue;
                 }
-                if (value.equals(record.get(column))) {
+                if (value.equals(recordValue)) {
                     return 1.0;
                 }
             }

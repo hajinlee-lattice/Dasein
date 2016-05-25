@@ -3,6 +3,7 @@ package com.latticeengines.transform.v2_0_25.functions;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Map;
+
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
@@ -38,18 +39,18 @@ public class Encoder implements RealTimeTransform {
                 || valueAsString.equals("null") //
                 || valueAsString.equals("NULL")) {
             valueAsString = "NULL";
-            return "1463472903";
+            return 1463472903L;
         }
 
         if (value.getClass() == Boolean.class) {
             if (valueAsString.toString().equals("0")) {
-                return "0";
+                return 0L;
             } else if (valueAsString.toString().equals("1")) {
-                return "1";
+                return 1L;
             } else if (valueAsString.toString().toLowerCase().equals("true")) {
-                return "1";
+                return 1L;
             } else if (valueAsString.toString().toLowerCase().equals("false")) {
-                return "0";
+                return 0L;
             }
         }
 
@@ -65,7 +66,7 @@ public class Encoder implements RealTimeTransform {
                     if (d.isNaN()) {
                         valueAsString = "NULL";
                     } else {
-                        return valueAsString;
+                        return value;
                     }
                 } catch (Exception e) {
                     valueAsString = "NULL";
