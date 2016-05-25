@@ -9,16 +9,16 @@
 
     <properties>
         <component-name>microservice-parent</component-name>
-        <le.monitor.version>2.0.32-SNAPSHOT</le.monitor.version>
-        <le.microservice.version>2.0.32-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>2.0.32-SNAPSHOT</le.propdata.version>
-        <le.network.version>2.0.32-SNAPSHOT</le.network.version>
+        <le.monitor.version>2.0.33-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>2.0.33-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>2.0.33-SNAPSHOT</le.propdata.version>
+        <le.network.version>2.0.33-SNAPSHOT</le.network.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.32-SNAPSHOT</version>
+        <version>2.0.33-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

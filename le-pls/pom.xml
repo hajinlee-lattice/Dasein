@@ -9,23 +9,23 @@
 
     <properties>
         <component-name>pls</component-name>
-        <le.common.version>2.0.32-SNAPSHOT</le.common.version>
-        <le.db.version>2.0.32-SNAPSHOT</le.db.version>
-        <le.domain.version>2.0.32-SNAPSHOT</le.domain.version>
-        <le.remote.version>2.0.32-SNAPSHOT</le.remote.version>
-        <le.camille.version>2.0.32-SNAPSHOT</le.camille.version>
-        <le.security.version>2.0.32-SNAPSHOT</le.security.version>
-        <le.baton.version>2.0.32-SNAPSHOT</le.baton.version>
-        <le.monitor.version>2.0.32-SNAPSHOT</le.monitor.version>
-        <le.liaison.version>2.0.32-SNAPSHOT</le.liaison.version>
-        <le.scoringapi.version>2.0.32-SNAPSHOT</le.scoringapi.version>
-        <le.swlib.version>2.0.32-SNAPSHOT</le.swlib.version>
-        <le.testfwk.version>2.0.32-SNAPSHOT</le.testfwk.version>
-        <le.workflow.version>2.0.32-SNAPSHOT</le.workflow.version>
-        <le.scheduler.version>2.0.32-SNAPSHOT</le.scheduler.version>
-        <le.serviceflows.prospectdiscovery.version>2.0.32-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
-        <le.serviceflows.leadprioritization.version>2.0.32-SNAPSHOT</le.serviceflows.leadprioritization.version>
-        <le.proxy.version>2.0.32-SNAPSHOT</le.proxy.version>
+        <le.common.version>2.0.33-SNAPSHOT</le.common.version>
+        <le.db.version>2.0.33-SNAPSHOT</le.db.version>
+        <le.domain.version>2.0.33-SNAPSHOT</le.domain.version>
+        <le.remote.version>2.0.33-SNAPSHOT</le.remote.version>
+        <le.camille.version>2.0.33-SNAPSHOT</le.camille.version>
+        <le.security.version>2.0.33-SNAPSHOT</le.security.version>
+        <le.baton.version>2.0.33-SNAPSHOT</le.baton.version>
+        <le.monitor.version>2.0.33-SNAPSHOT</le.monitor.version>
+        <le.liaison.version>2.0.33-SNAPSHOT</le.liaison.version>
+        <le.scoringapi.version>2.0.33-SNAPSHOT</le.scoringapi.version>
+        <le.swlib.version>2.0.33-SNAPSHOT</le.swlib.version>
+        <le.testfwk.version>2.0.33-SNAPSHOT</le.testfwk.version>
+        <le.workflow.version>2.0.33-SNAPSHOT</le.workflow.version>
+        <le.scheduler.version>2.0.33-SNAPSHOT</le.scheduler.version>
+        <le.serviceflows.prospectdiscovery.version>2.0.33-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
+        <le.serviceflows.leadprioritization.version>2.0.33-SNAPSHOT</le.serviceflows.leadprioritization.version>
+        <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -34,7 +34,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.32-SNAPSHOT</version>
+        <version>2.0.33-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
