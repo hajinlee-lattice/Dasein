@@ -1,12 +1,11 @@
 LineNumber,ErrorMessage
-2,Wrong number of columns in line: 2 Columns read: 11 Columns expected: 10
-3,"[Email column is empty, so City cannot be empty.]"
+3,[Email column is empty so City cannot be empty.]
 5,[Required Column LEAD is missing value.]
 6,[Required Column LEAD is missing value.]
 7,[Cannot convert dfds3rer to FLOAT.]
 8,[Cannot convert asdb to INT.]
 12,[Cannot parse JOS/DJF1O23JD/0DFJW as Date or Timestamp.]
 14,[Required Column LEAD is missing value.]
-15,"[Email column is empty, so City cannot be empty.]"
+15,[Email column is empty so City cannot be empty.]
 17,[Cannot convert abc to BOOLEAN.]
 18,[Cannot convert 2 to BOOLEAN.]

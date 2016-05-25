@@ -1,8 +1,8 @@
 LEAD,Country,Company,Email,City,DS CompanyName Length,DS CompanyName Entropy,Last Modified Date,kickboxDisposable,string column
-9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,0,,3
+9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,0,
 12609604,Singapore,,,,1,,10/10/04,1,
 10996868,China,Husor,sun,ze,5,0.464385619,10/23/04,0,
-,Australia,SMS MANAGEMENT & TECHNOLOGY LIMITED,Murali,Ganti,30,0.1276334577,10/10/04 12:00 AM,FALSE,
+,Australia,BS:5252525  ORDER:999994,201,Ganti,30,0.1276334577,10/10/04 12:00 AM,FALSE,
 ,China,thit 北京清软英泰?,Lin,zhang 张家林,12,0.2848579862,10/10/04,,
 3390874,India,Hexaware,Amar,Deo,8,dfds3rer,10/10/04,,
 10725022,Malaysia,AMD,Seng Ping,Gan,asdb,0.5283208336,10/10/04,,
@@ -16,5 +16,5 @@ LEAD,Country,Company,Email,City,DS CompanyName Length,DS CompanyName Entropy,Las
 11239854,China,HUST ITEC,龚,逸凌,9,0.327522531,10/10/04,,
 10364388,Australia,n/a,Johan,Swanepoel,3,0.5283208336,2014-03-06,abc,
 11330434,New Zealand,Orion Health,Geethika,,12,0.2709690973,2004-01-03,2,
-11625974,Vietnam,,Dat,Nguyen,13,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00,TRUE,
+11625974,Vietnam,"""attribute with nested quote",Dat,Nguyen,,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00,TRUE,
 6200258,China,n/a,Guo,Peihui 郭培辉,3,0.5283208336,03/14/14 07:20 PM,FALSE,

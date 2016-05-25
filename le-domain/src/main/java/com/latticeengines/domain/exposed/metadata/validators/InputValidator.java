@@ -5,5 +5,5 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class InputValidator {
-    public abstract boolean validate(String field, Map<String, Object> row, Table metadata);
+    public abstract boolean validate(String field, Map<String, String> row, Table metadata);
 }

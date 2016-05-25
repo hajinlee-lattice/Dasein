@@ -21,10 +21,10 @@ public class RequiredIfOtherFieldIsEmpty extends InputValidator {
     }
 
     @Override
-    public boolean validate(String field, Map<String, Object> row, Table metadata) {
-        Object value = row.get(field);
+    public boolean validate(String field, Map<String, String> row, Table metadata) {
+        Object value = row.get(metadata.getAttribute(field).getDisplayName());
         if (value == null || value.toString().equals("")) {
-            Object otherFieldValue = row.get(otherField);
+            Object otherFieldValue = row.get(metadata.getAttribute(otherField).getDisplayName());
             if (otherFieldValue == null || otherFieldValue.toString().equals("")) {
                 return false;
             }

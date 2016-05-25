@@ -8,6 +8,15 @@
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
     <!-- Configures the eai mapreduce job. -->
+    <hdp:job id="eaiCSVImportJob" mapper="com.latticeengines.eai.file.runtime.mapreduce.CSVImportMapper" />
+
+    <bean id="eaiCSVImportCustomization" class="com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+        <constructor-arg ref="versionManager"/>
+        <constructor-arg value="${dataplatform.hdfs.stack:}" />
+    </bean>
+
     <hdp:job id="eaiCSVExportJob" mapper="com.latticeengines.eai.file.runtime.mapreduce.CSVExportMapper" />
 
     <bean id="eaiCSVExportCustomization" class="com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob">

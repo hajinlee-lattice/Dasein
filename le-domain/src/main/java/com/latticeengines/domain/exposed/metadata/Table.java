@@ -184,6 +184,22 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
+    public Attribute getAttributeFromDisplayName(final String displayName) {
+        if (displayName == null) {
+            return null;
+        }
+        return Iterables.find(attributes, new Predicate<Attribute>() {
+            @Override
+            public boolean apply(@Nullable Attribute attribute) {
+                if (attribute.getDisplayName() == null) {
+                    return false;
+                }
+                return attribute.getDisplayName().equals(displayName);
+            }
+        }, null);
+    }
+
+    @JsonIgnore
     public List<Attribute> getAttributes(final LogicalDataType logicalDataType) {
         if (logicalDataType == null) {
             return null;

@@ -18,7 +18,7 @@ public class TestValidator extends InputValidator {
     }
 
     @Override
-    public boolean validate(String field, Map<String, Object> row, Table metadata) {
+    public boolean validate(String field, Map<String, String> row, Table metadata) {
         return true;
     }
 }

@@ -161,16 +161,16 @@ public class LedpCSVToAvroImportMapper extends
         String attrKey = attr.getName();
         if (CollectionUtils.isNotEmpty(validators)) {
             RequiredIfOtherFieldIsEmpty validator = (RequiredIfOtherFieldIsEmpty) validators.get(0);
-            if (!validator.validate(attrKey, fieldMap, table)) {
-                missingRequiredColValue = true;
-                if (attrKey.equals(validator.otherField)) {
-                    throw new RuntimeException(String.format("Required Column %s is missing value.",
-                            attr.getDisplayName()));
-                } else {
-                    throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", table
-                            .getAttribute(validator.otherField).getDisplayName(), attr.getDisplayName()));
-                }
-            }
+//            if (!validator.validate(attrKey, fieldMap, table)) {
+//                missingRequiredColValue = true;
+//                if (attrKey.equals(validator.otherField)) {
+//                    throw new RuntimeException(String.format("Required Column %s is missing value.",
+//                            attr.getDisplayName()));
+//                } else {
+//                    throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", table
+//                            .getAttribute(validator.otherField).getDisplayName(), attr.getDisplayName()));
+//                }
+//            }
         }
     }
 
