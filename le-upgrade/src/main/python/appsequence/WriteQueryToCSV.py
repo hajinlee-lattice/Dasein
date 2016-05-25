@@ -60,7 +60,7 @@ class WriteQueryToCSV(StepBase):
                     csvFile.write(self._createUnicodeDelimited(row, u',') + u'\n')
                     nRowsRead += 1
 
-        print '\n      => Query returned {0} rows, and they were written to \"{1}\"'.format(nRowsRead, csvFileName),
+        print '      => Query returned {0} rows, and they were written to \"{1}\"'.format(nRowsRead, csvFileName),
         return True
 
 
