@@ -59,7 +59,7 @@ class DataCompositionGenerator(State):
                 details["type"] = "STRING"
 
             # Keep in sync with FieldInterpretation
-            if name in schema["features"]:
+            if name in schema["original_features"]:
                 details["interpretation"] = "Feature"
             elif name == "Id" or name == "LeadID" or name == "ExternalId":
                 details["interpretation"] = "Id"

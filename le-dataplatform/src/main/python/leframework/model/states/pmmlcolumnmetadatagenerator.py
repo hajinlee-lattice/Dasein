@@ -17,14 +17,13 @@ class PmmlColumnMetadataGenerator(State, JsonGenBase):
         self.inputColumnMetadata = []
         mediator = self.mediator
         
-        metadata = mediator.metadata[1]
         fields = mediator.schema["original_features"]
         
         fieldsWithTypes = mediator.schema["fields"]
         
         for field in fields:
             f = OrderedDict()
-            record = None
+
             f["Description"] = field
             
             f["Name"] = field

@@ -1,10 +1,9 @@
 import logging
+import math
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
-from leframework.util.scoringutil import ScoringUtil
 import pandas as pd
-import math
 
 
 class InitializeRevenue(State):
