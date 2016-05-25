@@ -12,7 +12,9 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'http://app.lattice.local',
+                // API_URL: 'http://app.lattice.local',
+                API_URL: 'http://10.41.0.13:3000',
+                // API_URL: 'https://app3.lattice-engines.com',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,

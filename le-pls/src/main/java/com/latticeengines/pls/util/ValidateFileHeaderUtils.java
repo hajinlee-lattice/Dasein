@@ -61,8 +61,13 @@ public class ValidateFileHeaderUtils {
             List<CSVRecord> csvRecords = parser.getRecords();
             int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
 
-            for (int i = 0; i < numFieldsToAdd; i++) {
-                columnFields.add(csvRecords.get(i).get(columnHeaderName));
+            int i = 0;
+            while (columnFields.size() < numFieldsToAdd && i < csvRecords.size()) {
+                String columnField = csvRecords.get(i).get(columnHeaderName);
+                if (columnField != null && ! columnField.isEmpty()) {
+                    columnFields.add(columnField);
+                }
+                i++;
             }
 
             return columnFields;

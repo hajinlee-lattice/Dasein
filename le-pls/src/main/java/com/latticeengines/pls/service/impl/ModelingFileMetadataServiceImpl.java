@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.util.*;
 
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
@@ -88,6 +90,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SourceFile sourceFile = getSourceFile(sourceFileName);
         NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, fieldMappingDocument);
 
+        log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
@@ -180,7 +183,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         LatticeSchemaField latticeSchemaField = new LatticeSchemaField();
 
         latticeSchemaField.setName(attribute.getName());
-        latticeSchemaField.setFieldType(attribute.getDataType());
+        // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
+        latticeSchemaField.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
         if (! attribute.getNullable()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
         } else if (!attribute.getValidatorWrappers().isEmpty()) {
@@ -196,6 +200,25 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         return latticeSchemaField;
+    }
+
+    private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
+        UserDefinedType fieldType;
+        switch (attributeType.toUpperCase()) {
+            case "BOOLEAN":
+                fieldType = UserDefinedType.BOOLEAN;
+                break;
+            case "LONG":
+            case "INT":
+            case "DOUBLE":
+                fieldType = UserDefinedType.NUMBER;
+                break;
+            case "STRING":
+            default:
+                fieldType = UserDefinedType.TEXT;
+                break;
+        }
+        return fieldType;
     }
 
     private String getRequiredIfNoField(List<InputValidatorWrapper> inputValidatorWrappers) {

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
 public class FieldMapping {
 
@@ -11,7 +12,7 @@ public class FieldMapping {
     private String mappedField;
 
     @JsonProperty
-    private String fieldType;
+    private UserDefinedType fieldType;
 
     @JsonProperty
     private boolean mappedToLatticeField;
@@ -32,11 +33,11 @@ public class FieldMapping {
         return this.mappedField;
     }
 
-    public void setFieldType(String fieldType) {
+    public void setFieldType(UserDefinedType fieldType) {
         this.fieldType = fieldType;
     }
 
-    public String getFieldType() {
+    public UserDefinedType getFieldType() {
         return this.fieldType;
     }
 

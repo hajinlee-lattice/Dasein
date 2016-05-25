@@ -25,7 +25,24 @@
     "nodemon": "^1.9.1",
     "request": "^2.69.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-html2js": "^0.3.6",
+    "grunt-http": "^2.0.1",
+    "grunt-karma": "^0.12.2",
+    "grunt-ng-annotate": "^2.0.2",
+    "grunt-processhtml": "^0.3.13",
+    "grunt-rename": "^0.1.4",
+    "grunt-replace": "^1.0.1",
+    "grunt-usemin": "^3.1.1",
+    "karma": "^0.13.22"
+  },
   "scripts": {
     "install": "npm run InstallDev",
     "postinstall": "npm run build",

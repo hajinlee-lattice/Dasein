@@ -82,7 +82,7 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANYNAME", "ACCOUNT NAME" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "ACCOUNT NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator(InterfaceName.Website.name()) //
@@ -138,7 +138,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "EMPLOYEES" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -172,7 +172,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONENUMBER" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -216,7 +216,7 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANYNAME", "COMPANY", "ACCOUNT" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "COMPANY", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator(InterfaceName.Email.name()) //
@@ -302,7 +302,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("IsClosed") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "ISCLOSED", "CLOSED" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ISCLOSED", "IS CLOSED", "CLOSED" })) //
                 .type(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.IsClosed) //
                 .logicalType(LogicalDataType.Opportunity) //
@@ -310,7 +310,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("StageName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "STAGENAME", "STAGE" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STAGE NAME", "STAGE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .logicalType(LogicalDataType.Opportunity) //
@@ -318,7 +318,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONENUMBER" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -334,7 +334,7 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NO. OF EMPLOYEES" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "NO. OF EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //

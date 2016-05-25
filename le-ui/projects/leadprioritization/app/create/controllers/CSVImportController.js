@@ -141,48 +141,6 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
-    this.GetUnknownColumns = function(csvFile) {
-        var deferred = $q.defer();
-
-        $http({
-            method: 'GET',
-            url: '/pls/models/fileuploads/' + csvFile.name + '/metadata/unknown',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .success(function(data, status, headers, config) {
-            console.log('VALIDATION SUCCESS', status, data);
-            if (data == null || !data.Success) {
-                if (data && data.Errors.length > 0) {
-                    var errors = data.Errors.join('\n');
-                }
-                result = {
-                    Success: false,
-                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
-                    Result: null
-                };
-            } else {
-                result = {
-                    Success: true,
-                    ResultErrors: data.Errors,
-                    Result: data.Result
-                };
-            }
-
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            console.log('VALIDATION ERROR', status, data);
-            var result = {
-                Success: false,
-                ResultErrors: data.errorMsg
-            };
-
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
-
     this.GetSchemaToLatticeFields = function() {
         var deferred = $q.defer();
 
@@ -203,12 +161,12 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     }
 
-    this.GetFieldDocument = function(csvFile) {
+    this.GetFieldDocument = function(csvFileName) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
-            url: '/pls/models/uploadfile/' + csvFile.name + '/fieldmappings',
+            url: '/pls/models/uploadfile/' + csvFileName + '/fieldmappings',
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
@@ -245,49 +203,28 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
-    this.SetUnknownColumns = function(csvMetaData, csvUnknownColumns) {
+    this.SaveFieldDocuments = function(csvFileName, schemaInterpretation, fieldMappings, ignoredFields) {
         var deferred = $q.defer();
+        var result;
 
         $http({
             method: 'POST',
-            url: '/pls/models/fileuploads/' + csvMetaData.name + '/metadata/unknown',
-            data: csvUnknownColumns,
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .success(function(data, status, headers, config) {
-            console.log('csvUnknownColumns POST SUCCESS', status, data);
-            if (data == null) {
-                result = {
-                    Success: false,
-                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
-                    Result: null
-                };
-            } else {
-                result = {
-                    Success: true,
-                    ResultErrors: data.Errors,
-                    Result: data.Result
-                };
+            url: '/pls/models/uploadfile/fieldmappings',
+            headers: { 'Content-Type': 'application/json' },
+            params: { 'displayName': csvFileName },
+            data: {
+                'schemaInterpretation': schemaInterpretation,
+                'fieldMappings': fieldMappings,
+                'ignoredFields': ignoredFields
             }
-
+        }).success(function(data, status, headers, config) {
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            console.log('csvUnknownColumns POST ERROR', status, data);
-            var result = {
-                Success: false,
-                ResultErrors: data.errorMsg
-            };
-
             deferred.resolve(result);
         });
-
         return deferred.promise;
     };
-
-    this.SaveFieldDocuments = function(csvMetaData, mappingsDocument) {
-
-    }
 
     this.StartModeling = function(csvMetaData) {
         var deferred = $q.defer();

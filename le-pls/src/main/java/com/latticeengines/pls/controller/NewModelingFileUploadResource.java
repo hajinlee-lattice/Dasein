@@ -94,57 +94,11 @@ public class NewModelingFileUploadResource {
         return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName, file);
     }
 
-    private static FieldMappingDocument DOCUMENT = new FieldMappingDocument();
-    private static FieldMapping FIELD_1 = new FieldMapping();
-    private static FieldMapping FIELD_2 = new FieldMapping();
-    private static FieldMapping FIELD_3 = new FieldMapping();
-    private static FieldMapping FIELD_4 = new FieldMapping();
-    private static FieldMapping FIELD_5 = new FieldMapping();
-    private static FieldMapping FIELD_6 = new FieldMapping();
-    private static FieldMapping FIELD_7 = new FieldMapping();
-    private static FieldMapping FIELD_8 = new FieldMapping();
-
     @RequestMapping(value="{sourceFileName}/fieldmappings", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Decides if the csv is a lead or model based. Returned the best mapping and unknown columns as well as lattice fields")
     public ResponseDocument<FieldMappingDocument> getFieldMappings(@PathVariable String sourceFileName) {
-        DOCUMENT.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
-
-        FIELD_1.setUserField("Email");
-        FIELD_1.setMappedField("Email");
-        FIELD_1.setMappedToLatticeField(true);
-        FIELD_1.setFieldType(Schema.Type.STRING.toString());
-
-        FIELD_2.setUserField("Event");
-        FIELD_2.setMappedField("Event");
-        FIELD_2.setMappedToLatticeField(true);
-        FIELD_2.setFieldType(Schema.Type.STRING.toString());
-
-        FIELD_3.setUserField("Id");
-        FIELD_3.setMappedField("Id");
-        FIELD_3.setMappedToLatticeField(true);
-        FIELD_3.setFieldType(Schema.Type.STRING.toString());
-
-        FIELD_4.setUserField("CustomerWebsiteURL");
-        FIELD_4.setMappedToLatticeField(false);
-
-        FIELD_5.setUserField("Industry");
-        FIELD_5.setMappedField("Industry");
-        FIELD_5.setMappedToLatticeField(true);
-        FIELD_5.setFieldType(Schema.Type.STRING.toString());
-
-        FIELD_6.setUserField("FirstName");
-        FIELD_6.setMappedToLatticeField(false);
-
-        FIELD_7.setUserField("LastName");
-        FIELD_7.setMappedToLatticeField(false);
-
-        FIELD_8.setUserField("Date");
-        FIELD_8.setMappedToLatticeField(false);
-
-        DOCUMENT.setFieldMappings(Arrays.asList(FIELD_1, FIELD_2, FIELD_3, FIELD_4, FIELD_5, FIELD_6, FIELD_7, FIELD_8));
-        DOCUMENT.setIgnoredFields(new ArrayList<String>());
-        return ResponseDocument.successResponse(DOCUMENT);
+        return ResponseDocument.successResponse(modelingFileMetadataService.mapFieldDocumentBestEffort(sourceFileName));
     }
 
     @RequestMapping(value="fieldmappings", method = RequestMethod.POST)

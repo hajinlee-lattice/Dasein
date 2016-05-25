@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
 public class LatticeSchemaField {
 
@@ -11,7 +12,7 @@ public class LatticeSchemaField {
     private RequiredType requiredType;
 
     @JsonProperty
-    private String fieldType;
+    private UserDefinedType fieldType;
 
     @JsonProperty
     private String requiredIfNoField;
@@ -32,11 +33,11 @@ public class LatticeSchemaField {
         return this.requiredType;
     }
 
-    public void setFieldType(String fieldType) {
+    public void setFieldType(UserDefinedType fieldType) {
         this.fieldType = fieldType;
     }
 
-    public String getFieldType() {
+    public UserDefinedType getFieldType() {
         return this.fieldType;
     }
 
