@@ -11,3 +11,5 @@
 */target
 */node_modules
 */bower_components
+*/.sass-cache
+*__pycache__*
