@@ -13,3 +13,16 @@ section.container.setup-import {
         }
     }
 }
+.lattice-mapping {
+    .summary {
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: left;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    tr td:nth-child(2) {
+        text-align: right;
+    }
+}
