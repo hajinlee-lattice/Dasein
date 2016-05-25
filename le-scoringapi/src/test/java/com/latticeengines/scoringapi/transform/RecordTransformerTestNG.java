@@ -237,7 +237,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
             } else if (recId instanceof Integer) {
                 recIdAsDouble = ((Integer) recId).doubleValue();
             } else {
-                return null;
+                recIdAsDouble = Double.valueOf(recId.toString());
             }
 
 
@@ -274,20 +274,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                     Double expectedScore = expectedScores.get(record.getKey());
                     Double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
 
-                    if (Math.abs(expectedScore - scoreFast) > 0.0000001) {
-                        Map<String, Object> transformed = recordTransformer.transformOld(modelPath, transforms, record.getValue());
-                        for(String keyFromTransformed : transformed.keySet()) {
-                            if(transformed.containsKey(keyFromTransformed) == true && transformedFast.containsKey(keyFromTransformed) == true) {
-                                if(transformed.get(keyFromTransformed) != null && transformedFast.get(keyFromTransformed) != null) {
-                                    if(transformed.get(keyFromTransformed).toString().equals(transformedFast.get(keyFromTransformed).toString()) == false) {
-                                        System.out.println("Error Key: " + keyFromTransformed + " T:" +
-                                                transformed.get(keyFromTransformed) + " TF:" + transformedFast.get(keyFromTransformed));
-                                    }
-                                }
-                            } else {
-                                System.out.println("Key Error for " + keyFromTransformed);
-                            }
-                        }
+                    if (Math.abs(expectedScore - scoreFast) > 0.000001) {
                         System.out.println(String.format("Record id %f has value %f, expected is %f", //
                                 key, scoreFast, expectedScore));
                         System.out.println("Difference," + Math.abs(expectedScore - scoreFast));

@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.FieldName;
@@ -68,6 +70,24 @@ public class ModelEvaluator {
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
         List<String> nullFields = new ArrayList<>();
+        
+        boolean debugRow = false;
+        
+        if (log.isDebugEnabled()) {
+            String recordKeyColumn = System.getProperty("ID");
+            String recordKeyValue = System.getProperty("VALUE");
+            if (recordKeyColumn != null && recordKeyValue != null) {
+                Object v = record.get(recordKeyColumn);
+                
+                if (v != null) {
+                    Double k = Double.valueOf(v.toString());
+                    
+                    if (k.equals(Double.valueOf(recordKeyValue))) {
+                        debugRow = true;
+                    }
+                }
+            }
+        }
         for (FieldName name : evaluator.getActiveFields()) {
             Object value = record.get(name.getValue());
             if (value == null) {
@@ -95,6 +115,9 @@ public class ModelEvaluator {
                 value = ((Integer) value).doubleValue();
             }
             try {
+                if (debugRow) {
+                    System.out.println(String.format("%s=%f", name, value));
+                }
                 arguments.put(name, evaluator.prepare(name, value));
             } catch (Exception e) {
                 throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(),

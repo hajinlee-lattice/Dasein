@@ -163,8 +163,8 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 recIdAsDouble = ((Long) recId).doubleValue();
             } else if (recId instanceof Integer) {
                 recIdAsDouble = ((Integer) recId).doubleValue();
-            } else {
-                throw new RuntimeException("Key not instance of Long or Integer.");
+            } else if (recId instanceof Utf8) {
+                recIdAsDouble = Double.valueOf(((Utf8) recId).toString());
             }
 
             Map<String, Object> recordAsMap = new HashMap<>();
@@ -187,25 +187,12 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 double expectedScore = expectedScores.get(recIdAsDouble);
                 double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
 
-                if (Math.abs(expectedScore - scoreFast) > 0.0000001) {
-                    Map<String, Object> transformed = recordTransformer.transformOld(
-                            modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
-                    for(String key : transformed.keySet()) {
-                        if(transformed.containsKey(key) && transformedFast.containsKey(key)) {
-                            if(transformed.get(key) != null && transformedFast.get(key) != null) {
-                                if(transformed.get(key).toString().equals(transformedFast.get(key).toString()) == false) {
-                                    transformDifferences++;
-                                    System.out.println("Difference in transforms for Key: " + key + " T:" + transformed.get(key) + " TF:" + transformedFast.get(key));
-                                }
-                            }
-                        }
-                    }
-
+                if (Math.abs(expectedScore - scoreFast) > 0.000001) {
                     errors++;
                     errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble, Math
                             .abs(expectedScore - scoreFast)));
-                    System.out.println(String.format("Difference for Record id %d has diff of %f value %f, expected is %f",
-                            recId, Math.abs(expectedScore - scoreFast) , scoreFast, expectedScore));
+                    System.out.println(String.format("Difference for Record id %f has diff of %f value %f, expected is %f",
+                            recIdAsDouble, Math.abs(expectedScore - scoreFast) , scoreFast, expectedScore));
                 }
             } catch (Exception e) {
                 errors++;
