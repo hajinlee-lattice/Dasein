@@ -39,7 +39,6 @@ import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.MetricUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
@@ -51,9 +50,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final Log log = LogFactory.getLog(MetricServiceImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
-
-    @Autowired
-    private VersionManager versionManager;
 
     @Value("${monitor.influxdb.url:}")
     private String url;
@@ -145,8 +141,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
         if (StringUtils.isNotEmpty(stack)) {
             builder.tag(MetricUtils.TAG_STACK, stack);
         }
-        builder.tag(MetricUtils.TAG_ARTIFACT_VERSION, StringUtils.isEmpty(versionManager.getCurrentVersion())
-                ? MetricUtils.NULL : versionManager.getCurrentVersion());
         RetentionPolicy policy = RetentionPolicyImpl.DEFAULT;
         List<Point> points = new ArrayList<>();
 

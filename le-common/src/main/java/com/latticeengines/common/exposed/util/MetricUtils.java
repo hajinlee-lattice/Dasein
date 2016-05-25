@@ -29,11 +29,10 @@ public class MetricUtils {
 
     private static final Log log = LogFactory.getLog(MetricUtils.class);
     public static final String TAG_ENVIRONMENT = "Environment";
-    public static final String TAG_ARTIFACT_VERSION = "ArtifactVersion";
     public static final String TAG_HOST = "Host";
     public static final String TAG_STACK = "Stack";
     public static final String NULL = "null";
-    public static Collection<String> frameworkTags = Arrays.asList(TAG_ENVIRONMENT, TAG_ARTIFACT_VERSION, TAG_HOST, TAG_STACK);
+    public static Collection<String> frameworkTags = Arrays.asList(TAG_ENVIRONMENT, TAG_HOST, TAG_STACK);
 
     public static Map<String, String> parseTags(Dimension dimension) {
         return parseTagsInternal(dimension);

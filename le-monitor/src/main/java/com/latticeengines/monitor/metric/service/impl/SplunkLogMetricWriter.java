@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.util.MetricUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.monitor.metric.service.MetricWriter;
@@ -29,9 +27,6 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
     private static final Log log = LogFactory.getLog(SplunkLogMetricWriter.class);
     private boolean enabled = true;
-
-    @Autowired
-    private VersionManager versionManager;
 
     @Value("${monitor.influxdb.environment:Local}")
     private String environment;
@@ -47,9 +42,6 @@ public class SplunkLogMetricWriter implements MetricWriter {
         logPrefix = String.format("%s=\"%s\" ", MetricUtils.TAG_HOST,
                 getHostName() == null ? MetricUtils.NULL : getHostName());
         logPrefix += String.format("%s=\"%s\" ", MetricUtils.TAG_ENVIRONMENT, environment);
-        logPrefix += String.format("%s=\"%s\" ", MetricUtils.TAG_ARTIFACT_VERSION,
-                StringUtils.isEmpty(versionManager.getCurrentVersion()) ? MetricUtils.NULL
-                        : versionManager.getCurrentVersion());
     }
 
     @Override
