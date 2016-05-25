@@ -4,7 +4,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('CustomFieldsController', function($scope, $rootScope, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal) {
+.controller('CustomFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal) {
     $scope.csvFileName = $stateParams.csvFileName;
     $scope.schema;
     $scope.fieldMappings = [];

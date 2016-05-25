@@ -106,6 +106,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
         metadataProxy.createTable(customerSpace, table.getName(), table);
         sourceFile.setTableName(table.getName());
+        sourceFile.setSchemaInterpretation(fieldMappingDocument.getSchemaInterpretation());
         sourceFileService.update(sourceFile);
     }
 
