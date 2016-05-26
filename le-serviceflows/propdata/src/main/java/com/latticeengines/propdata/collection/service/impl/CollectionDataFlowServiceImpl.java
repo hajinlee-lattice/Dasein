@@ -58,6 +58,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Value("${propdata.collection.cascading.platform:tez}")
     protected String cascadingPlatform;
 
+    @Value("${propdata.collection.cascading.partitions:8}")
+    protected Integer cascadingPartitions;
+
     @Override
     public void executeMergeRawData(MostRecentSource source, String uid, String dataFlowBean) {
         if (StringUtils.isEmpty(dataFlowBean)) {
@@ -153,6 +156,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, new Properties());
         return ctx;
     }

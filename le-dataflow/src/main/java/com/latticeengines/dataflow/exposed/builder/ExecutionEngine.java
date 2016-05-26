@@ -51,6 +51,14 @@ public abstract class ExecutionEngine {
     protected String getQueue(DataFlowContext dataFlowCtx) {
         return dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
     }
+
+    protected Integer getPartitions(DataFlowContext dataFlowCtx) {
+        if (dataFlowCtx.containsProperty(DataFlowProperty.PARTITIONS)) {
+            return dataFlowCtx.getProperty(DataFlowProperty.PARTITIONS, Integer.class);
+        } else {
+            return 1;
+        }
+    }
     
     public abstract FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties);
     

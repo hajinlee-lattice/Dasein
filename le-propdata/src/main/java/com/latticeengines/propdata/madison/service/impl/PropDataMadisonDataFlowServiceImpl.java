@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
@@ -29,6 +30,9 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
 
     @Value("${propdata.madison.cascading.engine:tez}")
     private String cascadingEngine;
+
+    @Value("${propdata.collection.cascading.partitions:8}")
+    protected Integer cascadingPartitions;
 
     @Override
     public void execute(String flowName, List<String> sourcePaths, String targetPath, String targetSchemaPath) {
@@ -60,6 +64,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("FLOWNAME", flowName + "-Aggregation");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty("JOBPROPERTIES", getJobProperties());
         dataTransformationService.executeNamedTransformation(ctx, "madisonDataFlowAggregationBuilder");
     }
@@ -83,6 +88,7 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("FLOWNAME", flowName + "-GroupAndExpand");
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty("JOBPROPERTIES", getJobProperties());
         dataTransformationService.executeNamedTransformation(ctx, "madisonDataFlowGroupAndExpandBuilder");
     }
@@ -92,7 +98,6 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         if (useDefaultProperties) {
             return jobProperties;
         }
-        jobProperties.put("cascading.flow.runtime.gather.partitions.num", "32");
         jobProperties.put("mapred.reduce.tasks", "72");
         jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
         jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "8");

@@ -20,7 +20,8 @@ public class TezExecutionEngine extends ExecutionEngine {
     @Override
     public FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties) {
         properties.put("tez.queue.name", getQueue(dataFlowCtx));
-        properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(1).buildProperties(properties);
+        properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(getPartitions(dataFlowCtx))
+                .buildProperties(properties);
         return new Hadoop2TezFlowConnector(properties);
     }
 
