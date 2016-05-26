@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -20,7 +23,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
-import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
+import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +39,7 @@ public class ModelResource {
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
 
     @Autowired
-    private ModelWorkflowSubmitter modelWorkflowSubmitter;
+    private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -68,13 +71,13 @@ public class ModelResource {
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
         log.info(String.format("cloneAndRemodel called with parameters %s", parameters.toString()));
-        Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
-                parameters.getAttributes());
+        Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
+        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(clone.getAttributes(), parameters.getAttributes());
         ModelSummary modelSummary = modelSummaryService
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter
-                        .submit(clone.getName(), parameters.getName(), parameters.getDisplayName(), modelSummary)
+                        .submit(clone.getName(), parameters.getName(), parameters.getDisplayName(), userRefinedAttributes, modelSummary)
                         .toString());
     }
 

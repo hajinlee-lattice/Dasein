@@ -14,7 +14,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("modelWorkflow")
-public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> {
+public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
     @Autowired
     private Sample sample;

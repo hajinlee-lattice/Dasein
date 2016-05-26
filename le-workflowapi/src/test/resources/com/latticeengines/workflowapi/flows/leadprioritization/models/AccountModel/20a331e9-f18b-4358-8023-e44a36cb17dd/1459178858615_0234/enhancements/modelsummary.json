@@ -18878,7 +18878,8 @@
     "TopSample": [], 
     "BottomSample": [], 
     "EventTableProvenance": {
-        "EventTableName": "RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib", 
+        "EventTableName": "RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib",
+        "TrainingTableName": "sourceFile_Account_csv",
         "SourceSchemaInterpretation": "SalesforceAccount"
     }
 }

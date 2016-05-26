@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
@@ -248,6 +247,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument) {
-        return  new NewMetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
+        return new NewMetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
     }
 }

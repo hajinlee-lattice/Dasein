@@ -9,11 +9,13 @@ import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 public interface ModelMetadataService {
     List<VdbMetadataField> getMetadata(String modelId);
 
-    Table cloneAndUpdateMetadata(String modelSummaryId, List<VdbMetadataField> fields);
+    Table cloneTrainingTable(String modelSummaryId);
 
     List<String> getRequiredColumnDisplayNames(String modelId);
 
     List<Attribute> getRequiredColumns(String modelId);
 
     Table getTrainingTableFromModelId(String modelId);
+
+    List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields);
 }

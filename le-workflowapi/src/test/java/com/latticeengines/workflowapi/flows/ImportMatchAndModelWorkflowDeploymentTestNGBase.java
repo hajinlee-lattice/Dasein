@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflo
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -59,6 +61,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryParser modelSummaryParser;
 
     @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
@@ -150,5 +155,37 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected ModelSummary locateModelSummary(String name, CustomerSpace space) {
+        String startingHdfsPoint = "/user/s-analytics/customers/" + space;
+        HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
+
+            @Override
+            public boolean accept(FileStatus file) {
+                if (file == null) {
+                    return false;
+                }
+
+                String name = file.getPath().getName().toString();
+                return name.equals("modelsummary.json");
+            }
+
+        };
+
+        try {
+            List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
+            for (String file : files) {
+                String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
+                ModelSummary summary = modelSummaryParser.parse(file, contents);
+                if (name.equals(modelSummaryParser.parseOriginalName(summary.getName()))) {
+                    return summary;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 }

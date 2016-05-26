@@ -45,12 +45,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     }
 
     @Override
-    public Table cloneAndUpdateMetadata(String modelId, List<VdbMetadataField> fields) {
+    public Table cloneTrainingTable(String modelId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        Table eventTable = getEventTableFromModelId(modelId);
-        Table clone = metadataProxy.cloneTable(customerSpace, eventTable.getName());
-        clone.setAttributes(getAttributesFromFields(clone.getAttributes(), fields));
-        metadataProxy.updateTable(customerSpace, clone.getName(), clone);
+        Table trainingTable = getTrainingTableFromModelId(modelId);
+        Table clone = metadataProxy.cloneTable(customerSpace, trainingTable.getName());
         return clone;
     }
 
@@ -84,16 +82,26 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         return requiredColumns;
     }
 
-    private List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields) {
+    @Override
+    public List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields) {
         List<Attribute> attributeCopy = new ArrayList<>(attributes);
         List<Attribute> editedAttributes = new ArrayList<>();
 
-        for (Attribute attribute : attributes) {
-            for (VdbMetadataField field : fields) {
+        for (VdbMetadataField field : fields) {
+            boolean found = false;
+            for (Attribute attribute : attributes) {
                 if (attribute.getName().equals(field.getColumnName())) {
                     attributeCopy.remove(attribute);
                     editedAttributes.add(overwriteAttributeWithFieldValues(attribute, field));
+                    found = true;
+                    break;
                 }
+            }
+            if (!found) {
+                Attribute newAttribute = new Attribute();
+                newAttribute.setName(field.getColumnName());
+                overwriteAttributeWithFieldValues(newAttribute, field);
+                attributeCopy.add(newAttribute);
             }
         }
 
@@ -120,7 +128,9 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         if (field.getStatisticalType() != null) {
             attribute.setStatisticalType(field.getStatisticalType());
         }
-
+        if (field.getCategory() != null) {
+            attribute.setCategory(field.getCategory());
+        }
         return attribute;
     }
 

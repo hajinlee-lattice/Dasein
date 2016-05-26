@@ -1,114 +1,120 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.List;
 import java.util.Map;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
-import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
-import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
-public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
+public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
-        private ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration();
-        private ImportStepConfiguration importData = new ImportStepConfiguration();
-        private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
-        private CreatePrematchEventTableReportConfiguration createEventTableReport = new CreatePrematchEventTableReportConfiguration();
+        private MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration();
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
-        private ModelStepConfiguration model = new ModelStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
-        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
+        private ModelStepConfiguration model = new ModelStepConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
+        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
+        private ResolveMetadataFromUserRefinedAttributesConfiguration resolveAttributes = new ResolveMetadataFromUserRefinedAttributesConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            importData.setMicroServiceHostPort(microServiceHostPort);
-            registerReport.setMicroServiceHostPort(microServiceHostPort);
-            createEventTableReport.setMicroServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
-            model.setMicroServiceHostPort(microServiceHostPort);
             match.setMicroServiceHostPort(microServiceHostPort);
-            addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
+            model.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
+            addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
+            resolveAttributes.setMicroServiceHostPort(microServiceHostPort);
+            return this;
+        }
+
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
+            match.setInternalResourceHostPort(internalResourceHostPort);
+            model.setInternalResourceHostPort(internalResourceHostPort);
+            export.setInternalResourceHostPort(internalResourceHostPort);
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            resolveAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importMatchAndModelWorkflow", customerSpace,
-                    "ImportMatchAndModelWorkflow");
-            importData.setCustomerSpace(customerSpace);
-            registerReport.setCustomerSpace(customerSpace);
-            createEventTableReport.setCustomerSpace(customerSpace);
+            configuration.setCustomerSpace(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
-            model.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
-            addStandardAttributes.setCustomerSpace(customerSpace);
+            model.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
+            addStandardAttributes.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
+            resolveAttributes.setCustomerSpace(customerSpace);
             return this;
         }
 
-        public Builder sourceFileName(String sourceFileName) {
-            importData.setSourceFileName(sourceFileName);
+        public Builder workflow(String workflowName) {
+            configuration.setWorkflowName(workflowName);
+            configuration.setName(workflowName);
+            return this;
+        }
+
+        public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
+            model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            return this;
+        }
+
+        public Builder modelName(String modelName) {
+            model.setModelName(modelName);
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            model.setDisplayName(displayName);
+            return this;
+        }
+
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder trainingTableName(String trainingTableName) {
+            model.setTrainingTableName(trainingTableName);
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
+        public Builder transformationGroupName(TransformationGroup transformationGroup) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
+            return this;
+        }
+
+        public Builder sourceModelSummary(ModelSummary modelSummary) {
+            model.setSourceModelSummary(modelSummary);
             return this;
         }
 
         public Builder dedupTargetTableName(String targetTableName) {
             dedupEventTable.setTargetTableName(targetTableName);
             match.setInputTableName(targetTableName);
-            createEventTableReport.setSourceTableName(targetTableName);
-            return this;
-        }
-
-        public Builder minPositiveEvents(long minPositiveEvents) {
-            createEventTableReport.setMinPositiveEvents(minPositiveEvents);
-            return this;
-        }
-
-        public Builder minDedupedRows(long minDedupedRows) {
-            createEventTableReport.setMinDedupedRows(minDedupedRows);
-            return this;
-        }
-
-        public Builder sourceType(SourceType sourceType) {
-            importData.setSourceType(sourceType);
-            return this;
-        }
-
-        public Builder internalResourceHostPort(String internalResourceHostPort) {
-            importData.setInternalResourceHostPort(internalResourceHostPort);
-            registerReport.setInternalResourceHostPort(internalResourceHostPort);
-            createEventTableReport.setInternalResourceHostPort(internalResourceHostPort);
-            dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
-            model.setInternalResourceHostPort(internalResourceHostPort);
-            match.setInternalResourceHostPort(internalResourceHostPort);
-            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
-            return this;
-        }
-
-        public Builder importReportName(String reportName) {
-            registerReport.setReportName(reportName);
-            return this;
-        }
-
-        public Builder eventTableReportName(String eventTableReportName) {
-            createEventTableReport.setReportName(eventTableReportName);
             return this;
         }
 
@@ -124,11 +130,6 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder dedupFlowExtraSources(Map<String, String> extraSources) {
             dedupEventTable.setExtraSources(extraSources);
-            return this;
-        }
-
-        public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
-            model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
@@ -178,53 +179,25 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+        public Builder userRefinedAttributes(List<Attribute> userRefinedAttributes) {
+            resolveAttributes.setUserRefinedAttributes(userRefinedAttributes);
             return this;
         }
 
-        public Builder trainingTableName(String trainingTableName) {
-            model.setTrainingTableName(trainingTableName);
-            return this;
-        }
-
-        public Builder modelName(String modelName) {
-            model.setModelName(modelName);
-            return this;
-        }
-
-        public Builder displayName(String displayName) {
-            model.setDisplayName(displayName);
-            return this;
-        }
-
-        public Builder inputProperties(Map<String, String> inputProperties) {
-            configuration.setInputProperties(inputProperties);
-            return this;
-        }
-
-        public Builder transformationGroup(TransformationGroup transformationGroup) {
-            addStandardAttributes.setTransformationGroup(transformationGroup);
-            return this;
-        }
-
-        public ImportMatchAndModelWorkflowConfiguration build() {
+        public MatchAndModelWorkflowConfiguration build() {
+            match.setMatchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission());
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
-            match.setMatchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission());
 
-            configuration.add(importData);
-            configuration.add(registerReport);
-            configuration.add(createEventTableReport);
             configuration.add(dedupEventTable);
             configuration.add(match);
             configuration.add(model);
-            configuration.add(addStandardAttributes);
-            configuration.add(matchResult);
-
             configuration.add(export);
-
+            configuration.add(matchResult);
+            configuration.add(addStandardAttributes);
+            configuration.add(resolveAttributes);
             return configuration;
         }
+
     }
 }

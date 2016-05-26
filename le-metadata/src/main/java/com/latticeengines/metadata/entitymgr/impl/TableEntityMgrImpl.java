@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.ExtractDao;
@@ -129,7 +130,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         final Table clone = TableUtils.clone(existing);
-        clone.setName(UUID.randomUUID().toString());
+        clone.setName(UUID.randomUUID().toString() + "_clone");
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
@@ -142,7 +143,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                     MultiTenantContext.getCustomerSpace());
 
-            Path sourcePath = tablesPath.append(name);
+            Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, clone));
             Path destPath = tablesPath.append(clone.getName());
             log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
             try {

@@ -11,7 +11,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("pmmlModelWorkflow")
-public class PMMLModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> {
+public class PMMLModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
     @Autowired
     private CreatePMMLModel createPMMLModel;
