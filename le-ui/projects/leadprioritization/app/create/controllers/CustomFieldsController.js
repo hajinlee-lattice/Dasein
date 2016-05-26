@@ -4,31 +4,29 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('CustomFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal) {
+.controller('CustomFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal, FieldDocument) {
     $scope.csvFileName = $stateParams.csvFileName;
     $scope.schema;
     $scope.fieldMappings = [];
     $scope.fieldNameToFieldMappings = {};
     $scope.fieldNameToFieldTypes = {};
-    $scope.mappingOptions = [{ name: "Map to a Lattice Field", id: 0 },
-            { name: "Custom Field with the same name", id: 1 },
+    $scope.mappingOptions = [{ name: "Map to Lattice Data Cloud", id: 0 },
+            { name: "Custom Field", id: 1 },
             { name: "Ignore this field", id: 2}];
     $scope.ignoredFields = [];
 
-    csvImportService.GetFieldDocument($scope.csvFileName).then(function(result) {
-        $scope.schema = result.Result.schemaInterpretation;
-        $scope.fieldMappings = result.Result.fieldMappings;
+    $scope.schema = FieldDocument.schemaInterpretation;
+    $scope.fieldMappings = FieldDocument.fieldMappings;
 
-        for (var i = 0; i < $scope.fieldMappings.length; i++) {
-            var fieldMapping = $scope.fieldMappings[i];
-            if (fieldMapping.mappedField == null) {
-                $scope.fieldNameToFieldMappings[fieldMapping.userField] = null;
-            } else {
-                $scope.fieldNameToFieldMappings[fieldMapping.userField] = fieldMapping;
-            }
-            $scope.fieldNameToFieldTypes[fieldMapping.userField] = fieldMapping.fieldType;
+    for (var i = 0; i < $scope.fieldMappings.length; i++) {
+        var fieldMapping = $scope.fieldMappings[i];
+        if (fieldMapping.mappedField == null) {
+            $scope.fieldNameToFieldMappings[fieldMapping.userField] = null;
+        } else {
+            $scope.fieldNameToFieldMappings[fieldMapping.userField] = fieldMapping;
         }
-    });
+        $scope.fieldNameToFieldTypes[fieldMapping.userField] = fieldMapping.fieldType;
+    }
 
     $scope.mappingChanged = function(fieldMapping, selectedOption) {
         if (selectedOption == null) { // user mapped a field and unmapped it for some reason

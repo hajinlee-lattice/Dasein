@@ -322,7 +322,7 @@ angular.module('mainApp.create.csvImport', [
             var modelSetter = model.assign;
 
             element.bind('change', function(){
-                scope.vm.cancelClicked();
+                scope.vm.clickCancel();
 
                 var input = this;
                 
@@ -358,6 +358,8 @@ angular.module('mainApp.create.csvImport', [
                         setTimeout(function() {
                             $('#modelDisplayName').select();
                         }, 1);
+
+                        $('#modelDisplayName').parent('div.form-group').removeClass('is-pristine');
                     }
 
                     modelSetter(scope, element[0].files[0]);
@@ -405,7 +407,7 @@ angular.module('mainApp.create.csvImport', [
             csvImportService.Upload({
                 file: vm.csvFile, 
                 url: '/pls/models/uploadfile/unnamed',
-                // url: '/pls/models/fileuploads/unnamed',
+                //url: '/pls/models/fileuploads/unnamed',
                 params: {
                     // schema: fileType,
                     displayName: vm.csvFileName,
@@ -455,14 +457,11 @@ angular.module('mainApp.create.csvImport', [
                     vm.percent = 0;
                     vm.uploaded = true;
                     vm.message = 'Done.';
-
-                    /*
-
-                    */
                 } else {
                     vm.percent = 0;
                     vm.percentage = '';
                     vm.message = 'Transfer aborted';
+                    vm.uploaded = false;
 
                     setTimeout(function() {
                         vm.message = 'Choose a CSV file';
@@ -475,7 +474,7 @@ angular.module('mainApp.create.csvImport', [
                 }
             });
 
-            $('#fileUploadCancelBtn').on('click', vm.cancelClicked.bind(this));
+            $('#fileUploadCancelBtn').on('click', vm.clickCancel.bind(this));
         };
 
         vm.clickNext = function() {
@@ -495,12 +494,13 @@ angular.module('mainApp.create.csvImport', [
             }, 1);
         }
 
-        vm.cancelClicked = function() {
+        vm.clickCancel = function() {
             vm.uploading = false;
             vm.uploaded = false;
             vm.percentage = '';
             vm.percent = 0;
             vm.message = '';
+
             var xhr = csvImportStore.Get('cancelXHR', true);
             
             if (xhr) {
@@ -508,15 +508,9 @@ angular.module('mainApp.create.csvImport', [
             }
         };
 
-        function expandTextarea(id) {
-            document.getElementById(id).addEventListener('keyup', function() {
-                this.style.overflow = 'hidden';
-                this.style.height = 0;
-                this.style.height = this.scrollHeight + 'px';
-            }, false);
-        }
-
-        expandTextarea('modelDescription');
-
+        vm.expandTextarea = function(target) {
+            target.style.height = 0;
+            target.style.height = target.scrollHeight + 'px';
+        };
     }
 ]);

@@ -151,7 +151,7 @@ angular
             return deferred.promise;
         };
     })
-    .controller('AttributesCtrl', function($scope, $state, $stateParams, AttributesModel) {
+    .controller('AttributesCtrl', function($state, $stateParams, AttributesModel) {
         var vm = this;
 
         vm.SubCategoryMap = AttributesModel.SubCategoryMap;

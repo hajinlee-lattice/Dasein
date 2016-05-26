@@ -116,6 +116,17 @@ angular
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
                 },
                 "main@": {
+                    resolve: {
+                        FieldDocument: function($q, $stateParams, csvImportService) {
+                            var deferred = $q.defer();
+
+                            csvImportService.GetFieldDocument($stateParams.csvFileName).then(function(result) {
+                                deferred.resolve(result.Result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
                     controller: 'CustomFieldsController',
                     templateUrl: 'app/create/views/CustomFieldsView.html'
                 }   

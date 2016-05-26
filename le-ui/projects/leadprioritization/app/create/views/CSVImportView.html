@@ -23,8 +23,8 @@
               csv-uploader="vm.csvFile" />
             <i class="fa fa-save" style="pointer-events:none;" ng-if="!vm.uploading && !vm.uploaded"></i>
             <i class="fa fa-spinner fa-spin" ng-if="vm.uploading && vm.percent == 0"></i>
-            <i class="fa fa-close" ng-click="vm.cancelClicked()" ng-if="vm.uploading && vm.percent > 0"></i>
-            <i class="fa fa-check" ng-click="vm.cancelClicked()" ng-if="vm.uploaded"></i>
+            <i class="fa fa-close" ng-click="vm.clickCancel()" ng-if="vm.uploading && vm.percent > 0"></i>
+            <i class="fa fa-check" ng-click="vm.clickCancel()" ng-if="vm.uploaded"></i>
         </div>
         <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
         <p id="csvFileUploadMessage">{{vm.message}}&nbsp;<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
@@ -52,7 +52,8 @@
           row="8"
           cols="30"
           name="modelDescription" 
-          ng-model="vm.modelDescription" 
+          ng-model="vm.modelDescription"
+          ng-keyup="vm.expandTextarea($event)"
           id="modelDescription" 
           class="form-control" />
       </div>

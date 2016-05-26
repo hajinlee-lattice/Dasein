@@ -430,7 +430,7 @@ angular.module('pd.jobs', [
             $scope.jobs = result;
 
             if (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache) {
-                $scope.showEmptyJobsMessage = true
+                $scope.showEmptyJobsMessage = true;
             } else {
                 $scope.showEmptyJobsMessage = false;
             }

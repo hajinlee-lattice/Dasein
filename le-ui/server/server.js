@@ -51,13 +51,20 @@ class Server {
         this.app.set('view engine', '.html');
         this.app.set('views', options.APP_ROOT);
 
-        //process.on('uncaughtException', err => app.close());
-        //process.on('SIGTERM', err => app.close());
+        this.setMiddleware();
+
+        process.on('uncaughtException', err => {
+            console.log('uncaughtException', err);
+            //this.app.close();
+        });
+        
+        process.on('SIGTERM', err => {
+            console.log('SIGTERM', err);
+        });
+        
         process.on('ECONNRESET', err => { 
             console.log('ECONNRESET', err);
         });
-
-        this.setMiddleware();
     }
 
     setMiddleware() {

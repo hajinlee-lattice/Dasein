@@ -27,6 +27,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.password = "";
     $scope.loginMessage = null;
     $scope.loginErrorMessage = null;
+    $scope.loading = false;
     $scope.showLoginError = false;
     $scope.showSuccessMessage = false;
     $scope.successMessage = "";
@@ -46,6 +47,7 @@ angular.module('mainApp.login.controllers.LoginController', [
 
     // Controller methods
     $scope.loginClick = function () {
+        $scope.loading = true;
         $scope.showLoginError = false;
         $scope.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
         if ($scope.loginInProgess) {
@@ -62,6 +64,7 @@ angular.module('mainApp.login.controllers.LoginController', [
         LoginService.Login($scope.username, $scope.password).then(function(result) {
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
+            $scope.loading = false;
             if (result != null && result.Success === true) {
                 $rootScope.$broadcast("LoggedIn");
 

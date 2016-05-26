@@ -12,6 +12,115 @@ section.container.setup-import {
             color: #fff;
         }
     }
+    textarea {
+        overflow: hidden;
+    }
+}
+/*
+Create Model: Custom Fields Page
+================================================================== */
+section.container.custom-fields {
+    margin-top: 80px;
+    h2, h3 {
+        text-align: center;
+    }
+    h2 {
+        font-size: 36px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+    h3 {
+        font-size: 20px;
+        font-weight: normal;
+        text-transform: none;
+        margin-bottom: 40px;
+    }
+    thead {
+        border-bottom: #333 solid 1px;
+    }
+    tr {
+        display: flex;
+        align-items: stretch;
+        th {
+            padding: .5em 1em 1em;
+            margin: 0;
+            &:last-child {
+                flex: 1;
+            }
+            &:first-child {
+                text-align: right;
+                border-right: #b0b0b0 solid 1px;
+            }
+            &:nth-child(3) {
+                font-style: italic;
+                color: #b0b0b0;
+            }
+        }
+        td.field_mapping_label {
+            border-right: #b0b0b0 solid 1px;
+            padding-right: 1em;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            
+            label {
+                word-wrap: break-word;
+                padding: 0;
+                margin: 0;
+            }
+        }
+        td {
+            padding: 0.3em 1.4em .3em 1em;
+            margin: 0;
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
+                
+            &:last-child {
+                flex: 1;
+            }
+            &:first-child {
+                text-align: right;
+            }
+            &:nth-child(3) {
+                /*width: 137px;*/
+                padding-right: 0;
+            }
+            select {
+                display: inline-block;
+                font-size: 14px;
+                height: 35px;
+                border-radius: 0;
+                -moz-border-radius: 0;
+                -webkit-border-radius: 0;
+                &:nth-child(1) {
+                    /*width:40%;*/
+                    /*margin-right: 3%;*/
+                }
+                &:nth-child(2) {
+                    /*width: 56%;*/
+                }
+            }
+            input {
+                display: inline-block;
+            }
+        }
+    }
+    .actions {
+        padding-top: 20px;
+        margin-top: 50px;
+        border-top: #b0b0b0 solid 1px;
+    }
+    div.error-message {
+        width: 600px;
+        margin: 0 auto 2em;
+        overflow: hidden;
+        height: 2.4em;
+        background: #f03213;
+        color: white;
+        font-size: 1.2em;
+        padding: 0.5em;
+    }
 }
 .lattice-mapping {
     .summary {
@@ -25,4 +134,44 @@ section.container.setup-import {
     tr td:nth-child(2) {
         text-align: right;
     }
+}
+/*
+Create Model: Validate Import View
+================================================================== */
+.import-summary {
+    h2 {
+        font-size: 1.35em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        height: 2.4em;
+    }
+    h3 {
+        text-align: center;
+        font-size: 3em;
+        margin: 0;
+    }
+    .summary-list dt {
+        color: #333;
+        font-size: 0.9em;
+        text-transform: initial;
+    }
+}
+.uploaded-leads, .excluded-leads, .used-leads {
+    padding-top: 110px;  
+    background-repeat: no-repeat;
+}
+.uploaded-leads {
+    background-image: url("../images/ico-uploaded-lead-23.svg");
+    background-position: center 48px;
+    background-size: 114px;
+}
+.excluded-leads {
+    background-image: url("../images/ico-excluded-lead-24.svg");
+    background-position: center 42px;
+    background-size: 56px;
+}
+.used-leads {
+    background-image: url("../images/ico-used-lead-25.svg");
+    background-position: center 43px;
+    background-size: 53px;
 }
