@@ -44,7 +44,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private final ConcurrentMap<String, Long> fetcherActivity = new ConcurrentHashMap<>();
     private ExecutorService executor;
 
-    @Value("${propdata.match.group.size:20}")
+    @Value("${propdata.match.realtime.group.size:20}")
     private Integer groupSize;
 
     @Value("${propdata.match.num.fetchers:16}")

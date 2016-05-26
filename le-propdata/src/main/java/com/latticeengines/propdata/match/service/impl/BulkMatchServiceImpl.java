@@ -69,7 +69,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
     @Value("${propdata.match.num.threads:4}")
     private Integer threadPoolSize;
 
-    @Value("${propdata.match.group.size:20}")
+    @Value("${propdata.match.bulk.group.size:20}")
     private Integer groupSize;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
