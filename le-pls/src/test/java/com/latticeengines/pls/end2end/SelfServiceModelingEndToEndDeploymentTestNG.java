@@ -221,10 +221,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
             fields.add(field);
 
-            if (field.getColumnName().equals("Website")) {
+            if (field.getColumnName().equals("Phone_Entropy")) {
                 field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
             }
-            if (field.getColumnName().equals("City")) {
+            if (field.getColumnName().equals("Activity_Count_Click_Email")) {
                 field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
             }
         }
