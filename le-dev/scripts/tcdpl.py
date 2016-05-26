@@ -1,5 +1,9 @@
-import subprocess, os, stat, sys, pexpect, signal, psutil, atexit
 import argparse
+import atexit
+import os
+import psutil
+import signal
+import subprocess
 import time
 from shutil import copyfile, rmtree
 
@@ -60,7 +64,7 @@ def deployApp(app, modules):
             break
 
     if appWar is None:
-        raise Error("Cannot find war file for app " + app)
+        raise IOError("Cannot find war file for app " + app)
 
     webappName = 'oauth' if (app == 'oauth2') else app
     webappWar = 'ROOT.war'
