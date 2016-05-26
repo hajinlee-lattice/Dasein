@@ -13,3 +13,4 @@
 */bower_components
 */.sass-cache
 *__pycache__*
+*/testartifacts/models
