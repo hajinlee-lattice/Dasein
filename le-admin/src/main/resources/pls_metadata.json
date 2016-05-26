@@ -1,2 +1,6 @@
 {
+  "RootPath": "/",
+  "Nodes": [
+    { "Node": "EnrichAttributesMaxNumber", "Data": {"Type": "number", "Required": true}}
+  ]
 }
