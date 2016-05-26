@@ -59,7 +59,6 @@ public class NewMetadataResolver {
 
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
         for (FieldMapping fieldMapping : fieldMappings) {
-            log.info(String.format("The lattice field is: %s mapped to: %s", fieldMapping.getUserField(), fieldMapping.getMappedField()));
             if (fieldMapping.getMappedField() == null) {
                 return false;
             }
@@ -93,11 +92,10 @@ public class NewMetadataResolver {
         result.fieldMappings = new ArrayList<>();
 
         List<Attribute> attributes = result.metadata.getAttributes();
-
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.isMappedToLatticeField()) {
                 for (Attribute attribute : attributes) {
-                    if (attribute.getDisplayName().equalsIgnoreCase(fieldMapping.getMappedField())) {
+                    if (isUserFieldMatchWithAttribute(fieldMapping.getUserField(), attribute)) {
                         attribute.setDisplayName(fieldMapping.getUserField());
                     }
                 }
@@ -173,7 +171,7 @@ public class NewMetadataResolver {
             FieldMapping knownColumn = new FieldMapping();
             while (headerIterator.hasNext()) {
                 String header = headerIterator.next();
-                if (isHeaderMatchWithAttribute(header, attribute)) {
+                if (isUserFieldMatchWithAttribute(header, attribute)) {
                     foundMatchingAttribute = true;
                     attribute.setDisplayName(header);
                     headerIterator.remove();
@@ -210,7 +208,7 @@ public class NewMetadataResolver {
         }
     }
 
-    private boolean isHeaderMatchWithAttribute(String header, Attribute attribute) {
+    private boolean isUserFieldMatchWithAttribute(String header, Attribute attribute) {
         List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
         if (allowedDisplayNames != null) {
             for (int i = 0; i < attribute.getAllowedDisplayNames().size(); i++) {
@@ -229,19 +227,55 @@ public class NewMetadataResolver {
     private Attribute getAttributeFromFieldName(String fieldName) {
         Attribute attribute = new Attribute();
 
-        String dataType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString();
+        String fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString();
 
         attribute.setName(fieldName.replaceAll("[^A-Za-z0-9_]", "_"));
-        attribute.setPhysicalDataType(dataType);
-        attribute.setDisplayName(dataType);
+        attribute.setPhysicalDataType(fieldType);
+        attribute.setDisplayName(fieldName);
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-        attribute.setFundamentalType(dataType);
-        attribute.setStatisticalType(dataType);
+        attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));
+        attribute.setStatisticalType(getStatisticalTypeFromFieldType(fieldType));
         attribute.setNullable(true);
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
 
         return attribute;
+    }
+
+    private String getFundamentalTypeFromFieldType(String fieldType) {
+        String fundamentalType = null;
+        switch (fieldType.toUpperCase()) {
+            case "BOOLEAN":
+                fundamentalType = ModelingMetadata.FT_BOOLEAN;
+                break;
+            case "NUMBER":
+                fundamentalType = ModelingMetadata.FT_NUMERIC;
+                break;
+            case "TEXT":
+            default:
+                fundamentalType = ModelingMetadata.FT_ALPHA;
+                break;
+        }
+        return fundamentalType;
+    }
+
+    private String getStatisticalTypeFromFieldType(String fieldType) {
+        String statisticalType = null;
+        switch (fieldType.toUpperCase()) {
+            case "BOOLEAN":
+                statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
+                break;
+            case "NUMBER":
+                statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
+                break;
+            case "TEXT":
+                statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
+                break;
+            default:
+                statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
+                break;
+        }
+        return statisticalType;
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
