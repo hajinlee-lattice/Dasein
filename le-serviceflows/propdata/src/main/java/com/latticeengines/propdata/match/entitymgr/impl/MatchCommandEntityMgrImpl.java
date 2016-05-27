@@ -2,6 +2,7 @@ package com.latticeengines.propdata.match.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
@@ -15,14 +16,14 @@ public class MatchCommandEntityMgrImpl implements MatchCommandEntityMgr {
     private MatchCommandDao matchCommandDao;
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
     public MatchCommand createCommand(MatchCommand command) {
         matchCommandDao.create(command);
         return matchCommandDao.findByField("RootOperationUID", command.getRootOperationUid());
     }
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
     public MatchCommand updateCommand(MatchCommand command) {
         matchCommandDao.update(command);
         return matchCommandDao.findByField("RootOperationUID", command.getRootOperationUid());
