@@ -59,7 +59,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
@@ -78,7 +77,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .withValidator(InterfaceName.Event.name()) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //
@@ -194,7 +192,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .withValidator(InterfaceName.Id.name()) //
                 .build());
         table.addAttribute(attr("Email") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EMAIL" })) //
@@ -209,10 +206,10 @@ public class SchemaRepository {
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON" })) //
-                .required().interfaceName(InterfaceName.Event) //
+                .required()//
+                .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .withValidator(InterfaceName.Event.name()) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //

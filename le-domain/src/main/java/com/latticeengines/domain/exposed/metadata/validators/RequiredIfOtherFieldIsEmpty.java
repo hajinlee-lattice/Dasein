@@ -26,7 +26,8 @@ public class RequiredIfOtherFieldIsEmpty extends InputValidator {
         if (value == null || value.toString().equals("")) {
             Object otherFieldValue = row.get(metadata.getAttribute(otherField).getDisplayName());
             if (otherFieldValue == null || otherFieldValue.toString().equals("")) {
-                return false;
+                throw new RuntimeException(String.format("%s column is empty so %s cannot be empty.", metadata
+                        .getAttribute(otherField).getDisplayName(), metadata.getAttribute(field).getDisplayName()));
             }
         }
 

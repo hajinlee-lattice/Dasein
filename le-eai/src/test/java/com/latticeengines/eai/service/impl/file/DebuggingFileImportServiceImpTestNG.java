@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -23,18 +24,18 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
+import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 
-public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private ImportService fileImportService;
@@ -61,12 +62,14 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
         HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
-        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
+        // change file name
+        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/Lead.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
+        // change metadata json
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
     }
 
-    @Test(groups = "functional", dataProvider = "getPropertiesProvider")
+    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = false)
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
         ImportContext ctx = new ImportContext(yarnConfiguration);
@@ -78,16 +81,14 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(
-                new File(dataUrl.getPath()).getParentFile(), "file2") }));
+        Table t = JsonUtils.deserialize(IOUtils.toString(new FileInputStream(new File(metadataUrl.getPath()))), Table.class);
+        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { t}));
         fileImportConfig.setProperties(properties);
 
-        List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
+        List<Table> tables = Arrays.<Table> asList(new Table[] { t});
 
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
-
-        eaiMetadataService.updateTableSchema(tables, ctx);
 
         ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);
         assertNotNull(appId);
@@ -107,9 +108,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @DataProvider
     public Object[][] getPropertiesProvider() {
         Map<String, String> metadataFileProperties = getProperties(true);
-        Map<String, String> inlineMetadataProperties = getProperties(false);
-
-        return new Object[][] { { metadataFileProperties }, { inlineMetadataProperties } };
+        return new Object[][] { { metadataFileProperties }};
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
@@ -125,8 +124,8 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
             }
             props.put(ImportProperty.METADATA, contents);
         }
-        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/file2.csv");
+     // change file name
+        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/Lead.csv");
         return props;
     }
-
 }

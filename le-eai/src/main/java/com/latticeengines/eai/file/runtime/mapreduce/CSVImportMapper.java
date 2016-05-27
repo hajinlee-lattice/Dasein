@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -43,7 +44,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
-import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
@@ -61,6 +61,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private boolean missingRequiredColValue = Boolean.FALSE;
     private boolean fieldMalFormed = Boolean.FALSE;
+    private boolean rowError = Boolean.FALSE;
 
     private Map<String, String> errorMap = new HashMap<>();
 
@@ -113,6 +114,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(csvFileName))) {
             CSVFormat format = CSVFormat.RFC4180.withHeader();
             try (CSVParser parser = new CSVParser(reader, format)) {
+                Set<String> headers = parser.getHeaderMap().keySet();
                 DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
                 try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
                     dataFileWriter.create(schema, new File(avroFileName));
@@ -122,6 +124,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         CSVRecord csvRecord = null;
                         missingRequiredColValue = false;
                         fieldMalFormed = false;
+                        rowError = false;
                         try {
                             if (iterator.hasNext()) {
                                 csvRecord = iterator.next();
@@ -134,7 +137,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
                             continue;
                         }
-                        GenericRecord avroRecord = toGenericRecord(csvRecord.toMap());
+                        GenericRecord avroRecord = toGenericRecord(headers, csvRecord);
                         if (errorMap.size() == 0) {
                             dataFileWriter.append(avroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
@@ -143,6 +146,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
                             } else if (fieldMalFormed) {
                                 context.getCounter(RecordImportCounter.FIELD_MALFORMED).increment(1);
+                            } else if (rowError) {
+                                context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
                             }
                             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
                             if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() <= errorLineNumber) {
@@ -166,50 +171,54 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return null;
     }
 
-    private GenericRecord toGenericRecord(Map<String, String> csvRecord) {
+    private GenericRecord toGenericRecord(Set<String> headers, CSVRecord csvRecord) {
         GenericRecord avroRecord = new GenericData.Record(schema);
-
-        for (Map.Entry<String, String> entry : csvRecord.entrySet()) {
-            final String csvFieldKey = entry.getKey();
-            Attribute attr = table.getAttributeFromDisplayName(csvFieldKey);
-
+        for (final String header : headers) {
+            Attribute attr = table.getAttributeFromDisplayName(header);
             Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
-            String csvFieldValue = String.valueOf(entry.getValue());
+            String csvFieldValue = null;
+            try {
+                csvFieldValue = String.valueOf(csvRecord.get(header));
+            } catch (Exception e) { // This catch is for the row error
+                rowError = true;
+                LOG.error(e);
+                errorMap.put(header, e.getMessage());
+                return null;
+            }
             Object avroFieldValue = null;
 
             List<InputValidator> validators = attr.getValidators();
-
             try {
                 validateAttribute(validators, csvRecord, attr);
-                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", csvFieldKey));
+                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", header));
                 if (attr.isNullable() && StringUtils.isEmpty(csvFieldValue)) {
                     avroFieldValue = null;
                 } else {
                     avroFieldValue = toAvro(csvFieldValue, avroType, attr);
                 }
+                avroRecord.put(attr.getName(), avroFieldValue);
             } catch (Exception e) {
                 LOG.error(e);
-                errorMap.put(csvFieldKey, e.getMessage());
+                errorMap.put(header, e.getMessage());
             }
-            avroRecord.put(attr.getName(), avroFieldValue);
         }
         avroRecord.put(InterfaceName.InternalId.name(), importedLineNum + 1);
         return avroRecord;
     }
 
-    private void validateAttribute(List<InputValidator> validators, Map<String, String> fieldMap, Attribute attr) {
+    private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr) {
         String attrKey = attr.getName();
+        if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(attr.getDisplayName()))) {
+            missingRequiredColValue = true;
+            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
+        }
         if (CollectionUtils.isNotEmpty(validators)) {
-            RequiredIfOtherFieldIsEmpty validator = (RequiredIfOtherFieldIsEmpty) validators.get(0);
-            if (!validator.validate(attrKey, fieldMap, table)) {
+            InputValidator validator = validators.get(0);
+            try {
+                validator.validate(attrKey, csvRecord.toMap(), table);
+            } catch (Exception e) {
                 missingRequiredColValue = true;
-                if (attrKey.equals(validator.otherField)) {
-                    throw new RuntimeException(String.format("Required Column %s is missing value.",
-                            attr.getDisplayName()));
-                } else {
-                    throw new RuntimeException(String.format("%s column is empty so %s cannot be empty.", table
-                            .getAttribute(validator.otherField).getDisplayName(), attr.getDisplayName()));
-                }
+                throw new RuntimeException(e.getMessage());
             }
         }
     }
