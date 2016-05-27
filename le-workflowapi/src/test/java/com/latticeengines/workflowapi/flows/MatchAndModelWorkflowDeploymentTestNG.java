@@ -1,9 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotNull;
-
-import java.io.File;
-import java.io.FileOutputStream;
+import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -22,10 +20,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -87,9 +87,11 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         Schema schema = AvroUtils.readSchemaFromLocalFile(path);
         Table eventTable = MetadataConverter.getTable(schema, new ArrayList<Extract>(), null, null);
         eventTable.setName("RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib");
+        eventTable.getAttribute(InterfaceName.Website.name()).setTags(Tag.INTERNAL);
+        eventTable.getAttribute(InterfaceName.City.name()).setTags(Tag.INTERNAL);
         metadataProxy.createTable(MultiTenantContext.getCustomerSpace().toString(), eventTable.getName(), eventTable);
 
-        URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/tables/Account.avro");
+        URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/tables/SourceFile_Account_csv.avro");
         String parent = accountTable.getExtracts().get(0).getPath().replace("*.avro", "Account.avro");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(), parent);
     }
@@ -109,13 +111,12 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         log.info("wait 15 sec for model to be downloaded.");
         Thread.sleep(15000L);
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
-        IOUtils.write(metadata.toString(), new FileOutputStream(new File("f.txt")));
         for (VdbMetadataField field : metadata) {
-            if (field.getColumnName().equals("Activity_Count_Click_Email")) {
-                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            if (field.getColumnName().equals(InterfaceName.Website.name())) {
+                field.setApprovedUsage(ApprovedUsage.NONE.toString());
             }
-            if (field.getColumnName().equals("Phone_Entropy")) {
-                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            if (field.getColumnName().equals(InterfaceName.City.name())) {
+                field.setApprovedUsage(ApprovedUsage.NONE.toString());
             }
         }
 
@@ -123,6 +124,15 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(summary.getId());
         cloneAndRemodel(clone, modelMetadataService.getAttributesFromFields(clone.getAttributes(), metadata),
                 modelSummary);
+
+        summary = locateModelSummary("testWorkflowAccount_clone", DEMO_CUSTOMERSPACE);
+        assertNotNull(summary);
+        metadata = modelMetadataService.getMetadata(summary.getId());
+        for (VdbMetadataField field : metadata) {
+            if (field.getColumnName().equals(InterfaceName.Website.name()) || field.getColumnName().equals(InterfaceName.City.name())) {
+                assertEquals(field.getApprovedUsage(), ApprovedUsage.NONE.toString());
+            }
+        }
     }
 
     protected void cloneAndRemodel(Table clone, List<Attribute> userRefinedAttributes, ModelSummary modelSummary)

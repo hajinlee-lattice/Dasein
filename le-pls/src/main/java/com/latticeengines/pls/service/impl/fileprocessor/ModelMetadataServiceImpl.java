@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -38,8 +39,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table table = getEventTableFromModelId(modelId);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Attribute attribute : table.getAttributes()) {
-            VdbMetadataField field = getFieldFromAttribute(attribute);
-            fields.add(field);
+            if (!attribute.getName().equals(InterfaceName.InternalId.name())) {
+                VdbMetadataField field = getFieldFromAttribute(attribute);
+                fields.add(field);
+            }
         }
         return fields;
     }

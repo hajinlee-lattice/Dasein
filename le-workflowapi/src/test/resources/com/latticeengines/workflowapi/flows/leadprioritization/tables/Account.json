@@ -1,1 +1,524 @@
-{"name":"SourceFile_Account_csv","attributes":[{"name":"Id","length":null,"nullable":false,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"Id","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Id"},"validatorWrappers":[],"display_name":"Id","source_logical_type":"STRING","logical_type":"Id","enum_values":""},{"name":"Website","length":null,"nullable":false,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"Website","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Website"},"validatorWrappers":[],"display_name":"Website","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Event","length":null,"nullable":false,"physicalDataType":"BOOLEAN","precision":null,"scale":null,"properties":{"InterfaceName":"Event","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Event"},"validatorWrappers":[],"display_name":"Event","source_logical_type":"BOOLEAN","logical_type":"Event","enum_values":""},{"name":"CompanyName","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"CompanyName","ApprovedUsage":["Model"],"PhysicalName":"CompanyName"},"validatorWrappers":[{"json":"{\"otherField\":\"Website\"}","raw_type":"com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"}],"display_name":"CompanyName","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"City","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"City","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"City"},"validatorWrappers":[{"json":"{\"otherField\":\"Website\"}","raw_type":"com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"}],"display_name":"City","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"State","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"State","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"State"},"validatorWrappers":[{"json":"{\"otherField\":\"Website\"}","raw_type":"com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"}],"display_name":"State","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Country","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"Country","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Country"},"validatorWrappers":[{"json":"{\"otherField\":\"Website\"}","raw_type":"com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"}],"display_name":"Country","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"PostalCode","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"PostalCode","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"PostalCode"},"validatorWrappers":[],"display_name":"PostalCode","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Industry","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"InterfaceName":"Industry","ApprovedUsage":["Model"],"PhysicalName":"Industry"},"validatorWrappers":[],"display_name":"Industry","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"AnnualRevenue","length":null,"nullable":true,"physicalDataType":"DOUBLE","precision":null,"scale":null,"properties":{"InterfaceName":"AnnualRevenue","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"AnnualRevenue"},"validatorWrappers":[],"display_name":"AnnualRevenue","source_logical_type":"DOUBLE","logical_type":null,"enum_values":""},{"name":"NumberOfEmployees","length":null,"nullable":true,"physicalDataType":"INT","precision":null,"scale":null,"properties":{"InterfaceName":"NumberOfEmployees","ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"NumberOfEmployees"},"validatorWrappers":[],"display_name":"NumberOfEmployees","source_logical_type":"INT","logical_type":null,"enum_values":""},{"name":"CreatedDate","length":null,"nullable":true,"physicalDataType":"LONG","precision":null,"scale":null,"properties":{"InterfaceName":"CreatedDate","ApprovedUsage":["Model"],"PhysicalName":"CreatedDate"},"validatorWrappers":[],"display_name":"CreatedDate","source_logical_type":"LONG","logical_type":null,"enum_values":""},{"name":"LastModifiedDate","length":null,"nullable":true,"physicalDataType":"LONG","precision":null,"scale":null,"properties":{"InterfaceName":"LastModifiedDate","ApprovedUsage":["Model"],"PhysicalName":"LastModifiedDate"},"validatorWrappers":[],"display_name":"LastModifiedDate","source_logical_type":"LONG","logical_type":null,"enum_values":""},{"name":"Type","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Type"},"validatorWrappers":[],"display_name":"Type","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Street","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Street"},"validatorWrappers":[],"display_name":"Street","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Sic","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Sic"},"validatorWrappers":[],"display_name":"Sic","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Ownership","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Ownership"},"validatorWrappers":[],"display_name":"Ownership","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"TickerSymbol","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"TickerSymbol"},"validatorWrappers":[],"display_name":"TickerSymbol","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"Rating","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"Rating"},"validatorWrappers":[],"display_name":"Rating","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"OwnerId","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"OwnerId"},"validatorWrappers":[],"display_name":"OwnerId","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"LastActivityDate","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"LastActivityDate"},"validatorWrappers":[],"display_name":"LastActivityDate","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"LastViewedDate","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"LastViewedDate"},"validatorWrappers":[],"display_name":"LastViewedDate","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"AccountSource","length":null,"nullable":true,"physicalDataType":"STRING","precision":null,"scale":null,"properties":{"ApprovedUsage":["ModelAndAllInsights"],"PhysicalName":"AccountSource"},"validatorWrappers":[],"display_name":"AccountSource","source_logical_type":"STRING","logical_type":null,"enum_values":""},{"name":"InternalId","length":null,"nullable":false,"physicalDataType":"LONG","precision":null,"scale":null,"properties":{},"validatorWrappers":[],"display_name":"InternalId","source_logical_type":"","logical_type":"InternalId","enum_values":""}],"extracts":[{"name":"*.avro","path":"/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19/*.avro","extraction_ts":1459463179000,"processed_records":0}],"interpretation":"SalesforceAccount","display_name":"SalesforceAccount","primary_key":{"name":"Id","attributes":["Id"],"attributesAsStr":"Id","display_name":"Id"},"last_modified_key":{"name":"LastModifiedDate","attributes":["LastModifiedDate"],"attributesAsStr":"LastModifiedDate","display_name":"LastModifiedDate","last_modified_ts":1459463181708},"marked_for_purge":true,"extracts_directory":"/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19"}
+{
+  "name": "SourceFile_Account_csv",
+  "attributes": [
+    {
+      "name": "Id",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "Id",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Id"
+      },
+      "validatorWrappers": [],
+      "display_name": "Id",
+      "source_logical_type": "STRING",
+      "logical_type": "Id",
+      "enum_values": ""
+    },
+    {
+      "name": "Website",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "Website",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Website",
+        "Tags": [
+          "Internal"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Website",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Event",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "BOOLEAN",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "Event",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Event"
+      },
+      "validatorWrappers": [],
+      "display_name": "Event",
+      "source_logical_type": "BOOLEAN",
+      "logical_type": "Event",
+      "enum_values": ""
+    },
+    {
+      "name": "CompanyName",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "CompanyName",
+        "ApprovedUsage": [
+          "Model"
+        ],
+        "PhysicalName": "CompanyName"
+      },
+      "validatorWrappers": [
+        {
+          "json": "{\"otherField\":\"Website\"}",
+          "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+        }
+      ],
+      "display_name": "CompanyName",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "City",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "City",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "City",
+        "Tags": [
+          "Internal"
+        ]
+      },
+      "validatorWrappers": [
+        {
+          "json": "{\"otherField\":\"Website\"}",
+          "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+        }
+      ],
+      "display_name": "City",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "State",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "State",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "State"
+      },
+      "validatorWrappers": [
+        {
+          "json": "{\"otherField\":\"Website\"}",
+          "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+        }
+      ],
+      "display_name": "State",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Country",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "Country",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Country"
+      },
+      "validatorWrappers": [
+        {
+          "json": "{\"otherField\":\"Website\"}",
+          "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+        }
+      ],
+      "display_name": "Country",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "PostalCode",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "PostalCode",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "PostalCode"
+      },
+      "validatorWrappers": [],
+      "display_name": "PostalCode",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Industry",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "Industry",
+        "ApprovedUsage": [
+          "Model"
+        ],
+        "PhysicalName": "Industry"
+      },
+      "validatorWrappers": [],
+      "display_name": "Industry",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "AnnualRevenue",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "DOUBLE",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "AnnualRevenue",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "AnnualRevenue"
+      },
+      "validatorWrappers": [],
+      "display_name": "AnnualRevenue",
+      "source_logical_type": "DOUBLE",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "NumberOfEmployees",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "INT",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "NumberOfEmployees",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "NumberOfEmployees"
+      },
+      "validatorWrappers": [],
+      "display_name": "NumberOfEmployees",
+      "source_logical_type": "INT",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "CreatedDate",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "LONG",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "CreatedDate",
+        "ApprovedUsage": [
+          "Model"
+        ],
+        "PhysicalName": "CreatedDate"
+      },
+      "validatorWrappers": [],
+      "display_name": "CreatedDate",
+      "source_logical_type": "LONG",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "LastModifiedDate",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "LONG",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "InterfaceName": "LastModifiedDate",
+        "ApprovedUsage": [
+          "Model"
+        ],
+        "PhysicalName": "LastModifiedDate"
+      },
+      "validatorWrappers": [],
+      "display_name": "LastModifiedDate",
+      "source_logical_type": "LONG",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Type",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Type"
+      },
+      "validatorWrappers": [],
+      "display_name": "Type",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Street",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Street"
+      },
+      "validatorWrappers": [],
+      "display_name": "Street",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Sic",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Sic"
+      },
+      "validatorWrappers": [],
+      "display_name": "Sic",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Ownership",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Ownership"
+      },
+      "validatorWrappers": [],
+      "display_name": "Ownership",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "TickerSymbol",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "TickerSymbol"
+      },
+      "validatorWrappers": [],
+      "display_name": "TickerSymbol",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Rating",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "Rating"
+      },
+      "validatorWrappers": [],
+      "display_name": "Rating",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "OwnerId",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "OwnerId"
+      },
+      "validatorWrappers": [],
+      "display_name": "OwnerId",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "LastActivityDate",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "LastActivityDate"
+      },
+      "validatorWrappers": [],
+      "display_name": "LastActivityDate",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "LastViewedDate",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "LastViewedDate"
+      },
+      "validatorWrappers": [],
+      "display_name": "LastViewedDate",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "AccountSource",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "STRING",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ],
+        "PhysicalName": "AccountSource"
+      },
+      "validatorWrappers": [],
+      "display_name": "AccountSource",
+      "source_logical_type": "STRING",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "InternalId",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "LONG",
+      "precision": null,
+      "scale": null,
+      "properties": {},
+      "validatorWrappers": [],
+      "display_name": "InternalId",
+      "source_logical_type": "",
+      "logical_type": "InternalId",
+      "enum_values": ""
+    }
+  ],
+  "extracts": [
+    {
+      "name": "*.avro",
+      "path": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19/*.avro",
+      "extraction_ts": 1459463179000,
+      "processed_records": 0
+    }
+  ],
+  "interpretation": "SalesforceAccount",
+  "display_name": "SalesforceAccount",
+  "primary_key": {
+    "name": "Id",
+    "attributes": [
+      "Id"
+    ],
+    "attributesAsStr": "Id",
+    "display_name": "Id"
+  },
+  "last_modified_key": {
+    "name": "LastModifiedDate",
+    "attributes": [
+      "LastModifiedDate"
+    ],
+    "attributesAsStr": "LastModifiedDate",
+    "display_name": "LastModifiedDate",
+    "last_modified_ts": 1459463181708
+  },
+  "marked_for_purge": true,
+  "extracts_directory": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19"
+}

@@ -104,6 +104,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
                 metadataResolver.calculate();
             }
             Table table = metadataResolver.getMetadata();
+            System.out.println(table);
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
             metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
