@@ -11,7 +11,8 @@
     <import resource="classpath:dataplatform-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.scoring.service">
-
+    </context:component-scan>
+    <context:component-scan base-package="com.latticeengines.scoring.exposed.service">
     </context:component-scan>
 
 </beans>
