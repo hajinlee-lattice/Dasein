@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
@@ -17,6 +16,7 @@ import org.testng.annotations.BeforeMethod;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Table;

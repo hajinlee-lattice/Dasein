@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.operation;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyIm
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
@@ -145,6 +147,41 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         Schema schema = getOutputSchema();
         Assert.assertNotNull(schema.getField("Foo"));
         Assert.assertNull(schema.getField("Email"));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testAddRowId() throws IOException {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        prepareAddRowId(avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                return feature.addRowID(new FieldMetadata("RowID", Long.class));
+            }
+        });
+
+        List<GenericRecord> output = readOutput();
+        Set<Long> ids = new HashSet<>(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+        for (GenericRecord record : output) {
+            System.out.println(record);
+            ids.remove(record.get("RowID"));
+        }
+
+        Assert.assertTrue(ids.isEmpty());
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
+    private void prepareAddRowId(String avroDir, String fileName) {
+        Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
+                { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
+                { "dom2.com", "f2", 4, 101L }, { "dom2.com", "f3", 2, 102L }, { "dom2.com", "k1_low", 3, 124L }, };
+
+        uploadAvro(data, avroDir, fileName);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -304,8 +341,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features,
-                        columnMappings, Integer.class, PivotType.SUM, 0);
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features, columnMappings,
+                        Integer.class, PivotType.SUM, 0);
                 return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
@@ -492,8 +529,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]},"
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
@@ -522,8 +559,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadDepivotAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Topic1\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Score1\",\"type\":[\"double\",\"null\"]},"
                 + "{\"name\":\"Topic2\",\"type\":[\"string\",\"null\"]},"
