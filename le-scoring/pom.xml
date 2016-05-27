@@ -16,7 +16,7 @@
         <le.monitor.version>2.0.33-SNAPSHOT</le.monitor.version>
         <le.serviceruntime.version>2.0.33-SNAPSHOT</le.serviceruntime.version>
         <le.security.version>2.0.33-SNAPSHOT</le.security.version>
-        <le.proxy.version>2.0.32-SNAPSHOT</le.proxy.version>
+        <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
