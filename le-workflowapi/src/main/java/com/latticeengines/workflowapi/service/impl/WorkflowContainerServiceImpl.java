@@ -102,7 +102,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 customer + String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getWorkflowQueueNameForSubmission());
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
-        appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(), "[" + workflowConfig.getWorkflowName() + "]");
+        appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
+                workflowConfig.getWorkflowName().replace(" ", "_"));
 
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
@@ -149,9 +150,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null
-                    && !workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals(
-                            "bulkMatchWorkflow")) {
+            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null && !workflowJob
+                    .getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals("bulkMatchWorkflow")) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
                 if (workflowId == null) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
