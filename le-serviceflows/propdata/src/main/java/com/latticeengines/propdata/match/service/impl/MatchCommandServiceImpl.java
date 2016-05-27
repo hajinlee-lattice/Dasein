@@ -31,6 +31,7 @@ import com.latticeengines.propdata.match.service.MatchCommandUpdater;
 public class MatchCommandServiceImpl implements MatchCommandService {
 
     private static Log log = LogFactory.getLog(MatchCommandServiceImpl.class);
+    private static final Integer MAX_RETRIES = 2;
 
     @Autowired
     private MatchCommandEntityMgr matchCommandEntityMgr;
@@ -97,6 +98,20 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             throw new RuntimeException("Cannot find a match block with block operation uid " + blockOperationUid);
         }
         return new MatchBlockUpdaterImpl(matchBlock);
+    }
+
+    @Override
+    public Boolean blockIsRetriable(String blockOperationUid) {
+        MatchBlock matchBlock = matchBlockEntityMgr.findByBlockUid(blockOperationUid);
+        if (matchBlock == null) {
+            throw new RuntimeException("Cannot find a match block with block operation uid " + blockOperationUid);
+        }
+        return matchBlock.getNumRetries() < MAX_RETRIES;
+    }
+
+    @Override
+    public MatchBlock retryBlock(String blockOperationUid, ApplicationId applicationId) {
+        return updateBlock(blockOperationUid).retry(applicationId).commit();
     }
 
     @Override
@@ -204,6 +219,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
         public MatchBlockUpdaterImpl errorMessage(String errorMessage) {
             matchBlock.setErrorMessage(errorMessage);
+            return this;
+        }
+
+        public MatchBlockUpdaterImpl retry(ApplicationId appId) {
+            matchBlock.setApplicationId(appId.toString());
+            matchBlock.setApplicationState(YarnApplicationState.NEW);
+            matchBlock.setProgress(0f);
+            matchBlock.setNumRetries(matchBlock.getNumRetries() + 1);
             return this;
         }
 

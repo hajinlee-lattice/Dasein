@@ -91,4 +91,17 @@ public class YarnUtils {
 
     }
 
+    public static void kill(Configuration yarnConfiguration, ApplicationId applicationId) {
+        YarnClient yarnClient = YarnClient.createYarnClient();
+        yarnClient.init(yarnConfiguration);
+        yarnClient.start();
+        try {
+            yarnClient.killApplication(applicationId);
+        } catch (Exception e) {
+            log.error("Failed to kill application " + applicationId, e);
+        } finally {
+            yarnClient.stop();
+        }
+    }
+
 }

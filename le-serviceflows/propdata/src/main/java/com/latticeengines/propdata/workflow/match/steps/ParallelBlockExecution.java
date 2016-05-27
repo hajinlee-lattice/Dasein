@@ -65,13 +65,13 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private Long progressUpdated;
     private MatchOutput matchOutput;
     private Random random = new Random(System.currentTimeMillis());
+    private List<PropDataJobConfiguration> jobConfigurations = new ArrayList<>();
 
     @Override
     public void execute() {
         try {
             log.info("Inside ParallelBlockExecution execute()");
             initializeYarnClient();
-            List<PropDataJobConfiguration> jobConfigurations = new ArrayList<>();
 
             Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
             if (listObj instanceof List) {
@@ -234,11 +234,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 log.info("Took it out of the running matcher list. Remaining matches are " + applicationIds);
 
                 if (FinalApplicationStatus.FAILED.equals(status) || FinalApplicationStatus.KILLED.equals(status)) {
-                    String errorMsg = "Application [" + appId + "] ended abnormally with the final status " + status;
-                    log.warn(errorMsg + ". Killing the whole match");
-                    MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
-                            : MatchStatus.ABORTED;
-                    failTheWorkflowByFailedBlock(terminalStatus, report);
+                    handleAbnormallyTerminatedBlock(report);
                 } else if (FinalApplicationStatus.SUCCEEDED.equals(status)) {
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                     mergeBlockResult(appId);
@@ -249,6 +245,33 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 }
 
             }
+        }
+    }
+
+    private void handleAbnormallyTerminatedBlock(ApplicationReport report) {
+        ApplicationId appId = report.getApplicationId();
+        FinalApplicationStatus status = report.getFinalApplicationStatus();
+        String errorMsg = "Application [" + appId + "] ended abnormally with the final status " + status;
+
+        String blockUid = blockUuidMap.get(appId.toString());
+        if (matchCommandService.blockIsRetriable(blockUid)) {
+            log.info(errorMsg + ". Retry the block.");
+            for (PropDataJobConfiguration jobConfiguration : jobConfigurations) {
+                if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
+                    ApplicationId newAppId = ConverterUtils
+                            .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    blockUuidMap.remove(appId.toString());
+                    blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
+                    applicationIds.add(newAppId);
+                    matchCommandService.retryBlock(blockUid, newAppId);
+                    log.info("Submit a match block to application id " + newAppId);
+                }
+            }
+        } else {
+            log.warn(errorMsg + ". Killing the whole match");
+            MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
+                    : MatchStatus.ABORTED;
+            failTheWorkflowByFailedBlock(terminalStatus, report);
         }
     }
 

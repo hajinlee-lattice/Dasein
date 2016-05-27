@@ -48,12 +48,13 @@ public class UpdateFailedMatchListener extends LEJobListener {
     public void afterJobExecution(JobExecution jobExecution) {
         ExitStatus exitStatus = jobExecution.getExitStatus();
         log.info("In AfterMatchListener.afterJob. ExitStatus=" + exitStatus);
-        if (ExitStatus.FAILED.equals(exitStatus)) {
+        if (ExitStatus.FAILED.getExitCode().equals(exitStatus.getExitCode())) {
             failTheWorkflowAndUpdateCommandTable(jobExecution);
         }
     }
 
     private void failTheWorkflowAndUpdateCommandTable(JobExecution jobExecution) {
+        log.info("Failing the workflow ...");
         String rootOperationUid = jobExecution.getExecutionContext().getString(BulkMatchContextKey.ROOT_OPERATION_UID);
         String errorMsg = "Unknown error.";
         if (jobExecution.getFailureExceptions() != null && !jobExecution.getFailureExceptions().isEmpty()) {

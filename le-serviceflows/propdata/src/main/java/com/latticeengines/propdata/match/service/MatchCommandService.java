@@ -21,4 +21,8 @@ public interface MatchCommandService {
 
     MatchBlock updateBlockByApplicationReport(String blockOperationUid, ApplicationReport report);
 
+    Boolean blockIsRetriable(String blockOperationUid);
+
+    MatchBlock retryBlock(String blockOperationUid, ApplicationId applicationId);
+
 }

@@ -116,7 +116,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     }
 
     @Test(groups = "deployment")
-    public void testMultiBlockBulkMatch() {
+    public void testMultiBlockBulkMatch() throws InterruptedException {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
@@ -126,6 +126,15 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         MatchInput input = createAvroBulkMatchInput(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+
+        // mimic one block failed
+        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
+            Thread.sleep(100L);
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        }
+        String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
+        YarnUtils.kill(yarnConfiguration, ConverterUtils.toApplicationId(blockAppId));
+
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
