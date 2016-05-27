@@ -28,7 +28,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
 
     @Test(groups = "deployment", enabled = true)
     public void modelSmallAccountData() throws Exception {
-        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv",
+        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/AccountSmallData.csv",
                 SchemaInterpretation.SalesforceAccount);
         ModelingParameters params = new ModelingParameters();
         params.setFilename(sourceFile.getName());
