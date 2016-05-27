@@ -16,6 +16,7 @@
         <le.monitor.version>2.0.33-SNAPSHOT</le.monitor.version>
         <le.serviceruntime.version>2.0.33-SNAPSHOT</le.serviceruntime.version>
         <le.security.version>2.0.33-SNAPSHOT</le.security.version>
+        <le.proxy.version>2.0.32-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
@@ -380,6 +381,18 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

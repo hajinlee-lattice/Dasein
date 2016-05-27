@@ -252,8 +252,11 @@ public enum LedpCode {
     LEDP_20030("The extract table with PID {0} does not have valid path."), //
     LEDP_20031("The uploaded file does not have model Id column."), //
     LEDP_20032("The uploaded file does not have record Id column."), //
-    LEDP_20033("This row of the uploaded file had empty valie for model Id column."), //
+    LEDP_20033("This modelGuids is not set in the rts bulk scoring configuration."), //
     LEDP_20034("This row of the uploaded file had empty valie for record Id column."), //
+    LEDP_20035("This score does not have score row Id."), //
+    LEDP_20036("This score does not have model Id."), //
+    LEDP_20037("This score does not have valid score."), //
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //

@@ -1,5 +1,8 @@
 package com.latticeengines.scoring.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.Arrays;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,11 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.scoring.exposed.service.ScoringService;
 import com.latticeengines.scoring.service.ScoringJobService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scoring", description = "REST resource for scoring service by Lattice")
 @RestController
@@ -27,6 +29,9 @@ public class ScoringResource {
 
     @Autowired
     private ScoringJobService scoringJobService;
+
+    @Autowired
+    private ScoringService scoringService;
 
     @Autowired
     private JobService jobService;
@@ -44,4 +49,12 @@ public class ScoringResource {
     public JobStatus getImportDataJobStatus(@PathVariable String applicationId) {
         return jobService.getJobStatus(applicationId);
     }
+
+    @RequestMapping(value = "/rtsbulkscore", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Submit a bulk scoring job")
+    public ApplicationId submitBulkScoreJob(@RequestBody RTSBulkScoringConfiguration rtsBulkScoringConfig) {
+        return scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
+    }
+
 }
