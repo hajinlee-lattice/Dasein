@@ -47,6 +47,8 @@ public class DataFlowServiceImpl implements DataFlowService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getDataflowQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
+                "[" + dataFlowConfig.getDataFlowBeanName() + "]");
 
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());

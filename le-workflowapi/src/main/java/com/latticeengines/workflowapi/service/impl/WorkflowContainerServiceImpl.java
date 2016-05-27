@@ -102,6 +102,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 customer + String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getWorkflowQueueNameForSubmission());
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
+        appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(), "[" + workflowConfig.getWorkflowName() + "]");
 
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());

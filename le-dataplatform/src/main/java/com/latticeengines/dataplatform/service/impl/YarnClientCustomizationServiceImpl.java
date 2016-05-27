@@ -118,7 +118,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             client.setEnvironment(environment);
         }
 
-        //copy the metadata.json file to HDFS data directory
+        // copy the metadata.json file to HDFS data directory
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         if (jobType != null) {
             String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
@@ -135,10 +135,13 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             }
         }
     }
-    
+
     protected String appName(Properties appMasterProperties, String clientName) {
         if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME.name())) {
             return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
+        } else if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME_SUFFIX.name())) {
+            return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
+                    clientName) + "~" + appMasterProperties.getProperty(AppMasterProperty.APP_NAME_SUFFIX.name());
         } else {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                     clientName);
