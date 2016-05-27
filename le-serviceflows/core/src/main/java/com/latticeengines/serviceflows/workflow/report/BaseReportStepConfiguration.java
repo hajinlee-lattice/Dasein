@@ -11,10 +11,8 @@ public class BaseReportStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     private String internalResourceHostPort;
 
-    @NotNull
-    @NotEmptyString
     @JsonProperty
-    private String reportName;
+    private String reportNamePrefix;
 
     public String getInternalResourceHostPort() {
         return internalResourceHostPort;
@@ -24,11 +22,11 @@ public class BaseReportStepConfiguration extends MicroserviceStepConfiguration {
         this.internalResourceHostPort = internalResourceHostPort;
     }
 
-    public String getReportName() {
-        return reportName;
+    public String getReportNamePrefix() {
+        return reportNamePrefix;
     }
 
-    public void setReportName(String reportName) {
-        this.reportName = reportName;
+    public void setReportNamePrefix(String reportNamePrefix) {
+        this.reportNamePrefix = reportNamePrefix;
     }
 }

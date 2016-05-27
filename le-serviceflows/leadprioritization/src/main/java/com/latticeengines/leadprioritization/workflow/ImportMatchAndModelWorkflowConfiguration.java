@@ -102,13 +102,13 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder importReportName(String reportName) {
-            registerReport.setReportName(reportName);
+        public Builder importReportNamePrefix(String reportName) {
+            registerReport.setReportNamePrefix(reportName);
             return this;
         }
 
-        public Builder eventTableReportName(String eventTableReportName) {
-            createEventTableReport.setReportName(eventTableReportName);
+        public Builder eventTableReportNamePrefix(String eventTableReportName) {
+            createEventTableReport.setReportNamePrefix(eventTableReportName);
             return this;
         }
 

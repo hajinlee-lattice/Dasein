@@ -1,18 +1,19 @@
 package com.latticeengines.serviceflows.workflow.report;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 /**
  * A base report generation step for generating a single report.
  */
 public abstract class BaseReportStep<T extends BaseReportStepConfiguration> extends BaseWorkflowStep<T> {
-    private String getName() {
-        return getConfiguration().getReportName();
+    private String getNamePrefix() {
+        return getConfiguration().getReportNamePrefix();
     }
 
     protected abstract ReportPurpose getPurpose();
@@ -24,12 +25,7 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
         ObjectNode json = getJson();
         if (json != null) {
             Report report = createReport(json.toString());
-
-            registerReportInContext(report);
-
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
-                    .getInternalResourceHostPort());
-            proxy.registerReport(report, getConfiguration().getCustomerSpace().toString());
+            registerReport(getConfiguration().getCustomerSpace(), report);
         }
     }
 
@@ -39,7 +35,12 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
         kv.setPayload(json);
         report.setJson(kv);
         report.setPurpose(getPurpose());
-        report.setName(getName());
+        String prefix = getNamePrefix();
+        if (prefix != null && !prefix.isEmpty()) {
+            report.setName(getNamePrefix() + "_" + UUID.randomUUID().toString());
+        } else {
+            report.setName(UUID.randomUUID().toString());
+        }
         return report;
     }
 }

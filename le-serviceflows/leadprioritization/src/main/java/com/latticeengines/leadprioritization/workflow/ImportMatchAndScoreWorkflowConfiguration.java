@@ -5,7 +5,6 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
@@ -62,8 +61,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder reportName(String reportName) {
-            registerReport.setReportName(reportName);
+        public Builder reportNamePrefix(String reportName) {
+            registerReport.setReportNamePrefix(reportName);
             return this;
         }
 

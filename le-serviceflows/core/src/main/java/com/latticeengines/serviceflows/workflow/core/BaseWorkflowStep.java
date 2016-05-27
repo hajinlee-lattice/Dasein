@@ -2,10 +2,8 @@ package com.latticeengines.serviceflows.workflow.core;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,6 +28,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
@@ -193,14 +192,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
     }
 
-    protected Report retrieveReport(CustomerSpace space, String name) {
-        if (name == null) {
-            return null;
-        }
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        return proxy.findReportByName(name, space.toString());
-    }
-
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
         if (name == null) {
             return null;
@@ -214,16 +205,37 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return new InternalResourceRestApiProxy(getConfiguration().getInternalResourceHostPort());
     }
 
-    protected void registerReportInContext(Report report) {
+    protected void registerReport(CustomerSpace customerSpace, Report report) {
         @SuppressWarnings("unchecked")
-        Set<String> reports = getObjectFromContext(WorkflowContextConstants.REPORTS, Set.class);
+        Map<ReportPurpose, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
 
-        if (reports == null) {
-            reports = new HashSet<String>();
+        if (map == null) {
+            map = new HashMap<ReportPurpose, String>();
         }
 
-        reports.add(report.getName());
-        putObjectInContext(WorkflowContextConstants.REPORTS, reports);
+        map.put(report.getPurpose(), report.getName());
+        putObjectInContext(WorkflowContextConstants.REPORTS, map);
+
+        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
+                .getInternalResourceHostPort());
+        proxy.registerReport(report, customerSpace.toString());
+    }
+
+    protected Report retrieveReport(CustomerSpace space, ReportPurpose purpose) {
+        @SuppressWarnings("unchecked")
+        Map<ReportPurpose, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
+
+        if (map == null) {
+            return null;
+        }
+
+        String name = map.get(purpose);
+        if (name == null) {
+            return null;
+        }
+
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+        return proxy.findReportByName(name, space.toString());
     }
 
     protected Double getDoubleValueFromContext(String key) {

@@ -12,13 +12,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component
 public class ValidatePrematchEventTable extends BaseWorkflowStep<CreatePrematchEventTableReportConfiguration> {
     @Override
     public void execute() {
-        Report report = retrieveReport(configuration.getCustomerSpace(), configuration.getReportName());
+        Report report = retrieveReport(configuration.getCustomerSpace(), ReportPurpose.PREMATCH_EVENT_TABLE_SUMMARY);
         ObjectNode json = JsonUtils.deserialize(report.getJson().getPayload(), ObjectNode.class);
 
         List<String> errors = new ArrayList<>();

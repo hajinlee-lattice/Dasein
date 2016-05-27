@@ -26,7 +26,7 @@ public class TestReportWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder reportName(String reportName) {
-            registerReport.setReportName(reportName);
+            registerReport.setReportNamePrefix(reportName);
             return this;
         }
 

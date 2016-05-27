@@ -167,8 +167,8 @@ public class WorkflowExecutionCache {
         if (contextObj == null) {
             return reports;
         }
-        if (contextObj instanceof Set) {
-            for (Object obj : (Set) contextObj) {
+        if (contextObj instanceof Map) {
+            for (Object obj : ((Map) contextObj).values()) {
                 if (obj instanceof String) {
                     Report report = reportService.getReportByName((String) obj);
                     if (report != null) {

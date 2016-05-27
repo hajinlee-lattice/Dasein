@@ -54,8 +54,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
         }
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                sourceFile.getTableName()) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName()) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
@@ -70,10 +69,10 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
                 transformationGroup);
 
-        log.info(String.format(
-                "Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
-                modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
-                sourceFile.getDisplayName()));
+        log.info(String
+                .format("Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
+                        modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
+                        sourceFile.getDisplayName()));
         return workflowJobService.submit(configuration);
 
     }
@@ -105,7 +104,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .sourceFileName(sourceFile.getName()) //
                 .sourceType(SourceType.FILE) //
                 .internalResourceHostPort(internalResourceHostPort)//
-                .reportName(sourceFile.getName() + "_Report") //
+                .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
                 .inputTableName(sourceFile.getTableName()) //
                 .matchClientDocument(matchClientDocument) //
