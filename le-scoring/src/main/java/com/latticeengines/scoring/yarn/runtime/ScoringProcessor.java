@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContextAware;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -167,44 +166,38 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Schema schema = ReflectData.get().getSchema(ScoreResult.class);
 
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-        DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter);
 
-        dataFileWriter.create(schema, new File(fileName));
-        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
-            List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
-            String id = scoreResponse.getId();
-            if (StringUtils.isBlank(id)) {
-                throw new LedpException(LedpCode.LEDP_20035);
-            }
-            for (ScoreModelTuple tuple : scoreModelTupleList) {
-                builder.set("id", id);
-                String modelId = tuple.getModelId();
-                if (StringUtils.isBlank(modelId)) {
-                    throw new LedpException(LedpCode.LEDP_20036);
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
+
+            dataFileWriter.create(schema, new File(fileName));
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
+                List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
+                String id = scoreResponse.getId();
+                if (StringUtils.isBlank(id)) {
+                    throw new LedpException(LedpCode.LEDP_20035);
                 }
-                double score = tuple.getScore();
-                if (score > 99 || score < 5) {
-                    throw new LedpException(LedpCode.LEDP_20037);
+                for (ScoreModelTuple tuple : scoreModelTupleList) {
+                    builder.set("id", id);
+                    String modelId = tuple.getModelId();
+                    if (StringUtils.isBlank(modelId)) {
+                        throw new LedpException(LedpCode.LEDP_20036);
+                    }
+                    double score = tuple.getScore();
+                    if (score > 99 || score < 5) {
+                        throw new LedpException(LedpCode.LEDP_20037);
+                    }
+                    builder.set("modelId", modelId);
+                    builder.set("score", score);
+                    dataFileWriter.append(builder.build());
                 }
-                builder.set("modelId", modelId);
-                builder.set("score", score);
-                dataFileWriter.append(builder.build());
             }
         }
-        dataFileWriter.close();
         HdfsUtils.copyLocalToHdfs(new Configuration(), fileName, scorePath);
     }
 
     private String getAvroFileName(String path) throws IOException {
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
-
-            @Override
-            public boolean accept(String filename) {
-                return filename.endsWith(".avro");
-            }
-
-        });
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, "*.avro");
         String fileName = files.size() > 0 ? files.get(0) : null;
         if (fileName == null) {
             throw new LedpException(LedpCode.LEDP_12003, new String[] { path });
