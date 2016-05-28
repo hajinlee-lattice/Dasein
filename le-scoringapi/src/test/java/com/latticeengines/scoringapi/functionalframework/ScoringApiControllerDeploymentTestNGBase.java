@@ -23,11 +23,11 @@ import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
@@ -160,14 +160,14 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
 
-        URL eventTableDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        URL eventTableDataCompositionUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "eventtable-"
+                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
         URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.PMML_FILENAME);
-        URL dataScienceDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        URL scoreDerivationUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+        URL dataScienceDataCompositionUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "datascience-"
+                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        URL scoreDerivationUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH
+                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -176,16 +176,16 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         HdfsUtils.mkdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
-                artifactTableDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
-                artifactBaseDir + TEST_MODEL_FOLDERNAME + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
-                artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(), artifactTableDir
+                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(), artifactBaseDir + TEST_MODEL_FOLDERNAME
+                + "_model.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir
+                + ModelRetrieverImpl.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(), enhancementsDir
+                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
+                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());
