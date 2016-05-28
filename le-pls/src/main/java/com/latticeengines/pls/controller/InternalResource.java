@@ -1,3 +1,4 @@
+
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
@@ -337,8 +338,10 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllActive();
+        return postProcessModelSummaryList(modelSummaryEntityMgr.findAllActive());
+    }
 
+    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries) {
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());
             summary.setDetails(null);
@@ -362,6 +365,27 @@ public class InternalResource extends InternalResourceBase {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return modelSummaryEntityMgr.getTotalCount(lastUpdateTime, considerAllStatus);
+
+    }
+
+    @RequestMapping(value = "/modelsummarydetails/paginate/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get paginated model summaries")
+    public List<ModelSummary> getPaginatedModelSummaries(
+            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
+            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
+            @ApiParam(value = "Offset", required = false) @RequestParam(value = "offset", required = true) int offset,
+            @ApiParam(value = "Maximum entries in page", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        long lastUpdateTime = 0;
+        if (!StringUtils.isEmpty(start)) {
+            lastUpdateTime = dateFormat.parse(start).getTime();
+        }
+        return postProcessModelSummaryList(
+                modelSummaryEntityMgr.getPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum));
 
     }
 

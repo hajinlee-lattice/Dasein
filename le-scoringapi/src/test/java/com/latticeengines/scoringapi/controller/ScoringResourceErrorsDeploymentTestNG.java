@@ -11,7 +11,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 

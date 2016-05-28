@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -121,6 +122,13 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int getTotalCount(long lastUpdateTime, boolean considerAllStatus) {
         return modelSummaryDao.getTotalCount(lastUpdateTime, considerAllStatus);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
+            int maximum) {
+        return modelSummaryDao.getPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
     }
 
     private void inflateDetails(ModelSummary summary) {

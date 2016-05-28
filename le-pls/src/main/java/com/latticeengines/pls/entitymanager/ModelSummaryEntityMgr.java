@@ -28,6 +28,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     int getTotalCount(long lastUpdateTime, boolean considerAllStatus);
 
+    List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
+
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
 
     void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap);
@@ -39,5 +41,4 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     List<Predictor> findAllPredictorsByModelId(String modelId);
 
     List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId);
-
 }

@@ -103,6 +103,28 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return ((Long) query.uniqueResult()).intValue();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
+            int maximum) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String basicQueryStr = "from %s where lastUpdateTime >= :lastUpdateTime ";
+        if (!considerAllStatus) {
+            basicQueryStr += " and status = :statusId ";
+        }
+
+        basicQueryStr += " order by lastUpdateTime asc";
+
+        String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr).setFirstResult(offset).setMaxResults(maximum);
+        query.setLong("lastUpdateTime", lastUpdateTime);
+        if (!considerAllStatus) {
+            query.setInteger("statusId", ModelSummaryStatus.ACTIVE.getStatusId());
+        }
+        return query.list();
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public ModelSummary findValidByModelId(String modelId) {
@@ -119,5 +141,4 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         }
         return (ModelSummary) list.get(0);
     }
-
 }

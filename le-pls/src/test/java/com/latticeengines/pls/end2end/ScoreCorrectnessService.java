@@ -46,13 +46,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
-import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 
 @Component
@@ -106,8 +106,8 @@ public class ScoreCorrectnessService {
         Oauth2HeaderHttpRequestInterceptor interceptor = new Oauth2HeaderHttpRequestInterceptor(accessToken);
         scoringRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));
 
-        ScoreCorrectnessArtifacts artifacts = modelRetriever.retrieveScoreCorrectnessArtifactsFromHdfs(
-                CustomerSpace.parse(tenantId), modelId);
+        ScoreCorrectnessArtifacts artifacts = modelRetriever
+                .retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace.parse(tenantId), modelId);
 
         Map<String, Double> expectedScores = getExpectedScoresFromScoredTxt(artifacts, numRecordsToScore);
         Map<String, Map<String, Object>> expectedRecords = getExpectedRecords(artifacts);
@@ -128,8 +128,8 @@ public class ScoreCorrectnessService {
         double percentScored = (double) scoreResponses.size() / (double) numRecordsToScore * 100.0;
         log.info("Percent Scored:" + percentScored);
         Assert.assertTrue(percentScored >= 90.0,
-                String.format("Actual scored records less than 90 percent, actual:%d, expected:%d", scoreResponses.size(),
-                        numRecordsToScore));
+                String.format("Actual scored records less than 90 percent, actual:%d, expected:%d",
+                        scoreResponses.size(), numRecordsToScore));
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {
@@ -141,7 +141,8 @@ public class ScoreCorrectnessService {
             System.out.println(JsonUtils.serialize(compared));
         }
 
-        int num5 = 0, num4 = 0, num3 = 0, num2 = 0, numRecordsWithMatchConflicts = 0, numRecordsWithTransformConflicts = 0, totalMatchConflicts = 0, totalTransformConflicts = 0;
+        int num5 = 0, num4 = 0, num3 = 0, num2 = 0, numRecordsWithMatchConflicts = 0,
+                numRecordsWithTransformConflicts = 0, totalMatchConflicts = 0, totalTransformConflicts = 0;
         for (ComparedRecord compared : result.values()) {
             totalMatchConflicts += compared.getNumMatchFieldConflicts();
             totalTransformConflicts += compared.getNumTransformFieldConflicts();
@@ -170,19 +171,17 @@ public class ScoreCorrectnessService {
         System.out.println("***** Summary of Delta Records *****");
         for (String id : result.keySet()) {
             ComparedRecord compared = result.get(id);
-            System.out
-                    .println(String
-                            .format("ID:%s Expected:%s ScoreApi:%s Delta:%s NumMatchConflicts:%d NumTranformConflicts:%s ScoreWarnings:%s",
-                                    id, compared.getExpectedScore(), compared.getScoreApiScore(),
-                                    compared.getScoreDifference(), compared.getNumMatchFieldConflicts(),
-                                    compared.getNumTransformFieldConflicts(),
-                                    JsonUtils.serialize(compared.getWarnings())));
+            System.out.println(String.format(
+                    "ID:%s Expected:%s ScoreApi:%s Delta:%s NumMatchConflicts:%d NumTranformConflicts:%s ScoreWarnings:%s",
+                    id, compared.getExpectedScore(), compared.getScoreApiScore(), compared.getScoreDifference(),
+                    compared.getNumMatchFieldConflicts(), compared.getNumTransformFieldConflicts(),
+                    JsonUtils.serialize(compared.getWarnings())));
         }
 
         System.out.println("***** Overall Summary *****");
-        System.out.println(generateThresholdSummary(totalCompared, result.size(), THRESHOLD,
-                numRecordsWithMatchConflicts, numRecordsWithTransformConflicts, totalMatchConflicts,
-                totalTransformConflicts));
+        System.out
+                .println(generateThresholdSummary(totalCompared, result.size(), THRESHOLD, numRecordsWithMatchConflicts,
+                        numRecordsWithTransformConflicts, totalMatchConflicts, totalTransformConflicts));
         System.out.println(generateSummary(totalCompared, num5, 0.00001));
         System.out.println(generateSummary(totalCompared, num4, 0.0001));
         System.out.println(generateSummary(totalCompared, num3, 0.001));
@@ -193,13 +192,12 @@ public class ScoreCorrectnessService {
     private String generateThresholdSummary(int totalRecords, int different, double threshold,
             int numRecordsWithMatchConflicts, int numRecordsWithTransformConflicts, int totalMatchConflicts,
             int totalTransformConflicts) {
-        return String
-                .format("threshold:%f recordsCompared:%d different:%d percentDifferent:%3.1f differentRecordsWithMatchConflicts:%d differentRecordsWithTransformConflicts:%d avgMatchConflictsPerMatchConflictedRecord:%d avgTransformConflictsPerTransformConflictedRecord:%d",
-                        threshold, totalRecords, different, (float) different / (float) totalRecords * 100.0,
-                        numRecordsWithMatchConflicts, numRecordsWithTransformConflicts,
-                        numRecordsWithMatchConflicts == 0 ? 0 : totalMatchConflicts / numRecordsWithMatchConflicts,
-                        numRecordsWithTransformConflicts == 0 ? 0 : totalTransformConflicts
-                                / numRecordsWithTransformConflicts);
+        return String.format(
+                "threshold:%f recordsCompared:%d different:%d percentDifferent:%3.1f differentRecordsWithMatchConflicts:%d differentRecordsWithTransformConflicts:%d avgMatchConflictsPerMatchConflictedRecord:%d avgTransformConflictsPerTransformConflictedRecord:%d",
+                threshold, totalRecords, different, (float) different / (float) totalRecords * 100.0,
+                numRecordsWithMatchConflicts, numRecordsWithTransformConflicts,
+                numRecordsWithMatchConflicts == 0 ? 0 : totalMatchConflicts / numRecordsWithMatchConflicts,
+                numRecordsWithTransformConflicts == 0 ? 0 : totalTransformConflicts / numRecordsWithTransformConflicts);
     }
 
     private String generateSummary(int totalRecords, int different, double threshold) {
@@ -336,7 +334,8 @@ public class ScoreCorrectnessService {
         return new SimpleEntry<>(parsedExpected, parsedScoreApi);
     }
 
-    private Map<String, DebugScoreResponse> scoreRecords(String modelId, Map<String, Map<String, Object>> inputRecords) {
+    private Map<String, DebugScoreResponse> scoreRecords(String modelId,
+            Map<String, Map<String, Object>> inputRecords) {
         final Queue<String> inputQueue = new ConcurrentLinkedQueue<>();
         Set<String> problemScores = new ConcurrentSkipListSet<>();
         Map<String, DebugScoreResponse> responses = new ConcurrentHashMap<>();
@@ -456,8 +455,8 @@ public class ScoreCorrectnessService {
     private Map<String, Map<String, Object>> getExpectedMatchedRecords(ScoreCorrectnessArtifacts artifacts)
             throws IOException {
         Map<String, Map<String, Object>> matchedRecords = new HashMap<>();
-        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, artifacts.getPathToSamplesAvro()
-                + "allTest-r-00000.avro");
+        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration,
+                artifacts.getPathToSamplesAvro() + "allTest-r-00000.avro");
         Schema schema = avroRecords.get(0).getSchema();
         List<Schema.Field> fields = schema.getFields();
 
@@ -484,7 +483,8 @@ public class ScoreCorrectnessService {
         return matchedRecords;
     }
 
-    private Map<String, Map<String, Object>> getExpectedRecords(ScoreCorrectnessArtifacts artifacts) throws IOException {
+    private Map<String, Map<String, Object>> getExpectedRecords(ScoreCorrectnessArtifacts artifacts)
+            throws IOException {
         Map<String, Map<String, Object>> records = new HashMap<>();
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
         try (CSVParser parser = CSVParser.parse(artifacts.getExpectedRecords(), format)) {

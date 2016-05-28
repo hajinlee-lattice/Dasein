@@ -4,45 +4,59 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 
-    <display-name>SCORE API</display-name>
-    <description>Lattice Engines Score REST API</description>
+	<display-name>SCORE API</display-name>
+	<description>Lattice Engines Score REST API</description>
 
-    <filter>
-        <filter-name>cors</filter-name>
-        <filter-class>com.latticeengines.scoringapi.web.CorsFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>cors</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+	<filter>
+		<filter-name>cors</filter-name>
+		<filter-class>com.latticeengines.scoringapi.web.CorsFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>cors</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
-    <filter>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:scoringapi-context.xml</param-value>
-    </context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			classpath:scoringapi-base-context.xml
+			classpath:scoringapi-context.xml
+			classpath:scoringapi-internal-context.xml
+		</param-value>
+	</context-param>
 
-    <servlet>
-        <servlet-name>score</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>score</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>score</servlet-name>
-        <url-pattern>/score/*</url-pattern>
-    </servlet-mapping>
+	<servlet>
+		<servlet-name>scoreinternal</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>score</servlet-name>
+		<url-pattern>/score/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>scoreinternal</servlet-name>
+		<url-pattern>/scoreinternal/*</url-pattern>
+	</servlet-mapping>
 </web-app>

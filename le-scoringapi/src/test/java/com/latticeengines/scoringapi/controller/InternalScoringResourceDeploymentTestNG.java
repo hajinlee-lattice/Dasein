@@ -6,24 +6,19 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -33,13 +28,16 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
-public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
+public class InternalScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final String SALESFORCE = "SALESFORCE";
     private static final String MISSING_FIELD_COUNTRY = "Country";
@@ -55,25 +53,18 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     private static final int RECORD_MODEL_CARDINALITY = 2;
     private static final int MAX_MODELS = 20;
     private volatile Throwable exception = null;
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-    private static final String UTC = "UTC";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private Map<String, List<String>> threadPerfMap = new HashMap<>();
     private boolean shouldPrintPerformanceInfo = true;
+
+    @Autowired
+    private InternalScoringApiInterface internalScoringApiProxy;
     private int baseAllModelCount = 0;
     private int baseAllActiveModelCount = 0;
 
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
-
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
-        String url = apiHostPort + "/score/models/CONTACT";
-        ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<Model>>() {
-                });
-        List<Model> models = response.getBody();
+        List<Model> models = internalScoringApiProxy.getActiveModels(apiHostPort + "/scoreinternal", ModelType.CONTACT,
+                customerSpace.toString());
         Assert.assertEquals(models.size(), 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
         Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
@@ -82,11 +73,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
-        String url = apiHostPort + "/score/models/" + modelId + "/fields";
-        ResponseEntity<Fields> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<Fields>() {
-                });
-        Fields fields = response.getBody();
+        Fields fields = internalScoringApiProxy.getModelFields(apiHostPort + "/scoreinternal", modelId,
+                customerSpace.toString());
         Assert.assertNotNull(fields);
         Assert.assertEquals(fields.getModelId(), modelId);
 
@@ -99,24 +87,19 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
     @Test(groups = "deployment", enabled = true)
     public void scoreRecord() throws IOException {
-        String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
-        ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
-                ScoreResponse.class);
-        ScoreResponse scoreResponse = response.getBody();
+        ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(apiHostPort + "/scoreinternal",
+                scoreRequest, customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void scoreDebugRecord() throws IOException {
-        String url = apiHostPort + "/score/record/debug";
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
-        ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
-                DebugScoreResponse.class);
-
-        DebugScoreResponse scoreResponse = response.getBody();
+        DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
+                .scoreProbabilityRecord(apiHostPort + "/scoreinternal", scoreRequest, customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
         Assert.assertTrue(difference < 0.1);
@@ -124,24 +107,38 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
     @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
-        String url = apiHostPort + "/score/record/debug";
         URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
         String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
 
         scoreRequest.setModelId(MODEL_ID);
-        ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
-                DebugScoreResponse.class);
 
-        DebugScoreResponse scoreResponse = response.getBody();
+        DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
+                .scoreProbabilityRecord(apiHostPort + "/scoreinternal", scoreRequest, customerSpace.toString());
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void getBaseModelsCount() {
-        baseAllModelCount = getModelCount(1, true, new Date(), false);
+    public void getPaginatedModels() {
+        List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(apiHostPort + "/scoreinternal",
+                new Date(0), true, 0, 1, customerSpace.toString());
+        Assert.assertNotNull(models);
+        Assert.assertEquals(models.size(), 1);
+        Assert.assertNotNull(models.get(0).getFields());
+        Assert.assertNotNull(models.get(0).getFields().getFields());
+        Assert.assertTrue(models.get(0).getFields().getFields().size() > 1);
+        Assert.assertNotNull(models.get(0).getModel());
+        Assert.assertNotNull(models.get(0).getModel().getModelId());
+        Assert.assertNotNull(models.get(0).getModel().getName());
+        Assert.assertNotNull(models.get(0).getStatus());
+        Assert.assertNotNull(models.get(0).getLastModifiedTimestamp());
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void getModelsCountAll() {
+        baseAllModelCount = getModelCount(1, true, null, false);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -165,22 +162,17 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     }
 
     private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {
-        String url = apiHostPort + "/score/modeldetails/count?considerAllStatus=" + considerAllStatus;
-        if (lastUpdateTime != null) {
-            url += "&start=" + dateFormat.format(lastUpdateTime);
-        }
-
-        ResponseEntity<Integer> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, Integer.class);
-        int modelsCount = response.getBody();
+        int modelsCount = internalScoringApiProxy.getModelCount(apiHostPort + "/scoreinternal", lastUpdateTime,
+                considerAllStatus, customerSpace.toString());
         if (shouldAssert) {
             Assert.assertTrue(modelsCount >= n);
         }
         return n;
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getBaseModelsCount", "getModelsCountActive" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModelsCountAll", "getModelsCountActive" })
     public void scoreRecords() throws IOException, InterruptedException {
-        final String url = apiHostPort + "/score/records";
+        final String url = apiHostPort + "/scoreinternal/records";
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
         TestRegisterModels modelCreator = new TestRegisterModels();
 
@@ -272,17 +264,16 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
         try {
             BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList);
-            ObjectMapper om = new ObjectMapper();
             long timeDuration = System.currentTimeMillis();
-            ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+            List<RecordScoreResponse> response = internalScoringApiProxy
+                    .scorePercentileRecords(apiHostPort + "/scoreinternal", bulkScoreRequest, customerSpace.toString());
             timeDuration = System.currentTimeMillis() - timeDuration;
             System.out.println(n + " => " + timeDuration);
             threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);
-            Assert.assertEquals(response.getBody().size(), n);
+            Assert.assertEquals(response.size(), n);
 
             int idx = 0;
-            for (Object res : response.getBody()) {
-                RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
+            for (RecordScoreResponse result : response) {
                 Assert.assertEquals(result.getScores().size(), RECORD_MODEL_CARDINALITY);
                 for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
                     Assert.assertEquals(result.getScores().get(j).getScore(), EXPECTED_SCORE_99);

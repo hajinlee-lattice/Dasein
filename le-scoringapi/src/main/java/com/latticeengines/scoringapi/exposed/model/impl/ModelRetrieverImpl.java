@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
@@ -36,7 +37,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -45,10 +49,12 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
@@ -83,6 +89,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private int scoreArtifactCacheMaxSize;
 
     @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
     private Warnings warnings;
 
     @Autowired
@@ -105,11 +114,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
         List<Model> models = new ArrayList<>();
 
         List<?> modelSummaries = internalResourceRestApiProxy.getActiveModelSummaries(customerSpace);
+        convertModelSummaryToModel(type, models, modelSummaries, customerSpace);
+        return models;
+    }
+
+    private void convertModelSummaryToModel(ModelType type, List<Model> models, List<?> modelSummaries,
+            CustomerSpace customerSpace) {
         if (modelSummaries != null) {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
                 ModelType modelType = getModelType(map.get("SourceSchemaInterpretation"));
+
                 if ((type == ModelType.ACCOUNT && modelType == ModelType.ACCOUNT)
                         || (type == ModelType.CONTACT && modelType == ModelType.CONTACT)) {
                     Model model = new Model(map.get("Id"), map.get("DisplayName"), type);
@@ -117,8 +133,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 }
             }
         }
-
-        return models;
     }
 
     private ModelType getModelType(String sourceSchemaInterpretation) {
@@ -140,11 +154,23 @@ public class ModelRetrieverImpl implements ModelRetriever {
         fields.setFields(fieldList);
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
+
+        // Table modelMetadataTable =
+        // metadataProxy.getTable(customerSpace.toString(),
+        // StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelType().name())));
+        // Map<String, Attribute> attributeMap =
+        // modelMetadataTable.getNameAttributeMap();
         Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
         for (String fieldName : mapFields.keySet()) {
             FieldSchema fieldSchema = mapFields.get(fieldName);
             if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                Field field = new Field(fieldName, fieldSchema.type);
+                Field field = null;
+                // if (attributeMap.containsKey(fieldName)) {
+                // field = new Field(fieldName, fieldSchema.type,
+                // attributeMap.get(fieldName).getDisplayName());
+                // } else {
+                field = new Field(fieldName, fieldSchema.type);
+                // }
                 fieldList.add(field);
             }
         }
@@ -551,6 +577,41 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
         return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus);
+    }
+
+    @Override
+    public List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
+            boolean considerAllStatus) {
+        List<?> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start, offset, maximum,
+                considerAllStatus);
+        List<ModelDetail> models = new ArrayList<>();
+        convertModelSummaryToModelDetail(models, modelSummaries, customerSpace);
+        return models;
+    }
+
+    private void convertModelSummaryToModelDetail(List<ModelDetail> models, List<?> modelSummaries,
+            CustomerSpace customerSpace) {
+        ObjectMapper om = new ObjectMapper();
+        if (modelSummaries != null) {
+            for (Object modelSummary : modelSummaries) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = (Map<String, Object>) modelSummary;
+                ModelType modelType = getModelType((String) map.get("SourceSchemaInterpretation"));
+
+                Model model = new Model((String) map.get("Id"), (String) map.get("DisplayName"), modelType);
+                Long lastModifiedTimestamp = (Long) map.get("LastUpdateTime");
+                Fields fields = getModelFields(customerSpace, model.getModelId());
+                ModelSummaryStatus status = null;
+                try {
+                    String statusStr = om.writeValueAsString(map.get("Status"));
+                    status = om.readValue(statusStr, ModelSummaryStatus.class);
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+                ModelDetail modelDetail = new ModelDetail(model, status, fields, lastModifiedTimestamp);
+                models.add(modelDetail);
+            }
+        }
     }
 
 }

@@ -14,10 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {

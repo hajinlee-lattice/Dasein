@@ -23,6 +23,7 @@
         <le.monitor.version>2.0.33-SNAPSHOT</le.monitor.version>
         <le.oauth2.db.version>2.0.33-SNAPSHOT</le.oauth2.db.version>
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
+        <le.network.version>2.0.33-SNAPSHOT</le.network.version>
         <le.transform.version>2.0.33-SNAPSHOT</le.transform.version>
         <le.testframework.version>2.0.33-SNAPSHOT</le.testframework.version>
         <le.transform.version>2.0.33-SNAPSHOT</le.transform.version>
@@ -369,11 +370,17 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-           <groupId>commons-io</groupId>
+            <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${le.network.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

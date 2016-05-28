@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
@@ -24,4 +25,7 @@ public interface ModelRetriever {
     ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace, String modelId);
 
     int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus);
+
+    List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
+            boolean considerAllStatus);
 }

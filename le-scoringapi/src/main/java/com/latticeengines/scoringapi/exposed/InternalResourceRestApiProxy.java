@@ -103,4 +103,21 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public List<?> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
+            boolean considerAllStatus) {
+        try {
+            String url = constructUrl("pls/internal/modelsummarydetails/paginate", customerSpace.toString());
+            url += "?" + "considerAllStatus" + "=" + considerAllStatus + "&" + "offset" + "=" + offset + "&" + "maximum"
+                    + "=" + maximum;
+            if (!StringUtils.isEmpty(start)) {
+                url += "&" + "start" + "=" + start;
+            }
+
+            log.debug("Get from " + url);
+            return restTemplate.getForObject(url, List.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getPaginatedModels: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
 }

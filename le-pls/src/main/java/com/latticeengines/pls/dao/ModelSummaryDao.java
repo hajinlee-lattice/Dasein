@@ -21,4 +21,6 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     ModelSummary findValidByModelId(String modelId);
 
+    List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
+
 }
