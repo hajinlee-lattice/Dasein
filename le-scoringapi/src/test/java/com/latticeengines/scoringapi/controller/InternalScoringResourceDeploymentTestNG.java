@@ -120,7 +120,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    // @Test(groups = "deployment", enabled = true)
     public void getPaginatedModels() {
         List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(apiHostPort + "/scoreinternal",
                 new Date(0), true, 0, 1, customerSpace.toString());
