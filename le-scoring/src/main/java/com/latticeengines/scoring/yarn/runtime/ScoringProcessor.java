@@ -197,7 +197,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     }
 
     private String getAvroFileName(String path) throws IOException {
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, "*.avro");
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, ".*.avro");
         String fileName = files.size() > 0 ? files.get(0) : null;
         if (fileName == null) {
             throw new LedpException(LedpCode.LEDP_12003, new String[] { path });
