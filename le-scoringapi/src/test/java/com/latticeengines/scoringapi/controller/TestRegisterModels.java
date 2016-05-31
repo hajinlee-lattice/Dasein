@@ -4,31 +4,45 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class TestRegisterModels {
 
+    public static final String DISPLAY_NAME_PREFIX = "Display Name ";
+
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
             InternalResourceRestApiProxy plsRest, Tenant tenant, TestModelConfiguration modelConfiguration,
-            CustomerSpace customerSpace) throws IOException {
+            CustomerSpace customerSpace, MetadataProxy metadataProxy) throws IOException {
         createModel(plsRest, tenant, modelConfiguration, customerSpace);
-        return setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
+        TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
+                tenant, modelConfiguration);
+        createTableEntryForModel(modelConfiguration.getEventTable(),
+                testModelArtifactDataComposition.getEventTableDataComposition().fields, customerSpace, metadataProxy);
+        return testModelArtifactDataComposition;
     }
 
-    private void createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
+    private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
             TestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
@@ -48,6 +62,7 @@ public class TestRegisterModels {
             plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
         }
         plsRest.createModelSummary(modelSummary, customerSpace);
+        return modelSummary;
     }
 
     private TestModelArtifactDataComposition setupHdfsArtifacts(Configuration yarnConfiguration, Tenant tenant,
@@ -105,4 +120,51 @@ public class TestRegisterModels {
         plsRest.deleteModelSummary(modelId, customerSpace);
     }
 
+    public static void createTableEntryForModel(String tableName, Map<String, FieldSchema> fields,
+            CustomerSpace customerSpace, MetadataProxy metadataProxy) throws IOException {
+        Table scoreResultTable = createGenericOutputSchema(tableName, fields);
+        metadataProxy.createTable(customerSpace.toString(), scoreResultTable.getName(), scoreResultTable);
+    }
+
+    private static Table createGenericOutputSchema(String tableName, Map<String, FieldSchema> fields) {
+        Table scoreResultTable = new Table();
+        scoreResultTable.setName(tableName);
+        scoreResultTable.setDisplayName(tableName);
+        List<Attribute> attributes = new ArrayList<>();
+        for (String key : fields.keySet()) {
+            Attribute attr = new Attribute();
+            attr.setName(key);
+            attr.setDisplayName(DISPLAY_NAME_PREFIX + key);
+            Type type = null;
+            switch (fields.get(key).type) {
+            case BOOLEAN:
+                type = Type.BOOLEAN;
+                break;
+            case FLOAT:
+                type = Type.FLOAT;
+                break;
+            case INTEGER:
+                type = Type.INT;
+                break;
+            case LONG:
+                type = Type.LONG;
+                break;
+            case STRING:
+            default:
+                type = Type.STRING;
+                break;
+            }
+            attr.setPhysicalDataType(type.name());
+            attr.setSourceLogicalDataType(fields.get(key).type.name());
+            attributes.add(attr);
+        }
+
+        scoreResultTable.setAttributes(attributes);
+        return scoreResultTable;
+    }
+
+    private static void createTable(String name, Table table, CustomerSpace customerSpace,
+            MetadataProxy metadataProxy) {
+
+    }
 }

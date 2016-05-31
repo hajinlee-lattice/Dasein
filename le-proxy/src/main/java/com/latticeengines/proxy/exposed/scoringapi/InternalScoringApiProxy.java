@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,18 +29,21 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
     private static final String UTC = "UTC";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
+    @Value("${proxy.scoringapi.rest.endpoint.hostport}")
+    private String internalScoringApiHostPort;
+
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
     public InternalScoringApiProxy() {
-        super("score");
+        super("/scoreinternal/score");
     }
 
     @Override
-    public List<Model> getActiveModels(String serviceHostPort, ModelType type, String tenantIdentifier) {
-        String url = constructUrl(serviceHostPort, "/models/{type}?tenantIdentifier={tenantIdentifier}", type,
-                tenantIdentifier);
+    public List<Model> getActiveModels(ModelType type, String tenantIdentifier) {
+        String url = constructUrl(internalScoringApiHostPort, "/models/{type}?tenantIdentifier={tenantIdentifier}",
+                type, tenantIdentifier);
         System.out.println(url);
         List<?> resultList = get("getActiveModels", url, List.class);
         List<Model> models = new ArrayList<>();
@@ -56,32 +60,35 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
     }
 
     @Override
-    public Fields getModelFields(String serviceHostPort, String modelId, String tenantIdentifier) {
-        String url = constructUrl(serviceHostPort, "/models/{modelId}/fields?tenantIdentifier={tenantIdentifier}",
-                modelId, tenantIdentifier);
+    public Fields getModelFields(String modelId, String tenantIdentifier) {
+        String url = constructUrl(internalScoringApiHostPort,
+                "/models/{modelId}/fields?tenantIdentifier={tenantIdentifier}", modelId, tenantIdentifier);
         return get("getModelFields", url, Fields.class);
     }
 
     @Override
-    public int getModelCount(String serviceHostPort, Date start, boolean considerAllStatus, String tenantIdentifier) {
+    public int getModelCount(Date start, boolean considerAllStatus, String tenantIdentifier) {
         String url = "/modeldetails/count?considerAllStatus={considerAllStatus}&tenantIdentifier={tenantIdentifier}";
         if (start != null) {
             String startStr = dateFormat.format(start);
-            url = constructUrl(serviceHostPort, url + "&start={start}", considerAllStatus, tenantIdentifier, startStr);
+            url = constructUrl(internalScoringApiHostPort, url + "&start={start}", considerAllStatus, tenantIdentifier,
+                    startStr);
         } else {
-            url = constructUrl(serviceHostPort, url, considerAllStatus, tenantIdentifier);
+            url = constructUrl(internalScoringApiHostPort, url, considerAllStatus, tenantIdentifier);
         }
         return get("getModelCount", url, Integer.class);
     }
 
     @Override
-    public List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus, int offset, int maximum, String tenantIdentifier) {
+    public List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
+            String tenantIdentifier) {
         String url = "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&tenantIdentifier={tenantIdentifier}";
         if (start != null) {
             String startStr = dateFormat.format(start);
-            url = constructUrl(serviceHostPort, url + "&start={start}", considerAllStatus, offset, maximum, tenantIdentifier, startStr);
+            url = constructUrl(internalScoringApiHostPort, url + "&start={start}", considerAllStatus, offset, maximum,
+                    tenantIdentifier, startStr);
         } else {
-            url = constructUrl(serviceHostPort, url, considerAllStatus, offset, maximum, tenantIdentifier);
+            url = constructUrl(internalScoringApiHostPort, url, considerAllStatus, offset, maximum, tenantIdentifier);
         }
         List resultList = get("getPaginatedModels", url, List.class);
         List<ModelDetail> paginatedModels = new ArrayList<>();
@@ -98,16 +105,17 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
     }
 
     @Override
-    public ScoreResponse scorePercentileRecord(String serviceHostPort, ScoreRequest scoreRequest,
-            String tenantIdentifier) {
-        String url = constructUrl(serviceHostPort, "/record?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
+    public ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier) {
+        String url = constructUrl(internalScoringApiHostPort, "/record?tenantIdentifier={tenantIdentifier}",
+                tenantIdentifier);
         return post("scorePercentileRecord", url, scoreRequest, ScoreResponse.class);
     }
 
     @Override
-    public List<RecordScoreResponse> scorePercentileRecords(String serviceHostPort, BulkRecordScoreRequest scoreRequest,
+    public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
             String tenantIdentifier) {
-        String url = constructUrl(serviceHostPort, "/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
+        String url = constructUrl(internalScoringApiHostPort, "/records?tenantIdentifier={tenantIdentifier}",
+                tenantIdentifier);
         List resultList = post("scorePercentileRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {
@@ -122,9 +130,8 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
     }
 
     @Override
-    public DebugScoreResponse scoreProbabilityRecord(String serviceHostPort, ScoreRequest scoreRequest,
-            String tenantIdentifier) {
-        String url = constructUrl(serviceHostPort, "/record/debug?tenantIdentifier={tenantIdentifier}",
+    public DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier) {
+        String url = constructUrl(internalScoringApiHostPort, "/record/debug?tenantIdentifier={tenantIdentifier}",
                 tenantIdentifier);
         return post("scoreProbabilityRecord", url, scoreRequest, DebugScoreResponse.class);
     }

@@ -14,6 +14,10 @@ public class Field {
     @ApiModelProperty(required = true, value = "Data type of the field")
     private FieldType fieldType;
 
+    @JsonProperty("displayName")
+    @ApiModelProperty(required = false, value = "Display name of the field")
+    private String displayName;
+
     public Field() {
         super();
     }
@@ -24,12 +28,21 @@ public class Field {
         this.fieldType = fieldType;
     }
 
+    public Field(String fieldName, FieldType fieldType, String displayName) {
+        this(fieldName, fieldType);
+        this.displayName = displayName;
+    }
+
     public String getFieldName() {
         return fieldName;
     }
 
     public FieldType getFieldType() {
         return fieldType;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
 }

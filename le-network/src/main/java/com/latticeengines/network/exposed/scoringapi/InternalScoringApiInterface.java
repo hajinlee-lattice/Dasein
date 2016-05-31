@@ -14,20 +14,18 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 
 public interface InternalScoringApiInterface {
-    List<Model> getActiveModels(String serviceHostPort, ModelType type, String tenantIdentifier);
+    List<Model> getActiveModels(ModelType type, String tenantIdentifier);
 
-    Fields getModelFields(String serviceHostPort, String modelId, String tenantIdentifier);
+    Fields getModelFields(String modelId, String tenantIdentifier);
 
-    int getModelCount(String serviceHostPort, Date lastUpdateTime, boolean considerAllStatus, String tenantIdentifier);
+    int getModelCount(Date lastUpdateTime, boolean considerAllStatus, String tenantIdentifier);
 
-    ScoreResponse scorePercentileRecord(String serviceHostPort, ScoreRequest scoreRequest, String tenantIdentifier);
+    ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier);
 
-    List<RecordScoreResponse> scorePercentileRecords(String serviceHostPort, BulkRecordScoreRequest scoreRequest,
+    List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier);
+
+    DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier);
+
+    List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier);
-
-    DebugScoreResponse scoreProbabilityRecord(String serviceHostPort, ScoreRequest scoreRequest,
-            String tenantIdentifier);
-
-    List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus, int offset,
-            int maximum, String tenantIdentifier);
 }

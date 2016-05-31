@@ -35,10 +35,12 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class InternalScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
+    private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
     private static final String SALESFORCE = "SALESFORCE";
     private static final String MISSING_FIELD_COUNTRY = "Country";
     private static final String MISSING_FIELD_FIRSTNAME = "FirstName";
@@ -55,16 +57,18 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
     private volatile Throwable exception = null;
     private Map<String, List<String>> threadPerfMap = new HashMap<>();
     private boolean shouldPrintPerformanceInfo = true;
-
-    @Autowired
-    private InternalScoringApiInterface internalScoringApiProxy;
     private int baseAllModelCount = 0;
     private int baseAllActiveModelCount = 0;
 
+    @Autowired
+    private InternalScoringApiInterface internalScoringApiProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
-        List<Model> models = internalScoringApiProxy.getActiveModels(apiHostPort + "/scoreinternal", ModelType.CONTACT,
-                customerSpace.toString());
+        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT, customerSpace.toString());
         Assert.assertEquals(models.size(), 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
         Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
@@ -73,8 +77,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
     @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
-        Fields fields = internalScoringApiProxy.getModelFields(apiHostPort + "/scoreinternal", modelId,
-                customerSpace.toString());
+        Fields fields = internalScoringApiProxy.getModelFields(modelId, customerSpace.toString());
         Assert.assertNotNull(fields);
         Assert.assertEquals(fields.getModelId(), modelId);
 
@@ -89,8 +92,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
     public void scoreRecord() throws IOException {
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
-        ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(apiHostPort + "/scoreinternal",
-                scoreRequest, customerSpace.toString());
+        ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
+                customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
     }
 
@@ -99,7 +102,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
-                .scoreProbabilityRecord(apiHostPort + "/scoreinternal", scoreRequest, customerSpace.toString());
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
         Assert.assertTrue(difference < 0.1);
@@ -114,26 +117,26 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
         scoreRequest.setModelId(MODEL_ID);
 
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
-                .scoreProbabilityRecord(apiHostPort + "/scoreinternal", scoreRequest, customerSpace.toString());
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
     }
 
-    // @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void getModelFieldsAfterScoring() {
+        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT, customerSpace.toString());
+        for (Model model : models) {
+            Fields fields = internalScoringApiProxy.getModelFields(model.getModelId(), customerSpace.toString());
+            checkFields(model.getName(), fields, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
+        }
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void getPaginatedModels() {
-        List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(apiHostPort + "/scoreinternal",
-                new Date(0), true, 0, 1, customerSpace.toString());
-        Assert.assertNotNull(models);
-        Assert.assertEquals(models.size(), 1);
-        Assert.assertNotNull(models.get(0).getFields());
-        Assert.assertNotNull(models.get(0).getFields().getFields());
-        Assert.assertTrue(models.get(0).getFields().getFields().size() > 1);
-        Assert.assertNotNull(models.get(0).getModel());
-        Assert.assertNotNull(models.get(0).getModel().getModelId());
-        Assert.assertNotNull(models.get(0).getModel().getName());
-        Assert.assertNotNull(models.get(0).getStatus());
-        Assert.assertNotNull(models.get(0).getLastModifiedTimestamp());
+        List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(new Date(0), true, 0, 50,
+                customerSpace.toString());
+        checkModelDetails(models, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -152,8 +155,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
-            "getModelsCountAfterBulkScoring" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring",
+            "getPaginatedModels" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
@@ -162,28 +165,29 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
     }
 
     private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {
-        int modelsCount = internalScoringApiProxy.getModelCount(apiHostPort + "/scoreinternal", lastUpdateTime,
-                considerAllStatus, customerSpace.toString());
+        int modelsCount = internalScoringApiProxy.getModelCount(lastUpdateTime, considerAllStatus,
+                customerSpace.toString());
         if (shouldAssert) {
             Assert.assertTrue(modelsCount >= n);
         }
         return n;
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModelsCountAll", "getModelsCountActive" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModels", "getModelsCountAll",
+            "getModelsCountActive" })
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/scoreinternal/records";
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
         TestRegisterModels modelCreator = new TestRegisterModels();
 
         for (int i = 0; i < MAX_MODELS; i++) {
-            String testModelFolderName = "3MulesoftAllRows" + i + "20160314_112802";
+            String testModelFolderName = TEST_MODEL_NAME_PREFIX + i + "20160314_112802";
             String applicationId = "application_" + i + "1457046993615_3823";
             String modelVersion = "ba99b36-c222-4f93" + i + "-ab8a-6dcc11ce45e9";
             TestModelConfiguration modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId,
                     modelVersion);
             TestModelArtifactDataComposition modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
-                    plsRest, tenant, modelConfiguration, customerSpace);
+                    plsRest, tenant, modelConfiguration, customerSpace, metadataProxy);
             models.put(modelConfiguration, modelArtifactDataComposition);
             System.out.println("Registered model: " + testModelFolderName);
         }
@@ -265,8 +269,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringApiControlle
         try {
             BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList);
             long timeDuration = System.currentTimeMillis();
-            List<RecordScoreResponse> response = internalScoringApiProxy
-                    .scorePercentileRecords(apiHostPort + "/scoreinternal", bulkScoreRequest, customerSpace.toString());
+            List<RecordScoreResponse> response = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
+                    customerSpace.toString());
             timeDuration = System.currentTimeMillis() - timeDuration;
             System.out.println(n + " => " + timeDuration);
             threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);

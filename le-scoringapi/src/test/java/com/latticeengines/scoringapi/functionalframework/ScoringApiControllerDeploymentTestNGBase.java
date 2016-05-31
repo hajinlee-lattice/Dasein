@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -23,6 +25,9 @@ import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.Field;
+import com.latticeengines.domain.exposed.scoringapi.Fields;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
@@ -88,6 +93,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 CLIENT_ID_LP);
         OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
         log.info(accessToken.getValue());
+        System.out.println(accessToken.getValue());
         tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
     }
@@ -160,14 +166,14 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
 
-        URL eventTableDataCompositionUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "eventtable-"
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        URL eventTableDataCompositionUrl = ClassLoader
+                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
         URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.PMML_FILENAME);
-        URL dataScienceDataCompositionUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "datascience-"
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        URL scoreDerivationUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH
-                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+        URL dataScienceDataCompositionUrl = ClassLoader
+                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        URL scoreDerivationUrl = ClassLoader
+                .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -176,16 +182,16 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         HdfsUtils.mkdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(), artifactTableDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(), artifactBaseDir + TEST_MODEL_FOLDERNAME
-                + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir
-                + ModelRetrieverImpl.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
+                artifactTableDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
+                artifactBaseDir + TEST_MODEL_FOLDERNAME + "_model.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
+                artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
+                enhancementsDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
+                enhancementsDir + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());
@@ -201,6 +207,36 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
         return scoreRequest;
+    }
+
+    protected void checkModelDetails(List<ModelDetail> models, String modelNamePrefix, String fieldDisplayNamePrefix) {
+        Assert.assertNotNull(models);
+        Assert.assertTrue(models.size() >= 1);
+        Assert.assertTrue(models.size() <= 50);
+        for (ModelDetail model : models) {
+            Assert.assertNotNull(model.getFields());
+            Assert.assertNotNull(model.getFields().getFields());
+            Assert.assertTrue(model.getFields().getFields().size() > 1);
+            Assert.assertNotNull(model.getModel());
+            Assert.assertNotNull(model.getModel().getModelId());
+            Assert.assertNotNull(model.getModel().getName());
+            Assert.assertNotNull(model.getStatus());
+            Assert.assertNotNull(model.getLastModifiedTimestamp());
+
+            checkFields(model.getModel().getName(), model.getFields(), modelNamePrefix, fieldDisplayNamePrefix);
+        }
+    }
+
+    protected void checkFields(String modelName, Fields fields, String modelNamePrefix, String fieldDisplayNamePrefix) {
+        for (Field field : fields.getFields()) {
+            Assert.assertNotNull(field.getFieldName());
+            Assert.assertNotNull(field.getFieldType());
+            if (modelName.startsWith(modelNamePrefix)) {
+                String displayName = field.getDisplayName();
+                Assert.assertNotNull(displayName);
+                Assert.assertEquals(displayName, fieldDisplayNamePrefix + field.getFieldName());
+            }
+        }
     }
 
 }

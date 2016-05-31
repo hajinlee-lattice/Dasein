@@ -155,22 +155,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
 
-        // Table modelMetadataTable =
-        // metadataProxy.getTable(customerSpace.toString(),
-        // StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelType().name())));
-        // Map<String, Attribute> attributeMap =
-        // modelMetadataTable.getNameAttributeMap();
+        Table modelMetadataTable = metadataProxy.getTable(customerSpace.toString(),
+                StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelSummary().getEventTableName())));
+        Map<String, Attribute> attributeMap = new HashMap<>();
+        if (modelMetadataTable != null) {
+            attributeMap = modelMetadataTable.getNameAttributeMap();
+        }
         Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
         for (String fieldName : mapFields.keySet()) {
             FieldSchema fieldSchema = mapFields.get(fieldName);
             if (fieldSchema.source.equals(FieldSource.REQUEST)) {
                 Field field = null;
-                // if (attributeMap.containsKey(fieldName)) {
-                // field = new Field(fieldName, fieldSchema.type,
-                // attributeMap.get(fieldName).getDisplayName());
-                // } else {
-                field = new Field(fieldName, fieldSchema.type);
-                // }
+                if (attributeMap.containsKey(fieldName)) {
+                    field = new Field(fieldName, fieldSchema.type, attributeMap.get(fieldName).getDisplayName());
+                } else {
+                    field = new Field(fieldName, fieldSchema.type);
+                }
                 fieldList.add(field);
             }
         }

@@ -17,6 +17,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,17 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
+    private static final String TEST_MODEL_NAME_PREFIX = "Test3MulesoftAllRows";
     private static final String SALESFORCE = "SALESFORCE";
     private static final String MISSING_FIELD_COUNTRY = "Country";
     private static final String MISSING_FIELD_FIRSTNAME = "FirstName";
@@ -63,30 +67,34 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
     private int baseAllModelCount = 0;
     private int baseAllActiveModelCount = 0;
 
+    @Autowired
+    private MetadataProxy metadataProxy;
+
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
-        String url = apiHostPort + "/score/models/CONTACT";
-        ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<Model>>() {
-                });
-        List<Model> models = response.getBody();
+        List<Model> models = getModelList();
         Assert.assertEquals(models.size(), 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
         Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
     }
 
+    private List<Model> getModelList() {
+        String url = apiHostPort + "/score/models/CONTACT";
+        ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<Model>>() {
+                });
+        List<Model> models = response.getBody();
+        return models;
+    }
+
     @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
-        String url = apiHostPort + "/score/models/" + modelId + "/fields";
-        ResponseEntity<Fields> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<Fields>() {
-                });
-        Fields fields = response.getBody();
+        Fields fields = getFieldsForModel(modelId);
         Assert.assertNotNull(fields);
         Assert.assertEquals(fields.getModelId(), modelId);
 
@@ -95,6 +103,15 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             Assert.assertEquals(expectedSchema.type, field.getFieldType());
             Assert.assertEquals(expectedSchema.source, FieldSource.REQUEST);
         }
+    }
+
+    private Fields getFieldsForModel(String modelId) {
+        String url = apiHostPort + "/score/models/" + modelId + "/fields";
+        ResponseEntity<Fields> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Fields>() {
+                });
+        Fields fields = response.getBody();
+        return fields;
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -137,6 +154,23 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void getModelFieldsAfterScoring() {
+        List<Model> models = getModelList();
+        for (Model model : models) {
+            Fields fields = getFieldsForModel(model.getModelId());
+            checkFields(model.getName(), fields, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
+        }
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void getPaginatedModels() {
+        String url = apiHostPort + "/score";
+
+        List<ModelDetail> models = getPaginatedModels(url, new Date(0), true, 0, 50);
+        checkModelDetails(models, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -185,13 +219,13 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         TestRegisterModels modelCreator = new TestRegisterModels();
 
         for (int i = 0; i < MAX_MODELS; i++) {
-            String testModelFolderName = "3MulesoftAllRows" + i + "20160314_112802";
+            String testModelFolderName = TEST_MODEL_NAME_PREFIX + i + "20160314_112802";
             String applicationId = "application_" + i + "1457046993615_3823";
             String modelVersion = "ba99b36-c222-4f93" + i + "-ab8a-6dcc11ce45e9";
             TestModelConfiguration modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId,
                     modelVersion);
             TestModelArtifactDataComposition modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
-                    plsRest, tenant, modelConfiguration, customerSpace);
+                    plsRest, tenant, modelConfiguration, customerSpace, metadataProxy);
             models.put(modelConfiguration, modelArtifactDataComposition);
             System.out.println("Registered model: " + testModelFolderName);
         }
@@ -370,5 +404,17 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
             records.add(record);
         }
         return records;
+    }
+
+    private List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus,
+            int offset, int maximum) {
+        String url = serviceHostPort
+                + "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&start={start}";
+        String startStr = dateFormat.format(start);
+        System.out.println(url);
+        ResponseEntity<List<ModelDetail>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<ModelDetail>>() {
+                }, considerAllStatus, offset, maximum, startStr);
+        return response.getBody();
     }
 }
