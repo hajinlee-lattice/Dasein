@@ -63,7 +63,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     public String process(DataFlowConfiguration dataFlowConfig) throws Exception {
         log.info("Running processor.");
         appContext = loadSoftwarePackages("dataflowapi", softwareLibraryService, appContext, versionManager);
-        Map<String, String> sources = new HashMap<>();
         Map<String, Table> sourceTables = new HashMap<>();
 
         List<DataFlowSource> dataFlowSources = dataFlowConfig.getDataSources();
