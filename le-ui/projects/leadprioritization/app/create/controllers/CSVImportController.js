@@ -92,6 +92,7 @@ angular
                 displayName = vm.modelDisplayName,
                 modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName);
 
+            metaData.name = fileName;
             metaData.modelName = modelName;
             metaData.displayName = displayName;
             metaData.description = vm.modelDescription;

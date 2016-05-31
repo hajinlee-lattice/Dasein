@@ -187,7 +187,7 @@ angular
             method: 'POST',
             url: '/pls/models/' + csvMetaData.modelName,
             data: {
-                'description': 'Self-service Model', // csvMetaData.description,
+                'description': csvMetaData.description,
                 'filename': csvMetaData.name,
                 'name': csvMetaData.modelName,
                 'displayName': csvMetaData.displayName
