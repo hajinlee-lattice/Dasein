@@ -44,6 +44,7 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                                                profile=metadata)
 
     # If properties are empty, don't try and set values
+    disabledSteps = []
     if pipelineProps:
         try:
             props = dict((u.split("=")[0], u.split("=")[1]) for u in pipelineProps.split(" "))
@@ -53,12 +54,19 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                     tokens = prop.split(".")
                     step = stepMap[tokens[0]]
                     if step is not None:
+                        if tokens[1] == 'enabled' and value.lower() == 'false':
+                            disabledSteps.append(step)
+                            continue
                         currentValue = getattr(step, tokens[1])
                         setattr(step, tokens[1], (type(currentValue))(value))
                 except Exception as propError:
                     logger.error(str(propError))
         except Exception as e:
             logger.error(str(e))
+
+        for disabledStep in reversed(disabledSteps):
+            logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
+            steps.remove(disabledStep)
 
     return steps
 

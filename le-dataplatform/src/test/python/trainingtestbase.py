@@ -54,7 +54,6 @@ class TrainingTestBase(TestBase):
         enginedir = "/leframework/scoringengine.py"
 
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
-        os.symlink("../../main/python/rulefwk.py", "./rulefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")

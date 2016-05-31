@@ -118,8 +118,8 @@
   "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s0Test-r-00000.avro",
   "python_script": "/app/dataplatform/scripts/algorithm/data_rule.py",
   "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
-  "pipeline_driver":"/app/dataplatform/scripts/pipeline/rulepipeline.json",
+  "pipeline_driver":"/app/dataplatform/scripts/pipeline/testrulepipeline.json",
   "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",
-  "pipeline_properties":"anonymousleadrule.threshold=65",
+  "pipeline_properties":"testrowruletwo.enabled=false",
   "name": "Model_Submission1"
 }

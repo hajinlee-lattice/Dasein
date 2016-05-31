@@ -90,10 +90,10 @@ class ColumnTransform(object):
             return False
 
     def buildPipelineFromFile(self, pipelinePath="./lepipeline.tar.gz",
-                                       stringColumns=None, 
-                                       categoricalColumns=None, 
-                                       continuousColumns=None, 
-                                       targetColumn=None, 
+                                       stringColumns=None,
+                                       categoricalColumns=None,
+                                       continuousColumns=None,
+                                       targetColumn=None,
                                        columnsToTransform=None,
                                        profile=None):
         # Return Array that holds functions loaded from file
@@ -122,7 +122,7 @@ class ColumnTransform(object):
                 logger.info("Configurable Pipeline Current Path: %s" % str(os.getcwd()))
                 fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, [pipelinePath])
                 columnTransformObject[self.loadedModuleKey] = imp.load_module(uniqueColumnTransformName, fileObject, pathname, description)
-                logger.info("Loaded %s for Configurable Pipeline " % uniqueColumnTransformName) 
+                logger.info("Loaded %s for Configurable Pipeline " % uniqueColumnTransformName)
 
                 mainClassName = value[self.mainClassNameKey]
                 namedParameterList = value[self.namedParameterListToInitKey]
@@ -133,6 +133,10 @@ class ColumnTransform(object):
                                           targetColumn=targetColumn, \
                                           columnsToTransform=columnsToTransform,
                                           profile=profile)
+                if kwargs.has_key("enabled") and (kwargs["enabled"].lower() == "false"):
+                    logger.info("Skip disabled step " + uniqueColumnTransformName)
+                    continue
+
                 loadedObject = getattr(columnTransformObject[self.loadedModuleKey], mainClassName)(**kwargs)
                 columnTransformObject[self.loadedObjectKey] = loadedObject
 
@@ -149,7 +153,7 @@ class ColumnTransform(object):
             logger.exception("Caught Exception while building Configurable Pipeline %s" % str(e))
             return None
 
-    def buildKwArgs(self, namedParameterList=None, 
+    def buildKwArgs(self, namedParameterList=None,
                             stringColumns=None,
                             categoricalColumns=None,
                             continuousColumns=None,

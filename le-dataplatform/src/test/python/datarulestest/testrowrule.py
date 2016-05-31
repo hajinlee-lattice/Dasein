@@ -2,9 +2,9 @@ from leframework.codestyle import overrides
 from pipelinefwk import get_logger
 from rulefwk import RowRule
 
-logger = get_logger("AnonymousLeadRule")
+logger = get_logger("TestRowRule")
 
-class AnonymousLeadRule(RowRule):
+class TestRowRule(RowRule):
 
     threshold = 2
 
@@ -18,8 +18,12 @@ class AnonymousLeadRule(RowRule):
 
     @overrides(RowRule)
     def getRowsToRemove(self):
-        return { "34ds" : True }
+        return { "Row1" : True,
+                 "Row2" : True,
+                 "Row3" : False,
+                 "Row4" : False,
+               }
 
     @overrides(RowRule)
     def getDescription(self):
-        return "A lead is anonymous if it is missing all domain and company location fields"
+        return "A test column rule"

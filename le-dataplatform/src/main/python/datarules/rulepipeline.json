@@ -7,6 +7,7 @@
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
+        "threshold": 4
       },
       "ColumnTransformFilePath": "anonymousleadrule.py"
     }

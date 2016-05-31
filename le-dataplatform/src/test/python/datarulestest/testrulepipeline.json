@@ -1,0 +1,49 @@
+{
+  "columnTransformFiles": {
+    "TestColumnRule": {
+      "KeyWhenSortingByAscending": "1",
+      "Name": "testcolumnrule",
+      "MainClassName": "TestColumnRule",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "threshold": 4
+      },
+      "ColumnTransformFilePath": "testcolumnrule.py"
+    },
+    "TestRowRule": {
+      "KeyWhenSortingByAscending": "2",
+      "Name": "testrowrule",
+      "MainClassName": "TestRowRule",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "threshold": 4
+      },
+      "ColumnTransformFilePath": "testrowrule.py"
+    },
+    "TestRowRuleTwo": {
+      "KeyWhenSortingByAscending": "3",
+      "Name": "testrowruletwo",
+      "MainClassName": "TestRowRuleTwo",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "threshold": 4
+      },
+      "ColumnTransformFilePath": "testrowruletwo.py"
+    },
+    "TestRowRuleThree": {
+      "KeyWhenSortingByAscending": "3",
+      "Name": "testrowrulethree",
+      "MainClassName": "TestRowRuleThree",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "threshold": 4,
+        "enabled": "false"
+      },
+      "ColumnTransformFilePath": "testrowrulethree.py"
+    }
+  }
+}

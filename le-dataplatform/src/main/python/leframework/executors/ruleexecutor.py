@@ -1,3 +1,4 @@
+import os
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 
@@ -32,6 +33,14 @@ class DataRuleExecutor(Executor):
         pipelineDriver = params["schema"]["pipeline_driver"]
         pipelineLib = params["schema"]["python_pipeline_lib"]
         pipelineProps = params["schema"]["pipeline_properties"] if "pipeline_properties" in params["schema"] else ""
+        modelLocalDir = params["modelLocalDir"]
+
+        # Create directory for data rule output
+        dataRulesLocalDir = modelLocalDir + "datarules/"
+
+        if not os.path.exists(dataRulesLocalDir):
+            os.mkdir(dataRulesLocalDir)
+
 
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
@@ -50,6 +59,7 @@ class DataRuleExecutor(Executor):
                                                                pipelineProps)
         params["pipeline"] = pipeline
         training = pipeline.apply(params["training"], configMetadata)
+        pipeline.processResults(dataRulesLocalDir)
         return (training, test, metadata)
 
     @overrides(Executor)
