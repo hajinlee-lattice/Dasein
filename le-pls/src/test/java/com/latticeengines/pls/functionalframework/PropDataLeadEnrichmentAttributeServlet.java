@@ -32,7 +32,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setColumnName("TechIndicator_AddThis");
         column.setDisplayName("Add This");
         column.setDataType("NVARCHAR(50)");
-        column.setMatchDestination("BuiltWithPivoted");
+        column.setMatchDestination("BuiltWith_Pivoted_Source");
         column.setTagList(Collections.singletonList(Tag.EXTERNAL));
         column.setFundamentalType(FundamentalType.BOOLEAN);
         column.setStatisticalType(StatisticalType.ORDINAL);

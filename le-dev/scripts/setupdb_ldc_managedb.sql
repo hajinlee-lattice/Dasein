@@ -17,14 +17,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID, ExternalColumnID, DefaultColumnName, Description, DataType, DisplayName, Category, StatisticalType, DisplayDiscretizationStrategy, FundamentalType, ApprovedUsage, Tags);
-
-LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ColumnMapping.csv' INTO TABLE `ColumnMapping`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(PID, ExternalColumnID, SourceName, SourceColumn, Priority);
+(PID,ExternalColumnID,DefaultColumnName,TablePartition,Description,DataType,DisplayName,Category,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,MatchDestination,Tags);
 
 LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/Publication.csv' INTO TABLE `Publication`
 FIELDS TERMINATED BY ','

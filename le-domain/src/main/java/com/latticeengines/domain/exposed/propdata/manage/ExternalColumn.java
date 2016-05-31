@@ -8,23 +8,16 @@ import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -56,6 +49,9 @@ public class ExternalColumn implements HasPid, Serializable {
     @Column(name = "DefaultColumnName", nullable = false, length = 100)
     private String defaultColumnName;
 
+    @Column(name = "TablePartition", nullable = false, length = 200)
+    private String tablePartition;
+
     @Column(name = "Description", nullable = true, length = 1000)
     private String description;
 
@@ -83,13 +79,11 @@ public class ExternalColumn implements HasPid, Serializable {
     @Column(name = "Tags", nullable = true, length = 500)
     private String tags;
 
+    @Column(name = "MatchDestination", nullable = true, length = 200)
+    private String matchDestination;
+
     @Column(name = "DisplayDiscretizationStrategy", nullable = true, length = 1000)
     private String discretizationStrategy;
-
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "externalColumn")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @Fetch(FetchMode.SUBSELECT)
-    private List<ColumnMapping> columnMappings;
 
     @Override
     @JsonIgnore
@@ -113,32 +107,42 @@ public class ExternalColumn implements HasPid, Serializable {
         this.externalColumnID = externalColumnID;
     }
     
-    @JsonProperty("DefaultColumnName")
+    @JsonIgnore
     public String getDefaultColumnName() {
 		return defaultColumnName;
 	}
 
-    @JsonProperty("DefaultColumnName")
+    @JsonIgnore
 	public void setDefaultColumnName(String defaultColumnName) {
 		this.defaultColumnName = defaultColumnName;
 	}
 
-    @JsonProperty("Description")
+    @JsonIgnore
+    public String getTablePartition() {
+        return tablePartition;
+    }
+
+    @JsonIgnore
+    public void setTablePartition(String tablePartition) {
+        this.tablePartition = tablePartition;
+    }
+
+    @JsonIgnore
     public String getDescription() {
         return description;
     }
 
-    @JsonProperty("Description")
+    @JsonIgnore
     public void setDescription(String description) {
         this.description = description;
     }
 
-    @JsonProperty("DataType")
+    @JsonIgnore
     public String getDataType() {
         return dataType;
     }
 
-    @JsonProperty("DataType")
+    @JsonIgnore
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
@@ -153,12 +157,12 @@ public class ExternalColumn implements HasPid, Serializable {
         this.displayName = displayName;
     }
 
-    @JsonProperty("Category")
+    @JsonIgnore
     public Category getCategory() {
         return category;
     }
 
-    @JsonProperty("Category")
+    @JsonIgnore
     public void setCategory(Category category) {
         this.category = category;
     }
@@ -203,27 +207,27 @@ public class ExternalColumn implements HasPid, Serializable {
         this.tags = tags;
     }
 
-    @JsonProperty("DisplayDiscretizationStrategy")
+    @JsonIgnore
     public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
 
-    @JsonProperty("DisplayDiscretizationStrategy")
+    @JsonIgnore
     public void setDiscretizationStrategy(String discretizationStrategy) {
         this.discretizationStrategy = discretizationStrategy;
     }
 
-    @JsonProperty("ColumnMappings")
-    public List<ColumnMapping> getColumnMappings() {
-        return columnMappings;
+    @JsonIgnore
+    public String getMatchDestination() {
+        return matchDestination;
     }
 
-    @JsonProperty("ColumnMappings")
-    public void setColumnMappings(List<ColumnMapping> columnMappings) {
-        this.columnMappings = columnMappings;
+    @JsonIgnore
+    public void setMatchDestination(String matchDestination) {
+        this.matchDestination = matchDestination;
     }
 
-    @JsonProperty("FundamentalType")
+    @JsonIgnore
     private String getFundamentalTypeAsString() {
         if (fundamentalType == null) {
             return null;
@@ -232,12 +236,12 @@ public class ExternalColumn implements HasPid, Serializable {
         }
     }
 
-    @JsonProperty("FundamentalType")
+    @JsonIgnore
     private void setFundamentalTypeByString(String fundamentalType) {
         setFundamentalType(FundamentalType.fromName(fundamentalType));
     }
 
-    @JsonProperty("StatisticalType")
+    @JsonIgnore
     private String getStatisticalTypeAsString() {
         if (statisticalType == null) {
             return null;
@@ -246,7 +250,7 @@ public class ExternalColumn implements HasPid, Serializable {
         }
     }
 
-    @JsonProperty("StatisticalType")
+    @JsonIgnore
     private void setStatisticalTypeByString(String statisticalType) {
         setStatisticalType(StatisticalType.fromName(statisticalType));
     }
@@ -291,7 +295,7 @@ public class ExternalColumn implements HasPid, Serializable {
         setApprovedUsageList(approvedUsages);
     }
 
-    @JsonProperty("Tags")
+    @JsonIgnore
     public List<String> getTagList() {
         List<String> tags = new ArrayList<>();
         if (StringUtils.isEmpty(this.tags)) {  return tags; }
@@ -299,7 +303,7 @@ public class ExternalColumn implements HasPid, Serializable {
         return tags;
     }
 
-    @JsonProperty("Tags")
+    @JsonIgnore
     public void setTagList(List<String> tags) {
         List<String> tokens = new ArrayList<>();
         for (String tag: tags) {
@@ -320,6 +324,7 @@ public class ExternalColumn implements HasPid, Serializable {
         metadata.setApprovedUsageList(getApprovedUsageList());
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
+        metadata.setMatchDestination(getMatchDestination());
         return metadata;
     }
 

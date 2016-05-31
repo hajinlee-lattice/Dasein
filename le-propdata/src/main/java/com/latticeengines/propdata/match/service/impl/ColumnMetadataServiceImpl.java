@@ -1,8 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,12 +20,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnMapping;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.core.service.SourceService;
-import com.latticeengines.propdata.core.source.HasSqlPresence;
-import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.ExternalColumnService;
 
@@ -35,9 +29,6 @@ import com.latticeengines.propdata.match.service.ExternalColumnService;
 public class ColumnMetadataServiceImpl implements ColumnMetadataService {
 
     private static final Log log = LogFactory.getLog(ColumnMetadataServiceImpl.class);
-
-    @Autowired
-    private SourceService sourceService;
 
     @Autowired
     private ExternalColumnService externalColumnService;
@@ -86,19 +77,6 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         for (ExternalColumn externalColumn : externalColumns) {
             try {
                 ColumnMetadata columnMetadata = externalColumn.toColumnMetadata();
-                if (externalColumn.getColumnMappings() != null && !externalColumn.getColumnMappings().isEmpty()) {
-                    ColumnMapping maxPriorityCM = Collections.max(externalColumn.getColumnMappings(),
-                            new Comparator<ColumnMapping>() {
-                                public int compare(ColumnMapping cm1, ColumnMapping cm2) {
-                                    return Integer.compare(cm1.getPriority(), cm2.getPriority());
-                                }
-                            });
-                    if (maxPriorityCM.getSourceName() != null) {
-                        Source source = sourceService.findBySourceName(maxPriorityCM.getSourceName());
-                        HasSqlPresence hasSqlPresence = (HasSqlPresence) source;
-                        columnMetadata.setMatchDestination(hasSqlPresence.getSqlMatchDestination());
-                    }
-                }
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
                 throw new RuntimeException(

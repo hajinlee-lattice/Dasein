@@ -21,10 +21,6 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
-    <bean id="columnMappingDao" class="com.latticeengines.propdata.match.dao.impl.ColumnMappingDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
-    </bean>
-
     <task:scheduler id="matchScheduler" pool-size="4" />
 
     <task:executor id="matchExecutor"
