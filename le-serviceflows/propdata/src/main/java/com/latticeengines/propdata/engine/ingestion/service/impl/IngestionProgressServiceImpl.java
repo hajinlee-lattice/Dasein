@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,8 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         if (ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)) {
             try {
                 DateFormat format = new SimpleDateFormat("yyyyMMdd");
+                TimeZone timezone = TimeZone.getTimeZone("UTC");
+                format.setTimeZone(timezone);
                 String fileVersion = HdfsPathBuilder.dateFormat
                         .format(format.parse(fileName.substring(17, 25)));
                 fileDest = fileDest.append(fileVersion);
