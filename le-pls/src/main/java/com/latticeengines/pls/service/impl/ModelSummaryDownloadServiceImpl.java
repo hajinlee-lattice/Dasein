@@ -44,7 +44,7 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     private FeatureImportanceParser featureImportanceParser;
 
     public Future<Boolean> downloadModel(Tenant tenant) {
-        log.info("Downloading model for tenant " + tenant.getId());
+        log.debug("Downloading model for tenant " + tenant.getId());
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
         builder.modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
             .tenant(tenant) //
@@ -58,7 +58,7 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        log.info("ModelDownloader is ready to pick up models.");
+        log.debug("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();
         if (log.isDebugEnabled()) {
            log.debug(timeStampContainer.getTimeStamp().getSeconds());

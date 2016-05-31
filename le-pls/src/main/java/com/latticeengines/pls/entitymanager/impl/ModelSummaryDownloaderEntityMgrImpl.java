@@ -53,8 +53,7 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
     private TimeStampContainer timeStampContainer;
 
     public ListenableFuture<Boolean> downloadModel(Tenant tenant) {
-        log.info("Downloading model for tenant " + tenant.getId());
-        System.out.println("Downloading model for tenant " + tenant.getId());
+        log.debug("Downloading model for tenant " + tenant.getId());
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
         builder.modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .tenant(tenant) //
@@ -80,7 +79,7 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
 
     @Override
     public String downloadModel() {
-        log.info("ModelDownloader is ready to pick up models.");
+        log.debug("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();
         if (log.isDebugEnabled()) {
             log.debug(timeStampContainer.getTimeStamp().getSeconds());

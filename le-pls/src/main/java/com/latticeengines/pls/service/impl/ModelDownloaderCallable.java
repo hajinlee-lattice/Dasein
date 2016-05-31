@@ -30,7 +30,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
     private static final Log log = LogFactory.getLog(ModelDownloaderCallable.class);
-    
+
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -69,10 +69,16 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         };
 
+        if (!HdfsUtils.fileExists(yarnConfiguration, startingHdfsPoint)) {
+            log.debug(String.format("No models seem to have been created yet for tenant with id %s", tenant.getId()));
+            return false;
+        }
+
         List<String> files = new ArrayList<>();
+
         try {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
-            log.info(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(),
+            log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(),
                     tenant.getId()));
         } catch (FileNotFoundException e) {
             log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
@@ -101,13 +107,13 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     ModelSummary summary = parser.parse(file, contents);
                     String[] tokens = file.split("/");
                     summary.setTenant(tenant);
-                    
+
                     try {
                         setFeatureImportance(summary, file);
                     } catch (IOException e) {
                         log.warn("Errors fetching RF feature importance file. Skipping...", e);
                     }
-                    
+
                     try {
                         summary.setApplicationId("application_" + tokens[tokens.length - 3]);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -134,12 +140,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         return foundFilesToDownload;
     }
-    
+
     private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath) throws IOException {
         String fiPath = getRandomForestFiHdfsPath(modelSummaryHdfsPath);
         Map<String, Double> fiMap = featureImportanceParser.parse(fiPath, //
                 HdfsUtils.getHdfsFileContents(yarnConfiguration, fiPath));
-        
+
         List<Predictor> predictors = summary.getPredictors();
         Map<String, Predictor> map = new HashMap<>();
         for (Predictor predictor : predictors) {
@@ -147,13 +153,13 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
         for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
             Predictor p = map.get(entry.getKey());
-            
+
             if (p != null) {
                 p.setFeatureImportance(entry.getValue());
             }
         }
     }
-    
+
     private static String getRandomForestFiHdfsPath(String modelSummaryHdfsPath) {
         String[] tokens = modelSummaryHdfsPath.split("/");
         String[] rfModelTokens = new String[tokens.length-1];
@@ -161,7 +167,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         rfModelTokens[rfModelTokens.length-1] ="rf_model.txt";
         return StringUtils.join(rfModelTokens, "/");
     }
-    
+
     public static class Builder {
         private Tenant tenant;
         private String modelServiceHdfsBaseDir;
@@ -223,7 +229,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         public ModelSummaryParser getModelSummaryParser() {
             return modelSummaryParser;
         }
-        
+
         public FeatureImportanceParser getFeatureImportanceParser() {
             return featureImportanceParser;
         }
