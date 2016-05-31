@@ -49,7 +49,7 @@ public class LeadEnrichmentServiceImplTestNG extends PlsFunctionalTestNGBaseDepr
         Assert.assertEquals(attribute.getFieldName(), "TechIndicator_AddThis");
         Assert.assertEquals(attribute.getFieldType(), "NVARCHAR(50)");
         Assert.assertEquals(attribute.getDisplayName(), "Add This");
-        Assert.assertEquals(attribute.getDataSource(), "BuiltWithPivoted");
+        Assert.assertEquals(attribute.getDataSource(), "BuiltWith_Pivoted_Source");
         Assert.assertEquals(attribute.getDescription(), "Tech Indicator Add This");
         attribute = attributes.get(1);
         Assert.assertEquals(attribute.getFieldName(), "TechIndicator_RemoveThis");
