@@ -7,6 +7,7 @@ import java.util.*;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -104,10 +105,12 @@ public class NewMetadataResolver {
             }
         }
 
-        for (String ignoredField : fieldMappingDocument.getIgnoredFields()) {
-            Attribute attribute = getAttributeFromFieldName(ignoredField);
-            attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-            attributes.add(attribute);
+        if (fieldMappingDocument.getIgnoredFields() != null) {
+            for (String ignoredField : fieldMappingDocument.getIgnoredFields()) {
+                Attribute attribute = getAttributeFromFieldName(ignoredField);
+                attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+                attributes.add(attribute);
+            }
         }
     }
 
@@ -136,6 +139,13 @@ public class NewMetadataResolver {
 
     private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
         UserDefinedType fieldType;
+        Schema.Type avroType;
+
+        try {
+            avroType = Schema.Type.valueOf(attributeType);
+        } catch (Exception e) {
+            avroType = Schema.Type.STRING;
+        }
         switch (attributeType.toUpperCase()) {
             case "BOOLEAN":
                 fieldType = UserDefinedType.BOOLEAN;

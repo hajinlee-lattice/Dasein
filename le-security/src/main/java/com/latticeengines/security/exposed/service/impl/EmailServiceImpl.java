@@ -440,4 +440,24 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to send PLS scoring error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
+
+    @Override
+    public void sendPlsOnetimeSfdcAccessTokenEmail(User user, String accessToken) {
+        try {
+            log.info("Sending PLS one-time sfdc access token email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_ONETIME_SFDC_ACCESS_TOKEN);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{username}}", user.getEmail());
+            builder.replaceToken("{{accessToken}}", accessToken);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - SFDC Access Token", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending PLS one-time SFDC access token to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS one-time SFDC access token to " + user.getEmail(), e);
+        }
+    }
 }

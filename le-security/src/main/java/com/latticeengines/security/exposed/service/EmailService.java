@@ -48,4 +48,6 @@ public interface EmailService {
     void sendPlsScoreCompletionEmail(User user, String hostport);
 
     void sendPlsScoreErrorEmail(User user, String hostport);
+
+    void sendPlsOnetimeSfdcAccessTokenEmail(User user, String accessToken);
 }
