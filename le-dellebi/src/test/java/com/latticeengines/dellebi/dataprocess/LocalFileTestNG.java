@@ -40,7 +40,8 @@ public class LocalFileTestNG extends DellEbiTestNGBase {
         context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
         boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         Assert.assertEquals(result, true);
-        exportAndReportService.export(context);
+        result = exportAndReportService.export(context);
+        Assert.assertEquals(result, true);
 
     }
 }

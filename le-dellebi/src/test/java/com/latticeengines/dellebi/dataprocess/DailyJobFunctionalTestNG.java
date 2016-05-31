@@ -94,8 +94,8 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         if (isProcessed == false) {
             Assert.assertEquals(result, true);
-            exportAndReportService.export(context);
-
+            result = exportAndReportService.export(context);
+            Assert.assertEquals(result, true);
             Configuration conf = new Configuration();
             Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(context)), true);
             List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");

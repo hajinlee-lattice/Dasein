@@ -8,9 +8,13 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
@@ -70,7 +74,13 @@ public class ExportAndReportService {
     private DellEbiFlowService dellEbiFlowService;
 
     @Autowired
+    private JobService jobService;
+
+    @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
 
     @Autowired
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
@@ -110,24 +120,32 @@ public class ExportAndReportService {
         String optionalEnclosureValue = "\t";
 
         SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setDbCreds(creds)
-                .setSourceDir(sourceDir).setQueue(queue).setCustomer(customer).setNumMappers(numMappers)
+                .setSourceDir(sourceDir).setQueue(queue).setCustomer(customer).setNumMappers(numMappers).setSync(false)
                 .setExportColumns(targetColumns).addExtraOption(optionalEnclosurePara)
                 .addExtraOption(optionalEnclosureValue).build();
 
         try {
-            sqoopSyncJobService.exportData(exporter);
+            ApplicationId appId = sqoopSyncJobService.exportData(exporter);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
+
+            if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                jobService.killJob(appId);
+                throw new IllegalStateException("The final state of " + appId + " is not "
+                        + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+            }
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();
             log.error("Export files " + sourceDir + " to SQL server failed", e);
         }
 
-        dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Exported.getStatus());
-        dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
-
-        log.info("Finish export HDFS files to SQL server");
-
         if (errorMsg == null) {
+
+            dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Exported.getStatus());
+            dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
+
+            log.info("Finish exporting HDFS files to SQL server");
+
             try {
                 dellEbiFlowService.runStoredProcedure(context);
             } catch (Exception e) {
