@@ -92,7 +92,7 @@
             </build>
         </profile>
         <profile>
-            <id>propdata</id>
+            <id>test</id>
             <build>
                 <plugins>
                     <plugin>
@@ -100,6 +100,13 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
+
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>log4j.configuration</name>
+                                    <value>file:///${project.basedir}/src/main/resources/log4j.properties</value>
+                                </systemProperty>
+                            </systemProperties>
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}</extraClasspath>
                             </webAppConfig>
@@ -108,7 +115,7 @@
                             </httpConnector>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp-propdata/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/test/webapp-propdata</webAppSourceDirectory>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
                         </configuration>
                         <dependencies>
                             <dependency>

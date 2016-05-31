@@ -119,6 +119,6 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
-        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT '%s' FROM `%s`", column, tableName), String.class);
+        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT `%s` FROM `%s`", column, tableName), String.class);
     }
 }
