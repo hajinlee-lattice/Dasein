@@ -35,9 +35,8 @@
 							<label for="fieldType_{{$index}}">{{ fieldMapping.userField }}</label>
 						</td>
 						<td class="four columns field_mapping_inputs">
-                            <select class="form-control" ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? mappingOptions[0] : null" ng-model="selectedOption" ng-change="mappingChanged(fieldMapping, selectedOption)"
+                            <select class="form-control" ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? mappingOptions[1] : mappingOptions[0]" ng-model="selectedOption" ng-change="mappingChanged(fieldMapping, selectedOption)"
 									ng-options="mappingOption as mappingOption.name for mappingOption in mappingOptions">
-								<option value="" selected>...</option>
                             </select>
 						</td>
 						<td class="four columns field_mapping_inputs">
@@ -49,7 +48,7 @@
 					          ng-model="fieldMapping.mappedField"
 					          ng-value="fieldMapping.mappedField"
 					          ng-hide="selectedOption.id == 2"
-					          ng-show="fieldMapping.mappedField || selectedOption.id == 1"
+					          ng-show="fieldMapping.mappedField || selectedOption.id == 0"
 					          ng-disabled="fieldMapping.mappedToLatticeField"
 					          placeholder="" />
 						</td>
