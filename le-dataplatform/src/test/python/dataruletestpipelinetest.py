@@ -12,7 +12,7 @@ class DataRuleTestPipelineTest(DataRuleTestBase):
         from launcher import Launcher
 
         launcher = Launcher("model-datarule-test.json")
-        launcher.execute(True)
+        launcher.execute(False)
 
         self.assertRuleOutputCount(2)
         self.assertRuleOutput("./results/datarules/TestColumnRule_Column.avro", ["AColumn", "CColumn"])

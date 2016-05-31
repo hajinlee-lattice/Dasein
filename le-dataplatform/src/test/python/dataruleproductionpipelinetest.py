@@ -12,7 +12,7 @@ class DataRuleProductionPipelineTest(DataRuleTestBase):
         from launcher import Launcher
 
         launcher = Launcher("model-datarule.json")
-        launcher.execute(True)
+        launcher.execute(False)
 
         self.assertRuleOutputCount(1)
         self.assertRuleOutput("./results/datarules/AnonymousLeadRule_Row.avro", ["34ds"])
