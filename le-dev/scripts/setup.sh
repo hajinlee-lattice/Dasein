@@ -63,6 +63,7 @@ done
 wait
 
 echo "Update propdata DB"
+pushd $WSHOME/le-propdata; mvn -DskipTests clean install; popd;
 bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
 processErrors
 
