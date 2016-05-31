@@ -85,6 +85,31 @@ Create Model: Custom Fields Page
 ================================================================== */
 section.container.custom-fields {
     margin-top: 3em;
+    hgroup {
+        position: relative;
+        margin-bottom: 49px;
+        padding-top: 19px;
+        margin-top: 14px;
+        &:before,
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+        }
+        &:before {
+            background: url("../images/bkg-field-mapping-import.png") top left no-repeat;
+            left: 0;
+            width: 247px;
+            height: 148px;
+        }
+        &:after {    
+            background: url("../images/bkg-field-mapping-lattice.png") top right no-repeat;
+            right: 0;
+            top: 8px;
+            width: 271px;
+            height: 121px;
+        }
+    }
     h2, h3 {
         text-align: center;
     }
@@ -97,7 +122,6 @@ section.container.custom-fields {
         font-size: 20px;
         font-weight: normal;
         text-transform: none;
-        margin-bottom: 40px;
     }
     thead {
         border-bottom: #333 solid 1px;
@@ -198,8 +222,15 @@ section.container.custom-fields {
         padding: 20px;
         height: 44em;
     }
+    tbody {
+        color: #3488c6;
+    }
     tr td:nth-child(2) {
         text-align: right;
+    }
+    tbody tr:hover, tbody tr:nth-child(odd):hover {
+        cursor: pointer;
+        background: #f1f1f1;
     }
 }
 /*

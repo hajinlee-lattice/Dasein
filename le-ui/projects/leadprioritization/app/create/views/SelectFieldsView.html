@@ -5,11 +5,9 @@
             <h4 class="modal-title">{{ResourceUtility.getString('MAP_FIELD_TITLE')}}</h4>
         </div>
         <div class="modal-body">
-
             <div class="summary gray-summary-list">
                 <p>Select which field {{fieldName}} should map to.</p>
             </div>
-
             <div class="row">
                 <table class="no-stripes">
                     <thead>
@@ -29,7 +27,6 @@
                     </tbody>
                 </table>
             </div>
-
             <div class="row" ng-init="pagesize = 10; current = 1" ng-show="max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls current="current" max="max = latticeSchemaFields.length / pagesize">
