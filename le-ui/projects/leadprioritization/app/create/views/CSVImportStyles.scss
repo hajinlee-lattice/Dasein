@@ -12,15 +12,79 @@ section.container.setup-import {
             color: #fff;
         }
     }
+    
     textarea {
         overflow: hidden;
+    }
+
+    div.toggle-check {
+        vertical-align: top;
+        font-size: 1em;
+        margin-right: .8em;
+        margin-top: 0.2em;
+        
+        div {
+            
+        }
+        label {
+
+        }
+        input {
+            margin-top: 0.5em;
+            margin-right: 0.5em;
+            margin-left: 1.5em;
+        }
+    }
+
+    div.progress {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        border-radius: 0;
+        box-shadow: 1px 0 1px 0px #aaa;
+        transition: all 500ms linear;
+
+        &.processing {
+            background: #e2e2e2;
+        }
+        &.compressing {
+            transition: all 1000ms linear;
+            background: #dfdfdf;
+        }
+        &.uploading {
+            background: #85d7ff;
+        }
+        &.uploading.finished {
+            background: #a2e264;
+            width: 100%;
+        }
+    }
+
+    i {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        padding: 0.6em;
+
+        &.fa-close {
+            color: #666;
+        }
+
+        &.fa-check {
+            color: darkolivegreen;
+        }
+        &.fa-save {
+            pointer-events: none;
+        }
     }
 }
 /*
 Create Model: Custom Fields Page
 ================================================================== */
 section.container.custom-fields {
-    margin-top: 80px;
+    margin-top: 3em;
     h2, h3 {
         text-align: center;
     }
@@ -70,7 +134,7 @@ section.container.custom-fields {
             }
         }
         td {
-            padding: 0.3em 1.4em .3em 1em;
+            padding: 0.3em 0em .3em 1em;
             margin: 0;
             vertical-align: middle;
             display: flex;
@@ -93,13 +157,15 @@ section.container.custom-fields {
                 border-radius: 0;
                 -moz-border-radius: 0;
                 -webkit-border-radius: 0;
+                /*
                 &:nth-child(1) {
-                    /*width:40%;*/
-                    /*margin-right: 3%;*/
+                    width:40%;
+                    margin-right: 3%;
                 }
                 &:nth-child(2) {
-                    /*width: 56%;*/
+                    width: 56%;
                 }
+                */
             }
             input {
                 display: inline-block;
@@ -130,6 +196,7 @@ section.container.custom-fields {
     }
     .modal-body {
         padding: 20px;
+        height: 44em;
     }
     tr td:nth-child(2) {
         text-align: right;

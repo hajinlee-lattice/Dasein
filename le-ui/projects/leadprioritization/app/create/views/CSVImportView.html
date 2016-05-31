@@ -6,30 +6,48 @@
       <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
         <label for="loadfile">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}<span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
         <div class="fileUpload button form-control">
-            <div 
-              id="csvFileProgressBar" 
-              ng-if="vm.uploading || vm.uploaded" 
-              style="background:{{vm.percent > 0 ? '#a2e264' : vm.uploaded ? '#8ed162' : '#f2f2f2'}};width:{{vm.uploaded || vm.percent == 0 ? '100' : vm.percent}}%"></div>
-            <span>{{vm.csvFileDisplayName}}</span>
+            <!--<div class="progress processing" ng-show="vm.processing" style="width:{{vm.process_percent}}%"></div>-->
+            <div class="progress processing" ng-show="vm_uploader.processing || vm_uploader.compressing" style="width:{{vm_uploader.process_percent + vm_uploader.compress_percent}}%"></div>
+            <div class="progress uploading {{vm_uploader.uploaded ? 'finished' : ''}}" ng-show="vm_uploader.uploading || vm_uploader.uploaded" style="width:{{vm_uploader.uploaded ? '100' : vm_uploader.upload_percent}}%"></div>
+            <span>{{vm_uploader.csvFileDisplayName}}</span>
             <input
+              required
               id="uploadBtn"
               name="csvFileName"
-              ng-model="vm.csvFileName"
-              required
+              ng-model="vm_uploader.csvFileName"
               type="file"
               accept=".csv"
               class="upload"
-              ng-hide="vm.uploading"
-              csv-uploader="vm.csvFile" />
-            <i class="fa fa-save" style="pointer-events:none;" ng-if="!vm.uploading && !vm.uploaded"></i>
-            <i class="fa fa-spinner fa-spin" ng-if="vm.uploading && vm.percent == 0"></i>
-            <i class="fa fa-close" ng-click="vm.clickCancel()" ng-if="vm.uploading && vm.percent > 0"></i>
-            <i class="fa fa-check" ng-click="vm.clickCancel()" ng-if="vm.uploaded"></i>
+              ng-hide="vm_uploader.uploading"
+              ng-change="vm_uploader.cancel(); vm.clickCancel()"
+              csv-uploader="vm_uploader.csvFile" />
+            <i class="fa fa-save" ng-if="!vm_uploader.compressing && !vm_uploader.processing && !vm_uploader.uploading && !vm_uploader.uploaded"></i>
+            <i class="fa fa-spinner fa-pulse" ng-if="(vm_uploader.compressing || vm_uploader.processing || vm_uploader.uploading) && !vm_uploader.uploaded && vm_uploader.upload_percent == 0"></i>
+            <i class="fa fa-close" ng-click="vm_uploader.cancel(); vm.clickCancel();" ng-if="vm_uploader.uploading && vm_uploader.upload_percent > 0"></i>
+            <i class="fa fa-check" ng-click="vm_uploader.cancel(); vm.clickCancel();" ng-if="vm_uploader.uploaded"></i>
         </div>
         <p class="help-block">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
-        <p id="csvFileUploadMessage">{{vm.message}}&nbsp;<span class="pull-right">{{vm.percentage ? vm.percentage + '%' : ''}}</span> </p>
+        <p id="csvFileUploadMessage">{{vm_uploader.message}}&nbsp;<span class="pull-right">{{vm_uploader.percentage ? vm_uploader.percentage + '%' : ''}}</span> </p>
       </div>
-
+      
+      <div class="form-group">
+        <label>Model Type</label>
+        <div class="toggle-check">
+          <div>
+            <label>
+              <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required />
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}} <span ng-if="vm.accountLeadCheck == 'SalesforceAccount' && vm.showTypeDefault">(default)</span>
+            </label>
+          </div>
+          <div>
+            <label>
+              <input type="radio" value="SalesforceLead" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required />
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}} <span ng-if="vm.accountLeadCheck == 'SalesforceLead' && vm.showTypeDefault">(default)</span>
+            </label>
+          </div>
+        </div>          
+      </div>
+      
       <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
         <label>{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELNAME')}}</label>
         <input 
@@ -37,6 +55,7 @@
           class="form-control" 
           id="modelDisplayName"
           name="modelDisplayName"
+          ng-change="vm.changeName()"
           ng-model="vm.modelDisplayName"
           ng-value="vm.modelDisplayName"
           ng-minlength="2"
@@ -53,21 +72,10 @@
           cols="30"
           name="modelDescription" 
           ng-model="vm.modelDescription"
-          ng-keyup="vm.expandTextarea($event)"
+          ng-keyup="vm.keyupTextArea($event)"
           id="modelDescription" 
           class="form-control" />
       </div>
-      <!--
-      <div class="form-group">
-        <label>Model Type</label>
-        <div class="toggle-check">
-          <input type="radio" name="account-lead-check" ng-model="vm.accountLeadCheck" id="account-check" class="" />
-          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}} (default)</label><br>
-          <input type="radio" name="account-lead-check" ng-model="vm.accountLeadCheck" id="lead-check" class="" />
-          <label for="account-lead-check">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}}</label>
-        </div>          
-      </div>
-      -->
       <div class="row form-actions">
         <div class="pull-left">
             <button 
@@ -80,8 +88,8 @@
             <button 
                 type="button" 
                 class="button orange-button block-button"
-                ng-disabled="uploadForm.$invalid || (vm.uploading && !vm.uploaded)"
-                ng-click="vm.clickNext()">
+                ng-disabled="uploadForm.$invalid || (!vm_uploader.uploaded)"
+                ng-click="vm.clickNext(vm_uploader.choosenFileName)">
               {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
             </button>
         </div>

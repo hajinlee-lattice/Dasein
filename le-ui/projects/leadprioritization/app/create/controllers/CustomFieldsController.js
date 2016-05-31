@@ -11,7 +11,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     $scope.fieldNameToFieldMappings = {};
     $scope.fieldNameToFieldTypes = {};
     $scope.mappingOptions = [{ name: "Map to Lattice Data Cloud", id: 0 },
-            { name: "Custom Field", id: 1 },
+            { name: "Custom Field Name", id: 1 },
             { name: "Ignore this field", id: 2}];
     $scope.ignoredFields = [];
 
@@ -31,6 +31,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     $scope.mappingChanged = function(fieldMapping, selectedOption) {
         if (selectedOption == null) { // user mapped a field and unmapped it for some reason
             $scope.fieldNameToFieldMappings[fieldMapping.userField] = null;
+
         } else if (selectedOption == $scope.mappingOptions[0]) {
             showLatticeFieldsSelector(fieldMapping);
         } else if (selectedOption == $scope.mappingOptions[1]) {
@@ -39,6 +40,10 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
             newCustomFieldMapping.mappedField = fieldMapping.userField;
             newCustomFieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
             newCustomFieldMapping.mappedToLatticeField = false;
+
+            if (!fieldMapping.mappedField) {
+                fieldMapping.mappedField = fieldMapping.userField;
+            }
 
             $scope.fieldNameToFieldMappings[fieldMapping.userField] = newCustomFieldMapping;
         } else if (selectedOption == $scope.mappingOptions[2]) {
@@ -97,6 +102,8 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     }
 
     function showLatticeFieldsSelector (fieldSelected) {
+        csvImportStore.CurrentFieldMapping = fieldSelected;
+
         SelectFieldsModal.show($scope.schema, fieldSelected);
     };
 });

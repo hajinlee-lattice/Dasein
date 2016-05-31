@@ -805,27 +805,6 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    #csvFileProgressBar {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-    }
- 
-    i {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 2.1em;
-      padding: 0.6em;
-    }
-    i.fa.fa-close {
-      color: #666;
-    } 
-    i.fa.fa-check {
-      color: darkolivegreen;
-    } 
   }
   div {
       position: relative;

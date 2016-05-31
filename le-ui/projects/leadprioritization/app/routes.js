@@ -117,10 +117,11 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        FieldDocument: function($q, $stateParams, csvImportService) {
+                        FieldDocument: function($q, $stateParams, csvImportService, csvImportStore) {
                             var deferred = $q.defer();
 
                             csvImportService.GetFieldDocument($stateParams.csvFileName).then(function(result) {
+                                csvImportStore.SetFieldDocument($stateParams.csvFileName, result.Result);
                                 deferred.resolve(result.Result);
                             });
 

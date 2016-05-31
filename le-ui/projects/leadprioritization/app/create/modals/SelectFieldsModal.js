@@ -5,7 +5,7 @@ angular.module('mainApp.setup.modals.SelectFieldsModal', [
 ])
 .service('SelectFieldsModal', function($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     this.show = function(schema, fieldMapping) {
-
+console.log(fieldMapping);
         $http.get('app/create/views/SelectFieldsView.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.schema = schema;
@@ -29,16 +29,24 @@ angular.module('mainApp.setup.modals.SelectFieldsModal', [
         });
     };
 })
-.controller('SelectFieldsController', function($scope, $rootScope, $state, ResourceUtility, NavUtility, csvImportService) {
+.controller('SelectFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore) {
     $scope.ResourceUtility = ResourceUtility;
-
     $scope.latticeSchemaFields;
+    $scope.CurrentFieldMapping = csvImportStore.CurrentFieldMapping;
     csvImportService.GetSchemaToLatticeFields().then(function(result) {
         $scope.latticeSchemaFields = result[$scope.schema];
+    console.log('hhh', csvImportStore.CurrentFieldMapping);
     });
-
     $scope.mapLatticeField = function(latticeSchemaField) {
-        $rootScope.$broadcast(NavUtility.MAP_LATTICE_SCHEMA_FIELD_EVENT, { 'userFieldName': $scope.fieldName, 'latticeSchemaField': latticeSchemaField} );
+        console.log(latticeSchemaField);
+        $rootScope.$broadcast(NavUtility.MAP_LATTICE_SCHEMA_FIELD_EVENT, { 
+            'userFieldName': $scope.fieldName, 
+            'latticeSchemaField': latticeSchemaField
+        });
+
+        $scope.CurrentFieldMapping.mappedField = latticeSchemaField.name;
+        $scope.CurrentFieldMapping.fieldType = latticeSchemaField.fieldType;
+        $scope.CurrentFieldMapping.mappedToLatticeField = true;
 
         $("#modalContainer").modal('hide');
     }

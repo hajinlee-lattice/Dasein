@@ -7,7 +7,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.modals.ServiceErrorModule',
+    'mainApp.core.modules.ServiceErrorModule',
     'mainApp.core.controllers.MainViewController',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',

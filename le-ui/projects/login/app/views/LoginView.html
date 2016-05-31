@@ -44,7 +44,12 @@
                                 class="form-control {{passwordInvalid ? 'error' : ''}}">
                     </div>
                     <div class="form-actions">
-                        <button id="loginButton" type="submit" data-ng-click="loginClick()" class="button orange-button">
+                        <button 
+                                id="loginButton" 
+                                type="submit" 
+                                data-ng-click="loginClick()" 
+                                class="button orange-button"
+                                ng-disabled="loading">
                             {{ResourceUtility.getString('LOGIN_LABEL')}}
                         </button>
                         <i ng-show="loading" class="fa fa-spinner fa-pulse fa-fw"></i>

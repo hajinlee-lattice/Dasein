@@ -22,10 +22,9 @@
 				<thead>
 					<tr>
 						<th class="three columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDNAME')}}</th>
-						<th class="three columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
-						<th class="one columns">&nbsp</th>
-						<th class="three columns">&nbsp</th>
-						<th class="two columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						<th class="four columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<th class="four columns">&nbsp</th>
+						<th class="one columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -33,26 +32,34 @@
 						<td class="three columns field_mapping_label">
 							<label for="fieldType_{{$index}}">{{ fieldMapping.userField }}</label>
 						</td>
-						<td class="three columns field_mapping_inputs">
+						<td class="four columns field_mapping_inputs">
                             <select class="form-control" ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? mappingOptions[0] : null" ng-model="selectedOption" ng-change="mappingChanged(fieldMapping, selectedOption)"
 									ng-options="mappingOption as mappingOption.name for mappingOption in mappingOptions">
 								<option value="" selected>...</option>
                             </select>
 						</td>
-						<td class="one columns field_mapping_inputs">
-                            =>
-						</td>
-						<td class="three columns field_mapping_inputs">
+						<td class="four columns field_mapping_inputs">
+
 					        <input 
 					          type="text" 
 					          class="form-control" 
 					          name="fieldMappingInput"
-					          ng-model="vm.fieldMappingInput"
-					          ng-value="vm.fieldMappingInput"
+					          ng-model="fieldMapping.mappedField"
+					          ng-value="fieldMapping.mappedField"
+					          ng-hide="selectedOption.id == 2"
+					          ng-show="fieldMapping.mappedField || selectedOption.id == 1"
+					          ng-disabled="fieldMapping.mappedToLatticeField"
 					          placeholder="" />
 						</td>
-						<td class="two columns field_mapping_type">
-							<select class="custom-select" name="columnType_{{$index}}" ng-model="fieldMapping.fieldType" ng-init="fieldMapping.fieldType=fieldMapping.fieldType" value="{{fieldMapping.fieldType}}">
+						<td class="one columns field_mapping_type">
+							<select 
+									class="custom-select" 
+									name="columnType_{{$index}}" 
+									ng-model="fieldMapping.fieldType" 
+									ng-init="fieldMapping.fieldType=fieldMapping.fieldType" 
+									ng-disabled="fieldMapping.mappedToLatticeField"
+									ng-hide="selectedOption.id == 2"
+									value="{{fieldMapping.fieldType}}">
 								<option value="TEXT" selected>Text</option>
 								<option value="NUMBER">Number</option>
 								<option value="BOOLEAN">Boolean</option>

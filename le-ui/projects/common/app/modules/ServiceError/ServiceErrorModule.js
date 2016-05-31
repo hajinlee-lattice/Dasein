@@ -1,5 +1,5 @@
 angular
-.module('mainApp.core.modals.ServiceErrorModule', [
+.module('mainApp.core.modules.ServiceErrorModule', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .factory('ServiceErrorInterceptor', function ($q, $injector) {
