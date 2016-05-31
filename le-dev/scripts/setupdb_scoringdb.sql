@@ -347,7 +347,7 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 (SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY, MODEL_ID);
 
-LOAD DATA INFILE 'WSHOME/le-scoring/src/test/resources/com/latticeengines/scoring/mysql/ScoringDeploymentTestNG_Base_LeadsTable.csv'
+LOAD DATA INFILE 'WSHOME/le-scoring/src/test/resources/com/latticeengines/scoring/mysql/ScoringDeploymentTestNG_Base_LeadsTable.txt'
 INTO TABLE ScoringDeploymentTestNG_Base_LeadsTable
 FIELDS TERMINATED BY '\t' ENCLOSED BY '$'
 LINES TERMINATED BY '\n'
