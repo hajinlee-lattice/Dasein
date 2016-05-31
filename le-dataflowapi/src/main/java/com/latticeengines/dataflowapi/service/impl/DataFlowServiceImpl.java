@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
@@ -27,6 +28,15 @@ public class DataFlowServiceImpl implements DataFlowService {
 
     @Autowired
     private JobService jobService;
+
+    @Value("${dataflowapi.engine:TEZ}")
+    private String cascadingEngine;
+
+    @Value("${dataflowapi.flink.vcores:2}")
+    private Integer flinkVcores;
+
+    @Value("${dataflowapi.flink.mem:4096}")
+    private Integer flinkMemory;
 
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
@@ -52,8 +62,13 @@ public class DataFlowServiceImpl implements DataFlowService {
 
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
+        if ("FLINK".equalsIgnoreCase(cascadingEngine)) {
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkMemory));
+        } else {
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+            containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
+        }
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);

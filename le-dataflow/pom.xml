@@ -184,6 +184,16 @@
         </dependency>
         <dependency>
             <groupId>cascading</groupId>
+            <artifactId>cascading-expression</artifactId>
+            <version>${cascading.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cascading</groupId>
+            <artifactId>cascading-hadoop2-io</artifactId>
+            <version>${cascading.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cascading</groupId>
             <artifactId>cascading-local</artifactId>
             <version>${cascading.version}</version>
             <exclusions>
@@ -275,6 +285,29 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${tez.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.data-artisans</groupId>
+            <artifactId>cascading-flink</artifactId>
+            <version>${cascading.flink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cascading</groupId>
+                    <artifactId>cascading-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cascading</groupId>
+                    <artifactId>cascading-hadoop2-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cascading</groupId>
+                    <artifactId>cascading-expression</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-hadoop2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

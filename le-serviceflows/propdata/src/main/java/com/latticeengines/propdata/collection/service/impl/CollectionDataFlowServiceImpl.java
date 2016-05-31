@@ -140,12 +140,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
             String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
-        if ("mr".equalsIgnoreCase(cascadingPlatform)) {
-            ctx.setProperty(DataFlowProperty.ENGINE, "MR");
-        } else {
-            ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
-        }
-
+        ctx.setProperty(DataFlowProperty.ENGINE, cascadingPlatform.toUpperCase());
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
         ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);

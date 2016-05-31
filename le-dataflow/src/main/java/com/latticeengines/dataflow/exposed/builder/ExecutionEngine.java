@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
+import com.latticeengines.dataflow.exposed.builder.engine.FlinkExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.engine.MapReduceExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.engine.TezExecutionEngine;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -21,6 +22,7 @@ public abstract class ExecutionEngine {
     static {
         new MapReduceExecutionEngine();
         new TezExecutionEngine();
+        new FlinkExecutionEngine();
     }
     
     protected static void register(ExecutionEngine engine) {

@@ -146,6 +146,9 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             String srcDir = workflowDirInHdfs(progress);
             HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
             HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
+            if (!HdfsUtils.fileExists(yarnConfiguration, snapshotDir + "/_SUCCESS")) {
+                HdfsUtils.writeToFile(yarnConfiguration, snapshotDir + "/_SUCCESS", "");
+            }
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;
