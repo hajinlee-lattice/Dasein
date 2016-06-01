@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
@@ -15,7 +16,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroOutputFormat;
 import org.apache.avro.mapred.AvroWrapper;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -81,8 +81,8 @@ public class LedpCSVToAvroImportMapper extends
 
         outputPath = AvroOutputFormat.getOutputPath(new JobConf(context.getConfiguration()));
         Log.info("Path is:" + outputPath);
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), CSVFormat.RFC4180.withHeader("LineNumber",
-                "ErrorMessage").withDelimiter(','));
+        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber",
+                "ErrorMessage"));
         CSVDBRecordReader.csvFilePrinter = csvFilePrinter;
         CSVDBRecordReader.ignoreRecordsCounter = context.getCounter(RecordImportCounter.IGNORED_RECORDS);
         CSVDBRecordReader.rowErrorCounter = context.getCounter(RecordImportCounter.ROW_ERROR);

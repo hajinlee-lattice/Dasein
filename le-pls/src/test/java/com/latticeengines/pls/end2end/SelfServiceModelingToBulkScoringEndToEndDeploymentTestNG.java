@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -144,7 +145,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         assertTrue(results.length() > 0);
         CSVParser parser = null;
         InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(response.getBody()));
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+        CSVFormat format = LECSVFormat.format;
         try {
             parser = new CSVParser(reader, format);
             Set<String> csvHeaders = parser.getHeaderMap().keySet();

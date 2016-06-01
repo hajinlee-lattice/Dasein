@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -66,7 +66,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 headers.add(displayName);
             }
         }
-        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
+        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), LECSVFormat.format.withHeader(
                 headers.toArray(new String[] {})));
         return this;
     }

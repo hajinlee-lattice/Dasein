@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -112,7 +113,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             try (InputStream is = fs.open(new Path(csvPath))) {
 
                 try (InputStreamReader reader = new InputStreamReader(is)) {
-                    CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+                    CSVFormat format = LECSVFormat.format;
                     try (CSVParser parser = new CSVParser(reader, format)) {
                         assertEquals(parser.getRecords().size(), num);
                         for (CSVRecord record : parser.getRecords()) {

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -430,7 +431,7 @@ public class ScoreCorrectnessService {
             String pathToModelInputCsv, Map<String, Double> expectedScores, List<Field> fields) throws IOException {
         Map<String, Map<String, Object>> records = new HashMap<>();
         Set<String> ids = expectedScores.keySet();
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+        CSVFormat format = LECSVFormat.format;
         ClassPathResource csvResource = new ClassPathResource(pathToModelInputCsv);
         try (CSVParser parser = new CSVParser(new InputStreamReader(new BOMInputStream(csvResource.getInputStream())),
                 format)) {
@@ -486,7 +487,7 @@ public class ScoreCorrectnessService {
     private Map<String, Map<String, Object>> getExpectedRecords(ScoreCorrectnessArtifacts artifacts)
             throws IOException {
         Map<String, Map<String, Object>> records = new HashMap<>();
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+        CSVFormat format = LECSVFormat.format;
         try (CSVParser parser = CSVParser.parse(artifacts.getExpectedRecords(), format)) {
             String idFieldValue = null;
             for (CSVRecord csvRecord : parser) {

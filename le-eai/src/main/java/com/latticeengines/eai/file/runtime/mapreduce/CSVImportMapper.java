@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
@@ -85,8 +86,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
 
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), CSVFormat.RFC4180.withHeader("LineNumber",
-                "ErrorMessage").withDelimiter(','));
+        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber",
+                "ErrorMessage"));
 
         errorLineNumber = conf.getInt("errorLineNumber", 1000);
 
@@ -112,7 +113,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(csvFileName))) {
-            CSVFormat format = CSVFormat.RFC4180.withHeader();
+            CSVFormat format = LECSVFormat.format;
             try (CSVParser parser = new CSVParser(reader, format)) {
                 Set<String> headers = parser.getHeaderMap().keySet();
                 DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();

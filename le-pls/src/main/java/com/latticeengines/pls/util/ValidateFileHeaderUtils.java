@@ -8,6 +8,7 @@ import java.util.*;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -38,12 +39,15 @@ public class ValidateFileHeaderUtils {
             InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                     ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
-            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+            CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             closeableResourcePool.addCloseable(parser);
             headerFields = parser.getHeaderMap().keySet();
+
             return headerFields;
 
+        } catch (IllegalArgumentException e) {
+            throw new LedpException(LedpCode.LEDP_18109, new String[] {e.getMessage()});
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -56,7 +60,7 @@ public class ValidateFileHeaderUtils {
             InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                     ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
-            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+            CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             List<CSVRecord> csvRecords = parser.getRecords();
             int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
