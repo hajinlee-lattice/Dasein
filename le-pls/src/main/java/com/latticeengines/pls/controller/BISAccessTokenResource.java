@@ -55,10 +55,9 @@ public class BISAccessTokenResource {
             log.info(String.format("The user is: %s", user.toString()));
             log.info(response);
 
-            emailService.sendPlsOnetimeSfdcAccessTokenEmail(user, response.get("TenantPassword"));
-            // Map<String, String> responseMap = new ObjectMapper().readValue(response.getResult().toString(), HashMap.class);
+            emailService.sendPlsOnetimeSfdcAccessTokenEmail(user, tenantId, response.get("TenantPassword"));
         } catch (Exception e) {
-            log.warn(String.format("request failed: %s", "lasd"), e);
+            log.warn(String.format("Generate bis access token failed for user: %s and tenant: %s", username, tenantId), e);
             return ResponseDocument.failedResponse(e);
         }
         return ResponseDocument.successResponse(true);

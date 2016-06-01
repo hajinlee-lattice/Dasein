@@ -4,7 +4,7 @@ angular.module('pd.jobs', [
     'pd.jobs.import.ready',
     'pd.jobs.status',
     'pd.navigation.pagination',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;

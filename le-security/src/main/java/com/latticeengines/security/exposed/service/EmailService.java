@@ -49,5 +49,5 @@ public interface EmailService {
 
     void sendPlsScoreErrorEmail(User user, String hostport);
 
-    void sendPlsOnetimeSfdcAccessTokenEmail(User user, String accessToken);
+    void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
 }

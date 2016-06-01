@@ -442,7 +442,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsOnetimeSfdcAccessTokenEmail(User user, String accessToken) {
+    public void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken) {
         try {
             log.info("Sending PLS one-time sfdc access token email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -450,14 +450,14 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{username}}", user.getEmail());
+            builder.replaceToken("{{username}}", tenantId);
             builder.replaceToken("{{accessToken}}", accessToken);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Lead Prioritization - SFDC Access Token", mp, Collections.singleton(user.getEmail()));
-            log.info("Sending PLS one-time SFDC access token to " + user.getEmail() + " succeeded.");
+            log.info(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s succeeded", user.getEmail(), tenantId));
         } catch (Exception e) {
-            log.error("Failed to send PLS one-time SFDC access token to " + user.getEmail(), e);
+            log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed", user.getEmail(), tenantId));
         }
     }
 }

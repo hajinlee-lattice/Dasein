@@ -478,6 +478,24 @@ angular
                 }
             }
         })
+        .state('home.sfdcsettings', {
+            url: '/sfdcsettings',
+            views: {
+                "summary@": {
+                    resolve: {
+                        ResourceString: function() {
+                            return 'SFDC_ACCESS_TOKEN';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: 'sfdcCredentialsController',
+                    templateUrl: 'app/sfdc/views/SFDCCredentialsView.html'
+                }
+            }
+        })
         .state('home.apiconsole', {
             url: '/apiconsole',
             views: {
