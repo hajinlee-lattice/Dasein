@@ -35,6 +35,9 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.displayName = args.displayName;
     });
 
+    
+    checkBrowserWidth();
+    $(window).resize(checkBrowserWidth);
     $scope.handleSidebarToggle = function ($event) {
         $("body").toggleClass("open-nav");
     }
@@ -50,5 +53,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.showProfileNav = !$scope.showProfileNav;
         $event.stopPropagation();
     };
+
+    function checkBrowserWidth(){
+        if (window.matchMedia("(min-width: 1200px)").matches) {
+            $("body").addClass("open-nav");
+        } else {
+            $("body").removeClass("open-nav");
+        }
+    }
 
 });
