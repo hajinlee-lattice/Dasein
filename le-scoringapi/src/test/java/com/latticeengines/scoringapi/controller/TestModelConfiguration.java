@@ -3,19 +3,6 @@ package com.latticeengines.scoringapi.controller;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 
 public class TestModelConfiguration {
-    // private String testModelFolderName = "3MulesoftAllRows20160314_112802";
-    // private String modelId = "ms__" + testModelFolderName + "_";
-    // private String modelName = testModelFolderName;
-    // private String localModelPath = "com/latticeengines/scoringapi/model/" +
-    // testModelFolderName + "/";
-    // private String applicationId = "application_1457046993615_3823";
-    // private String parsedApplicationId = "1457046993615_3823";
-    // private String modelVersion = "1ba99b36-c222-4f93-ab8a-6dcc11ce45e9";
-    // private String eventTable = testModelFolderName;
-    // private String sourceInterpretation = "SalesforceLead";
-    // private String modelSummaryJsonLocalpath = localModelPath +
-    // ModelRetrieverImpl.MODEL_JSON;
-
     private String testModelFolderName;
     private String modelId;
     private String modelName;
@@ -31,8 +18,6 @@ public class TestModelConfiguration {
         this.testModelFolderName = testModelFolderName;
         this.modelId = "ms__" + testModelFolderName + "_";
         this.modelName = testModelFolderName;
-        // this.localModelPath = "com/latticeengines/scoringapi/model/" +
-        // testModelFolderName + "/";
         this.applicationId = applicationId;
         this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
         this.modelVersion = modelVersion;
