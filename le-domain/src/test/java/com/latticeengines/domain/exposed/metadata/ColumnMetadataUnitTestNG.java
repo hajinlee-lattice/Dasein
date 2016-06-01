@@ -24,10 +24,11 @@ public class ColumnMetadataUnitTestNG {
         cm.setTagList(Collections.singletonList(Tag.EXTERNAL));
         cm.setFundamentalType(FundamentalType.BOOLEAN);
         cm.setStatisticalType(StatisticalType.ORDINAL);
+        cm.setCategory(Category.WEBSITE_PROFILE);
 
         String serializedString = JsonUtils.serialize(cm);
 
-        ExternalColumn deserializedColumn = JsonUtils.deserialize(serializedString, ExternalColumn.class);
+        ColumnMetadata deserializedColumn = JsonUtils.deserialize(serializedString, ColumnMetadata.class);
         Assert.assertTrue(deserializedColumn.getApprovedUsageList().contains(ApprovedUsage.MODEL));
         Assert.assertTrue(deserializedColumn.getApprovedUsageList().contains(ApprovedUsage.NONE));
         Assert.assertEquals(deserializedColumn.getStatisticalType(), StatisticalType.ORDINAL);
