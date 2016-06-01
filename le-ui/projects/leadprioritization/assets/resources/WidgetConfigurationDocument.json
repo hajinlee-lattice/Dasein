@@ -15,6 +15,7 @@
               "ScoreProperty": "RocScore",
               "NameProperty": "DisplayName",
               "StatusProperty": "Status",
+              "TypeProperty": "SourceSchemaInterpretation",
               "ExternalAttributesProperty": "ExternalAttributes",
               "InternalAttributesProperty": "InternalAttributes",
               "CreatedDateProperty": "ConstructionTime",

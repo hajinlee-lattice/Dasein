@@ -28,6 +28,16 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     } else {
         $scope.status = ResourceUtility.getString("MODEL_DETAILS_INACTIVE_LABEL");
     }
+
+
+    $scope.modelType = modelDetails[widgetConfig.TypeProperty];
+    console.log(data);
+    if ($scope.modelType == 'SalesforceLead') {
+        $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_LEADS_TITLE");
+    } else if ($scope.modelType == 'SalesforceAccount') {
+        $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_ACCOUNTS_TITLE");
+    }
+
     
     $scope.score = modelDetails[widgetConfig.ScoreProperty];
     if ($scope.score != null && $scope.score < 1) {

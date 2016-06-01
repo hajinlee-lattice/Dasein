@@ -256,6 +256,8 @@ angular.module('mainApp.models.services.ModelService', [
                 modelSummary.ModelDetails.Status = data.Status;
                 modelSummary.ModelDetails.DisplayName = data.DisplayName;
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
+                modelSummary.ModelDetails.SourceSchemaInterpretation = data.SourceSchemaInterpretation;
+
                 // sync with front-end json structure
                 result.resultObj = modelSummary;
             }

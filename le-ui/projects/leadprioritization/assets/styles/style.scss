@@ -1109,6 +1109,11 @@ Model Details
         padding: 7px 7px 7px 0;
         text-align: left;
     }
+        .marketo-attributes a:after {
+            clear: both;
+            content: '';
+            display: table;
+        }
         .attributes a:hover {
             color: #747474;
             background: #e1eefd;
@@ -1138,6 +1143,7 @@ Model Details
             }
         .marketo-attributes span {
             margin-right: 1em;
+            float: left;
         }
             .marketing-response span {
                 background: #4095e1;
