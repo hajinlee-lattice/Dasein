@@ -92,35 +92,41 @@ public class WorkflowExecutionCache {
         }
 
         log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
-        JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
-        JobInstance jobInstance = jobExecution.getJobInstance();
-        WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
 
-        Job job = new Job();
-        job.setId(workflowId.getId());
-        job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
-        job.setStartTimestamp(workflowStatus.getStartTime());
-        job.setJobType(jobInstance.getJobName());
-        job.setSteps(getJobSteps(jobExecution));
-        job.setReports(getReports(jobExecution));
-        job.setOutputs(getOutputs(jobExecution));
-        if (workflowJob != null) {
-            job.setInputs(workflowJob.getInputContext());
-            job.setApplicationId(workflowJob.getApplicationId());
-            job.setUser(workflowJob.getUserId());
-            ErrorDetails errorDetails = workflowJob.getErrorDetails();
-            if (errorDetails != null) {
-                job.setErrorCode(errorDetails.getErrorCode());
-                job.setErrorMsg(errorDetails.getErrorMsg());
+        try {
+            JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
+            JobInstance jobInstance = jobExecution.getJobInstance();
+            WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+
+            Job job = new Job();
+            job.setId(workflowId.getId());
+            job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
+            job.setStartTimestamp(workflowStatus.getStartTime());
+            job.setJobType(jobInstance.getJobName());
+            job.setSteps(getJobSteps(jobExecution));
+            job.setReports(getReports(jobExecution));
+            job.setOutputs(getOutputs(jobExecution));
+            if (workflowJob != null) {
+                job.setInputs(workflowJob.getInputContext());
+                job.setApplicationId(workflowJob.getApplicationId());
+                job.setUser(workflowJob.getUserId());
+                ErrorDetails errorDetails = workflowJob.getErrorDetails();
+                if (errorDetails != null) {
+                    job.setErrorCode(errorDetails.getErrorCode());
+                    job.setErrorMsg(errorDetails.getErrorMsg());
+                }
             }
-        }
 
-        if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
-            job.setEndTimestamp(workflowStatus.getEndTime());
-            cache.put(job.getId(), job);
+            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
+                job.setEndTimestamp(workflowStatus.getEndTime());
+                cache.put(job.getId(), job);
+            }
+            return job;
+        } catch (Exception e) {
+            log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);
+            throw e;
         }
-        return job;
     }
 
     private List<Job> loadMissingJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
