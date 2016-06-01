@@ -146,6 +146,9 @@ class LPMigration_LP3ModelingQuery(StepBase):
         else:
             q_pls_modeling.removeColumn('From_SFDC_CompanySize')
 
+        spec_email = 'LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IF"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"), LatticeFunctionIdentifier(ContainerElementName("Email_Domain_IsPublic")), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Cat"), LatticeFunctionExpressionConstant("publicdomain@", DataTypeVarChar(13)), LatticeFunctionIdentifier(ContainerElementName("SFDC_Lead_Contact_PropDataID"))), LatticeFunctionIdentifier(ContainerElementName("SFDC_Email")))'
+        q_pls_modeling.getColumn('Email').setExpression(ExpressionVDBImplFactory.create(spec_email))
+
         self._adjustQueryCommon(conn_mgr, q_pls_modeling, cols)
 
 
