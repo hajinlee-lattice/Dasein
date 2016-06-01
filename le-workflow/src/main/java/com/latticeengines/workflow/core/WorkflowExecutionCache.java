@@ -184,6 +184,17 @@ public class WorkflowExecutionCache {
                     throw new RuntimeException("Failed to convert context object.");
                 }
             }
+        } else if (contextObj instanceof Set) {
+            for (Object obj : (Set) contextObj) {
+                if (obj instanceof String) {
+                    Report report = reportService.getReportByName((String) obj);
+                    if (report != null) {
+                        reports.add(report);
+                    }
+                } else {
+                    throw new RuntimeException("Failed to convert context object.");
+                }
+            }
         } else {
             throw new RuntimeException("Failed to convert context object.");
         }
