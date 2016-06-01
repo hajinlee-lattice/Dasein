@@ -93,6 +93,10 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
             throw new Exception("The lead input base table for scoringDeploymentTest does not exist.");
         }
 
+        if (CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
+            throw new Exception("Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
+        }
+
         path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.mkdir(yarnConfiguration, path);
         URL modelSummaryUrl = ClassLoader
