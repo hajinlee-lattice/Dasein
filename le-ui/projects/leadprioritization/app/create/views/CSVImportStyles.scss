@@ -80,6 +80,8 @@ section.container.setup-import {
         }
     }
 }
+
+
 /*
 Create Model: Custom Fields Page
 ================================================================== */
@@ -92,22 +94,29 @@ section.container.custom-fields {
         margin-top: 14px;
         &:before,
         &:after {
+            display: none;
             content: '';
             position: absolute;
             top: 0;
         }
         &:before {
-            background: url("../images/bkg-field-mapping-import.png") top left no-repeat;
-            left: 0;
-            width: 247px;
-            height: 148px;
+            background-image: url("../images/bkg-field-mapping-import.png");
+            background-position: top left;
+            background-repeat: no-repeat;
+            background-size: 150px 95px;
+            top: 24px;
+            width: 150px;
+            height: 95px;
         }
         &:after {    
-            background: url("../images/bkg-field-mapping-lattice.png") top right no-repeat;
+            background-image: url("../images/bkg-field-mapping-lattice.png");
+            background-position: top right;
+            background-repeat: no-repeat;
+            background-size: 166px 82px;
             right: 0;
-            top: 8px;
-            width: 271px;
-            height: 121px;
+            top: 30px;
+            width: 166px;
+            height: 82px;
         }
     }
     h2, h3 {
@@ -212,6 +221,8 @@ section.container.custom-fields {
         padding: 0.5em;
     }
 }
+
+/* Map to Lattice Fields Modal */
 .lattice-mapping {
     .summary {
         padding: 20px;
@@ -233,6 +244,9 @@ section.container.custom-fields {
         background: #f1f1f1;
     }
 }
+
+
+
 /*
 Create Model: Validate Import View
 ================================================================== */
@@ -272,4 +286,56 @@ Create Model: Validate Import View
     background-image: url("../images/ico-used-lead-25.svg");
     background-position: center 43px;
     background-size: 53px;
+}
+
+
+
+/*
+Media Queries
+=================================================================== */
+@media screen and (min-width: 768px) {
+    section.container.custom-fields {
+        hgroup {
+            &:before,
+            &:after {
+                display: block;
+            }
+        }
+    }
+}
+@media screen and (min-width: 960px) {
+    section.container.custom-fields {
+        hgroup {
+            &:before {
+                background-size: 212px 122px;
+                top: 16px;
+                width: 212px;
+                height: 122px;
+            }
+            &:after {    
+                background-size: 230px 105px;
+                top: 25px;
+                width: 230px;
+                height: 105px;
+            }
+        }
+    }
+}
+@media screen and (min-width: 1200px) {
+    section.container.custom-fields {
+        hgroup {
+            &:before {
+                background-size: 247px 148px;
+                width: 247px;
+                height: 148px;
+                top: 0;
+            }
+            &:after {    
+                background-size: 271px 121px;
+                top: 8px;
+                width: 271px;
+                height: 121px;
+            }
+        }
+    }
 }
