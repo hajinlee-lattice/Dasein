@@ -1,6 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
         Job job = workflowService.getJob(workflowId);
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
-        assertEquals(report.getName(), "Test");
+        assertTrue(report.getName().startsWith("Test"));
 
         Report retrieved = reportService.getReportByName(report.getName());
         assertEquals(report.getJson().toString(), retrieved.getJson().toString());
