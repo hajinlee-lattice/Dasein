@@ -10,6 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
@@ -17,6 +23,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -172,6 +180,65 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         }
 
         Assert.assertTrue(ids.isEmpty());
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testAddRowIdParallel() throws InterruptedException, IOException, ExecutionException {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+        Integer numThreads = 2;
+
+        prepareAddRowId(avroDir, fileName);
+
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        List<Future<String>> exceptions = new ArrayList<>();
+
+        for (int i = 0; i < numThreads; i++) {
+            exceptions.add(executor.submit(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    String targetPath = "/tmp/DataFlowOperationTestOutput_" + UUID.randomUUID().toString();
+                    try {
+                        for (int j = 0; j < 2; j++) {
+                            try {
+                                HdfsUtils.rmdir(configuration, targetPath);
+                            } catch (Exception e) {
+                                return "Failed to clean up target path: " + targetPath;
+                            }
+                            execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+                                @Override
+                                public Node construct(DataFlowParameters parameters) {
+                                    Node feature = addSource("Feature");
+                                    return feature.addRowID(new FieldMetadata("RowID", Long.class));
+                                }
+                            }, targetPath);
+                            List<GenericRecord> output = readOutput(targetPath);
+                            Set<Long> ids = new HashSet<>(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+                            for (GenericRecord record : output) {
+                                ids.remove(record.get("RowID"));
+                            }
+                            Assert.assertTrue(ids.isEmpty(), "Remaining IDs: " + new ArrayList<>(ids));
+                        }
+                        return "";
+                    } catch (Exception e) {
+                        return e.getMessage() + "\n" + ExceptionUtils.getFullStackTrace(e);
+                    } finally {
+                        try {
+                            HdfsUtils.rmdir(configuration, targetPath);
+                        } catch (Exception e) {
+                            return "Failed to clean up target path: " + targetPath;
+                        }
+                    }
+                }
+            }));
+        }
+
+        for (Future<String> future: exceptions) {
+            String exception = future.get();
+            Assert.assertTrue(StringUtils.isEmpty(exception), "Error: " + exception);
+        }
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }

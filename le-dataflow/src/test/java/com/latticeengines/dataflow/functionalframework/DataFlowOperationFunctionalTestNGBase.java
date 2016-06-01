@@ -92,8 +92,12 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     }
 
     protected List<GenericRecord> readOutput() {
-        return AvroUtils.getDataFromGlob(configuration, TARGET_PATH + "/*.avro");
+        return readOutput(TARGET_PATH);
     }
+    protected List<GenericRecord> readOutput(String targetPath) {
+        return AvroUtils.getDataFromGlob(configuration, targetPath + "/*.avro");
+    }
+
 
     protected List<GenericRecord> readInput(String source) {
         Map<String, String> paths = getSourcePaths();
@@ -106,12 +110,16 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     }
 
     protected void execute(DataFlowBuilder builder) {
+        execute(builder, TARGET_PATH);
+    }
+
+    protected void execute(DataFlowBuilder builder, String tagetPath) {
         builder.setLocal(LOCAL);
 
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.SOURCETABLES, getSources());
         ctx.setProperty(DataFlowProperty.CUSTOMER, "Customer");
-        ctx.setProperty(DataFlowProperty.TARGETPATH, TARGET_PATH);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, tagetPath);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "Output");
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");
