@@ -125,6 +125,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, LEAD_INPUT_TABLE_NAME, 0, 3891,
                 new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
+        log.info("Created scoring command with LeadInputQueue_ID=" + scoringCommand.getPid());
 
         // wait for the scoringManager to pick up the row in leadInputQueue
         int iterations = 0;
