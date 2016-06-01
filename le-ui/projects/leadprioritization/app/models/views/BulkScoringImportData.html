@@ -41,7 +41,7 @@
     				</tr>
     			</thead>
     			<tbody>
-                    <tr ng-repeat="requiredField in requiredFields | startFrom: (current - 1) * pagesize | limitTo: pagesize">
+                    <tr ng-repeat="requiredField in requiredFields | orderBy: -requiredField | startFrom: (current - 1) * pagesize | limitTo: pagesize">
                         <td>{{requiredField}}</td>
                     </tr>
     			</tbody>
