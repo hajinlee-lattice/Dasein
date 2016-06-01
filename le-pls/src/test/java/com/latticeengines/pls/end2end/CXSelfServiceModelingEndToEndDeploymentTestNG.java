@@ -5,6 +5,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -13,11 +15,15 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.monitor.metric.service.impl.SplunkLogMetricWriter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +62,12 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+
+import com.latticeengines.monitor.metric.service.impl.SplunkLogMetricWriter;
+
 @Component
 public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -73,19 +85,66 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
 
+    @Value("${pls.modelingservice.basedir}")
+    private String modelingServiceHdfsBaseDir;
+
+    @Value("${pls.fs.defaultFS}")
+    private String plsHdfsPath;
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    Double rocScore;
+
     @BeforeClass(groups = "qa.lp")
     public void setup() throws Exception {
+        fileName = System.getenv("FILENAME");
+        log.info("WSHOME:" + System.getenv("WSHOME"));
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
-        log.info("Test environment setup finished.");
+        log.info(String.format("Test environment setup finished. tenant name: %s ", tenantToAttach.getName()));
 
         //fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-        fileName = System.getenv("FILENAME");
+
     }
 
+    @Test(groups="qa.lp", enabled=true)
+    public void testModelQuality() throws InterruptedException, IOException
+    {
+        String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
+        downloadModels();
+        log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
+        //WriteToSplunk();
+    }
+
+    public void downloadModels() throws IOException {
+        String tenantName = tenantToAttach.getId();
+        // debug use
+        // String tenantName = "LETest1464379257704.LETest1464379257704.Production";
+        String hdfsPath = String.format("%s/%s/%s", plsHdfsPath , modelingServiceHdfsBaseDir, tenantName);
+
+        // TODO: do we make local path a parameter from Jenkins?
+        try {
+            String localPath = System.getenv("MODEL_LOCALPATH");
+            if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+                // remove local copy first
+                FileUtils.deleteDirectory(new File(localPath, tenantName));
+
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, localPath + "/" + tenantName);
+                log.info(String.format("File %s copied to local machine at %s", hdfsPath, localPath));
+            } else {
+                log.info(String.format("File %s does not exist on HDFS", hdfsPath));
+            };
+        } catch (IOException ioe) {
+            log.info("ERROR: " + ioe.getMessage());
+        }
+
+    }
+
+
+
     @SuppressWarnings("rawtypes")
-    @Test(groups = "qa.lp", enabled = true)
     public void uploadFile() {
         if (schemaInterpretation == null) {
             schemaInterpretation = SchemaInterpretation.SalesforceLead;
@@ -105,7 +164,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         ResponseDocument response = restTemplate.getForObject(
                 String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getRestAPIHostPort(),
@@ -124,7 +182,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                         sourceFile.getName()), unknownColumns, ResponseDocument.class);
     }
 
-    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "resolveMetadata")
+    //    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
         ModelingParameters parameters = new ModelingParameters();
         parameters.setName("CXSelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
@@ -160,7 +218,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "qa.lp", dependsOnMethods = "createModel")
+    //    @Test(groups = "qa.lp", dependsOnMethods = "createModel")
     public void retrieveReport() {
         Job job = restTemplate.getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), modelingWorkflowApplicationId), //
@@ -170,7 +228,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(reports.size(), 2);
     }
 
-    @Test(groups = "qa.lp", dependsOnMethods = "createModel", timeOut = 120000)
     public void retrieveModelSummary() throws InterruptedException {
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
@@ -195,7 +252,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }
     }
 
-    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
         // Relies on error in Account.csv
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
@@ -208,63 +264,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());
         assertTrue(errors.length() > 0);
-    }
-
-    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
-    public void cloneAndRemodel() {
-        @SuppressWarnings("unchecked")
-        List<Object> rawFields = restTemplate.getForObject(
-                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), originalModelSummary.getId()),
-                List.class);
-        List<VdbMetadataField> fields = new ArrayList<>();
-        for (Object rawField : rawFields) {
-            VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
-            fields.add(field);
-
-            if (field.getColumnName().equals("Website")) {
-                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-            }
-            if (field.getColumnName().equals("City")) {
-                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-            }
-        }
-
-        // Now remodel
-        CloneModelingParameters parameters = new CloneModelingParameters();
-        parameters.setName(modelName + "_clone");
-        modelName = parameters.getName();
-        parameters.setDescription("clone");
-        parameters.setAttributes(fields);
-        parameters.setSourceModelSummaryId(originalModelSummary.getId());
-
-        ResponseDocument<?> response;
-        response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),
-                parameters, ResponseDocument.class);
-
-        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
-
-        log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-
-        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
-
-    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
-    public void retrieveModelSummaryForClonedModel() throws InterruptedException {
-        ModelSummary found = getModelSummary(modelName);
-        assertNotNull(found);
-        List<Predictor> predictors = found.getPredictors();
-        assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
-            @Override
-            public boolean apply(@Nullable Predictor predictor) {
-                return predictor.getName().equals(InterfaceName.Website.toString())
-                        || predictor.getName().equals(InterfaceName.Country.toString());
-            }
-
-        }));
-        assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
-        String foundFileTableName = found.getTrainingTableName();
-        assertNotNull(foundFileTableName);
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {
@@ -357,6 +356,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         ModelSummary modelSummary = getModelSummary();
         String modelId = modelSummary.getId();
         log.info("modeling id: " + modelId);
+        rocScore = modelSummary.getRocScore();
         return modelId;
     }
 
