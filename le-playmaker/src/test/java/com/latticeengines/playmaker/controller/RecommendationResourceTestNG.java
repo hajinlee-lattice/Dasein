@@ -97,6 +97,55 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
     }
 
     @Test(groups = "deployment")
+    public void getContacts() {
+        String url = apiHostPort + "/playmaker/contacts?start=1&offset=1&maximum=100";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertNotNull(result);
+    }
+
+    @Test(groups = "deployment")
+    public void getContactCount() {
+        String url = apiHostPort + "/playmaker/contactcount?start=1";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
+
+    @Test(groups = "deployment")
+    public void getContactExtensions() {
+        String url = apiHostPort + "/playmaker/contactextensions?start=1&offset=1&maximum=100";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertNotNull(result);
+    }
+
+    @Test(groups = "deployment")
+    public void getContactExtensionCount() {
+        String url = apiHostPort + "/playmaker/contactextensioncount?start=1";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
+
+    @Test(groups = "deployment")
+    public void getContactExtensionSchema() {
+        String url = apiHostPort + "/playmaker/contactextensionschema";
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> result = restTemplate.getForObject(url, List.class);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
+    }
+
+    @Test(groups = "deployment")
+    public void getContactExtensionColumnCount() {
+        String url = apiHostPort + "/playmaker/contactextensioncolumncount";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
+    
+    @Test(groups = "deployment")
     public void getPlayValues() {
         String url = apiHostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")

@@ -35,7 +35,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1  ISNULL(T.[Display_Name], '') + '|' + ISNULL(T.[Phone_Number], '') + '|' + ISNULL(T.[Email_Address], '') "
                 + " + '|' +  ISNULL(T.[Address_Street_1], '') + '|' + ISNULL(T.[City], '') + '|' + ISNULL(T.[State_Province], '') "
-                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') "
+                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') + '|' + ISNULL(CONVERT(VARCHAR, T.[LEContact_ID]), '') "
                 + getSfdcContactID()
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
@@ -59,7 +59,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     protected String getSfdcContactID() {
-        return " + '|' ";
+        return " + '|' + COALESCE(T.[CrmLink_ID], '') ";
+    }
+
+    protected String getSfdcContactIDFromLEContact() {
+        return  "[CrmLink_ID] AS SfdcContactID, ";
     }
 
     protected String getMonetaryValue() {
@@ -76,7 +80,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 String contacts = (String) record.get("Contacts");
                 if (contacts != null) {
                     String[] contactArray = contacts.split("[|]", -1);
-                    if (contactArray.length >= 9) {
+                    if (contactArray.length >= 10) {
                         // On recommendation record as well.
                         record.put("SfdcContactID", contactArray[8]);
                         
@@ -90,7 +94,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactMap.put("State", contactArray[5]);
                         contactMap.put("Country", contactArray[6]);
                         contactMap.put("ZipCode", contactArray[7]);
-                        contactMap.put("SfdcContactID", contactArray[8]);
+                        contactMap.put("ContactID", contactArray[8]);
+                        contactMap.put("SfdcContactID", contactArray[9]);
                         contactList.add(contactMap);
                         record.put("Contacts", contactList);
                         
@@ -246,8 +251,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds) {
-        String extensionColumns = getExtensionColumns();
-        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID ,"
+        String extensionColumns = getAccountExtensionColumns();
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + extensionColumns + " "
                 + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
@@ -271,7 +276,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return result;
     }
 
-    private String getExtensionColumns() {
+    private String getAccountExtensionColumns() {
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
         for (Map<String, Object> field : schema) {
@@ -309,8 +314,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     public List<Map<String, Object>> getAccountExtensionSchema() {
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
                 + "S.Value AS DisplayName "
-                + "FROM [ExtensionColumnSpec] C JOIN [ExtensionTableSpec] T ON C.Parent_ID = T.ExtensionTableSpec_ID "
-                + "AND T.External_ID = 'LEAccount' "
+                + "FROM [ExtensionColumn] C JOIN [ExtensionTable] T ON C.Parent_ID = T.ExtensionTable_ID "
+                + "AND T.Table_Notion = 'LEAccount' "
                 + "JOIN [ConfigTableColumn] CC on C.Column_Name = CC.Column_Lookup_ID "
                 + "JOIN [ConfigTable] CT ON CC.[ConfigTable_ID] = CT.ConfigTable_ID "
                 + "JOIN [ConfigResource] S ON CC.Column_Display_Key = S.Key_Name AND S.Locale_ID = -1 "
@@ -324,6 +329,137 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public int getAccountExtensionColumnCount() {
         List<Map<String, Object>> schema = getAccountExtensionSchema();
+        return schema.size();
+    }
+
+    @Override
+    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds) {
+        String sql = "SELECT * FROM (SELECT C.[LEContact_ID] AS ID, C.[External_ID] AS ExternalID, C.[Display_Name] AS Name, C.[Account_ID] AS AccountID, "
+                + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone,"
+                + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
+                + "C.[Address_Street_1] AS Address, C.[Address_Street_2] AS Address2,"
+                + "C.[City] AS City, C.[State_Province] AS State,"
+                + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
+                + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
+                + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], C.[LEContact_ID] ) RowNum "
+                + getContactFromWhereClause(contactIds)
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
+        if (!CollectionUtils.isEmpty(contactIds)) {
+            source.addValue("contactIds", contactIds);
+        }
+
+        List<Map<String, Object>> results = queryForListOfMap(sql, source);
+        return results;
+    }
+    
+    @Override
+    public int getContactCount(long start, List<Integer> contactIds) {
+        String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds);
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        if (!CollectionUtils.isEmpty(contactIds)) {
+            source.addValue("contactIds", contactIds);
+        }
+        return queryForObject(sql, source, Integer.class);
+    }
+
+    
+    private String getContactFromWhereClause(List<Integer> contactIds) {
+        String whereClause = 
+             "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 "
+                    + "%s AND DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
+
+        StringBuilder extraFilter = new StringBuilder();
+        if (CollectionUtils.isEmpty(contactIds)) {
+            extraFilter.append("");
+        } else {
+            extraFilter.append("AND C.[LEContact_ID] IN (:contactIds) ");
+        }
+        return String.format(whereClause, extraFilter.toString());
+    }
+        
+    @Override
+    public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<Integer> contactIds) {
+        String extensionColumns = getContactExtensionColumns();
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
+                + getSfdcContactIDFromLEContact()
+                + extensionColumns + " "
+                + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
+                + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], [Item_ID]) RowNum "
+                + getContactExtensionFromWhereClause(contactIds)
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
+        if (!CollectionUtils.isEmpty(contactIds)) {
+            source.addValue("contactIds", contactIds);
+        }
+
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                map.remove("Item_ID");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public int getContactExtensionCount(long start, List<Integer> contactIds) {
+        String sql = "SELECT COUNT(*) " + getContactExtensionFromWhereClause(contactIds);
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        if (!CollectionUtils.isEmpty(contactIds)) {
+            source.addValue("contactIds", contactIds);
+        }
+        return queryForObject(sql, source, Integer.class);
+    }
+
+    private String getContactExtensionFromWhereClause(List<Integer> contactIds) {
+        String whereClause = "FROM [LEContact_Extensions] E WITH (NOLOCK) JOIN [LEContact] C WITH (NOLOCK) ON E.Item_ID = C.LEContact_ID AND C.IsActive = 1 "
+                + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
+
+        StringBuilder extraFilter = new StringBuilder();
+        if (CollectionUtils.isEmpty(contactIds)) {
+            extraFilter.append("");
+        } else {
+            extraFilter.append("AND E.[Item_ID] IN (:contactIds) ");
+        }
+        return String.format(whereClause, extraFilter.toString());
+    }
+    
+    @Override
+    public List<Map<String, Object>> getContactExtensionSchema() {
+        String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
+                + "(SELECT DISTINCT S.value FROM ConfigResource S "
+                + "WHERE C.Display_Name_Key IS NOT NULL AND S.Key_Name = C.Display_Name_Key AND S.Locale_ID = -1) AS DisplayName "
+                + "FROM [ExtensionColumn] C JOIN [ExtensionTable] T ON C.Parent_ID = T.ExtensionTable_ID "
+                + "AND T.Table_Notion = 'LEContact' "
+                + "WHERE C.IsActive = 1 ";
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        return result;
+    }
+
+    private String getContactExtensionColumns() {
+        List<Map<String, Object>> schema = getContactExtensionSchema();
+        StringBuilder builder = new StringBuilder();
+        for (Map<String, Object> field : schema) {
+            builder.append("E.").append(field.get("Field")).append(", ");
+        }
+
+        return builder.toString();
+    }
+
+    @Override
+    public int getContactExtensionColumnCount() {
+        List<Map<String, Object>> schema = getContactExtensionSchema();
         return schema.size();
     }
 

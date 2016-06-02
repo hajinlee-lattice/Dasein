@@ -8,9 +8,4 @@ public class PlaymakerRecommendationDaoImplV780 extends PlaymakerRecommendationD
         super(namedJdbcTemplate);
     }
 
-    @Override
-    protected String getSfdcContactID() {
-        return " + '|' + COALESCE(T.[CRMContact_External_ID], '') ";
-    }
-
 }

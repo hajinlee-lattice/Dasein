@@ -18,7 +18,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds);
+    Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds);
 
     Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
@@ -28,7 +28,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayCount(String tenantName, long start, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextensionCount(String tenantName, long start, List<Integer> accountIds);
+    Map<String, Object> getAccountextExsionCount(String tenantName, long start, List<Integer> accountIds);
 
     Map<String, Object> getPlayValueCount(String tenantName, long start, List<Integer> playgroupIds);
 
@@ -37,5 +37,19 @@ public interface PlaymakerRecommendationEntityMgr {
     List<Map<String, Object>> getPlayGroups(String tenantName, long start, int offset, int maximum);
 
     Map<String, Object> getPlayGroupCount(String tenantName, long start);
+
+    Map<String, Object> getContacts(String tenantName, long start, int offset, int maximum, List<Integer> contactIds);
+    
+    Map<String, Object> getContactCount(String tenantName, long start, List<Integer> contactIds);
+
+    Map<String, Object> getContactExtensionColumnCount(String tenantName);
+
+    List<Map<String, Object>> getContactExtensionSchema(String tenantName);
+
+    Map<String, Object> getContactExtensionCount(String tenantName, long start, List<Integer> accountIds);
+
+    Map<String, Object> getContactExtensions(String tenantName, long start, int offset, int maximum,
+            List<Integer> accountIds);
+
 
 }

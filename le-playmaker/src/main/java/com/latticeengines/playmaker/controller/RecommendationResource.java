@@ -116,7 +116,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountextensions(tenantName, start, offset, maximum, accountIds);
+        return playmakerRecommendationMgr.getAccountExtensions(tenantName, start, offset, maximum, accountIds);
     }
 
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -128,7 +128,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountextensionCount(tenantName, start, accountIds);
+        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, start, accountIds);
     }
 
     @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -147,6 +147,74 @@ public class RecommendationResource extends SpringBootServletInitializer {
         return playmakerRecommendationMgr.getAccountExtensionColumnCount(tenantName);
     }
 
+    @RequestMapping(value = "/contacts", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get contacts")
+    public Map<String, Object> getContacts(
+            HttpServletRequest request,
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
+            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @ApiParam(value = "Contact Id whose contacts are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContacts(tenantName, start, offset, maximum, contactIds);
+    }
+
+    @RequestMapping(value = "/contactcount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get contact count")
+    public Map<String, Object> getContactCount(
+            HttpServletRequest request,
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "Contact Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContactCount(tenantName, start, contactIds);
+    }
+    
+    @RequestMapping(value = "/contactextensions", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get contact extensions")
+    public Map<String, Object> getContactExtensions(
+            HttpServletRequest request,
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
+            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContactExtensions(tenantName, start, offset, maximum, contactIds);
+    }
+
+    @RequestMapping(value = "/contactextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get record count of contact extension")
+    public Map<String, Object> getContactExtensionCount(
+            HttpServletRequest request,
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContactExtensionCount(tenantName, start, contactIds);
+    }
+
+    @RequestMapping(value = "/contactextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Contact extensions")
+    public List<Map<String, Object>> getContactExtensionSchema(HttpServletRequest request) {
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContactExtensionSchema(tenantName);
+    }
+
+    @RequestMapping(value = "/contactextensioncolumncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get column count of contact extension")
+    public Map<String, Object> getContactExtensionColumnCount(HttpServletRequest request) {
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        return playmakerRecommendationMgr.getContactExtensionColumnCount(tenantName);
+    }
+    
     @RequestMapping(value = "/playvalues", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")
