@@ -62,7 +62,7 @@ public class ScoreCorrectnessService {
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 64;
-    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 1.0;
+    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 0.5;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
