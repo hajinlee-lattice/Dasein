@@ -161,6 +161,10 @@ Icons
 		-webkit-mask-image:  url("/assets/images/ico_app-settings.svg");
 		mask:  url("/assets/images/ico_app-settings.svg");
 	}
+	&.ico-salesforce {
+		-webkit-mask-image:  url("/assets/images/ico-salesforce.svg");
+		mask:  url("/assets/images/ico-salesforce.svg");
+	}
 	&.ico-api-console {
 		-webkit-mask-image:  url("/assets/images/ico-api-console.svg");
 		mask:  url("/assets/images/ico-api-console.svg");
@@ -300,6 +304,10 @@ Icons
 		background-image:  url("/assets/images/ico-marketo.png");
 		background-size: 16px;
 	}	
+	.ico-salesforce {
+		background-image:  url("/assets/images/ico-salesforce.png");
+		background-size: 18px;
+	}
 	.ico-api-console {
 		background-image:  url("/assets/images/ico-api-console.png");
 		background-size: 16px;
