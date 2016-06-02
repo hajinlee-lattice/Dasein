@@ -66,7 +66,7 @@ public class Encoder implements RealTimeTransform {
                     if (d.isNaN()) {
                         valueAsString = "NULL";
                     } else {
-                        return value;
+                        return d.longValue();
                     }
                 } catch (Exception e) {
                     valueAsString = "NULL";
@@ -87,7 +87,7 @@ public class Encoder implements RealTimeTransform {
         }
         code = code.and(BigInteger.valueOf(4294967295l));
 
-        return code;
+        return code.longValue();
     }
 
     @Override
