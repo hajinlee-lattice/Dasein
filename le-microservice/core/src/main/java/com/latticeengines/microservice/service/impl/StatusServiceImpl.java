@@ -108,6 +108,7 @@ public class StatusServiceImpl implements StatusService {
                 if (isUp(url)) {
                     log.info("Discovered a new app to monitor: " + app);
                     statusMap.put(app, "OK");
+                    monitoredApps.add(app);
                 }
             }
         }
