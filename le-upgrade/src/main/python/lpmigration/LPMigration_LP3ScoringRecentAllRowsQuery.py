@@ -43,7 +43,7 @@ class LPMigration_LP3ScoringRecentAllRowsQuery(StepBase):
         if template_type == 'MKTO':
             spec_email = 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("MKTO_LeadRecord")), ContainerElementName("Email")))'
             leadEntity = 'MKTO_LeadRecord_ID'
-        elif: template_type == 'SFDC':
+        elif template_type == 'SFDC':
             spec_email = 'LatticeFunctionIdentifier(ContainerElementName("SFDC_Email"))'
             leadEntity = 'SFDC_Lead_Contact_ID'
         else:
