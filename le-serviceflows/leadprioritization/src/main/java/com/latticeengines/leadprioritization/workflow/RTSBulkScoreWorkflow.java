@@ -29,7 +29,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
 
     @Bean
-    public Job scoreWorkflowJob() throws Exception {
+    public Job rtsBulkScoreWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 
