@@ -207,6 +207,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             addStandardAttributes.setTransformationGroup(transformationGroup);
             return this;
         }
+        
+        public Builder excludePropDataColumns(boolean excludePropDataColumns) {
+            model.setExcludePropDataColumns(excludePropDataColumns);
+            return this;
+        }
 
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setExportDestination(ExportDestination.FILE);
@@ -221,7 +226,6 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             configuration.add(model);
             configuration.add(addStandardAttributes);
             configuration.add(matchResult);
-
             configuration.add(export);
 
             return configuration;

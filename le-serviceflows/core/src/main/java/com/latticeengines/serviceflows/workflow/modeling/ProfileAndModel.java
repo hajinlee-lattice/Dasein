@@ -2,8 +2,10 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -19,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -38,7 +41,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         log.info("Inside ProfileAndModel execute()");
 
         ModelSummary sourceSummary = configuration.getSourceModelSummary();
-        if (sourceSummary!=null) {
+        if (sourceSummary != null) {
             try {
                 String indented = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(sourceSummary);
                 log.info("Found source model summary in configuration\n " + indented);
@@ -108,11 +111,20 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         for (Attribute event : events) {
             excludedColumns.add(event.getName());
         }
+        
+        log.info("Exclude prop data columns = " + configuration.excludePropDataColumns());
 
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null //
-                    || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None")) {
+                    || attr.getApprovedUsage().size() == 0 //
+                    || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
+            } else if (configuration.excludePropDataColumns() && attr.getTags() != null) {
+                Set<String> tags = new HashSet<>(attr.getTags());
+                
+                if (tags.contains(Tag.EXTERNAL.getName()) || tags.contains(Tag.EXTERNAL_TRANSFORM.getName())) {
+                    excludedColumns.add(attr.getName());
+                }
             }
         }
 
