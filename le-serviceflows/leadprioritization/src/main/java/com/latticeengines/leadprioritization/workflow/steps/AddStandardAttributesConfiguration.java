@@ -8,7 +8,6 @@ public class AddStandardAttributesConfiguration extends DataFlowStepConfiguratio
     private TransformationGroup transformationGroup;
 
     public AddStandardAttributesConfiguration() {
-        setPurgeSources(true);
         setTargetTableName("addStandardAttributesViaJavaFunction");
         setBeanName("addStandardAttributesViaJavaFunction");
     }

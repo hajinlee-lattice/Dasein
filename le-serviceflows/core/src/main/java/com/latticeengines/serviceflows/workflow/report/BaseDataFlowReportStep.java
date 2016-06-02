@@ -35,7 +35,6 @@ public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepCon
         configuration.setPodId(getConfiguration().getPodId());
         configuration.setTargetTableName("Report_" + DateTime.now().getMillis());
         configuration.setBeanName("createReport");
-        configuration.setPurgeSources(false);
         CreateReportParameters parameters = getDataFlowParameters();
         configuration.setDataFlowParams(parameters);
         runCreateReportDataFlow.setConfiguration(configuration);

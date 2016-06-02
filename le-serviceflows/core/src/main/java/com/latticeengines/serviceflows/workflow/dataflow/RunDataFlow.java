@@ -56,7 +56,6 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         for (Table table : tables) {
             DataFlowSource source = new DataFlowSource();
             source.setName(table.getName());
-            source.setPurgeAfterUse(getConfiguration().getPurgeSources());
             sources.add(source);
         }
         return sources;

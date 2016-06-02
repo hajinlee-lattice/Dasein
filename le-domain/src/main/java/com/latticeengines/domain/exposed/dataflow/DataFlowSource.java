@@ -9,7 +9,6 @@ public class DataFlowSource implements HasName {
 
     private String name;
     private String rawDataPath;
-    private boolean purgeAfterUse;
     private List<ExtractFilter> extractFilters;
 
     @Override
@@ -32,15 +31,5 @@ public class DataFlowSource implements HasName {
     @JsonProperty("extract_filters")
     public void setExtractFilters(List<ExtractFilter> extractFilters) {
         this.extractFilters = extractFilters;
-    }
-
-    @JsonProperty("purge_afer_use")
-    public boolean getPurgeAfterUse() {
-        return purgeAfterUse;
-    }
-
-    @JsonProperty("purge_afer_use")
-    public void setPurgeAfterUse(boolean purgeAfterUse) {
-        this.purgeAfterUse = purgeAfterUse;
     }
 }

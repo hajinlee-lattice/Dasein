@@ -5,7 +5,6 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class ProcessMatchResultConfiguration extends DataFlowStepConfiguration {
 
     public ProcessMatchResultConfiguration() {
-        setPurgeSources(false);
         setBeanName("parseMatchResult");
     }
 

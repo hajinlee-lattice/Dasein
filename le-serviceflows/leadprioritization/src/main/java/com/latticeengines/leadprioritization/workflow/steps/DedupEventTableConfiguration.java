@@ -8,7 +8,6 @@ public class DedupEventTableConfiguration extends DataFlowStepConfiguration {
     private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
     
     public DedupEventTableConfiguration() {
-        setPurgeSources(true);
     }
     
     public void setDeduplicationType(DedupType deduplicationType) {

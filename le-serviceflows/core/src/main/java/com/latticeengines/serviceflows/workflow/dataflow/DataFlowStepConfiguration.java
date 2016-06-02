@@ -23,8 +23,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     private DataFlowParameters dataFlowParams;
 
-    private boolean purgeSources;
-
     @JsonProperty("extra_sources")
     public Map<String, String> getExtraSources() {
         return extraSources;
@@ -63,15 +61,5 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("data_flow_params")
     public void setDataFlowParams(DataFlowParameters dataFlowParams) {
         this.dataFlowParams = dataFlowParams;
-    }
-
-    @JsonProperty("purge_sources")
-    public boolean getPurgeSources() {
-        return purgeSources;
-    }
-
-    @JsonProperty("purge_sources")
-    public void setPurgeSources(boolean purgeSources) {
-        this.purgeSources = purgeSources;
     }
 }
