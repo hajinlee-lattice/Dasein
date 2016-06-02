@@ -77,7 +77,7 @@ public class ModelResource {
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter
-                        .submit(clone.getName(), parameters.getName(), parameters.getDisplayName(), userRefinedAttributes, modelSummary)
+                        .submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
     }
 

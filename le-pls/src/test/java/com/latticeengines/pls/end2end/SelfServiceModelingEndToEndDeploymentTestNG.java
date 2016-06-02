@@ -40,6 +40,7 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
@@ -236,6 +237,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setDescription("clone");
         parameters.setAttributes(fields);
         parameters.setSourceModelSummaryId(originalModelSummary.getId());
+        parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
 
         ResponseDocument<?> response;
         response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),

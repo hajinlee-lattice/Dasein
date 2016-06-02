@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
@@ -35,7 +37,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
-    public ApplicationId submit(String cloneTableName, String modelName, String displayName,
+    public ApplicationId submit(String cloneTableName, CloneModelingParameters parameters,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         String modelSummaryId = modelSummary.getId();
 
@@ -44,14 +46,14 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummaryId });
         }
 
-        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName, modelName,
-                displayName, TransformationGroup.fromName(transformationGroupName), userRefinedAttributes, modelSummary);
+        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName, parameters,
+                TransformationGroup.fromName(transformationGroupName), userRefinedAttributes, modelSummary);
         return workflowJobService.submit(configuration);
     }
 
-    public MatchAndModelWorkflowConfiguration generateConfiguration(String cloneTableName, String modelName,
-            String displayName, TransformationGroup transformationGroup, List<Attribute> userRefinedAttributes,
-            ModelSummary modelSummary) {
+    public MatchAndModelWorkflowConfiguration generateConfiguration(String cloneTableName,
+            CloneModelingParameters parameters, TransformationGroup transformationGroup,
+            List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         String sourceSchemaInterpretation = modelSummary.getSourceSchemaInterpretation();
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
@@ -61,32 +63,36 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
-        MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration.Builder()
+        MatchAndModelWorkflowConfiguration.Builder builder = new MatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .workflow("modelAndEmailWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .modelName(modelName) //
-                .displayName(displayName) //
+                .modelName(parameters.getName()) //
+                .displayName(parameters.getDisplayName()) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
-                .transformationGroupName(transformationGroup) //
+                .transformationGroup(transformationGroup) //
                 .sourceModelSummary(modelSummary) //
+                .deduplicationType(parameters.getDeduplicationType()) //
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain")) //
                 .dedupFlowExtraSources(extraSources) //
-                .dedupTargetTableName(cloneTableName + "_deduped") //
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null
                                                                                               // means
                                                                                               // latest
-                .userRefinedAttributes(userRefinedAttributes) //
-                .build();
-        return configuration;
+                .userRefinedAttributes(userRefinedAttributes);
+        if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
+            builder.dedupTargetTableName(cloneTableName + "_deduped");
+        } else if (parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) {
+            builder.dedupTargetTableName(cloneTableName);
+        }
+        return builder.build();
     }
 
 }

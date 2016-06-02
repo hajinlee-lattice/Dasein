@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,12 +21,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -129,7 +132,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         assertNotNull(summary);
         metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
-            if (field.getColumnName().equals(InterfaceName.Website.name()) || field.getColumnName().equals(InterfaceName.City.name())) {
+            if (field.getColumnName().equals(InterfaceName.Website.name())
+                    || field.getColumnName().equals(InterfaceName.City.name())) {
                 assertEquals(field.getApprovedUsage(), ApprovedUsage.NONE.toString());
             }
         }
@@ -137,9 +141,12 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     protected void cloneAndRemodel(Table clone, List<Attribute> userRefinedAttributes, ModelSummary modelSummary)
             throws Exception {
+        CloneModelingParameters parameters = new CloneModelingParameters();
+        parameters.setName("testWorkflowAccount_clone");
+        parameters.setDisplayName("clone");
+        parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
-                clone.getName(), "testWorkflowAccount_clone", "clone", TransformationGroup.STANDARD,
-                userRefinedAttributes, modelSummary);
+                clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         WorkflowExecutionId workflowId = workflowService.start(modelAndEmailWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

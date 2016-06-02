@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 
 public class CloneModelingParameters {
     @JsonProperty
@@ -20,6 +21,9 @@ public class CloneModelingParameters {
 
     @JsonProperty
     private List<VdbMetadataField> attributes;
+
+    @JsonProperty
+    private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
 
     public String getName() {
         return name;
@@ -59,6 +63,14 @@ public class CloneModelingParameters {
 
     public void setSourceModelSummaryId(String sourceModelSummaryId) {
         this.sourceModelSummaryId = sourceModelSummaryId;
+    }
+
+    public DedupType getDeduplicationType() {
+        return deduplicationType;
+    }
+
+    public void setDeduplicationType(DedupType deduplicationType) {
+        this.deduplicationType = deduplicationType;
     }
 
     @Override

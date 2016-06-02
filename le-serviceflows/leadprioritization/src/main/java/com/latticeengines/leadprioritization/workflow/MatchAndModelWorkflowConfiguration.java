@@ -2,8 +2,10 @@ package com.latticeengines.leadprioritization.workflow;
 
 import java.util.List;
 import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -102,13 +104,18 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder transformationGroupName(TransformationGroup transformationGroup) {
+        public Builder transformationGroup(TransformationGroup transformationGroup) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             return this;
         }
 
         public Builder sourceModelSummary(ModelSummary modelSummary) {
             model.setSourceModelSummary(modelSummary);
+            return this;
+        }
+
+        public Builder deduplicationType(DedupType dedupType) {
+            dedupEventTable.setDeduplicationType(dedupType);
             return this;
         }
 
