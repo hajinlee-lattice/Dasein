@@ -88,9 +88,14 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
             throw new RuntimeException("Could not find any fields for use in public domain resolution logic");
         }
 
-        String expr = "(" + StringUtils.join(fields, "+") + ").hashCode()";
+        List<String> exprFields = new ArrayList<>();
+        for (int i = 0; i < fields.size(); ++i) {
+            exprFields.add(String.format("(%s != null ? %s : new String())", fields.get(i), fields.get(i)));
+        }
 
-        return publicDomains.addFunction(expr, new FieldList(fields), new FieldMetadata(hashFieldName, Long.class));
+        String expr = "(" + StringUtils.join(exprFields, "+") + ").hashCode()";
+
+        return publicDomains.addFunction(expr, new FieldList(fields), new FieldMetadata(hashFieldName, Integer.class));
     }
 
     private Node addSortColumn(Node last, Node source, String field) {
