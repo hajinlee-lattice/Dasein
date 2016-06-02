@@ -4,11 +4,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 /**
  * Front-end inputs for a modeling job.
  */
 public class ModelingParameters {
+
     @JsonProperty
     private String filename;
 
@@ -26,6 +28,9 @@ public class ModelingParameters {
     
     @JsonProperty
     private boolean excludePropDataColumns = false;
+    
+    @JsonProperty
+    private TransformationGroup transformationGroup;
     
 
     public String getFilename() {
@@ -76,8 +81,17 @@ public class ModelingParameters {
         this.excludePropDataColumns = excludePropDataColumns;
     }
 
+    public TransformationGroup getTransformationGroup() {
+        return transformationGroup;
+    }
+
+    public void setTransformationGroup(TransformationGroup transformationGroup) {
+        this.transformationGroup = transformationGroup;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 public enum TransformationGroup {
 
     STANDARD("standard"), //
+    NONE("none"), //
     POC("poc"), //
     ALL("all"); //
 

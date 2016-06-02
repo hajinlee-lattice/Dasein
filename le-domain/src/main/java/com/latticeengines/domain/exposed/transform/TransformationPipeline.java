@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.transform;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
@@ -202,6 +204,8 @@ public class TransformationPipeline {
 
     public static Set<TransformDefinition> getTransforms(TransformationGroup group) {
         switch (group) {
+        case NONE:
+            return new HashSet<>();
         case ALL:
             return ImmutableSet.<TransformDefinition> builder()//
                     .addAll(getStandardTransforms()) //
