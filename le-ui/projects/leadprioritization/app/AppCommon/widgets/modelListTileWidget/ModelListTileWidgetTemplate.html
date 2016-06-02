@@ -2,8 +2,23 @@
 
     <div class="model-title" data-ng-hide="nameStatus.editing">
         <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
-        <h2 class="edit" data-ng-if="mayChangeModelNames">
-            <button type="button" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button>
+        <h2 class="edit">
+  <!--           <button type="button" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button> -->
+
+            <button type="button" data-ng-click="modelMenuClick($event)" ng-class="{'open': showModelMenu}"><span class="fa fa-bars"></span></button>
+            <div class="model-menu" ng-show="showModelMenu">
+                <ul>
+                    <li><a href="javascript:void(0)" data-ng-click="modelNameEditClick($event)" data-ng-if="mayChangeModelNames" data-title="Enter Model Name">Edit</a></li>
+
+                    <li><a href="javascript:void(0)" data-ng-if="mayDeleteModels && !isActive" data-ng-click="deleteModelClick($event)">Delete</a></li>
+
+                    <li><a href="javascript:void(0)" data-ng-if="!isActive" data-ng-click="updateAsActiveClick($event)">Activate</a></li>
+
+                    <li><a href="javascript:void(0)" data-ng-if="isActive" data-ng-click="updateAsInactiveClick($event)">Deactivate</a></li>
+
+                    <li><a ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" data-ng-click="refineAndCloneClick($event)">Refine &amp; Clone</a></li>
+                </ul>
+            </div>
         </h2>
     </div>        
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
@@ -29,7 +44,6 @@
             <span data-ng-show="!isActive" class="error-text">{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
             <span data-ng-show="isActive" class="success-text">{{ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
         </div>
-        <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
     </div>
 
 </div><!-- End .model -->
