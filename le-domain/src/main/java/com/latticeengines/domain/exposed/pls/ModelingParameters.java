@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 
 /**
  * Front-end inputs for a modeling job.
@@ -18,6 +20,13 @@ public class ModelingParameters {
 
     @JsonProperty
     private String description;
+    
+    @JsonProperty
+    private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
+    
+    @JsonProperty
+    private boolean excludePropDataColumns = false;
+    
 
     public String getFilename() {
         return filename;
@@ -49,6 +58,22 @@ public class ModelingParameters {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public DedupType getDeduplicationType() {
+        return deduplicationType;
+    }
+    
+    public void setDeduplicationType(DedupType deduplicationType) {
+        this.deduplicationType = deduplicationType;
+    }
+    
+    public boolean getExcludePropDataColumns() {
+        return excludePropDataColumns;
+    }
+    
+    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
+        this.excludePropDataColumns = excludePropDataColumns;
     }
 
     @Override

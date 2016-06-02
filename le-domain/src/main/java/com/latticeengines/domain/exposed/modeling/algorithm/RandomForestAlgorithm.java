@@ -36,7 +36,7 @@ public class RandomForestAlgorithm extends AlgorithmBase {
                 "criterion=gini", //
                 "n_estimators=100", //
                 "n_jobs=5", //
-                "min_samples_split=25", //
+                "min_samples_split=25",//
                 "min_samples_leaf=10", //
                 "max_depth=8", //
                 "bootstrap=True", //
@@ -47,9 +47,6 @@ public class RandomForestAlgorithm extends AlgorithmBase {
     @JsonIgnore
     @Transient
     private String[] getPipelinePropertyArray() {
-        return new String[] { //
-                "pivotstep.minCategoricalCount=300", //
-                "pivotstep.maxCategoricalCount=500" //
-        };
+        return new String[] {};
     }
 }
