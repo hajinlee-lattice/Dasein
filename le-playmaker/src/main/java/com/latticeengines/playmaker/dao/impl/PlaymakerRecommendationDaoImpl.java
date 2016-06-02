@@ -82,7 +82,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                     String[] contactArray = contacts.split("[|]", -1);
                     if (contactArray.length >= 10) {
                         // On recommendation record as well.
-                        record.put("SfdcContactID", contactArray[8]);
+                        record.put("SfdcContactID", contactArray[9]);
                         
                         List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
@@ -340,6 +340,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "C.[Address_Street_1] AS Address, C.[Address_Street_2] AS Address2,"
                 + "C.[City] AS City, C.[State_Province] AS State,"
                 + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
+                + getSfdcContactIDFromLEContact()
                 + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], C.[LEContact_ID] ) RowNum "
                 + getContactFromWhereClause(contactIds)

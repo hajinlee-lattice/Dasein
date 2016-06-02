@@ -93,8 +93,8 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     public Map<String, Object> getContacts(String tenantName, long start, int offset, int maximum, List<Integer> contactIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> plays = dao.getContacts(start, offset, maximum, contactIds);
-        Map<String, Object> result = wrapResult(plays);
+        List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds);
+        Map<String, Object> result = wrapResult(contacts);
         return result;
     }
     
