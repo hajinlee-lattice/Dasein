@@ -17,6 +17,8 @@
         <le.serviceruntime.version>2.0.33-SNAPSHOT</le.serviceruntime.version>
         <le.security.version>2.0.33-SNAPSHOT</le.security.version>
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
+        <le.scoringapi.version>2.0.33-SNAPSHOT</le.scoringapi.version>
+        <le.testframework.version>2.0.33-SNAPSHOT</le.testframework.version>
     </properties>
 
     <parent>
@@ -240,6 +242,7 @@
             <version>${le.security.version}</version>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -393,6 +396,22 @@
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scoringapi</artifactId>
+            <version>${le.scoringapi.version}</version>
+            <classifier>intf</classifier>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testframework.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

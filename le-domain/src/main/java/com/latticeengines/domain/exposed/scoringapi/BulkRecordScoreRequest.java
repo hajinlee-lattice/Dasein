@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class BulkRecordScoreRequest {
 
@@ -64,6 +65,10 @@ public class BulkRecordScoreRequest {
 
     public void setRequestTimestamp(String requestTimestamp) {
         this.requestTimestamp = requestTimestamp;
+    }
+
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

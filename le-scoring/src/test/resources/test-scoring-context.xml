@@ -22,5 +22,7 @@
 
     <import resource="classpath:scoring-context.xml" />
     <import resource="classpath:scoring-properties-context.xml" />
+<!--     <import resource="classpath:scoring-appmaster-context.xml" /> -->
+<!--     <import resource="classpath:proxy-context.xml" /> -->
 
 </beans>

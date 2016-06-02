@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResult;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
-import com.latticeengines.proxy.exposed.scoringapi.ScoringApiProxy;
+import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
@@ -59,7 +59,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ScoringApiProxy scoringApiProxy;
+    private InternalScoringApiProxy internalScoringApiProxy;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -74,10 +74,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
         log.info("In side the rts bulk scoring processor.");
         String path = getExtractPath(rtsBulkScoringConfig);
+        String tenant = rtsBulkScoringConfig.getTenant();
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
-            List<RecordScoreResponse> recordScoreResponse = scoringApiProxy.bulkScore(scoreRequest);
+            log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
+                    .getRecords().size(), tenant));
+            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
+                    scoreRequest, tenant);
             recordScoreResponseList.addAll(recordScoreResponse);
         }
         convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
