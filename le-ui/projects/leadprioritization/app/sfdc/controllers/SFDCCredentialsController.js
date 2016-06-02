@@ -3,8 +3,12 @@ angular.module('mainApp.sfdc.sfdcCredentials', [
 ])
 .controller('sfdcCredentialsController', function($scope, $q, $http, BrowserStorageUtility) {
         $scope.showTokenMessage = false;
+        $scope.loading = false;
 
-        $scope.generateAndEmailSFDCAccessToken = function() {
+        $scope.generateAndEmailSFDCAccessTokenClicked = function() {
+            $scope.loading = true;
+            $scope.showTokenMessage = false;
+
             var clientSession = BrowserStorageUtility.getClientSession();
             var emailAddress = clientSession.EmailAddress;
             var tenantId = clientSession.Tenant.Identifier;
@@ -23,10 +27,12 @@ angular.module('mainApp.sfdc.sfdcCredentials', [
             .success(function(data, status, headers, config) {
                 $scope.showTokenMessage = true;
                 $scope.tokenSucceeded = true;
+                $scope.loading = false;
             })
             .error(function(data, status, headers, config) {
                 $scope.showTokenMessage = true;
                 $scope.tokenSucceeded = false;
+                $scope.loading = false;
             });
         };
 
