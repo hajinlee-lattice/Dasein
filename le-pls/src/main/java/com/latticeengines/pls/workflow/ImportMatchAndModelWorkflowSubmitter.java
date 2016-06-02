@@ -26,7 +26,7 @@ import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 
 @Component
 public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
-    @SuppressWarnings("unused")
+
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
     @Autowired
@@ -71,6 +71,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
+        log.info("Modeling parameters: " + parameters.toString());
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -80,7 +81,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .importReportNamePrefix(sourceFile.getName() + "_Report") //
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
                 .dedupDataFlowBeanName("dedupEventTable") //
-                .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain")) //
+                .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain", parameters.getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
@@ -96,6 +97,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .minDedupedRows(minDedupedRows) //
                 .minPositiveEvents(minPositiveEvents) //
                 .transformationGroup(transformationGroup) //
+                .excludePropDataColumns(parameters.getExcludePropDataColumns()) //
                 .build();
         return configuration;
     }
@@ -104,6 +106,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
         TransformationGroup transformationGroup = getTransformationGroupFromZK();
+        
+        if (parameters.getTransformationGroup() != null) {
+            transformationGroup = parameters.getTransformationGroup(); 
+        }
+        
         ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters, transformationGroup);
 
         ApplicationId applicationId = workflowJobService.submit(configuration);
