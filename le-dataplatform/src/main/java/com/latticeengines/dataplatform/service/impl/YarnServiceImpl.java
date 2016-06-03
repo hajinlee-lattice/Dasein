@@ -132,7 +132,14 @@ public class YarnServiceImpl implements YarnService {
         currentIndex = (currentIndex + 1) % rmServiceIds.length;
         yarnConfiguration.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
         String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
-        return "http://" + rmHostPort + "/ws/v1/cluster";        
+        String address = yarnConfiguration.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String schedulerAddress = yarnConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "." + rmServiceIds[currentIndex]);
+        yarnConfiguration.set(YarnConfiguration.RM_ADDRESS, address);
+        yarnConfiguration.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
+        yarnConfiguration.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
+
+        return "http://" + rmHostPort + "/ws/v1/cluster";
     }
 
 }

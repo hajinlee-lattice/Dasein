@@ -92,11 +92,17 @@ public class CustomYarnClient extends CommandYarnClient {
         }
         currentIndex = (currentIndex + 1) % rmServiceIds.length;
         conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
+        String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "." + rmServiceIds[currentIndex]);
+        conf.set(YarnConfiguration.RM_ADDRESS, address);
+        conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
+        conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
+        setConfiguration(conf);
         try {
             clientRmTemplate.afterPropertiesSet();
         } catch (Exception e) {
             log.error("clientRmTemplate refresh properties faied.");
         }
-        
     }
 }
