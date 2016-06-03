@@ -33,6 +33,9 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
         Map<String, Object> result = template.requestBodyAndHeaders("direct:getLeadMetadata", null, headers, Map.class);
+        if (result.get("result") == null) {
+            throw new RuntimeException("result is null!");
+        }
         List<Map<String, Object>> leadMetadata = (List<Map<String, Object>>) result.get("result");
         Map<String, Map<String, Object>> metadataMap = new HashMap<>();
         for (Map<String, Object> lead : leadMetadata) {

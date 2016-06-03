@@ -87,7 +87,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileExportConfig.setExportFormat(ExportFormat.CSV);
         fileExportConfig.setExportDestination(ExportDestination.FILE);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
-
+        //fileExportConfig.setUsingDisplayName(Boolean.FALSE);
         Table table = createFile(new File(csvUrl.getPath()).getParentFile(), "file2");
         Extract extract = new Extract();
         extract.setPath(sourceFilePath + "/file.avro");

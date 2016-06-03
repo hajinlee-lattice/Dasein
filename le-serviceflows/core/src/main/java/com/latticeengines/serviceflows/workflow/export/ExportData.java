@@ -49,6 +49,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
         exportConfig.setExportFormat(configuration.getExportFormat());
         exportConfig.setExportDestination(configuration.getExportDestination());
         exportConfig.setCustomerSpace(configuration.getCustomerSpace());
+        exportConfig.setUsingDisplayName(configuration.getUsingDisplayName());
         exportConfig.setTable(retrieveTable());
         if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_INPUT_PATH))) {
             exportConfig.setExportInputPath(getStringValueFromContext(EXPORT_INPUT_PATH));

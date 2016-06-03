@@ -52,6 +52,8 @@ public class FileExportServiceImpl extends ExportService {
             context.setProperty(ExportProperty.INPUT_FILE_PATH,
                     ExtractUtils.getSingleExtractPath(yarnConfiguration, table));
         }
+        boolean exportUsingDisplayName = exportConfig.getUsingDisplayName();
+        context.setProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.valueOf(exportUsingDisplayName));
         strategy.exportData(null, table, null, context);
     }
 

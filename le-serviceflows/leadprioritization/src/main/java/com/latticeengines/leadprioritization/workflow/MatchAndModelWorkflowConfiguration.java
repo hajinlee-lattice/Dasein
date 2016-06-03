@@ -193,6 +193,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public MatchAndModelWorkflowConfiguration build() {
             match.setMatchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission());
+            export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 

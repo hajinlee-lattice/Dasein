@@ -21,6 +21,8 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     private String tableName;
 
+    private boolean shouldUseDisplayName = Boolean.TRUE;
+
     private Map<String, String> properties = new HashMap<>();
 
     public ExportFormat getExportFormat() {
@@ -73,5 +75,13 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setExportTargetPath(String exportTargetPath) {
         this.exportTargetPath = exportTargetPath;
+    }
+
+    public boolean getUsingDisplayName() {
+        return shouldUseDisplayName;
+    }
+
+    public void setUsingDisplayName(boolean shouldUseDisplayName) {
+        this.shouldUseDisplayName = shouldUseDisplayName;
     }
 }

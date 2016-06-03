@@ -14,6 +14,7 @@ public class ExportConfiguration extends BasePayloadConfiguration {
     private Table table;
     private String exportInputPath;
     private String exportTargetPath;
+    private boolean exportUsingDisplayName = Boolean.TRUE;
     private Map<String, String> properties = new HashMap<>();
 
     @JsonProperty("export_format")
@@ -78,5 +79,15 @@ public class ExportConfiguration extends BasePayloadConfiguration {
 
     public void setProperty(String propertyName, String propertyValue) {
         properties.put(propertyName, propertyValue);
+    }
+
+    @JsonProperty("UseDisplayName")
+    public boolean getUsingDisplayName() {
+        return exportUsingDisplayName;
+    }
+
+    @JsonProperty("UseDisplayName")
+    public void setUsingDisplayName(boolean exportUsingDisplayName) {
+        this.exportUsingDisplayName = exportUsingDisplayName;
     }
 }
