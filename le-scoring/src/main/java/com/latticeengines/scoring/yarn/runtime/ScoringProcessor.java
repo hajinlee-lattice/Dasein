@@ -43,8 +43,8 @@ import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
-        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
+        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -132,15 +132,22 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             if (StringUtils.isBlank(recordIdObj.toString())) {
                 throw new LedpException(LedpCode.LEDP_20034);
             }
-            record.setModelIds(modelGuids);
-            record.setRecordId(recordIdObj.toString());
+
             Map<String, Object> attributeValues = new HashMap<>();
-            record.setAttributeValues(attributeValues);
             for (Schema.Field field : fields) {
                 String fieldName = field.name();
                 Object fieldValue = avroRecord.get(fieldName);
                 attributeValues.put(fieldName, fieldValue);
             }
+
+            Map<String, Map<String, Object>> modelAttributeValuesMap = new HashMap<>();
+            for (String modelguid : modelGuids) {
+                modelAttributeValuesMap.put(modelguid, attributeValues);
+            }
+
+            record.setModelAttributeValuesMap(modelAttributeValuesMap);
+            record.setRecordId(recordIdObj.toString());
+
             records.add(record);
 
             if (i % BulkRecordScoreRequest.MAX_ALLOWED_RECORDS == 0) {

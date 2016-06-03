@@ -1,11 +1,10 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class Record {
     public static final String LATTICE_ID = "LATTICE";
@@ -18,17 +17,13 @@ public class Record {
     @ApiModelProperty(value = "Type of record ID")
     private String idType;
 
-    @JsonProperty("modelIds")
-    @ApiModelProperty(value = "List of model ID")
-    private List<String> modelIds;
+    @JsonProperty("modelAttributeValuesMap")
+    @ApiModelProperty(value = "Map of model ID and attributeValues")
+    Map<String, Map<String, Object>> modelAttributeValuesMap;
 
     @JsonProperty("performEnrichment")
     @ApiModelProperty(value = "Should perform enrichment or not")
     private boolean performEnrichment;
-
-    @JsonProperty("attributeValues")
-    @ApiModelProperty(value = "Attribute values")
-    private Map<String, Object> attributeValues;
 
     private String rootOperationId;
 
@@ -50,12 +45,12 @@ public class Record {
         this.idType = idType;
     }
 
-    public List<String> getModelIds() {
-        return modelIds;
+    public Map<String, Map<String, Object>> getModelAttributeValuesMap() {
+        return modelAttributeValuesMap;
     }
 
-    public void setModelIds(List<String> modelIds) {
-        this.modelIds = modelIds;
+    public void setModelAttributeValuesMap(Map<String, Map<String, Object>> modelAttributeValuesMap) {
+        this.modelAttributeValuesMap = modelAttributeValuesMap;
     }
 
     public boolean isPerformEnrichment() {
@@ -64,14 +59,6 @@ public class Record {
 
     public void setPerformEnrichment(boolean performEnrichment) {
         this.performEnrichment = performEnrichment;
-    }
-
-    public Map<String, Object> getAttributeValues() {
-        return attributeValues;
-    }
-
-    public void setAttributeValues(Map<String, Object> attributeValues) {
-        this.attributeValues = attributeValues;
     }
 
     public String getRootOperationId() {

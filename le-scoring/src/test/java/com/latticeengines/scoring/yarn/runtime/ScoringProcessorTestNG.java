@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
@@ -66,14 +67,17 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         List<BulkRecordScoreRequest> scoreRequestList = bulkScoringProcessor.convertAvroToBulkScoreRequest(dir,
                 rtsBulkScoringConfig);
         Assert.assertEquals(scoreRequestList.size(), 107);
-        Assert.assertNotNull(scoreRequestList.get(0).getRecords());
-        Assert.assertEquals(scoreRequestList.get(0).getRule(), ScoringProcessor.RECORD_RULE);
-        Assert.assertEquals(scoreRequestList.get(0).getSource(), ScoringProcessor.RECORD_SOURCE);
-        Assert.assertEquals(scoreRequestList.get(0).getRecords().get(0).getIdType(), ScoringProcessor.DEFAULT_ID_TYPE);
-        Assert.assertEquals(scoreRequestList.get(0).getRecords().size(), 200);
+        BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
+        Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
+        Assert.assertEquals(bulkRecordScoreRequest.getRule(), ScoringProcessor.RECORD_RULE);
+        Assert.assertEquals(bulkRecordScoreRequest.getSource(), ScoringProcessor.RECORD_SOURCE);
+
+        Record record = bulkRecordScoreRequest.getRecords().get(0);
+        Assert.assertEquals(record.getIdType(), ScoringProcessor.DEFAULT_ID_TYPE);
+        Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 200);
         Assert.assertEquals(scoreRequestList.get(106).getRecords().size(), 62);
-        Assert.assertEquals(scoreRequestList.get(0).getRecords().get(0).getModelIds().size(), 1);
-        Assert.assertTrue(scoreRequestList.get(0).getRecords().get(0).getModelIds().contains(modelGuidString));
+        Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
+        Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
     }
 
     @Test(groups = "functional")

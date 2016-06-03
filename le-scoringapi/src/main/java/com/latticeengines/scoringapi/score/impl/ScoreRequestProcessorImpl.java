@@ -42,8 +42,8 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
@@ -186,7 +186,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             Map<String, ScoringArtifacts> scoringArtifactsMap) {
         List<ModelSummary> modelSummaryList = new ArrayList<>();
         for (Tuple tuple : parsedTupleList) {
-            String modelId = getModelId(tuple);
+            String modelId = tuple.getModelId();
             if (org.apache.commons.lang.StringUtils.isNotEmpty(modelId)) {
                 ModelSummary modelSummary = scoringArtifactsMap.get(modelId).getModelSummary();
                 modelSummaryList.add(modelSummary);
@@ -246,7 +246,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
             ScoreModelTuple score = new ScoreModelTuple();
             score.setScore(resp.getScore());
-            score.setModelId(tuple.getRecord().getModelIds().get(tuple.getModelIndex()));
+            score.setModelId(tuple.getModelId());
 
             scores.add(score);
 
@@ -257,23 +257,16 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private ScoringArtifacts getScoringArtifactForTuple(Map<String, ScoringArtifacts> scoringArtifactsMap,
             Tuple tuple) {
-        String modelId = getModelId(tuple);
+        String modelId = tuple.getModelId();
         ScoringArtifacts scoringArtifacts = scoringArtifactsMap.get(modelId);
         return scoringArtifacts;
     }
 
     private Map<String, FieldSchema> getSchemaForTuple(Map<String, Map<String, FieldSchema>> fieldSchemasMap,
             Tuple tuple) {
-        String modelId = getModelId(tuple);
+        String modelId = tuple.getModelId();
         Map<String, FieldSchema> schema = fieldSchemasMap.get(modelId);
         return schema;
-    }
-
-    private String getModelId(Tuple tuple) {
-        int modelIndex = tuple.getModelIndex();
-        List<String> recordModelIds = tuple.record.getModelIds();
-        String modelId = recordModelIds.get(modelIndex);
-        return modelId;
     }
 
     private List<Map<String, Object>> transform(Map<String, ScoringArtifacts> scoringArtifactsMap,
@@ -304,21 +297,23 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         List<Tuple> recordAndFieldList = new ArrayList<>();
         for (Record record : request.getRecords()) {
             int modelIndex = 0;
-            for (String modelId : record.getModelIds()) {
+            for (String modelId : record.getModelAttributeValuesMap().keySet()) {
                 Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.get(modelId);
-                checkForMissingFields(record.getRecordId(), fieldSchemas, record.getAttributeValues());
+                Map<String, Object> attrValMap = record.getModelAttributeValuesMap().get(modelId);
+                checkForMissingFields(record.getRecordId(), fieldSchemas, attrValMap);
                 String latticeId = record.getRecordId();
 
                 if (!Record.LATTICE_ID.equals(record.getIdType())) {
-                    latticeId = LatticeIdGenerator.generateLatticeId(record.getAttributeValues());
+                    latticeId = LatticeIdGenerator.generateLatticeId(attrValMap);
                 }
 
                 record.setRootOperationId(request.getRootOperationId());
                 record.setRequestTimestamp(request.getRequestTimestamp());
 
                 Tuple tuple = new Tuple(request.getRequestTimestamp(), latticeId, record,
-                        parseRecord(record.getRecordId(), fieldSchemas, record.getAttributeValues()), modelIndex++);
+                        parseRecord(record.getRecordId(), fieldSchemas, attrValMap), modelId);
                 recordAndFieldList.add(tuple);
+
             }
         }
 
@@ -330,7 +325,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         // extract a set of unique modelIds across all modelIds
         Set<String> uniqueModelIds = new HashSet<>();
         for (Record record : records) {
-            for (String modelId : record.getModelIds()) {
+            for (String modelId : record.getModelAttributeValuesMap().keySet()) {
                 // check if modelId is valid
                 if (org.apache.commons.lang.StringUtils.isBlank(modelId)) {
                     throw new ScoringApiException(LedpCode.LEDP_31101);
@@ -494,6 +489,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     }
 
     private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
+
+        // if (scoringArtifacts.getModelSummary().)
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
@@ -579,15 +576,15 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         private String latticeId;
         private Record record;
         private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedData;
-        private int modelIndex;
+        private String modelId;
 
         public Tuple(String requstTimestamp, String latticeId, Record record,
-                SimpleEntry<Map<String, Object>, InterpretedFields> parsedData, int modelIndex) {
+                SimpleEntry<Map<String, Object>, InterpretedFields> parsedData, String modelId) {
             this.requstTimestamp = requstTimestamp;
             this.latticeId = latticeId;
             this.record = record;
             this.parsedData = parsedData;
-            this.modelIndex = modelIndex;
+            this.modelId = modelId;
         }
 
         public String getRequstTimestamp() {
@@ -606,9 +603,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             return parsedData;
         }
 
-        public int getModelIndex() {
-            return modelIndex;
+        public String getModelId() {
+            return modelId;
         }
-
     }
 }
