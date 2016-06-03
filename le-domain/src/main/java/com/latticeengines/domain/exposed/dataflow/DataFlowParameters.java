@@ -1,7 +1,18 @@
 package com.latticeengines.domain.exposed.dataflow;
 
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Transient;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
@@ -23,4 +34,22 @@ import com.latticeengines.domain.exposed.propdata.match.ParseMatchResultParamete
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
 })
 public class DataFlowParameters {
+    @Transient
+    @JsonIgnore
+    public final Set<String> getSourceTableNames() {
+        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(getClass(), SourceTableName.class);
+
+        Set<String> sources = new HashSet<>();
+        for (Field field : fields) {
+            try {
+                Object value = field.get(this);
+                if (value != null) {
+                    sources.add(value.toString());
+                }
+            } catch (IllegalAccessException e) {
+                // pass
+            }
+        }
+        return sources;
+    }
 }

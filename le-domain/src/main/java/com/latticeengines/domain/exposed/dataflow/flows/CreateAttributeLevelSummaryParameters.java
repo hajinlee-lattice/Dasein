@@ -3,11 +3,13 @@ package com.latticeengines.domain.exposed.dataflow.flows;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public class CreateAttributeLevelSummaryParameters extends DataFlowParameters {
 
     @JsonProperty("event_table")
+    @SourceTableName
     public String eventTable;
     
     @JsonProperty("groupby_columns")

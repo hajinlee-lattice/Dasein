@@ -1,14 +1,17 @@
 package com.latticeengines.domain.exposed.dataflow.flows;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("score_results_table_name")
+    @SourceTableName
     private String scoreResultsTableName;
 
     @JsonProperty("input_table_name")
+    @SourceTableName
     private String inputTableName;
 
     @JsonProperty("debug_enabled")
