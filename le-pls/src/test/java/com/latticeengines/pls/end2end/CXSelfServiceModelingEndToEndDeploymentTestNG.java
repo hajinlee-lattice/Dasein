@@ -134,12 +134,13 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         else if(folder.isDirectory())
         {
             File[] listOfFiles = folder.listFiles();
+            String FolderName=fileName;
             log.info(String.format("===========Files numbre is %d", listOfFiles.length));
             for (int i = 0; i < listOfFiles.length; i++)
             {
                 if (listOfFiles[i].getName().toLowerCase().endsWith(".csv"))
                 {
-                    fileName=fileName+'/'+listOfFiles[i].getName();
+                    fileName=FolderName+'/'+listOfFiles[i].getName();
                     log.info(String.format("======CSV File Name is: %s=========", fileName));
                     String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
                     downloadModels();
