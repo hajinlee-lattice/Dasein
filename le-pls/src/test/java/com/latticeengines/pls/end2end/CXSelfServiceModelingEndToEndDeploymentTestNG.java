@@ -112,12 +112,50 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     @Test(groups="qa.lp", enabled=true)
     public void testModelQuality() throws InterruptedException, IOException
     {
-        String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
-        downloadModels();
-        log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
-        //WriteToSplunk();
+        String fullPath=System.getenv("WSHOME")+"/le-pls/src/test/resources/"+RESOURCE_BASE+'/'+fileName;
+        log.info("Folder Full Path:"+fullPath);
+        File folder = new File(fullPath);
+        if (folder.isFile())
+        {
+            if (fileName.toLowerCase().endsWith(".csv"))
+            {
+                //fileName=fileName;
+                log.info(String.format("======CSV File Name is: %s=========", fileName));
+                String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
+                downloadModels();
+                log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
+              //WriteToSplunk();
+            }
+            else
+            {
+                log.info(String.format("The file %s is not CSV file, so skip to model", fileName));
+            }
+        }
+        else if(folder.isDirectory())
+        {
+            File[] listOfFiles = folder.listFiles();
+            log.info(String.format("===========Files numbre is %d", listOfFiles.length));
+            for (int i = 0; i < listOfFiles.length; i++)
+            {
+                if (listOfFiles[i].getName().toLowerCase().endsWith(".csv"))
+                {
+                    fileName=fileName+'/'+listOfFiles[i].getName();
+                    log.info(String.format("======CSV File Name is: %s=========", fileName));
+                    String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
+                    downloadModels();
+                    log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
+                  //WriteToSplunk();
+                }
+                else
+                {
+                    log.info(String.format("The file %s in folder %s is not CSV file, so skip to model", listOfFiles[i].getName(),folder.getPath()));
+                }
+                
+                
+            }
+        }
     }
-
+    
     public void downloadModels() throws IOException {
         String tenantName = tenantToAttach.getId();
         // debug use
