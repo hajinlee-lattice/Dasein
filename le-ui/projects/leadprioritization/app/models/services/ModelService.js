@@ -14,7 +14,7 @@ angular.module('mainApp.models.services.ModelService', [
     // checks if items matching args exists, performs XHR to fetch if they don't
     this.getModel = function(modelId) {
         var deferred = $q.defer(),
-            model = this.models[modelId];
+            model = this.modelsMap[modelId];
         
         if (typeof model == 'object') {
             deferred.resolve(model);

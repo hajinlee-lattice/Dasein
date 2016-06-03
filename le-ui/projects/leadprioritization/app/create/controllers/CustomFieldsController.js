@@ -24,17 +24,14 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         if (selectedOption == $scope.mappingOptions[1]) {
             showLatticeFieldsSelector(fieldMapping);
         } else if (selectedOption == $scope.mappingOptions[0]) {
-            var newCustomFieldMapping = {};
-            newCustomFieldMapping.userField = fieldMapping.userField;
-            newCustomFieldMapping.mappedField = fieldMapping.userField;
-            newCustomFieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
-            newCustomFieldMapping.mappedToLatticeField = false;
+            fieldMapping.userField = fieldMapping.userField;
+            fieldMapping.mappedField = fieldMapping.userField;
+            fieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
+            fieldMapping.mappedToLatticeField = false;
 
             if (!fieldMapping.mappedField) {
                 fieldMapping.mappedField = fieldMapping.userField;
             }
-
-            $scope.fieldNameToFieldMappings[fieldMapping.userField] = newCustomFieldMapping;
         } else if (selectedOption == $scope.mappingOptions[2]) {
             $scope.fieldNameToFieldMappings[fieldMapping.userField] = {}; // if field is ignored, we'll use {} to designate it.
         }
@@ -105,6 +102,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
 
     function showLatticeFieldsSelector (fieldSelected) {
         csvImportStore.CurrentFieldMapping = fieldSelected;
+        csvImportStore.fieldNameToFieldMappings = $scope.fieldNameToFieldMappings;
 
         SelectFieldsModal.show($scope.schema, fieldSelected);
     };

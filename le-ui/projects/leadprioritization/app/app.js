@@ -124,18 +124,19 @@ var mainApp = angular.module('mainApp', [
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
         });
-        */
         $scope.getWidgetConfigDoc();
+        */
     };
 
     $scope.getWidgetConfigDoc = function () {
-        return;
+        /*
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
         });
+        */
     };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
@@ -231,7 +232,6 @@ var mainApp = angular.module('mainApp', [
 
     function createMandatoryChangePasswordViewForLocale(locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-        console.log('createMandatoryChangePasswordViewForLocale');
             $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;

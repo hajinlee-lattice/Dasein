@@ -29,13 +29,19 @@ console.log(fieldMapping);
         });
     };
 })
+.filter('weed', function() {
+    return function(items, key) {
+        console.log(key, items);
+    };
+})
 .controller('SelectFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.latticeSchemaFields;
     $scope.CurrentFieldMapping = csvImportStore.CurrentFieldMapping;
+    $scope.fieldNameToFieldMappings = csvImportStore.fieldNameToFieldMappings;
+    console.log('modal init', $scope.fieldNameToFieldMappings);
     csvImportService.GetSchemaToLatticeFields().then(function(result) {
         $scope.latticeSchemaFields = result[$scope.schema];
-    console.log('hhh', csvImportStore.CurrentFieldMapping);
     });
     $scope.mapLatticeField = function(latticeSchemaField) {
         console.log(latticeSchemaField);

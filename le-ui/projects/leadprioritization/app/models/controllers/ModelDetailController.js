@@ -19,6 +19,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     
     var modelId = $stateParams.modelId;
 
+    console.log(modelId, ModelStore, Model);
+
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;

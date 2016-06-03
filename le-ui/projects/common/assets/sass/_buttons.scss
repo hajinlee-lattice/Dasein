@@ -40,6 +40,8 @@ button.button, a.button, .button {
   border: 1px solid transparent;
   color: $pearl-white;
   text-transform: uppercase;
+  border-radius: 5px;
+  font-weight: bold;
   
   &.link-button {
   	display: inline;

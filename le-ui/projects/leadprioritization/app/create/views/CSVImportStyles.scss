@@ -17,6 +17,10 @@ section.container.setup-import {
         overflow: hidden;
     }
 
+    #csvFileUploadMessage {
+        font-size: 0.9em;
+    }
+
     div.toggle-check {
         vertical-align: top;
         font-size: 1em;
@@ -36,7 +40,7 @@ section.container.setup-import {
         }
     }
 
-    div.progress {
+    div.progress { 
         position: absolute;
         top: 0;
         bottom: 0;
@@ -46,7 +50,7 @@ section.container.setup-import {
         transition: all 500ms linear;
 
         &.processing {
-            background: #e2e2e2;
+            background: #dddddd;
         }
         &.compressing {
             transition: all 1000ms linear;

@@ -20,6 +20,7 @@
                         <tr ng-repeat="latticeSchemaField in latticeSchemaFields |
                                         startFrom: (current - 1) * pagesize |
                                         limitTo: pagesize" 
+                            ng-if="!fieldNameToFieldMappings[latticeSchemaField.name]"
                             ng-click="mapLatticeField(latticeSchemaField)">
                             <td>{{latticeSchemaField.name}}</td>
                             <td>{{getRequiredType(latticeSchemaField)}}</td>

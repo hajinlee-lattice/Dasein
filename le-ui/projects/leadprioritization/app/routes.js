@@ -283,9 +283,7 @@ angular
                             .then(
                                 function onSuccess(response) {
                                     deferred.resolve(response.data);
-                                    console.log("success");
                                 }, function onError(response) {
-                                    console.log("error");
                                     deferred.reject(response.data);
                                 }
                             );
@@ -293,6 +291,7 @@ angular
                         }
                     },
                     controller: 'csvBulkUploadController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/models/views/BulkScoringImportData.html'
                 }   
             }

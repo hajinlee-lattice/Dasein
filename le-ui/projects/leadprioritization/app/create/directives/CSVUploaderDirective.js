@@ -5,6 +5,7 @@ angular
         restrict: 'A',
         require:'ngModel',
         link: function(scope, element, attrs, ngModel) {
+            console.log('link', scope, element, attrs, ngModel);
             var model = $parse(attrs.csvUploader);
             var modelSetter = model.assign;
 
@@ -33,11 +34,16 @@ angular
                     compressed: true,
                     csvFileName: null,
                     csvFileDisplayName: '',
-                    message: 'Choose a CSV file'
+                    message: 'Choose a CSV file',
+                    params: vm_form.params || {}
                 },
                 element = this.element = $element[0];
 
             vm.startUpload = function() {
+                if (!vm.csvFile) {
+                    return false;
+                }
+
                 vm.startTime = new Date();
                 vm.upload_percent = 0;
                 vm.processing = true;
@@ -62,7 +68,10 @@ angular
                 vm.csvFileDisplayName = fileName;
 
                 // FIXME: emit an event, change from form controller
-                vm_form.generateModelName(fileName);
+                if (fileName) {
+                    console.log(fileName, vm_form);
+                    vm_form.generateModelName(fileName);
+                }
             }
 
             vm.readHeaders = function(file) {
@@ -84,20 +93,15 @@ angular
                 }, 500);
 
                 var deferred = $q.defer(),
-                    FR = new FileReader();
+                    FR = new FileReader(),
+                    sliced = file.slice(0, 2048); // grab first 2048 chars
 
-                FR.onprogress = function(e) {
+                FR.onload = function(e) {
                     var lines = e.target.result.split(/[\r\n]+/g);
-                    
-                    if (parseInt(lines.length) > 0) {
-                        FR.onprogress = null;
-                        FR.abort();
-                    }
-                    
                     deferred.resolve(lines[0]);
                 };
 
-                FR.readAsText(file);
+                FR.readAsText(sliced);
 
                 return deferred.promise;
             }
@@ -181,15 +185,20 @@ angular
                 vm.uploading = true;
                 vm.upload_percent = 0;
 
+                if (!vm_form.params) {
+                    vm_form.params = {};
+                }
+
                 var fileType = vm.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
                     modelName = vm.modelDisplayName = vm.modelDisplayName || vm.csvFileName,
                     options = {
                         file: file, 
-                        url: '/pls/models/uploadfile/unnamed',
+                        url: vm_form.params.url || '/pls/models/uploadfile/unnamed',
                         params: {
-                            schema: fileType,
                             displayName: vm.csvFileName,
-                            compressed: vm.compressed
+                            schema: vm_form.params.schema || fileType,
+                            modelId: vm_form.params.modelId || false,
+                            compressed: (vm_form.params.compressed || vm_form.params.compressed === false ? vm_form.params.compressed : vm.compressed)
                         },
                         progress: vm.uploadProgress
                     };
@@ -280,6 +289,23 @@ angular
                 vm.csvFileDisplayName = '';
                 vm.choosenFileName = '';
             }
+
+            angular.extend(vm, options);
+        }
+    };
+})
+.directive('csvUploaderContainer', function ($parse) {
+    return {
+        restrict: 'A',
+        templateUrl: 'app/create/directives/CSVUploaderTemplate.html',
+        controllerAs: 'vm_uploader_container',
+        controller: function ($scope, $state, $q, $element, ResourceUtility, StringUtility, csvImportService, csvImportStore) {
+            var vm_form = $scope.vm,
+                vm = this,
+                options = {
+
+                },
+                element = this.element = $element[0];
 
             angular.extend(vm, options);
         }
