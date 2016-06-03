@@ -17,7 +17,8 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.params = {
         url: '/pls/scores/fileuploads',
         modelId: $stateParams.modelId,
-        compressed: true
+        compressed: true, 
+        schema: null
     }
 
     vm.uploadFile = function() {

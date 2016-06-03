@@ -51,6 +51,12 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         mapUserFieldToLatticeField(data.userFieldName, data.latticeSchemaField);
     });
 
+    $scope.$on('Mapped_Field_Modal_Cancelled', function(event, data) {
+        console.log(event, data);
+        mapUserFieldToLatticeField(data.userFieldName, data.latticeSchemaField);
+        $scope.mappingChanged(data.latticeSchemaField, $scope.mappingOptions[0]);
+    });
+
     function deleteFromIgnoredFieldIfExists(fieldName) {
         if (fieldName in $scope.ignoredFields) {
             $scope.ignoredFields.splice($scope.ignoredFields.indexOf(fieldName), 1);
@@ -107,6 +113,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     function showLatticeFieldsSelector (fieldSelected) {
         csvImportStore.CurrentFieldMapping = fieldSelected;
         csvImportStore.fieldNameToFieldMappings = $scope.fieldNameToFieldMappings;
+        csvImportStore.fieldMappings = $scope.fieldMappings;
 
         SelectFieldsModal.show($scope.schema, fieldSelected);
     };
