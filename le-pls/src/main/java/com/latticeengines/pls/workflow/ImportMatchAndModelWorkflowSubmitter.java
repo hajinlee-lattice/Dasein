@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,16 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
+
+        ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined.getDefaultSelection();
+        String predefinedSelectionName = parameters.getPredefinedSelectionName();
+        if (StringUtils.isNotEmpty(predefinedSelectionName)) {
+            predefinedSelection = ColumnSelection.Predefined.fromName(predefinedSelectionName);
+            if (predefinedSelection == null) {
+                throw new IllegalArgumentException("Cannot parse column selection named " + predefinedSelectionName);
+            }
+        }
+
         log.info("Modeling parameters: " + parameters.toString());
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
@@ -88,7 +99,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null means latest
+                .matchColumnSelection(predefinedSelection, null) // null means latest
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //

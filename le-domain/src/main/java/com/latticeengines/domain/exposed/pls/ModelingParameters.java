@@ -22,16 +22,18 @@ public class ModelingParameters {
 
     @JsonProperty
     private String description;
-    
+
     @JsonProperty
     private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
-    
+
     @JsonProperty
     private boolean excludePropDataColumns = false;
-    
+
     @JsonProperty
     private TransformationGroup transformationGroup;
-    
+
+    @JsonProperty
+    private String predefinedSelectionName;
 
     public String getFilename() {
         return filename;
@@ -64,19 +66,19 @@ public class ModelingParameters {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     public DedupType getDeduplicationType() {
         return deduplicationType;
     }
-    
+
     public void setDeduplicationType(DedupType deduplicationType) {
         this.deduplicationType = deduplicationType;
     }
-    
+
     public boolean getExcludePropDataColumns() {
         return excludePropDataColumns;
     }
-    
+
     public void setExcludePropDataColumns(boolean excludePropDataColumns) {
         this.excludePropDataColumns = excludePropDataColumns;
     }
@@ -87,6 +89,14 @@ public class ModelingParameters {
 
     public void setTransformationGroup(TransformationGroup transformationGroup) {
         this.transformationGroup = transformationGroup;
+    }
+
+    public String getPredefinedSelectionName() {
+        return predefinedSelectionName;
+    }
+
+    public void setPredefinedSelectionName(String predefinedSelectionName) {
+        this.predefinedSelectionName = predefinedSelectionName;
     }
 
     @Override
