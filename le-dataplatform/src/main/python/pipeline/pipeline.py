@@ -34,6 +34,9 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
 
+    allColumns = categoricalColumns.copy()
+    allColumns.update(continuousColumns)
+
     colTransform = columntransform.ColumnTransform(pathToPipelineFiles=[pipelineDriver])
     (names, steps) = colTransform.buildPipelineFromFile(pipelinePath="./" + pipelineLib, \
                                                stringColumns=stringColumns, \
@@ -41,7 +44,8 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                                                continuousColumns=continuousColumns, \
                                                targetColumn=targetColumn, \
                                                columnsToTransform=columnsToTransform, \
-                                               profile=metadata)
+                                               profile=metadata,
+                                               allColumns=allColumns)
 
     # If properties are empty, don't try and set values
     disabledSteps = []

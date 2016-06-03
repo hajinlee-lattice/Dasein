@@ -44,6 +44,88 @@
         "enabled": "false"
       },
       "ColumnTransformFilePath": "testrowrulethree.py"
+    },
+    "CountUniqueValue": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "countuniquevaluerule",
+      "MainClassName": "CountUniqueValueRule",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn",
+        "uniqueCountThreshold":200
+      },
+      "ColumnTransformFilePath": "countuniquevaluerule.py"
+    },
+    "PopulatedRowCount": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "populatedrowcount",
+      "MainClassName": "PopulatedRowCount",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns"
+      },
+      "ColumnTransformFilePath": "populatedrowcount.py"
+    },
+    "FrequencyIssue": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "frequencyissue",
+      "MainClassName": "FrequencyIssue",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "frequencyissue.py"
+    },
+    "FutureInformation": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "futureinformation",
+      "MainClassName": "FutureInformation",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "futureinformation.py"
+    },
+    "HighlyPredictiveSmallPopulation": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "highlypredictivesmallpopulation",
+      "MainClassName": "HighlyPredictiveSmallPopulation",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "highlypredictivesmallpopulation.py"
+    },
+    "NullIssue": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "nullissue",
+      "MainClassName": "NullIssue",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "nullissue.py"
     }
   }
 }
