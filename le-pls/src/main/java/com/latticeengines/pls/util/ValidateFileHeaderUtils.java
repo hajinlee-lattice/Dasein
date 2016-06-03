@@ -9,6 +9,7 @@ import java.util.*;
 import javax.annotation.Nullable;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -43,6 +44,11 @@ public class ValidateFileHeaderUtils {
             CSVParser parser = new CSVParser(reader, format);
             closeableResourcePool.addCloseable(parser);
             headerFields = parser.getHeaderMap().keySet();
+            // make this temporary fix
+            if(parser.getRecords().size() < 1){
+                throw new RuntimeException(String.format(
+                        "Expected at least 1 record.  Instead found %d", parser.getRecords().size()));
+            }
 
             return headerFields;
 
@@ -62,7 +68,12 @@ public class ValidateFileHeaderUtils {
                     StandardCharsets.UTF_8);
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
+            closeableResourcePool.addCloseable(parser);
             List<CSVRecord> csvRecords = parser.getRecords();
+            if(parser.getRecords().size() < 1){
+                throw new RuntimeException(String.format(
+                        "Expected at least 1 record.  Instead found %d", parser.getRecords().size()));
+            }
             int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
 
             int i = 0;
