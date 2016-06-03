@@ -48,7 +48,7 @@
 					          ng-model="fieldMapping.mappedField"
 					          ng-value="fieldMapping.mappedField"
 					          ng-hide="selectedOption.id == 2"
-					          ng-show="fieldMapping.mappedField || selectedOption.id == 1"
+					          ng-show="fieldMapping.mappedField || selectedOption.id == 0"
 					          ng-disabled="fieldMapping.mappedToLatticeField"
 					          placeholder="" />
 						</td>
@@ -86,7 +86,7 @@
 				</button>
 			</div>
 			<div class="pull-right" ng-hide="errors">
-				<button ng-click="csvSubmitColumns($event)" ng-disabled="!isDocumentCompletelyMapped()" class="button orange-button" type="button">
+				<button ng-click="csvSubmitColumns(); NextClicked = true;" ng-disabled="NextClicked" class="button orange-button" type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
 				</button>
 			</div>

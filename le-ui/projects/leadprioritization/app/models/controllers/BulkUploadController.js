@@ -21,6 +21,7 @@ angular.module('mainApp.create.csvBulkUpload', [
     }
 
     vm.uploadFile = function() {
+        /*
         vm.showImportError = false;
         vm.importErrorMsg = "";
         vm.importing = true;
@@ -100,26 +101,36 @@ angular.module('mainApp.create.csvBulkUpload', [
         ShowSpinner('<div><h6 id="file_progress">Compressing...<br>This may take a moment.</h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
 
         $('#fileUploadCancelBtn').on('click', vm.cancelClicked.bind(this));
+        */
     };
 
-    vm.clickNext = function() {
-        csvImportService.StartTestingSet(vm.params.modelId, fileName).then(function(result) {
-            console.log('scoring testing set',result);
-            $state.go('home.model.jobs', { 'jobCreationSuccess': true });
-        });
-    }
-
     vm.processHeaders = function(headers) {
-        console.log('processHeaders', headers);
+        //console.log('processHeaders', headers);
     }
 
     vm.generateModelName = function(fileName) {
-        console.log('generateModelName', fileName);
+        //console.log('generateModelName', fileName);
+    }
+    
+    vm.uploadResponse = function(result) {
+        //console.log('upload response',result);
+
+        if (result.Result && result.Result.name) {
+            vm.fileName = result.Result.name;
+        }
     }
 
     vm.cancelClicked = function() {
-        console.log('# Upload Cancelled');
+        //console.log('# Upload Cancelled');
         csvImportStore.Get('cancelXHR', true).abort();
         $state.go('home.model.jobs');
     };
+
+    vm.clickNext = function() {
+        ShowSpinner('Executing Scoring Job...');
+        csvImportService.StartTestingSet(vm.params.modelId, vm.fileName).then(function(result) {
+            //console.log('scoring testing set', vm.fileName, result);
+            $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
+        });
+    }
 });

@@ -26,7 +26,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         } else if (selectedOption == $scope.mappingOptions[0]) {
             fieldMapping.userField = fieldMapping.userField;
             fieldMapping.mappedField = fieldMapping.userField;
-            fieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
+            //fieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
             fieldMapping.mappedToLatticeField = false;
 
             if (!fieldMapping.mappedField) {
@@ -40,11 +40,10 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     for (var i = 0; i < $scope.fieldMappings.length; i++) {
         var fieldMapping = $scope.fieldMappings[i];
         if (fieldMapping.mappedField == null) {
-            $scope.fieldNameToFieldMappings[fieldMapping.userField] = null;
             $scope.mappingChanged(fieldMapping, $scope.mappingOptions[0])
         } else {
-            $scope.fieldNameToFieldMappings[fieldMapping.userField] = fieldMapping;
         }
+        $scope.fieldNameToFieldMappings[fieldMapping.userField] = fieldMapping;
         $scope.fieldNameToFieldTypes[fieldMapping.userField] = fieldMapping.fieldType;
     }
 
@@ -58,7 +57,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         }
     }
 
-    $scope.csvSubmitColumns = function(event) {
+    $scope.csvSubmitColumns = function() {
         var fieldMappings = [];
         for (fieldName in $scope.fieldNameToFieldMappings) {
             if ($scope.fieldNameToFieldMappings[fieldName].userField != null) {
@@ -68,6 +67,8 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
             }
         }
 
+        ShowSpinner('Saving Field Mappings...')
+
         csvImportService.SaveFieldDocuments(
             $scope.csvFileName, 
             $scope.schema, 
@@ -75,6 +76,9 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
             $scope.ignoredFields
         ).then(function(result) {
             var csvMetadata = csvImportStore.Get($scope.csvFileName);
+            
+            ShowSpinner('Executing Modeling Job...');
+
             csvImportService.StartModeling(csvMetadata).then(function(result) {
                 $state.go('home.jobs.status', {'jobCreationSuccess': result.Success });
             });

@@ -5,7 +5,6 @@ angular
         restrict: 'A',
         require:'ngModel',
         link: function(scope, element, attrs, ngModel) {
-            console.log('link', scope, element, attrs, ngModel);
             var model = $parse(attrs.csvUploader);
             var modelSetter = model.assign;
 
@@ -20,7 +19,7 @@ angular
             });
         },
         controllerAs: 'vm_uploader',
-        controller: function ($scope, $state, $q, $element, ResourceUtility, StringUtility, csvImportService, csvImportStore) {
+        controller: function ($scope, $state, $q, $element, ResourceUtility, StringUtility, csvImportService, csvImportStore, ServiceErrorUtility) {
             var vm_form = $scope.vm,
                 vm = this,
                 options = {
@@ -43,6 +42,8 @@ angular
                 if (!vm.csvFile) {
                     return false;
                 }
+
+                ServiceErrorUtility.hideBanner();
 
                 vm.startTime = new Date();
                 vm.upload_percent = 0;
@@ -69,7 +70,6 @@ angular
 
                 // FIXME: emit an event, change from form controller
                 if (fileName) {
-                    console.log(fileName, vm_form);
                     vm_form.generateModelName(fileName);
                 }
             }
@@ -209,6 +209,10 @@ angular
             }
 
             vm.uploadResponse = function(result) {
+                if (typeof vm_form.uploadResponse == 'function') {
+                    vm_form.uploadResponse(result);
+                }
+
                 vm.uploading = false;
 
                 if (result.Success && result.Result) {
@@ -219,10 +223,8 @@ angular
                     vm.uploaded = true;
                     vm.message = 'Done in ' + vm.getElapsedTime(vm.startTime);
                 } else {
-                    vm.upload_percent = 0;
-                    vm.percentage = '';
+                    vm.cancel(true);
                     vm.message = 'Transfer aborted';
-                    vm.uploaded = false;
 
                     setTimeout(function() {
                         vm.message = 'Choose a CSV file';
@@ -275,7 +277,7 @@ angular
                 return timestamp;
             }
 
-            vm.cancel = function() {
+            vm.cancel = function(IGNORE_FILENAME) {
                 vm.processing = false;
                 vm.compressing = false;
                 vm.uploading = false;
@@ -285,9 +287,12 @@ angular
                 vm.compress_percent = 0;
                 vm.upload_percent = 0;
                 vm.message = '';
-                //vm.csvFileName = null;
-                vm.csvFileDisplayName = '';
-                vm.choosenFileName = '';
+
+                if (!IGNORE_FILENAME) {
+                    //vm.csvFileName = null;
+                    vm.csvFileDisplayName = '';
+                    vm.choosenFileName = '';
+                }
             }
 
             angular.extend(vm, options);

@@ -5,7 +5,6 @@ angular.module('mainApp.setup.modals.SelectFieldsModal', [
 ])
 .service('SelectFieldsModal', function($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     this.show = function(schema, fieldMapping) {
-console.log(fieldMapping);
         $http.get('app/create/views/SelectFieldsView.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.schema = schema;
@@ -27,11 +26,6 @@ console.log(fieldMapping);
             });
 
         });
-    };
-})
-.filter('weed', function() {
-    return function(items, key) {
-        console.log(key, items);
     };
 })
 .controller('SelectFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore) {
