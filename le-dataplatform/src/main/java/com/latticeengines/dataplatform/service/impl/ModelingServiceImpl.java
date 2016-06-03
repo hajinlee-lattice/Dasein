@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
@@ -68,6 +69,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -171,11 +173,12 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        properties.setProperty(
+                MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
+                        versionManager.getCurrentVersionInStack(stackName)));
 
-        return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()),
-                properties);
+        return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()), properties);
     }
 
     @Override
@@ -219,6 +222,48 @@ public class ModelingServiceImpl implements ModelingService {
                 dispatchService.getProfileJobName(dataProfileConfig.isParallelEnabled()));
         m.addModelingJob(modelingJob);
         return dispatchService.submitJob(modelingJob, dataProfileConfig.isParallelEnabled(), false);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ApplicationId reviewData(DataReviewConfiguration dataReviewConfig) {
+        if (dataReviewConfig.getCustomer() == null) {
+            throw new LedpException(LedpCode.LEDP_15002);
+        }
+
+        Model m = setupProfileModel(dataReviewConfig);
+        m.setName("DataReview-" + System.currentTimeMillis());
+        List<String> featureList = getFeatureList(dataReviewConfig, m);
+        if (featureList.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_15016);
+        }
+
+        m.setDataFormat("avro");
+        m.setTargetsList(dataReviewConfig.getTargets());
+        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setFeaturesList(featureList);
+
+        m.setModelHdfsDir(m.getMetadataHdfsPath());
+        ModelDefinition modelDefinition = new ModelDefinition();
+        modelDefinition.setName(m.getName());
+        AlgorithmBase dataReviewAlgorithm = new DataReviewAlgorithm();
+        dataReviewAlgorithm.setSampleName(dataReviewConfig.getSamplePrefix());
+        dataReviewAlgorithm.setMapperSize("0");
+        if (StringUtils.isEmpty(dataReviewConfig.getContainerProperties())) {
+            dataReviewAlgorithm.setContainerProperties(getDefaultContainerProperties());
+        } else {
+            dataReviewAlgorithm.setContainerProperties(dataReviewConfig.getContainerProperties());
+        }
+        if (!StringUtils.isEmpty(dataReviewConfig.getScript())) {
+            dataReviewAlgorithm.setScript(dataReviewConfig.getScript());
+        }
+        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataReviewAlgorithm }));
+        String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+        m.setModelDefinition(modelDefinition);
+
+        ModelingJob modelingJob = createJob(m, dataReviewAlgorithm, assignedQueue, "reviewing");
+        m.addModelingJob(modelingJob);
+        return dispatchService.submitJob(modelingJob, dataReviewConfig.isParallelEnabled(), false);
     }
 
     @Override
@@ -315,13 +360,14 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void validateModelInputData(Model model) throws Exception {
         try {
-            ModelValidationService validator = ModelValidationService.get(model.getModelDefinition().getAlgorithms().get(0).getName());
+            ModelValidationService validator = ModelValidationService.get(model.getModelDefinition().getAlgorithms()
+                    .get(0).getName());
             validator.validate(model);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
-    
+
     private void setDefaultValues(Algorithm algorithm) {
         RandomForestAlgorithm rf = new RandomForestAlgorithm();
         if (StringUtils.isEmpty(algorithm.getPipelineDriver())) {
@@ -347,7 +393,7 @@ public class ModelingServiceImpl implements ModelingService {
         } else {
             classifier.setDisplayName(classifier.getName());
         }
-        
+
         setDefaultValues(algorithm);
 
         classifier.setModelHdfsDir(model.getModelHdfsDir());
@@ -364,7 +410,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setPipelineProperties(algorithm.getPipelineProperties());
         classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
-        
+
         if (algorithm.hasDataDiagnostics()) {
             classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
         }
@@ -473,8 +519,8 @@ public class ModelingServiceImpl implements ModelingService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
-        appMasterProperties.put(dispatchService.getMapSizeKeyName(model.isParallelEnabled()),
-                algorithm.getMapperSize());
+        appMasterProperties
+                .put(dispatchService.getMapSizeKeyName(model.isParallelEnabled()), algorithm.getMapperSize());
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);
