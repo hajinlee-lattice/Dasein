@@ -24,6 +24,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.DEPLOYMENT_WIZARD_NAV_EVENT = "DeploymentWizardNavEvent";
     this.LEAD_ENRICHMENT_NAV_EVENT = "LeadEnrichment";
     this.MAP_LATTICE_SCHEMA_FIELD_EVENT = "MapLatticeSchemaField";
+    this.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT = "ManageFieldsAdvancedSettingsEvent";
 
     // General Event Constants
     this.SYSTEM_CONFIGURED_COMPLETE_EVENT = "SystemConfiguredCompleteEvent";

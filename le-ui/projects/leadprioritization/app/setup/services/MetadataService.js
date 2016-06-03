@@ -74,7 +74,7 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.UpdateAndCloneFields = function (modelName, modelDisplayName, originalModelSummaryId, fields) {
+    this.UpdateAndCloneFields = function (dedupType, modelName, modelDisplayName, originalModelSummaryId, fields) {
         var deferred = $q.defer();
 
         var cloneParams = {
@@ -82,7 +82,8 @@ angular.module('mainApp.setup.services.MetadataService', [
             displayName: modelDisplayName,
             description: 'cloned from model: ' + originalModelSummaryId,
             attributes: fields,
-            sourceModelSummaryId: originalModelSummaryId
+            sourceModelSummaryId: originalModelSummaryId,
+            deduplicationType: dedupType
         };
 
         $http({

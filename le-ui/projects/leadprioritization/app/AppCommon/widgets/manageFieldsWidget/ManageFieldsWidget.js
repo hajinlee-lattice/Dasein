@@ -1,17 +1,19 @@
 angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.services.MetadataService',
     'mainApp.appCommon.services.ManageFieldsService',
     'mainApp.setup.modals.EditFieldModel',
     'mainApp.setup.controllers.DiscardEditFieldsModel',
-    'mainApp.setup.modals.UpdateFieldsModal'
+    'mainApp.setup.modals.UpdateFieldsModal',
+    'mainApp.setup.modals.FieldMappingSettingsModal'
 ])
 
 .controller('ManageFieldsWidgetController', function (
-    $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility,
-    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel, UpdateFieldsModal) {
+    $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility,
+    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -22,6 +24,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.dirtyRows = {};
     $scope.indexToOldFieldsForSingleFieldPage = {};
     $scope.indexToOldFieldsForListFieldsPage = {};
+    $scope.oneLeadPerDomain = true;
+    $scope.useLatticeAttributes = true;
 
     getOptionsAndFields();
 
@@ -339,7 +343,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.saveInProgress) { return; }
 
         var editedData = getAllEditedData();
-        if (editedData != null && editedData.length > 0) {
+        if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
             DiscardEditFieldsModel.show($scope);
         } else {
             $scope.showEditFieldsError = true;
@@ -347,13 +351,53 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
     };
 
+    $scope.advancedSettingsClicked = function() {
+        FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.useLatticeAttributes);
+    };
+
+    $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, useLatticeAttributes) {
+        $scope.oneLeadPerDomain = oneLeadPerDomain;
+
+        if ($scope.useLatticeAttributes != useLatticeAttributes) {
+            if (!useLatticeAttributes) {
+                disableAllLatticeAttributes();
+            } else {
+                enableAllLatticeAttributes();
+                loadFields();
+            }
+        }
+        $scope.useLatticeAttributes = useLatticeAttributes;
+    });
+
+    function disableAllLatticeAttributes() {
+        for (var i = 0; i < $scope.fields.length; i++) {
+            var field = $scope.fields[i];
+            if ($scope.isLatticeAttribute(field) && field.ApprovedUsage != 'None') {
+                field.ApprovedUsage = 'None';
+                $scope.indexToOldFieldsForListFieldsPage[i] = field;
+                $scope.fields[i] = field;
+            }
+        }
+
+        renderGrid($scope.fields);
+    }
+
+    function enableAllLatticeAttributes() {
+        for (var index in $scope.indexToOldFieldsForListFieldsPage) {
+            if ($scope.isLatticeAttribute($scope.indexToOldFieldsForListFieldsPage[index]) &&
+                $scope.indexToOldFieldsForListFieldsPage[index].ApprovedUsage == 'None') {
+                delete $scope.indexToOldFieldsForListFieldsPage[index];
+            }
+        }
+    }
+
     $scope.remodelClicked = function($event) {
         if ($scope.saveInProgress) { return; }
         $scope.showEditFieldsError = false;
 
         var editedData = getAllEditedData();
-        if (editedData != null && editedData.length > 0) {
-            UpdateFieldsModal.show($scope.modelSummaryId, editedData);
+        if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, editedData);
 
             $scope.saveInProgress = false;
         } else {
@@ -366,6 +410,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
+        $scope.oneLeadPerDomain = true;
+        $scope.useLatticeAttributes = true;
         $scope.dirtyRows = {};
 
         $scope.indexToOldFieldsForListFieldsPage = {};

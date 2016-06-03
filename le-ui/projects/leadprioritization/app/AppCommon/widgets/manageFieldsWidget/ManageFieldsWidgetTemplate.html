@@ -35,6 +35,7 @@
                     <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_CATEGORIES')}}</option>
                 </select>
                 <label class="checkbox"><input type="checkbox" data-ng-change="filterFields($event)" data-ng-model="onlyShowErrorFields"/>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_CHECKBOX_ONLY_SHOW_ERROR_FIELDS')}}<span class="warning"></span></label>
+                <a href="javascript:void(0)" data-ng-click="advancedSettingsClicked()" style="float: right">Advanced Settings</a>
             </div>
         </div>
         <div class="fields-panel">
