@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
@@ -55,6 +56,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
+    private static final String DUMMY_APP_ID = "DUMMY_APP";
 
     @Value("${scoringapi.hostport}")
     protected String apiHostPort;
@@ -73,6 +75,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Autowired
     protected Configuration yarnConfiguration;
 
+    @Autowired
+    protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
+
     protected InternalResourceRestApiProxy plsRest = null;
 
     protected DataComposition eventTableDataComposition;
@@ -89,10 +94,18 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     public void beforeClass() throws IOException {
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         oAuthUser = getOAuthUser(TENANT_ID);
-        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(), oAuthUser.getPassword(),
-                CLIENT_ID_LP);
+
+        if (shouldUseAppId()) {
+            System.out.println("Requesting access token for appi id: " + getAppIdForOauth2());
+            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, CLIENT_ID_LP,
+                    getAppIdForOauth2(), authHostPort);
+        } else {
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
+                    oAuthUser.getPassword(), CLIENT_ID_LP);
+        }
         OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
         log.info(accessToken.getValue());
+
         System.out.println(accessToken.getValue());
         tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
@@ -237,6 +250,14 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 Assert.assertEquals(displayName, fieldDisplayNamePrefix + field.getFieldName());
             }
         }
+    }
+
+    protected boolean shouldUseAppId() {
+        return false;
+    }
+
+    protected String getAppIdForOauth2() {
+        return DUMMY_APP_ID;
     }
 
 }

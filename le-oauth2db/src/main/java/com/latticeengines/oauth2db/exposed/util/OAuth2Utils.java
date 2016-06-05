@@ -4,10 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
@@ -26,6 +31,7 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 public class OAuth2Utils {
 
     private static final Log log = LogFactory.getLog(OAuth2Utils.class);
+    private static final String APP_ID = "app_id";
 
     public static String extractHeaderToken(HttpServletRequest request) {
         Enumeration<String> headers = request.getHeaders("Authorization");
@@ -89,8 +95,13 @@ public class OAuth2Utils {
         return CustomerSpace.parse(getTenantName(request, oAuthUserEntityMgr));
     }
 
+    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
+            String clientId) {
+        return getOauthTemplate(authHostPort, username, password, clientId, null);
+    }
 
-    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password, String clientId) {
+    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
+            String clientId, String appId) {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setUsername(username);
         resource.setPassword(password);
@@ -100,6 +111,14 @@ public class OAuth2Utils {
         resource.setAccessTokenUri(authHostPort + "/oauth/token");
 
         DefaultAccessTokenRequest accessTokenRequest = new DefaultAccessTokenRequest();
+
+        if (!StringUtils.isEmpty(appId)) {
+            Map<String, List<String>> headers = new HashMap<>();
+            List<String> appList = new ArrayList<>();
+            appList.add(appId);
+            headers.put(APP_ID, appList);
+            accessTokenRequest.setHeaders(headers);
+        }
         OAuth2ClientContext context = new DefaultOAuth2ClientContext(accessTokenRequest);
         OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);
         return newRestTemplate;

@@ -118,7 +118,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "scoreRecords" })
     public void getPaginatedModels() {
         String url = apiHostPort + "/score";
 
@@ -169,6 +169,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
         runScoringTest(url);
+    }
+
+    @Override
+    protected boolean shouldUseAppId() {
+        return true;
     }
 
     private List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus,

@@ -25,7 +25,7 @@ import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
 
 @Configuration
-@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-properties-context.xml" })
 public class OAuthServer extends SpringBootServletInitializer {
@@ -52,9 +52,14 @@ public class OAuthServer extends SpringBootServletInitializer {
         @Autowired
         private OneTimeKeyAuthenticationManager authenticationManager;
 
+        @Autowired
+        private LatticeAuthenticationKeyGenerator authenticationKeyGenerator;
+
         @Bean
         public JdbcTokenStore tokenStore() {
-            return new JdbcTokenStore(dataSource);
+            JdbcTokenStore tokenStore = new JdbcTokenStore(dataSource);
+            tokenStore.setAuthenticationKeyGenerator(authenticationKeyGenerator);
+            return tokenStore;
         }
 
         @Bean
