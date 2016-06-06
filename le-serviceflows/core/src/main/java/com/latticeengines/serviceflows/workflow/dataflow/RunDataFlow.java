@@ -57,7 +57,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     private List<DataFlowSource> createDataFlowSources(DataFlowParameters parameters) {
         List<DataFlowSource> sources = new ArrayList<>();
-        Set<String> sourceNames = parameters.getSourceTableNames();
+        Set<String> sourceNames = parameters != null ? parameters.getSourceTableNames() : new HashSet<String>();
         if (sourceNames.isEmpty()) {
             // May be missing an extra source
             sourceNames = new HashSet<>(metadataProxy.getTableNames(configuration.getCustomerSpace().toString()));
