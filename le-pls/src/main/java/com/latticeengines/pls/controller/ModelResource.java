@@ -70,7 +70,7 @@ public class ModelResource {
     @ApiOperation(value = "Clones and remodels with the specified model name.")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
-        log.info(String.format("cloneAndRemodel called with parameters %s", parameters.toString()));
+        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(), parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
         List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(clone.getAttributes(), parameters.getAttributes());
         ModelSummary modelSummary = modelSummaryService

@@ -68,16 +68,15 @@ public class ValidateFileHeaderUtils {
                     StandardCharsets.UTF_8);
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
+            Iterator<CSVRecord> csvRecordIterator = parser.iterator();
             closeableResourcePool.addCloseable(parser);
-            List<CSVRecord> csvRecords = parser.getRecords();
+
             if (!parser.iterator().hasNext()) {
                 throw new RuntimeException("Expected at least 1 record. Instead found 0");
             }
-            int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
-
             int i = 0;
-            while (columnFields.size() < numFieldsToAdd && i < csvRecords.size()) {
-                String columnField = csvRecords.get(i).get(columnHeaderName);
+            while (i < MAX_NUM_ROWS && csvRecordIterator.hasNext()) {
+                String columnField = csvRecordIterator.next().get(columnHeaderName);
                 if (columnField != null && !columnField.isEmpty()) {
                     columnFields.add(columnField);
                 }
