@@ -45,22 +45,22 @@ public class ValidateFileHeaderUtils {
             closeableResourcePool.addCloseable(parser);
             headerFields = parser.getHeaderMap().keySet();
             // make this temporary fix
-            if(parser.getRecords().size() < 1){
-                throw new RuntimeException(String.format(
-                        "Expected at least 1 record.  Instead found %d", parser.getRecords().size()));
+            if (!parser.iterator().hasNext()) {
+                throw new RuntimeException("Expected at least 1 record. Instead found 0");
             }
 
             return headerFields;
 
         } catch (IllegalArgumentException e) {
-            throw new LedpException(LedpCode.LEDP_18109, new String[] {e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
 
-    public static List<String> getCSVColumnValues(String columnHeaderName, InputStream stream, CloseableResourcePool closeableResourcePool) {
+    public static List<String> getCSVColumnValues(String columnHeaderName, InputStream stream,
+            CloseableResourcePool closeableResourcePool) {
         try {
             List<String> columnFields = new ArrayList<>();
             InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
@@ -70,16 +70,15 @@ public class ValidateFileHeaderUtils {
             CSVParser parser = new CSVParser(reader, format);
             closeableResourcePool.addCloseable(parser);
             List<CSVRecord> csvRecords = parser.getRecords();
-            if(parser.getRecords().size() < 1){
-                throw new RuntimeException(String.format(
-                        "Expected at least 1 record.  Instead found %d", parser.getRecords().size()));
+            if (!parser.iterator().hasNext()) {
+                throw new RuntimeException("Expected at least 1 record. Instead found 0");
             }
             int numFieldsToAdd = csvRecords.size() < MAX_NUM_ROWS ? csvRecords.size() : MAX_NUM_ROWS;
 
             int i = 0;
             while (columnFields.size() < numFieldsToAdd && i < csvRecords.size()) {
                 String columnField = csvRecords.get(i).get(columnHeaderName);
-                if (columnField != null && ! columnField.isEmpty()) {
+                if (columnField != null && !columnField.isEmpty()) {
                     columnFields.add(columnField);
                 }
                 i++;
@@ -94,7 +93,7 @@ public class ValidateFileHeaderUtils {
 
     @SuppressWarnings("unchecked")
     public static void checkForDuplicateHeaders(List<Attribute> attributes, String fileDisplayName,
-                                                Set<String> headerFields) {
+            Set<String> headerFields) {
         Map<String, List<String>> duplicates = new HashMap<>();
         for (final Attribute attribute : attributes) {
             final List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
