@@ -46,7 +46,7 @@ public class ValidateFileHeaderUtils {
             headerFields = parser.getHeaderMap().keySet();
             // make this temporary fix
             if (!parser.iterator().hasNext()) {
-                throw new RuntimeException("Expected at least 1 record. Instead found 0");
+                throw new LedpException(LedpCode.LEDP_18110);
             }
 
             return headerFields;
@@ -71,8 +71,8 @@ public class ValidateFileHeaderUtils {
             Iterator<CSVRecord> csvRecordIterator = parser.iterator();
             closeableResourcePool.addCloseable(parser);
 
-            if (!parser.iterator().hasNext()) {
-                throw new RuntimeException("Expected at least 1 record. Instead found 0");
+            if (!csvRecordIterator.hasNext()) {
+                throw new LedpException(LedpCode.LEDP_18110);
             }
             int i = 0;
             while (i < MAX_NUM_ROWS && csvRecordIterator.hasNext()) {
