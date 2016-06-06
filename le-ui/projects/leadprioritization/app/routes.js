@@ -133,6 +133,18 @@ angular
                 }   
             }
         })
+        .state('home.models.import.job', {
+            url: '/:applicationId/job',
+            views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
+                },
+                "main@": {
+                    controller: 'ImportJobController',
+                    templateUrl: 'app/create/views/ImportJobView.html'
+                }
+            }
+        })
         .state('home.models.create', {
             url: '/create',
             views: {

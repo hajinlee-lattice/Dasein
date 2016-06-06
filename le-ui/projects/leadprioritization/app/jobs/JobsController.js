@@ -280,6 +280,63 @@ angular.module('pd.jobs', [
         return deferred.promise;
     };
 
+    this.getJobStatusFromApplicationId = function(applicationId) {
+
+        var deferred = $q.defer();
+        var result;
+
+        $http({
+            method: 'GET',
+            url: '/pls/jobs/yarnapps/' + applicationId,
+            headers: {
+                'ErrorDisplayMethod': 'banner',
+                'If-Modified-Since': 0
+            }
+        }).then(
+            function onSuccess(response) {
+                clearNumSteps();
+                var job = response.data;
+                var stepRunning = getStepRunning(job);
+                var stepsCompleted = getStepsCompleted(job);
+                var stepFailed = getStepFailed(job);
+
+                result = {
+                    success: true,
+                    resultObj: {
+                        id: job.id,
+                        user: job.user,
+                        errorCode: job.errorCode,
+                        errorMsg: job.errorMsg,
+                        jobType: job.jobType,
+                        jobStatus: job.jobStatus,
+                        startTimestamp: job.startTimestamp,
+                        stepRunning: stepRunning,
+                        stepsCompleted: stepsCompleted,
+                        stepFailed: stepFailed,
+                        completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                        reports: job.reports
+                    }
+                };
+                deferred.resolve(result);
+            },
+            function onError(response) {
+                result = {
+                    success: false,
+                    resultObj: {
+                        id: job.id,
+                        user: job.user,
+                        errorCode: job.errorCode,
+                        errorMsg: job.errorMsg,
+                        jobType: job.jobType,
+                    }
+                };
+                deferred.resolve(result);
+            }
+        );
+
+        return deferred.promise;
+    };
+
     this.rescoreTrainingData = function() {
         var deferred = $q.defer();
         var result = {

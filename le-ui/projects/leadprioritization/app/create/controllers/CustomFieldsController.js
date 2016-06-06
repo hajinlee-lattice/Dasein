@@ -87,6 +87,14 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
 
             csvImportService.StartModeling(csvMetadata).then(function(result) {
                 $state.go('home.jobs.status', {'jobCreationSuccess': result.Success });
+
+                if (result.Result && result.Result != "") {
+                    setTimeout(function() {
+                        $state.go('home.models.import.job', { applicationId: result.Result });
+                    }, 1);
+                } else {
+                    // ERROR
+                }
             });
         });
     };
