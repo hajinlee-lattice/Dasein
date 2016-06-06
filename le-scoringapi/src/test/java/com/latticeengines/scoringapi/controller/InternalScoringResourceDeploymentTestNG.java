@@ -98,7 +98,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    // @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    // "scoreRecords" })
     public void getPaginatedModels() {
         List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(new Date(0), true, 0, 50,
                 customerSpace.toString());
@@ -121,8 +122,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring",
-            "getPaginatedModels" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);

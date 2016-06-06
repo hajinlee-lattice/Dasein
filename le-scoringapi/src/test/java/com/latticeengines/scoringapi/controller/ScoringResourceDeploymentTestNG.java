@@ -118,7 +118,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         }
     }
 
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "scoreRecords" })
+    // @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    // "scoreRecords" })
     public void getPaginatedModels() {
         String url = apiHostPort + "/score";
 
@@ -142,8 +143,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
-            "getModelsCountAfterBulkScoring" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring"})
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
@@ -174,6 +174,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     @Override
     protected boolean shouldUseAppId() {
         return true;
+    }
+
+    @Override
+    protected String getAppIdForOauth2() {
+        return "DUMMY_APP";
     }
 
     private List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus,
