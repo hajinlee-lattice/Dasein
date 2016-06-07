@@ -9,10 +9,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.DeleteModelModal',
-    'mainApp.models.modals.StaleModelModal'
+    'mainApp.models.modals.StaleModelModal',
+    'mainApp.models.modals.DeactivateModelModal'
 ])
-.controller('ModelListTileWidgetController', function ($http, $scope, $state, $rootScope, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, FeatureFlagService, ModelService) {
+.controller('ModelListTileWidgetController', function ($http, $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
+    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -43,13 +44,13 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $event.stopPropagation();
         }
         $scope.showModelMenu = !$scope.showModelMenu;
-    }
+    };
 
     $scope.refineAndCloneClick = function ($event) {
         if ($event != null) {
             $event.stopPropagation();
         }
-    }
+    };
 
     $scope.updateAsActiveClick = function ($event) {
         var modelId = $scope.data.Id;
@@ -65,31 +66,18 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     console.log("errors");
                 }
             });
-        }
-
-    }
+        };
+    };
 
     $scope.updateAsInactiveClick = function ($event) {
-        var modelId = $scope.data.Id;
-
-        updateAsInactiveModel(modelId);
-
-        function updateAsInactiveModel(modelId) {
-            $("#deleteModelError").hide();
-            ModelService.updateAsInactiveModel(modelId).then(function(result) {
-                if (result != null && result.success === true) {
-                    $state.go('home.models', {}, { reload: true } );
-                } else {
-                    console.log("errors");
-                }
-            });
-        }
-    }
+        $event.preventDefault();
+        DeactivateModelModal.show($scope.data.Id);
+    };
 
     $scope.deleteModelClick = function ($event) {
         $event.preventDefault();
         DeleteModelModal.show($scope.data.Id);
-    }
+    };
 
     $scope.modelNameEditClick = function ($event) {
         if ($event != null) {
@@ -107,7 +95,10 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $event.preventDefault();
         }
 
-        if (!$scope.nameStatus.editing && !incomplete) {
+        var targetElement = $($event.target);
+        if (targetElement.parent().hasClass("model-menu")) {
+            $event.preventDefault();
+        } else if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
         } else if (!$scope.nameStatus.editing && incomplete) {
         	StaleModelModal.show($scope.data.Id);

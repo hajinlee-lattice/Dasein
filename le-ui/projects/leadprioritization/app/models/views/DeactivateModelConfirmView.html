@@ -1,0 +1,24 @@
+<div class="modal-dialog modal-sm" data-ng-controller="DeactivateModelController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ResourceUtility.getString('MODEL_DEACTIVATE_TITLE')}}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-12 text-center">
+              <p>{{ResourceUtility.getString('MODEL_DEACTIVATE_LABEL1')}}</p>
+                <div class="row alert-holder">
+                  <div id="deactivateModelError" class="alert alert-danger">
+                    {{deactivateModelErrorMessage}}
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button class="button blue-button" type="button" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+            <a class="button orange-button" href="#" data-ng-click="deactivateModelClick($event)">{{ResourceUtility.getString('MODEL_DEACTIVATE_TITLE')}}</a>
+        </div>
+    </div>
+</div>
