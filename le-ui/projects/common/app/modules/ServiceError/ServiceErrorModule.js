@@ -29,7 +29,7 @@ angular
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
                 method = params[0],
-                state = params[1] || null; // state or elementQuery
+                state = params[1] || null, // state or elementQuery
                 stateParams = params[2] || null;
 
             switch (method) {
@@ -40,7 +40,6 @@ angular
                 case 'suppress': this.showSuppressed(response); break;
                 default: this.showModal(response);
             }
-
         }
     };
 

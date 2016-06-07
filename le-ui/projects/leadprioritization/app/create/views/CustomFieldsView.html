@@ -1,5 +1,5 @@
 <section class="container custom-fields">
-	<form name="fieldMappingForm" novalidate>
+	<form novalidate name="fieldMappingForm">
 	<div class="row">
 		<div class="ten columns offset-one">
 			<hgroup>
@@ -11,7 +11,7 @@
 		</div>
 	</div>
 
-	<div class="row">
+	<div class="row field-mapping-form">
 		<div class="ten offset-one columns">
 			<table class="unstyled">
 				<thead>
@@ -52,6 +52,7 @@
 	                            	{{fieldMapping.mappedField}}
 	                            </option>
 	                            <option value="{{UnmappedField.name}}"
+	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(UnmappedField.name) > -1) }"
 	                            		ng-if="!vm.fieldMappingsMapped[UnmappedField.name] && UnmappedField.name != fieldMapping.mappedField"
 	                            		ng-repeat="UnmappedField in vm.UnmappedFields"
 	                            		ng-selected="fieldMapping.mappedField == UnmappedField.name">
@@ -60,6 +61,7 @@
                             </select>
 					        <input 	required
           							ng-minlength="1"
+          							ng-pattern="/^[a-zA-Z0-9_\-]*$/"
 									type="text" 
 									class="form-control" 
 									name="mapping_custom_field_input_{{$index}}"
@@ -90,8 +92,24 @@
 		</div>
 	</div>
 
+	<div class="row field-mapping-validation">
+		<div class="ten columns offset-one" ng-class="{ 'has-error' : fieldMappingForm.$invalid }">
+      		<p class="help-block">
+      			* One or more of your columns is unmapped or has errors
+      		</p>
+    	</div>
+  	</div>
+
+	<div class="row field-mapping-validation" ng-repeat="RequiredField in vm.RequiredFields" ng-if="!vm.fieldMappingsMapped[RequiredField]">
+		<div class="ten columns offset-one has-error">
+			<p class="help-block">
+		    	* Required column is missing: <i class="orange-text">{{RequiredField}}</i>
+			</p>
+    	</div>
+    </div>
+
 	<div class="row">
-		<div class="ten columns offset-one actions">
+		<div class="ten columns offset-one field-mapping-actions">
 			<div class="pull-left">
 				<button ui-sref="home.models.import" class="button gray-button" type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}

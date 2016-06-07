@@ -62,7 +62,7 @@ angular
                 displayName = fileName.replace('.csv',''),
                 displayName = displayName.substr(0, 50 - (timestamp.length + 1));
 
-            if (vm.modelDisplayName.indexOf(displayName) < 0) {
+            if (vm.modelDisplayName && vm.modelDisplayName.indexOf(displayName) < 0) {
                 vm.modelDisplayName = displayName + '_' + timestamp;
                 vm.showNameDefault = true;
             }

@@ -203,18 +203,43 @@ section.container.custom-fields {
                     width: 56%;
                 }
                 */
+                option.required {
+                    font-weight: bold;
+                }
             }
             input {
                 display: inline-block;
                 font-size: 14px;
                 padding-left: 10px;
             }
+            input,select {
+                &.ng-valid.ng-valid-required {
+                    border-left-width: 4px;
+                    border-color: #629acc;
+                    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                }
+                &.ng-invalid {
+                    color: #a94442;
+                    border-color: #a94442;
+                    border-left-width: 4px;
+                    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+                    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+                }
+            }
         }
     }
-    .actions {
-        padding-top: 20px;
-        margin-top: 50px;
+    .field-mapping-actions {
+        padding-top: 1em;
         border-top: #b0b0b0 solid 1px;
+    }
+    .field-mapping-form {
+        margin-bottom: 1em;
+    }
+    .field-mapping-validation {
+        i.orange-text {
+            font-weight: bold;
+        }
     }
     div.error-message {
         width: 600px;

@@ -53,15 +53,15 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
                 break;
         }
 
+        vm.refreshLatticeFields();
         vm.validateForm();
     }
 
     vm.changeLatticeField = function(fieldMapping) {
-        vm.refreshLatticeFields();
-
         fieldMapping.mappedToLatticeField = true;
         fieldMapping.fieldType = vm.UnmappedFieldsMap[fieldMapping.mappedField].fieldType;
         
+        vm.refreshLatticeFields();
         vm.validateForm();
     }
 
@@ -69,7 +69,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         vm.fieldMappingsMapped = {};
         vm.UnmappedFieldsMap = {};
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.mappedField) {
+            if (fieldMapping.mappedField && !fieldMapping.ignored) {
                 vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
             }
         });
