@@ -20,7 +20,7 @@ def propDirsOpts():
                 project = dirName.replace(CONF_ENV, '').split('/')[-1]
                 if project[:3] == 'le-':
                     projects.append(project[3:])
-    return ['-D%s_PROPDIR=%s/le-%s' % (os.environ['WSHOME'], p.upper(), p) + CONF_ENV for p in projects]
+    return ['-D%s_PROPDIR=%s/le-%s' % (p.upper(), os.environ['WSHOME'], p) + CONF_ENV for p in projects]
 
 
 def commonOpts():
