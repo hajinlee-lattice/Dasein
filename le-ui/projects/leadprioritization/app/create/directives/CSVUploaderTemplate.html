@@ -1,4 +1,4 @@
-<label for="loadfile">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}<span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+<label for="loadfile">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}<span ng-ifclass="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
 <div class="fileUpload button form-control">
     <!--<div class="progress processing" ng-show="vm.processing" style="width:{{vm.process_percent}}%"></div>-->
     <div class="progress processing" ng-show="vm_uploader.processing || vm_uploader.compressing" style="width:{{vm_uploader.process_percent + vm_uploader.compress_percent}}%"></div>
@@ -6,12 +6,12 @@
     <span>{{vm_uploader.csvFileDisplayName}}</span>
     <input
       required
-      id="uploadBtn"
-      name="csvFileName"
-      ng-model="vm_uploader.csvFileName"
       type="file"
       accept=".csv"
+      id="uploadBtn"
+      name="csvFileName"
       class="upload"
+      ng-model="vm_uploader.csvFileName"
       ng-hide="vm_uploader.uploading"
       ng-change="vm_uploader.cancel(); vm.clickCancel()"
       csv-uploader="vm_uploader.csvFile" />

@@ -1,26 +1,19 @@
 <section class="container custom-fields">
-
-	<div class="row">
-		<div class="error-message text-center" ng-show="errors">
-			<div>{{ errors }}</div>
-		</div>
-	</div>
-
+	<form name="fieldMappingForm" novalidate>
 	<div class="row">
 		<div class="ten columns offset-one">
 			<hgroup>
 				<h2>Field Mapping</h2>
-				<h3>You must map to Lattice Fields: <br/><span class="orange-text">email</span>, <span class="orange-text">website</span>, <span class="orange-text">record ID</span></h3>
+				<h3>You must map to Lattice Fields: <br/>
+					<span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{RequiredField}}</span></span>
+				</h3>
 			</hgroup>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="ten offset-one columns">
-
-			<!-- <p ng-hide="errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING', [data.length])}}</p> -->
-
-			<table ng-hide="errors" class="unstyled">
+			<table class="unstyled">
 				<thead>
 					<tr>
 						<th class="three columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDNAME')}}</th>
@@ -29,36 +22,60 @@
 						<th class="one columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 					</tr>
 				</thead>
+
 				<tbody>
-                    <tr ng-repeat="fieldMapping in fieldMappings">
+                    <tr ng-repeat="fieldMapping in vm.fieldMappings">
 						<td class="three columns field_mapping_label">
 							<label for="fieldType_{{$index}}">{{ fieldMapping.userField }}</label>
 						</td>
+
 						<td class="four columns field_mapping_inputs">
-                            <select class="form-control" ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? mappingOptions[1] : mappingOptions[0]" ng-model="selectedOption" ng-change="mappingChanged(fieldMapping, selectedOption)"
-									ng-options="mappingOption as mappingOption.name for mappingOption in mappingOptions">
+                            <select class="form-control" 
+	                            	ng-model="selectedOption" 
+	                            	ng-change="vm.changeMappingOption(fieldMapping, selectedOption)"
+	                            	ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? vm.mappingOptions[1] : vm.mappingOptions[0]" 
+									ng-options="mappingOption as mappingOption.name for mappingOption in vm.mappingOptions">
                             </select>
 						</td>
-						<td class="four columns field_mapping_inputs">
 
-					        <input 
-					          type="text" 
-					          class="form-control" 
-					          name="fieldMappingInput"
-					          ng-model="fieldMapping.mappedField"
-					          ng-value="fieldMapping.mappedField"
-					          ng-hide="selectedOption.id == 2"
-					          ng-show="fieldMapping.mappedField || selectedOption.id == 0"
-					          ng-disabled="fieldMapping.mappedToLatticeField"
-					          placeholder="" />
+						<td class="four columns field-mapping-inputs">
+                            <select required
+                            		name="mapping_lattice_field_select_{{$index}}"
+                            		class="form-control"
+	                            	ng-if="selectedOption.id == 1"
+                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
+	                            	ng-model="fieldMapping.mappedField"
+	                            	ng-change="vm.changeLatticeField(fieldMapping, UnmappedField)">
+	                            <option value="{{fieldMapping.mappedField}}"
+	                            		ng-if="vm.UnmappedFieldsMap[fieldMapping.mappedField]"
+	                            		ng-selected="fieldMapping.mappedField == fieldMapping.userField">
+	                            	{{fieldMapping.mappedField}}
+	                            </option>
+	                            <option value="{{UnmappedField.name}}"
+	                            		ng-if="!vm.fieldMappingsMapped[UnmappedField.name] && UnmappedField.name != fieldMapping.mappedField"
+	                            		ng-repeat="UnmappedField in vm.UnmappedFields"
+	                            		ng-selected="fieldMapping.mappedField == UnmappedField.name">
+	                            	{{UnmappedField.name}}
+	                            </option>
+                            </select>
+					        <input 	required
+          							ng-minlength="1"
+									type="text" 
+									class="form-control" 
+									name="mapping_custom_field_input_{{$index}}"
+                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
+									ng-model="fieldMapping.mappedField"
+									ng-value="fieldMapping.mappedField"
+									ng-if="selectedOption.id == 0" />
 						</td>
+
 						<td class="one columns field_mapping_type">
 							<select 
 									class="custom-select" 
 									name="columnType_{{$index}}" 
 									ng-model="fieldMapping.fieldType" 
 									ng-init="fieldMapping.fieldType=fieldMapping.fieldType" 
-									ng-disabled="fieldMapping.mappedToLatticeField"
+									ng-disabled="selectedOption.id == 1"
 									ng-hide="selectedOption.id == 2"
 									value="{{fieldMapping.fieldType}}">
 								<option value="TEXT" selected>Text</option>
@@ -75,30 +92,21 @@
 
 	<div class="row">
 		<div class="ten columns offset-one actions">
-			<div class="pull-left" ng-if="errors">
+			<div class="pull-left">
 				<button ui-sref="home.models.import" class="button gray-button" type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
 				</button>
 			</div>
-			<div class="pull-left" ng-hide="errors">
-				<button ui-sref="home.models.import" class="button gray-button" type="button">
-					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
-				</button>
-			</div>
-			<div class="pull-right" ng-hide="errors">
-				<button ng-click="csvSubmitColumns(); NextClicked = true;" ng-disabled="NextClicked" class="button orange-button" type="button">
+			<div class="pull-right">
+				<button 
+						ng-click="vm.clickNext(); NextClicked = true;" 
+						ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
+						class="button orange-button" 
+						type="button">
 					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
 				</button>
 			</div>
 		</div>
 	</div>
-
-
+	</form>
 </section>
-<!-- 
-<script>
-  $( document ).ready(function() {
-    $(".custom-select").selectpicker();
-  });
-</script>
- -->

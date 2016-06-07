@@ -156,7 +156,7 @@ angular
         return deferred.promise;
     };
 
-    this.SaveFieldDocuments = function(csvFileName, schemaInterpretation, fieldMappings, ignoredFields) {
+    this.SaveFieldDocuments = function(csvFileName, FieldDocument) {
         var deferred = $q.defer();
         var result;
 
@@ -166,9 +166,9 @@ angular
             headers: { 'Content-Type': 'application/json' },
             params: { 'displayName': csvFileName },
             data: {
-                'schemaInterpretation': schemaInterpretation,
-                'fieldMappings': fieldMappings,
-                'ignoredFields': ignoredFields
+                'schemaInterpretation': FieldDocument.schemaInterpretation,
+                'fieldMappings': FieldDocument.fieldMappings,
+                'ignoredFields': FieldDocument.ignoredFields
             }
         })
         .success(function(data, status, headers, config) {
@@ -177,6 +177,7 @@ angular
         .error(function(data, status, headers, config) {
             deferred.resolve(result);
         });
+
         return deferred.promise;
     };
 

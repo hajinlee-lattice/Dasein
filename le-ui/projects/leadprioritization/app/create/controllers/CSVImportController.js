@@ -119,7 +119,8 @@ angular
                 xhr.abort();
             }
         },
-        keyupTextArea: function(target) {
+        keyupTextArea: function(event) {
+            var target = event.target;
             target.style.height = 0;
             target.style.height = target.scrollHeight + 'px';
         }

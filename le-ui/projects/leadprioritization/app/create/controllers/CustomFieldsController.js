@@ -4,13 +4,136 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('CustomFieldsController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal, FieldDocument) {
+.controller('CustomFieldsController', function($state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
+    var vm = this;
+
+    angular.extend(vm, {
+        FormValidated: true,
+        ResourceUtility : ResourceUtility,
+        csvFileName: $stateParams.csvFileName,
+        mappingOptions: [
+            { id: 0, name: "Custom Field Name" },
+            { id: 1, name: "Map to Lattice Data Cloud" },
+            { id: 2, name: "Ignore this field" }
+        ],
+        ignoredFields: FieldDocument.ignoredFields = [],
+        UnmappedFields: UnmappedFields[FieldDocument.schemaInterpretation],
+        fieldMappings: FieldDocument.fieldMappings,
+        schema: FieldDocument.schemaInterpretation,
+        RequiredFields: []
+    });
+
+    vm.init = function() {
+        vm.refreshLatticeFields();
+        vm.UnmappedFields.forEach(function(field, index) {
+            if (field.requiredType == 'Required') {
+                vm.RequiredFields.push(field.name);
+            }
+        });
+        console.log('init', this);
+    }
+
+    vm.changeMappingOption = function(fieldMapping, selectedOption) {
+        fieldMapping.mappedToLatticeField = false;
+        delete fieldMapping.ignored;
+
+        switch (selectedOption.id) {
+            case 0: 
+                fieldMapping.mappedField = fieldMapping.mappedField || fieldMapping.userField;
+                break;
+            case 1: 
+                fieldMapping.mappedField = vm.UnmappedFieldsMap[fieldMapping.mappedField] 
+                    ? fieldMapping.mappedField 
+                    : '';
+
+                fieldMapping.mappedToLatticeField = true;
+                break;
+            case 2: 
+                fieldMapping.ignored = true; 
+                break;
+        }
+
+        vm.validateForm();
+    }
+
+    vm.changeLatticeField = function(fieldMapping) {
+        vm.refreshLatticeFields();
+
+        fieldMapping.mappedToLatticeField = true;
+        fieldMapping.fieldType = vm.UnmappedFieldsMap[fieldMapping.mappedField].fieldType;
+        
+        vm.validateForm();
+    }
+
+    vm.refreshLatticeFields = function() {
+        vm.fieldMappingsMapped = {};
+        vm.UnmappedFieldsMap = {};
+        vm.fieldMappings.forEach(function(fieldMapping, index) {
+            if (fieldMapping.mappedField) {
+                vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
+            }
+        });
+        vm.UnmappedFields.forEach(function(UnmappedField, index) {
+            vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
+        });
+    }
+
+    vm.clickNext = function() {
+        ShowSpinner('Saving Field Mappings...');
+
+        vm.fieldMappings.forEach(function(fieldMapping, index) {
+            if (fieldMapping.ignored) {
+                vm.ignoredFields.push(fieldMapping.userField);
+
+                delete fieldMapping.ignored;
+            }
+        });
+
+        csvImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
+            ShowSpinner('Executing Modeling Job...');
+
+            var csvMetadata = csvImportStore.Get(vm.csvFileName);
+            
+            csvImportService.StartModeling(csvMetadata).then(function(result) {
+                $state.go('home.jobs.status', { 'jobCreationSuccess': result.Success });
+            });
+        });
+    }
+
+    vm.validateForm = function() {
+        vm.FormValidated = true;
+
+        vm.fieldMappings.forEach(function(fieldMapping, index) {
+            if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
+                vm.FormValidated = false;
+            }
+        });
+
+        vm.RequiredFields.forEach(function(requiredField, index) {
+            if (!vm.fieldMappingsMapped[requiredField]) {
+                vm.FormValidated = false;
+            }
+        });
+    }
+
+    vm.init();
+});
+/*
+.controller('CustomFieldsController-bak', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal, FieldDocument) {
     $scope.csvFileName = $stateParams.csvFileName;
     $scope.schema;
     $scope.fieldMappings = [];
     $scope.fieldNameToFieldMappings = {};
     $scope.fieldNameToFieldTypes = {};
     $scope.mappingOptions = [
+        { name: "Custom Field Name", id: 0 },
+        { name: "Map to Lattice Data Cloud", id: 1 },
+        { name: "Ignore this field", id: 2 }
+    ];
+    $scope.ignoredFields = [];
+
+    $scope.schema = FieldDocument.schemaInterpretation;
+    $scope.fieldMappings = FieldDocument.fieldMappings;    $scope.mappingOptions = [
         { name: "Custom Field Name", id: 0 },
         { name: "Map to Lattice Data Cloud", id: 1 },
         { name: "Ignore this field", id: 2 }
@@ -126,3 +249,4 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         SelectFieldsModal.show($scope.schema, fieldSelected);
     };
 });
+*/

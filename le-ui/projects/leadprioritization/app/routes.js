@@ -126,8 +126,18 @@ angular
                             });
 
                             return deferred.promise;
+                        },
+                        UnmappedFields: function($q, $stateParams, csvImportService, csvImportStore) {
+                            var deferred = $q.defer();
+
+                            csvImportService.GetSchemaToLatticeFields().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
                         }
                     },
+                    controllerAs: 'vm',
                     controller: 'CustomFieldsController',
                     templateUrl: 'app/create/views/CustomFieldsView.html'
                 }   
@@ -143,23 +153,6 @@ angular
                     controller: 'ImportJobController',
                     templateUrl: 'app/create/views/ImportJobView.html'
                 }
-            }
-        })
-        .state('home.models.create', {
-            url: '/create',
-            views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_IMPORT_MODEL_CSV_READY';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/create/views/CreateModelView.html'
-                }   
             }
         })
         .state('home.model', {

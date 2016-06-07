@@ -304,7 +304,7 @@ angular
         restrict: 'A',
         templateUrl: 'app/create/directives/CSVUploaderTemplate.html',
         controllerAs: 'vm_uploader_container',
-        controller: function ($scope, $state, $q, $element, ResourceUtility, StringUtility, csvImportService, csvImportStore) {
+        controller: function ($scope, $state, $q, $element) {
             var vm_form = $scope.vm,
                 vm = this,
                 options = {
