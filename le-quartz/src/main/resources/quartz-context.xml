@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xmlns:tx="http://www.springframework.org/schema/tx"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xmlns:context="http://www.springframework.org/schema/context" 
-    xmlns:aop="http://www.springframework.org/schema/aop"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 	    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
         http://www.springframework.org/schema/context 
-        http://www.springframework.org/schema/context/spring-context-4.0.xsd
-	    http://www.springframework.org/schema/tx
-	    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:predefined-quartz-context.xml"/>
-    <!-- <import resource="classpath:quartz-persistence-context.xml"/> -->
     <import resource="classpath:quartzclient-context.xml"/>
     <context:annotation-config/>
     <context:component-scan base-package="com.latticeengines.quartz">
@@ -26,16 +20,13 @@
         class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
         lazy-init="false">
         <property name="autoStartup" value="true" />
-        <property name="applicationContextSchedulerContextKey"
-            value="applicationContext" />
+        <property name="applicationContextSchedulerContextKey" value="applicationContext" />
         <property name="waitForJobsToCompleteOnShutdown" value="true" />
         <property name="overwriteExistingJobs" value="true" />
-        <property name="dataSource">
-            <ref bean="dataSourceQuartz" />
-        </property>
+        <property name="dataSource" ref="dataSourceQuartz" />
+        <property name="transactionManager" ref="transactionManagerQuartz" />
         <property name="quartzProperties">
             <props>
-                <!-- <prop key="org.quartz.jobStore.useProperties">true</prop> -->
                 <prop key="org.quartz.jobStore.misfireThreshold">6000</prop>
                 <prop key="org.quartz.jobStore.class">org.quartz.impl.jdbcjobstore.JobStoreTX</prop>
                 <prop key="org.quartz.jobStore.driverDelegateClass">${quartz.jobStore.driver.delegate}</prop>
@@ -44,7 +35,7 @@
                 <prop key="org.quartz.jobStore.clusterCheckinInterval">20000</prop>
                 <prop key="org.quartz.scheduler.instanceName">LEClusteredScheduler</prop>
                 <prop key="org.quartz.scheduler.instanceId">AUTO</prop>
-                <prop key="org.quartz.scheduler.jmx.export">true</prop>
+                <prop key="org.quartz.scheduler.jmx.export">false</prop>
             </props>
         </property>
     </bean>
