@@ -121,14 +121,14 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int getTotalCount(long lastUpdateTime, boolean considerAllStatus) {
-        return modelSummaryDao.getTotalCount(lastUpdateTime, considerAllStatus);
+        return modelSummaryDao.findTotalCount(lastUpdateTime, considerAllStatus);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
             int maximum) {
-        return modelSummaryDao.getPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
+        return modelSummaryDao.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
     }
 
     private void inflateDetails(ModelSummary summary) {

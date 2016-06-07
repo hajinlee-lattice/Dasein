@@ -17,10 +17,10 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> findAllActive();
 
-    int getTotalCount(long lastUpdateTime, boolean considerAllStatus);
+    int findTotalCount(long lastUpdateTime, boolean considerAllStatus);
 
     ModelSummary findValidByModelId(String modelId);
 
-    List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
+    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
 
 }

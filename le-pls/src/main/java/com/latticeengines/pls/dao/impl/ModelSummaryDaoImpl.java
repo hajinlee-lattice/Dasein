@@ -87,7 +87,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     }
 
     @Override
-    public int getTotalCount(long lastUpdateTime, boolean considerAllStatus) {
+    public int findTotalCount(long lastUpdateTime, boolean considerAllStatus) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
         String basicQueryStr = "select count(*) from %s where lastUpdateTime >= :lastUpdateTime ";
@@ -105,7 +105,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
+    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
             int maximum) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
