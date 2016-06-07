@@ -364,7 +364,7 @@ public class InternalResource extends InternalResourceBase {
         if (!StringUtils.isEmpty(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
-        return modelSummaryEntityMgr.getTotalCount(lastUpdateTime, considerAllStatus);
+        return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
 
     }
 
@@ -385,7 +385,7 @@ public class InternalResource extends InternalResourceBase {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return postProcessModelSummaryList(
-                modelSummaryEntityMgr.getPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum));
+                modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum));
 
     }
 

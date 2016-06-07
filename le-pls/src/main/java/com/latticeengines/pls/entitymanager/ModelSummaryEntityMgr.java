@@ -26,9 +26,9 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     List<ModelSummary> findAllActive();
 
-    int getTotalCount(long lastUpdateTime, boolean considerAllStatus);
+    int findTotalCount(long lastUpdateTime, boolean considerAllStatus);
 
-    List<ModelSummary> getPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
+    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
 
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
 
