@@ -43,6 +43,7 @@ angular.module('mainApp.models.modals.DeactivateModelModal', [
         $("#deactivateModelError").hide();
         ModelService.updateAsInactiveModel(modelId).then(function(result) {
             if (result != null && result.success === true) {
+                $("#modalContainer").modal('hide');
                 $state.go('home.models', {}, { reload: true } );
             } else {
                 console.log("errors");

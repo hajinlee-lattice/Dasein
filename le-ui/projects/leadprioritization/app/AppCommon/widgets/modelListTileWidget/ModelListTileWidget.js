@@ -38,13 +38,32 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
     var incomplete = data[widgetConfig.IncompleteProperty];
     
-    $scope.showModelMenu = false;
-    $scope.modelMenuClick = function ($event) {
+    $scope.showCustomMenu = false;
+    $scope.customMenuClick = function ($event) {
         if ($event != null) {
             $event.stopPropagation();
         }
-        $scope.showModelMenu = !$scope.showModelMenu;
+        $scope.showCustomMenu = !$scope.showCustomMenu;
     };
+    $(document).bind('click', function(event){
+        var isClickedElementChildOfPopup = $element
+            .find(event.target)
+            .length > 0;
+
+        if (isClickedElementChildOfPopup)
+            return;
+
+        $scope.$apply(function(){
+            $scope.showCustomMenu = false;
+        });
+    });
+
+
+
+
+
+
+
 
     $scope.refineAndCloneClick = function ($event) {
         if ($event != null) {
@@ -58,7 +77,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         updateAsActiveModel(modelId);
 
         function updateAsActiveModel(modelId) {
-            $("#deleteModelError").hide();
             ModelService.updateAsActiveModel(modelId).then(function(result) {
                 if (result != null && result.success === true) {
                     $state.go('home.models', {}, { reload: true } );
@@ -70,12 +88,16 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
 
     $scope.updateAsInactiveClick = function ($event) {
-        $event.preventDefault();
+        if ($event != null) {
+            $event.stopPropagation();
+        }
         DeactivateModelModal.show($scope.data.Id);
     };
 
     $scope.deleteModelClick = function ($event) {
-        $event.preventDefault();
+        if ($event != null) {
+            $event.stopPropagation();
+        }
         DeleteModelModal.show($scope.data.Id);
     };
 
@@ -95,10 +117,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $event.preventDefault();
         }
 
-        var targetElement = $($event.target);
-        if (targetElement.parent().hasClass("model-menu")) {
-            $event.preventDefault();
-        } else if (!$scope.nameStatus.editing && !incomplete) {
+        if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
         } else if (!$scope.nameStatus.editing && incomplete) {
         	StaleModelModal.show($scope.data.Id);
