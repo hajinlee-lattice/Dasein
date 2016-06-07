@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,7 +42,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -107,9 +107,9 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private String avroPath, outputAvro, outputJson;
     private MatchOutput blockOutput;
     private Date receivedAt;
-    private Schema schema;
+    private Schema outputSchema;
+    private Schema inputSchema;
     private Integer numThreads;
-    private Boolean singleBlockMode;
     private MatchInput matchInput;
     private String podId;
     private Boolean returnUnmatched;
@@ -123,7 +123,6 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             receivedAt = new Date();
 
             podId = jobConfiguration.getHdfsPodId();
-            singleBlockMode = jobConfiguration.getSingleBlock();
             returnUnmatched = jobConfiguration.getReturnUnmatched();
             HdfsPodContext.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
@@ -155,13 +154,10 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             avroPath = jobConfiguration.getAvroPath();
             divider = new BlockDivider(avroPath, yarnConfiguration, groupSize);
             log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize);
-            schema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"));
+            inputSchema = jobConfiguration.getInputAvroSchema();
+            outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"));
             Integer rowsProcessed = 0;
-            if (singleBlockMode) {
-                matchCommandService.update(rootOperationUid).progress(0.07f).status(MatchStatus.MATCHING).commit();
-            } else {
-                setProgress(0.07f);
-            }
+            setProgress(0.07f);
 
             List<MatchInput> matchInputs = getInputs();
             while (!matchInputs.isEmpty()) {
@@ -185,14 +181,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         } catch (Exception e) {
             String rootOperationUid = jobConfiguration.getRootOperationUid();
             String blockOperationUid = jobConfiguration.getBlockOperationUid();
-            String errFile;
-            if (jobConfiguration.getSingleBlock()) {
-                errFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
-                matchCommandService.update(rootOperationUid).status(MatchStatus.FAILED).errorMessage(e.getMessage())
-                        .commit();
-            } else {
-                errFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid).toString();
-            }
+            String errFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
+                    .toString();
             try {
                 HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getFullStackTrace(e));
             } catch (Exception e1) {
@@ -266,8 +256,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             List<Object> allValues = new ArrayList<>(outputRecord.getInput());
             allValues.addAll(outputRecord.getOutput());
 
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            List<Schema.Field> fields = schema.getFields();
+            GenericRecordBuilder builder = new GenericRecordBuilder(outputSchema);
+            List<Schema.Field> fields = outputSchema.getFields();
             for (int i = 0; i < fields.size(); i++) {
                 Object value = allValues.get(i);
                 if (value instanceof Date) {
@@ -281,7 +271,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             records.add(builder.build());
         }
         if (!HdfsUtils.fileExists(yarnConfiguration, outputAvro)) {
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, outputAvro, records);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, outputSchema, outputAvro, records);
         } else {
             AvroUtils.appendToHdfsFile(yarnConfiguration, outputAvro, records);
         }
@@ -291,17 +281,20 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     @MatchStep
     private Schema constructOutputSchema(String recordName) {
         Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName);
-        Schema inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+        if (inputSchema == null) {
+            inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+            log.info("Using extracted input schema: \n"
+                            + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        } else {
+            log.info("Using provited input schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        }
         inputSchema = prefixFieldName(inputSchema, "Source_");
         return (Schema) AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
     }
 
     @MatchStep
     private void finalizeBlock() throws IOException {
-        if (singleBlockMode) {
-            matchCommandService.update(rootOperationUid).progress(0.07f).status(MatchStatus.FINISHING).commit();
-        }
-
         finalizeMatchOutput();
         generateOutputMetric(matchInput, blockOutput);
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
@@ -319,15 +312,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
                         blockOutput.getStatistics().getRowsMatched(), count));
             }
         }
-
-        if (singleBlockMode) {
-            String matchOutputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-            generateOutputFiles();
-            matchCommandService.update(rootOperationUid).progress(1f).status(MatchStatus.FINISHED)
-                    .resultLocation(matchOutputDir).rowsMatched(count.intValue()).commit();
-        } else {
-            setProgress(1f);
-        }
+        setProgress(1f);
     }
 
     @MatchStep
@@ -368,41 +353,6 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         blockOutput.getStatistics().setTimeElapsedInMsec(finishedAt.getTime() - receivedAt.getTime());
         matchExecutor.appendMetadata(blockOutput, predefinedSelection);
         HdfsUtils.writeToFile(yarnConfiguration, outputJson, JsonUtils.serialize(blockOutput));
-    }
-
-    @Override
-    protected void setProgress(float progress) {
-        super.setProgress(progress);
-        if (singleBlockMode) {
-            matchCommandService.update(rootOperationUid).progress(progress).commit();
-        }
-    }
-
-    private void generateOutputFiles() {
-        log.info("Generating match output files ...");
-        try {
-            String matchOutputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-            String blockOutputDir = hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid)
-                    .toString();
-            String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
-            HdfsUtils.copyFiles(yarnConfiguration, blockOutputDir, matchOutputDir);
-            log.info("Copied avro from " + blockOutputDir + " to " + matchOutputDir);
-            HdfsUtils.copyFiles(yarnConfiguration, outputJson, outputFile);
-            log.info("Copied output json from " + blockOutputDir + " to " + matchOutputDir);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to copy block output to match output.", e);
-        }
-
-        try {
-            String matchAvsc = hdfsPathBuilder.constructMatchSchemaFile(rootOperationUid).toString();
-            String blockResultAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid)
-                    .toString();
-            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(blockResultAvro));
-            HdfsUtils.writeToFile(yarnConfiguration, matchAvsc, schema.toString());
-            log.info("Extract avsc into " + matchAvsc);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to write schema file: " + e.getMessage(), e);
-        }
     }
 
     private class MatchCallable implements Callable<MatchContext> {

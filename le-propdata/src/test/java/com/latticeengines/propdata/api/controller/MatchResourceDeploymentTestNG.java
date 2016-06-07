@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -81,12 +84,15 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     }
 
     @Test(groups = "deployment")
-    public void testSingleBlockBulkMatch() throws Exception {
+    public void testBulkMatchWithSchema() throws Exception {
+        HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
 
-        // use avr dir
-        MatchInput input = createAvroBulkMatchInput(true);
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
+
+        // use avr dir and with schema
+        MatchInput input = createAvroBulkMatchInput(true, schema);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -103,8 +109,8 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
 
-        // use avro file
-        input = createAvroBulkMatchInput(false);
+        // use avro file and without schema
+        input = createAvroBulkMatchInput(false, null);
         command = matchProxy.matchBulk(input, podId);
         appId = ConverterUtils.toApplicationId(command.getApplicationId());
         status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -115,15 +121,14 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testMultiBlockBulkMatch() throws InterruptedException {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
         uploadTestAVro(avroDir, fileName);
 
-        // use avro dir
-        MatchInput input = createAvroBulkMatchInput(true);
+        MatchInput input = createAvroBulkMatchInput(true, null);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
 
@@ -148,19 +153,9 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
-
-        // use avro file
-        input = createAvroBulkMatchInput(false);
-        command = matchProxy.matchBulk(input, podId);
-        appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
-        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-        matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
     }
 
-    private MatchInput createAvroBulkMatchInput(boolean useDir) {
+    private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
@@ -169,6 +164,9 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
             inputBuffer.setAvroDir(avroDir);
         } else {
             inputBuffer.setAvroDir(avroDir + "/" + fileName);
+        }
+        if (inputSchema != null) {
+            inputBuffer.setSchema(inputSchema);
         }
         matchInput.setInputBuffer(inputBuffer);
         return matchInput;
@@ -215,9 +213,6 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
             throw new RuntimeException("Failed to upload test avro.", e);
         }
     }
-
-
-
 
     private void uploadTestAVro(String avroDir, String fileName) {
         try {

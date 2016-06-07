@@ -44,7 +44,7 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testMatchBlockInYarnContainer() throws Exception {
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -67,7 +67,6 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
         jobConfiguration.setThreadPoolSize(4);
         jobConfiguration.setGroupSize(10);
-        jobConfiguration.setSingleBlock(false);
 
         ApplicationId applicationId = propDataYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);

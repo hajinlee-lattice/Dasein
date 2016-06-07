@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.match;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
@@ -111,6 +113,15 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
+
+        Schema schema;
+        try {
+            schema = TableUtils.createSchema(preMatchEventTable.getName(), preMatchEventTable);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create avro schema from pre-match event table.", e);
+        }
+        inputBuffer.setSchema(schema);
+
         matchInput.setInputBuffer(inputBuffer);
 
         return matchInput;

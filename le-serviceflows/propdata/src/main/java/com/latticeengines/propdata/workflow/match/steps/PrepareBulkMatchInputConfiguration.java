@@ -1,9 +1,16 @@
 package com.latticeengines.propdata.workflow.match.steps;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -16,6 +23,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @NotEmptyString
     @NotNull
     private String inputAvroDir;
+
+    private Schema inputAvroSchema;
 
     @NotNull
     private CustomerSpace customerSpace;
@@ -53,6 +62,39 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @JsonProperty("input_avro_dir")
     public void setInputAvroDir(String inputAvroDir) {
         this.inputAvroDir = inputAvroDir;
+    }
+
+    @JsonProperty("input_avro_schema")
+    private JsonNode getInputAvroSchemaAsJson() {
+        try {
+            if (inputAvroSchema != null) {
+                return new ObjectMapper().readTree(inputAvroSchema.toString());
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Faild to parst schema to json node");
+        }
+    }
+
+    @JsonProperty("input_avro_schema")
+    private void setInputAvroSchemaAsJson(JsonNode inputAvroSchema) {
+        if (inputAvroSchema != null && StringUtils.isNotEmpty(inputAvroSchema.toString())
+                && !"null".equalsIgnoreCase(inputAvroSchema.toString())) {
+            this.inputAvroSchema = new Schema.Parser().parse(inputAvroSchema.toString());
+        } else  {
+            this.inputAvroSchema = null;
+        }
+    }
+
+    @JsonIgnore
+    public Schema getInputAvroSchema() {
+        return inputAvroSchema;
+    }
+
+    @JsonIgnore
+    public void setInputAvroSchema(Schema inputAvroSchema) {
+        this.inputAvroSchema = inputAvroSchema;
     }
 
     @JsonProperty("customer_space")

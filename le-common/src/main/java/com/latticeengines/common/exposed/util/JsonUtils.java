@@ -126,6 +126,15 @@ public class JsonUtils {
         return output;
     }
 
+    public static <T> String pprint(T object) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            return object.toString();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T clone(T object) {
         return (T) deserialize(serialize(object), object.getClass());

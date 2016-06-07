@@ -1,13 +1,20 @@
 package com.latticeengines.domain.exposed.propdata;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
+import org.apache.commons.lang.StringUtils;
 
 public class PropDataJobConfiguration extends BasePayloadConfiguration {
 
@@ -23,9 +30,9 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String rootOperationUid;
     private String blockOperationUid;
     private String appName;
-    private Boolean singleBlock;
     private Boolean returnUnmatched;
     private String yarnQueue;
+    private Schema inputAvroSchema;
 
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
@@ -75,6 +82,39 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("avro_path")
     public void setAvroPath(String avroPath) {
         this.avroPath = avroPath;
+    }
+
+    @JsonProperty("input_avro_schema")
+    private JsonNode getInputAvroSchemaAsJson() {
+        try {
+            if (inputAvroSchema != null) {
+                return new ObjectMapper().readTree(inputAvroSchema.toString());
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Faild to parst schema to json node");
+        }
+    }
+
+    @JsonProperty("input_avro_schema")
+    private void setInputAvroSchemaAsJson(JsonNode inputAvroSchema) {
+        if (inputAvroSchema != null && StringUtils.isNotEmpty(inputAvroSchema.toString())
+                && !"null".equalsIgnoreCase(inputAvroSchema.toString())) {
+            this.inputAvroSchema = new Schema.Parser().parse(inputAvroSchema.toString());
+        } else  {
+            this.inputAvroSchema = null;
+        }
+    }
+
+    @JsonIgnore
+    public Schema getInputAvroSchema() {
+        return inputAvroSchema;
+    }
+
+    @JsonIgnore
+    public void setInputAvroSchema(Schema inputAvroSchema) {
+        this.inputAvroSchema = inputAvroSchema;
     }
 
     @JsonProperty("predefined_selection")
@@ -145,16 +185,6 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("app_name")
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    @JsonProperty("single_block")
-    public Boolean getSingleBlock() {
-        return singleBlock;
-    }
-
-    @JsonProperty("single_block")
-    public void setSingleBlock(Boolean singleBlock) {
-        this.singleBlock = singleBlock;
     }
 
     @JsonProperty("return_unmatched")

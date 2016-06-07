@@ -188,6 +188,12 @@ public class ColumnMetadata {
         setApprovedUsageList(approvedUsages);
     }
 
+    @JsonIgnore
+    public String getApprovedUsageString() {
+        List<String> tokens = getApprovedUsageJson();
+        return "[" + StringUtils.join(tokens, ",") + "]";
+    }
+
     @JsonProperty("Category")
     public String getCategoryAsString() {
         if (category != null) {

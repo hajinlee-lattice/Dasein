@@ -39,6 +39,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             if (inputBuffer instanceof AvroInputBuffer) {
                 AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
                 prepareConfig.setInputAvroDir(avroInputBuffer.getAvroDir());
+                prepareConfig.setInputAvroSchema(avroInputBuffer.getSchema());
             }
             prepareConfig.setPredefinedSelection(matchInput.getPredefinedSelection());
             prepareConfig.setPredefinedSelectionVersion(matchInput.getPredefinedVersion());

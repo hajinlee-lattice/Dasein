@@ -112,6 +112,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
                     jobConfiguration.getBlockOperationUid()).toString();
             jobConfiguration.setAvroPath(targetFile);
+            jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block(%d/%d)[%s]~%s",
                     getConfiguration().getRootOperationUid(), blockIdx, blocks.length, blockOperationUid,
                     getConfiguration().getCustomerSpace().toString()));
@@ -146,7 +147,6 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setGroupSize(groupSize);
         jobConfiguration.setThreadPoolSize(threadPoolSize);
-        jobConfiguration.setSingleBlock(false);
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
         return jobConfiguration;
     }
