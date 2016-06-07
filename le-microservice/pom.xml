@@ -204,7 +204,8 @@
         <module>propdata</module>
         <module>scoring</module>
         <module>workflowapi</module>
-	<module>quartz</module>
+        <module>dellebi</module>
+        <module>quartz</module>
     </modules>
 
 </project>
