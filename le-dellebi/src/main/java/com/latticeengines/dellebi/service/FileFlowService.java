@@ -18,8 +18,6 @@ public interface FileFlowService {
 
     boolean deleteFile(String fileName);
 
-    void registerFailedFile(String fileName);
-
     void initialContext(DataFlowContext context);
 
 }

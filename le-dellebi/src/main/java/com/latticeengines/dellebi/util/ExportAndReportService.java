@@ -1,5 +1,6 @@
 package com.latticeengines.dellebi.util;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -9,7 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -129,7 +133,11 @@ public class ExportAndReportService {
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
 
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                boolean isRunning = isJobRunning(yarnConfiguration, appId);
                 jobService.killJob(appId);
+                if (isRunning) {
+                    throw new IllegalStateException(appId + " is running but stuck, the job is killed now");
+                }
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
             }
@@ -200,5 +208,16 @@ public class ExportAndReportService {
         }
         long endTime = System.currentTimeMillis();
         return DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS");
+    }
+
+    private Boolean isJobRunning(Configuration yarnConfiguration, ApplicationId applicationId) {
+        ApplicationReport report;
+        try {
+            report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+            return (report.getYarnApplicationState().equals(YarnApplicationState.RUNNING));
+        } catch (Exception e) {
+            log.warn("Failed to get application status of application id " + applicationId);
+        }
+        return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.dellebi.entitymanager.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,12 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
     }
 
     @Override
+    @Transactional(value = "transactionManagerDellEbiCfg")
+    public List<DellEbiExecutionLog> getEntriesByFile(String file) {
+        return dellEbiExecutionLogDao.getEntriesByFile(file);
+    }
+
+    @Override
     public BaseDao<DellEbiExecutionLog> getDao() {
         return dellEbiExecutionLogDao;
     }
@@ -59,6 +66,19 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
         }
 
         dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Failed.getStatus());
+        dellEbiExecutionLog.setEndDate(new Date());
+        dellEbiExecutionLog.setError(err);
+        executeUpdate(dellEbiExecutionLog);
+    }
+
+    @Override
+    @Transactional(value = "transactionManagerDellEbiCfg")
+    public void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err) {
+        if (dellEbiExecutionLog == null || err == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.TriedFailed.getStatus());
         dellEbiExecutionLog.setEndDate(new Date());
         dellEbiExecutionLog.setError(err);
         executeUpdate(dellEbiExecutionLog);

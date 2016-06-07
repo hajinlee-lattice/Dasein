@@ -36,4 +36,22 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         return list.get(0);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<DellEbiExecutionLog> getEntriesByFile(String file) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<DellEbiExecutionLog> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where FileName = :file order by id desc", entityClz.getSimpleName());
+
+        Query query = session.createQuery(queryStr);
+        query.setString("file", file);
+        List<DellEbiExecutionLog> list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+
+        return list;
+    }
+
 }

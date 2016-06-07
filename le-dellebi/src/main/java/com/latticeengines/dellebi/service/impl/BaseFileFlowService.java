@@ -3,12 +3,9 @@ package com.latticeengines.dellebi.service.impl;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -32,9 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public abstract class BaseFileFlowService implements FileFlowService {
 
     static final Log log = LogFactory.getLog(BaseFileFlowService.class);
-
-    static final int FAIL_TRIES = 3;
-    private Map<String, Integer> failedFiles = new HashMap<>();
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
@@ -60,30 +54,23 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     protected boolean isFailedFile(String zipFileName) {
-        zipFileName = zipFileName.toLowerCase();
-        Integer count = failedFiles.get(zipFileName);
-        if (count == null) {
+
+        boolean rc = false;
+
+        DellEbiExecutionLog executionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(zipFileName);
+        if (executionLog == null) {
             return false;
         }
-        return count > FAIL_TRIES;
-    }
+        if (executionLog.getStatus() == DellEbiExecutionLogStatus.TriedFailed.getStatus()) {
+            rc = true;
+        }
 
-    @Override
-    public void registerFailedFile(String fileName) {
-        fileName = fileName.toLowerCase();
-        if (fileName.endsWith(".txt")) {
-            fileName = StringUtils.removeEnd(fileName, ".txt") + ".zip";
+        String error = executionLog.getError();
+        if (error != null && error.contains("is running but stuck")) {
+            rc = true;
         }
-        Integer count = failedFiles.get(fileName);
-        if (count == null) {
-            count = 1;
-        } else {
-            count++;
-        }
-        failedFiles.put(fileName, count);
-        if (count > FAIL_TRIES) {
-            log.info("Found bad file name=" + fileName);
-        }
+
+        return rc;
     }
 
     protected String downloadAndUnzip(InputStream is, String fileName) {

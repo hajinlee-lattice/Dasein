@@ -1,5 +1,6 @@
 package com.latticeengines.dellebi.entitymanager;
 
+import java.util.List;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 
 public interface DellEbiExecutionLogEntityMgr {
@@ -13,5 +14,9 @@ public interface DellEbiExecutionLogEntityMgr {
     DellEbiExecutionLog getEntryByFile(String file);
 
     void recordFailure(DellEbiExecutionLog dellEbiExecutionLog, String err);
+
+    void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err);
+
+    List<DellEbiExecutionLog> getEntriesByFile(String file);
 
 }

@@ -20,13 +20,14 @@ import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     private static final Log log = LogFactory.getLog(DailyFlow.class);
-
+    static final int FAIL_TRIES = 3;
     @Resource(name = "localFileFlowService")
     private FileFlowService localFileFlowService;
 
@@ -145,14 +146,27 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Override
     public void registerFailedFile(DataFlowContext context, String err) {
+
         String zipFileName = context.getProperty(ZIP_FILE_NAME, String.class);
-        if (isSmb(context)) {
-            smbFileFlowService.registerFailedFile(zipFileName);
-        }
-        localFileFlowService.registerFailedFile(zipFileName);
 
         DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(LOG_ENTRY, DellEbiExecutionLog.class);
-        dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
+
+        List<DellEbiExecutionLog> executionLogs = dellEbiExecutionLogEntityMgr.getEntriesByFile(zipFileName);
+        int count = 0;
+        for (DellEbiExecutionLog executionLog : executionLogs) {
+            if (executionLog.getStatus() == DellEbiExecutionLogStatus.Completed.getStatus()) {
+                break;
+            } else {
+                count++;
+            }
+        }
+
+        if (count >= FAIL_TRIES) {
+            dellEbiExecutionLogEntityMgr.recordRetryFailure(dellEbiExecutionLog, err);
+            log.info("Failed to re-try file name=" + zipFileName);
+        } else {
+            dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
+        }
     }
 
     @Override
