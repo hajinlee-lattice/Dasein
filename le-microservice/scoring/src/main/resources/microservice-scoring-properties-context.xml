@@ -27,6 +27,7 @@
                 <value>file:${SCORING_PROPDIR:/etc/ledp}/scoring.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
                 <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
                 <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
                 <value>file:${QUARTZCLIENT_PROPDIR:/etc/ledp}/quartzclient.properties</value>
                 <value>file:${QUARTZ_PROPDIR:/etc/ledp}/quartz.properties</value>
