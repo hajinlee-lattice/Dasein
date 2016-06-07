@@ -111,6 +111,25 @@ Basic Lists
 .ordered-list { 
 	list-style: decimal; 
 }
+dl {
+  margin-bottom: 0;
+  font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+}
+dt {
+  float: left;
+  clear: left;
+  text-align: left;
+  width: 50%;
+  text-transform: normal;
+  color: #333;
+  font-size: 1.25em;
+}
+dd {
+  margin: 0 0 0 50%;
+  padding: 0;
+  text-align: right;
+  font-size: 1.25em;
+}
 
 /* 
 Summary Cards
