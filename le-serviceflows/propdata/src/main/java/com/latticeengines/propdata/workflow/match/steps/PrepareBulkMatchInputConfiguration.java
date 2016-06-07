@@ -73,7 +73,7 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
                 return null;
             }
         } catch (IOException e) {
-            throw new RuntimeException("Faild to parst schema to json node");
+            throw new RuntimeException("Failed to parse schema to json node.");
         }
     }
 
