@@ -204,6 +204,15 @@ CREATE TABLE [dbo].[QUARTZ_ACTIVESTACK] (
 )
 GO
 
+CREATE TABLE [dbo].[QUARTZ_JOBACTIVE] (
+        [PID] bigint identity not null unique,
+        [JobName] varchar(255) not null,
+        [TenantId] varchar(255) not null,
+        [IsActive] bit not null,
+        primary key ([PID])
+)
+GO
+
 ALTER TABLE [dbo].[QRTZ_CALENDARS] WITH NOCHECK ADD
   CONSTRAINT [PK_QRTZ_CALENDARS] PRIMARY KEY  CLUSTERED
   (

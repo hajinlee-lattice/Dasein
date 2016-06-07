@@ -164,6 +164,14 @@ create table `QUARTZ_ACTIVESTACK` (
         primary key (`PID`)
     ) ENGINE=InnoDB;
 
+create table `QUARTZ_JOBACTIVE` (
+        `PID` bigint not null auto_increment unique,
+        `JobName` varchar(255) not null,
+        `TenantId` varchar(255) not null,
+	`IsActive` tinyint not null,
+        primary key (`PID`)
+    ) ENGINE=InnoDB;
+
 CREATE INDEX IDX_QRTZ_J_REQ_RECOVERY ON QRTZ_JOB_DETAILS(SCHED_NAME,REQUESTS_RECOVERY);
 CREATE INDEX IDX_QRTZ_J_GRP ON QRTZ_JOB_DETAILS(SCHED_NAME,JOB_GROUP);
 

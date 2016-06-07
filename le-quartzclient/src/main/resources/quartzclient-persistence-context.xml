@@ -49,5 +49,8 @@
     <bean id="activeStackDao" class="com.latticeengines.quartzclient.dao.impl.ActiveStackDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryQuartz" />
     </bean>
+    <bean id="jobActiveDao" class="com.latticeengines.quartzclient.dao.impl.JobActiveDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryQuartz" />
+    </bean>
 
 </beans>

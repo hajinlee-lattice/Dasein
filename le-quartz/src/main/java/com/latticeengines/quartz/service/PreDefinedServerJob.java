@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.quartz.PredefinedJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.ActiveStackEntityMgr;
+import com.latticeengines.quartzclient.entitymanager.JobActiveEntityMgr;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 public class PreDefinedServerJob extends QuartzJobBean {
@@ -38,6 +39,8 @@ public class PreDefinedServerJob extends QuartzJobBean {
 
     private ActiveStackEntityMgr activeStackEntityMgr;
 
+    private JobActiveEntityMgr jobActiveEntityMgr;
+
     private String currentStack;
 
     private RestTemplate restTemplate = new RestTemplate();
@@ -45,6 +48,7 @@ public class PreDefinedServerJob extends QuartzJobBean {
     public void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");
         activeStackEntityMgr = (ActiveStackEntityMgr) appCtx.getBean("activeStackEntityMgr");
+        jobActiveEntityMgr = (JobActiveEntityMgr) appCtx.getBean("jobActiveEntityMgr");
         try {
             currentStack = PropertyUtils.getProperty("quartz.current.stack");
         } catch (Exception e) {
@@ -65,7 +69,6 @@ public class PreDefinedServerJob extends QuartzJobBean {
 
         String activeStack = activeStackEntityMgr.getActiveStack();
         if (activeStack != null && activeStack.equals(currentStack)) {
-
             JobDataMap data = context.getJobDetail().getJobDataMap();
             String url = data.getString(DESTURL);
             String jobType = data.getString(JOBTYPE);
@@ -73,35 +76,38 @@ public class PreDefinedServerJob extends QuartzJobBean {
             String jobName = context.getJobDetail().getKey().getName();
             String queryApi = data.getString(QUERYAPI);
 
-            PredefinedJobArguments jobArgs = new PredefinedJobArguments();
-            jobArgs.setPredefinedJobType(jobType);
-            jobArgs.setJobName(jobName);
-            jobArgs.setTenantId(tenantId);
+            if (jobActiveEntityMgr.getJobActive(jobName, tenantId)) {
+                PredefinedJobArguments jobArgs = new PredefinedJobArguments();
+                jobArgs.setPredefinedJobType(jobType);
+                jobArgs.setJobName(jobName);
+                jobArgs.setTenantId(tenantId);
 
-            int jobTimeout = data.getInt(TIMEOUT);
+                int jobTimeout = data.getInt(TIMEOUT);
 
-            if (checkAllJobFinished(jobArgs, jobTimeout, queryApi)) {
-                JobHistory jobHistory = new JobHistory();
-                try {
-                    jobHistory.setJobName(jobName);
-                    jobHistory.setTenantId(tenantId);
-                    jobHistory.setTriggeredTime(new Date());
-                    TriggeredJobInfo triggeredJobInfo = restTemplate.postForObject(url, jobArgs,
-                            TriggeredJobInfo.class);
-                    String jobHandle = "";
-                    String executionHost = "";
-                    if (triggeredJobInfo != null) {
-                        jobHandle = triggeredJobInfo.getJobHandle();
-                        executionHost = triggeredJobInfo.getExecutionHost();
+                if (checkAllJobFinished(jobArgs, jobTimeout, queryApi)) {
+                    JobHistory jobHistory = new JobHistory();
+                    try {
+                        jobHistory.setJobName(jobName);
+                        jobHistory.setTenantId(tenantId);
+                        jobHistory.setTriggeredTime(new Date());
+                        TriggeredJobInfo triggeredJobInfo = restTemplate.postForObject(url,
+                                jobArgs,
+                                TriggeredJobInfo.class);
+                        String jobHandle = "";
+                        String executionHost = "";
+                        if (triggeredJobInfo != null) {
+                            jobHandle = triggeredJobInfo.getJobHandle();
+                            executionHost = triggeredJobInfo.getExecutionHost();
+                        }
+                        jobHistory.setTriggeredJobHandle(jobHandle);
+                        jobHistory.setExecutionHost(executionHost);
+                        jobHistory.setTriggeredJobStatus(TriggeredJobStatus.START);
+                    } catch (RestClientException e) {
+                        jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
+                        jobHistory.setErrorMessage(e.getMessage());
                     }
-                    jobHistory.setTriggeredJobHandle(jobHandle);
-                    jobHistory.setExecutionHost(executionHost);
-                    jobHistory.setTriggeredJobStatus(TriggeredJobStatus.START);
-                } catch (RestClientException e) {
-                    jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
-                    jobHistory.setErrorMessage(e.getMessage());
+                    jobHistoryEntityMgr.saveJobHistory(jobHistory);
                 }
-                jobHistoryEntityMgr.saveJobHistory(jobHistory);
             }
         }
 
