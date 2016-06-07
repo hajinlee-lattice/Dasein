@@ -12,6 +12,12 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+import java.sql.*;
+import java.text.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.annotation.Nullable;
 
@@ -35,6 +41,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -84,12 +91,21 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
+    private Connection conn;
+    private String SqlServer_report="10.41.1.97\\sql2012std";
+    private String Sql_userName="dataloader_user";
+    private String Sql_password="password";
+    private String Sql_DBName="MQTest";
+    private String ModelArtifacts;
+    private String Webhdfs_nn1="http://10.41.1.185:50070/explorer.html#/";
+    private String Webhdfs_nn2="http://10.41.1.104:50070/explorer.html#/";
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
     @Value("${pls.fs.defaultFS}")
     private String plsHdfsPath;
+    
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -104,13 +120,22 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
         log.info(String.format("Test environment setup finished. tenant name: %s ", tenantToAttach.getName()));
-
+        conn=dbConnect();
         //fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-
     }
-
+    
+    @AfterClass(groups = "qa.lp")
+    public void tearDown() throws Exception{
+        log.info("====This is tear down method====");
+        if (conn!=null)
+        {
+            log.info("====Close sql connection====");
+            conn.close();
+        }
+    }
+    
     @Test(groups="qa.lp", enabled=true)
-    public void testModelQuality() throws InterruptedException, IOException
+    public void testModelQuality() throws InterruptedException, IOException,SQLException,ParseException
     {
         String fullPath=System.getenv("WSHOME")+"/le-pls/src/test/resources/"+RESOURCE_BASE+'/'+fileName;
         log.info("Folder Full Path:"+fullPath);
@@ -124,7 +149,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
                 downloadModels();
                 log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
-              //WriteToSplunk();
+                WriteQualityTestReport();
             }
             else
             {
@@ -145,7 +170,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                     String modelId = prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
                     downloadModels();
                     log.info(String.format("CX: ModelId is %s, ROC score is %f", modelId, rocScore));
-                  //WriteToSplunk();
+                    WriteQualityTestReport();
                 }
                 else
                 {
@@ -369,6 +394,63 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 throw new RuntimeException(e);
             }
         }
+    }
+    
+    private void WriteQualityTestReport() throws SQLException,ParseException{
+        String tenantName=tenantToAttach.getId();
+        String hdfsPath_nn1 = String.format("%s%s%s", Webhdfs_nn1, modelingServiceHdfsBaseDir, tenantName);
+        String hdfsPath_nn2 = String.format("%s%s%s", Webhdfs_nn2, modelingServiceHdfsBaseDir, tenantName);
+        String Customer="";
+        String CSVFile=fileName;
+        if (fileName.indexOf('/')>=0)
+        {
+            CSVFile=fileName.split("/")[1];
+        } 
+        if (CSVFile.lastIndexOf(".")>0){
+            Customer=CSVFile.substring(0,CSVFile.lastIndexOf("."));
+        }
+        
+        if (Customer.indexOf('/')>=0)
+        {
+            Customer=Customer.split("/")[1];
+        }
+        if (Customer.indexOf("_LP3_")>0)
+        {
+            Customer=Customer.split("_LP3_")[0];
+        }
+        else if(Customer.split("_").length>2)
+        {
+            Customer=Customer.split("_")[0]+'_'+Customer.split("_")[1];
+        }
+        log.info("====start to connect DB======");
+        Connection conn = dbConnect();
+        System.out.println("Connected to server !!!");
+        Statement statement=conn.createStatement();
+        log.info("====start to insert DB======");
+        int res=statement.executeUpdate("insert INTO [dbo].[ModelQualityReport] ([Customer],[CSVFile],[ModelArtifacts_NN1],[ModelArtifacts_NN2],[ROC],[CreateDate]) VALUES ('"+Customer+"', '"+CSVFile+"','"+hdfsPath_nn1+"','"+hdfsPath_nn2+"',"+rocScore+",'"+ getCurrentTimeStamp()+"')");
+        assertEquals(res,1);
+        log.info("====completed to insert DB======");
+        statement.close();
+        //conn.close();
+        } 
+    
+    private String getCurrentTimeStamp() throws ParseException {
+        DateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss");
+        java.util.Date today = new java.util.Date();
+        return dateFormat.format(today.getTime());
+
+    }
+    
+    private Connection dbConnect() throws SQLServerException{
+        SQLServerDataSource dataSource = new SQLServerDataSource();
+        dataSource.setServerName(SqlServer_report);
+        dataSource.setPortNumber(1433);
+        dataSource.setDatabaseName(Sql_DBName);
+        dataSource.setUser(Sql_userName);
+        dataSource.setPassword(Sql_password);
+        Connection conn = dataSource.getConnection();
+        return conn;
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation,
