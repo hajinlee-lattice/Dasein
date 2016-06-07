@@ -117,6 +117,12 @@ class Launcher(object):
         if not os.path.exists(modelEnhancementsLocalDir):
             os.mkdir(modelEnhancementsLocalDir)
 
+        # Create directory for pipeline
+        pipelineLocalDir = modelLocalDir + "pipeline/"
+
+        if not os.path.exists(pipelineLocalDir):
+            os.mkdir(pipelineLocalDir)
+
         # Execute the packaged script from the client and get the returned file
         # that contains the generated model data
         execfile(script, globals())
@@ -132,6 +138,7 @@ class Launcher(object):
         params = dict()
         params["modelLocalDir"] = modelLocalDir
         params["modelEnhancementsLocalDir"] = modelEnhancementsLocalDir
+        params["pipelineLocalDir"] = pipelineLocalDir
         params["modelHdfsDir"] = modelHdfsDir
         params["schema"] = schema
         params["parser"] = parser
@@ -214,6 +221,14 @@ class Launcher(object):
             (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
             for filename in filter(lambda e: executor.accept(e), filenames):
                 hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
+
+            # Get hdfs pipeline dir
+            pipelineHdfsDir = modelHdfsDir + "pipeline/"
+
+            hdfs.mkdir(pipelineHdfsDir)
+            (_, _, filenames) = os.walk(pipelineLocalDir).next()
+            for filename in filter(lambda e: executor.accept(e), filenames):
+                hdfs.copyFromLocal(pipelineLocalDir + filename, "%s%s" % (pipelineHdfsDir, filename))
 
             # Copy the data rules files from local to hdfs
             dataRulesLocalDir = modelLocalDir + "datarules/"

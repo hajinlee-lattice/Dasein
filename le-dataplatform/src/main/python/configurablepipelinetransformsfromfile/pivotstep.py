@@ -23,6 +23,7 @@ class PivotStep(PipelineStep):
     pivotValuesFilePath = None
     minCategoricalCount = 5
     maxCategoricalCount = 10
+    pValues = {}
     
     def __init__(self, columnsToPivot={}, 
                         categoricalColumns={}, 
@@ -40,7 +41,7 @@ class PivotStep(PipelineStep):
     def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
         learnedConfig = self.__learnPivotValuesFromData(trainingDataFrame, configMetadata)
         self.__setPivotColumns(configMetadata, learnedConfig)
-        self.__writeRTSArtifact()
+        self.__writeRTSArtifacts()
 
     def transform(self, dataFrame, configMetadata, test):
         columnsToRemove = set()
@@ -68,6 +69,7 @@ class PivotStep(PipelineStep):
             categoricalValues = self.dataprofile[column]
             
             if len(categoricalValues) < self.minCategoricalCount or len(categoricalValues) > self.maxCategoricalCount:
+                self.pValues[column] = "Num values %d outside of range [%d,%d]" % (len(categoricalValues), self.minCategoricalCount, self.maxCategoricalCount)
                 continue 
             for value in categoricalValues:
                 if "positiveEventCount" in value:
@@ -81,7 +83,8 @@ class PivotStep(PipelineStep):
             o = [100.0*x/totalObserved for x in observed]
             e = [100.0*x/totalExpected for x in expected]
             c = chisquare(o, e)[1]
-                
+            
+            self.pValues[column] = "%f" % c
             if c < self.pvalueThreshold:
                 logger.info("Pivoting %s because chi-square returns %f < %f." % (column, c, self.pvalueThreshold))
                 learnedConfig[column] = self.__getPivotConfig(column, observedValues)
@@ -158,7 +161,7 @@ class PivotStep(PipelineStep):
                 self.columnsToPivot[pivotColumn] = pValues
 
 
-    def __writeRTSArtifact(self):
+    def __writeRTSArtifacts(self):
         if len(self.columnsToPivot) == 0:
             return
         with open("pivotvalues.txt", "w") as fp:
@@ -176,4 +179,7 @@ class PivotStep(PipelineStep):
     
     def doColumnCheck(self):
         return False
+    
+    def getDebugArtifacts(self):
+        return [{"pivotstep-pvalues.json": self.pValues}]
 

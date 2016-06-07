@@ -89,6 +89,9 @@ class PipelineStep(object):
     def doColumnCheck(self):
         return True
     
+    def getDebugArtifacts(self):
+        return []
+    
 class ModelStep(PipelineStep):
     model = None
     modelInputColumns = []

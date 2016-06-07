@@ -161,6 +161,7 @@ class LearningExecutor(Executor):
             mediator.clf = clf
             mediator.modelLocalDir = params["modelLocalDir"]
             mediator.modelEnhancementsLocalDir = params["modelEnhancementsLocalDir"]
+            mediator.pipelineLocalDir = params["pipelineLocalDir"]
             mediator.modelHdfsDir = params["modelHdfsDir"]
             mediator.allDataPreTransform = params["allDataPreTransform"]
             mediator.allDataPostTransform = params["allDataPostTransform"]

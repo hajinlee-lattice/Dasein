@@ -26,7 +26,7 @@ class Finalize(State):
         self.writeEnhancedFiles(self.getMediator())
         self.writeMessages(self.getMediator())
         self.writeExportData(self.getMediator())
-        
+        self.writePipelineDebugArtifacts(self.getMediator())
         
     def writeMessages(self, mediator):
         if len(mediator.messages) > 0:
@@ -64,7 +64,7 @@ class Finalize(State):
             
     def invokeModelPredictorsExtraction(self, mediator):
         modelJSONFilePath = mediator.modelLocalDir + mediator.name + "_model.json"
-        csvFilePath = mediator.modelLocalDir + mediator.name+ "_model.csv"
+        csvFilePath = mediator.modelLocalDir + mediator.name + "_model.csv"
         subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath, 'metadata.avsc'])
 
     def writeReadoutSample(self, mediator):
@@ -75,6 +75,14 @@ class Finalize(State):
         exportFilePath = mediator.modelLocalDir + mediator.name + "_dataexport.csv"
         if os.path.isfile("./exportdfstep.csv"):
             os.rename("./exportdfstep.csv", exportFilePath)
+            
+    def writePipelineDebugArtifacts(self, mediator):
+        base = self.mediator.pipelineLocalDir
+        for step in mediator.scoringPipeline.getPipeline():
+            for item in step.getDebugArtifacts():
+                fileName, value = item.iteritems().next()
+                with open(os.path.join(base, fileName), "wb") as f:
+                    json.dump(value, f, indent=4)
 
     def writeEnhancedFiles(self, mediator):
         base = self.mediator.modelEnhancementsLocalDir

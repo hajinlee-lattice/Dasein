@@ -36,7 +36,7 @@ class ImputationStep(PipelineStep):
     def transform(self, dataFrame, configMetadata, test):
         if len(self.imputationValues) == 0:
             self.imputationValues = self.__computeImputationValues(dataFrame)
-            self.__writeRTSArtifact()
+            self.__writeRTSArtifacts()
         for column, value in self.columns.iteritems():
             if column in dataFrame:
                 try:
@@ -45,7 +45,7 @@ class ImputationStep(PipelineStep):
                     dataFrame[column] = dataFrame[column].fillna(value)
         return dataFrame
     
-    def __writeRTSArtifact(self):
+    def __writeRTSArtifacts(self):
         with open("imputations.txt", "w") as fp:
             fp.write(str(self.imputationValues))
             self.imputationFilePath = os.path.abspath(fp.name)
@@ -156,3 +156,6 @@ class ImputationStep(PipelineStep):
         if valuePair == binPairs[numBins - 1]:
             adjValue = 2.0 * splitValue
         return valuePair[0] + adjValue
+    
+    def getDebugArtifacts(self):
+        return [{"imputationstep-imputationvalues.json": self.imputationValues}]
