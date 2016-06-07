@@ -62,6 +62,30 @@
             </properties>
         </profile>
         <profile>
+            <id>qaclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <scoring.properties.path>conf/env/qaclustera</scoring.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qaclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <scoring.properties.path>conf/env/qaclusterb</scoring.properties.path>
+            </properties>
+        </profile>
+        <profile>
             <id>production</id>
             <activation>
                 <property>
@@ -71,6 +95,30 @@
             </activation>
             <properties>
                 <scoring.properties.path>conf/env/prodcluster</scoring.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productiona</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>productiona</value>
+                </property>
+            </activation>
+            <properties>
+                <scoring.properties.path>conf/env/productiona</scoring.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productionb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>productionb</value>
+                </property>
+            </activation>
+            <properties>
+                <scoring.properties.path>conf/env/productionb</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -123,6 +171,17 @@
                             <sources>
                                 <source>
                                     <location>target/le-scoring-${le.rpm.version}-shaded.jar</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/app/scoring</directory>
+                            <filemode>644</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>${scoring.properties.path}/scoring.properties</location>
                                 </source>
                             </sources>
                         </mapping>
