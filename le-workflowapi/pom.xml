@@ -26,6 +26,7 @@
         <le.dataflow.version>2.0.33-SNAPSHOT</le.dataflow.version>
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
         <le.pls.version>2.0.33-SNAPSHOT</le.pls.version>
+        <le.testframework.version>2.0.33-SNAPSHOT</le.testframework.version>
     </properties>
 
     <parent>
@@ -288,5 +289,14 @@
             <version>${le.pls.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testframework.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        
     </dependencies>
 </project>

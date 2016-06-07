@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -22,7 +23,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
-import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
+import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -41,7 +42,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private ModelSummaryService modelSummaryService;
 
     @Autowired
-    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
+    private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
 
     @Autowired
     private ImportMatchAndScoreWorkflowSubmitter importMatchAndScoreWorkflowSubmitter;
@@ -65,8 +66,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
         }
 
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data",
-                TransformationGroup.fromName(transformationGroupName)).toString();
+        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data")
+                .toString();
     }
 
     @Override

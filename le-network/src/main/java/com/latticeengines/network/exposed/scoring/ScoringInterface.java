@@ -1,7 +1,5 @@
 package com.latticeengines.network.exposed.scoring;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
@@ -13,6 +11,6 @@ public interface ScoringInterface {
 
     JobStatus getImportDataJobStatus(String applicationId);
 
-    ApplicationId submitBulkScoreJob(RTSBulkScoringConfiguration rtsBulkScoringConfig);
+    AppSubmission submitBulkScoreJob(RTSBulkScoringConfiguration rtsBulkScoringConfig);
 
 }

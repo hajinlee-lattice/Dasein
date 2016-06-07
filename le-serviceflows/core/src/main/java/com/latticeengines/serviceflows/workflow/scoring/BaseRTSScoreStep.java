@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -35,8 +34,8 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         log.info("Inside RTS Bulk Score execute()");
         Map.Entry<RTSBulkScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
         RTSBulkScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
-        ApplicationId appId = scoringProxy.submitBulkScoreJob(scoringConfig);
-        waitForAppId(appId.toString(), configuration.getMicroServiceHostPort());
+        String appId = scoringProxy.submitBulkScoreJob(scoringConfig).getApplicationIds().get(0);
+        waitForAppId(appId, configuration.getMicroServiceHostPort());
 
         if (configuration.isRegisterScoredTable()) {
             try {
@@ -49,7 +48,6 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
 
     private Map.Entry<RTSBulkScoringConfiguration, String> buildScoringConfig() {
         RTSBulkScoringConfiguration scoringConfig = new RTSBulkScoringConfiguration();
-        scoringConfig.setTenant(configuration.getCustomerSpace().getTenantId().toString());
         String modelId = getModelId();
         scoringConfig.setModelGuids(Arrays.asList(new String[] { modelId }));
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
@@ -60,6 +58,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         String inputTableName = configuration.getInputTableName();
         Table metadataTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
         scoringConfig.setMetadataTable(metadataTable);
+        scoringConfig.setCustomerSpace(configuration.getCustomerSpace());
         return new AbstractMap.SimpleEntry<RTSBulkScoringConfiguration, String>(scoringConfig, tableName);
     }
 

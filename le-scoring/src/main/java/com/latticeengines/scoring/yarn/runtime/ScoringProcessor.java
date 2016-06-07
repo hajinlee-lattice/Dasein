@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.DatumWriter;
-import org.apache.avro.reflect.ReflectData;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
@@ -38,13 +39,13 @@ import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
-import com.latticeengines.domain.exposed.scoringapi.ScoreResult;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
-        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
+        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -74,14 +75,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
         log.info("In side the rts bulk scoring processor.");
         String path = getExtractPath(rtsBulkScoringConfig);
-        String tenant = rtsBulkScoringConfig.getTenant();
+        String customerSpace = rtsBulkScoringConfig.getCustomerSpace().toString();
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
             log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
-                    .getRecords().size(), tenant));
+                    .getRecords().size(), customerSpace));
             List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
-                    scoreRequest, tenant);
+                    scoreRequest, customerSpace);
             recordScoreResponseList.addAll(recordScoreResponse);
         }
         convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
@@ -174,7 +175,27 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         String scorePath = String.format(targetPath + "/%s", fileName);
         log.info("The output score path is " + scorePath);
 
-        Schema schema = ReflectData.get().getSchema(ScoreResult.class);
+        Table outputTable = new Table();
+        outputTable.setName("scoreOutput");
+        Attribute idAttr = new Attribute();
+        idAttr.setName("Id");
+        idAttr.setDisplayName("Id");
+        idAttr.setSourceLogicalDataType("");
+        idAttr.setPhysicalDataType(Type.STRING.name());
+        Attribute modelIdAttr = new Attribute();
+        modelIdAttr.setName("modelId");
+        modelIdAttr.setDisplayName("modelId");
+        modelIdAttr.setSourceLogicalDataType("");
+        modelIdAttr.setPhysicalDataType(Type.STRING.name());
+        Attribute scoreAttr = new Attribute();
+        scoreAttr.setName("score");
+        scoreAttr.setDisplayName("score");
+        scoreAttr.setSourceLogicalDataType("");
+        scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
+        outputTable.addAttribute(idAttr);
+        outputTable.addAttribute(modelIdAttr);
+        outputTable.addAttribute(scoreAttr);
+        Schema schema = TableUtils.createSchema(outputTable.getName(), outputTable);
 
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
 
@@ -189,7 +210,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     throw new LedpException(LedpCode.LEDP_20035);
                 }
                 for (ScoreModelTuple tuple : scoreModelTupleList) {
-                    builder.set("id", id);
+                    builder.set("Id", id);
                     String modelId = tuple.getModelId();
                     if (StringUtils.isBlank(modelId)) {
                         throw new LedpException(LedpCode.LEDP_20036);

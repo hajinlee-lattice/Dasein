@@ -2,10 +2,13 @@ package com.latticeengines.leadprioritization.dataflow;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 import java.util.List;
+
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -31,8 +34,8 @@ public class CombineInputTableWithScoreTestNG extends ServiceFlowsDataFlowFuncti
     public void execute() throws Exception {
         List<GenericRecord> inputRecords = AvroUtils.readFromLocalFile(ClassLoader.getSystemResource(
                 String.format("%s/%s/part-m-00000.avro", //
-                        getFlowBeanName(),getStandardParameters().getInputTableName())) //
-                        .getPath());
+                        getFlowBeanName(), getStandardParameters().getInputTableName())) //
+                .getPath());
 
         executeDataFlow(getStandardParameters());
 
@@ -41,7 +44,6 @@ public class CombineInputTableWithScoreTestNG extends ServiceFlowsDataFlowFuncti
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.Id.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-            assertNotNull(record.get(ScoreResultField.RawScore.name()));
         }
     }
 

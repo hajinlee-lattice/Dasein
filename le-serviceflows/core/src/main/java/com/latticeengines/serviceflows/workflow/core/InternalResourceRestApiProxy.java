@@ -7,10 +7,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
@@ -169,6 +171,18 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public ModelSummary getModelSummaryFromModelId(String modelId, CustomerSpace customerSpace) {
+        ModelSummary modelSummary = null;
+        try {
+            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString());
+            log.debug("Get from " + url);
+            modelSummary = restTemplate.getForObject(url, ModelSummary.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getModelSummaryFromModelId: Remote call failure", e);
+        }
+        return modelSummary;
+    }
+
     public void sendPlsScoreEmail(String result, String tenantId) {
         try {
             String url = constructUrl("pls/internal/emails/score/result", result, tenantId);
@@ -178,4 +192,45 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }
     }
+
+    public void createModelSummary(ModelSummary modelSummary, CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/modelsummaries", customerSpace.toString());
+            log.debug(String.format("Posting to %s", url));
+            restTemplate.postForObject(url, modelSummary, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("createModelSummary: Remote call failure", e);
+        }
+    }
+
+    public void deleteModelSummary(String modelId, CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/modelsummaries/", modelId, customerSpace.toString());
+            log.debug(String.format("Deleting to %s", url));
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            throw new RuntimeException("deleteModelSummary: Remote call failure", e);
+        }
+    }
+
+    public boolean createTenant(Tenant tenant) {
+        try {
+            String url = constructUrl("pls/admin/tenants");
+            log.debug(String.format("Posting to %s", url));
+            return restTemplate.postForObject(url, tenant, Boolean.class);
+        } catch (Exception e) {
+            throw new RuntimeException("createTenant: Remote call failure", e);
+        }
+    }
+
+    public void deleteTenant(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/admin/tenants/", customerSpace.toString());
+            log.debug(String.format("Deleting to %s", url));
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            throw new RuntimeException("deleteTenant: Remote call failure", e);
+        }
+    }
+
 }

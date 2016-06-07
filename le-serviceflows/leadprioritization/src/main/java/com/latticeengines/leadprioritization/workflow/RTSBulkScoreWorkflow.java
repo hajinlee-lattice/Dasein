@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
+import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.RTSScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
@@ -26,7 +26,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
     private ExportWorkflow exportWorkflow;
 
     @Autowired
-    private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
+    private SendEmailAfterRTSBulkScoringCompletionListener sendEmailAfterRTSBulkScoringCompletionListener;
 
     @Bean
     public Job rtsBulkScoreWorkflowJob() throws Exception {
@@ -38,7 +38,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
         return new WorkflowBuilder().next(score) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
-                .listener(sendEmailAfterScoringCompletionListener) //
+                .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
 
     }

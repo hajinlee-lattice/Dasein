@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ScoreResult {
 
-    @JsonProperty("id")
+    @JsonProperty("Id")
     private String id = "";
 
     @JsonProperty("modelId")

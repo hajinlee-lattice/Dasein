@@ -53,8 +53,9 @@ public class ScoringResource {
     @RequestMapping(value = "/rtsbulkscore", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Submit a bulk scoring job")
-    public ApplicationId submitBulkScoreJob(@RequestBody RTSBulkScoringConfiguration rtsBulkScoringConfig) {
-        return scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
+    public AppSubmission submitBulkScoreJob(@RequestBody RTSBulkScoringConfiguration rtsBulkScoringConfig) {
+        return new AppSubmission(
+                Arrays.<ApplicationId> asList(scoringService.submitScoreWorkflow(rtsBulkScoringConfig)));
     }
 
 }

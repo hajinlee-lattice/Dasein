@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.scoring;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -30,9 +29,9 @@ public class ScoringProxy extends BaseRestApiProxy implements ScoringInterface {
     }
 
     @Override
-    public ApplicationId submitBulkScoreJob(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
+    public AppSubmission submitBulkScoreJob(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
         String url = constructUrl("/rtsbulkscore");
-        return post("createRTSBulkScoringJob", url, rtsBulkScoringConfig, ApplicationId.class);
+        return post("createRTSBulkScoringJob", url, rtsBulkScoringConfig, AppSubmission.class);
     }
 
 }

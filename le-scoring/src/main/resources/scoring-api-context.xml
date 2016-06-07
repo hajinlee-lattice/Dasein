@@ -9,6 +9,8 @@
 
     <import resource="classpath:scoring-mapreduce-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:scoring-yarn-client-context.xml" />
+    <import resource="classpath:scoring-yarn-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.scoring.service">
     </context:component-scan>

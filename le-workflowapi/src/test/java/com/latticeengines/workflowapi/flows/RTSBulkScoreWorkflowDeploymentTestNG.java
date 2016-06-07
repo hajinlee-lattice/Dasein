@@ -1,19 +1,13 @@
-package com.latticeengines.scoring.exposed.service.impl;
+package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterClass;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -21,24 +15,35 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.scoring.exposed.InternalResourceRestApiProxy;
-import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflow;
+import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
-public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
-
-    @Value("${scoring.pls.api.hostport}")
-    private String plsApiHostPort;
+public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
 
     @Autowired
-    private ScoringServiceImpl scoringService;
+    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
-    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/ScoringServiceImplTestNG/Tenants/ScoringServiceImplTestNG/Spaces/Production/Data/Tables/";
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Autowired
+    private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/RTSBulkScoreWorkflowDeploymentTestNG/Tenants/RTSBulkScoreWorkflowDeploymentTestNG/Spaces/Production/Data/Tables/";
 
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
 
@@ -48,66 +53,48 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
-    protected static final String TENANT_ID = "ScoringServiceImplTestNG.ScoringServiceImplTestNG.Production";
-
-    protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
-
-    protected InternalResourceRestApiProxy plsRest;
+    protected static final String TENANT_ID = "RTSBulkScoreWorkflowDeploymentTestNG";
 
     protected Tenant tenant;
 
+    protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
+
+    private ModelSummary summary;
+
     @BeforeClass(groups = "deployment")
-    public void setup() throws IOException {
+    public void setup() throws Exception {
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
         ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(testModelFolderName,
                 applicationId, modelVersion);
-        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         tenant = setupTenant();
-        createModel(plsRest, tenant, modelConfiguration, customerSpace);
+        summary = createModel(tenant, modelConfiguration, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
     }
 
-    @AfterClass(groups = "deployment")
-    public void cleanup() throws IOException {
+    @Test(groups = "deployment", enabled = true)
+    public void testScoreAccount() throws Exception {
+        Assert.assertNotNull(summary);
+        score(summary.getId(), summary.getTrainingTableName());
     }
 
-    @Test(groups = "deployment")
-    public void testSubmitScoringYarnContainerJob() throws Exception {
-        RTSBulkScoringConfiguration rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
-        rtsBulkScoringConfig.setCustomerSpace(customerSpace);
-        List<String> modelGuids = new ArrayList<String>();
-        modelGuids.add("ms__a8684c37-a3b9-452f-b7e3-af440e4365b8_");
-        rtsBulkScoringConfig.setModelGuids(modelGuids);
-        Table metadataTable = new Table();
-        Extract extract = new Extract();
-        extract.setPath(TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX + AVRO_FILE);
-        metadataTable.addExtract(extract);
-        rtsBulkScoringConfig.setMetadataTable(metadataTable);
-        String tableName = String.format("RTSBulkScoreResult_%s_%d", TEST_MODEL_NAME_PREFIX.replaceAll("-", "_"),
-                System.currentTimeMillis());
-        String targeDir = TEST_INPUT_DATA_DIR + tableName;
-        rtsBulkScoringConfig.setTargetResultDir(targeDir);
-        ApplicationId appId = scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
-        assertNotNull(appId);
-        System.out.println(appId);
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    private void score(String modelId, String tableToScore) throws Exception {
+        RTSBulkScoreWorkflowConfiguration rtsBulkScoreWorkflowConfig = rtsBulkScoreWorkflowSubmitter
+                .generateConfiguration(modelId, tableToScore, tableToScore);
+        WorkflowExecutionId workflowId = workflowService.start(rtsBulkScoreWorkflow.name(), rtsBulkScoreWorkflowConfig);
+        waitForCompletion(workflowId);
     }
 
-    private Tenant setupTenant() throws IOException {
-        String tenantId = TENANT_ID;
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-        tenant.setName(tenantId);
-        plsRest.deleteTenant(customerSpace);
-        plsRest.createTenant(tenant);
-        return tenant;
+    private Tenant setupTenant() throws Exception {
+        Tenant returnTenant = setupTenant(customerSpace);
+        MultiTenantContext.setTenant(returnTenant);
+        assertNotNull(MultiTenantContext.getTenant());
+        return returnTenant;
     }
 
-    private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
-            ScoringTestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
+    private ModelSummary createModel(Tenant tenant, ScoringTestModelConfiguration modelConfiguration,
+            CustomerSpace customerSpace) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -120,33 +107,52 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
-        ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),
-                customerSpace);
+        Table metadataTable = new Table();
+        Extract extract = new Extract();
+        extract.setName("ExtractTable");
+        extract.setProcessedRecords(100L);
+        extract.setTenantId(tenant.getPid());
+        extract.setPath(TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX + AVRO_FILE);
+        extract.setExtractionTimestamp(12345L);
+        extract.setTable(metadataTable);
+        metadataTable.setName("MetadataTable");
+        metadataTable.setTableType(TableType.DATATABLE);
+        metadataTable.addExtract(extract);
+        metadataTable.setDisplayName("MetadataTable");
+        metadataTable.setInterpretation(SchemaInterpretation.SalesforceAccount.name());
+        metadataTable.setTenant(tenant);
+        metadataTable.setTenantId(tenant.getPid());
+        metadataTable.setMarkedForPurge(true);
+        metadataProxy.createTable(customerSpace.toString(), "MetadataTable", metadataTable);
+
+        modelSummary.setTrainingTableName(metadataTable.getName());
+
+        ModelSummary retrievedSummary = internalResourceProxy.getModelSummaryFromModelId(
+                modelConfiguration.getModelId(), customerSpace);
         if (retrievedSummary != null) {
-            plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
+            internalResourceProxy.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
         }
-        plsRest.createModelSummary(modelSummary, customerSpace);
+        internalResourceProxy.createModelSummary(modelSummary, customerSpace);
         return modelSummary;
     }
 
     private void setupHdfsArtifacts(Configuration yarnConfiguration, Tenant tenant,
             ScoringTestModelConfiguration modelConfiguration) throws IOException {
         String tenantId = tenant.getId();
-        String artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
+        String artifactTableDir = String.format(Model.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 modelConfiguration.getEventTable());
-        String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
+        String artifactBaseDir = String.format(Model.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());
-        String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
+        String enhancementsDir = artifactBaseDir + Model.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
         URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                + Model.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
-        URL rfpmmlUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
-                + ModelRetrieverImpl.PMML_FILENAME);
+        URL rfpmmlUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath() + Model.PMML_FILENAME);
         URL scoreDerivationUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
-                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                + Model.SCORE_DERIVATION_FILENAME);
         URL inputAvroFile = ClassLoader.getSystemResource(LOCAL_DATA_DIR + AVRO_FILE);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
@@ -159,15 +165,14 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.mkdir(yarnConfiguration, inputDataDir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), artifactTableDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                + Model.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir
-                + ModelRetrieverImpl.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir + Model.PMML_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                + Model.SCORE_DERIVATION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), enhancementsDir
-                + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                + Model.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputAvroFile.getFile(), inputDataDir);
     }
 
@@ -192,7 +197,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             this.modelVersion = modelVersion;
             this.eventTable = testModelFolderName;
             this.sourceInterpretation = "SalesforceLead";
-            this.modelSummaryJsonLocalpath = localModelPath + ModelRetrieverImpl.MODEL_JSON;
+            this.modelSummaryJsonLocalpath = localModelPath + Model.MODEL_JSON;
         }
 
         public String getTestModelFolderName() {
@@ -235,5 +240,4 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             return modelSummaryJsonLocalpath;
         }
     }
-
 }

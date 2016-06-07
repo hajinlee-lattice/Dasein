@@ -10,23 +10,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
-    private String tenant;
-
     private Table metadataTable;
 
     private String targetResultDir;
 
     private List<String> modelGuids = new ArrayList<>();
-
-    @JsonProperty("tenant")
-    public String getTenant() {
-        return this.tenant;
-    }
-
-    @JsonProperty("tenant")
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
 
     @JsonProperty("model_guids")
     public List<String> getModelGuids() {

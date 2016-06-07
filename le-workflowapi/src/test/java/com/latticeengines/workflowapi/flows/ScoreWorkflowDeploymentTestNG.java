@@ -71,10 +71,22 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
                 "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
-                        + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/");
+                        + "/models/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib/");
+        URL eventtableDatacompositionUrl = getClass()
+                .getClassLoader()
+                .getResource(
+                        RESOURCE_BASE
+                                + "/models/AccountModel/20a331e9-f18b-4358-8023-e44a36cb17dd/1459178858615_0234/enhancements/datacomposition.json");
+        HdfsUtils
+                .copyFromLocalToHdfs(
+                        yarnConfiguration,
+                        eventtableDatacompositionUrl.getPath(),
+                        "/user/s-analytics/customers/"
+                                + DEMO_CUSTOMERSPACE.toString()
+                                + "/data/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib-Event-Metadata/datacomposition.json");
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
@@ -119,6 +131,14 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         WorkflowExecutionId workflowId = workflowService.start(scoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);
+    }
+
+    public Table getAccountTable() {
+        return accountTable;
+    }
+
+    public void setAccountTable(Table accountTable) {
+        this.accountTable = accountTable;
     }
 
 }

@@ -35,7 +35,7 @@
     <bean id="itemProcessor" class="com.latticeengines.scoring.yarn.runtime.ScoringProcessor" />
 
     <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
-    <import resource="classpath:security-context.xml" />
+    <import resource="classpath:scoring-yarn-context.xml" />
     <import resource="classpath:proxy-context.xml" />
 
 </beans>
