@@ -1,63 +1,63 @@
-<section class="import-job-status">
+<div class="import-job-status">
+    <h2 style="margin-left: 40px">Build Model</h2>
 
-    <div class="row">
-        <div class="six columns offset-three">
-
-            <h2>Build Model: {{modelDisplayName}}</h2>
-            <dl data-ng-if="jobStatusReturned">
-                <dt>Job Started</dt>
-                <dd>
-                    <span class="chevron-content icon" data-ng-if="jobStatus == 'Pending'">
-                        <i class="fa fa-spinner fa-pulse"></i>
-                    </span>
-                    <span class="chevron-content icon" data-ng-if="jobStarted">
-                        <i class="fa fa-check"></i>
-                    </span>
-                    <span>{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</span>
-                </dd>
-            </dl>
-            <dl data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data">
-                <dt>Loading Data</dt>
-                <dd>
-                    <span class="chevron-content icon" data-ng-if="jobStepsRunningStates.load_data">
-                        <i class="fa fa-spinner fa-pulse"></i>
-                    </span>
-                    <span class="chevron-content icon" data-ng-if="jobStepsCompletedStates.load_data">
-                        <i class="fa fa-check"></i>
-                    </span>
-                    <span>{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</span>
-                </dd>
-            </dl>
-            <dl data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights">
-                <dt>Matching to Data Cloud</dt>
-                <dd>
-                    <span class="chevron-content icon" data-ng-if="jobStepsRunningStates.generate_insights">
-                        <i class="fa fa-spinner fa-pulse"></i>
-                    </span>
-                    <span class="chevron-content icon" data-ng-if="jobStepsCompletedStates.generate_insights">
-                        <i class="fa fa-check"></i>
-                    </span>
-                    <span>{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</span>
-                </dd>
-            </dl>
-            <dl data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market">
-                <dt>Building Models...</dt>
-                <dd>
-                    <span class="chevron-content icon" data-ng-if="jobStepsRunningStates.create_global_target_market">
-                        <i class="fa fa-spinner fa-pulse"></i>
-                    </span>
-                    <span class="chevron-content icon" data-ng-if="jobStepsCompletedStates.create_global_target_market">
-                        <i class="fa fa-check"></i>
-                    </span>
-                    <span>{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</span>
-                </dd>
-            </dl>
-            <div data-ng-if="jobStatus == 'Completed'">
-                <a ui-sref="home.jobs.status.csv({jobId: job.id})">
-                    <i class="fa fa-list-alt"></i>View Report
-                </a>
-            </div>
-        </div>
+    <div class="row columns twelve" data-ng-if="jobStatus != null">
+        <span class="columns two">Job Started</span>
+        <span class="icon columns one" data-ng-if="jobStatus == 'Pending'">
+            <i class="fa fa-spinner fa-pulse"></i>
+        </span>
+        <span class=" icon columns one" data-ng-if="startTimestamp">
+            <i class="fa fa-check"></i>
+        </span>
+        <span class="columns two">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</span>
+    </div>
+    <div class="row columns twelve" data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">
+        <span class="columns two">Processing File</span>
+        <span class="icon columns one" data-ng-if="jobStepsRunningStates.load_data">
+            <i class="fa fa-spinner fa-pulse"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="jobStepsCompletedStates.load_data">
+            <i class="fa fa-check"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="stepFailed == 'load_data'">
+            <i class="fa fa-close"></i>
+        </span>
+        <span class="columns two">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</span>
+    </div>
+    <div class="row columns twelve" data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">
+        <span class="columns two">Matching to Data Cloud</span>
+        <span class="icon columns one" data-ng-if="jobStepsRunningStates.generate_insights">
+            <i class="fa fa-spinner fa-pulse"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="jobStepsCompletedStates.generate_insights">
+            <i class="fa fa-check"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="stepFailed == 'generate_insights'">
+            <i class="fa fa-close"></i>
+        </span>
+        <span class="columns two">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</span>
+    </div>
+    <div class="row columns twelve" data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">
+        <span class="columns two">Building Models...</span>
+        <span class="icon columns one" data-ng-if="jobStepsRunningStates.create_global_target_market">
+            <i class="fa fa-spinner fa-pulse"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="jobStepsCompletedStates.create_global_target_market">
+            <i class="fa fa-check"></i>
+        </span>
+        <span class="icon columns one" data-ng-if="stepFailed == 'create_global_target_market'">
+            <i class="fa fa-close"></i>
+        </span>
+        <span class="columns two">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</span>
     </div>
 
-</section>
+    <div class="row columns twelve" data-ng-if="jobStatus == 'Failed'">
+        <span>Create Model Job: Failed</span>
+    </div>
+
+    <div data-ng-if="jobStatus == 'Completed'">
+        <a ui-sref="home.jobs.status.csv({jobId: job.id})">
+            <i class="fa fa-list-alt"></i>View Report
+        </a>
+    </div>
+</div>

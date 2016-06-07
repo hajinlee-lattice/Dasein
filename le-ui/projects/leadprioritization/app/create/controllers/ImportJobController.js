@@ -4,9 +4,8 @@ angular.module('mainApp.create.controller.ImportJobController', [
     'mainApp.core.utilities.NavUtility',
     'pd.jobs'
 ])
-.controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService) {
+.controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService, csvImportStore) {
     $scope.applicationId = $stateParams.applicationId;
-    $scope.jobStatusReturned = false;
     var REFRESH_JOB_INTERVAL_ID;
     var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;
 
@@ -20,7 +19,6 @@ angular.module('mainApp.create.controller.ImportJobController', [
     };
 
     function updateStatesBasedOnJobStatus(jobStatus) {
-        $scope.jobStatus = jobStatus.jobStatus;
         $scope.startTimestamp = jobStatus.startTimestamp;
         for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
             $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
@@ -64,19 +62,11 @@ angular.module('mainApp.create.controller.ImportJobController', [
     function getJobStatusFromAppId() {
         JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
             if (response.success) {
-                var jobStatus = response.resultObj.jobStatus;
-                $scope.jobStatusReturned = true;
-                if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
+                $scope.jobStatus = response.resultObj.jobStatus;
+                if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
                     cancelPeriodJobStatusQuery();
-                } else if (jobStatus == "Running" && $scope.jobStatus == "Pending") {
-                    $scope.jobStarted = true;
-                } else if (jobStatus == "Failed" && $scope.jobStatus == "Pending") {
-                    $scope.jobNeverStarted = true;
                 }
 
-                if (jobStatus == 'Running' || jobStatus == "Completed") {
-                    $scope.jobStarted = true;
-                }
                 updateStatesBasedOnJobStatus(response.resultObj);
             } else {
 
