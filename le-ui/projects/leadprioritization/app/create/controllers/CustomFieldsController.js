@@ -95,7 +95,13 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
             var csvMetadata = csvImportStore.Get(vm.csvFileName);
             
             csvImportService.StartModeling(csvMetadata).then(function(result) {
-                $state.go('home.jobs.status', { 'jobCreationSuccess': result.Success });
+                if (result.Result && result.Result != "") {
+                    setTimeout(function() {
+                        $state.go('home.models.import.job', { applicationId: result.Result });
+                    }, 1);
+                } else {
+                    // ERROR
+                }
             });
         });
     }
@@ -121,7 +127,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
 /*
 .controller('CustomFieldsController-bak', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal, FieldDocument) {
     $scope.csvFileName = $stateParams.csvFileName;
-    $scope.schema;
+    $scope.schema = csvImportStore.Get($scope.csvFileName).schemaInterpretation;
     $scope.fieldMappings = [];
     $scope.fieldNameToFieldMappings = {};
     $scope.fieldNameToFieldTypes = {};
@@ -132,7 +138,6 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     ];
     $scope.ignoredFields = [];
 
-    $scope.schema = FieldDocument.schemaInterpretation;
     $scope.fieldMappings = FieldDocument.fieldMappings;    $scope.mappingOptions = [
         { name: "Custom Field Name", id: 0 },
         { name: "Map to Lattice Data Cloud", id: 1 },
