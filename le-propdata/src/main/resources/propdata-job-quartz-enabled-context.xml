@@ -34,5 +34,33 @@
         </property>
     </bean>
 
+    <bean name="propDataEngineHeartBeatDetail"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="durability" value="true" />
+        <property name="jobClass"
+                  value="com.latticeengines.propdata.job.EngineHeartBeat" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="ingestionProxy" value-ref="ingestionProxy" />
+                <entry key="transformationProxy" value-ref="transformationProxy" />
+                <entry key="publicationProxy" value-ref="publicationProxy" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="propDataEngineHeartBeatTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="propDataEngineHeartBeatDetail" />
+        <property name="cronExpression" value="${propdata.job.heartbeat.schedule}" />
+    </bean>
+
+    <bean id="propDataEngineHeartBeatScheduler"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="propDataEngineHeartBeatTrigger" />
+            </list>
+        </property>
+    </bean>
 
 </beans>
