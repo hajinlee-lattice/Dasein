@@ -4,11 +4,13 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.dellebi.dao.DellEbiExecutionLogDao;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 
+@Component("dellEbiExecutionLogDao")
 public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>implements DellEbiExecutionLogDao {
 
     @Override

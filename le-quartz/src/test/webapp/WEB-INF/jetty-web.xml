@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN"
+        "http://www.eclipse.org/jetty/configure_9_0.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Required minimal context configuration :                        -->
+    <!--  + contextPath                                                  -->
+    <!--  + war OR resourceBase                                          -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <Set name="contextPath">/</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-quartz-2.0.33-SNAPSHOT.war</Set>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Optional context configuration                                  -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <Set name="extractWAR">true</Set>
+</Configure>

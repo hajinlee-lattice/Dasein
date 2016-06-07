@@ -42,10 +42,10 @@
     </bean>
 
     <!-- Hibernate session factory -->
-    <bean id="sessionFactoryDellEbi"
+    <bean id="sessionFactoryDellEbi" primary="true"
         class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceDellEbi" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dellebi" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dellebi, com.latticeengines.domain.exposed" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${dellebi.configdb.datasource.dialect}</prop>
@@ -66,7 +66,7 @@
     <bean id="dellEbiTargetJDBCTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
         p:dataSource-ref="dataSourceDellEbiTarget" />
 
-    <bean id="dellEbiCfgDao"
+    <bean id="dellEbiConfigDao"
         class="com.latticeengines.dellebi.dao.impl.DellEbiConfigDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryDellEbi" />
     </bean>

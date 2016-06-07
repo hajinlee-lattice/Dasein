@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 //@Repository
+@Component("dellEbiConfigDao")
 public class DellEbiConfigDaoImpl extends BaseDaoImpl<DellEbiConfig>implements DellEbiConfigDao {
 
     private static List<DellEbiConfig> configs;

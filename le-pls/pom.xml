@@ -26,6 +26,7 @@
         <le.serviceflows.prospectdiscovery.version>2.0.33-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>2.0.33-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
+        <le.quartzclient.version>2.0.33-SNAPSHOT</le.quartzclient.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -298,6 +299,11 @@
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartzclient</artifactId>
+            <version>${le.quartzclient.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

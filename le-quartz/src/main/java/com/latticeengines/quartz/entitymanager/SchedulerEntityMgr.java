@@ -21,4 +21,6 @@ public interface SchedulerEntityMgr {
 
     Boolean resumeAllJobs();
 
+    void addPredefinedJob(JobConfig jobConfig);
+
 }

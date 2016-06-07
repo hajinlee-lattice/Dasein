@@ -33,6 +33,9 @@
 
         <module>le-propdata</module>
         <module>le-microservice/propdata</module>
+
+        <module>le-quartz</module>
+        <module>le-microservice/quartz</module>
     <!--
         <module>le-scoring</module>
         <module>le-microservice/scoring</module>

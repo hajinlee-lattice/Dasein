@@ -192,6 +192,14 @@ CREATE TABLE [dbo].[JOB_HISTORY] (
 	[TriggeredTime] datetime2 not null,
 	[TriggeredJobStatus] integer not null,
 	[ErrorMessage] varchar(8000),
+	[ExecutionHost] varchar(8000),
+	primary key ([PID])
+)
+GO
+
+CREATE TABLE [dbo].[QUARTZ_ACTIVESTACK] (
+	[PID] bigint identity not null unique,
+	[ActiveStack] varchar(255) not null,
 	primary key ([PID])
 )
 GO

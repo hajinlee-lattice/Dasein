@@ -38,7 +38,7 @@ alias secdpl='mvn -Pgenerate -DskipTests -Djavax.net.ssl.trustStore=certificates
 alias scheddpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scheduler-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 alias perfdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-perf-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 
-alias microservicedplnobld='bash -c "rm -f $JETTY_HOME/webapps/*" && cp eai/target/le-eai-*.war $JETTY_HOME/webapps && cp dataflowapi/target/le-dataflowapi-*.war $JETTY_HOME/webapps && cp metadata/target/le-metadata-*.war $JETTY_HOME/webapps && cp propdata/target/le-propdata-*.war $JETTY_HOME/webapps && cp core/target/le-microservice-*.war $JETTY_HOME/webapps && cp modeling/target/le-modeling-*.war $JETTY_HOME/webapps && cp workflowapi/target/le-workflowapi-*.war $JETTY_HOME/webapps && cp scoring/target/le-scoring-*.war $JETTY_HOME/webapps'
+alias microservicedplnobld='bash -c "rm -f $JETTY_HOME/webapps/*" && cp eai/target/le-eai-*.war $JETTY_HOME/webapps && cp dataflowapi/target/le-dataflowapi-*.war $JETTY_HOME/webapps && cp metadata/target/le-metadata-*.war $JETTY_HOME/webapps && cp propdata/target/le-propdata-*.war $JETTY_HOME/webapps && cp core/target/le-microservice-*.war $JETTY_HOME/webapps && cp modeling/target/le-modeling-*.war $JETTY_HOME/webapps && cp workflowapi/target/le-workflowapi-*.war $JETTY_HOME/webapps && cp scoring/target/le-scoring-*.war $JETTY_HOME/webapps && cp quartz/target/le-quartz-*.war $JETTY_HOME/webapps'
 alias microservicedpl='mvn -DskipTests clean package && microservicedplnobld'
 alias msbld='pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package && popd'
 

@@ -30,6 +30,7 @@
                 <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
                 <value>file:${PROXY_PROPDIR}/proxy.properties</value>
+                <value>file:${QUARTZCLIENT_PROPDIR}/quartzclient.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

@@ -13,6 +13,7 @@
         <le.microservice.version>2.0.33-SNAPSHOT</le.microservice.version>
         <le.propdata.version>2.0.33-SNAPSHOT</le.propdata.version>
         <le.network.version>2.0.33-SNAPSHOT</le.network.version>
+        <le.quartz.version>2.0.33-SNAPSHOT</le.quartz.version>
     </properties>
 
     <parent>
@@ -203,6 +204,7 @@
         <module>propdata</module>
         <module>scoring</module>
         <module>workflowapi</module>
+	<module>quartz</module>
     </modules>
 
 </project>

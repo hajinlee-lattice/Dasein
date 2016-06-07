@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
-import com.latticeengines.quartz.entitymanager.JobHistoryEntityMgr;
+import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 @Component("workFlowJob")
 public class WorkFlowJob extends QuartzJobBean {

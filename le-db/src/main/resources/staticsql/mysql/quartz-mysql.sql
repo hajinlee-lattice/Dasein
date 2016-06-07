@@ -154,6 +154,13 @@ create table `JOB_HISTORY` (
         `TriggeredTime` datetime not null,
 	`TriggeredJobStatus` integer not null,
 	`ErrorMessage` varchar(8000),
+	`ExecutionHost` varchar(8000),
+        primary key (`PID`)
+    ) ENGINE=InnoDB;
+
+create table `QUARTZ_ACTIVESTACK` (
+        `PID` bigint not null auto_increment unique,
+        `ActiveStack` varchar(255) not null,
         primary key (`PID`)
     ) ENGINE=InnoDB;
 

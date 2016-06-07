@@ -45,7 +45,9 @@
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/buildmachine</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/buildmachine</camille.properties.path>
-                <microservice.properties.path>core/conf/env/buildmachine</microservice.properties.path>
+                <quartz.properties.path>../le-quartz/conf/env/buildmachine</quartz.properties.path>
+                <quartzclient.properties.path>../le-quartzclient/conf/env/buildmachine</quartzclient.properties.path>
+                <microservice.properties.path>core/conf/env/buildmachine</microservice.properties.path>                
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -73,6 +75,8 @@
                 <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/devcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/devcluster</camille.properties.path>
+                <quartz.properties.path>../le-quartz/conf/env/devcluster</quartz.properties.path>
+                <quartzclient.properties.path>../le-quartzclient/conf/env/devcluster</quartzclient.properties.path>
                 <microservice.properties.path>core/conf/env/devcluster</microservice.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
@@ -102,7 +106,9 @@
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/qacluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
-                <microservice.properties.path>core/conf/env/qacluster</microservice.properties.path>
+                <quartz.properties.path>../le-quartz/conf/env/qacluster</quartz.properties.path>
+                <quartzclient.properties.path>../le-quartzclient/conf/env/qacluster</quartzclient.properties.path>
+                <microservice.properties.path>core/conf/env/qacluster</microservice.properties.path>                
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -131,6 +137,8 @@
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/prodcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <quartz.properties.path>../le-quartz/conf/env/prodcluster</quartz.properties.path>
+                <quartzclient.properties.path>../le-quartzclient/conf/env/prodcluster</quartzclient.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -177,6 +185,9 @@
                                 </source>
                                 <source>
                                     <location>workflowapi/target/le-workflowapi-microservice-${le.rpm.version}.war</location>
+                                </source>
+                                <source>
+                                    <location>quartz/target/le-quartz-microservice-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -227,6 +238,9 @@
                                 </source>
                                 <source>
                                     <location>${camille.properties.path}/camille.properties</location>
+                                </source>
+                                <source>
+                                    <location>${quartz.properties.path}/quartz.properties</location>
                                 </source>
                             </sources>
                         </mapping>

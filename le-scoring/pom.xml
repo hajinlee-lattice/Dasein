@@ -19,6 +19,7 @@
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
         <le.scoringapi.version>2.0.33-SNAPSHOT</le.scoringapi.version>
         <le.testframework.version>2.0.33-SNAPSHOT</le.testframework.version>
+        <le.quartzclient.version>2.0.33-SNAPSHOT</le.quartzclient.version>
     </properties>
 
     <parent>
@@ -379,6 +380,11 @@
             <version>${le.monitor.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartzclient</artifactId>
+            <version>${le.quartzclient.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

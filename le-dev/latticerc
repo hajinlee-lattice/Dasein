@@ -21,6 +21,8 @@ export PLAYMAKER_PROPDIR=$WSHOME/le-playmaker/conf/env/dev
 export OAUTH2_DB_PROPDIR=$WSHOME/le-oauth2db/conf/env/dev
 export MICROSERVICE_PROPDIR=$WSHOME/le-microservice/core/conf/env/dev
 export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
+export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
+export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
 
 if [ -f $WSHOME/le-dev/aliases ]; then
     . $WSHOME/le-dev/aliases

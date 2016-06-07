@@ -65,6 +65,10 @@
                                     <location>workflowapi/target/le-workflowapi-microservice-${le.rpm.version}.war</location>
                                     <destination>workflowapi.war</destination>
                                 </source>
+                                <source>
+                                    <location>quartz/target/le-quartz-microservice-${le.rpm.version}.war</location>
+                                    <destination>quartz.war</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

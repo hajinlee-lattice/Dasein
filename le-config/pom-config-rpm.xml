@@ -109,6 +109,12 @@
                                 <source>
                                     <location>../le-transform/conf/env/buildmachine/transform.properties</location>
                                 </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/buildmachine/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/buildmachine/quartzclient.properties</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -185,6 +191,12 @@
                                 </source>
                                 <source>
                                     <location>../le-transform/conf/env/devcluster/transform.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/devcluster/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/devcluster/quartzclient.properties</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -269,6 +281,12 @@
                                 <source>
                                     <location>../le-transform/conf/env/qaclustera/transform.properties</location>
                                 </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/qaclustera/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/qaclustera/quartzclient.properties</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -351,6 +369,12 @@
                                 </source>
                                 <source>
                                     <location>../le-transform/conf/env/qaclusterb/transform.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/qaclusterb/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/qaclusterb/quartzclient.properties</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -441,6 +465,12 @@
                                 <source>
                                     <location>../le-transform/conf/env/prodclustera/transform.properties</location>
                                 </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/prodclustera/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/prodclustera/quartzclient.properties</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
@@ -529,6 +559,12 @@
                                 </source>
                                 <source>
                                     <location>../le-transform/conf/env/prodclusterb/transform.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartz/conf/env/prodclusterb/quartz.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-quartzclient/conf/env/prodclusterb/quartzclient.properties</location>
                                 </source>
                             </sources>
                         </mapping>

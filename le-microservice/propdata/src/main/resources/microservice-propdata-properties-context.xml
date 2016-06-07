@@ -16,6 +16,8 @@
                 <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
                 <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
                 <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
+                <value>file:${QUARTZCLIENT_PROPDIR:/etc/ledp}/quartzclient.properties</value>
+                <value>file:${QUARTZ_PROPDIR:/etc/ledp}/quartz.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false"/>

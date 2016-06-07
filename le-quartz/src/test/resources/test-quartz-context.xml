@@ -2,13 +2,31 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:util="http://www.springframework.org/schema/util"
   xmlns:mvc="http://www.springframework.org/schema/mvc"
   xsi:schemaLocation="
   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
     <import resource="classpath:quartz-context.xml"/>
     <import resource="classpath:quartz-properties-context.xml"/>
+    <import resource="classpath:quartzclient-resource-context.xml"/>
+   
+    <bean name="testPredefinedJob" class="com.latticeengines.quartz.service.TestPredefinedJobBean"></bean>
+    
+    <bean name="testJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="testPredefinedJob" />
+        <property name="cronTrigger" value="0/5 * * * * ?" />
+        <property name="destUrl" value="http://localhost:8899/quartz/quartzjob/triggerjob" />
+        <property name="queryApi" value="http://localhost:8899/quartz/quartzjob/checkactivejob" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;testPredefinedJob&quot;}" />
+        <property name="jobTimeout" value="20" />
+    </bean>
+    
+    <util:list id="testPredefinedJobs" list-class="java.util.ArrayList">
+        <ref bean="testJob"/>
+    </util:list>
 
 </beans>

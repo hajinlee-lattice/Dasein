@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-quartz</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>le-${component-name}</name>
     <description>LE Quartz</description>
 
@@ -13,12 +13,11 @@
         <quartz.version>2.2.2</quartz.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <le.domain.version>2.0.33-SNAPSHOT</le.domain.version>
-        <le.common.version>2.0.33-SNAPSHOT</le.common.version>
         <le.db.version>2.0.33-SNAPSHOT</le.db.version>
         <le.network.version>2.0.33-SNAPSHOT</le.network.version>
         <le.proxy.version>2.0.33-SNAPSHOT</le.proxy.version>
         <le.security.version>2.0.33-SNAPSHOT</le.security.version>
-        <!-- <spring.security.version>3.2.5.RELEASE</spring.security.version> -->
+        <le.quartzclient.version>2.0.33-SNAPSHOT</le.quartzclient.version>
     </properties>
 
     <parent>
@@ -83,6 +82,11 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartzclient</artifactId>
+            <version>${le.quartzclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
             <version>${le.network.version}</version>
             <classifier>intf</classifier>
@@ -99,6 +103,7 @@
             <version>${le.proxy.version}</version>
             <scope>runtime</scope>
         </dependency>
+
         <!-- Security related -->
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -148,19 +153,81 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <webApp>
+                                <contextPath>/</contextPath>
+                            </webApp>
+                            <httpConnector>
+                                <port>8899</port>
+                            </httpConnector>
+                            <useTestClasspath>true</useTestClasspath>
+                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <webApp>
-                        <contextPath>/</contextPath>
-                    </webApp>
-                    <httpConnector>
-                        <port>8899</port>
-                    </httpConnector>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>${maven.install.version}</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <packaging>jar</packaging>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <groupId>${project.parent.groupId}</groupId>
+                            <version>${project.parent.version}</version>
+                            <file>
+                                ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
+                            </file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven.deploy.version}</version>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                            <url>${project.distributionManagement.repository.url}</url>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <groupId>${project.parent.groupId}</groupId>
+                            <version>${project.parent.version}</version>
+                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

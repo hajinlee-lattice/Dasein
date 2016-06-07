@@ -3,9 +3,13 @@ package com.latticeengines.quartz.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -17,6 +21,8 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -25,9 +31,10 @@ import com.latticeengines.domain.exposed.quartz.JobConfig;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.JobInfo;
 import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
-import com.latticeengines.quartz.entitymanager.JobHistoryEntityMgr;
 import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
+import com.latticeengines.quartz.service.PreDefinedServerJob;
 import com.latticeengines.quartz.service.WorkFlowJob;
+import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 @Component("schedulerEntityMgr")
 public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
@@ -39,6 +46,12 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
 
     @Autowired
     private JobHistoryEntityMgr jobHistoryEntityMgr;
+
+    @Autowired
+    private ApplicationContext appContext;
+
+    @Value("${quartz.predefined.jobs.enabled}")
+    private boolean addPredefinedJobs;
 
     @Override
     public Boolean addJob(String tenantId, JobConfig jobConfig) {
@@ -185,5 +198,56 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
         String[] schemes = { "http", "https" };
         UrlValidator urlValidator = new UrlValidator(schemes);
         return urlValidator.isValid(url);
+    }
+
+    @SuppressWarnings("unchecked")
+    @PostConstruct
+    private void AddPredifinedJobs() {
+        if (addPredefinedJobs) {
+            log.info("Add predefined jobs.");
+            List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("predefinedJobs");
+            for (JobConfig jobConfig : jobConfigs) {
+                addPredefinedJob(jobConfig);
+            }
+        } else {
+            log.info("Predefined jobs will not added due to flag setting.");
+        }
+    }
+
+    @Override
+    public void addPredefinedJob(JobConfig jobConfig) {
+        JobKey jobKey = new JobKey(jobConfig.getJobName(), "PredefinedJobs");
+        try {
+            if (scheduler.checkExists(jobKey)) {
+                log.info("Job Already exists");
+                return;
+            } else {
+                String jobArgs = jobConfig.getJobArguments();
+                JSONObject json = new JSONObject(jobArgs);
+                JobDetail jobDetail = JobBuilder
+                        .newJob(com.latticeengines.quartz.service.PreDefinedServerJob.class)
+                        .withIdentity(jobKey).build();
+                jobDetail.getJobDataMap().put(PreDefinedServerJob.DESTURL,
+                        jobConfig.getDestUrl());
+                jobDetail.getJobDataMap().put(PreDefinedServerJob.QUERYAPI,
+                        jobConfig.getQueryApi());
+                jobDetail.getJobDataMap().put(PreDefinedServerJob.TIMEOUT,
+                        jobConfig.getJobTimeout());
+                jobDetail.getJobDataMap().put(PreDefinedServerJob.JOBTYPE,
+                        json.getString("jobType"));
+                CronTrigger trigger = TriggerBuilder
+                        .newTrigger()
+                        .withIdentity(jobConfig.getJobName() + "_trigger",
+                                "PredefinedJobs")
+                        .withSchedule(
+                                CronScheduleBuilder.cronSchedule(jobConfig
+                                        .getCronTrigger())).build();
+                scheduler.scheduleJob(jobDetail, trigger);
+            }
+        } catch (SchedulerException e) {
+            log.error(e.getMessage());
+        } catch (JSONException e) {
+            log.error(e.getMessage());
+        }
     }
 }

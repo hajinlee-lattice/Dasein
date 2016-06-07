@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,11 +48,16 @@ public class JobHistory implements HasPid, Serializable {
 
     @JsonProperty("triggered_job_status")
     @Column(name = "TriggeredJobStatus", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     private TriggeredJobStatus triggeredJobStatus;
 
     @JsonProperty("error_message")
     @Column(name = "ErrorMessage", nullable = true)
     private String errorMessage;
+
+    @JsonProperty("execution_host")
+    @Column(name = "ExecutionHost", nullable = true)
+    private String executionHost;
 
     @Override
     public Long getPid() {
@@ -108,5 +115,13 @@ public class JobHistory implements HasPid, Serializable {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getExecutionHost() {
+        return executionHost;
+    }
+
+    public void setExecutionHost(String executionHost) {
+        this.executionHost = executionHost;
     }
 }

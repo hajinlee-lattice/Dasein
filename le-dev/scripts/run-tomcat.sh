@@ -23,6 +23,8 @@ export JOB_PROPDIR=$WSHOME/le-job/conf/env/dev
 export DELLEBI_PROPDIR=$WSHOME/le-dellebi/conf/env/dev
 export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
 export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
+export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
+export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
 
 export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=1g -Xmx4g"

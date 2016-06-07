@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-quartz-microservice</artifactId>
+    <packaging>war</packaging>
+    <name>le-${component-name}</name>
+    <description>LE Quartz</description>
+
+    <properties>
+        <component-name>quartz-microservice</component-name>
+        <le.microservice.version>2.0.33-SNAPSHOT</le.microservice.version>
+        <le.quartz.version>2.0.33-SNAPSHOT</le.quartz.version>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-microservice-parent</artifactId>
+        <version>2.0.33-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartz</artifactId>
+            <version>${le.quartz.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartz</artifactId>
+            <version>${le.quartz.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-microservice</artifactId>
+            <version>${le.microservice.version}</version>
+            <classifier>classes</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>${sqljdbc4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.connector.version}                         </version>
+        </dependency>
+    </dependencies>
+</project>
+
