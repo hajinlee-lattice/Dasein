@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "JOB_HISTORY")
+@Table(name = "QUARTZ_JOB_HISTORY")
 public class JobHistory implements HasPid, Serializable {
 
     private static final long serialVersionUID = -2804059029306935710L;

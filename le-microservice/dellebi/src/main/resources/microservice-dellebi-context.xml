@@ -7,6 +7,7 @@
 
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:dellebi-api-context.xml"/>
+    <import resource="classpath:quartzclient-resource-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.microservice.dellebi"/>
 
