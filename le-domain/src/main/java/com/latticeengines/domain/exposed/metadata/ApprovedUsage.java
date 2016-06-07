@@ -8,7 +8,8 @@ public enum ApprovedUsage {
     MODEL("Model"),
     MODEL_ALLINSIGHTS("ModelAndAllInsights"),
     MODEL_MODELINSIGHTS("ModelAndModelInsights"),
-    LEAD_ENRICHMENT("LeadEnrichment"),
+    ENRICHMENT("Enrichment"),
+    TRANSFORM("Transform"),
     NONE("None");
 
     private final String name;
