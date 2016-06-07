@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -75,10 +76,12 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
         for (Attribute attribute : attributes) {
-            LogicalDataType logicalDataType = attribute.getLogicalDataType();
-            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
-                    && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
-                requiredColumns.add(attribute);
+            if (!attribute.getApprovedUsage().contains(ApprovedUsage.NONE.toString())) {
+                LogicalDataType logicalDataType = attribute.getLogicalDataType();
+                if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
+                        && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
+                    requiredColumns.add(attribute);
+                }
             }
         }
         log.info("The required columns are : " + Arrays.toString(requiredColumns.toArray()));
