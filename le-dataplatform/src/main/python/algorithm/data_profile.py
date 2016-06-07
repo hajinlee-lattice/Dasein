@@ -218,7 +218,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     return None
 
 def retrieveOtherMetadata(columnsMetadata, attributeStats):
-    qualifiedApprovedUsage = ["None", "Model", "ModelAndModelInsights", "ModelAndAllInsights"]
+    qualifiedApprovedUsage = ["None", "Model", "ModelAndModelInsights", "ModelAndAllInsights", "Transform"]
 
     otherMetadata = dict()
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
