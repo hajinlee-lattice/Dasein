@@ -12,7 +12,7 @@
 
     <import resource="classpath:quartz-context.xml"/>
     <import resource="classpath:quartz-properties-context.xml"/>
-    <import resource="classpath:quartzclient-resource-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
    
     <bean name="testPredefinedJob" class="com.latticeengines.quartz.service.TestPredefinedJobBean"></bean>
     

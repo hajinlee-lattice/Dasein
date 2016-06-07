@@ -1,4 +1,4 @@
-package com.latticeengines.quartzclient.exposed;
+package com.latticeengines.quartzclient.controller;
 
 import javax.servlet.http.HttpServletRequest;
 

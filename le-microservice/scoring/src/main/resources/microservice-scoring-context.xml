@@ -8,7 +8,7 @@
     <import resource="classpath:microservice-context.xml" />
     <import resource="classpath:scoring-api-context.xml" />
     <import resource="classpath:scoring-context.xml"/>
-    <import resource="classpath:quartzclient-resource-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
     <context:component-scan base-package="com.latticeengines.scoring.controller, com.latticeengines.microservice.scoring" />
 
     <bean id="scoringHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">

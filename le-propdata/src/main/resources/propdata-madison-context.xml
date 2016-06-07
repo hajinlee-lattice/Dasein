@@ -11,7 +11,5 @@
     <import resource="classpath:serviceflows-propdata-dataflow-context.xml"/>
     <import resource="classpath:propdata-zk-runtime-context.xml" />
     <import resource="classpath:dataplatform-context.xml"/>
-    <import resource="classpath:quartzclient-persistence-context.xml"/>
-    <import resource="classpath:quartzclient-resource-context.xml"/>
 
 </beans>

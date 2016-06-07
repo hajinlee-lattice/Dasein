@@ -7,7 +7,7 @@
 
     <import resource="classpath:microservice-context.xml"/>
     <import resource="classpath:propdata-api-context.xml"/>
-    <import resource="classpath:quartzclient-resource-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
     <import resource="classpath:microservice-propdata-embedded-server-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.propdata.api.controller, com.latticeengines.microservice.propdata"/>
