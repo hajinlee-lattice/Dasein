@@ -20,6 +20,7 @@
                 <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
                 <value>file:${CAMILLE_PROPDIR:/etc/ledp}/camille.properties</value>
                 <value>file:${WORKFLOW_PROPDIR:/etc/ledp}/workflow.properties</value>
+                <value>file:${QUARTZCLIENT_PROPDIR:/etc/ledp}/quartzclient.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false"/>
