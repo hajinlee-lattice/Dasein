@@ -129,7 +129,7 @@ class PmmlModelExecutor(Executor):
 
     @overrides(Executor)
     def getModelDirPath(self, schema):
-        return schema["model_data_dir"]
+        return self.getModelDirByContainerId(schema)
     
     @overrides(Executor)
     def accept(self, filename):
