@@ -11,9 +11,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
@@ -50,6 +47,8 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     
     private FeatureImportanceParser featureImportanceParser;
 
+    private PlatformTransactionManager transactionManager;
+
     public Future<Boolean> downloadModel(Tenant tenant) {
         log.debug("Downloading model for tenant " + tenant.getId());
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
@@ -73,16 +72,7 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
 
         final List<Future<Boolean>> futures = new ArrayList<>();
 
-        SchedulerContext sc = null;
-        try {
-            sc = context.getScheduler().getContext();
-        } catch (SchedulerException e) {
-            log.error(e.getMessage(), e);
-        }
-        ApplicationContext appCtx = (ApplicationContext) sc.get("applicationContext");
-
-        PlatformTransactionManager ptm = appCtx.getBean("transactionManager", PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {
                 List<Tenant> tenants = tenantEntityMgr.findAll();
@@ -164,5 +154,12 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     public void setFeatureImportanceParser(FeatureImportanceParser featureImportanceParser) {
         this.featureImportanceParser = featureImportanceParser;
     }
-    
+
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
 }
