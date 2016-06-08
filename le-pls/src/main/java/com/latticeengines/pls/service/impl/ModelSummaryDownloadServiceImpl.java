@@ -16,7 +16,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -70,17 +70,17 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
            log.debug(timeStampContainer.getTimeStamp().getSeconds());
         }
 
-        final List<Future<Boolean>> futures = new ArrayList<>();
-
         TransactionTemplate tx = new TransactionTemplate(transactionManager);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                List<Tenant> tenants = tenantEntityMgr.findAll();
-                for (Tenant tenant : tenants) {
-                    futures.add(downloadModel(tenant));
-                }
+        List<Tenant> tenants = tx.execute(new TransactionCallback<List<Tenant>>() {
+            public List<Tenant> doInTransaction(TransactionStatus status) {
+                return tenantEntityMgr.findAll();
             }
         });
+
+        List<Future<Boolean>> futures = new ArrayList<>();
+        for (Tenant tenant : tenants) {
+            futures.add(downloadModel(tenant));
+        }
         
         for (Future<Boolean> future : futures) {
             try {
