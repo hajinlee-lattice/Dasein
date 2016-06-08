@@ -8,6 +8,8 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.quartz.ActiveStack;
 import com.latticeengines.quartzclient.dao.ActiveStackDao;
 import com.latticeengines.quartzclient.entitymanager.ActiveStackEntityMgr;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("activeStackEntityMgr")
 public class ActiveStackEntityMgrImpl extends BaseEntityMgrImpl<ActiveStack> implements
@@ -22,6 +24,7 @@ public class ActiveStackEntityMgrImpl extends BaseEntityMgrImpl<ActiveStack> imp
     }
 
     @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public String getActiveStack() {
         return activeStackDao.getActiveStack();
     }

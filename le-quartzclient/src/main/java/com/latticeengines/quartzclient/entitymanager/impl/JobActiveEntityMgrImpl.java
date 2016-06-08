@@ -8,6 +8,8 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.quartz.JobActive;
 import com.latticeengines.quartzclient.dao.JobActiveDao;
 import com.latticeengines.quartzclient.entitymanager.JobActiveEntityMgr;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("jobActiveEntityMgr")
 public class JobActiveEntityMgrImpl extends BaseEntityMgrImpl<JobActive> implements
@@ -22,6 +24,7 @@ public class JobActiveEntityMgrImpl extends BaseEntityMgrImpl<JobActive> impleme
     }
 
     @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean getJobActive(String jobName, String tenantId) {
         return jobActiveDao.getJobActive(jobName, tenantId);
     }

@@ -11,9 +11,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -63,12 +70,27 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
         if (log.isDebugEnabled()) {
            log.debug(timeStampContainer.getTimeStamp().getSeconds());
         }
-        List<Tenant> tenants = tenantEntityMgr.findAll();
-        
-        List<Future<Boolean>> futures = new ArrayList<>();
-        for (Tenant tenant : tenants) {
-            futures.add(downloadModel(tenant));
+
+        final List<Future<Boolean>> futures = new ArrayList<>();
+
+        SchedulerContext sc = null;
+        try {
+            sc = context.getScheduler().getContext();
+        } catch (SchedulerException e) {
+            log.error(e.getMessage(), e);
         }
+        ApplicationContext appCtx = (ApplicationContext) sc.get("applicationContext");
+
+        PlatformTransactionManager ptm = appCtx.getBean("transactionManager", PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                List<Tenant> tenants = tenantEntityMgr.findAll();
+                for (Tenant tenant : tenants) {
+                    futures.add(downloadModel(tenant));
+                }
+            }
+        });
         
         for (Future<Boolean> future : futures) {
             try {
