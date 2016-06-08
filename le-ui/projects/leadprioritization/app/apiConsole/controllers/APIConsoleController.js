@@ -12,6 +12,11 @@ angular.module('pd.apiconsole', [
     ModelService.GetAllModels(true).then(function(result) {
         if (result != null && result.success === true) {
             $scope.models = result.resultObj;
+            $scope.models.forEach(function(model, index) {
+                if (model.Status.toLowerCase() != 'active') {
+                    delete $scope.models[index];
+                }
+            });
         } else {
             $scope.showLoadingError = true;
             $scope.loadingError = resultErrors;
