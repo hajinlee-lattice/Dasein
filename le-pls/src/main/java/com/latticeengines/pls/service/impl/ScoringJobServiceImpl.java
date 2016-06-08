@@ -17,12 +17,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
-import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
+import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -45,7 +44,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
 
     @Autowired
-    private ImportMatchAndScoreWorkflowSubmitter importMatchAndScoreWorkflowSubmitter;
+    private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -61,11 +60,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
         }
 
-        String transformationGroupName = modelSummary.getTransformationGroupName();
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
-        }
-
         return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data")
                 .toString();
     }
@@ -73,12 +67,10 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public String scoreTestingData(String modelId, String fileName) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        String transformationGroupName = modelSummary.getTransformationGroupName();
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
-                TransformationGroup.fromName(transformationGroupName)).toString();
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName).toString();
     }
 
     @Override
@@ -89,7 +81,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
-            if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")) {
+            if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")
+                    || job.getJobType().equals("rtsBulkScoreWorkflow")
+                    || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
                 String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
                 if (jobModelId != null && jobModelId.equals(modelId)) {
                     ret.add(job);
