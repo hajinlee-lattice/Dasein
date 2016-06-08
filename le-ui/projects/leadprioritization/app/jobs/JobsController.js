@@ -97,7 +97,7 @@ angular.module('pd.jobs', [
             'validatePrematchEventTable': 'generate_insights',
             'matchDataCloud': 'generate_insights',
             'processMatchResult': 'generate_insights',
-            'addStandardAttributes': 'create_global_target_market',
+            'addStandardAttributesViaJavaFunction': 'create_global_target_market',
             'sample': 'create_global_target_market',
             'exportData': 'create_global_target_market',
             'profileAndModel': 'create_global_target_market',
