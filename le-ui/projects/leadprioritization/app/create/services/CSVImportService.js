@@ -118,11 +118,13 @@ angular
 
     this.GetFieldDocument = function(csvFileName) {
         var deferred = $q.defer();
+        var schema = csvImportStore.Get(csvFileName).schemaInterpretation;
 
         $http({
             method: 'GET',
             url: '/pls/models/uploadfile/' + csvFileName + '/fieldmappings',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            params: { 'schema': schema }
         })
         .success(function(data, status, headers, config) {
             if (data == null || !data.Success) {
@@ -166,7 +168,6 @@ angular
             headers: { 'Content-Type': 'application/json' },
             params: { 'displayName': csvFileName },
             data: {
-                'schemaInterpretation': FieldDocument.schemaInterpretation,
                 'fieldMappings': FieldDocument.fieldMappings,
                 'ignoredFields': FieldDocument.ignoredFields
             }

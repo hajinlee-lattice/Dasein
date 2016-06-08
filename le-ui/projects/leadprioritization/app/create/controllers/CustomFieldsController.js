@@ -7,6 +7,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
 .controller('CustomFieldsController', function($state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
     var vm = this;
 
+    var schema = csvImportStore.Get($stateParams.csvFileName).schemaInterpretation;
     angular.extend(vm, {
         FormValidated: true,
         ResourceUtility : ResourceUtility,
@@ -17,9 +18,9 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
             { id: 2, name: "Ignore this field" }
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
-        UnmappedFields: UnmappedFields[FieldDocument.schemaInterpretation],
+        UnmappedFields: UnmappedFields[schema],
         fieldMappings: FieldDocument.fieldMappings,
-        schema: FieldDocument.schemaInterpretation,
+        schema: schema,
         RequiredFields: []
     });
 

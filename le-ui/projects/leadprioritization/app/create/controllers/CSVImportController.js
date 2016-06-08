@@ -90,12 +90,14 @@ angular
         clickNext: function(fileName) {
             var metaData = vm.metadata = vm.metadata || {},
                 displayName = vm.modelDisplayName,
-                modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName);
+                modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName),
+                schemaInterpretation = vm.accountLeadCheck;
 
             metaData.name = fileName;
             metaData.modelName = modelName;
             metaData.displayName = displayName;
             metaData.description = vm.modelDescription;
+            metaData.schemaInterpretation = schemaInterpretation;
             csvImportStore.Set(fileName, metaData);
 
             setTimeout(function() {

@@ -78,16 +78,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName) {
+    public FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, null);
+        if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
+            sourceFile.setSchemaInterpretation(schemaInterpretation);
+            sourceFileService.update(sourceFile);
+        }
+        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, schemaInterpretation, null);
         return resolver.getFieldMappingsDocumentBestEffort();
     }
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, fieldMappingDocument);
+        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(), fieldMappingDocument);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
@@ -105,7 +109,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
         metadataProxy.createTable(customerSpace, table.getName(), table);
         sourceFile.setTableName(table.getName());
-        sourceFile.setSchemaInterpretation(fieldMappingDocument.getSchemaInterpretation());
         sourceFileService.update(sourceFile);
     }
 
@@ -246,7 +249,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
     }
 
-    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument) {
-        return new NewMetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
+    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, FieldMappingDocument fieldMappingDocument) {
+        return new NewMetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
     }
 }

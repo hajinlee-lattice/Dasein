@@ -189,7 +189,7 @@ angular
                     vm_form.params = {};
                 }
 
-                var fileType = vm.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+                var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'SalesforceLead',
                     modelName = vm.modelDisplayName = vm.modelDisplayName || vm.csvFileName,
                     options = {
                         file: file, 

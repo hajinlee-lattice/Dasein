@@ -39,8 +39,9 @@ public class NewMetadataResolver {
 
     private Result result;
 
-    public NewMetadataResolver(String csvPath, Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
+    public NewMetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation, Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
         this.csvPath = csvPath;
+        this.schema = schemaInterpretation;
         this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
         result = new Result();
@@ -70,8 +71,6 @@ public class NewMetadataResolver {
     public FieldMappingDocument getFieldMappingsDocumentBestEffort() {
         FieldMappingDocument fieldMappingsDocument = new FieldMappingDocument();
 
-        schema = schemaInterpretation();
-        fieldMappingsDocument.setSchemaInterpretation(schema);
         calculate();
         fieldMappingsDocument.setFieldMappings(result.fieldMappings);
 
@@ -79,12 +78,7 @@ public class NewMetadataResolver {
     }
 
     public void resolveBasedOnFieldMappingDocument() {
-        schema = this.fieldMappingDocument.getSchemaInterpretation();
         calculateBasedOnFieldMappingDocument();
-    }
-
-    public void setSchema(SchemaInterpretation schema) {
-        this.schema = schema;
     }
 
     private void calculateBasedOnFieldMappingDocument() {
@@ -119,22 +113,6 @@ public class NewMetadataResolver {
         result.metadata = repository.getSchema(schema);
         result.fieldMappings = new ArrayList<>();
         calculateHelper();
-    }
-
-    public SchemaInterpretation schemaInterpretation() {
-        if (schema == null) {
-            Set<String> headerFields = getHeaderFields();
-            if (headerFields.contains("Website")) {
-                schema = SchemaInterpretation.SalesforceAccount;
-            } else if (headerFields.contains("Email")) {
-                schema = SchemaInterpretation.SalesforceLead;
-            }
-        }
-
-        if (schema == null) {
-            return SchemaInterpretation.SalesforceLead;
-        }
-        return schema;
     }
 
     private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
@@ -187,7 +165,7 @@ public class NewMetadataResolver {
                     headerIterator.remove();
 
                     knownColumn.setUserField(header);
-                    knownColumn.setMappedField(attribute.getDisplayName());
+                    knownColumn.setMappedField(attribute.getName());
                     knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);

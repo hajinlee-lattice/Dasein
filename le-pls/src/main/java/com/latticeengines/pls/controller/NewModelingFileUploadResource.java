@@ -54,6 +54,7 @@ public class NewModelingFileUploadResource {
                                                     @RequestParam("fileName") String fileName, //
                                                     @RequestParam(value = "compressed", required = false) boolean compressed, //
                                                     @RequestParam(value = "displayName", required = true) String csvFileName, //
+                                                    @RequestParam(value="schema", required = false) SchemaInterpretation schemaInterpretation, //
                                                     @RequestParam("file") MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
@@ -72,7 +73,7 @@ public class NewModelingFileUploadResource {
             stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName);
 
             return ResponseDocument
-                    .successResponse(fileUploadService.uploadFile(fileName, csvFileName, stream));
+                    .successResponse(fileUploadService.uploadFile(fileName, schemaInterpretation, csvFileName, stream));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
         } finally {
@@ -90,15 +91,18 @@ public class NewModelingFileUploadResource {
     public ResponseDocument<SourceFile> uploadFile( //
                                                     @RequestParam(value = "compressed", required = false) boolean compressed, //
                                                     @RequestParam(value = "displayName", required = true) String csvFileName, //
+                                                    @RequestParam(value="schema", required = false) SchemaInterpretation schemaInterpretation, //
                                                     @RequestParam("file") MultipartFile file) {
-        return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName, file);
+        return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName, schemaInterpretation, file);
     }
 
     @RequestMapping(value="{sourceFileName}/fieldmappings", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Decides if the csv is a lead or model based. Returned the best mapping and unknown columns as well as lattice fields")
-    public ResponseDocument<FieldMappingDocument> getFieldMappings(@PathVariable String sourceFileName) {
-        return ResponseDocument.successResponse(modelingFileMetadataService.mapFieldDocumentBestEffort(sourceFileName));
+    public ResponseDocument<FieldMappingDocument> getFieldMappings( //
+                                                                    @PathVariable String sourceFileName,
+                                                                    @RequestParam(value="schema", required = false) SchemaInterpretation schemaInterpretation) {
+        return ResponseDocument.successResponse(modelingFileMetadataService.mapFieldDocumentBestEffort(sourceFileName, schemaInterpretation));
     }
 
     @RequestMapping(value="fieldmappings", method = RequestMethod.POST)

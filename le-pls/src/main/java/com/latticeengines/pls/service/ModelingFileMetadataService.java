@@ -12,7 +12,7 @@ import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 
 public interface ModelingFileMetadataService {
 
-    FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName);
+    FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation);
 
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
 

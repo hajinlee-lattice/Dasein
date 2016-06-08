@@ -10,9 +10,6 @@ public class FieldMappingDocument {
     private List<FieldMapping> fieldMappings;
 
     @JsonProperty
-    private SchemaInterpretation schemaInterpretation;
-
-    @JsonProperty
     private List<String> ignoredFields;
 
     public void setFieldMappings(List<FieldMapping> fieldMappings) {
@@ -21,14 +18,6 @@ public class FieldMappingDocument {
 
     public List<FieldMapping> getFieldMappings() {
         return this.fieldMappings;
-    }
-
-    public void setSchemaInterpretation(SchemaInterpretation schemaInterpretation) {
-        this.schemaInterpretation = schemaInterpretation;
-    }
-
-    public SchemaInterpretation getSchemaInterpretation() {
-        return this.schemaInterpretation;
     }
 
     public void setIgnoredFields(List<String> ignoredFields) {
