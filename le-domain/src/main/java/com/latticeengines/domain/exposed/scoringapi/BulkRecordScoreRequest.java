@@ -1,11 +1,11 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class BulkRecordScoreRequest {
 
@@ -15,16 +15,14 @@ public class BulkRecordScoreRequest {
     @ApiModelProperty(value = "Name of the source system that originated this score request.")
     private String source;
 
-    @JsonProperty("rule")
-    @ApiModelProperty(value = "Name of the rule that initiated this score request")
-    private String rule;
-
     @JsonProperty("records")
     @ApiModelProperty(value = "List of records", required = true)
     private List<Record> records;
 
+    @ApiModelProperty(hidden = true)
     private String rootOperationId;
 
+    @ApiModelProperty(hidden = true)
     private String requestTimestamp;
 
     public String getSource() {
@@ -33,14 +31,6 @@ public class BulkRecordScoreRequest {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getRule() {
-        return rule;
-    }
-
-    public void setRule(String rule) {
-        this.rule = rule;
     }
 
     public List<Record> getRecords() {

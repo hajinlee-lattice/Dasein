@@ -430,6 +430,7 @@ public enum LedpCode {
     LEDP_31103("problem_populating_missing_field", "Problem populating missing field {0} with value {1}"), //
     LEDP_31104("problem_scoring_missing_fields", "Problem scoring the record due to missing fields {0}"), //
     LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
+    LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31199("missing_domain", "Domain field(s) are missing {0}"), //
 
     // le-serviceflows

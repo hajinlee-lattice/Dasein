@@ -69,7 +69,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(scoreRequestList.size(), 107);
         BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
         Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
-        Assert.assertEquals(bulkRecordScoreRequest.getRule(), ScoringProcessor.RECORD_RULE);
         Assert.assertEquals(bulkRecordScoreRequest.getSource(), ScoringProcessor.RECORD_SOURCE);
 
         Record record = bulkRecordScoreRequest.getRecords().get(0);
@@ -78,6 +77,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(scoreRequestList.get(106).getRecords().size(), 62);
         Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
         Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
+        Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
     }
 
     @Test(groups = "functional")

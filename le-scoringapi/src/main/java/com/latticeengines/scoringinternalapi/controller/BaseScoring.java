@@ -96,17 +96,13 @@ public abstract class BaseScoring {
 
     protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
             boolean considerAllStatus, CustomerSpace customerSpace) throws ParseException {
-        if (!StringUtils.isEmpty(start)) {
-            Date startDate = dateFormat.parse(start);
-        }
+        start = validateStartValue(start);
         return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus, customerSpace);
     }
 
     protected int getModelCount(HttpServletRequest request, String start, boolean considerAllStatus,
             CustomerSpace customerSpace) throws ParseException {
-        if (!StringUtils.isEmpty(start)) {
-            Date startDate = dateFormat.parse(start);
-        }
+        start = validateStartValue(start);
         return fetchModelCount(request, start, considerAllStatus, customerSpace);
     }
 
@@ -218,6 +214,23 @@ public abstract class BaseScoring {
             }
 
             return response;
+        }
+    }
+
+    private String validateStartValue(String start) throws ParseException {
+        try {
+            Date startDate = null;
+            if (!StringUtils.isEmpty(start)) {
+                startDate = dateFormat.parse(start);
+            } else {
+                // if no start date is specified then default start date is
+                // start of epoch time 1971-1-1
+                startDate = new Date(0);
+                start = dateFormat.format(startDate);
+            }
+            return start;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31106, e, new String[] { start });
         }
     }
 }

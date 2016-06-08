@@ -89,6 +89,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             }
 
             record.setModelAttributeValuesMap(modelAttributeValuesMap);
+            record.setRule("Dummy Rule");
 
             records.add(record);
         }
@@ -177,12 +178,16 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected BulkRecordScoreRequest getBulkScoreRequest(int n,
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
         BulkRecordScoreRequest bulkRequest = new BulkRecordScoreRequest();
-        bulkRequest.setRule("Dummy Rule");
         bulkRequest.setSource("Dummy Source");
 
         List<Record> records = generateRecords(n, modelList);
 
         bulkRequest.setRecords(records);
+
+        if (n == 4) {
+            ObjectMapper om = new ObjectMapper();
+            System.out.println(om.writeValueAsString(bulkRequest));
+        }
 
         return bulkRequest;
     }

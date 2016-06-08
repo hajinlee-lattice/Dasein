@@ -44,8 +44,8 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
-        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
+        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -79,10 +79,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
-            log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
-                    .getRecords().size(), customerSpace));
-            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
-                    scoreRequest, customerSpace);
+            log.info(String.format("Sending internal scoring api with %d records to for tenant %s",
+                    scoreRequest.getRecords().size(), customerSpace));
+            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest,
+                    customerSpace);
             recordScoreResponseList.addAll(recordScoreResponse);
         }
         convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
@@ -117,7 +117,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         List<Schema.Field> fields = schema.getFields();
 
         BulkRecordScoreRequest scoreRequest = new BulkRecordScoreRequest();
-        scoreRequest.setRule(RECORD_RULE);
         scoreRequest.setSource(RECORD_SOURCE);
         List<Record> records = new ArrayList<Record>();
         scoreRequest.setRecords(records);
@@ -148,13 +147,13 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
             record.setModelAttributeValuesMap(modelAttributeValuesMap);
             record.setRecordId(recordIdObj.toString());
+            record.setRule(RECORD_RULE);
 
             records.add(record);
 
             if (i % BulkRecordScoreRequest.MAX_ALLOWED_RECORDS == 0) {
                 requestList.add(scoreRequest);
                 scoreRequest = new BulkRecordScoreRequest();
-                scoreRequest.setRule(RECORD_RULE);
                 scoreRequest.setSource(RECORD_SOURCE);
                 records = new ArrayList<Record>();
                 scoreRequest.setRecords(records);

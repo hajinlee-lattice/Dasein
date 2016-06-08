@@ -25,8 +25,14 @@ public class Record {
     @ApiModelProperty(value = "Should perform enrichment or not")
     private boolean performEnrichment;
 
+    @JsonProperty("rule")
+    @ApiModelProperty(value = "Name of the rule that initiated score request for this record")
+    private String rule;
+
+    @ApiModelProperty(hidden = true)
     private String rootOperationId;
 
+    @ApiModelProperty(hidden = true)
     private String requestTimestamp;
 
     public String getRecordId() {
@@ -75,5 +81,13 @@ public class Record {
 
     public void setRequestTimestamp(String requestTimestamp) {
         this.requestTimestamp = requestTimestamp;
+    }
+
+    public String getRule() {
+        return rule;
+    }
+
+    public void setRule(String rule) {
+        this.rule = rule;
     }
 }
