@@ -197,7 +197,7 @@ angular.module('mainApp.models.services.ModelService', [
                     modelSummary = JSON.parse(data.Details.Payload);
                 }
                 modelSummary.ModelDetails.Status = data.Status;
-                modelSummary.ModelDetails.DisplayName = data.Name;
+                modelSummary.ModelDetails.DisplayName = data.DisplayName;
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
                 // sync with front-end json structure
                 result.resultObj = modelSummary;
