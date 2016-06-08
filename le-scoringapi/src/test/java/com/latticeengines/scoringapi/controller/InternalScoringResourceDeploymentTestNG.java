@@ -109,11 +109,13 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
     @Test(groups = "deployment", enabled = true)
     public void getModelsCountAll() {
         baseAllModelCount = getModelCount(1, true, null, false);
+        System.out.println("Internal api - Base all model count = " + baseAllModelCount);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void getModelsCountActive() {
         baseAllActiveModelCount = getModelCount(1, false, null, false);
+        System.out.println("Internal api - Base all active model count = " + baseAllActiveModelCount);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
@@ -122,7 +124,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
+            "getModelsCountAfterBulkScoring" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);

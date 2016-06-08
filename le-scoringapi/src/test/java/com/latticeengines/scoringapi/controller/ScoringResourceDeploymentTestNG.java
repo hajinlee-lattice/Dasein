@@ -130,11 +130,13 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     @Test(groups = "deployment", enabled = true)
     public void getBaseModelsCount() {
         baseAllModelCount = getModelCount(1, true, new Date(), false);
+        System.out.println("Base all model count = " + baseAllModelCount);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void getModelsCountActive() {
         baseAllActiveModelCount = getModelCount(1, false, null, false);
+        System.out.println("Base all active model count = " + baseAllActiveModelCount);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
