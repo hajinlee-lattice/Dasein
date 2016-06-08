@@ -24,6 +24,7 @@ public class ColumnMetadata {
     private String tags;
     private String discretizationStrategy;
     private String matchDestination;
+    private Boolean isPremium = Boolean.FALSE;
 
     @JsonProperty("ColumnName")
     public String getColumnName() {
@@ -113,6 +114,20 @@ public class ColumnMetadata {
     @JsonProperty("MatchDestination")
     public void setMatchDestination(String matchDestination) {
         this.matchDestination = matchDestination;
+    }
+
+    @JsonProperty("IsPremium")
+    private Boolean getIsPremium() {
+        return isPremium;
+    }
+
+    public Boolean isPremium() {
+        return isPremium;
+    }
+
+    @JsonProperty("IsPremium")
+    public void setIsPremium(Boolean isPremium) {
+        this.isPremium = isPremium;
     }
 
     @JsonProperty("FundamentalType")

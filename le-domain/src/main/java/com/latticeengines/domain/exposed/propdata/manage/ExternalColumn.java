@@ -325,6 +325,9 @@ public class ExternalColumn implements HasPid, Serializable {
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setMatchDestination(getMatchDestination());
+        if (getExternalColumnID().startsWith("TechIndicator") && Category.TECHNOLOGY_PROFILE.equals(getCategory())) {
+            metadata.setIsPremium(Boolean.TRUE);
+        }
         return metadata;
     }
 
