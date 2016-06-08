@@ -110,7 +110,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             .modelProxy(modelProxy) //
             .modelName(modelStepConfiguration.getModelName()) //
             .table(tableName) //
-            .metadataTable(String.format("%s-%s-Metadata", tableName, featuresAndTarget.getValue())) //
+            .metadataTable(String.format("%s-Event-Metadata", tableName)) //
             .avroSchema(avroSchema) //
             .metadataArtifacts(getMetadataArtifacts()) //
             .yarnConfiguration(yarnConfiguration);
