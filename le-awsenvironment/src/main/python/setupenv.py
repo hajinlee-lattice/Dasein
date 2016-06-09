@@ -17,7 +17,9 @@ CONF_DIR = 'conf'
 def main(args):
     args = args[1:]
     parser = argparse.ArgumentParser(description="Setup AWS stack")
-    parser.add_argument('environment', help="Environment in which to setup stack")
+    parser.add_argument('environment', help="Environment name (prod, prodstaging, qa)")
+    parser.add_argument('aws_access_key', help="AWS access key tied to the account being deployed")
+    parser.add_argument('aws_secret_key', help="AWS secret key tied to the account being deployed")
     namespace = parser.parse_args(args)
     with open(CONF_DIR + '/template.json', 'r') as template_file:
         template = template_file.read()
@@ -25,8 +27,8 @@ def main(args):
     environment = Environment(namespace.environment)
 
     client = boto3.client('cloudformation',
-                          aws_access_key_id=environment.credentials['access_key'],
-                          aws_secret_access_key=environment.credentials['secret_key'],
+                          aws_access_key_id=namespace.aws_access_key,
+                          aws_secret_access_key=namespace.aws_secret_key,
                           region_name=REGION)
 
     stack = utils.get_stack(client, STACK_NAME)
