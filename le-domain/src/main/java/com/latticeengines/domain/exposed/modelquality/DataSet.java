@@ -1,0 +1,134 @@
+package com.latticeengines.domain.exposed.modelquality;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+@Entity
+@Table(name = "MODELQUALITY_DATASET")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class DataSet implements HasName, HasTenant, HasPid {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+    
+    // There is no foreign key to the TENANT table because we want to selectively add customer data sets
+    @JsonProperty("customer_space")
+    @Column(name = "CUSTOMER_SPACE", nullable = false)
+    private String customerSpace;
+    
+    @Column(name = "NAME", nullable = false)
+    private String name;
+    
+    @Column(name = "INDUSTRY", nullable = false)
+    private String industry;
+    
+    @Column(name = "TYPE", nullable = false)
+    private DataSetType dataSetType;
+    
+    @JsonProperty("training_hdfs_path")
+    @Column(name = "TRAINING_HDFS_PATH")
+    private String trainingSetHdfsPath;
+    
+    @JsonProperty("test_hdfs_path")
+    @Column(name = "TEST_HDFS_PATH")
+    private String testSetHdfsPath;
+    
+    @JsonProperty("scoring_data_sets")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataSet")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        customerSpace = tenant.getId();
+    }
+
+    @Override
+    public Tenant getTenant() {
+        if (customerSpace == null) {
+            throw new IllegalStateException("Customer space cannot be null.");
+        }
+        return new Tenant(customerSpace);
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public Long getPid() {
+        return pid;
+    }
+
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    public String getTrainingSetHdfsPath() {
+        return trainingSetHdfsPath;
+    }
+
+    public void setTrainingSetHdfsPath(String trainingSetHdfsPath) {
+        this.trainingSetHdfsPath = trainingSetHdfsPath;
+    }
+
+    public String getTestSetHdfsPath() {
+        return testSetHdfsPath;
+    }
+
+    public void setTestSetHdfsPath(String testSetHdfsPath) {
+        this.testSetHdfsPath = testSetHdfsPath;
+    }
+
+    public List<ScoringDataSet> getScoringDataSets() {
+        return scoringDataSets;
+    }
+
+    public void setScoringDataSets(List<ScoringDataSet> scoringDataSets) {
+        this.scoringDataSets = scoringDataSets;
+    }
+    
+    public void addScoringDataSet(ScoringDataSet scoringDataSet) {
+        scoringDataSets.add(scoringDataSet);
+    }
+
+}
