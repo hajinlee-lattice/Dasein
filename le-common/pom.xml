@@ -215,6 +215,11 @@
             <version>${springfox.swagger.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+            <version>${cronutils.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

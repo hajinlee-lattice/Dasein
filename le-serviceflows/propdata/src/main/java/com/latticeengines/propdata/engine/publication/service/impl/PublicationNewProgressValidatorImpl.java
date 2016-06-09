@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.engine.publication.service.impl;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,6 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
@@ -17,7 +17,6 @@ import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.util.CronUtils;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationNewProgressValidator;
 
@@ -67,14 +66,9 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
         if (StringUtils.isNotEmpty(publication.getCronExpression())) {
             PublicationProgress lastRun = progressEntityMgr.findLatestUnderMaximumRetry(publication);
             Date lastTriggerTime = lastRun.getCreateTime();
-            Date lastScheduledTime;
-            try {
-                lastScheduledTime = CronUtils.getPreviousFireTime(publication.getCronExpression());
-            } catch (ParseException e) {
-                throw new RuntimeException("Failed to parse cron expression " + publication.getCronExpression());
-            }
+            Date lastScheduledTime = CronUtils.getPreviousFireTime(publication.getCronExpression()).toDate();
             if (!lastTriggerTime.before(lastScheduledTime)) {
-                // alread triggered
+                // already triggered
                 return true;
             }
         }

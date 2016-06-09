@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.engine.ingestion.dao.impl;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -13,19 +12,19 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.core.util.CronUtils;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionProgressDao;
 
 import reactor.util.CollectionUtils;
 
 @Component("ingestionProgressDao")
-public class IngestionProgressDaoImpl extends
-        BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress> implements IngestionProgressDao {
+public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress>
+        implements IngestionProgressDao {
     private static final Log log = LogFactory.getLog(IngestionProgressDaoImpl.class);
 
     @Override
@@ -42,8 +41,7 @@ public class IngestionProgressDaoImpl extends
         for (String column : fields.keySet()) {
             sb.append(column + " = :" + column + " and ");
         }
-        String queryStr = String.format(
-                "from %s where " + sb.toString().substring(0, sb.length() - 4),
+        String queryStr = String.format("from %s where " + sb.toString().substring(0, sb.length() - 4),
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
@@ -71,8 +69,7 @@ public class IngestionProgressDaoImpl extends
         for (String column : fields.keySet()) {
             sb.append(column + " = :" + column + " and ");
         }
-        String queryStr = String.format(
-                "delete from %s where " + sb.toString().substring(0, sb.length() - 4),
+        String queryStr = String.format("delete from %s where " + sb.toString().substring(0, sb.length() - 4),
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
@@ -90,22 +87,16 @@ public class IngestionProgressDaoImpl extends
         Session session = getSessionFactory().getCurrentSession();
         Class<IngestionProgress> entityClz = getEntityClass();
         String queryStr = String.format(
-                "select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :lastestScheduledTime",
+                "select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :latestScheduledTime",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("ingestionId", ingestion.getPid());
         query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
-        Date lastestScheduledTime;
-        try {
-            lastestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression());
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            log.debug("Latest scheduled time: " + lastestScheduledTime == null ? "null"
-                    : df.format(lastestScheduledTime) + " for ingestion " + ingestion.toString());
-        } catch (ParseException e) {
-            throw new RuntimeException(
-                    "Failed to parse cron expression " + ingestion.getCronExpression());
-        }
-        query.setParameter("lastestScheduledTime", lastestScheduledTime);
+        Date latestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.debug("Latest scheduled time: " + latestScheduledTime == null ? "null"
+                : df.format(latestScheduledTime) + " for ingestion " + ingestion.toString());
+        query.setParameter("latestScheduledTime", latestScheduledTime);
         if (CollectionUtils.isEmpty(query.list())) {
             return true;
         } else {

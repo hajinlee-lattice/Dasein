@@ -127,7 +127,7 @@ public class IngestionProgressEntityMgrImplTestNG extends PropDataEngineFunction
         progress.setHdfsPod(HDFS_POD);
         progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
         progress.setStartTime(new Date());
-        progress.setLastestStatusUpdateTime(new Date());
+        progress.setLatestStatusUpdateTime(new Date());
         progress.setRetries(0);
         progress.setSize(Long.valueOf("1000"));
         progress.setStatus(ProgressStatus.NEW);
@@ -144,7 +144,7 @@ public class IngestionProgressEntityMgrImplTestNG extends PropDataEngineFunction
         progress.setHdfsPod(HDFS_POD);
         progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
         progress.setStartTime(new Date());
-        progress.setLastestStatusUpdateTime(new Date());
+        progress.setLatestStatusUpdateTime(new Date());
         progress.setRetries(0);
         progress.setSize(Long.valueOf("1000"));
         progress.setStatus(ProgressStatus.FAILED);

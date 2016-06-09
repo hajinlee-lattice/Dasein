@@ -64,7 +64,7 @@ public class IngestionProgress implements HasPid, Serializable {
     private Date startTime;
 
     @Column(name = "LastestStatusUpdateTime", nullable = false)
-    private Date lastestStatusUpdateTime;
+    private Date latestStatusUpdateTime;
 
     @Column(name = "ApplicationId", length = 50)
     private String applicationId;
@@ -158,14 +158,14 @@ public class IngestionProgress implements HasPid, Serializable {
         this.startTime = startTime;
     }
 
-    @JsonProperty("LastestStatusUpdateTime")
-    public Date getLastestStatusUpdateTime() {
-        return lastestStatusUpdateTime;
+    @JsonProperty("LatestStatusUpdateTime")
+    public Date getLatestStatusUpdateTime() {
+        return latestStatusUpdateTime;
     }
 
-    @JsonProperty("LastestStatusUpdateTime")
-    public void setLastestStatusUpdateTime(Date lastestStatusUpdateTime) {
-        this.lastestStatusUpdateTime = lastestStatusUpdateTime;
+    @JsonProperty("LatestStatusUpdateTime")
+    public void setLatestStatusUpdateTime(Date latestStatusUpdateTime) {
+        this.latestStatusUpdateTime = latestStatusUpdateTime;
     }
 
     @JsonProperty("ApplicationId")
