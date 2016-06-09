@@ -87,14 +87,26 @@ public class NewMetadataResolver {
         result.fieldMappings = new ArrayList<>();
 
         List<Attribute> attributes = result.metadata.getAttributes();
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.isMappedToLatticeField()) {
-                for (Attribute attribute : attributes) {
+        Iterator<Attribute> attrIterator = attributes.iterator();
+        while (attrIterator.hasNext()) {
+            boolean foundMatchingAttribute = false;
+            Attribute attribute = attrIterator.next();
+            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                if (fieldMapping.isMappedToLatticeField()) {
                     if (isUserFieldMatchWithAttribute(fieldMapping.getUserField(), attribute)) {
+                        foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
+                        break;
                     }
                 }
-            } else {
+            }
+            if (!foundMatchingAttribute) {
+                attrIterator.remove();
+            }
+        }
+
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (!fieldMapping.isMappedToLatticeField()) {
                 attributes.add(getAttributeFromFieldName(fieldMapping.getUserField()));
             }
         }
@@ -105,6 +117,10 @@ public class NewMetadataResolver {
                 attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
                 attributes.add(attribute);
             }
+        }
+        Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
+        if (lastModified == null) {
+            result.metadata.setLastModifiedKey(null);
         }
     }
 
@@ -125,18 +141,18 @@ public class NewMetadataResolver {
             avroType = Schema.Type.STRING;
         }
         switch (attributeType.toUpperCase()) {
-            case "BOOLEAN":
-                fieldType = UserDefinedType.BOOLEAN;
-                break;
-            case "LONG":
-            case "INT":
-            case "DOUBLE":
-                fieldType = UserDefinedType.NUMBER;
-                break;
-            case "STRING":
-            default:
-                fieldType = UserDefinedType.TEXT;
-                break;
+        case "BOOLEAN":
+            fieldType = UserDefinedType.BOOLEAN;
+            break;
+        case "LONG":
+        case "INT":
+        case "DOUBLE":
+            fieldType = UserDefinedType.NUMBER;
+            break;
+        case "STRING":
+        default:
+            fieldType = UserDefinedType.TEXT;
+            break;
         }
         return fieldType;
     }
@@ -155,7 +171,6 @@ public class NewMetadataResolver {
             Iterator<String> headerIterator = headerFields.iterator();
 
             boolean foundMatchingAttribute = false;
-            String matchedHeader = new String();
             FieldMapping knownColumn = new FieldMapping();
             while (headerIterator.hasNext()) {
                 String header = headerIterator.next();
@@ -233,16 +248,16 @@ public class NewMetadataResolver {
     private String getFundamentalTypeFromFieldType(String fieldType) {
         String fundamentalType = null;
         switch (fieldType.toUpperCase()) {
-            case "BOOLEAN":
-                fundamentalType = ModelingMetadata.FT_BOOLEAN;
-                break;
-            case "NUMBER":
-                fundamentalType = ModelingMetadata.FT_NUMERIC;
-                break;
-            case "TEXT":
-            default:
-                fundamentalType = ModelingMetadata.FT_ALPHA;
-                break;
+        case "BOOLEAN":
+            fundamentalType = ModelingMetadata.FT_BOOLEAN;
+            break;
+        case "NUMBER":
+            fundamentalType = ModelingMetadata.FT_NUMERIC;
+            break;
+        case "TEXT":
+        default:
+            fundamentalType = ModelingMetadata.FT_ALPHA;
+            break;
         }
         return fundamentalType;
     }
@@ -250,18 +265,18 @@ public class NewMetadataResolver {
     private String getStatisticalTypeFromFieldType(String fieldType) {
         String statisticalType = null;
         switch (fieldType.toUpperCase()) {
-            case "BOOLEAN":
-                statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
-                break;
-            case "NUMBER":
-                statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
-                break;
-            case "TEXT":
-                statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
-                break;
-            default:
-                statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
-                break;
+        case "BOOLEAN":
+            statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
+            break;
+        case "NUMBER":
+            statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
+            break;
+        case "TEXT":
+            statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
+            break;
+        default:
+            statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
+            break;
         }
         return statisticalType;
     }
@@ -300,9 +315,11 @@ public class NewMetadataResolver {
     }
 
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false");
+
     private boolean isBooleanTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && ! columnField.isEmpty() && ! ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
+            if (columnField != null && !columnField.isEmpty()
+                    && !ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
                 return false;
             }
         }
@@ -311,7 +328,7 @@ public class NewMetadataResolver {
 
     private boolean isDoubleTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
-            if (columnField != null && ! columnField.isEmpty()) {
+            if (columnField != null && !columnField.isEmpty()) {
                 try {
                     Double.parseDouble(columnField);
                 } catch (NumberFormatException e) {

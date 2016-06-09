@@ -72,7 +72,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     public void setup() throws Exception {
         selfServiceModeling.setup();
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
+        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
     }
 
     @Test(groups = "deployment.lp")
@@ -219,29 +219,29 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         }
     }
 
-    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
-        @Override
-        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
-            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
-                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
-                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-                    "Source_Detail__c", "Cloud_Plan__c" });
-            log.info(unknownColumns);
-            for (LinkedHashMap<String, String> map : unknownColumns) {
-                String columnName = map.get("columnName");
-                if (booleanSet.contains(columnName)) {
-                    map.put("columnType", Schema.Type.BOOLEAN.name());
-                } else if (strSet.contains(columnName)) {
-                    map.put("columnType", Schema.Type.STRING.name());
-                } else if (columnName.startsWith("Activity_Count_")) {
-                    map.put("columnType", Schema.Type.INT.name());
-                }
-            }
-            log.info(unknownColumns);
-
-            return null;
-        }
-    };
+//    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
+//        @Override
+//        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
+//            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
+//                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+//                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+//            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+//                    "Source_Detail__c", "Cloud_Plan__c" });
+//            log.info(unknownColumns);
+//            for (LinkedHashMap<String, String> map : unknownColumns) {
+//                String columnName = map.get("columnName");
+//                if (booleanSet.contains(columnName)) {
+//                    map.put("columnType", Schema.Type.BOOLEAN.name());
+//                } else if (strSet.contains(columnName)) {
+//                    map.put("columnType", Schema.Type.STRING.name());
+//                } else if (columnName.startsWith("Activity_Count_")) {
+//                    map.put("columnType", Schema.Type.INT.name());
+//                }
+//            }
+//            log.info(unknownColumns);
+//
+//            return null;
+//        }
+//    };
 
 }

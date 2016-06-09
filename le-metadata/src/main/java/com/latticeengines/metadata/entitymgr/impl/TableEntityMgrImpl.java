@@ -130,7 +130,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         final Table clone = TableUtils.clone(existing);
-        clone.setName(UUID.randomUUID().toString() + "_clone");
+        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_'));
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override

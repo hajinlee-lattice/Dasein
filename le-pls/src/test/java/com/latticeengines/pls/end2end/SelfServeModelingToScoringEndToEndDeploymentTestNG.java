@@ -43,40 +43,40 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @Test(groups = "deployment.lp", enabled = true)
     public void testLeadModelToScoreCorrectness() throws InterruptedException, IOException {
         String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
-        String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, unknownColumnHandler, fileName);
+        String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
         scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId, 1000);
     }
 
     @Test(groups = "deployment.lp", enabled = false)
     public void testAccountModelToScoreCorrectness() throws InterruptedException, IOException {
         String fileName = "Mulesoft_SFDC_LP3_ModelingAccount_20160412_3kRows.csv";
-        String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceAccount, null, fileName);
+        String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceAccount, fileName);
         scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId, 100);
     }
 
-    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
-        @Override
-        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
-            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
-                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
-                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-                    "Source_Detail__c", "Cloud_Plan__c" });
-            log.info(unknownColumns);
-            for (LinkedHashMap<String, String> map : unknownColumns) {
-                String columnName = map.get("columnName");
-                if (booleanSet.contains(columnName)) {
-                    map.put("columnType", Schema.Type.BOOLEAN.name());
-                } else if (strSet.contains(columnName)) {
-                    map.put("columnType", Schema.Type.STRING.name());
-                } else if (columnName.startsWith("Activity_Count_")) {
-                    map.put("columnType", Schema.Type.INT.name());
-                }
-            }
-            log.info(unknownColumns);
-
-            return null;
-        }
-    };
+//    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
+//        @Override
+//        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
+//            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
+//                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+//                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+//            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+//                    "Source_Detail__c", "Cloud_Plan__c" });
+//            log.info(unknownColumns);
+//            for (LinkedHashMap<String, String> map : unknownColumns) {
+//                String columnName = map.get("columnName");
+//                if (booleanSet.contains(columnName)) {
+//                    map.put("columnType", Schema.Type.BOOLEAN.name());
+//                } else if (strSet.contains(columnName)) {
+//                    map.put("columnType", Schema.Type.STRING.name());
+//                } else if (columnName.startsWith("Activity_Count_")) {
+//                    map.put("columnType", Schema.Type.INT.name());
+//                }
+//            }
+//            log.info(unknownColumns);
+//
+//            return null;
+//        }
+//    };
 
 }

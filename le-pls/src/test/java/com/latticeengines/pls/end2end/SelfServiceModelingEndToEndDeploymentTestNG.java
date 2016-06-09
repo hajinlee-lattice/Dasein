@@ -50,6 +50,8 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -73,7 +75,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private ModelSummary originalModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
-    private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
+    //private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -98,8 +100,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/fileuploads/unnamed?schema=%s&displayName=%s", getRestAPIHostPort(),
-                        schemaInterpretation, "SelfServiceModeling Test File.csv"), //
+                String.format("%s/pls/models/uploadfile/unnamed?displayName=%s", getRestAPIHostPort(),
+                        "SelfServiceModeling Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -108,21 +110,25 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
+        sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getRestAPIHostPort(),
-                        sourceFile.getName()), ResponseDocument.class);
-        @SuppressWarnings("unchecked")
-        List<LinkedHashMap<String, String>> unknownColumns = new ObjectMapper().convertValue(response.getResult(),
-                List.class);
+                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
+                        sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
+        FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
+                FieldMappingDocument.class);
 
-        System.out.println("the unknown columsn are: " + unknownColumns);
-        log.info("the unknown columsn are: " + unknownColumns);
-        if (unknownColumnHandler != null) {
-            unknownColumnHandler.apply(unknownColumns);
+        for (FieldMapping mapping : mappings.getFieldMappings()) {
+            if (mapping.getMappedField() == null) {
+                mapping.setMappedToLatticeField(false);
+                mapping.setMappedField(mapping.getUserField().replace(' ', '_'));
+            }
         }
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getRestAPIHostPort(),
-                        sourceFile.getName()), unknownColumns, ResponseDocument.class);
+
+        log.info("the fieldmappings are: " + mappings.getFieldMappings());
+        log.info("the ignored fields are: " + mappings.getIgnoredFields());
+        restTemplate.postForObject(
+                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
+                        sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -336,7 +342,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation,
-            Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName)
+            String fileName)
             throws InterruptedException {
         if (!StringUtils.isBlank(fileName)) {
             this.fileName = fileName;
@@ -344,9 +350,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         if (schemaInterpretation != null) {
             this.schemaInterpretation = schemaInterpretation;
         }
-        if (unknownColumnHandler != null) {
-            this.unknownColumnHandler = unknownColumnHandler;
-        }
+//        if (unknownColumnHandler != null) {
+//            this.unknownColumnHandler = unknownColumnHandler;
+//        }
         log.info("Uploading File");
         uploadFile();
         sourceFile = getSourceFile();
