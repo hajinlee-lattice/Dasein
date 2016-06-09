@@ -11,15 +11,14 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.models.controllers.ModelDetailController', 
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.services.TopPredictorService',
-    'mainApp.appCommon.services.ThresholdExplorerService'
+    'mainApp.appCommon.services.ThresholdExplorerService',
+    'mainApp.create.csvBulkUpload'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
     NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $stateParams.modelId;
-
-    console.log(modelId, ModelStore, Model);
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {

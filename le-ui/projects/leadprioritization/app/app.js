@@ -17,10 +17,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
     'mainApp.create.csvImport',
-    'mainApp.create.csvReport',
-    'mainApp.create.csvBulkUpload',
     'mainApp.sfdc.sfdcCredentials',
-    'mainApp.create.controller.ImportJobController',
     'pd.navigation',
     'pd.jobs',
     'pd.apiconsole'

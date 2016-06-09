@@ -17,8 +17,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.services.FeatureFlagService',
     'mainApp.setup.controllers.SetupController',
     'mainApp.setup.controllers.DeploymentWizardController',
-    'mainApp.setup.controllers.LeadEnrichmentController',
-    'mainApp.create.controller.CustomFieldsController'
+    'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
 .controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, LoginService, NavUtility, FeatureFlagService, ConfigService) {

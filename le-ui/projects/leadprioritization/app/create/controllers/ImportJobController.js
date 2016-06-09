@@ -1,7 +1,6 @@
-angular.module('mainApp.create.controller.ImportJobController', [
-    'mainApp.create.csvImport',
+angular.module('mainApp.create.importJob', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.NavUtility',
+    'mainApp.create.csvImport',
     'pd.jobs'
 ])
 .controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService, csvImportStore) {

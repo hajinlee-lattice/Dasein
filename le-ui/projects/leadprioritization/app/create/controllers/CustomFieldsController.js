@@ -1,37 +1,36 @@
-angular.module('mainApp.create.controller.CustomFieldsController', [
-    'mainApp.create.csvImport',
-    'mainApp.setup.modals.SelectFieldsModal',
+angular.module('mainApp.create.customFields', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.NavUtility'
+    'mainApp.create.csvImport'
 ])
 .controller('CustomFieldsController', function($state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
     var vm = this;
 
-    var schema = csvImportStore.Get($stateParams.csvFileName).schemaInterpretation;
     angular.extend(vm, {
         FormValidated: true,
         ResourceUtility : ResourceUtility,
         csvFileName: $stateParams.csvFileName,
         mappingOptions: [
             { id: 0, name: "Custom Field Name" },
-            { id: 1, name: "Map to Lattice Data Cloud" },
+            { id: 1, name: "Map to Standard Field" },
             { id: 2, name: "Ignore this field" }
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
-        UnmappedFields: UnmappedFields[schema],
         fieldMappings: FieldDocument.fieldMappings,
-        schema: schema,
         RequiredFields: []
     });
 
     vm.init = function() {
-        vm.refreshLatticeFields();
+        vm.csvMetadata = csvImportStore.Get($stateParams.csvFileName) || {};
+        vm.schema = vm.csvMetadata.schemaInterpretation;
+        vm.UnmappedFields = UnmappedFields[vm.schema] || [];
+
         vm.UnmappedFields.forEach(function(field, index) {
             if (field.requiredType == 'Required') {
                 vm.RequiredFields.push(field.name);
             }
         });
-        console.log('init', this);
+
+        vm.refreshLatticeFields();
     }
 
     vm.changeMappingOption = function(fieldMapping, selectedOption) {
@@ -39,17 +38,17 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         delete fieldMapping.ignored;
 
         switch (selectedOption.id) {
-            case 0: 
+            case 0: // custom user mapping
                 fieldMapping.mappedField = fieldMapping.mappedField || fieldMapping.userField;
                 break;
-            case 1: 
+            case 1: // map to lattice cloud
                 fieldMapping.mappedField = vm.UnmappedFieldsMap[fieldMapping.mappedField] 
                     ? fieldMapping.mappedField 
                     : '';
 
                 fieldMapping.mappedToLatticeField = true;
                 break;
-            case 2: 
+            case 2: // ignore this field
                 fieldMapping.ignored = true; 
                 break;
         }
@@ -69,11 +68,13 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     vm.refreshLatticeFields = function() {
         vm.fieldMappingsMapped = {};
         vm.UnmappedFieldsMap = {};
+
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             if (fieldMapping.mappedField && !fieldMapping.ignored) {
                 vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
             }
         });
+        
         vm.UnmappedFields.forEach(function(UnmappedField, index) {
             vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
         });
@@ -82,6 +83,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
     vm.clickNext = function() {
         ShowSpinner('Saving Field Mappings...');
 
+        // build ignoredFields list from temp 'ignored' fieldMapping property
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             if (fieldMapping.ignored) {
                 vm.ignoredFields.push(fieldMapping.userField);
@@ -93,9 +95,7 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         csvImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
             ShowSpinner('Executing Modeling Job...');
 
-            var csvMetadata = csvImportStore.Get(vm.csvFileName);
-            
-            csvImportService.StartModeling(csvMetadata).then(function(result) {
+            csvImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {
                     setTimeout(function() {
                         $state.go('home.models.import.job', { applicationId: result.Result });
@@ -107,15 +107,18 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
         });
     }
 
+    // here are additional checks not covered by angular's built in form validation
     vm.validateForm = function() {
         vm.FormValidated = true;
 
+        // make sure there are no empty drop-down selection
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                 vm.FormValidated = false;
             }
         });
 
+        // make sure all lattice required fields are mapped
         vm.RequiredFields.forEach(function(requiredField, index) {
             if (!vm.fieldMappingsMapped[requiredField]) {
                 vm.FormValidated = false;
@@ -125,134 +128,3 @@ angular.module('mainApp.create.controller.CustomFieldsController', [
 
     vm.init();
 });
-/*
-.controller('CustomFieldsController-bak', function($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, csvImportService, csvImportStore, SelectFieldsModal, FieldDocument) {
-    $scope.csvFileName = $stateParams.csvFileName;
-    $scope.schema = csvImportStore.Get($scope.csvFileName).schemaInterpretation;
-    $scope.fieldMappings = [];
-    $scope.fieldNameToFieldMappings = {};
-    $scope.fieldNameToFieldTypes = {};
-    $scope.mappingOptions = [
-        { name: "Custom Field Name", id: 0 },
-        { name: "Map to Lattice Data Cloud", id: 1 },
-        { name: "Ignore this field", id: 2 }
-    ];
-    $scope.ignoredFields = [];
-
-    $scope.fieldMappings = FieldDocument.fieldMappings;    $scope.mappingOptions = [
-        { name: "Custom Field Name", id: 0 },
-        { name: "Map to Lattice Data Cloud", id: 1 },
-        { name: "Ignore this field", id: 2 }
-    ];
-    $scope.ignoredFields = [];
-
-    $scope.schema = FieldDocument.schemaInterpretation;
-    $scope.fieldMappings = FieldDocument.fieldMappings;
-
-    $scope.mappingChanged = function(fieldMapping, selectedOption) {
-        if (selectedOption == $scope.mappingOptions[1]) {
-            showLatticeFieldsSelector(fieldMapping);
-        } else if (selectedOption == $scope.mappingOptions[0]) {
-            fieldMapping.userField = fieldMapping.userField;
-            fieldMapping.mappedField = fieldMapping.userField;
-            //fieldMapping.fieldType = $scope.fieldNameToFieldTypes[fieldMapping.userField];
-            fieldMapping.mappedToLatticeField = false;
-
-            if (!fieldMapping.mappedField) {
-                fieldMapping.mappedField = fieldMapping.userField;
-            }
-        } else if (selectedOption == $scope.mappingOptions[2]) {
-            $scope.fieldNameToFieldMappings[fieldMapping.userField] = {}; // if field is ignored, we'll use {} to designate it.
-        }
-    };
-
-    for (var i = 0; i < $scope.fieldMappings.length; i++) {
-        var fieldMapping = $scope.fieldMappings[i];
-        if (fieldMapping.mappedField == null) {
-            $scope.mappingChanged(fieldMapping, $scope.mappingOptions[0])
-        } else {
-        }
-        $scope.fieldNameToFieldMappings[fieldMapping.userField] = fieldMapping;
-        $scope.fieldNameToFieldTypes[fieldMapping.userField] = fieldMapping.fieldType;
-    }
-
-    $scope.$on(NavUtility.MAP_LATTICE_SCHEMA_FIELD_EVENT, function(event, data) {
-        mapUserFieldToLatticeField(data.userFieldName, data.latticeSchemaField);
-    });
-
-    $scope.$on('Mapped_Field_Modal_Cancelled', function(event, data) {
-        console.log(event, data);
-        mapUserFieldToLatticeField(data.userFieldName, data.latticeSchemaField);
-        $scope.mappingChanged(data.latticeSchemaField, $scope.mappingOptions[0]);
-    });
-
-    function deleteFromIgnoredFieldIfExists(fieldName) {
-        if (fieldName in $scope.ignoredFields) {
-            $scope.ignoredFields.splice($scope.ignoredFields.indexOf(fieldName), 1);
-        }
-    }
-
-    $scope.csvSubmitColumns = function() {
-        var fieldMappings = [];
-        for (fieldName in $scope.fieldNameToFieldMappings) {
-            if ($scope.fieldNameToFieldMappings[fieldName].userField != null) {
-                fieldMappings.push($scope.fieldNameToFieldMappings[fieldName]);
-            } else {
-                $scope.ignoredFields.push(fieldName);
-            }
-        }
-
-        ShowSpinner('Saving Field Mappings...')
-
-        csvImportService.SaveFieldDocuments(
-            $scope.csvFileName, 
-            $scope.schema, 
-            fieldMappings,
-            $scope.ignoredFields
-        ).then(function(result) {
-            var csvMetadata = csvImportStore.Get($scope.csvFileName);
-            
-            ShowSpinner('Executing Modeling Job...');
-
-            csvImportService.StartModeling(csvMetadata).then(function(result) {
-                $state.go('home.jobs.status', {'jobCreationSuccess': result.Success });
-
-                if (result.Result && result.Result != "") {
-                    setTimeout(function() {
-                        $state.go('home.models.import.job', { applicationId: result.Result });
-                    }, 1);
-                } else {
-                    // ERROR
-                }
-            });
-        });
-    };
-
-    $scope.isDocumentCompletelyMapped = function() {
-        for (var fieldName in $scope.fieldNameToFieldMappings) {
-            if ($scope.fieldNameToFieldMappings[fieldName] == null) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    function mapUserFieldToLatticeField(userFieldName, latticeSchemaField) {
-        var newUserFieldMapping = { userField: userFieldName };
-        newUserFieldMapping.mappedField = latticeSchemaField.name;
-        newUserFieldMapping.mappedToLatticeField = true;
-        newUserFieldMapping.fieldType = latticeSchemaField.fieldType;
-
-        $scope.fieldNameToFieldMappings[userFieldName] = newUserFieldMapping;
-        $scope.fieldNameToFieldTypes[userFieldName] = latticeSchemaField.fieldType;
-    }
-
-    function showLatticeFieldsSelector (fieldSelected) {
-        csvImportStore.CurrentFieldMapping = fieldSelected;
-        csvImportStore.fieldNameToFieldMappings = $scope.fieldNameToFieldMappings;
-        csvImportStore.fieldMappings = $scope.fieldMappings;
-
-        SelectFieldsModal.show($scope.schema, fieldSelected);
-    };
-});
-*/

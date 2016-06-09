@@ -55,6 +55,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     return {
         restrict:    'E',
         template:   '<a href="" data-ng-click="downloadFile($event)" data-ng-hide="modelUploaded||fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a>' +
+                    '<span data-ng-show="fetching" class="fa fa-spinner fa-pulse fa-fw"></span>&nbsp;' +
                     '<span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>' +
                     '<span data-ng-show="modelUploaded">{{ResourceUtility.getString("MODEL_ADMIN_LINK_DISABLED")}}</span>',
         scope:       true,
@@ -69,7 +70,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                 $(anchor).removeAttr('disabled');
             });
         },
-        controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', 'SessionService', function ($scope, $attrs, $http, ResourceUtility, SessionService) {
+        controller:  function ($scope, $attrs, $http, ResourceUtility, SessionService) {
             $scope.fetching = false;
             $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
@@ -94,7 +95,19 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                     }
                 }).then(
                     function (response) {
-                        if ($attrs.filetype === "application/json") {
+                        if ($attrs.filetype === "application/octet-stream") {
+                            console.log('response', response);
+                            var byteArray = new Uint8Array(response.data);
+                            
+                            console.log('byteArray', byteArray.length);
+                            var data = pako.ungzip(byteArray);
+                            
+                            console.log('data', data);
+                            var restored = String.fromCharCode.apply(null, new Uint16Array(data));
+                            
+                            console.log('text', restored);
+                            $scope.blob = new Blob([restored], {type : $attrs.filetype});;
+                        } else if ($attrs.filetype === "application/json") {
                             $scope.blob = new Blob([JSON.stringify(response.data)], {type : $attrs.filetype});
                         } else {
                             $scope.blob = new Blob([response.data], {type : $attrs.filetype});
@@ -110,6 +123,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                     }
                 );
             };
-        }]
+        }
     };
 });

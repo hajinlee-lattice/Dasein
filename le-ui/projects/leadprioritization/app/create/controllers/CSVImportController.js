@@ -3,6 +3,9 @@ angular
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.modules.ServiceErrorModule',
+    'mainApp.create.importJob',
+    'mainApp.create.customFields',
+    'mainApp.create.csvReport',
     '720kb.tooltips'
 ])
 .controller('csvImportController', function($scope, $state, $q, ResourceUtility, StringUtility, csvImportService, csvImportStore) {

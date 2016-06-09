@@ -64,7 +64,6 @@ angular.module('mainApp.login.controllers.LoginController', [
         LoginService.Login($scope.username, $scope.password).then(function(result) {
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
-            $scope.loading = false;
             if (result != null && result.Success === true) {
                 $rootScope.$broadcast("LoggedIn");
 
@@ -74,6 +73,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             } else {
                 // Need to fail gracefully if we get no service response at all
                 $scope.showLoginHeaderMessage(result.errorMessage);
+                $scope.loading = false;
             }
         });
     };
