@@ -19,7 +19,6 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -99,8 +98,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
-                return attr.getName().equals(InterfaceName.InternalId.name())
-                        || attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString());
+                // import will create internal Id, filter out internal Id to
+                // avoid duplication
+                return attr.getName().equals(InterfaceName.InternalId.name());
             }
         });
 
