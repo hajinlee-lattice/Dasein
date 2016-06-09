@@ -29,7 +29,8 @@
         p:sessionFactory-ref="sessionFactoryPropDataEntitlements">
         <qualifier value="propdataEntitlements" />
     </bean>
-    <tx:annotation-driven transaction-manager="transactionManagerPropDataEntitlements" />
+
+    <tx:annotation-driven/>
 
     <bean id="dataColumnMapDao" class="com.latticeengines.propdata.api.dao.impl.DataColumnMapDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataEntitlements" />

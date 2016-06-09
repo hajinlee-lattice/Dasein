@@ -27,7 +27,8 @@
         p:sessionFactory-ref="sessionFactoryPropDataMatch">
         <qualifier value="propdata" />
     </bean>
-    <tx:annotation-driven transaction-manager="transactionManagerPropDataMatch" />
+
+    <tx:annotation-driven/>
 
     <bean id="commandDao" class="com.latticeengines.propdata.match.dao.impl.CommandDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />

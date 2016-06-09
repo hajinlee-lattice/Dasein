@@ -19,5 +19,6 @@
     <mvc:annotation-driven/>
 
     <import resource="classpath:pls-component-context.xml"/>
+    <import resource="classpath:dellebi-context.xml"/>
 
 </beans>
