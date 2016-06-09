@@ -17,9 +17,12 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -34,6 +37,9 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @Override
     public List<VdbMetadataField> getMetadata(String modelId) {
@@ -72,11 +78,15 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table trainingTable = getTrainingTableFromModelId(modelId);
         List<Attribute> attributes = trainingTable.getAttributes();
         if (attributes == null) {
-            log.error(String.format("Model %s does not have attribuets in the event tableName", modelId));
+            log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
+
+        SourceFile source = sourceFileService.findByTableName(trainingTable.getName());
+        Table schemaTable = SchemaRepository.instance().getSchema(source.getSchemaInterpretation());
         for (Attribute attribute : attributes) {
-            if (!attribute.getApprovedUsage().contains(ApprovedUsage.NONE.toString())) {
+            if (schemaTable.getAttribute(attribute.getName()) != null
+                    || !attribute.getApprovedUsage().contains(ApprovedUsage.NONE.toString())) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {

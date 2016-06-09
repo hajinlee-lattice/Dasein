@@ -10,6 +10,8 @@ public interface SourceFileEntityMgr extends BaseEntityMgr<SourceFile> {
     SourceFile findByName(String name);
 
     SourceFile findByApplicationId(String applicationId);
-    
+
     List<SourceFile> findAllSourceFiles();
+
+    SourceFile findByTableName(String tableName);
 }

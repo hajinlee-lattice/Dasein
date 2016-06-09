@@ -40,4 +40,9 @@ public class SourceFileServiceImpl implements SourceFileService {
     public void delete(SourceFile sourceFile) {
         sourceFileEntityMgr.delete(sourceFile);
     }
+
+    @Override
+    public SourceFile findByTableName(String tableName) {
+        return sourceFileEntityMgr.findByTableName(tableName);
+    }
 }

@@ -25,9 +25,14 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
     public SourceFile findByApplicationId(String applicationId) {
         return findByField("applicationId", applicationId);
     }
-    
+
     @Override
     public List<SourceFile> findAllSourceFiles() {
         return findAll();
+    }
+
+    @Override
+    public SourceFile findByTableName(String tableName) {
+        return findByField("tableName", tableName);
     }
 }

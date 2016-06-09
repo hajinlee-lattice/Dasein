@@ -55,6 +55,12 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     public SourceFile findByApplicationId(String applicationId) {
         return sourceFileDao.findByApplicationId(applicationId);
     }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public SourceFile findByTableName(String tableName) {
+        return sourceFileDao.findByTableName(tableName);
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)

@@ -5,6 +5,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 public interface SourceFileService {
 
     SourceFile findByName(String name);
+    
+    SourceFile findByTableName(String tableName);
 
     void create(SourceFile sourceFile);
 

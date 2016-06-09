@@ -13,4 +13,6 @@ public interface SourceFileDao extends BaseDao<SourceFile> {
     
     List<SourceFile> findAllSourceFiles();
 
+    SourceFile findByTableName(String tableName);
+
 }
