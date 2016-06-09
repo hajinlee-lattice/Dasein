@@ -3,19 +3,14 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-
 import javax.annotation.Nullable;
-
 import com.latticeengines.common.exposed.csv.LECSVFormat;
-import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -34,12 +29,9 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -218,30 +210,5 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             throw new RuntimeException(e);
         }
     }
-
-//    Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler = new Function<List<LinkedHashMap<String, String>>, Void>() {
-//        @Override
-//        public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
-//            Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
-//                    "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
-//                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-//            Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-//                    "Source_Detail__c", "Cloud_Plan__c" });
-//            log.info(unknownColumns);
-//            for (LinkedHashMap<String, String> map : unknownColumns) {
-//                String columnName = map.get("columnName");
-//                if (booleanSet.contains(columnName)) {
-//                    map.put("columnType", Schema.Type.BOOLEAN.name());
-//                } else if (strSet.contains(columnName)) {
-//                    map.put("columnType", Schema.Type.STRING.name());
-//                } else if (columnName.startsWith("Activity_Count_")) {
-//                    map.put("columnType", Schema.Type.INT.name());
-//                }
-//            }
-//            log.info(unknownColumns);
-//
-//            return null;
-//        }
-//    };
 
 }
