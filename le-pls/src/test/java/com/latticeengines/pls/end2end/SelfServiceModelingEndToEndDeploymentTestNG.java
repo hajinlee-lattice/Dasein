@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -293,6 +294,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             Thread.sleep(1000);
         }
         assertNotNull(found);
+        assertEquals(found.getStatus(), ModelSummaryStatus.INACTIVE);
 
         @SuppressWarnings("unchecked")
         List<Object> predictors = restTemplate.getForObject(

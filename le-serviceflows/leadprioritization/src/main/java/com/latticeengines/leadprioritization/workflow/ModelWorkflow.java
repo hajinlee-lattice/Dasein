@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.serviceflows.workflow.export.ExportData;
-import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
+import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -26,7 +26,7 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     private ProfileAndModel profileAndModel;
 
     @Autowired
-    private ActivateModel activateModel;
+    private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
     @Bean
     public Job modelWorkflowJob() throws Exception {
@@ -38,7 +38,7 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
         return new WorkflowBuilder().next(sample) //
                 .next(exportData) //
                 .next(profileAndModel) //
-                .next(activateModel) //
+                .next(downloadAndProcessModelSummaries) //
                 .build();
 
     }
