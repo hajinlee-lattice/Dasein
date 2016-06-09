@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
-
-import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
@@ -27,6 +25,7 @@ import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "transform", description = "REST resource for source transformation")
 @RestController
@@ -55,7 +54,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
             HttpServletRequest request) {
         checkHeader(request);
         try {
-            if (StringUtils.objectIsNullOrEmptyString(hdfsPod)) {
+            if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getHdfsPodId();
             }
 
@@ -77,7 +76,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
             HttpServletRequest request, HttpServletResponse response) {
         checkHeader(request);
         try {
-            if (StringUtils.objectIsNullOrEmptyString(hdfsPod)) {
+            if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getHdfsPodId();
             }
 
