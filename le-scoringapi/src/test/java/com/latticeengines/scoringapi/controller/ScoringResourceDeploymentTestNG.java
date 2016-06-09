@@ -118,25 +118,24 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         }
     }
 
-    // @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-    // "scoreRecords" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void getPaginatedModels() {
         String url = apiHostPort + "/score";
 
-        List<ModelDetail> models = getPaginatedModels(url, new Date(0), true, 0, 50);
+        List<ModelDetail> models = getPaginatedModels(url, new Date(0), true, 1, 50);
         checkModelDetails(models, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void getBaseModelsCount() {
         baseAllModelCount = getModelCount(1, true, new Date(), false);
-        System.out.println("Base all model count = " + baseAllModelCount);
+        Assert.assertEquals(baseAllModelCount, 1);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void getModelsCountActive() {
         baseAllActiveModelCount = getModelCount(1, false, null, false);
-        System.out.println("Base all active model count = " + baseAllActiveModelCount);
+        Assert.assertEquals(baseAllActiveModelCount, 1);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
@@ -145,8 +144,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
-            "getModelsCountAfterBulkScoring" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring",
+            "getPaginatedModels" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
