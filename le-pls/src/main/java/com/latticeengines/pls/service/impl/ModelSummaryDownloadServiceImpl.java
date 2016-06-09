@@ -14,10 +14,6 @@ import org.quartz.JobExecutionException;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -28,15 +24,15 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 @DisallowConcurrentExecution
 @Component("modelSummaryDownloadService")
 public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements ModelSummaryDownloadService {
-    
+
     private static final Log log = LogFactory.getLog(ModelSummaryDownloadServiceImpl.class);
-    
+
     private String modelingServiceHdfsBaseDir;
-    
+
     private AsyncTaskExecutor modelSummaryDownloadExecutor;
-    
+
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     private TenantEntityMgr tenantEntityMgr;
 
     private Configuration yarnConfiguration;
@@ -44,10 +40,8 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     private ModelSummaryParser modelSummaryParser;
 
     private TimeStampContainer timeStampContainer;
-    
-    private FeatureImportanceParser featureImportanceParser;
 
-    private PlatformTransactionManager transactionManager;
+    private FeatureImportanceParser featureImportanceParser;
 
     public Future<Boolean> downloadModel(Tenant tenant) {
         log.debug("Downloading model for tenant " + tenant.getId());
@@ -70,18 +64,13 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
            log.debug(timeStampContainer.getTimeStamp().getSeconds());
         }
 
-        TransactionTemplate tx = new TransactionTemplate(transactionManager);
-        List<Tenant> tenants = tx.execute(new TransactionCallback<List<Tenant>>() {
-            public List<Tenant> doInTransaction(TransactionStatus status) {
-                return tenantEntityMgr.findAll();
-            }
-        });
+        List<Tenant> tenants = tenantEntityMgr.findAll();
 
         List<Future<Boolean>> futures = new ArrayList<>();
         for (Tenant tenant : tenants) {
             futures.add(downloadModel(tenant));
         }
-        
+
         for (Future<Boolean> future : futures) {
             try {
                 future.get();
@@ -114,7 +103,7 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
         this.modelSummaryEntityMgr = modelSummaryEntityMgr;
     }
-    
+
     public TenantEntityMgr getTenantEntityMgr() {
         return tenantEntityMgr;
     }
@@ -146,20 +135,12 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     public void setTimeStampContainer(TimeStampContainer timeStampContainer){
         this.timeStampContainer = timeStampContainer;
     }
-    
+
     public FeatureImportanceParser getFeatureImportanceParser() {
         return featureImportanceParser;
     }
-    
+
     public void setFeatureImportanceParser(FeatureImportanceParser featureImportanceParser) {
         this.featureImportanceParser = featureImportanceParser;
-    }
-
-    public PlatformTransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
     }
 }

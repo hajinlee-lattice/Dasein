@@ -17,7 +17,6 @@
                 <entry key="modelSummaryParser" value-ref="modelSummaryParser" />
                 <entry key="featureImportanceParser" value-ref="featureImportanceParser" />
                 <entry key="timeStampContainer" value-ref="timeStampContainer" />
-                <entry key="transactionManager" value-ref="transactionManager" />
             </map>
         </property>
     </bean>
