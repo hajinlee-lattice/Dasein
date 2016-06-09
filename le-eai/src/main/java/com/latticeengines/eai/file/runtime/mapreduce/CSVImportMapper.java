@@ -176,6 +176,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         GenericRecord avroRecord = new GenericData.Record(schema);
         for (final String header : headers) {
             Attribute attr = table.getAttributeFromDisplayName(header);
+            if (attr == null) {
+                LOG.info(String.format("Not found csv header %s from the table schema", header));
+                continue;
+            }
             Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
             String csvFieldValue = null;
             try {
