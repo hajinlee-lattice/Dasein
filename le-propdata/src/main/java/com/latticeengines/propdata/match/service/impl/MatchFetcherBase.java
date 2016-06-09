@@ -31,6 +31,7 @@ public abstract class MatchFetcherBase {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(MatchFetcherBase.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
+    private static final Integer MAX_RETRIES = 2;
 
     @Autowired
     private DataSourceService dataSourceService;
@@ -60,20 +61,30 @@ public abstract class MatchFetcherBase {
                 });
     }
 
-    protected MatchContext fetchSync(MatchContext context) {
+    MatchContext fetchSync(MatchContext context) {
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Map<String, List<String>> sourceColumnsMap = context.getSourceColumnsMap();
         for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-            QueryExecutor queryExecutor = getQueryExecutor(sourceColumns.getKey(), sourceColumns.getValue(), context);
-            List<Map<String, Object>> queryResult = queryExecutor.query();
-            resultMap.put(sourceColumns.getKey(), queryResult);
+            List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
+                    MAX_RETRIES);
+            for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
+                try {
+                    QueryExecutor queryExecutor = getQueryExecutor(jdbcTemplate, sourceColumns.getKey(),
+                            sourceColumns.getValue(), context);
+                    List<Map<String, Object>> queryResult = queryExecutor.query();
+                    resultMap.put(sourceColumns.getKey(), queryResult);
+                    break;
+                } catch (Exception e) {
+                    log.error("Attempt to execute query failed.", e);
+                }
+            }
         }
         context.setResultsBySource(resultMap);
         return context;
     }
 
-    private QueryExecutor getQueryExecutor(String sourceName, List<String> targetColumns, MatchContext matchContext) {
-        JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
+    private QueryExecutor getQueryExecutor(JdbcTemplate jdbcTemplate, String sourceName, List<String> targetColumns,
+            MatchContext matchContext) {
         if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)
                 || MatchConstants.RTS.equals(sourceName)) {
             CachedMatchQueryExecutor callable = new CachedMatchQueryExecutor("Domain", "Name", "Country", "State",
@@ -86,7 +97,7 @@ public abstract class MatchFetcherBase {
             return callable;
         } else {
             throw new UnsupportedOperationException("Only support match against predefined selection "
-                    + ColumnSelection.Predefined.Model + " and " + ColumnSelection.Predefined.DerivedColumns + " now.");
+                    + ColumnSelection.Predefined.supportedSelections + " now.");
         }
     }
 
@@ -112,11 +123,11 @@ public abstract class MatchFetcherBase {
         private Set<String> domainSet;
         private Set<NameLocation> nameLocationSet;
 
-        public void setDomainSet(Set<String> domainSet) {
+        void setDomainSet(Set<String> domainSet) {
             this.domainSet = domainSet;
         }
 
-        public void setNameLocationSet(Set<NameLocation> nameLocationSet) {
+        void setNameLocationSet(Set<NameLocation> nameLocationSet) {
             this.nameLocationSet = nameLocationSet;
         }
 
@@ -208,19 +219,19 @@ public abstract class MatchFetcherBase {
 
     private abstract static class QueryExecutor {
 
-        protected String sourceName;
-        protected List<String> targetColumns;
-        protected JdbcTemplate jdbcTemplate;
+        String sourceName;
+        List<String> targetColumns;
+        JdbcTemplate jdbcTemplate;
 
-        public void setSourceName(String sourceName) {
+        void setSourceName(String sourceName) {
             this.sourceName = sourceName;
         }
 
-        public void setTargetColumns(List<String> targetColumns) {
+        void setTargetColumns(List<String> targetColumns) {
             this.targetColumns = targetColumns;
         }
 
-        public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
             this.jdbcTemplate = jdbcTemplate;
         }
 

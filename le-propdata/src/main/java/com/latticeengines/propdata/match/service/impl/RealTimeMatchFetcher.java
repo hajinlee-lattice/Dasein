@@ -51,8 +51,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private Integer numFetchers;
 
     @Autowired
-    @Qualifier("matchScheduler")
-    private ThreadPoolTaskScheduler matchScheduler;
+    @Qualifier("propdataScheduler")
+    private ThreadPoolTaskScheduler scheduler;
 
     @Autowired
     @Qualifier("monitorScheduler")
@@ -67,12 +67,12 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         for (int i = 0; i < numFetchers; i++) {
             executor.submit(new Fetcher());
         }
-        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+        scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 scanQueue();
             }
-        }, 10000L);
+        }, TimeUnit.SECONDS.toMillis(10));
     }
 
     @Override

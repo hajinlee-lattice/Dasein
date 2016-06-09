@@ -35,13 +35,13 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("matchScheduler")
-    private ThreadPoolTaskScheduler matchScheduler;
+    @Qualifier("propdataScheduler")
+    private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct
     private void postConstruct() {
         loadCaches();
-        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+        scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCaches();

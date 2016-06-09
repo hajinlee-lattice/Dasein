@@ -36,13 +36,13 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
     private ConcurrentMap<ColumnSelection.Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("matchScheduler")
-    private ThreadPoolTaskScheduler matchScheduler;
+    @Qualifier("propdataScheduler")
+    private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct
     private void postConstruct() {
         loadCache();
-        matchScheduler.scheduleWithFixedDelay(new Runnable() {
+        scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCache();

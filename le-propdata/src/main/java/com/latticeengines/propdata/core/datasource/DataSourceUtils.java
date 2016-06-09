@@ -1,5 +1,9 @@
 package com.latticeengines.propdata.core.datasource;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -34,6 +38,18 @@ public class DataSourceUtils {
         }
         log.debug("Get jdbc for url " + dataSource.getUrl().substring(0, dataSource.getUrl().indexOf(";")));
         return jdbcTemplateMap.get(dataSource.getUrl());
+    }
+
+    public static void retainUrls(Collection<DataSourceConnection> conns) {
+        List<String> urlsToRetain = new ArrayList<>();
+        for (DataSourceConnection conn: conns) {
+            urlsToRetain.add(conn.getUrl());
+        }
+        Set<String> urlsToRemove = jdbcTemplateMap.keySet();
+        urlsToRemove.removeAll(urlsToRetain);
+        for (String url: urlsToRemove) {
+            jdbcTemplateMap.remove(url);
+        }
     }
 
 }
