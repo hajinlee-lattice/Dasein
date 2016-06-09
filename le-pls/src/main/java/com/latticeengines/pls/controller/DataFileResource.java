@@ -109,10 +109,10 @@ public class DataFileResource {
             throws IOException {
         response.setHeader("Content-Encoding", "gzip");
         if (eventTableType.equalsIgnoreCase("training")) {
-            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*Training.*.csv");
         } else if (eventTableType.equalsIgnoreCase("test")) {
-            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*Test.*.csv");
         }
     }

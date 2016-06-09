@@ -172,8 +172,8 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
                 { MediaType.TEXT_PLAIN, ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
                 { MediaType.TEXT_PLAIN, "rf_model.txt" }, //
-                { "application/csv", "postMatchEventTable.*Training.*.csv" }, //
-                { "application/csv", "postMatchEventTable.*Test.*.csv" } };
+                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Training.*.csv" }, //
+                { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv" } };
     }
 
     @DataProvider(name = "dataFileProviderNotFound")

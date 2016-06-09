@@ -34,16 +34,15 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         try {
             response.setContentType(mimeType);
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", getFileName()));
-//            if (mimeType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
-//                response.setHeader("Content-Encoding", "gzip");
-//                try (InputStream is = getFileInputStream()) {
-//                    try (OutputStream os = response.getOutputStream()) {
-//                        GzipUtils.copyAndCompressStream(is, os);
-//                    }
-//                }
-//            } else {
+            if (mimeType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
+                try (InputStream is = getFileInputStream()) {
+                    try (OutputStream os = response.getOutputStream()) {
+                        GzipUtils.copyAndCompressStream(is, os);
+                    }
+                }
+            } else {
                 FileCopyUtils.copy(getFileInputStream(), response.getOutputStream());
-//            }
+            }
 
         } catch (Exception ex) {
             log.error("Failed to download file.", ex);
