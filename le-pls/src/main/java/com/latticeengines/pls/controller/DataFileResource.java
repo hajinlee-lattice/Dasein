@@ -107,11 +107,12 @@ public class DataFileResource {
     public void getPostMatchTrainingEventTableCsvFile(@RequestParam(value = "modelId") String modelId,
             @PathVariable String eventTableType, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        response.setHeader("Content-Encoding", "gzip");
         if (eventTableType.equalsIgnoreCase("training")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
                     "postMatchEventTable.*Training.*.csv");
         } else if (eventTableType.equalsIgnoreCase("test")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+            dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
                     "postMatchEventTable.*Test.*.csv");
         }
     }

@@ -143,7 +143,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 { "scorecsv", MediaType.TEXT_PLAIN }, //
                 { "explorercsv", "application/csv" }, //
                 { "rfmodelcsv", MediaType.TEXT_PLAIN }, //
-                { "postmatcheventtablecsv/training", MediaType.APPLICATION_OCTET_STREAM }, //
-                { "postmatcheventtablecsv/test", MediaType.APPLICATION_OCTET_STREAM } };
+                { "postmatcheventtablecsv/training", "application/csv" }, //
+                { "postmatcheventtablecsv/test", "application/csv" } };
     }
 }
