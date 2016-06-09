@@ -454,7 +454,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{accessToken}}", accessToken);
 
             Multipart mp = builder.buildMultipart();
-            sendMultiPartEmail("Lead Prioritization - SFDC Access Token", mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail("Salesforce Access Token", mp, Collections.singleton(user.getEmail()));
             log.info(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s succeeded", user.getEmail(), tenantId));
         } catch (Exception e) {
             log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed", user.getEmail(), tenantId));
