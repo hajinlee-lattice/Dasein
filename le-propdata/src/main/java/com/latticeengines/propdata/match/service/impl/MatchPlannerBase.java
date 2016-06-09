@@ -47,7 +47,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (input.getPredefinedSelection() != null) {
             if (StringUtils.isEmpty(input.getPredefinedVersion())) {
                 String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
-                log.info("Assign version " + version + " to column selection " + input.getPredefinedSelection());
+                log.debug("Assign version " + version + " to column selection " + input.getPredefinedSelection());
                 input.setPredefinedVersion(version);
             }
             if (!columnSelectionService.isValidVersion(input.getPredefinedSelection(), input.getPredefinedVersion())) {
