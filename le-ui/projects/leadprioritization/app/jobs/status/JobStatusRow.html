@@ -20,7 +20,7 @@
                     </a>
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
-                      ng-if="(jobType == 'scoreWorkflow' || jobType == 'importMatchAndScoreWorkflow') && job.status != 'Failed'">
+                      ng-if="isScoringJob" && job.status != "Failed">
                     <a href="javascript:void(0)" data-ng-click="clickGetScoringResults()">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
                         <i data-ng-show="showProgress" class="fa fa-refresh fa-spin"></i>

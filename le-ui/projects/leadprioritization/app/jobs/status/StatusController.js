@@ -26,9 +26,14 @@ angular
                     case "scoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                     case "placeholder": $scope.job.displayName = "Pending..."; break;
                     case "importmatchandscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
+                    case "importandrtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
+                    case "rtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                     default: $scope.job.displayName = "Create Model";
                 }
 
+                if ($scope.job.displayName == "Bulk Scoring") {
+                    $scope.isScoringJob = true;
+                }
                 $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;
 
