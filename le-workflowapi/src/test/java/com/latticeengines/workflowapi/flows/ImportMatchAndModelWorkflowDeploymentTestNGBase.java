@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -124,11 +125,12 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
     }
 
     protected String getModelSummary(String name) {
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllActive();
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
         String lookupId = null;
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(name)) {
                 lookupId = summary.getLookupId();
+                assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
             }
         }
 
