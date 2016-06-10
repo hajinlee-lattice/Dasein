@@ -9,6 +9,4 @@
 
     <import resource="classpath:serviceflows-propdata-core-context.xml"/>
 
-    <task:scheduler id="propdataScheduler" pool-size="4" />
-
 </beans>

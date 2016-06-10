@@ -35,7 +35,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("propdataScheduler")
+    @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

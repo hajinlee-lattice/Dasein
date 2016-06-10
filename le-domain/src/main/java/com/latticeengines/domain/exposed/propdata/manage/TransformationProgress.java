@@ -14,12 +14,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "TransformationProgress")
-public class TransformationProgress implements HasPid {
+public class TransformationProgress implements Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProgressID", unique = true, nullable = false)
@@ -36,7 +36,7 @@ public class TransformationProgress implements HasPid {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status")
-    protected TransformationProgressStatus status;
+    protected ProgressStatus status;
 
     @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
@@ -96,11 +96,11 @@ public class TransformationProgress implements HasPid {
         this.endDate = endDate;
     }
 
-    public TransformationProgressStatus getStatus() {
+    public ProgressStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TransformationProgressStatus status) {
+    public void setStatus(ProgressStatus status) {
         this.status = status;
         setLatestStatusUpdate(new Date());
     }
@@ -177,7 +177,7 @@ public class TransformationProgress implements HasPid {
         progress.setEndDate(endDate);
 
         progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setStatus(TransformationProgressStatus.NEW);
+        progress.setStatus(ProgressStatus.NEW);
 
         return progress;
     }
@@ -185,6 +185,18 @@ public class TransformationProgress implements HasPid {
     @Override
     public String toString() {
         return String.format("TransformationProgress %s [%s]", sourceName, rootOperationUID);
+    }
+
+    @Override
+    @JsonIgnore
+    public void setStatusBeforeFailed(ProgressStatus status) {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public ProgressStatus getStatusBeforeFailed() {
+        throw new UnsupportedOperationException("Deprecated operation.");
     }
 
 }

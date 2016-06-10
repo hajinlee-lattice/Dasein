@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -34,7 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IngestionProgress implements HasPid, Serializable {
+public class IngestionProgress implements Progress, Serializable {
 
     private static final long serialVersionUID = -1412771506655952055L;
 
@@ -64,7 +63,7 @@ public class IngestionProgress implements HasPid, Serializable {
     private Date startTime;
 
     @Column(name = "LastestStatusUpdateTime", nullable = false)
-    private Date latestStatusUpdateTime;
+    private Date latestStatusUpdate;
 
     @Column(name = "ApplicationId", length = 50)
     private String applicationId;
@@ -158,14 +157,14 @@ public class IngestionProgress implements HasPid, Serializable {
         this.startTime = startTime;
     }
 
-    @JsonProperty("LatestStatusUpdateTime")
-    public Date getLatestStatusUpdateTime() {
-        return latestStatusUpdateTime;
+    @JsonProperty("LatestStatusUpdate")
+    public Date getLatestStatusUpdate() {
+        return latestStatusUpdate;
     }
 
-    @JsonProperty("LatestStatusUpdateTime")
-    public void setLatestStatusUpdateTime(Date latestStatusUpdateTime) {
-        this.latestStatusUpdateTime = latestStatusUpdateTime;
+    @JsonProperty("LatestStatusUpdate")
+    public void setLatestStatusUpdate(Date latestStatusUpdate) {
+        this.latestStatusUpdate = latestStatusUpdate;
     }
 
     @JsonProperty("ApplicationId")
@@ -221,5 +220,47 @@ public class IngestionProgress implements HasPid, Serializable {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Override
+    @JsonIgnore
+    public Date getCreateTime() {
+        return getStartTime();
+    }
+
+    @Override
+    @JsonIgnore
+    public void setNumRetries(int numRetries) {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public int getNumRetries() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public String getSourceName() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public void setStatusBeforeFailed(ProgressStatus status) {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public ProgressStatus getStatusBeforeFailed() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public String getRootOperationUID() {
+        throw new UnsupportedOperationException("Deprecated operation.");
     }
 }

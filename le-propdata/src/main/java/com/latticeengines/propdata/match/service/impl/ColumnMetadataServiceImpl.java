@@ -36,7 +36,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
     private ConcurrentMap<ColumnSelection.Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("propdataScheduler")
+    @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

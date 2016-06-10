@@ -28,7 +28,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     private ZkConfigurationService zkConfigurationService;
 
     @Autowired
-    @Qualifier("propdataScheduler")
+    @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

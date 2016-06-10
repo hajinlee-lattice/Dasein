@@ -51,7 +51,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private Integer numFetchers;
 
     @Autowired
-    @Qualifier("propdataScheduler")
+    @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired

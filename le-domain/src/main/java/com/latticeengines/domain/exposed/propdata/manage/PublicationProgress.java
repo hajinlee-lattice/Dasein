@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
 
 @Entity
@@ -35,7 +34,7 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationDestina
 @Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PublicationProgress implements HasPid {
+public class PublicationProgress implements Progress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -263,6 +262,42 @@ public class PublicationProgress implements HasPid {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Override
+    @JsonIgnore
+    public String getRootOperationUID() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public void setStatusBeforeFailed(ProgressStatus status) {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public ProgressStatus getStatusBeforeFailed() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public void setNumRetries(int numRetries) {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public int getNumRetries() {
+        throw new UnsupportedOperationException("Deprecated operation.");
+    }
+
+    @Override
+    @JsonIgnore
+    public String getSourceName() {
+        throw new UnsupportedOperationException("Deprecated operation.");
     }
 
 }

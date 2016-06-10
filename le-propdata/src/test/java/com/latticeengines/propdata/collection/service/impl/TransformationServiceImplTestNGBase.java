@@ -13,8 +13,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -84,11 +84,11 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
         TransformationProgress response = transformationService.transform(progress,
                 createTransformationConfiguration());
 
-        Assert.assertEquals(response.getStatus(), TransformationProgressStatus.FINISHED);
+        Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
 
         TransformationProgress progressInDb = progressEntityMgr
                 .findProgressByRootOperationUid(progress.getRootOperationUID());
-        Assert.assertEquals(progressInDb.getStatus(), TransformationProgressStatus.FINISHED);
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return response;
     }
@@ -96,11 +96,11 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
     protected TransformationProgress finish(TransformationProgress progress) {
         TransformationProgress response = transformationService.finish(progress);
 
-        Assert.assertEquals(response.getStatus(), TransformationProgressStatus.FINISHED);
+        Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
 
         TransformationProgress progressInDb = progressEntityMgr
                 .findProgressByRootOperationUid(progress.getRootOperationUID());
-        Assert.assertEquals(progressInDb.getStatus(), TransformationProgressStatus.FINISHED);
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return response;
     }
