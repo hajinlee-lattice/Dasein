@@ -2,13 +2,16 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
@@ -55,7 +58,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
@@ -81,6 +84,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
                                                                                             // modelId
     private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
+    private static final String UTC = "UTC";
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
 
     @Value("${scoringapi.pls.api.hostport}")
     private String internalResourceHostPort;
@@ -608,7 +617,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                 }
-                ModelDetail modelDetail = new ModelDetail(model, status, fields, lastModifiedTimestamp);
+                ModelDetail modelDetail = new ModelDetail(model, status, fields,
+                        dateFormat.format(new Date(lastModifiedTimestamp)));
                 models.add(modelDetail);
             }
         }

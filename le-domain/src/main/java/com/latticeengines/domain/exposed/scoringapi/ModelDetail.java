@@ -20,13 +20,13 @@ public class ModelDetail {
 
     @JsonProperty("lastModifiedTimestamp")
     @ApiModelProperty(value = "Last modified timestamp")
-    private Long lastModifiedTimestamp;
+    private String lastModifiedTimestamp;
 
     public ModelDetail() {
         super();
     }
 
-    public ModelDetail(Model model, ModelSummaryStatus status, Fields fields, Long lastModifiedTimestamp) {
+    public ModelDetail(Model model, ModelSummaryStatus status, Fields fields, String lastModifiedTimestamp) {
         this();
         this.model = model;
         this.status = status;
@@ -58,11 +58,11 @@ public class ModelDetail {
         this.fields = fields;
     }
 
-    public Long getLastModifiedTimestamp() {
+    public String getLastModifiedTimestamp() {
         return lastModifiedTimestamp;
     }
 
-    public void setLastModifiedTimestamp(Long lastModifiedTimestamp) {
+    public void setLastModifiedTimestamp(String lastModifiedTimestamp) {
         this.lastModifiedTimestamp = lastModifiedTimestamp;
     }
 }
