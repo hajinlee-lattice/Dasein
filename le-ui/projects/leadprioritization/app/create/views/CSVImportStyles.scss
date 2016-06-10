@@ -324,6 +324,33 @@ Create Model: Validate Import View
 
 
 
+
+/*
+Create Model: Import Job Status
+================================================================== */
+.import-job-status {
+    dt {
+      width: 35%;
+    }
+    dd {
+      margin: 0 0 0 35%;
+      .fa-warning {
+        color: #D22027;
+      }
+    }
+    dd div {
+        display: inline-block;
+        &.progress-icon {
+            margin-right: 10px;
+        }
+    }
+    .row {
+        margin-bottom: 20px;
+    }
+}
+
+
+
 /*
 Media Queries
 =================================================================== */

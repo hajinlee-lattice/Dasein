@@ -14,6 +14,15 @@
 	background-size: 18px 18px;
 }
 
+/* Spinner ball */
+.loading-small {
+	width: 18px;
+	height: 18px;
+	display: inline-block;
+	background: url("../images/ajax-loader.gif") no-repeat center;
+	background-size: 18px 18px;
+}
+
 /* Bar */
 .meter {
 	height: 24px; 
