@@ -101,7 +101,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             @Override
             public boolean apply(@Nullable Attribute attr) {
                 return schemaTable.getAttribute(attr.getName()) == null
-                        && attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString());
+                        && (attr.getApprovedUsage() == null //
+                        || attr.getApprovedUsage().isEmpty() //
+                        || attr.getApprovedUsage().get(0).equals("None"));
             }
         });
 

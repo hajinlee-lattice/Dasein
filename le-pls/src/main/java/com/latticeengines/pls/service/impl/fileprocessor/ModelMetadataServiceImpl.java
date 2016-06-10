@@ -78,10 +78,12 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
-        Table schemaTable = SchemaRepository.instance().getSchema(SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
+        Table schemaTable = SchemaRepository.instance().getSchema(
+                SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
         for (Attribute attribute : attributes) {
             if (schemaTable.getAttribute(attribute.getName()) != null
-                    || !attribute.getApprovedUsage().contains(ApprovedUsage.NONE.toString())) {
+                    || !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
+                            .getApprovedUsage().get(0).equals("None"))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
