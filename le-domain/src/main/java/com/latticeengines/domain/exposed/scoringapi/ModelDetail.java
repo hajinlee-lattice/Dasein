@@ -19,7 +19,7 @@ public class ModelDetail {
     private Fields fields;
 
     @JsonProperty("lastModifiedTimestamp")
-    @ApiModelProperty(value = "Last modified timestamp")
+    @ApiModelProperty(value = "Last modified timestamp in ISO8601 format ")
     private String lastModifiedTimestamp;
 
     public ModelDetail() {
