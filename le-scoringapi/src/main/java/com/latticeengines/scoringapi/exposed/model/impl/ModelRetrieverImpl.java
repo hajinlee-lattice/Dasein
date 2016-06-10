@@ -58,7 +58,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
