@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -17,12 +18,15 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -30,6 +34,9 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {
     private static final Log log = LogFactory.getLog(ScoringJobServiceImpl.class);
+
+    @Value("${pls.scoring.use.rtsapi}")
+    private boolean useRtsApi;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -47,31 +54,13 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
 
     @Autowired
+    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
+
+    @Autowired
+    private ImportMatchAndScoreWorkflowSubmitter importMatchAndScoreWorkflowSubmitter;
+
+    @Autowired
     private Configuration yarnConfiguration;
-
-    @Override
-    public String scoreTrainingData(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-
-        if (modelSummary.getTrainingTableName() == null) {
-            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
-        }
-
-        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data")
-                .toString();
-    }
-
-    @Override
-    public String scoreTestingData(String modelId, String fileName) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName).toString();
-    }
 
     @Override
     public List<Job> getJobs(String modelId) {
@@ -121,9 +110,84 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
     }
 
+    @Override
+    public String scoreTestingData(String modelId, String fileName, Boolean useRts) {
+
+        if (useRts != null) {
+            useRtsApi = useRts.booleanValue();
+        }
+        if (useRtsApi) {
+            return scoreTestingDataUsingRtsApi(modelId, fileName);
+        }
+        return scoreTestingData(modelId, fileName);
+    }
+
+    @Override
+    public String scoreTrainingData(String modelId, Boolean useRts) {
+
+        if (useRts != null) {
+            useRtsApi = useRts.booleanValue();
+        }
+        if (useRtsApi) {
+            return scoreTrainingDataUsingRtsApi(modelId);
+        }
+        return scoreTrainingData(modelId);
+    }
+
     private Tenant getTenant() {
         Tenant tenant = MultiTenantContext.getTenant();
         return tenantEntityMgr.findByTenantId(tenant.getId());
+    }
+
+    private String scoreTrainingData(String modelId) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+
+        if (modelSummary.getTrainingTableName() == null) {
+            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
+        }
+
+        String transformationGroupName = modelSummary.getTransformationGroupName();
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+        }
+
+        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data",
+                TransformationGroup.fromName(transformationGroupName)).toString();
+    }
+
+    private String scoreTestingData(String modelId, String fileName) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        String transformationGroupName = modelSummary.getTransformationGroupName();
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+        }
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
+                TransformationGroup.fromName(transformationGroupName)).toString();
+    }
+
+    private String scoreTrainingDataUsingRtsApi(String modelId) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+
+        if (modelSummary.getTrainingTableName() == null) {
+            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
+        }
+
+        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data")
+                .toString();
+    }
+
+    private String scoreTestingDataUsingRtsApi(String modelId, String fileName) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName).toString();
     }
 
 }

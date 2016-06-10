@@ -45,7 +45,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
@@ -73,9 +73,9 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp")
     public void testScoreTrainingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE", getRestAPIHostPort(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE", getRestAPIHostPort(), modelId), //
+                String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
@@ -90,13 +90,12 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
             List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
                     String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
-            System.out.println("jobs are " + jobs);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
                 @Override
                 public boolean apply(@Nullable Job job) {
                     String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-                    return job.getJobType() != null && job.getJobType().equals("rtsBulkScoreWorkflow")
+                    return job.getJobType() != null && job.getJobType().equals("scoreWorkflow")
                             && modelId.equals(jobModelId);
                 }
             });
@@ -149,12 +148,12 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
             assertTrue(csvHeaders.contains("LEAD"));
             assertTrue(csvHeaders.contains("Phone"));
             assertTrue(csvHeaders.contains("Some Column"));
-            assertTrue(csvHeaders.contains("score"));
+            assertTrue(csvHeaders.contains("Score"));
             assertTrue(csvHeaders.contains("BusinessCountry"));
 
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
-                assertTrue(StringUtils.isNotEmpty(record.get("score")));
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
                 line++;
             }
             assertEquals(line, TOTAL_QUALIFIED_LINES);
@@ -184,11 +183,9 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(),
-                sourceFile.getName(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
-                        sourceFile.getName()), //
+                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score testing data applicationId = %s", applicationId));
@@ -217,34 +214,5 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
             throw new RuntimeException(e);
         }
     }
-
-    // Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler
-    // = new Function<List<LinkedHashMap<String, String>>, Void>() {
-    // @Override
-    // public Void apply(List<LinkedHashMap<String, String>> unknownColumns) {
-    // Set<String> booleanSet = Sets.newHashSet(new String[] {
-    // "Interest_esb__c", "Interest_tcat__c",
-    // "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree",
-    // "Unsubscribed", "kickboxDisposable",
-    // "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-    // Set<String> strSet = Sets.newHashSet(new String[] {
-    // "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-    // "Source_Detail__c", "Cloud_Plan__c" });
-    // log.info(unknownColumns);
-    // for (LinkedHashMap<String, String> map : unknownColumns) {
-    // String columnName = map.get("columnName");
-    // if (booleanSet.contains(columnName)) {
-    // map.put("columnType", Schema.Type.BOOLEAN.name());
-    // } else if (strSet.contains(columnName)) {
-    // map.put("columnType", Schema.Type.STRING.name());
-    // } else if (columnName.startsWith("Activity_Count_")) {
-    // map.put("columnType", Schema.Type.INT.name());
-    // }
-    // }
-    // log.info(unknownColumns);
-    //
-    // return null;
-    // }
-    // };
 
 }
