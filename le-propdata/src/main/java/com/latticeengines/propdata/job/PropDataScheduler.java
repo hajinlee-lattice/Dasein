@@ -28,7 +28,7 @@ import com.latticeengines.propdata.core.source.DataImportedFromDB;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("propdataScheduler")
+@Component("propDataScheduler")
 public class PropDataScheduler {
 
     private Scheduler scheduler;
