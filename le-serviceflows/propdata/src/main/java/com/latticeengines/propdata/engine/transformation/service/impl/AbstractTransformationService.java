@@ -17,9 +17,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -89,7 +89,7 @@ public abstract class AbstractTransformationService extends TransformationServic
             } else {
                 LOG.info("Retrying " + progress.getRootOperationUID());
                 progress.setNumRetries(progress.getNumRetries() + 1);
-                progress = getProgressEntityMgr().updateStatus(progress, TransformationProgressStatus.NEW);
+                progress = getProgressEntityMgr().updateStatus(progress, ProgressStatus.NEW);
             }
             writeTransformationConfig(transformationConfiguration, progress);
         } catch (Exception e) {
@@ -124,13 +124,13 @@ public abstract class AbstractTransformationService extends TransformationServic
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        getProgressEntityMgr().updateStatus(progress, TransformationProgressStatus.TRANSFORMING);
+        getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
 
         transformHook(progress, transformationConfiguration);
 
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
-        return getProgressEntityMgr().updateStatus(progress, TransformationProgressStatus.FINISHED);
+        return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
     }
 
     protected String sourceDirInHdfs(Source source) {

@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.dao.TransformationProgressDao;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
@@ -53,7 +53,7 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage")
-    public TransformationProgress updateStatus(TransformationProgress progress, TransformationProgressStatus status) {
+    public TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status) {
         progress.setStatus(status);
         return updateProgress(progress);
     }

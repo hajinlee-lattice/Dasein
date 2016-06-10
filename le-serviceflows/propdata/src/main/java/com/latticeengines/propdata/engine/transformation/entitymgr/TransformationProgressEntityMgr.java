@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.entitymgr;
 
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.source.Source;
 
 public interface TransformationProgressEntityMgr {
@@ -22,6 +22,6 @@ public interface TransformationProgressEntityMgr {
 
     void deleteAllProgressesOfSource(Source source);
 
-    TransformationProgress updateStatus(TransformationProgress progress, TransformationProgressStatus status);
+    TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status);
 
 }

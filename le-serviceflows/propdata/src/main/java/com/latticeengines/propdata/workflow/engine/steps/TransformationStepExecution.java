@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
@@ -65,18 +65,18 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
                 log.info("Processing transformation progress: " + progress.getRootOperationUID());
                 if (progress != null) {
                     progress.setStartDate(new Date());
-                    progress.setStatus(TransformationProgressStatus.TRANSFORMING);
+                    progress.setStatus(ProgressStatus.TRANSFORMING);
                     progress = transformationProgressEntityMgr.updateProgress(progress);
                 }
                 transformationService.transform(progress, transformationConfiguration);
-                progress.setStatus(TransformationProgressStatus.FINISHED);
+                progress.setStatus(ProgressStatus.FINISHED);
 
             } else {
                 log.info("No new data available in firehose.");
             }
         } catch (Exception e) {
             if (progress != null) {
-                progress.setStatus(TransformationProgressStatus.FAILED);
+                progress.setStatus(ProgressStatus.FAILED);
             }
             throw new LedpException(LedpCode.LEDP_25013, e.getMessage(), e);
         } finally {

@@ -55,7 +55,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         progress.setDestination(destination);
         progress.setHdfsPod(HdfsPodContext.getHdfsPodId());
         progress.setIngestion(ingestion);
-        progress.setLatestStatusUpdateTime(new Date());
+        progress.setLatestStatusUpdate(new Date());
         progress.setRetries(0);
         progress.setSource(source);
         progress.setStatus(ProgressStatus.NEW);
@@ -163,7 +163,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     public IngestionProgress updateSubmittedProgress(IngestionProgress progress,
             String applicationId) {
         progress.setApplicationId(applicationId);
-        progress.setLatestStatusUpdateTime(new Date());
+        progress.setLatestStatusUpdate(new Date());
         progress.setStartTime(new Date());
         if (progress.getStatus() == ProgressStatus.FAILED) {
             progress.setRetries(progress.getRetries() + 1);
@@ -214,7 +214,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         }
 
         public IngestionProgress commit(boolean persistent) {
-            progress.setLatestStatusUpdateTime(new Date());
+            progress.setLatestStatusUpdate(new Date());
             if (persistent) {
                 return ingestionProgressEntityMgr.saveProgress(progress);
             } else {
