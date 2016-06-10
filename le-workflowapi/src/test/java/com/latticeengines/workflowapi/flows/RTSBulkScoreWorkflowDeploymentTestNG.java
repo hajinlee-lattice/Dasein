@@ -8,6 +8,7 @@ import java.net.URL;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -59,6 +60,10 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
 
+    private String artifactTableDir;
+    private String artifactBaseDir;
+    private String enhancementsDir;
+
     private ModelSummary summary;
 
     @BeforeClass(groups = "deployment")
@@ -71,6 +76,15 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         tenant = setupTenant();
         summary = createModel(tenant, modelConfiguration, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
+    }
+
+    @AfterClass(groups = "deployment")
+    public void cleanup() throws IOException {
+        internalResourceProxy.deleteTenant(customerSpace);
+        HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
+        HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
+        HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
+        HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -139,12 +153,12 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private void setupHdfsArtifacts(Configuration yarnConfiguration, Tenant tenant,
             ScoringTestModelConfiguration modelConfiguration) throws IOException {
         String tenantId = tenant.getId();
-        String artifactTableDir = String.format(Model.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
+        artifactTableDir = String.format(Model.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 modelConfiguration.getEventTable());
-        String artifactBaseDir = String.format(Model.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
+        artifactBaseDir = String.format(Model.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());
-        String enhancementsDir = artifactBaseDir + Model.HDFS_ENHANCEMENTS_DIR;
+        enhancementsDir = artifactBaseDir + Model.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
         URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()

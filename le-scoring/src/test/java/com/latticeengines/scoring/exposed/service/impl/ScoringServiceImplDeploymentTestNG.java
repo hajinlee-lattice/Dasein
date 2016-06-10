@@ -52,6 +52,10 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
 
+    private String artifactTableDir;
+    private String artifactBaseDir;
+    private String enhancementsDir;
+
     protected InternalResourceRestApiProxy plsRest;
 
     protected Tenant tenant;
@@ -71,6 +75,11 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
+        plsRest.deleteTenant(customerSpace);
+        HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
+        HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
+        HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
+        HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
     }
 
     @Test(groups = "deployment")
@@ -132,12 +141,12 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     private void setupHdfsArtifacts(Configuration yarnConfiguration, Tenant tenant,
             ScoringTestModelConfiguration modelConfiguration) throws IOException {
         String tenantId = tenant.getId();
-        String artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
+        artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 modelConfiguration.getEventTable());
-        String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
+        artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());
-        String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
+        enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
         URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
