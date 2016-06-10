@@ -29,9 +29,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.status = ResourceUtility.getString("MODEL_DETAILS_INACTIVE_LABEL");
     }
 
-
     $scope.modelType = modelDetails[widgetConfig.TypeProperty];
-    console.log(data);
+
     if ($scope.modelType == 'SalesforceLead') {
         $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_LEADS_TITLE");
     } else if ($scope.modelType == 'SalesforceAccount') {

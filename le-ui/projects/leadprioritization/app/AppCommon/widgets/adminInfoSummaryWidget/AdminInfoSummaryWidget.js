@@ -96,17 +96,11 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                 }).then(
                     function (response) {
                         if ($attrs.filetype === "application/octet-stream") {
-                            console.log('response', response);
                             var byteArray = new Uint8Array(response.data);
-                            
-                            console.log('byteArray', byteArray.length);
                             var data = pako.ungzip(byteArray);
-                            
-                            console.log('data', data);
                             var restored = String.fromCharCode.apply(null, new Uint16Array(data));
                             
-                            console.log('text', restored);
-                            $scope.blob = new Blob([restored], {type : $attrs.filetype});;
+                            $scope.blob = new Blob([restored], {type : $attrs.filetype});
                         } else if ($attrs.filetype === "application/json") {
                             $scope.blob = new Blob([JSON.stringify(response.data)], {type : $attrs.filetype});
                         } else {
