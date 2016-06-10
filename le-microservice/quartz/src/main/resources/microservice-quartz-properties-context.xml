@@ -10,6 +10,7 @@
             <list>
                 <value>file:${QUARTZ_PROPDIR:/etc/ledp}/quartz.properties</value>
                 <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
+                <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
                 <value>file:${QUARTZCLIENT_PROPDIR:/etc/ledp}/quartzclient.properties</value>
             </list>
         </property>
