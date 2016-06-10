@@ -136,6 +136,9 @@ section.container.custom-fields {
         font-weight: normal;
         text-transform: none;
     }
+    table {
+        min-width: 670px;
+    }
     thead {
         border-bottom: #333 solid 1px;
     }

@@ -10,7 +10,7 @@ angular.module('mainApp.create.customFields', [
         ResourceUtility : ResourceUtility,
         csvFileName: $stateParams.csvFileName,
         mappingOptions: [
-            { id: 0, name: "Custom Field Name" },
+            { id: 0, name: "Use as Custom Predictor" },
             { id: 1, name: "Map to Standard Field" },
             { id: 2, name: "Ignore this field" }
         ],
