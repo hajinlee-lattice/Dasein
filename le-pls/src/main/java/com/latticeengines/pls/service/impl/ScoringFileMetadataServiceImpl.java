@@ -97,16 +97,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             resolver.calculateBasedOnExistingMetadata(table);
         }
 
-        final Table schemaTable = SchemaRepository.instance().getSchema(schemaInterpretation);
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
                 List<String> approvedUsages = attr.getApprovedUsage();
                 List<String> tags = attr.getTags();
-                return schemaTable.getAttribute(attr.getName()) == null
-                        && (approvedUsages == null || approvedUsages.isEmpty()
-                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString()) //
-                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString())));
+                return (approvedUsages == null || approvedUsages.isEmpty()
+                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString())) //
+                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()));
             }
         });
 
