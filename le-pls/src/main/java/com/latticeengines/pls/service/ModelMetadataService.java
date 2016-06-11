@@ -18,4 +18,6 @@ public interface ModelMetadataService {
     Table getTrainingTableFromModelId(String modelId);
 
     List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields);
+
+    Table getEventTableFromModelId(String modelId);
 }

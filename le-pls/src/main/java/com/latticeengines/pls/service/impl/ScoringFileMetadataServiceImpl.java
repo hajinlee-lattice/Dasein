@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -86,7 +87,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
-        Table table = modelMetadataService.getTrainingTableFromModelId(modelId);
+        Table table = modelMetadataService.getEventTableFromModelId(modelId);
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
                 yarnConfiguration);
         resolver.calculateBasedOnExistingMetadata(table);
@@ -100,10 +101,12 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
+                List<String> approvedUsages = attr.getApprovedUsage();
+                List<String> tags = attr.getTags();
                 return schemaTable.getAttribute(attr.getName()) == null
-                        && (attr.getApprovedUsage() == null //
-                        || attr.getApprovedUsage().isEmpty() //
-                        || attr.getApprovedUsage().get(0).equals("None"));
+                        && (approvedUsages == null || approvedUsages.isEmpty()
+                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString()) //
+                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString())));
             }
         });
 

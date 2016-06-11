@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import springfox.documentation.service.Tags;
+
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -16,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -71,8 +74,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
         List<Attribute> requiredColumns = new ArrayList<>();
-        Table trainingTable = getTrainingTableFromModelId(modelId);
-        List<Attribute> attributes = trainingTable.getAttributes();
+        Table eventTable = getEventTableFromModelId(modelId);
+        List<Attribute> attributes = eventTable.getAttributes();
         if (attributes == null) {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
@@ -81,9 +84,11 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table schemaTable = SchemaRepository.instance().getSchema(
                 SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
         for (Attribute attribute : attributes) {
-            if (schemaTable.getAttribute(attribute.getName()) != null
+            List<String> tags = attribute.getTags();
+            if ((tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString())) //
+                    && schemaTable.getAttribute(attribute.getName()) != null
                     || !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
-                            .getApprovedUsage().get(0).equals("None"))) {
+                            .getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString()))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
@@ -184,7 +189,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         }
     }
 
-    private Table getEventTableFromModelId(String modelId) {
+    @Override
+    public Table getEventTableFromModelId(String modelId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (modelSummary == null) {
