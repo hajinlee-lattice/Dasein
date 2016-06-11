@@ -69,6 +69,10 @@
                                     <location>quartz/target/le-quartz-microservice-${le.rpm.version}.war</location>
                                     <destination>quartz.war</destination>
                                 </source>
+                                <source>
+                                    <location>dellebi/target/le-dellebi-microservice-${le.rpm.version}.war</location>
+                                    <destination>dellebi.war</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
