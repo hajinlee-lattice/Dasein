@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -96,13 +97,15 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             resolver.calculateBasedOnExistingMetadata(table);
         }
 
+        final Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
                 List<String> approvedUsages = attr.getApprovedUsage();
                 List<String> tags = attr.getTags();
-                return (approvedUsages == null || approvedUsages.isEmpty()
-                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString())) //
+                return schema.getAttribute(attr.getName()) == null
+                        && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
+                                ApprovedUsage.NONE.toString())) //
                         || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()));
             }
         });
