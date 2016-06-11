@@ -87,7 +87,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
-        Table table = modelMetadataService.getEventTableFromModelId(modelId);
+        final Table table = modelMetadataService.getEventTableFromModelId(modelId);
+        table.setDisplayName(sourceFile.getDisplayName());
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
                 yarnConfiguration);
         resolver.calculateBasedOnExistingMetadata(table);
@@ -96,17 +97,21 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, unknown, yarnConfiguration);
             resolver.calculateBasedOnExistingMetadata(table);
         }
-
+        log.info("After resolving table is: " + table.toString());
         final Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
                 List<String> approvedUsages = attr.getApprovedUsage();
                 List<String> tags = attr.getTags();
-                return schema.getAttribute(attr.getName()) == null
+                if (schema.getAttribute(attr.getName()) == null
                         && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
                                 ApprovedUsage.NONE.toString())) //
-                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()));
+                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
+                    log.info(String.format("Removing attribute %s in table %s", attr.getName(), table.getName()));
+                    return true;
+                }
+                return false;
             }
         });
 
