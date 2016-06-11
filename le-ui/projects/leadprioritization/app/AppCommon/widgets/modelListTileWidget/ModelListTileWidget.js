@@ -72,6 +72,10 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
 
     $scope.updateAsActiveClick = function ($event) {
+
+        if ($event != null) {
+            $event.stopPropagation();
+        }
         var modelId = $scope.data.Id;
 
         updateAsActiveModel(modelId);
