@@ -19,11 +19,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +53,9 @@ public class ModelResource {
     @Autowired
     private ModelMetadataService modelMetadataService;
 
+    @Autowired
+    private MetadataProxy metadatProxy;
+
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
@@ -70,14 +76,21 @@ public class ModelResource {
     @ApiOperation(value = "Clones and remodels with the specified model name.")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
-        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(), parameters.getDeduplicationType()));
+        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
+                parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
-        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(clone.getAttributes(), parameters.getAttributes());
-        ModelSummary modelSummary = modelSummaryService
-                .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
+        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(clone.getAttributes(),
+                parameters.getAttributes());
+        for (Attribute attr : userRefinedAttributes) {
+            if (clone.getAttribute(attr.getName()) != null) {
+                AttributeUtils.copyPropertiesFromAttribute(attr, clone.getAttribute(attr.getName()), false);
+            }
+        }
+        metadatProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), clone.getName(), clone);
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(parameters
+                .getSourceModelSummaryId());
         return ResponseDocument.successResponse( //
-                modelWorkflowSubmitter
-                        .submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
+                modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
     }
 
