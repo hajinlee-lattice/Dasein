@@ -86,9 +86,11 @@ public class MetadataResolver {
                     headerIterator.remove();
                     attribute.setDisplayName(header);
                     foundMatchingAttribute = true;
+                    break;
                 } else if (attribute.getDisplayName().equalsIgnoreCase(header)) {
                     headerIterator.remove();
                     foundMatchingAttribute = true;
+                    break;
                 }
             }
             if (!foundMatchingAttribute) {

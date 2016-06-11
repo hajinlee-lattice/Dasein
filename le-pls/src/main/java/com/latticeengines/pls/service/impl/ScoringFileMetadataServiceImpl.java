@@ -88,11 +88,11 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
         final Table table = modelMetadataService.getEventTableFromModelId(modelId);
-        table.setDisplayName(sourceFile.getDisplayName());
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
                 yarnConfiguration);
         resolver.calculateBasedOnExistingMetadata(table);
         if (!resolver.isMetadataFullyDefined()) {
+            log.info(sourceFile.getName() + " not fully defined, need to resolve again");
             List<ColumnTypeMapping> unknown = resolver.getUnknownColumns();
             resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, unknown, yarnConfiguration);
             resolver.calculateBasedOnExistingMetadata(table);
@@ -119,6 +119,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         table.setPrimaryKey(null);
 
         table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        table.setDisplayName(sourceFile.getDisplayName());
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
         return table;
