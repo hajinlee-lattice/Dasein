@@ -86,17 +86,16 @@ public class MetadataResolver {
                     headerIterator.remove();
                     attribute.setDisplayName(header);
                     foundMatchingAttribute = true;
-                    break;
                 } else if (attribute.getDisplayName().equalsIgnoreCase(header)) {
                     headerIterator.remove();
                     foundMatchingAttribute = true;
-                    break;
                 }
             }
             if (!foundMatchingAttribute) {
                 if (!attribute.isNullable()) {
                     missingRequiredFields.add(attribute.getName());
                 }
+                System.out.println("Remove: " + attribute.getName());
                 attrIterator.remove();
             }
         }
