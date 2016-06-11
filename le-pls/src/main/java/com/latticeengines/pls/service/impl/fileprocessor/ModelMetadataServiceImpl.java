@@ -78,7 +78,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         for (Attribute attribute : attributes) {
             List<String> tags = attribute.getTags();
             if ((tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString())) //
-                    || !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
+                    && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
                             .getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString()))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
