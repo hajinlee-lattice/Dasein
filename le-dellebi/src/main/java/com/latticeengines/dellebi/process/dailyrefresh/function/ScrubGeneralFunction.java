@@ -180,6 +180,7 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
         if (strToBeTrimed == null)
             return null;
         strToBeTrimed = strToBeTrimed.replaceAll("\\x00", "");
+        strToBeTrimed = strToBeTrimed.replaceAll("\\t", " ");
         if (strToBeTrimed.equalsIgnoreCase("")) {
             return null;
         }

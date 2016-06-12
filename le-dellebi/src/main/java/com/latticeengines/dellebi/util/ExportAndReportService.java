@@ -211,9 +211,8 @@ public class ExportAndReportService {
     }
 
     private Boolean isJobRunning(Configuration yarnConfiguration, ApplicationId applicationId) {
-        ApplicationReport report;
         try {
-            report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+            ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
             return (report.getYarnApplicationState().equals(YarnApplicationState.RUNNING));
         } catch (Exception e) {
             log.warn("Failed to get application status of application id " + applicationId);
