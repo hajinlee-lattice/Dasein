@@ -3,19 +3,30 @@ package com.latticeengines.propdata.collection.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
 public abstract class FirehoseTransformationServiceImplTestNGBase extends TransformationServiceImplTestNGBase {
 
-    // @Test(groups = "collection")
+    @Autowired
+    TransformationProxy transformationProxy;
+
+    @Test(groups = "deployment")
     public void testWholeProgress() {
-        uploadBaseGZFile();
-        TransformationProgress progress = createNewProgress();
-        progress = transformData(progress);
-        finish(progress);
-        cleanupProgressTables();
+        try {
+            uploadBaseGZFile();
+            List<TransformationProgress> transformationProgressList = transformationProxy
+                    .scan("FunctionalBomboraFirehose");
+            Assert.assertNotNull(transformationProgressList);
+            Assert.assertTrue(transformationProgressList.size() > 0);
+            Assert.assertNotNull(transformationProgressList.get(0).getYarnAppId());
+        } finally {
+            cleanupProgressTables();
+        }
     }
 
     private void uploadBaseGZFile() {

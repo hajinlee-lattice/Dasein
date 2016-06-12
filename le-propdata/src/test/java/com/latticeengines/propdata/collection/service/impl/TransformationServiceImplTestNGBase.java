@@ -62,7 +62,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
                 String targetPath = getPathToUploadBaseData() + "/" + fileName;
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
                 InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-                String successPath = getPathToUploadBaseData() + "/" + fileName + "_SUCCESS";
+                String successPath = getPathToUploadBaseData() + "/_SUCCESS";
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
             }
         } catch (Exception e) {
