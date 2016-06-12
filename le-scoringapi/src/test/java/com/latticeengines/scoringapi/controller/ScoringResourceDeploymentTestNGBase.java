@@ -41,7 +41,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final double EXPECTED_SCORE_99 = 99.0d;
     protected static final int MAX_THREADS = 1;
     protected static final int RECORD_MODEL_CARDINALITY = 2;
-    protected static final int MAX_MODELS = 1;// 20;
+    protected static final int MAX_MODELS = 2;// 20;
     protected volatile Throwable exception = null;
     protected Map<String, List<String>> threadPerfMap = new HashMap<>();
     protected boolean shouldPrintPerformanceInfo = true;
@@ -184,7 +184,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
         bulkRequest.setRecords(records);
 
-        if (n == 4) {
+        if (n <=10) {
             ObjectMapper om = new ObjectMapper();
             System.out.println(om.writeValueAsString(bulkRequest));
         }
