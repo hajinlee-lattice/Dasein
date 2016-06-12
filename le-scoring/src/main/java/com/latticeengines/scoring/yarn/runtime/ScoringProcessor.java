@@ -44,8 +44,8 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
-        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
+        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -76,16 +76,30 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info("In side the rts bulk scoring processor.");
         String path = getExtractPath(rtsBulkScoringConfig);
         String customerSpace = rtsBulkScoringConfig.getCustomerSpace().toString();
+        long startTime = System.currentTimeMillis();
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
+        long endTime = System.currentTimeMillis();
+        long transformationTotalTime = endTime - startTime;
+        log.info("The transformation from avro to bulks score request takes " + (transformationTotalTime * 1.66667e-5)
+                + " mins");
+        startTime = System.currentTimeMillis();
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
-            log.info(String.format("Sending internal scoring api with %d records to for tenant %s",
-                    scoreRequest.getRecords().size(), customerSpace));
-            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest,
-                    customerSpace);
+            log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
+                    .getRecords().size(), customerSpace));
+            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
+                    scoreRequest, customerSpace);
             recordScoreResponseList.addAll(recordScoreResponse);
         }
+        endTime = System.currentTimeMillis();
+        long scoringApiRequestTotalTime = endTime - startTime;
+        log.info("The sending scoring requests takes " + (scoringApiRequestTotalTime * 1.66667e-5) + " mins");
+        startTime = System.currentTimeMillis();
         convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
+        endTime = System.currentTimeMillis();
+        transformationTotalTime = endTime - startTime;
+        log.info("The transformation from bulks score response to avro takes " + (transformationTotalTime * 1.66667e-5)
+                + " mins");
         return "In side the rts bulk scoring processor.";
     }
 
@@ -113,6 +127,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
         String fileName = getAvroFileName(path);
         List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, fileName);
+        log.info(String.format("There are %d records in total,", avroRecords.size()));
         Schema schema = avroRecords.get(0).getSchema();
         List<Schema.Field> fields = schema.getFields();
 
@@ -224,6 +239,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
             }
         }
+
         HdfsUtils.copyLocalToHdfs(new Configuration(), fileName, scorePath);
     }
 
