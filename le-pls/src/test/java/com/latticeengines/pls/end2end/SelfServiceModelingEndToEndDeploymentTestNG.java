@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -30,6 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
@@ -73,7 +75,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private ModelSummary originalModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
-    //private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
+
+    // private Function<List<LinkedHashMap<String, String>>, Void>
+    // unknownColumnHandler;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -121,6 +125,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 mapping.setMappedField(mapping.getUserField().replace(' ', '_'));
             }
         }
+
+        List<String> ignored = new ArrayList<>();
+        ignored.add("Activity_Count_Interesting_Moment_Webinar");
+        mappings.setIgnoredFields(ignored);
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
@@ -195,8 +203,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 assertEquals(tags.size(), 1);
                 assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
                 assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
             }
-            // TODO Assert more
         }
     }
 
@@ -340,18 +348,16 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    public String prepareModel(SchemaInterpretation schemaInterpretation,
-            String fileName)
-            throws InterruptedException {
+    public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName) throws InterruptedException {
         if (!StringUtils.isBlank(fileName)) {
             this.fileName = fileName;
         }
         if (schemaInterpretation != null) {
             this.schemaInterpretation = schemaInterpretation;
         }
-//        if (unknownColumnHandler != null) {
-//            this.unknownColumnHandler = unknownColumnHandler;
-//        }
+        // if (unknownColumnHandler != null) {
+        // this.unknownColumnHandler = unknownColumnHandler;
+        // }
         log.info("Uploading File");
         uploadFile();
         sourceFile = getSourceFile();

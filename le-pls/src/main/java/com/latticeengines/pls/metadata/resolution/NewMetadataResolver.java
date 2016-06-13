@@ -2,27 +2,35 @@ package com.latticeengines.pls.metadata.resolution;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
-import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
-import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import org.apache.avro.Schema;
+import javax.annotation.Nullable;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Logger;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
-import org.apache.log4j.Logger;
 
 public class NewMetadataResolver {
     private static Logger log = Logger.getLogger(NewMetadataResolver.class);
@@ -39,7 +47,8 @@ public class NewMetadataResolver {
 
     private Result result;
 
-    public NewMetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation, Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
+    public NewMetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation,
+            Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
         this.csvPath = csvPath;
         this.schema = schemaInterpretation;
         this.yarnConfiguration = yarnConfiguration;
@@ -112,10 +121,18 @@ public class NewMetadataResolver {
         }
 
         if (fieldMappingDocument.getIgnoredFields() != null) {
-            for (String ignoredField : fieldMappingDocument.getIgnoredFields()) {
-                Attribute attribute = getAttributeFromFieldName(ignoredField);
-                attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-                attributes.add(attribute);
+            for (final String ignoredField : fieldMappingDocument.getIgnoredFields()) {
+                if (ignoredField != null) {
+                    Attribute attribute = Iterables.find(attributes, new Predicate<Attribute>() {
+                        @Override
+                        public boolean apply(@Nullable Attribute input) {
+                            return ignoredField.equals(input.getName());
+                        }
+                    }, null);
+                    if (attribute != null) {
+                        attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+                    }
+                }
             }
         }
         Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
@@ -133,13 +150,6 @@ public class NewMetadataResolver {
 
     private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
         UserDefinedType fieldType;
-        Schema.Type avroType;
-
-        try {
-            avroType = Schema.Type.valueOf(attributeType);
-        } catch (Exception e) {
-            avroType = Schema.Type.STRING;
-        }
         switch (attributeType.toUpperCase()) {
         case "BOOLEAN":
             fieldType = UserDefinedType.BOOLEAN;
