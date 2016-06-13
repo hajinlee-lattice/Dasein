@@ -2,7 +2,7 @@ angular.module('mainApp.create.customFields', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.create.csvImport'
 ])
-.controller('CustomFieldsController', function($state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
+.controller('CustomFieldsController', function($scope, $state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
     var vm = this;
 
     angular.extend(vm, {
@@ -21,7 +21,7 @@ angular.module('mainApp.create.customFields', [
 
     vm.init = function() {
         vm.csvMetadata = csvImportStore.Get($stateParams.csvFileName) || {};
-        vm.schema = vm.csvMetadata.schemaInterpretation;
+        vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
         vm.UnmappedFields.forEach(function(field, index) {
@@ -31,38 +31,47 @@ angular.module('mainApp.create.customFields', [
         });
 
         vm.refreshLatticeFields();
+        console.log(this);
     }
 
-    vm.changeMappingOption = function(fieldMapping, selectedOption) {
-        fieldMapping.mappedToLatticeField = false;
-        delete fieldMapping.ignored;
+    vm.changeMappingOption = function(mapping, selectedOption) {
+        mapping.mappedToLatticeField = false;
+        delete mapping.ignored;
 
         switch (selectedOption.id) {
             case 0: // custom user mapping
-                fieldMapping.mappedField = fieldMapping.mappedField || fieldMapping.userField;
+                mapping.mappedField = mapping.mappedField || mapping.userField;
                 break;
             case 1: // map to lattice cloud
-                fieldMapping.mappedField = vm.UnmappedFieldsMap[fieldMapping.mappedField] 
-                    ? fieldMapping.mappedField 
+                mapping.mappedField = vm.UnmappedFieldsMap[mapping.mappedField] 
+                    ? mapping.mappedField 
                     : '';
 
-                fieldMapping.mappedToLatticeField = true;
+                mapping.mappedToLatticeField = true;
                 break;
             case 2: // ignore this field
-                fieldMapping.ignored = true; 
+                mapping.ignored = true; 
                 break;
         }
 
         vm.refreshLatticeFields();
-        vm.validateForm();
+
+        setTimeout(function() {
+            vm.validateForm();
+            $scope.$apply();
+        },1);
     }
 
-    vm.changeLatticeField = function(fieldMapping) {
-        fieldMapping.mappedToLatticeField = true;
-        fieldMapping.fieldType = vm.UnmappedFieldsMap[fieldMapping.mappedField].fieldType;
+    vm.changeLatticeField = function(mapping) {
+        mapping.mappedToLatticeField = true;
+        mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField].fieldType;
         
         vm.refreshLatticeFields();
-        vm.validateForm();
+
+        setTimeout(function() {
+            vm.validateForm();
+            $scope.$apply();
+        },1);
     }
 
     vm.refreshLatticeFields = function() {
@@ -100,11 +109,47 @@ angular.module('mainApp.create.customFields', [
                     setTimeout(function() {
                         $state.go('home.models.import.job', { applicationId: result.Result });
                     }, 1);
-                } else {
-                    // ERROR
                 }
             });
         });
+    }
+
+    vm.validateMappingSelect = function(mapping) {
+        var name = 'mapping_lattice_field_select_';
+
+        vm.validateIsDuplicate(name, mapping);
+    }
+
+    vm.validateMappingInput = function(mapping) {
+        var name = 'mapping_custom_field_input_';
+
+        vm.validateIsReserved(name, mapping);
+        vm.validateIsDuplicate(name, mapping);
+    }
+
+    vm.validateIsReserved = function(name, mapping) {
+        var isReserved = !!vm.UnmappedFieldsMap[mapping.mappedField];
+        
+        if ($scope.fieldMappingForm[name + mapping.userField]) {
+            $scope.fieldMappingForm[name + mapping.userField].$setValidity("Reserved", !isReserved);
+        }
+    }
+
+    vm.validateIsDuplicate = function(name, mapping) {
+        var value = mapping.mappedField;
+        var isDuplicate = false;
+
+        vm.fieldMappings.forEach(function(field) {
+            if (field.mappedField == value && !field.ignored) {
+                if (mapping.userField != field.userField) {
+                    isDuplicate = true;
+                }
+            }
+        }); 
+        
+        if ($scope.fieldMappingForm[name + mapping.userField]) {
+            $scope.fieldMappingForm[name + mapping.userField].$setValidity("Duplicate", !isDuplicate);
+        }
     }
 
     // here are additional checks not covered by angular's built in form validation
@@ -113,8 +158,18 @@ angular.module('mainApp.create.customFields', [
 
         // make sure there are no empty drop-down selection
         vm.fieldMappings.forEach(function(fieldMapping, index) {
+            if (fieldMapping.ignored) {
+                return;
+            }
+
             if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                 vm.FormValidated = false;
+            }
+
+            if (fieldMapping.mappedToLatticeField) {
+                vm.validateMappingSelect(fieldMapping);
+            } else {
+                vm.validateMappingInput(fieldMapping);
             }
         });
 

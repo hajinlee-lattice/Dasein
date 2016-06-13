@@ -8,15 +8,25 @@
             <button type="button" data-ng-click="customMenuClick($event)" ng-class="{'open': showCustomMenu}"><span class="fa fa-bars"></span></button>
             <div class="model-menu" ng-show="showCustomMenu">
                 <ul>
-                    <li><a href="javascript:void(0)" data-ng-click="modelNameEditClick($event)" data-ng-if="mayChangeModelNames" data-title="Enter Model Name">Edit</a></li>
+                    <li data-ng-click="modelNameEditClick($event)" data-ng-if="mayChangeModelNames">
+                        <a href="javascript:void(0)" data-title="Enter Model Name">Edit</a>
+                    </li>
 
-                    <li><a href="javascript:void(0)" data-ng-if="mayDeleteModels && !isActive" data-ng-click="deleteModelClick($event)">Delete</a></li>
+                    <li data-ng-if="mayDeleteModels && !isActive" data-ng-click="deleteModelClick($event)">
+                        <a href="javascript:void(0)">Delete</a>
+                    </li>
 
-                    <li><a href="javascript:void(0)" data-ng-if="!isActive" data-ng-click="updateAsActiveClick($event)">Activate</a></li>
+                    <li data-ng-if="!isActive" data-ng-click="updateAsActiveClick($event)">
+                        <a href="javascript:void(0)">Activate</a>
+                    </li>
 
-                    <li><a href="javascript:void(0)" data-ng-if="isActive" data-ng-click="updateAsInactiveClick($event)">Deactivate</a></li>
+                    <li data-ng-if="isActive" data-ng-click="updateAsInactiveClick($event)">
+                        <a href="javascript:void(0)">Deactivate</a>
+                    </li>
 
-                    <li><a ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" data-ng-click="refineAndCloneClick($event)">Refine &amp; Clone</a></li>
+                    <li ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" data-ng-click="refineAndCloneClick($event)">
+                        <a href="javascript:void(0)">Refine &amp; Clone</a>
+                    </li>
                 </ul>
             </div>
         </h2>

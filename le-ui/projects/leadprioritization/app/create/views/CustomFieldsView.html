@@ -26,7 +26,7 @@
 				<tbody>
                     <tr ng-repeat="fieldMapping in vm.fieldMappings">
 						<td class="three columns field_mapping_label">
-							<label for="fieldType_{{$index}}">{{ fieldMapping.userField }}</label>
+							<label for="fieldType_{{ fieldMapping.userField }}">{{ fieldMapping.userField }}</label>
 						</td>
 
 						<td class="four columns field_mapping_inputs">
@@ -40,12 +40,12 @@
 
 						<td class="four columns field-mapping-inputs">
                             <select required
-                            		name="mapping_lattice_field_select_{{$index}}"
+                            		name="mapping_lattice_field_select_{{ fieldMapping.userField }}"
                             		class="form-control"
 	                            	ng-if="selectedOption.id == 1"
-                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
 	                            	ng-model="fieldMapping.mappedField"
-	                            	ng-change="vm.changeLatticeField(fieldMapping, UnmappedField)">
+                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
+	                            	ng-change="vm.changeLatticeField(fieldMapping)">
 	                            <option value="{{fieldMapping.mappedField}}"
 	                            		ng-if="vm.UnmappedFieldsMap[fieldMapping.mappedField]"
 	                            		ng-selected="fieldMapping.mappedField == fieldMapping.userField">
@@ -60,20 +60,21 @@
 	                            </option>
                             </select>
 					        <input 	required
-          							ng-minlength="1"
 									type="text"
 									class="form-control" 
-									name="mapping_custom_field_input_{{$index}}"
+									name="mapping_custom_field_input_{{ fieldMapping.userField }}"
+          							ng-minlength="1"
                             		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
 									ng-model="fieldMapping.mappedField"
 									ng-value="fieldMapping.mappedField"
+									ng-keyup="vm.validateForm()"
 									ng-if="selectedOption.id == 0" />
 						</td>
 
 						<td class="one columns field_mapping_type">
 							<select 
 									class="custom-select" 
-									name="columnType_{{$index}}" 
+									name="columnType_{{ fieldMapping.userField }}" 
 									ng-model="fieldMapping.fieldType" 
 									ng-init="fieldMapping.fieldType=fieldMapping.fieldType" 
 									ng-disabled="selectedOption.id == 1"
@@ -94,7 +95,7 @@
 	<div class="row field-mapping-validation">
 		<div class="ten columns offset-one" ng-class="{ 'has-error' : fieldMappingForm.$invalid }">
       		<p class="help-block">
-      			* One or more of your columns is unmapped or has errors
+      			* One or more of your columns is unmapped or is using a reserved name
       		</p>
     	</div>
   	</div>
