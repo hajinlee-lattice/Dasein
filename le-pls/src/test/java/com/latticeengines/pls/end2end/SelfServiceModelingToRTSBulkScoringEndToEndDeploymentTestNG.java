@@ -110,7 +110,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         assertTrue(any);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testJobIsListed", timeOut = 1800000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testJobIsListed", timeOut = 3600000)
     public void poll() {
         JobStatus terminal;
         while (true) {
@@ -200,7 +200,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         testJobIsListed();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 1800000, enabled = true)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 3600000, enabled = true)
     public void pollScoringTestDataJob() {
         poll();
     }

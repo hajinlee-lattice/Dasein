@@ -85,10 +85,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         startTime = System.currentTimeMillis();
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
+            startTime = System.currentTimeMillis();
             log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
                     .getRecords().size(), customerSpace));
             List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
                     scoreRequest, customerSpace);
+            endTime = System.currentTimeMillis();
+            long oneBatchTime = endTime - startTime;
+            log.info("Sending this batch of score requests takes " + (oneBatchTime * 1.66667e-5) + " mins");
             recordScoreResponseList.addAll(recordScoreResponse);
         }
         endTime = System.currentTimeMillis();
