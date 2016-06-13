@@ -95,7 +95,7 @@ public class MetadataResolver {
                 if (!attribute.isNullable()) {
                     missingRequiredFields.add(attribute.getName());
                 }
-                System.out.println("Remove: " + attribute.getName());
+                System.out.println("Remove: " + attribute.getDisplayName());
                 attrIterator.remove();
             }
         }
