@@ -16,20 +16,20 @@
 			<table class="unstyled">
 				<thead>
 					<tr>
-						<th class="three columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
-						<th class="four columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
-						<th class="four columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
-						<th class="one columns">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 					</tr>
 				</thead>
 
 				<tbody>
                     <tr ng-repeat="fieldMapping in vm.fieldMappings">
-						<td class="three columns field_mapping_label">
+						<td class="field_mapping_label">
 							<label for="fieldType_{{ fieldMapping.userField }}">{{ fieldMapping.userField }}</label>
 						</td>
 
-						<td class="four columns field_mapping_inputs">
+						<td class="field_mapping_inputs">
                             <select class="form-control" 
 	                            	ng-model="selectedOption" 
 	                            	ng-change="vm.changeMappingOption(fieldMapping, selectedOption)"
@@ -38,7 +38,7 @@
                             </select>
 						</td>
 
-						<td class="four columns field-mapping-inputs">
+						<td class="field-mapping-inputs">
                             <select required
                             		name="mapping_lattice_field_select_{{ fieldMapping.userField }}"
                             		class="form-control"
@@ -71,7 +71,7 @@
 									ng-if="selectedOption.id == 0" />
 						</td>
 
-						<td class="one columns field_mapping_type">
+						<td class="field_mapping_type">
 							<select 
 									class="custom-select" 
 									name="columnType_{{ fieldMapping.userField }}" 

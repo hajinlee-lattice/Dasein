@@ -143,13 +143,13 @@ section.container.custom-fields {
         border-bottom: #333 solid 1px;
     }
     tr {
-        display: flex;
-        align-items: stretch;
         th {
             padding: .5em 1em 1em;
             margin: 0;
             &:last-child {
-                flex: 1;
+                .custom-select {
+                    width: 100px;
+                }
             }
             &:first-child {
                 text-align: right;
@@ -159,11 +159,9 @@ section.container.custom-fields {
         td.field_mapping_label {
             border-right: #b0b0b0 solid 1px;
             padding-right: 1em;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
             
             label {
+                width: 180px;
                 word-wrap: break-word;
                 padding: 0;
                 margin: 0;
@@ -173,17 +171,16 @@ section.container.custom-fields {
             padding: 0.3em 0em .3em 1em;
             margin: 0;
             vertical-align: middle;
-            display: flex;
-            align-items: center;
                 
             &:last-child {
-                flex: 1;
+                .custom-select {
+                    width: 100px;
+                }
             }
             &:first-child {
                 text-align: right;
             }
             &:nth-child(3) {
-                /*width: 137px;*/
                 padding-right: 0;
             }
             select {
@@ -193,15 +190,6 @@ section.container.custom-fields {
                 border-radius: 0;
                 -moz-border-radius: 0;
                 -webkit-border-radius: 0;
-                /*
-                &:nth-child(1) {
-                    width:40%;
-                    margin-right: 3%;
-                }
-                &:nth-child(2) {
-                    width: 56%;
-                }
-                */
                 option.required {
                     font-weight: bold;
                 }
