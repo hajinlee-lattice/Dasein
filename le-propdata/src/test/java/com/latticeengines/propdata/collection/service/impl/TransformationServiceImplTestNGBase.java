@@ -105,6 +105,13 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
         return response;
     }
 
+    protected void cleanupActiveFromProgressTables() {
+        TransformationProgress progress = progressEntityMgr.findRunningProgress(getSource());
+        if (progress != null) {
+            progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
+        }
+    }
+
     protected void cleanupProgressTables() {
         for (TransformationProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());

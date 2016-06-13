@@ -15,9 +15,20 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
     @Autowired
     TransformationProxy transformationProxy;
 
-    @Test(groups = "deployment")
+    @Test(groups = "collection")
     public void testWholeProgress() {
+        uploadBaseGZFile();
+        TransformationProgress progress = createNewProgress();
+        progress = transformData(progress);
+        finish(progress);
+        cleanupProgressTables();
+    }
+
+    @Test(groups = "deployment")
+    public void testDeploymentWholeProgress() {
         try {
+            cleanupActiveFromProgressTables();
+
             uploadBaseGZFile();
             List<TransformationProgress> transformationProgressList = transformationProxy
                     .scan("FunctionalBomboraFirehose");

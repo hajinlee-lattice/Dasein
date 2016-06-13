@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,6 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 import com.latticeengines.propdata.engine.transformation.service.impl.BomboraFirehoseIngestionService;
@@ -47,12 +46,9 @@ public class BomboraFirehoseIngestionServiceImplTestNG extends FirehoseTransform
 
     @Override
     TransformationConfiguration createTransformationConfiguration() {
-        BomboraFirehoseConfiguration conf = new BomboraFirehoseConfiguration();
-        conf.setSourceName(source.getSourceName());
-        Map<String, String> confMap = new HashMap<>();
-        conf.setSourceConfigurations(confMap);
-        conf.setInputFirehoseVersion(baseSourceVersion);
-        conf.setVersion(baseSourceVersion);
+        List<String> versionsToProcess = new ArrayList<>();
+        versionsToProcess.add(baseSourceVersion);
+        TransformationConfiguration conf = refreshService.createTransformationConfiguration(versionsToProcess);
         return conf;
     }
 }
