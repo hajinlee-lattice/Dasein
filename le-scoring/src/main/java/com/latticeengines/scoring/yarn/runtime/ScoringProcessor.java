@@ -82,7 +82,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         long transformationTotalTime = endTime - startTime;
         log.info("The transformation from avro to bulks score request takes " + (transformationTotalTime * 1.66667e-5)
                 + " mins");
-        startTime = System.currentTimeMillis();
+        long scoringStartTime = System.currentTimeMillis();
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
         for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
             startTime = System.currentTimeMillis();
@@ -95,8 +95,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             log.info("Sending this batch of score requests takes " + (oneBatchTime * 1.66667e-5) + " mins");
             recordScoreResponseList.addAll(recordScoreResponse);
         }
-        endTime = System.currentTimeMillis();
-        long scoringApiRequestTotalTime = endTime - startTime;
+        long scoringEndTime = System.currentTimeMillis();
+        long scoringApiRequestTotalTime = scoringEndTime - scoringStartTime;
         log.info("The sending scoring requests takes " + (scoringApiRequestTotalTime * 1.66667e-5) + " mins");
         startTime = System.currentTimeMillis();
         convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
