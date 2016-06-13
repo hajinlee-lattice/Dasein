@@ -47,7 +47,6 @@ angular.module('mainApp.login.controllers.LoginController', [
 
     // Controller methods
     $scope.loginClick = function () {
-        $scope.loading = true;
         $scope.showLoginError = false;
         $scope.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
         if ($scope.loginInProgess) {
