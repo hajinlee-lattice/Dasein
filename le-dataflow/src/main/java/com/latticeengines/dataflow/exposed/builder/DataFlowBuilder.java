@@ -188,6 +188,7 @@ public abstract class DataFlowBuilder {
                 if (fm.getPropertyValue("enumValues") != null) {
                     fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
                 }
+                fm.setNullable(attribute.getNullable());
 
                 Map<String, Object> properties = attribute.getProperties();
                 for (String key : properties.keySet()) {
@@ -230,7 +231,8 @@ public abstract class DataFlowBuilder {
 
                 attribute.setSourceLogicalDataType(fm.getPropertyValue("sourceLogicalType"));
                 attribute.setLogicalDataType(fm.getPropertyValue("logicalType"));
-                attribute.setNullable(true);
+                attribute.setNullable(fm.isNullable());
+
                 attribute.setPhysicalDataType(fm.getAvroType().toString().toLowerCase());
 
                 if (fm.getPropertyValue("precision") != null) {

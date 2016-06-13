@@ -1,15 +1,12 @@
 package com.latticeengines.domain.exposed.dataflow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public class FieldMetadata {
     private Schema.Type avroType;
@@ -17,9 +14,7 @@ public class FieldMetadata {
     private String fieldName;
     private Schema.Field avroField;
     private Map<String, String> properties = new HashMap<>();
-
-    @SuppressWarnings("unused")
-    private List<Attribute> ancestors = new ArrayList<>();
+    private boolean nullable = true;
 
     public FieldMetadata(FieldMetadata fm) {
         this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties());
@@ -92,6 +87,14 @@ public class FieldMetadata {
 
     public Map<String, String> getProperties() {
         return properties;
+    }
+
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 
     @Override
