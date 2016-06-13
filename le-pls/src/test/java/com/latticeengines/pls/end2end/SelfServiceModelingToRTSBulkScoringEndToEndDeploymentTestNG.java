@@ -51,7 +51,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
     // expected lines in data set to output to csv after bulk scoring
-    private static final int TOTAL_QUALIFIED_LINES = 4162;
+    private static final int TOTAL_QUALIFIED_LINES = 1126;
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -67,7 +67,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
+        fileName = "Lattice_Relaunch_Small.csv";
         modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
     }
 
@@ -146,12 +146,10 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         try {
             parser = new CSVParser(reader, format);
             Set<String> csvHeaders = parser.getHeaderMap().keySet();
-            assertTrue(csvHeaders.contains("LEAD"));
-            assertTrue(csvHeaders.contains("Phone"));
-            assertTrue(csvHeaders.contains("Some Column"));
+            assertTrue(csvHeaders.contains("Activity_Count_Click_Email"));
+            assertTrue(csvHeaders.contains("Industry"));
+            assertTrue(csvHeaders.contains("PhoneNumber"));
             assertTrue(csvHeaders.contains("score"));
-            assertTrue(csvHeaders.contains("BusinessCountry"));
-
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
                 assertTrue(StringUtils.isNotEmpty(record.get("score")));
