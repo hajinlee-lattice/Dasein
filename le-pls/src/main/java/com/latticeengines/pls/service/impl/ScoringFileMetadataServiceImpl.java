@@ -19,9 +19,10 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -85,29 +87,39 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
-        Table table = modelMetadataService.getTrainingTableFromModelId(modelId);
+        final Table table = modelMetadataService.getEventTableFromModelId(modelId);
+        final Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
+        Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
+            @Override
+            public boolean apply(@Nullable Attribute attr) {
+                List<String> approvedUsages = attr.getApprovedUsage();
+                List<String> tags = attr.getTags();
+                if (schema.getAttribute(attr.getName()) == null
+                        && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
+                                ApprovedUsage.NONE.toString())) //
+                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
+                    log.info(String.format("Removing attribute %s in table %s", attr.getName(), table.getName()));
+                    return true;
+                }
+                return false;
+            }
+        });
+        
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
                 yarnConfiguration);
         resolver.calculateBasedOnExistingMetadata(table);
         if (!resolver.isMetadataFullyDefined()) {
+            log.info(sourceFile.getName() + " not fully defined, need to resolve again");
             List<ColumnTypeMapping> unknown = resolver.getUnknownColumns();
             resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, unknown, yarnConfiguration);
             resolver.calculateBasedOnExistingMetadata(table);
         }
-
-        Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
-            @Override
-            public boolean apply(@Nullable Attribute attr) {
-                // import will create internal Id, filter out internal Id to
-                // avoid duplication
-                return attr.getName().equals(InterfaceName.InternalId.name());
-            }
-        });
+        log.info("After resolving table is: " + table.toString());
 
         // Don't dedup on primary key for scoring
         table.setPrimaryKey(null);
-
         table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        table.setDisplayName(sourceFile.getDisplayName());
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
         return table;
