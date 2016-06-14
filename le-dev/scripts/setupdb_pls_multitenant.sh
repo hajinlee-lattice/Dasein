@@ -26,5 +26,3 @@ else
     sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sql | mysql -u root -pwelcome
 fi
 
-cat $WSHOME/le-quartzclient/src/main/schema/quartz_tables_mysql.sql | mysql -u root -pwelcome
-

@@ -9,8 +9,6 @@
 
     <properties>
         <component-name>quartzclient</component-name>
-        <springframework.version>4.0.0.RELEASE</springframework.version>
-        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <le.domain.version>2.0.33-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.33-SNAPSHOT</le.db.version>
         <le.network.version>2.0.33-SNAPSHOT</le.network.version>
@@ -29,29 +27,8 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${springframework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${springframework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>${springframework.version}</version>
-        </dependency>
-        <!-- Security related. -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <version>${springframework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -116,16 +93,15 @@
             <version>${le.security.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
+            <version>${sqljdbc4.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.30</version>
+            <version>${mysql.connector.version}</version>
         </dependency>
     </dependencies>
 
