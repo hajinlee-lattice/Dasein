@@ -20,9 +20,12 @@ angular
         showNameDefault: false,
         showImportError: false,
         showImportSuccess: false,
-        ResourceUtility: ResourceUtility
+        ResourceUtility: ResourceUtility,
+        params: {
+            compressed: true
+        }
     });
-    
+
     vm.processHeaders = function(headers) {
         var columns = headers.split(','),
             schemaSuggestion;

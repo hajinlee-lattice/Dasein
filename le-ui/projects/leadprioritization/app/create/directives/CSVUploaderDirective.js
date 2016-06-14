@@ -60,11 +60,14 @@ angular
                 });
             }
 
+            // grab filename from file path
+            vm.getFileName = function(s) { 
+              return (typeof s==='string' && (s=s.match(/[^\\\/]+$/)) && s[0]) || '';
+            } 
+
             vm.changeFile = function(scope) {
                 var input = element,
-                    fileName = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-                        ? input.value
-                        : input.value.substring(12);
+                    fileName = vm.getFileName(input.value);
 
                 vm.csvFileDisplayName = fileName;
 
@@ -132,6 +135,15 @@ angular
             }
 
             vm.gzipFile = function(file) {
+                vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+
+                var deferred = $q.defer();
+
+                if (!vm.isCompressed()) {
+                    deferred.resolve(vm.csvFile);
+                    return deferred.promise;
+                }
+
                 vm.compressing = true;
 
                 setTimeout(function() {
@@ -143,12 +155,11 @@ angular
                         seconds = Math.floor((currentTime - vm.startTime) / 1000);
 
                     vm.compress_percent = (100 - (100 / seconds)) / 1.5;
-                    vm.message = 'Compressing: ' + vm.getElapsedTime(vm.startTime);
+                    vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                     $scope.$apply();
                 }, 1000);
 
-                var deferred = $q.defer(),
-                    convertedData = new Uint8Array(file);
+                var convertedData = new Uint8Array(file);
 
                 // Workers must exist in external files.  vm fakes that.
                 var blob = new Blob([
@@ -158,25 +169,40 @@ angular
                     "}"
                 ]);
 
-                // Obtain a blob URL reference to our fake worker 'file'.
-                var blobURL = window.URL.createObjectURL(blob),
-                    worker = new Worker(blobURL);
+                try {
+                    // Obtain a blob URL reference to our fake worker 'file'.
+                    var blobURL = window.URL.createObjectURL(blob),
+                        worker = new Worker(blobURL);
 
-                worker.onmessage = function(result) {
-                    var zipped = result.data,
-                        array = new Array(zipped),
-                        blob = new Blob(array);
+                    worker.onmessage = function(result) {
+                        var zipped = result.data,
+                            array = new Array(zipped),
+                            blob = new Blob(array);
 
-                    vm.compress_percent = 67;
-                    clearInterval(vm.compress_timer);
-                    deferred.resolve(blob);
-                };
+                        vm.compress_percent = 67;
+                        clearInterval(vm.compress_timer);
+                        deferred.resolve(blob);
+                    };
 
-                // pass the file and absolute URL to the worker
-                worker.postMessage(
-                    { url: document.location.origin, file: convertedData }, 
-                    [ convertedData.buffer ]
-                );
+                    // pass the file and absolute URL to the worker
+                    worker.postMessage(
+                        { url: document.location.origin, file: convertedData }, 
+                        [ convertedData.buffer ]
+                    );
+                } catch(e) {
+                    // fallback for IE and other browsers that dont support webworker method
+                    vm.message = 'Compressing the file, please wait...';
+
+                    setTimeout(function() {
+                        var zipped = pako.gzip(convertedData, { to : 'Uint8Array' }),
+                            array = new Array(zipped),
+                            blob = new Blob(array);
+
+                        vm.compress_percent = 67;
+                        clearInterval(vm.compress_timer);
+                        deferred.resolve(blob);
+                    }, 1);
+                }
 
                 return deferred.promise;
             }
@@ -195,10 +221,10 @@ angular
                         file: file, 
                         url: vm_form.params.url || '/pls/models/uploadfile/unnamed',
                         params: {
-                            displayName: vm.csvFileName,
                             schema: vm_form.params.schema || fileType,
                             modelId: vm_form.params.modelId || false,
-                            compressed: (vm_form.params.compressed || vm_form.params.compressed === false ? vm_form.params.compressed : vm.compressed)
+                            compressed: vm.isCompressed(),
+                            displayName: vm.csvFileName
                         },
                         progress: vm.uploadProgress
                     };
@@ -206,6 +232,14 @@ angular
                 vm.cancelDeferred = cancelDeferred = $q.defer();
 
                 csvImportService.Upload(options).then(vm.uploadResponse);
+            }
+
+            vm.isCompressed = function() {
+                if (!vm_form.params) {
+                    vm_form.params = {};
+                }
+
+                return (vm_form.params.compressed || vm_form.params.compressed === false ? vm_form.params.compressed : vm.compressed);
             }
 
             vm.uploadResponse = function(result) {
@@ -250,7 +284,7 @@ angular
                         percent = vm.upload_percent = ((done / total) * 100);
 
                     if (vm.uploading) {
-                        vm.message = 'Sending: ' + vm.getElapsedTime(vm.startTime);
+                        vm.message = 'Sending: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                         vm.percentage = Math.round(percent);
                         $scope.$apply();
                     }

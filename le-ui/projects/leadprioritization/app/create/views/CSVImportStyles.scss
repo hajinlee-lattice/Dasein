@@ -16,7 +16,22 @@ section.container.setup-import {
     textarea {
         overflow: hidden;
     }
-
+    
+    div.file-upload {
+        div.fileUpload {
+            position: relative;
+            
+            input.upload {
+                font-size: 0;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #aFF;
+                font-size: 10000px;
+            }
+        }
+    }
     #csvFileUploadMessage {
         font-size: 0.9em;
     }

@@ -87,7 +87,7 @@ angular
         }
 
         xhr.setRequestHeader("ErrorDisplayMethod", (options.ErrorDisplayMethod || 'banner'));
-        xhr.setRequestHeader("Content-Encoding", "gzip");
+        //xhr.setRequestHeader("Content-Encoding", "gzip");
 
         csvImportStore.Set('cancelXHR', xhr, true);
 
