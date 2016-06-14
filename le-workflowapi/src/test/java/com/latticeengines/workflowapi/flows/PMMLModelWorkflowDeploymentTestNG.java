@@ -1,7 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -11,7 +9,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
@@ -24,9 +21,9 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     @Autowired
     private PMMLModelWorkflow pmmlModelWorkflow;
-
-    @Autowired
-    private TestPMMLScoring testPMMLScoring;
+    //
+    // @Autowired
+    // private TestPMMLScoring testPMMLScoring;
 
     protected String modelName;
 
@@ -61,13 +58,13 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         Assert.assertEquals(status, BatchStatus.COMPLETED);
 
     }
-
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testWorkflow" })
-    public void scoreRecords() throws IOException, InterruptedException {
-        Model model = testPMMLScoring.getMeodel(modelName, PMML_CUSTOMERSPACE, pmmlTenant);
-        System.out.println(modelName + ", " + model.getModelId());
-        Assert.assertNotNull(model.getModelId());
-        testPMMLScoring.scoreRecords(model.getModelId(), PMML_CUSTOMERSPACE, pmmlTenant);
-    }
-
+    /*
+     * @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+     * "testWorkflow" }) public void scoreRecords() throws IOException,
+     * InterruptedException { Model model = testPMMLScoring.getMeodel(modelName,
+     * PMML_CUSTOMERSPACE, pmmlTenant); System.out.println(modelName + ", " +
+     * model.getModelId()); Assert.assertNotNull(model.getModelId());
+     * testPMMLScoring.scoreRecords(model.getModelId(), PMML_CUSTOMERSPACE,
+     * pmmlTenant); }
+     */
 }
