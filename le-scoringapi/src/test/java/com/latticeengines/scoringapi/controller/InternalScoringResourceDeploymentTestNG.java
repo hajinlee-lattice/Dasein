@@ -10,6 +10,7 @@ import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -53,6 +54,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
     public void scoreRecord() throws IOException {
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
+        ObjectMapper om = new ObjectMapper();
+        System.out.println(om.writeValueAsString(scoreRequest));
         ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
                 customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
