@@ -105,7 +105,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
         requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
         requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getName());
-        requestInfo.put("ModelType", scoringArtifacts.getModelType().name());
+        requestInfo.put("ModelType",
+                (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
 
         Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getFieldSchemas();
         split("retrieveModelArtifacts");
@@ -118,19 +119,27 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         String recordId = getIdIfAvailable(parsedRecordAndInterpretedFields.getValue(), request.getRecord());
         requestInfo.put("RecordId", recordId);
         split("parseRecord");
+        Map<String, Object> readyToTransformRecord = null;
 
-        Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
-                fieldSchemas, parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary());
-        addMissingFields(fieldSchemas, matchedRecord);
+        if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
+            Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
+                    fieldSchemas, parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary());
+            addMissingFields(fieldSchemas, matchedRecord);
+            readyToTransformRecord = matchedRecord;
+        } else {
+            Map<String, Object> formattedPmmlRecord = parsedRecordAndInterpretedFields.getKey();
+            addMissingFields(fieldSchemas, formattedPmmlRecord);
+            readyToTransformRecord = formattedPmmlRecord;
+        }
         split("matchRecord");
 
-        Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
+        Map<String, Object> transformedRecord = transform(scoringArtifacts, readyToTransformRecord);
         split("transformRecord");
 
         ScoreResponse scoreResponse = null;
         if (isDebug) {
             scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                    matchedRecord);
+                    readyToTransformRecord);
         } else {
             scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
         }
