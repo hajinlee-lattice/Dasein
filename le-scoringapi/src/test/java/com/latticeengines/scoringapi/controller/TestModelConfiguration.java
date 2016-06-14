@@ -14,9 +14,10 @@ public class TestModelConfiguration {
     private String sourceInterpretation;
     private String modelSummaryJsonLocalpath;
 
-    public TestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion) {
+    public TestModelConfiguration(String testModelFolderName, String modelId, String applicationId,
+            String modelVersion) {
         this.testModelFolderName = testModelFolderName;
-        this.modelId = "ms__" + testModelFolderName + "_";
+        this.modelId = modelId;
         this.modelName = testModelFolderName;
         this.applicationId = applicationId;
         this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
@@ -24,6 +25,10 @@ public class TestModelConfiguration {
         this.eventTable = testModelFolderName;
         this.sourceInterpretation = "SalesforceLead";
         this.modelSummaryJsonLocalpath = localModelPath + ModelRetrieverImpl.MODEL_JSON;
+    }
+
+    public TestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion) {
+        this(testModelFolderName, "ms__" + testModelFolderName + "_", applicationId, modelVersion);
     }
 
     public String getTestModelFolderName() {

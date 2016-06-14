@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exposed;
+package com.latticeengines.proxy.exposed.pls;
 
 import java.util.List;
 
@@ -12,6 +12,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
+
+    private static final String LOOKUP_ID_DELIM = "|";
 
     private static final Log log = LogFactory.getLog(InternalResourceRestApiProxy.class);
 
@@ -43,6 +45,12 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String url = constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString());
             log.debug("Get from " + url);
             modelSummary = restTemplate.getForObject(url, ModelSummary.class);
+            if (modelSummary != null && StringUtils.isEmpty(modelSummary.getEventTableName())) {
+                String lookupId = modelSummary.getLookupId();
+                String eventTableName = lookupId.substring(lookupId.indexOf(LOOKUP_ID_DELIM) + 1,
+                        lookupId.lastIndexOf(LOOKUP_ID_DELIM));
+                modelSummary.setEventTableName(eventTableName);
+            }
         } catch (Exception e) {
             throw new RuntimeException("getModelSummaryFromModelId: Remote call failure", e);
         }

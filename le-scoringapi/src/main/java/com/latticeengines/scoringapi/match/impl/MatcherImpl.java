@@ -140,9 +140,9 @@ public class MatcherImpl implements Matcher {
 
     @Override
     public List<Map<String, Object>> matchAndJoin(CustomerSpace space,
-            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
+            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsMap,
             Map<String, Map<String, FieldSchema>> fieldSchemasMap, List<ModelSummary> modelSummaryList) {
-        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsList, modelSummaryList);
+        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsMap, modelSummaryList);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
@@ -168,17 +168,17 @@ public class MatcherImpl implements Matcher {
     }
 
     private BulkMatchInput buildMatchInput(CustomerSpace space,
-            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
-                                           List<ModelSummary> modelSummaryList) {
+            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsMap,
+            List<ModelSummary> modelSummaryList) {
         BulkMatchInput bulkInput = new BulkMatchInput();
         List<MatchInput> matchInputList = new ArrayList<>();
         bulkInput.setInputList(matchInputList);
         bulkInput.setRequestId(UUID.randomUUID().toString());
         Integer idx = 0;
-        for (SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields : parsedRecordAndInterpretedFieldsList) {
+        for (String recordId : parsedRecordAndInterpretedFieldsMap.keySet()) {
             ModelSummary modelSummary = modelSummaryList.get(idx);
-            matchInputList.add(buildMatchInput(space, parsedRecordAndInterpretedFields.getValue(),
-                    parsedRecordAndInterpretedFields.getKey(), modelSummary));
+            matchInputList.add(buildMatchInput(space, parsedRecordAndInterpretedFieldsMap.get(recordId).getValue(),
+                    parsedRecordAndInterpretedFieldsMap.get(recordId).getKey(), modelSummary));
             idx++;
         }
         return bulkInput;

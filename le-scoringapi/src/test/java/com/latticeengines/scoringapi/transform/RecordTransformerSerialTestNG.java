@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
+import com.latticeengines.scoringapi.exposed.model.impl.DefaultModelEvaluator;
 import com.latticeengines.scoringapi.functionalframework.RecordTransformerTestMetadata;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
 
@@ -121,8 +122,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         modelExtractionDir = new File(String.format("/tmp/%s/", tenantName));
         modelExtractionDir.mkdir();
 
-        new ModelExtractor().extractModelArtifacts(modelFilePath,
-                modelExtractionDir.getAbsolutePath());
+        new ModelExtractor().extractModelArtifacts(modelFilePath, modelExtractionDir.getAbsolutePath());
 
         DataComposition dataComposition = JsonUtils.deserialize( //
                 FileUtils.readFileToString(new File(dataCompositionPath)), DataComposition.class);
@@ -130,8 +130,8 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 new File(scoreDerivationPath)), ScoreDerivation.class);
 
         System.out.println("Processing tenant " + tenantName);
-        transformAndScore(dataToScorePath, dataComposition.transforms, pmmlXmlPath,
-                scoreDerivation, expectedScoresPath, keyColumn);
+        transformAndScore(dataToScorePath, dataComposition.transforms, pmmlXmlPath, scoreDerivation, expectedScoresPath,
+                keyColumn);
     }
 
     private void transformAndScore(String avroFile, //
@@ -144,7 +144,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         config.set("fs.defaultFS", "file:///");
         FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new Path(avroFile));
         Reader pmmlReader = new java.io.FileReader(pmmlXmlPath);
-        ModelEvaluator pmmlEvaluator = new ModelEvaluator(pmmlReader);
+        ModelEvaluator pmmlEvaluator = new DefaultModelEvaluator(pmmlReader);
         Schema schema = AvroUtils.getSchema(config, new Path(avroFile));
         Map<Double, Double> expectedScores = getExpectedScores(expectedScoresPath);
         int i = 0;
@@ -176,8 +176,8 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 recordAsMap.put(f.name(), value);
             }
             long time9 = System.currentTimeMillis();
-            Map<String, Object> transformedFast = recordTransformer.transform(
-                    modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+            Map<String, Object> transformedFast = recordTransformer.transform(modelExtractionDir.getAbsolutePath(),
+                    transforms, recordAsMap);
             long time10 = System.currentTimeMillis();
             totalFastTransformTime += (time10 - time9);
 
@@ -189,10 +189,11 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
 
                 if (Math.abs(expectedScore - scoreFast) > 0.000001) {
                     errors++;
-                    errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble, Math
-                            .abs(expectedScore - scoreFast)));
-                    System.out.println(String.format("Difference for Record id %f has diff of %f value %f, expected is %f",
-                            recIdAsDouble, Math.abs(expectedScore - scoreFast) , scoreFast, expectedScore));
+                    errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble,
+                            Math.abs(expectedScore - scoreFast)));
+                    System.out.println(
+                            String.format("Difference for Record id %f has diff of %f value %f, expected is %f",
+                                    recIdAsDouble, Math.abs(expectedScore - scoreFast), scoreFast, expectedScore));
                 }
             } catch (Exception e) {
                 errors++;
@@ -201,24 +202,22 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
             }
 
             if (i % 1000 == 1) {
-                System.out.println("At record " + i + " in " + (System.currentTimeMillis() - time0)
-                        + " ms.");
+                System.out.println("At record " + i + " in " + (System.currentTimeMillis() - time0) + " ms.");
                 System.out.println(String.format("Average transform time per record = %.3f",
                         (double) totalTransformTime / (double) i));
                 System.out.println(String.format("Average fast transform time per record = %.3f",
-                        (double) totalFastTransformTime  / (double) i ));
-                System.out.println(String.format("Differences fast transform vs transform = %d",
-                        transformDifferences ));
+                        (double) totalFastTransformTime / (double) i));
+                System.out.println(String.format("Differences fast transform vs transform = %d", transformDifferences));
             }
             i++;
         }
 
-        System.out.println(String.format("Average transform time per record = %.3f",
-                (double) totalTransformTime / (double) i));
+        System.out.println(
+                String.format("Average transform time per record = %.3f", (double) totalTransformTime / (double) i));
         System.out.println(String.format("Average fast transform time per record = %.3f",
                 (double) totalFastTransformTime / (double) i));
-        System.out.println(String.format("Average evaluation time per record = %.3f",
-                (double) totalEvaluationTime / (double) i));
+        System.out.println(
+                String.format("Average evaluation time per record = %.3f", (double) totalEvaluationTime / (double) i));
         System.out.println("Number of errors = " + errors);
         for (Map.Entry<Double, Double> entry : errorKeys) {
             System.out.println("Record id = " + entry.getKey() + " value = " + entry.getValue());

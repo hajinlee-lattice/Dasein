@@ -15,7 +15,7 @@ public interface Matcher {
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelSummary modelSummary);
 
     List<Map<String, Object>> matchAndJoin(CustomerSpace space,
-            List<SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsList,
+            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordMap,
             Map<String, Map<String, FieldSchema>> fieldSchemasMap, List<ModelSummary> modelSummaryList);
 
 }

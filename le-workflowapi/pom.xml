@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-workflowapi</artifactId>
@@ -21,6 +21,8 @@
         <le.serviceflows.leadprioritization.version>2.0.33-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.serviceflows.propdata.version>2.0.33-SNAPSHOT</le.serviceflows.propdata.version>
         <le.workflow.version>2.0.33-SNAPSHOT</le.workflow.version>
+        <le.oauth2.db.version>2.0.33-SNAPSHOT</le.oauth2.db.version>
+        <le.scoringapi.version>2.0.33-SNAPSHOT</le.scoringapi.version>
         <le.network.version>2.0.33-SNAPSHOT</le.network.version>
         <le.metadata.version>2.0.33-SNAPSHOT</le.metadata.version>
         <le.dataflow.version>2.0.33-SNAPSHOT</le.dataflow.version>
@@ -62,6 +64,13 @@
             <artifactId>le-workflow</artifactId>
             <version>${le.workflow.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scoringapi</artifactId>
+            <version>${le.scoringapi.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -289,7 +298,38 @@
             <version>${le.pls.version}</version>
             <scope>test</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jetty</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>
+                                spring-boot-starter-actuator
+                            </artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jdbc</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>
+                                spring-boot-starter-security
+                            </artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
@@ -297,6 +337,6 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-        
+
     </dependencies>
 </project>

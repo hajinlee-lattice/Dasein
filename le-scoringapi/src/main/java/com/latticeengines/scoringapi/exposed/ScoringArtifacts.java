@@ -20,9 +20,13 @@ public class ScoringArtifacts {
     private final ModelEvaluator pmmlEvaluator;
     private final File modelArtifactsDir;
     private final Map<String, FieldSchema> fieldSchemas;
+    private final String modelJsonType;
 
-    public ScoringArtifacts(ModelSummary modelSummary, ModelType modelType, DataComposition dataScienceDataComposition, DataComposition eventTableDataComposition,
-            ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator, File modelArtifactsDir, Map<String, FieldSchema> fieldSchemas) {
+    public ScoringArtifacts(ModelSummary modelSummary, //
+            ModelType modelType, DataComposition dataScienceDataComposition, //
+            DataComposition eventTableDataComposition, ScoreDerivation scoreDerivation, //
+            ModelEvaluator pmmlEvaluator, File modelArtifactsDir, //
+            Map<String, FieldSchema> fieldSchemas, String modelJsonType) {
         super();
         this.modelSummary = modelSummary;
         this.modelType = modelType;
@@ -32,6 +36,7 @@ public class ScoringArtifacts {
         this.pmmlEvaluator = pmmlEvaluator;
         this.modelArtifactsDir = modelArtifactsDir;
         this.fieldSchemas = fieldSchemas;
+        this.modelJsonType = modelJsonType;
     }
 
     public ModelSummary getModelSummary() {
@@ -64,6 +69,10 @@ public class ScoringArtifacts {
 
     public Map<String, FieldSchema> getFieldSchemas() {
         return fieldSchemas;
+    }
+
+    public String getModelJsonType() {
+        return modelJsonType;
     }
 
 }

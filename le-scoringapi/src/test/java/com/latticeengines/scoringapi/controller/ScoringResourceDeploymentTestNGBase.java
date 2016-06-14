@@ -20,11 +20,15 @@ import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDeploymentTestNGBase {
@@ -41,12 +45,15 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final double EXPECTED_SCORE_99 = 99.0d;
     protected static final int MAX_THREADS = 1;
     protected static final int RECORD_MODEL_CARDINALITY = 2;
-    protected static final int MAX_MODELS = 2;// 20;
+    protected static final int MAX_MODELS = 2;
     protected volatile Throwable exception = null;
     protected Map<String, List<String>> threadPerfMap = new HashMap<>();
     protected boolean shouldPrintPerformanceInfo = true;
     protected int baseAllModelCount = 0;
     protected int baseAllActiveModelCount = 0;
+
+    @Autowired
+    protected InternalScoringApiInterface internalScoringApiProxy;
 
     protected static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
     protected static final String UTC = "UTC";
@@ -60,12 +67,13 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected MetadataProxy metadataProxy;
 
     protected List<Record> generateRecords(int n,
-            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isPmmlModel)
+            throws IOException {
         List<Record> records = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             Record record = new Record();
             record.setRecordId(UUID.randomUUID().toString());
-            ScoreRequest scoreRequest = getScoreRequest();
+            ScoreRequest scoreRequest = getScoreRequest(isPmmlModel);
             Map<String, Object> attributeValues = scoreRequest.getRecord();
             if (i == 0) {
                 attributeValues.remove(MISSING_FIELD_COUNTRY);
@@ -107,20 +115,45 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     }
 
     protected long testScore(String url, int n, long maxTime,
-            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
+            boolean isPmmlModel) throws IOException {
+        return testScore(url, n, maxTime, modelList, isInternalScoring, isPmmlModel, customerSpace);
+    }
+
+    protected long testScore(String url, int n, long maxTime,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
+            boolean isPmmlModel, CustomerSpace customerSpace) throws IOException {
         try {
-            BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList);
+            BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList, isPmmlModel);
             ObjectMapper om = new ObjectMapper();
             long timeDuration = System.currentTimeMillis();
-            ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+            System.out.println(om.writeValueAsString(bulkScoreRequest));
+
+            ResponseEntity<List> response = null;
+            List resultObjList = null;
+            if (isInternalScoring) {
+                resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
+                        customerSpace.toString());
+            } else {
+                response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+                resultObjList = response.getBody();
+            }
             timeDuration = System.currentTimeMillis() - timeDuration;
             System.out.println(n + " => " + timeDuration);
             threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);
-            Assert.assertEquals(response.getBody().size(), n);
+            Assert.assertEquals(resultObjList.size(), n);
 
             int idx = 0;
-            for (Object res : response.getBody()) {
+            for (Object res : resultObjList) {
                 RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
+
+                if (isPmmlModel) {
+                    Assert.assertTrue(result.getScores().get(0).getScore() > 0);
+                    Assert.assertTrue(result.getScores().get(0).getScore() < 100);
+                    Assert.assertTrue(result.getScores().size() >= 1);
+                    continue;
+                }
+
                 Assert.assertEquals(result.getScores().size(), RECORD_MODEL_CARDINALITY);
                 Set<String> modelsSubset = new HashSet<>();
 
@@ -176,15 +209,16 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     }
 
     protected BulkRecordScoreRequest getBulkScoreRequest(int n,
-            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) throws IOException {
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isPmmlModel)
+            throws IOException {
         BulkRecordScoreRequest bulkRequest = new BulkRecordScoreRequest();
         bulkRequest.setSource("Dummy Source");
 
-        List<Record> records = generateRecords(n, modelList);
+        List<Record> records = generateRecords(n, modelList, isPmmlModel);
 
         bulkRequest.setRecords(records);
 
-        if (n <=10) {
+        if (n <= 10) {
             ObjectMapper om = new ObjectMapper();
             System.out.println(om.writeValueAsString(bulkRequest));
         }
@@ -193,14 +227,22 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     }
 
     protected Runnable createScoringRunnable(final String url,
-            final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList) {
+            final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList,
+            final boolean isInternalScoring, final boolean isPmmlModel) {
+        return createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel, customerSpace);
+    }
+
+    protected Runnable createScoringRunnable(final String url,
+            final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList,
+            final boolean isInternalScoring, final boolean isPmmlModel, final CustomerSpace customerSpace) {
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
                     long timeTaken = 0;
-                    long baselineTimeForOneEntry = testScore(url, 1, timeTaken, modelList);
+                    long baselineTimeForOneEntry = testScore(url, 1, timeTaken, modelList, isInternalScoring,
+                            isPmmlModel, customerSpace);
 
                     long upperBoundForBulkScoring = baselineTimeForOneEntry * MAX_FOLD_FOR_TIME_TAKEN;
                     if (upperBoundForBulkScoring < MIN_UPPER_BOUND) {
@@ -213,20 +255,22 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
                     System.out.println("Max time upper bound for bulk scoring: " + upperBoundForBulkScoring);
 
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    testScore(url, 4, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 8, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 12, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 16, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 20, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 40, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 100, upperBoundForBulkScoring, modelList);
-                    // testScore(url, 200, upperBoundForBulkScoring, modelList);
+                    testScore(url, 4, upperBoundForBulkScoring, modelList, isInternalScoring, isPmmlModel,
+                            customerSpace);
+                    // testScore(url, 8, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 12, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 16, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 20, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 40, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 100, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
+                    // testScore(url, 200, upperBoundForBulkScoring, modelList,
+                    // isInternalScoring, isPmmlModel);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -235,19 +279,31 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         return runnable;
     }
 
-    protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList()
-            throws IOException {
+    protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList(String modelId,
+            InternalResourceRestApiProxy plsRest, CustomerSpace customerSpace, Tenant tenant) throws IOException {
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
         TestRegisterModels modelCreator = new TestRegisterModels();
 
         for (int i = 0; i < MAX_MODELS; i++) {
             String testModelFolderName = TEST_MODEL_NAME_PREFIX + i + "20160314_112802";
+            if (modelId != null) {
+                testModelFolderName = modelId;
+            }
             String applicationId = "application_" + i + "1457046993615_3823";
             String modelVersion = "ba99b36-c222-4f93" + i + "-ab8a-6dcc11ce45e9";
-            TestModelConfiguration modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId,
-                    modelVersion);
-            TestModelArtifactDataComposition modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
-                    plsRest, tenant, modelConfiguration, customerSpace, metadataProxy);
+            TestModelConfiguration modelConfiguration = null;
+            TestModelArtifactDataComposition modelArtifactDataComposition = null;
+            if (modelId == null) {
+                modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
+                modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
+                        (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
+                        modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace),
+                        metadataProxy);
+            } else {
+                modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
+                        modelVersion);
+            }
+
             models.put(modelConfiguration, modelArtifactDataComposition);
             System.out.println("Registered model: " + testModelFolderName);
         }
@@ -256,10 +312,54 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         return modelList;
     }
 
+    private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList() throws IOException {
+        return createModelList(null, null, null, null);
+    }
+
+    protected void runScoringTest(final String url, InternalResourceRestApiProxy plsRest, String modelId,
+            CustomerSpace customerSpace, Tenant tenant, boolean isInternalScoring, boolean isPmmlModel)
+            throws IOException, InterruptedException {
+        final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = createModelList(modelId,
+                plsRest, customerSpace, tenant);
+
+        Runnable runnable = createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel, customerSpace);
+
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; i < MAX_THREADS; i++) {
+            Thread th = new Thread(runnable);
+            threadPerfMap.put(th.getName(), new ArrayList<String>());
+            th.start();
+            threads.add(th);
+        }
+
+        for (Thread th : threads) {
+            th.join();
+        }
+
+        if (shouldPrintPerformanceInfo) {
+            for (String threadName : threadPerfMap.keySet()) {
+                System.out.println(threadName);
+                for (String perf : threadPerfMap.get(threadName)) {
+                    System.out.println(perf);
+                }
+            }
+        }
+
+        if (exception != null) {
+            Assert.assertNull(exception, "Got exception in one of the thread: " + getExceptionTrace(exception));
+        }
+    }
+
     protected void runScoringTest(final String url) throws IOException, InterruptedException {
+        runScoringTest(url, false, false);
+    }
+
+    protected void runScoringTest(final String url, final boolean isInternalScoring, boolean isPmmlModel)
+            throws IOException, InterruptedException {
         final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = createModelList();
 
-        Runnable runnable = createScoringRunnable(url, modelList);
+        Runnable runnable = createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel);
 
         List<Thread> threads = new ArrayList<>();
 

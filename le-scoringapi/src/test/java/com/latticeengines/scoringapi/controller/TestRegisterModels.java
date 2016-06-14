@@ -23,7 +23,8 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
@@ -73,17 +74,17 @@ public class TestRegisterModels {
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());
-        String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
+        String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
 
-        URL eventTableDataCompositionUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + "eventtable-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+        URL eventTableDataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
         URL rfpmmlUrl = ClassLoader
-                .getSystemResource(modelConfiguration.getLocalModelPath() + ModelRetrieverImpl.PMML_FILENAME);
-        URL dataScienceDataCompositionUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + "datascience-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                .getSystemResource(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
+        URL dataScienceDataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL scoreDerivationUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -93,15 +94,15 @@ public class TestRegisterModels {
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
-                artifactTableDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
-                artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
+                artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());

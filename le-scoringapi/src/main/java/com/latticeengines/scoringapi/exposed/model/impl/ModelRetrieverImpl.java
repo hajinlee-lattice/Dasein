@@ -15,6 +15,7 @@ import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
@@ -58,24 +60,25 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
+import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {
 
+    private static final String DELIM = ":";
+    private static final String MODEL_TYPE_KEY = "__type";
+    private static final String MODEL_KEY = "Model";
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
     public static final String HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
     public static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
-    public static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
-    public static final String PMML_FILENAME = "rfpmml.xml";
-    public static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
-    public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
+    public static final String MODEL_JSON_SUFFIX = "_model.json";
     public static final String MODEL_JSON = "model.json";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
@@ -87,6 +90,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     private static final String UTC = "UTC";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
@@ -105,6 +109,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private List<ModelJsonTypeHandler> modelJsonTypeHandlers;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
@@ -223,17 +230,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
         String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
+        String modelJsonType = getModelJsonType(modelSummary.getEventTableName(), hdfsScoreArtifactBaseDir);
 
-        DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
-        DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
+        DataComposition dataScienceDataComposition = getModelJsonTypeHandler(modelJsonType)
+                .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
+        DataComposition eventTableDataComposition = getModelJsonTypeHandler(modelJsonType)
+                .getEventTableDataComposition(hdfsScoreArtifactTableDir, localPathToPersist);
         Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
                 eventTableDataComposition, dataScienceDataComposition);
-        ScoreDerivation scoreDerivation = getScoreDerivation(hdfsScoreArtifactBaseDir);
-        ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
+        ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
+        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType)
+                .getScoreDerivation(hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
-                eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields);
+                eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
+                modelJsonType);
 
         return artifacts;
     }
@@ -340,37 +352,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return appId;
     }
 
-    private DataComposition getDataScienceDataComposition(String hdfsScoreArtifactBaseDir) {
-        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + DATA_COMPOSITION_FILENAME;
-        String content = null;
-        try {
-            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.isBlank(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
-            }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
-        }
-        DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);
-        return dataComposition;
-    }
-
-    private DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDir) {
-        String path = hdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
-        String content = null;
-        try {
-            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.isBlank(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
-                        localPathToPersist + "metadata-" + DATA_COMPOSITION_FILENAME);
-            }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
-        }
-        DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);
-        return dataComposition;
-    }
-
     private String getScoredTxt(String hdfsScoreArtifactBaseDir) {
         String content = null;
 
@@ -436,37 +417,44 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return content;
     }
 
-    private ScoreDerivation getScoreDerivation(String hdfsScoreArtifactBaseDir) {
-        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + SCORE_DERIVATION_FILENAME;
-        String content = null;
-        try {
-            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.isBlank(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + SCORE_DERIVATION_FILENAME);
+    private ModelJsonTypeHandler getModelJsonTypeHandler(String modelJsonType) {
+        for (ModelJsonTypeHandler handler : modelJsonTypeHandlers) {
+            if (handler.accept(modelJsonType)) {
+                return handler;
             }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
-        ScoreDerivation scoreDerivation = JsonUtils.deserialize(content, ScoreDerivation.class);
-        return scoreDerivation;
+        throw new LedpException(LedpCode.LEDP_31107, new String[] { modelJsonType });
     }
 
-    private ModelEvaluator getModelEvaluator(String hdfsScoreArtifactBaseDir) {
-        String path = hdfsScoreArtifactBaseDir + PMML_FILENAME;
+    private ModelEvaluator getModelEvaluator(String hdfsScoreArtifactBaseDir, String modelJsonType) {
+        return getModelJsonTypeHandler(modelJsonType).getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType,
+                localPathToPersist);
+    }
+
+    private String getModelJsonType(String eventTableName, String hdfsScoreArtifactBaseDir) {
+        String globPath = hdfsScoreArtifactBaseDir + "*" + MODEL_JSON_SUFFIX;
         FSDataInputStream is = null;
 
-        ModelEvaluator modelEvaluator = null;
-        try {
-            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
-            is = fs.open(new Path(path));
-            modelEvaluator = new ModelEvaluator(is);
-            if (!StringUtils.isBlank(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
+        String modelJsonType = null;
+        try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, globPath);
+
+            if (CollectionUtils.isEmpty(files)) {
+                throw new LedpException(LedpCode.LEDP_31000, new String[] { globPath });
             }
+            String modelJsonPath = files.get(0);
+
+            is = fs.open(new Path(modelJsonPath));
+            ObjectMapper om = new ObjectMapper();
+            JsonNode node = om.readValue(is, JsonNode.class);
+            node = node.get(MODEL_KEY);
+            node = node.get(MODEL_TYPE_KEY);
+            String type = node.textValue();
+            modelJsonType = type.substring(0, type.indexOf(DELIM));
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
+            throw new LedpException(LedpCode.LEDP_31000, new String[] { globPath });
         }
-        return modelEvaluator;
+        return modelJsonType;
     }
 
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, CustomerSpace customerSpace, String modelId) {
@@ -566,9 +554,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
         String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
+        String modelJsonType = getModelJsonType(modelSummary.getEventTableName(), hdfsScoreArtifactBaseDir);
 
-        DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
-        DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
+        DataComposition dataScienceDataComposition = getModelJsonTypeHandler(modelJsonType)
+                .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
+        DataComposition eventTableDataComposition = getModelJsonTypeHandler(modelJsonType)
+                .getEventTableDataComposition(hdfsScoreArtifactTableDir, localPathToPersist);
         Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
                 eventTableDataComposition, dataScienceDataComposition);
         String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);

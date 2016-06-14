@@ -112,6 +112,8 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     @Autowired
     private SoftwareLibraryService softwareLibraryService;
 
+    protected Tenant tenant;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         if (softwareLibraryService != null) {
@@ -124,18 +126,18 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
 
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
-        Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
-        if (t != null) {
-            tenantEntityMgr.delete(t);
+        tenant = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
+        if (tenant != null) {
+            tenantEntityMgr.delete(tenant);
         }
-        t = new Tenant();
-        t.setId(WFAPITEST_CUSTOMERSPACE.toString());
-        t.setName(WFAPITEST_CUSTOMERSPACE.toString());
-        tenantEntityMgr.create(t);
-        MultiTenantContext.setTenant(t);
+        tenant = new Tenant();
+        tenant.setId(WFAPITEST_CUSTOMERSPACE.toString());
+        tenant.setName(WFAPITEST_CUSTOMERSPACE.toString());
+        tenantEntityMgr.create(tenant);
+        MultiTenantContext.setTenant(tenant);
 
         com.latticeengines.domain.exposed.camille.Path path = //
-        PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
+                PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
     }

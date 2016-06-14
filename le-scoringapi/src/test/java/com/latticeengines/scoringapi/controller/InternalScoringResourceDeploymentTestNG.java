@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -23,14 +22,10 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 
 public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
-
-    @Autowired
-    private InternalScoringApiInterface internalScoringApiProxy;
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
@@ -145,6 +140,6 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
             "getModelsCountActive" })
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/scoreinternal/records";
-        runScoringTest(url);
+        runScoringTest(url, true, false);
     }
 }

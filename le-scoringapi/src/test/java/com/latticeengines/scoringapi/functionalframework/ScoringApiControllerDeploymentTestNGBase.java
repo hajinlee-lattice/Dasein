@@ -33,7 +33,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
-import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
@@ -52,6 +53,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
+    protected static final String LOCAL_PMML_MODEL_INPUT = "com/latticeengines/scoringapi/pmml_score_request.json";
     private static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
     private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
 
@@ -64,13 +66,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Value("${scoringapi.auth.hostport}")
     protected String authHostPort;
 
-    protected String playMakerApiHostPort;
-
     @Value("${scoringapi.pls.api.hostport}")
     protected String plsApiHostPort;
-
-    @Autowired
-    protected OAuthUserEntityMgr userEntityMgr;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -78,7 +75,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
-    protected InternalResourceRestApiProxy plsRest = null;
+    protected OAuthUserEntityMgr userEntityMgr;
+
+    protected InternalResourceRestApiProxy plsRest;
 
     protected DataComposition eventTableDataComposition;
 
@@ -92,6 +91,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
+        userEntityMgr = applicationContext.getBean(OAuthUserEntityMgr.class);
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         oAuthUser = getOAuthUser(TENANT_ID);
 
@@ -177,16 +177,16 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 EVENT_TABLE);
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId, EVENT_TABLE,
                 MODEL_VERSION, PARSED_APPLICATION_ID);
-        String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
+        String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
 
         URL eventTableDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
-        URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.PMML_FILENAME);
+        URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelJsonTypeHandler.PMML_FILENAME);
         URL dataScienceDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL scoreDerivationUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                .getSystemResource(LOCAL_MODEL_PATH + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -196,15 +196,15 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
-                artifactTableDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + TEST_MODEL_FOLDERNAME + "_model.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
-                artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
+                artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
-                enhancementsDir + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
+                enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());
@@ -216,7 +216,12 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     }
 
     protected ScoreRequest getScoreRequest() throws IOException {
-        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "score_request.json");
+        return getScoreRequest(false);
+    }
+
+    protected ScoreRequest getScoreRequest(boolean isPmmlModel) throws IOException {
+        URL scoreRequestUrl = ClassLoader
+                .getSystemResource(isPmmlModel ? LOCAL_PMML_MODEL_INPUT : LOCAL_MODEL_PATH + "score_request.json");
         String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
         return scoreRequest;
