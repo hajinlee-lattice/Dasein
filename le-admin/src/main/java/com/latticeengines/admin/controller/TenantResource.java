@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMa
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA') or hasRole('PROD\\TENANT_CONSOLE')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA') or hasRole('TENANT_CONSOLE')")
 public class TenantResource {
 
     @Autowired
