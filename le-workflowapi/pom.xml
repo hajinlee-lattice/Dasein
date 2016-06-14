@@ -210,6 +210,10 @@
                     <groupId>com.thoughtworks.xstream</groupId>
                     <artifactId>xstream</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-common</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -291,6 +295,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
