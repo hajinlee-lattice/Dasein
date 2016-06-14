@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
@@ -16,7 +15,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
     TransformationProxy transformationProxy;
 
     @Test(groups = "collection")
-    public void testWholeProgress() {
+    public void testTransformation() {
         uploadBaseGZFile();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -24,25 +23,24 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
         cleanupProgressTables();
     }
 
-    @Test(groups = "deployment")
-    public void testDeploymentWholeProgress() {
-        try {
-            cleanupActiveFromProgressTables();
-
-            uploadBaseGZFile();
-            List<TransformationProgress> transformationProgressList = transformationProxy
-                    .scan("FunctionalBomboraFirehose");
-            Assert.assertNotNull(transformationProgressList);
-            Assert.assertTrue(transformationProgressList.size() > 0);
-            Assert.assertNotNull(transformationProgressList.get(0).getYarnAppId());
-        } finally {
-            cleanupProgressTables();
-        }
+    @Test(groups = "collection", dependsOnMethods = { "testTransformation" })
+    public void testTransformationWithBadData() {
+        uploadBadBaseGZFile();
+        TransformationProgress progress = createNewProgress();
+        progress = transformData(progress);
+        finish(progress);
+        cleanupProgressTables();
     }
 
     private void uploadBaseGZFile() {
         List<String> fileList = new ArrayList<>();
         fileList.add("SampleBomboraData.csv.gz");
+        uploadFileToHdfs(fileList);
+    }
+
+    private void uploadBadBaseGZFile() {
+        List<String> fileList = new ArrayList<>();
+        fileList.add("SampleBomboraData_bad.csv.gz");
         uploadFileToHdfs(fileList);
     }
 
