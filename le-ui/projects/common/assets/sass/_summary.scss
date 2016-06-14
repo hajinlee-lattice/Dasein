@@ -1,0 +1,88 @@
+/* 
+Page Summary / Sub-Nav Headers
+==================================================== */
+.summary {
+  padding: 40px 0 0;
+  text-align: center;
+  background: $palladium;
+  background-image: url("/assets/images/bkg-blue-fire.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  .headers {
+    padding-bottom: 40px;
+  }
+  .data {
+    padding-bottom: 40px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    & > div {
+        margin: 7px;
+        min-height: auto;
+    }
+    @include media(">470px") {
+      flex-direction: row;
+      flex-wrap: wrap;
+      & > div {
+        width: 46%;
+      }
+    }
+    @include media(">740px") {
+      flex-wrap: nowrap;
+      & > div {
+        width: inherit;
+      }
+    }    
+  }
+  .nav {
+    text-align: left;
+  }
+
+
+  &.create-model-summary {
+    padding: 3px 0 0;
+    text-align: left;
+    p {
+      float: right;
+      margin-right: 20px;
+      font-style: italic;
+    }
+  }
+  &.blue-steel, &.blue-fire {
+    h1, h2, h3, h4, p {
+      color: #fff;
+      &.summary-title {
+        color: #222;
+      }
+    }
+    p {
+      font-size: 20px;
+    }
+    .black-summary-list.stats h3.summary-title {
+      color: #fff;
+      text-align: left;
+    }
+  }
+  &.blue-steel {
+    background-image: url("/assets/images/bkg-blue-steel.jpg");
+  }
+  .twelve .summary-list {
+  	float: left;
+  	width: 100%;
+  	margin-bottom: 4px;
+  	@include media(">small") {
+  		width: calc(50% - 4px);
+  		&:nth-child(odd) {
+  			margin-right: 4px;
+  		}
+  	}
+  	@include media(">xlarge") {
+  		width: calc(25% - 4px);
+  		&:nth-child(-n+3) {
+  			margin-right: 4px;
+  		}
+  	}
+  }
+}
