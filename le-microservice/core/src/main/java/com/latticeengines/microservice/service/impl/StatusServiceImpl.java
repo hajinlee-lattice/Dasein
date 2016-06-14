@@ -10,6 +10,8 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -76,7 +78,8 @@ public class StatusServiceImpl implements StatusService {
         Boolean overall = true;
         for (String microservice : microservices) {
             try {
-                String response = restTemplate.getForObject(String.format("%s/%s/v2/api-docs", microserviceHostport, microservice), String.class);
+                String response = restTemplate.getForObject(
+                        String.format("%s/%s/v2/api-docs", microserviceHostport, microservice), String.class);
                 if (response.contains("\"swagger\":\"2.0\"")) {
                     status.put(microservice, "OK");
                 } else {
@@ -96,6 +99,8 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<String, String> appStatus() {
+        LogManager.getLogger(RestTemplate.class).setLevel(Level.FATAL);
+
         Map<String, String> statusMap = new HashMap<>();
         for (String app : monitoredApps) {
             String url = healthUrls.get(app);
@@ -113,10 +118,10 @@ public class StatusServiceImpl implements StatusService {
             }
         }
 
+        LogManager.getLogger(RestTemplate.class).setLevel(Level.INFO);
         statusMap.put("Overall", statusMap.containsValue("ERROR") ? "ERROR" : "OK");
         return statusMap;
     }
-
 
     @Override
     public void unhookApp(String app) {
