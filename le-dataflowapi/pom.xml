@@ -86,13 +86,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
-            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-common</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -200,6 +199,11 @@
             <version>${le.dataplatform.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
