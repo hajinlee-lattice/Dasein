@@ -121,7 +121,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() throws InterruptedException {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
