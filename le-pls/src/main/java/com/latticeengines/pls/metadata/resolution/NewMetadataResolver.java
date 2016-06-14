@@ -102,7 +102,7 @@ public class NewMetadataResolver {
             Attribute attribute = attrIterator.next();
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (fieldMapping.isMappedToLatticeField()) {
-                    if (isUserFieldMatchWithAttribute(fieldMapping.getUserField(), attribute)) {
+                    if (isUserFieldMatchWithAttribute(fieldMapping.getMappedField(), attribute)) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
                         break;

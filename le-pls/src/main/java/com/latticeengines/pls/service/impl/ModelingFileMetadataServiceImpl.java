@@ -249,7 +249,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
     }
 
-    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, FieldMappingDocument fieldMappingDocument) {
+    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
+                                                       FieldMappingDocument fieldMappingDocument) {
         return new NewMetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
     }
 }
