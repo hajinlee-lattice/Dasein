@@ -158,6 +158,9 @@ public class MetadataConverter {
             if (field.getProp("length") != null) {
                 attribute.setLength(Integer.parseInt(field.getProp("length")));
             }
+            if (field.getProp("Nullable") != null) {
+                attribute.setNullable(Boolean.valueOf(field.getProp("Nullable")));
+            }
             // standardize date and datetime display
             if (type.equals("date")) {
                 attribute.setPropertyValue("dateformat", "YYYY-MM-DD");

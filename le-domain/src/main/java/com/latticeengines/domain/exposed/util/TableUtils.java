@@ -45,6 +45,9 @@ public class TableUtils {
             if (attr.getLogicalDataType() != null) {
                 fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType().toString());
             }
+            if (attr.getNullable() != null) {
+                fieldBuilder = fieldBuilder.prop("Nullable", attr.getNullable().toString());
+            }
             fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
