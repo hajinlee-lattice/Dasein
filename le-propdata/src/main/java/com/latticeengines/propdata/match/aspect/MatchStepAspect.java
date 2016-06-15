@@ -52,14 +52,6 @@ public class MatchStepAspect {
             tracker.set(trackId);
         }
         log.info(logMsg);
-
-        if (log.isDebugEnabled()) {
-            logMsg = String.format("MatchStep=%s TimeElapsedMs2=%d", signature, System.currentTimeMillis() - startTime);
-            if (trackId != null) {
-                logMsg += " RootOperationUID=" + trackId;
-            }
-            log.debug(logMsg);
-        }
         return retVal;
     }
 
