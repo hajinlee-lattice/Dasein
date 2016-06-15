@@ -182,8 +182,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(),
-                sourceFile.getName(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
+                sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
                         sourceFile.getName()), //

@@ -185,7 +185,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s", getRestAPIHostPort(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
+                sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);

@@ -36,7 +36,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private static final Log log = LogFactory.getLog(ScoringJobServiceImpl.class);
 
     @Value("${pls.scoring.use.rtsapi}")
-    private boolean useRtsApi;
+    private boolean useRtsApiDefaultValue;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -113,6 +113,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public String scoreTestingData(String modelId, String fileName, Boolean useRts) {
 
+        boolean useRtsApi = useRtsApiDefaultValue;
         if (useRts != null) {
             useRtsApi = useRts.booleanValue();
         }
@@ -125,6 +126,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public String scoreTrainingData(String modelId, Boolean useRts) {
 
+        boolean useRtsApi = useRtsApiDefaultValue;
         if (useRts != null) {
             useRtsApi = useRts.booleanValue();
         }
