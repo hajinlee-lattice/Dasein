@@ -18,6 +18,7 @@
         <module>le-api/pom-api-tc-rpm.xml</module>
         <module>le-job/pom-job-tc-rpm.xml</module>
         <module>le-config/pom-config-rpm.xml</module>
+        <module>le-config/pom-config-tc-rpm.xml</module>
         <module>le-oauth2/pom-oauth2-tc-rpm.xml</module>
         <module>le-scoringapi/pom-scoringapi-tc-rpm.xml</module>
         <module>le-playmaker/pom-playmaker-tc-rpm.xml</module>

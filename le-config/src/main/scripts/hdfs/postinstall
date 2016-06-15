@@ -1,0 +1,35 @@
+#!/bin/bash -x
+source /etc/profile
+echo "getting environment information"
+echo $LE_ENVIRONMENT
+echo $LE_STACK
+echo $STACK_PROFILE
+
+RPMFILE=`ls /tmp/le-config-hdfs-rpm-*.rpm`
+VERSION=`echo $RPMFILE | cut -d \- -f 5`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
+
+if [[ $SNAPSHOT = SNAPSHOT* ]]
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
+if [ ! -z "$LE_STACK" -a "$LE_STACK" != " " ]; then
+    VERSION=${LE_STACK}/${VERSION}
+fi
+
+echo $VERSION
+
+echo "replace tokens"
+cd /tmp/ledp/$LE_ENVIRONMENT
+
+python replace_token.py -d /tmp/ledp/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+
+su -l yarn -c "hdfs dfs -mkdir -p /app/${VERSION}/conf"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
+
+echo "cleaning up"
+rm -rf /tmp/ledp
+
+echo "finishing"
+hdfs dfs -ls /app/${VERSION}/conf

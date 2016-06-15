@@ -50,7 +50,7 @@ do
 done
 wait
 
-for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld'
+for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld' 'config|cfgdpl'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
