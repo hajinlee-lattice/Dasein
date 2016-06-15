@@ -40,7 +40,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
 
     abstract TransformationConfiguration createTransformationConfiguration();
 
-    @BeforeMethod(groups = "collection")
+    @BeforeMethod(groups = {"collection", "deployment"})
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -48,7 +48,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
         progressEntityMgr = getProgressEntityMgr();
     }
 
-    @AfterMethod(groups = "collection")
+    @AfterMethod(groups = {"collection", "deployment"})
     public void tearDown() throws Exception {
     }
 
