@@ -46,7 +46,7 @@
                         <scriptFile>src/main/scripts/hdfs/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/scritps/hdfs/postinstall</scriptFile>
+                        <scriptFile>src/main/scripts/hdfs/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>

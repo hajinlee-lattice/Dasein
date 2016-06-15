@@ -43,7 +43,7 @@
                         <scriptFile>src/main/scripts/tomcat/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/scritps/tomcat/postinstall</scriptFile>
+                        <scriptFile>src/main/scripts/tomcat/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
