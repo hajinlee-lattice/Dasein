@@ -34,7 +34,7 @@
                             <filemode>777</filemode>
                             <sources>
                                 <source>
-                                    <location>conf</location>
+                                    <location>conf/env</location>
                                 </source>
                                 <source>
                                     <location>src/main/python/replace_token.py</location>

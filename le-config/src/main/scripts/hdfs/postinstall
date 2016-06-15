@@ -21,12 +21,12 @@ fi
 echo $VERSION
 
 echo "replace tokens"
-cd /tmp/ledp/conf/$LE_ENVIRONMENT
+cd /tmp/ledp/$LE_ENVIRONMENT
 
-python replace_token.py -d /tmp/ledp/conf/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+python replace_token.py -d /tmp/ledp/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
 
 su -l yarn -c "hdfs dfs -mkdir -p /app/${VERSION}/conf"
-su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/conf/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
 
 echo "cleaning up"
 rm -rf /tmp/ledp

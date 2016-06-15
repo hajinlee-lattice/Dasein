@@ -6,7 +6,7 @@ echo $LE_STACK
 
 echo "copying files from temporary folders"
 mkdir -p /etc/ledp
-cp /tmp/ledp/conf/$LE_ENVIRONMENT/*.properties /etc/ledp/
+cp /tmp/ledp/$LE_ENVIRONMENT/*.properties /etc/ledp/
 chmod 755 /etc/ledp/*
 
 echo "cleaning up"
