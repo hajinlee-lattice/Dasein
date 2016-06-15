@@ -49,10 +49,10 @@
                                 type="submit" 
                                 data-ng-click="loginClick()" 
                                 class="button orange-button"
-                                ng-disabled="loading">
+                                ng-disabled="loginInProgess">
                             {{ResourceUtility.getString('LOGIN_LABEL')}}
                         </button>
-                        <i ng-show="loading" class="fa fa-spinner fa-pulse fa-fw"></i>
+                        <i ng-show="loginInProgess" class="fa fa-spinner fa-pulse fa-fw"></i>
                         <div class="secondary-actions">
                             <a data-toggle="modal" href="#myModal" data-ng-click="forgotPasswordClick($event)">
                                 {{ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}

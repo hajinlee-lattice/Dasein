@@ -27,7 +27,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.password = "";
     $scope.loginMessage = null;
     $scope.loginErrorMessage = null;
-    $scope.loading = false;
     $scope.showLoginError = false;
     $scope.showSuccessMessage = false;
     $scope.successMessage = "";
@@ -72,7 +71,6 @@ angular.module('mainApp.login.controllers.LoginController', [
             } else {
                 // Need to fail gracefully if we get no service response at all
                 $scope.showLoginHeaderMessage(result.errorMessage);
-                $scope.loading = false;
             }
         });
     };
