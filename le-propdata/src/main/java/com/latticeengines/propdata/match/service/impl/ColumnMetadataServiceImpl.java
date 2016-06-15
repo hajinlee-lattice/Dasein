@@ -119,6 +119,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
             if (columnMetadata.getDiscretizationStrategy() != null) {
                 fieldBuilder = fieldBuilder.prop("DiscretizationStrategy", columnMetadata.getDiscretizationStrategy());
             }
+            fieldBuilder = fieldBuilder.prop("Nullable", "true");
             String dataType = columnMetadata.getDataType();
             Schema.Type type = getAvroTypeFromSqlServerDataType(dataType);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);
