@@ -128,31 +128,35 @@ class LPCheckVersion( StepBase ):
       if type == 'MKTO':
         #s = re.search('queryColumnName=\"Score\" fsColumnName=\"(.*?)\"', str)
         mkto_d = re.search('queryColumnName=\"(.*?)Date(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
-        Sub_mktostr_cnt = str.find('fsColumnName=\"'+mkto_d.group(3)+'\"')
-        Sub_mktostr_cut = str[Sub_mktostr_cnt-30:Sub_mktostr_cnt+30]
-        str = str.replace(Sub_mktostr_cut,'')
-        s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
+        if mkto_d:
+          Sub_mktostr_cnt = str.find('fsColumnName=\"'+mkto_d.group(3)+'\"')
+          Sub_mktostr_cut = str[Sub_mktostr_cnt-30:Sub_mktostr_cnt+30]
+          str = str.replace(Sub_mktostr_cut,'')
+          s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
       elif type == 'ELQ':
         #s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', str)
         elqs_d = re.search('queryColumnName=\"(.*?)Date(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
-        Sub_elqstr_cnt = str.find('fsColumnName=\"'+elqs_d.group(3)+'\"')
-        Sub_elqstr_cut = str[Sub_elqstr_cnt-30:Sub_elqstr_cnt+30]
-        str = str.replace(Sub_elqstr_cut,'')
-        s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
+        if elqs_d:
+         Sub_elqstr_cnt = str.find('fsColumnName=\"'+elqs_d.group(3)+'\"')
+         Sub_elqstr_cut = str[Sub_elqstr_cnt-30:Sub_elqstr_cnt+30]
+         str = str.replace(Sub_elqstr_cut,'')
+         s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
       elif type == 'SFDCLead':
         #s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCLeadFromTargetQuery(str))
         sfdc_l = re.search('queryColumnName=\"(.*?)Date(.*?)\" fsColumnName=\"(.*?)\" formatter=', self.getSFDCLeadFromTargetQuery(str))
-        Sub_sfdcstr_cnt = self.getSFDCLeadFromTargetQuery(str).find('fsColumnName=\"'+sfdc_l.group(3)+'\"')
-        Sub_sfdcstr_cut = self.getSFDCLeadFromTargetQuery(str)[Sub_sfdcstr_cnt-30:Sub_sfdcstr_cnt+30]
-        str = self.getSFDCLeadFromTargetQuery(str).replace(Sub_sfdcstr_cut,'')
-        s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
+        if sfdc_l:
+         Sub_sfdcstr_cnt = self.getSFDCLeadFromTargetQuery(str).find('fsColumnName=\"'+sfdc_l.group(3)+'\"')
+         Sub_sfdcstr_cut = self.getSFDCLeadFromTargetQuery(str)[Sub_sfdcstr_cnt-30:Sub_sfdcstr_cnt+30]
+         str = self.getSFDCLeadFromTargetQuery(str).replace(Sub_sfdcstr_cut,'')
+         s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
       elif type == 'SFDCContact':
         #s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
         sfdc_c = re.search('queryColumnName=\"(.*?)Date(.*?)\" fsColumnName=\"(.*?)\" formatter=', self.getSFDCContactFromTargetQuery(str))
-        Sub_sfdcstr_cnt = self.getSFDCContactFromTargetQuery(str).find('fsColumnName=\"'+sfdc_c.group(3)+'\"')
-        Sub_sfdcstr_cut = self.getSFDCContactFromTargetQuery(str)[Sub_sfdcstr_cnt-30:Sub_sfdcstr_cnt+30]
-        str = self.getSFDCContactFromTargetQuery(str).replace(Sub_sfdcstr_cut,'')
-        s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
+        if sfdc_c:
+         Sub_sfdcstr_cnt = self.getSFDCContactFromTargetQuery(str).find('fsColumnName=\"'+sfdc_c.group(3)+'\"')
+         Sub_sfdcstr_cut = self.getSFDCContactFromTargetQuery(str)[Sub_sfdcstr_cnt-30:Sub_sfdcstr_cnt+30]
+         str = self.getSFDCContactFromTargetQuery(str).replace(Sub_sfdcstr_cut,'')
+         s = re.search('queryColumnName=\"(.*?)Score(.*?)\" fsColumnName=\"(.*?)\" formatter=', str)
 
     if not s:
       print ( 'Get the Score Field failed' )
