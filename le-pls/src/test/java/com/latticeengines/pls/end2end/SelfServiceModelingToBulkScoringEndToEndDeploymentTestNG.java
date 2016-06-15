@@ -64,6 +64,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private SourceFile sourceFile;
 
+    private String jobType;
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
@@ -80,9 +82,10 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
         assertNotNull(applicationId);
+        jobType = "scoreWorkflow";
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingData", timeOut = 60000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingData", timeOut = 120000)
     public void testJobIsListed() {
         boolean any = false;
         while (true) {
@@ -95,8 +98,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 @Override
                 public boolean apply(@Nullable Job job) {
                     String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-                    return job.getJobType() != null && job.getJobType().equals("scoreWorkflow")
-                            && modelId.equals(jobModelId);
+                    return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId);
                 }
             });
 
@@ -190,9 +192,10 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score testing data applicationId = %s", applicationId));
         assertNotNull(applicationId);
+        jobType = "importMatchAndScoreWorkflow";
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 60000, enabled = true)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 120000, enabled = true)
     public void testScoringTestDataJobIsListed() {
         testJobIsListed();
     }
