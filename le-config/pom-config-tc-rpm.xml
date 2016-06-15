@@ -40,10 +40,10 @@
                         </mapping>
                     </mappings>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/scripts/tomcat/scripts/preinstall</scriptFile>
+                        <scriptFile>src/main/scripts/tomcat/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/scritps/tomcat/scripts/postinstall</scriptFile>
+                        <scriptFile>src/main/scritps/tomcat/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>

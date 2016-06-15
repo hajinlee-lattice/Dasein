@@ -43,10 +43,10 @@
                         </mapping>
                     </mappings>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/scripts/hdfs/scripts/preinstall</scriptFile>
+                        <scriptFile>src/main/scripts/hdfs/preinstall</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/scritps/hdfs/scripts/postinstall</scriptFile>
+                        <scriptFile>src/main/scritps/hdfs/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
