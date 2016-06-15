@@ -30,7 +30,7 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/ledp/conf</directory>
+                            <directory>/tmp/ledp</directory>
                             <filemode>777</filemode>
                             <sources>
                                 <source>
