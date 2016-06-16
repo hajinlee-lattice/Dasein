@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import org.apache.commons.logging.Log;
@@ -196,6 +197,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setFieldType(UserDefinedType.TEXT);
             }
         }
     }
