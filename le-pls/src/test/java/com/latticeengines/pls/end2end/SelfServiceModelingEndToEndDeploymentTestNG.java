@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -123,6 +124,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             if (mapping.getMappedField() == null) {
                 mapping.setMappedToLatticeField(false);
                 mapping.setMappedField(mapping.getUserField().replace(' ', '_'));
+            }
+            if (mapping.getMappedField().startsWith("Activity_Count")) {
+                mapping.setFieldType(UserDefinedType.NUMBER);
             }
         }
 

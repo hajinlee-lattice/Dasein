@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Sets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,6 +36,12 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
+
+    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[]{"Interest_esb__c", "Interest_tcat__c",
+            "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+            "HasAnypointLogin", "HasCEDownload", "HasEEDownload"});
+    private static final Set<String> STR_SET = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+            "Source_Detail__c", "Cloud_Plan__c" });
 
     private String csvPath;
     private SchemaInterpretation schema;
@@ -352,6 +359,15 @@ public class MetadataResolver {
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
+        String mappedFieldName = columnHeaderName.replaceAll("[^A-Za-z0-9_]", "_");
+        if (mappedFieldName.startsWith("Activity_Count_")){
+            return UserDefinedType.NUMBER;
+        } else if (BOOLEAN_SET.contains(mappedFieldName)) {
+            return UserDefinedType.BOOLEAN;
+        } else if (STR_SET.contains(mappedFieldName)) {
+            return UserDefinedType.TEXT;
+        }
+
         UserDefinedType fundamentalType = null;
 
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
