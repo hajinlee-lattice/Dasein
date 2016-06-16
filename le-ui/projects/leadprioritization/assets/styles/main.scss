@@ -1,4 +1,3 @@
-@import "../../app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidgetStyles.scss";
 @import "../../app/create/views/CSVImportStyles.scss";
 @import "../../app/jobs/status/StatusStyles.scss";
 @import "../../app/navigation/pagination/PaginationStyles";
@@ -228,14 +227,14 @@ Model list title
 }
 
 .model-title h2.edit {
-  right: 0px;
+  right: 5px;
   top: 5px;
-  padding-right: 4px;
+  padding-right: 0;
 }
 
 .model-menu {
   position: absolute;
-  right: 4px;
+  right: 0;
   background: #222;
   padding: 10px 14px;
   width: 143px;

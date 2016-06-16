@@ -59,12 +59,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     });
 
 
-
-
-
-
-
-
     $scope.refineAndCloneClick = function ($event) {
         if ($event != null) {
             $event.stopPropagation();
@@ -197,4 +191,5 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
 
     return directiveDefinitionObject;
+
 });

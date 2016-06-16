@@ -1,3 +1,7 @@
+
+/* 
+Page Level List of Tiles
+======================================================== */
 .list-header {
 	margin-bottom: 20px;
 	.number-of-items {
@@ -5,3 +9,123 @@
 		font-size: 16px;
 	}
 }
+
+
+/* 
+Basic Lists
+========================================================= */
+.unordered-list, .ordered-list { 
+	margin-left: 20px; 
+}
+.unordered-list { 
+	list-style-type: disc; 
+}
+.ordered-list { 
+	list-style: decimal; 
+}
+dl {
+  margin-bottom: 0;
+  font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+}
+dt {
+  float: left;
+  clear: left;
+  text-align: left;
+  width: 50%;
+  text-transform: normal;
+  color: #333;
+  font-size: 1.25em;
+}
+dd {
+  margin: 0 0 0 50%;
+  padding: 0;
+  font-size: 1.25em;
+}
+
+/* 
+Summary Cards
+====================================================== */
+.summary-list {
+	padding: 20px;
+	background: rgba(255, 255, 255, 0.9);
+	color: $dark-gray;
+	min-height: 180px;
+}
+.gray-summary-list {
+	background: $white-gold;
+}
+
+.summary-title {
+	font-size: 14px;
+	text-transform: uppercase;
+	text-align: center;
+	margin-bottom: 8px;
+}
+.summary-list dt {
+	@include media(">large") {
+		float: left;
+		clear: left;
+		text-align: left;
+		width: 60%;
+	}
+}
+.summary-list dt:after {
+	content: ":";
+}
+.summary-list dd {
+	a {
+		color: #497eb8;
+	}
+	@include media(">medium") {
+		margin: 0 0 0 60%;
+		padding: 0;
+		text-align: right;
+	}
+}
+
+/* 
+Statistic Displays
+====================================================== */
+.stats-group:after {
+  display: table;
+  content: "";
+  clear: both;
+}
+.stats-group dl {
+	border-left: #999 solid 1px;
+	padding: 0 0.75em;
+	float: left;
+}
+.four .stats-group dl, .two .stats-group dl {
+  padding: 0 0.5em
+}
+.stats-group dl:first-of-type {
+	border-left: 0;
+	padding-left: 0;
+}
+.stats dt, .stats dd {
+	text-align: left;
+}
+.stats dt {
+	text-transform: uppercase;
+	font-size: 0.8em;
+	margin-bottom: 2px;
+	width: 100%;
+}
+.stats dd {
+	font-size: 2em;
+	line-height: 1;
+  margin: 0;
+}
+.black-summary-list.stats dd {
+  color: #fff;
+}
+
+/* Standardize this across HTML
+================================================== */
+.stats dd.small {
+  font-size: 1em;
+}
+
+
+

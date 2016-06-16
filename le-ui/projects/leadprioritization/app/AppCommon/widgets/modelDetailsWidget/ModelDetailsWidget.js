@@ -31,10 +31,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
     $scope.modelType = modelDetails[widgetConfig.TypeProperty];
 
-    if ($scope.modelType == 'SalesforceLead') {
-        $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_LEADS_TITLE");
-    } else if ($scope.modelType == 'SalesforceAccount') {
+
+    if ($scope.modelType == 'SalesforceAccount') {
         $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_ACCOUNTS_TITLE");
+    } else {
+        $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_LEADS_TITLE");
     }
 
     
