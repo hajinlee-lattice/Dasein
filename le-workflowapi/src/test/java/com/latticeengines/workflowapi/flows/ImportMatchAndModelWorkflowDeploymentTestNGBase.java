@@ -101,6 +101,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             };
             FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort();
             this.mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);
+            metadataResolver.setFieldMappingDocument(fieldMappingDocument);
             metadataResolver.calculateBasedOnFieldMappingDocument();
 
             Table table = metadataResolver.getMetadata();
@@ -112,14 +113,6 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             return internalResourceProxy.findSourceFileByName(sourceFile.getName(), tenant.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void mapFieldToCustomeFieldsWithSameName(FieldMappingDocument fieldMappingDocument) {
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-            }
         }
     }
 
@@ -198,4 +191,13 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
         return null;
     }
+
+    private void mapFieldToCustomeFieldsWithSameName(FieldMappingDocument fieldMappingDocument) {
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+            }
+        }
+    }
+
 }
