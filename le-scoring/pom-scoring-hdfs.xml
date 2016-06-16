@@ -24,7 +24,7 @@
 
     <profiles>
         <profile>
-            <id>development</id>
+            <id>devcluster</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
@@ -34,31 +34,6 @@
             </activation>
             <properties>
                 <scoring.properties.path>conf/env/devcluster</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/intcluster</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>qa</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>qacluster</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/qacluster</scoring.properties.path>
             </properties>
         </profile>
         <profile>
@@ -86,51 +61,27 @@
             </properties>
         </profile>
         <profile>
-            <id>production</id>
+            <id>prodclustera</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>prodcluster</value>
+                    <value>prodclustera</value>
                 </property>
             </activation>
             <properties>
-                <scoring.properties.path>conf/env/prodcluster</scoring.properties.path>
+                <scoring.properties.path>conf/env/prodclustera</scoring.properties.path>
             </properties>
         </profile>
         <profile>
-            <id>productiona</id>
+            <id>prodclusterb</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>productiona</value>
+                    <value>prodclusterb</value>
                 </property>
             </activation>
             <properties>
-                <scoring.properties.path>conf/env/productiona</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>productionb</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>productionb</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/productionb</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>buildmachine</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>buildmachine</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/buildmachine</scoring.properties.path>
+                <scoring.properties.path>conf/env/prodclusterb</scoring.properties.path>
             </properties>
         </profile>
     </profiles>
