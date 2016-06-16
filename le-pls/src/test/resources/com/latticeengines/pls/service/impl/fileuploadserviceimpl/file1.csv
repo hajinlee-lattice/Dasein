@@ -1,5 +1,1 @@
-Account iD,website,Event,Billing Country,ACCOUNT Name,Some Column,Last Modified Date
-1,a,b,c,d,e,10-20-2014
-2,f,g,h,i,j,10-20-2014
-3,k,l,m,n,o,10-20-2014
-4,p,q,r,s,t,10-20-2014
+Account iD,website,Event,Billing Country,ACCOUNT Name,Some Column,Last Modified Date,Boolean Column,Number Column,Almost Boolean Column1,a,b,c,d,e,10/20/14,TRUE,1,TRUE2,f,g,h,i,j,10/20/14,FALSE,11.1,FALSE3,k,l,m,n,o,10/20/14,TRUE,22222,TRUE4,p,q,r,s,t,10/20/14,0,4545,not true

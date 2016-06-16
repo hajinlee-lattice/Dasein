@@ -8,6 +8,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -28,8 +31,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
-import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
@@ -105,15 +106,12 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             }
         });
         
-        MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, null,
-                yarnConfiguration);
-        resolver.calculateBasedOnExistingMetadata(table);
-        if (!resolver.isMetadataFullyDefined()) {
-            log.info(sourceFile.getName() + " not fully defined, need to resolve again");
-            List<ColumnTypeMapping> unknown = resolver.getUnknownColumns();
-            resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, unknown, yarnConfiguration);
-            resolver.calculateBasedOnExistingMetadata(table);
-        }
+        MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, null);
+        List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
+        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
+        fieldMappingDocument.setFieldMappings(fieldMappings);
+        resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocument();
         log.info("After resolving table is: " + table.toString());
 
         // Don't dedup on primary key for scoring

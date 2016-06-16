@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFiel
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
-import com.latticeengines.pls.metadata.resolution.NewMetadataResolver;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
-import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -48,56 +46,26 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private MetadataProxy metadataProxy;
 
     @Override
-    public List<ColumnTypeMapping> getUnknownColumns(String sourceFileName) {
-        SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolver resolver = getMetadataResolver(sourceFile, null);
-        resolver.calculate();
-        return resolver.getUnknownColumns();
-    }
-
-    @Override
-    public void resolveMetadata(String sourceFileName, List<ColumnTypeMapping> additionalColumns) {
-        SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolver resolver = getMetadataResolver(sourceFile, additionalColumns);
-        resolver.calculate();
-        if (!resolver.isMetadataFullyDefined()) {
-            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
-        }
-
-        String customerSpace = MultiTenantContext.getTenant().getId().toString();
-
-        if (sourceFile.getTableName() != null) {
-            metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
-        }
-
-        Table table = resolver.getMetadata();
-        table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
-        metadataProxy.createTable(customerSpace, table.getName(), table);
-        sourceFile.setTableName(table.getName());
-        sourceFileService.update(sourceFile);
-    }
-
-    @Override
-    public FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation) {
+    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
             sourceFileService.update(sourceFile);
         }
-        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, schemaInterpretation, null);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, schemaInterpretation, null);
         return resolver.getFieldMappingsDocumentBestEffort();
     }
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        NewMetadataResolver resolver = getNewMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(), fieldMappingDocument);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(), fieldMappingDocument);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
-        resolver.resolveBasedOnFieldMappingDocument();
+        resolver.calculateBasedOnFieldMappingDocument();
 
         String customerSpace = MultiTenantContext.getTenant().getId().toString();
 
@@ -244,13 +212,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return sourceFile;
     }
 
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile, List<ColumnTypeMapping> additionalColumns) {
-        return new MetadataResolver(sourceFile.getPath(), //
-                sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
-    }
-
-    private NewMetadataResolver getNewMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-                                                       FieldMappingDocument fieldMappingDocument) {
-        return new NewMetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, FieldMappingDocument fieldMappingDocument) {
+        return new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
     }
 }

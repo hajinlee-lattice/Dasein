@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -33,7 +35,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
@@ -96,14 +97,12 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
             MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(),
-                    sourceFile.getSchemaInterpretation(), null, yarnConfiguration);
-            metadataResolver.calculate();
-            if (!metadataResolver.isMetadataFullyDefined()) {
-                List<ColumnTypeMapping> unknown = metadataResolver.getUnknownColumns();
-                metadataResolver = new MetadataResolver(sourceFile.getPath(), sourceFile.getSchemaInterpretation(),
-                        unknown, yarnConfiguration);
-                metadataResolver.calculate();
-            }
+                    sourceFile.getSchemaInterpretation(), yarnConfiguration, null) {
+            };
+            FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort();
+            this.mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);
+            metadataResolver.calculateBasedOnFieldMappingDocument();
+
             Table table = metadataResolver.getMetadata();
             System.out.println(table);
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
@@ -113,6 +112,14 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             return internalResourceProxy.findSourceFileByName(sourceFile.getName(), tenant.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void mapFieldToCustomeFieldsWithSameName(FieldMappingDocument fieldMappingDocument) {
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+            }
         }
     }
 

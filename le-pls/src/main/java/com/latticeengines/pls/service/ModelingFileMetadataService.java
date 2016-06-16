@@ -8,17 +8,12 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
-import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 
 public interface ModelingFileMetadataService {
 
-    FieldMappingDocument mapFieldDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation);
+    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation);
 
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
-
-    List<ColumnTypeMapping> getUnknownColumns(String sourceFileName);
-
-    void resolveMetadata(String sourceFileName, List<ColumnTypeMapping> unknownColumns);
 
     InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName);
 

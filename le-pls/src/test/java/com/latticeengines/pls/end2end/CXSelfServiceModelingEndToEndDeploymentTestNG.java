@@ -220,7 +220,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/fileuploads/unnamed?schema=%s&displayName=%s", getRestAPIHostPort(),
+                String.format("%s/pls/models/uploadfile/unnamed?schema=%s&displayName=%s", getRestAPIHostPort(),
                         schemaInterpretation, "SelfServiceModeling Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -230,7 +230,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     @SuppressWarnings("rawtypes")
     public void resolveMetadata() {
         ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getRestAPIHostPort(),
+                String.format("%s/pls/models/uploadfile/%s/metadata/unknown", getRestAPIHostPort(),
                         sourceFile.getName()), ResponseDocument.class);
         @SuppressWarnings("unchecked")
         List<LinkedHashMap<String, String>> unknownColumns = new ObjectMapper().convertValue(response.getResult(),
@@ -242,7 +242,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
             unknownColumnHandler.apply(unknownColumns);
         }
         response = restTemplate.postForObject(
-                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getRestAPIHostPort(),
+                String.format("%s/pls/models/uploadfile/%s/metadata/unknown", getRestAPIHostPort(),
                         sourceFile.getName()), unknownColumns, ResponseDocument.class);
     }
 

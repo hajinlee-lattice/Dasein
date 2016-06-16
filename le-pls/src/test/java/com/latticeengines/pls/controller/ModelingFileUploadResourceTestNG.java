@@ -66,7 +66,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String uri = String.format("/pls/models/fileuploads/unnamed?schema=%s&compressed=%s&displayName=%s",
+            String uri = String.format("/pls/models/uploadfile/unnamed?schema=%s&compressed=%s&displayName=%s",
                     SchemaInterpretation.SalesforceAccount, compressed, displayName);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
@@ -74,7 +74,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
             });
         } else {
             String filename = DateTime.now().getMillis() + ".csv";
-            String uri = String.format("/pls/models/fileuploads?fileName=%s&schema=%s&compressed=%s&displayName=%s",
+            String uri = String.format("/pls/models/uploadfile?fileName=%s&schema=%s&compressed=%s&displayName=%s",
                     filename, SchemaInterpretation.SalesforceAccount, compressed, displayName);
             System.out.println(uri);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,

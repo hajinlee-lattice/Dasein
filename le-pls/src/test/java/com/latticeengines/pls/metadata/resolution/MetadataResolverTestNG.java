@@ -8,12 +8,15 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.apache.avro.Schema.Type;
+import com.latticeengines.domain.exposed.metadata.*;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
@@ -26,12 +29,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
@@ -40,7 +37,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
-    
+
     private static Logger log = Logger.getLogger(MetadataResolverTestNG.class);
 
     @Autowired
@@ -49,6 +46,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     String hdfsPath = "/tmp/test_metadata_resolution";
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
+
+    private static final String ADDITION_COLUMN_1 = "additionalCol1";
+    private static final String ADDITION_COLUMN_2 = "additionalCol2";
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -69,21 +69,23 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     @Test(groups = "functional")
-    public void getUnknownColumns() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, null,
-                yarnConfiguration);
-        resolver.calculate();
+    public void getFieldMappingsTest() {
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
 
-        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column" });
-        List<ColumnTypeMapping> mappings = resolver.getUnknownColumns();
-        assertEquals(mappings.size(), expectedUnknownColumns.size());
-        for (ColumnTypeMapping mapping : mappings) {
-            assertTrue(expectedUnknownColumns.contains(mapping.getColumnName()));
-            assertEquals(mapping.getColumnType(), Type.STRING.name());
+        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column" });
+
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+
+                assertTrue(expectedUnknownColumns.contains(fieldMapping.getUserField()));
+            }
         }
+        resolver.setFieldMappingDocument(fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocument();
 
-        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, mappings, yarnConfiguration);
-        resolver.calculate();
+        assertTrue(resolver.isMetadataFullyDefined());
         Table table = resolver.getMetadata();
 
         assertEquals(table.getAttribute(InterfaceName.Id).getDisplayName(), "Account iD");
@@ -93,40 +95,78 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "ACCOUNT Name");
         assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(), "Last Modified Date");
         assertNull(table.getAttribute(InterfaceName.AnnualRevenue));
+
         Attribute attribute = table.getAttribute("Some_Column");
         assertEquals(attribute.getTags().size(), 1);
         assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
         assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
+
+        attribute = table.getAttribute("Boolean_Column");
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString());
+        attribute = table.getAttribute("Number_Column");
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.NUMBER.getAvroType().toString());
+        attribute = table.getAttribute("Almost_Boolean_Column");
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString());
+
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);
             assertEquals(a.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
             assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         }
-
-        ColumnTypeMapping additionalCol1 = new ColumnTypeMapping();
-        additionalCol1.setColumnName("additionalCol1");
-        additionalCol1.setColumnType("boolean");
-        ColumnTypeMapping additionalCol2 = new ColumnTypeMapping();
-        additionalCol2.setColumnName("additionalCol2");
-        additionalCol2.setColumnType("Double");
-        mappings.add(additionalCol1);
-        mappings.add(additionalCol2);
-        resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, mappings, yarnConfiguration);
-        resolver.calculate();
-        table = resolver.getMetadata();
-        attribute = table.getAttribute("additionalCol1");
-        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);
-        assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
-        attribute = table.getAttribute("additionalCol2");
-        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_NUMERIC);
-        assertEquals(attribute.getStatisticalType(), ModelingMetadata.RATIO_STAT_TYPE);
-
+        assertTrue(resolver.isMetadataFullyDefined());
     }
 
     @Test(groups = "functional")
-    public void testcalculateBasedOnExistingMetadata() throws IOException {
+    public void getMappingFromDocument_mapUnknownColumnToLatticeAttr_assertMappedCorrectly() {
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equals("Some Column")) {
+                    fieldMapping.setMappedToLatticeField(true);
+                    fieldMapping.setMappedField("Industry");
+                } else {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                }
+            }
+        }
+
+        resolver.setFieldMappingDocument(fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocument();
+
+        Table table = resolver.getMetadata();
+        assertEquals(table.getAttribute(InterfaceName.Industry).getDisplayName(), "Some Column");
+    }
+
+    @Test(groups = "functional")
+    public void getMappingFromDocument_setColumnToSpecificType_assertTypeIsSet() {
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField().equals("Almost Boolean Column")) {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setFieldType(UserDefinedType.BOOLEAN);
+                } else {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                }
+            }
+        }
+
+        resolver.setFieldMappingDocument(fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocument();
+        assertTrue(resolver.isMetadataFullyDefined());
+
+        Table table = resolver.getMetadata();
+        Attribute attribute = table.getAttribute("Almost_Boolean_Column");
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString());
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateBasedOnExistingMetadata() throws IOException {
         String path = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json").getPath();
 
@@ -142,7 +182,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
                 if (schema.getAttribute(attr.getName()) == null
                         && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
-                                ApprovedUsage.NONE.toString())) //
+                        ApprovedUsage.NONE.toString())) //
                         || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
                     log.info("Removing attr:" + attr.getName());
                     return true;
@@ -152,24 +192,17 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         });
         assertEquals(table.getAttributes().size(), 31);
 
-        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead, null,
-                yarnConfiguration);
-        resolver.calculateBasedOnExistingMetadata(table);
-        assertEquals(table.getAttributes().size(), 31);
-
-        if (!resolver.isMetadataFullyDefined()) {
-            List<ColumnTypeMapping> unknown = resolver.getUnknownColumns();
-            resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead, unknown,
-                    yarnConfiguration);
-            resolver.calculateBasedOnExistingMetadata(table);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead, yarnConfiguration, null);
+        List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
+        boolean foundSomeColumn = false;
+        for (FieldMapping fieldMapping : fieldMappings) {
+            log.info(String.format("The field mapping is: %s", fieldMapping.getUserField()));
+            if (fieldMapping.getUserField().equals("Some Column")) {
+                foundSomeColumn = true;
+            }
         }
-        assertNotNull(table.getAttributeFromDisplayName("Some Column"));
-        assertEquals(table.getAttributes().size(), 32);
-    }
-
-    @Test(groups = "functional")
-    public void testDuplicateHeadersFail() {
-
+        assertTrue(foundSomeColumn);
+        assertEquals(fieldMappings.size(), 32);
     }
 
     @AfterClass(groups = "functional")
@@ -177,3 +210,4 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 }
+
