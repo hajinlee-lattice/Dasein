@@ -59,8 +59,6 @@ public class StatusServiceImpl implements StatusService {
     private void postConstruct() {
         healthUrls.put("admin", adminHealthUrl);
         healthUrls.put("pls", plsHealthUrl);
-        healthUrls.put("oauth2", oauth2HealthUrl);
-        healthUrls.put("playmaker", playmakerHealthUrl);
         healthUrls.put("scoringapi", scoringapiHealthUrl);
         healthUrls.put("microservice", microserviceHealthUrl);
     }
