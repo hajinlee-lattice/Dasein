@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.review.ModelReviewResults;
-import com.latticeengines.domain.exposed.modeling.review.RuleRemediationEnablement;
+import com.latticeengines.domain.exposed.modeling.review.DataRuleConfiguration;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -72,13 +72,13 @@ public class ModelProxy extends BaseRestApiProxy implements ModelInterface {
     }
 
     @Override
-    public RuleRemediationEnablement getRuleEnablements(String modelId) {
+    public DataRuleConfiguration getRuleEnablements(String modelId) {
         String url = constructUrl("reviewenablements/{modelId}", modelId);
-        return get("getRuleEnablements", url, RuleRemediationEnablement.class);
+        return get("getRuleEnablements", url, DataRuleConfiguration.class);
     }
 
     @Override
-    public Boolean setRuleEnablements(String modelId, RuleRemediationEnablement enablement) {
+    public Boolean setRuleEnablements(String modelId, DataRuleConfiguration enablement) {
         String url = constructUrl("/reviewenablements/{modelId}", modelId);
         put("setRuleEnablements", url, enablement);
         return true;

@@ -3,18 +3,19 @@ package com.latticeengines.domain.exposed.modeling.review;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 
 public class ColumnRuleResult extends BaseRuleResult {
 
-    private Set<String> columnNames;
+    private Set<AttributeMetadata> columns;
 
     @JsonProperty
-    public Set<String> getColumnNames() {
-        return columnNames;
+    public Set<AttributeMetadata> getColumnNames() {
+        return columns;
     }
 
     @JsonProperty
-    public void setColumnNames(Set<String> columnNames) {
-        this.columnNames = columnNames;
+    public void setColumnNames(Set<AttributeMetadata> columnNames) {
+        this.columns = columnNames;
     }
 }

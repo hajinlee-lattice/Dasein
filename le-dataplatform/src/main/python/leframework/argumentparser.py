@@ -164,7 +164,7 @@ class ArgumentParser(object):
         included = []
         self.stringColNames = set()
 
-        scoringColumns = set(self.features) | set([self.target]) | set(self.keys) 
+        scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
         scoringColumns |= set([self.revenueColumn]) if self.revenueColumn != None else set()
         nonScoringColumns = set(self.readouts) | set(self.samples.values())
 
@@ -187,13 +187,13 @@ class ArgumentParser(object):
 
         tmpData = []
 
-        reader = None 
+        reader = None
         filedescriptor = open(dataFileName, 'rb')
         if self.isAvro():
             reader = avro.reader(filedescriptor)
         else:
             reader = csv.reader(filedescriptor)
-        
+
         numberOfNullTarget = 0
         for row in reader:
             rowlist = list(reservedFieldDefaultValues) if postProcessClf else []
@@ -225,10 +225,10 @@ class ArgumentParser(object):
         self.__populateSchemaWithMetadata(self.getSchema(), self)
 
         dataFrameColumns = reservedFields + includedNames if postProcessClf else includedNames
-        
+
         if len(tmpData) == 0:
             return pd.DataFrame(columns=dataFrameColumns)
-        
+
         return pd.DataFrame(tmpData, columns=dataFrameColumns)
 
     def __populateSchemaWithMetadata(self, schema, parser):
@@ -236,7 +236,9 @@ class ArgumentParser(object):
         schema["original_features"] = self.metadataSchema["features"]
         schema["keys"] = parser.getKeys()
         if "data_profile" in self.metadataSchema:
-            if schema["data_profile"].rfind('/') > 0 : schema["diagnostics_path"] = schema["data_profile"][0:schema["data_profile"].rfind('/')+1]
+            if schema["data_profile"].rfind('/') > 0:
+                schema["diagnostics_path"] = schema["data_profile"][0:schema["data_profile"].rfind('/')+1]
+                schema["datarules_path"] = schema["diagnostics_path"]
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"])
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["target"] = self.target
@@ -245,7 +247,7 @@ class ArgumentParser(object):
         schema["samples"] = self.samples
         schema["stringColumns"] = self.stringColNames
         schema["fields"] = { k['name']:k['type'][0] for k in self.fields }
-        
+
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
 

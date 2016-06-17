@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -79,6 +80,7 @@ public class ModelingServiceExecutor {
         loadData();
         sample();
         profile();
+        review();
         model();
     }
 
@@ -142,6 +144,21 @@ public class ModelingServiceExecutor {
         AppSubmission submission = modelProxy.profile(config);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
+        waitForAppId(appId);
+        return appId;
+    }
+
+    public String review() throws Exception {
+        DataReviewConfiguration config = new DataReviewConfiguration();
+        config.setCustomer(builder.getCustomer());
+        config.setTable(builder.getTable());
+        config.setMetadataTable(builder.getMetadataTable());
+        config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
+        config.setSamplePrefix("all");
+        config.setTargets(Arrays.asList(builder.getTargets()));
+        AppSubmission submission = modelProxy.review(config);
+        String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for review: %s", appId));
         waitForAppId(appId);
         return appId;
     }
@@ -490,7 +507,7 @@ public class ModelingServiceExecutor {
             this.setPredefinedSelectionVersion(version);
             return this;
         }
-        
+
         public Builder metadataArtifacts(Map<ArtifactType, String> metadataArtifacts) {
             this.setMetadataArtifacts(metadataArtifacts);
             return this;
@@ -819,11 +836,11 @@ public class ModelingServiceExecutor {
         public JobProxy getJobProxy() {
             return jobProxy;
         }
-        
+
         public void setMetadataArtifacts(Map<ArtifactType, String> metadataArtifacts) {
             this.metadataArtifacts = metadataArtifacts;
         }
-        
+
         public Map<ArtifactType, String> getMetadataArtifacts() {
             return metadataArtifacts;
         }

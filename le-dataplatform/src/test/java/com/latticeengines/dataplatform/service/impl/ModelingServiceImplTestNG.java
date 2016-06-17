@@ -36,10 +36,10 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
-import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
@@ -80,7 +80,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     protected static final Log log = LogFactory.getLog(ModelingServiceImplTestNG.class);
 
     private String customer = "DELL-" + suffix;
-    
+
     @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -109,12 +109,11 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         //
         model = produceModel(modelDef);
     }
-    
+
     @AfterClass (groups = {"functional", "functional.production"})
     public void tearDown() throws Exception{
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(customerBaseDir + "/" + customer), true);
-        
     }
 
     private Model produceModel(ModelDefinition modelDef) {
@@ -181,7 +180,27 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "profileData" })
+    public void reviewData() throws Exception {
+        DataReviewConfiguration config = new DataReviewConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+        config.setSamplePrefix("all");
+        config.setTargets(model.getTargetsList());
+        List<String> excludeList = new ArrayList<>();
+        excludeList.add("IDX");
+        excludeList.add("CustomerID");
+        excludeList.add("LeadID");
+        excludeList.add("Target_LatitudeOptiplex_Retention_PCA_PPA_Customer");
+        config.setExcludeColumnList(excludeList);
+        ApplicationId appId = modelingService.reviewData(config);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "reviewData" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -239,7 +258,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = {"functional"}, dependsOnMethods = { "submitModel" })
+    @Test(groups = {"functional"}, enabled=true, dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {
         // clean up: this test case expects no previous throttle
@@ -275,7 +294,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = {"functional"}, dependsOnMethods = { "throttleImmediate" })
+    @Test(groups = {"functional"}, enabled=true, dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(false);

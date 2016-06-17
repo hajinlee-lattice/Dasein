@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.review.DataRuleConfiguration;
 import com.latticeengines.domain.exposed.modeling.review.ModelReviewResults;
-import com.latticeengines.domain.exposed.modeling.review.RuleRemediationEnablement;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 
 @Api(value = "models", description = "REST resource for machine learning models")
@@ -120,15 +120,15 @@ public class ModelResource implements ModelInterface {
     @RequestMapping(value = "/reviewenablements/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get model review rule enablements for a model")
-    public RuleRemediationEnablement getRuleEnablements(@PathVariable String modelId) {
-        return modelReviewService.getRuleRemediationEnablement(modelId);
+    public DataRuleConfiguration getRuleEnablements(@PathVariable String modelId) {
+        return modelReviewService.getDataRuleConfiguration(modelId);
     }
 
     @RequestMapping(value = "/reviewenablements/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Set model review rule enablements for a model")
-    public Boolean setRuleEnablements(@PathVariable String modelId, @RequestBody RuleRemediationEnablement enablement) {
-        modelReviewService.setRuleRemediationEnablement(modelId, enablement);
+    public Boolean setRuleEnablements(@PathVariable String modelId, @RequestBody DataRuleConfiguration ruleConfig) {
+        modelReviewService.setDataRuleConfiguration(modelId, ruleConfig);
         return true;
     }
 

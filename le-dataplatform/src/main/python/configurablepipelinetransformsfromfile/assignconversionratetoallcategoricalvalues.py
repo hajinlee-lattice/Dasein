@@ -40,7 +40,7 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
                 if column in dataFrame.columns:
                     self.currentColumn = column
                     outputFrame[column] = self.__assignConversionRateToCategoricalColumns(column, dataFrame, self.targetColumn)
-                    
+
                     logger.info("self.assignConversionRateMapping " + str(self.categoricalColumnMapping))
 
             self.trainingMode = True

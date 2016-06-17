@@ -1,13 +1,25 @@
 {
   "columnTransformFiles": {
-    "PivotStep": {
+    "RemediateDataRulesStep": {
       "KeyWhenSortingByAscending": "1",
+      "Name": "remediatedatarulesstep",
+      "MainClassName": "RemediateDataRulesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "enabledRules": []
+      },
+      "ColumnTransformFilePath": "remediatedatarulesstep.py"
+    },
+    "PivotStep": {
+      "KeyWhenSortingByAscending": "2",
       "Name": "pivotstep",
       "MainClassName": "PivotStep",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
-      "NamedParameterListToInit": { 
-        "columnsToPivot": "emptyDictionary", 
+      "NamedParameterListToInit": {
+        "columnsToPivot": "emptyDictionary",
         "categoricalColumns": "categoricalColumns",
         "dataprofile": "dataprofile",
         "pvalueThreshold": 0.10,
@@ -17,7 +29,7 @@
       "ColumnTransformFilePath": "pivotstep.py"
     },
     "EnumeratedColumnTransformStep": {
-      "KeyWhenSortingByAscending": "2",
+      "KeyWhenSortingByAscending": "3",
       "Name": "enumeratedcolumntransformstep",
       "MainClassName": "EnumeratedColumnTransformStep",
       "UniqueColumnTransformName": "",
@@ -30,7 +42,7 @@
       "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": "3",
+      "KeyWhenSortingByAscending": "4",
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
       "UniqueColumnTransformName": "",
@@ -41,7 +53,7 @@
       "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": "4",
+      "KeyWhenSortingByAscending": "5",
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
       "UniqueColumnTransformName": "",
@@ -56,13 +68,13 @@
       "ColumnTransformFilePath": "imputationstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": "5",
+      "KeyWhenSortingByAscending": "6",
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {},
       "ColumnTransformFilePath": "exportdfstep.py"
-    } 
+    }
   }
 }

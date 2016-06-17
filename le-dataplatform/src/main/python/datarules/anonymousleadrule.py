@@ -18,7 +18,7 @@ class AnonymousLeadRule(RowRule):
 
     @overrides(RowRule)
     def getRowsToRemove(self):
-        return { "34ds" : True }
+        return { "34ds" : ["ColumnA"] }
 
     @overrides(RowRule)
     def getDescription(self):

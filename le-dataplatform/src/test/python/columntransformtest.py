@@ -17,7 +17,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         self.checkThatTransformsDontThrowExceptions()
         self.assertNamedParameterListStatic()
         self.assertSortingOfTransform(pipeline)
-        
+
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()[1]
@@ -34,7 +34,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 5, "Pipeline should have 5 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
@@ -51,7 +51,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 columnTransformObject = {}
 
                 try:
-                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, 
+                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
                                                                             "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
                 except Exception as e:
                     print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
@@ -75,7 +75,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def checkThatTransformsDontThrowExceptions(self):
         keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
-                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
+                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn", "remediatedatarulesstep"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
 
@@ -89,7 +89,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 columnTransformObject = {}
 
                 try:
-                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName, 
+                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
                                                                             "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
                 except Exception as e:
                     print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
@@ -132,22 +132,23 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         self.assertIsNone(namedParameterList["orderedDictContinuousColumns"], "OrderedDictContinuousolumn should be None")
         self.assertTrue(isinstance(namedParameterList["emptyDictionary"], dict), "Couldn't create Empty Dictionary")
         self.assertTrue(isinstance(namedParameterList["emptyList"], list), "Couldn't create Empty List")
-        
+
     def assertSortingOfTransform(self, pipeline):
         for i, step in enumerate(pipeline):
             print i, step
+
             if i == 0:
-                self.assertEquals(step.__class__.__name__ , "PivotStep")
+                self.assertEquals(step.__class__.__name__ , "RemediateDataRulesStep")
             if i == 1:
-                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
+                self.assertEquals(step.__class__.__name__ , "PivotStep")
             if i == 2:
-                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
+                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
             if i == 3:
+                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
+            if i == 4:
                 self.assertEquals(step.__class__.__name__ , "ImputationStep")
             if i == 5:
-                self.assertEquals(step.__class__.__name__ , "CleanCategoricalColumn")
-            if i == 6:
-                self.assertEquals(step.__class__.__name__ , "AssignConversionRateToCategoricalColumns")
+                self.assertEquals(step.__class__.__name__ , "ExportDataFrameStep")
 
     def assertSortingOfEVTransform(self, pipeline):
         for i, step in enumerate(pipeline):

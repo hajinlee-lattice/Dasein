@@ -71,6 +71,7 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
         modelExecutor.writeMetadataFiles();
         modelExecutor.profile();
+        modelExecutor.review();
         String modelAppId = modelExecutor.model();
         log.info(String.format("The generated model app id is: %s", modelAppId));
         modelApplicationIdToEventColumn.put(modelAppId, eventCol);

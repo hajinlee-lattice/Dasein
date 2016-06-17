@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
@@ -100,6 +101,14 @@ public class ModelResource {
     @ApiOperation(value = "Profile data")
     public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
         AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.profileData(config)));
+        return submission;
+    }
+
+    @RequestMapping(value = "/review", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Review data")
+    public AppSubmission review(@RequestBody DataReviewConfiguration config) {
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.reviewData(config)));
         return submission;
     }
 

@@ -123,6 +123,12 @@ class Launcher(object):
         if not os.path.exists(pipelineLocalDir):
             os.mkdir(pipelineLocalDir)
 
+        # Create directory for datarules
+        dataRulesLocalDir = modelLocalDir + "datarules/"
+        if not os.path.exists(dataRulesLocalDir):
+            os.mkdir(dataRulesLocalDir)
+
+
         # Execute the packaged script from the client and get the returned file
         # that contains the generated model data
         execfile(script, globals())
@@ -231,10 +237,6 @@ class Launcher(object):
                 hdfs.copyFromLocal(pipelineLocalDir + filename, "%s%s" % (pipelineHdfsDir, filename))
 
             # Copy the data rules files from local to hdfs
-            dataRulesLocalDir = modelLocalDir + "datarules/"
-            if not os.path.exists(dataRulesLocalDir):
-                os.mkdir(dataRulesLocalDir)
-
             dataRulesHdfsDir = modelHdfsDir + "datarules/"
 
             hdfs.mkdir(dataRulesHdfsDir)

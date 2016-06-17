@@ -26,7 +26,7 @@ public class DataReviewAlgorithm extends AlgorithmBase {
     @Transient
     private String[] getPipelinePropertyArray() {
         return new String[] { //
-                "anonymousleadrule.threshold=50" //
+                "" //
         };
     }
 }

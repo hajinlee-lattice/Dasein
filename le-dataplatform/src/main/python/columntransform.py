@@ -28,7 +28,7 @@ class ColumnTransform(object):
     resultOfCallingMainMethodNameKey = u"ResultOfCallingMainMethodName"
     sortingKey = u'KeyWhenSortingByAscending'
 
-    def __init__(self, pathToPipelineFiles=None):
+    def __init__(self, pathToPipelineFiles = None):
         if pathToPipelineFiles is not None:
             try:
                 for pipelineFile in pathToPipelineFiles:
@@ -96,7 +96,8 @@ class ColumnTransform(object):
                                        targetColumn=None,
                                        columnsToTransform=None,
                                        profile=None,
-                                       allColumns=None):
+                                       allColumns=None,
+                                       params=None):
         # Return Array that holds functions loaded from file
         pipelineAsArrayOfTransformClasses = []
         pipelineName = []
@@ -132,9 +133,10 @@ class ColumnTransform(object):
                                           categoricalColumns=categoricalColumns, \
                                           continuousColumns=continuousColumns, \
                                           targetColumn=targetColumn, \
-                                          columnsToTransform=columnsToTransform,
-                                          profile=profile,
-                                          allColumns=allColumns)
+                                          columnsToTransform=columnsToTransform, \
+                                          profile=profile, \
+                                          allColumns=allColumns, \
+                                          params=params)
                 if kwargs.has_key("enabled") and (kwargs["enabled"].lower() == "false"):
                     logger.info("Skip disabled step " + uniqueColumnTransformName)
                     continue
@@ -162,12 +164,13 @@ class ColumnTransform(object):
                             targetColumn=None,
                             columnsToTransform=None,
                             profile=None,
-                            allColumns=None):
+                            allColumns=None,
+                            params=None):
         kwargs = {}
         try:
-            value = None
-
             for namedArgument, namedArgumentDataTypeOrValue in namedParameterList.iteritems():
+                value = None
+
                 t = type(namedArgumentDataTypeOrValue)
                 if t is not str and t is not unicode:
                     value = namedArgumentDataTypeOrValue
@@ -188,6 +191,8 @@ class ColumnTransform(object):
                     value = continuousColumns
                 elif namedArgumentDataTypeOrValue.lower() == "dataprofile".lower():
                     value = profile
+                elif namedArgumentDataTypeOrValue.lower() == "params".lower():
+                    value = params
                 elif namedArgumentDataTypeOrValue.lower() == "columnsToTransform".lower():
                     if categoricalColumns is not None and stringColumns is not None:
                         value = set(stringColumns - set(categoricalColumns.keys()))

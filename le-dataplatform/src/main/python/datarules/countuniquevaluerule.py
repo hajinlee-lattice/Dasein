@@ -1,7 +1,9 @@
 from dataruleutils import isCategorical
 from leframework.codestyle import overrides
+from pipelinefwk import get_logger
 from rulefwk import ColumnRule
 
+logger = get_logger("countuniquevaluerule")
 
 class CountUniqueValueRule(ColumnRule):
     columnsThatFailedTest = {}

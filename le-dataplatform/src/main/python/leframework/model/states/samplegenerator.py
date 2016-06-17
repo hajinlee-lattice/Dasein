@@ -34,7 +34,6 @@ class SampleGenerator(State):
 
     def generateReadoutSample(self, preTransform, scoreColumnName):
         rows = preTransform.shape[0]
-
         # Extract Rows
         if rows > 2000:
             result = preTransform[:1000]

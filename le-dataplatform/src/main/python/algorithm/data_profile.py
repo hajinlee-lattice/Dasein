@@ -31,10 +31,10 @@ def getSchema():
     Returns the schema of output avro file
     Args:
         None
-    Returns: 
+    Returns:
         Hardcoded schema
     '''
-    
+
     metadataSchema = """
     {
       "type" : "record",
@@ -165,7 +165,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         modelDir: Output directory
         algorithmProperties: Unused
         runtimeProperties: Contains properties to report progress update
-    Output: 
+    Output:
         profile.avro: Profiling information used by modeling
         diagnostics.json: Diagnostics about the data set and bucketing metadata
     '''
@@ -190,8 +190,8 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     eventVector = data[schema["target"]]
     configMetadata = schema["config_metadata"]
 
-    
-    attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[], 
+
+    attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[],
                       "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
 
     otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
@@ -201,7 +201,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 
     index = 1
     dataDiagnostics = []
-    
+
     for colName in colNames:
         # Update progress
         progressReporter.nextState()
@@ -267,7 +267,7 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
     for columnMetadata in columnsMetadata:
         colName = columnMetadata['ColumnName']
         columnMetadataDict[colName] = columnMetadata
-        
+
     for colName in features:
         if columnMetadataDict.has_key(colName):
             columnMetadata = columnMetadataDict[colName]
@@ -295,7 +295,7 @@ def retrieveColumnBucketMetadata(columnsMetadata):
     '''
     bucketsMetadata = dict()
     diagnostics = OrderedDict()
-    
+
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
         diagnostics["Summary"] = "Invalid metadata format"
         return (bucketsMetadata, diagnostics)
@@ -309,7 +309,7 @@ def retrieveColumnBucketMetadata(columnsMetadata):
             bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
         except :
             logger.warn("Invalid metadata format for column: " + columnMetadata['ColumnName'])
-            # Include column metadata in diagnostics 
+            # Include column metadata in diagnostics
             diagnostics[columnMetadata['ColumnName']] = columnMetadata
             continue
 
@@ -328,21 +328,21 @@ def getPopulatedRowCount(columnData, continuous):
 
 def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, bucketingParams=None):
     '''
-    Performs profiling on given column 
+    Performs profiling on given column
     Args:
         columnData: A DataFrame vector of data for given column
         colName: Name of given column
         otherMetadata: Other interesting metadata of a given column
-        stringcols: A list of names of string columns 
+        stringcols: A list of names of string columns
         eventVector: A DataFrame vector of event column
         bucketDispatcher: A dispatcher that performs specific bucketing based on passed in parameters
         dataWriter: A buffered writer that writes to profile.avro
         index: Current id of column in output file
         bucketingParams: Parameters for bucketing
     Returns:
-        index: Id of next column in avro file 
+        index: Id of next column in avro file
         diagnostics: A dictionary of summary information of each column, i.e., PopulationRate, BucketingStrategy
-        
+
     Raises:
         RuntimeError : An error occurred when more than 1 bucketing strategy is found for a given column
     '''
@@ -350,17 +350,18 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
     filtered = True if colName in attributeStats["ApprovedUsage_EmptyOrUnrecognized"] else False
-    if otherMetadata[1] == "Model" and not filtered: 
+    if otherMetadata[1] == "Model" and not filtered:
         attributeStats["ApprovedUsage_Model"].append(colName)
         filtered = True
-    if (isnull(otherMetadata[2]) or otherMetadata[2] == "") and not filtered: 
+    if (isnull(otherMetadata[2]) or otherMetadata[2] == "") and not filtered:
         attributeStats["NULLCategory"].append(colName)
         filtered = True
     diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols) / float(len(columnData))
-    if diagnostics["PopulationRate"] < 0.005 and not filtered: 
+    if diagnostics["PopulationRate"] < 0.005 and not filtered:
         attributeStats["HighNullValueRate"].append(colName)
         filtered = True
 
+# bernard
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
@@ -375,6 +376,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
+# bernard
             return (index, diagnostics)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
@@ -426,7 +428,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         colName: Name of given column
         index: Current id of column in output file
     Returns:
-        index: id of next column in output file 
+        index: id of next column in output file
     '''
     mi, componentMi = calculateMutualInfo(columnVector, eventVector)
     entropyValue = entropy(eventVector)
@@ -478,12 +480,12 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         colName: Name of given column
         index: Current id of column in output file
     Returns:
-        index: id of next column in output file 
+        index: id of next column in output file
     '''
     bucketsVector = mapToBands(columnVector, bands)
     mi, componentMi = calculateMutualInfo(bucketsVector, eventVector)
     entropyValue = entropy(eventVector)
-    
+
     avgProbability = sum(eventVector) / float(len(eventVector))
     for i in range(len(bands) - 1):
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
@@ -499,7 +501,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["id"] = index
         datum["barecolumnname"] = colName
         datum["displayname"] = otherMetadata[0]
-        datum["approvedusage"] = otherMetadata[1] 
+        datum["approvedusage"] = otherMetadata[1]
         datum["category"] = otherMetadata[2]
         datum["fundamentaltype"] = otherMetadata[3]
         datum["columnvalue"] = None
@@ -527,7 +529,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
 def mapToBands(columnVector, bands):
     bucketsVector = []
     for x in columnVector:
-        if (np.isnan(x) or x is None): 
+        if (np.isnan(x) or x is None):
             bucketsVector.append(None)
             continue
         for i in range(len(bands) - 1):
@@ -535,11 +537,11 @@ def mapToBands(columnVector, bands):
                 bucketsVector.append(bands[i])
                 break
     return bucketsVector
-            
+
 
 def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous, componentMi, entropyValue):
     bandVector = []
-    
+
     if continuous:
         bandVector = map(lambda x: 1 if np.isnan(x) else 0, columnVector)
     else:
@@ -547,7 +549,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     bandCount = sum(bandVector)
     if bandCount == 0:
         return index
-    
+
     datum = {}
     (numPosEvents, lift) = getLift(avgProbability, bandCount, bandVector, eventVector)
     datum["id"] = index
@@ -577,15 +579,15 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
 
 def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params, attributeStats):
     '''
-    Writes all diagnostics to a json file   
+    Writes all diagnostics to a json file
     Args:
         dataDiagnostics: A dictionary of diagnostics on the data set
-        metadataDiagnostics: A dictionary of diagnostics on the metadata for bucketing strategies 
+        metadataDiagnostics: A dictionary of diagnostics on the metadata for bucketing strategies
         eventVector: A DataFrame vector of event column
         features: A list of feature column names
         modelDir: Output directory of the json file
     Returns:
-        None 
+        None
     '''
     summary = getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attributeStats)
 
@@ -610,7 +612,7 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
         summary["NumberOfSkippedRows"] = parser.numOfSkippedRow
 
         highUCThreshold = parser.highUCThreshold
-        
+
     highUCColumns = []
     for columnDiagnostics in dataDiagnostics:
         if columnDiagnostics.has_key("UncertaintyCoefficient") and columnDiagnostics["UncertaintyCoefficient"] > highUCThreshold:
@@ -621,12 +623,12 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
 
 def getCountWhereEventIsOne(valueVector, eventVector):
     '''
-    Finds the count of rows where value and event are both 1   
+    Finds the count of rows where value and event are both 1
     Args:
         valueVector: A DataFrame vector of boolean values where valueVector[i] = 1 means value = x for row i
         eventVector: A DataFrame vector of event column
     Returns:
-        The final count value 
+        The final count value
     '''
     counter = lambda x, y: 1 if x == 1 and y == 1 else 0
     return sum(map(counter, valueVector, eventVector))
@@ -645,7 +647,7 @@ def getLift(avgProbability, valueCount, valueVector, eventVector):
     '''
     if (avgProbability * valueCount) == 0:
         return (0, None)
-    countWhereEventIsOne = getCountWhereEventIsOne(valueVector, eventVector) 
+    countWhereEventIsOne = getCountWhereEventIsOne(valueVector, eventVector)
     return (countWhereEventIsOne, countWhereEventIsOne / float(avgProbability * valueCount))
 
 def uncertaintyCoefficient(mi, entropy):

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
@@ -49,9 +50,9 @@ import com.latticeengines.testframework.rest.StandaloneHttpServer;
  * This is an end-to-end test against a SQL Server database without having to go
  * through the REST API. It allows for an easier development-test cycle without
  * having to either deploy to Jetty or run from le-api.
- * 
+ *
  * @author rgonzalez
- * 
+ *
  */
 @Transactional
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
@@ -77,7 +78,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public String getCustomer() {
         return "Nutanix";
     }
-    
+
     protected boolean doClearDbTables() {
         return false;
     }
@@ -232,7 +233,22 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
+    public void reviewData() throws Exception {
+        DataReviewConfiguration config = new DataReviewConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+        config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
+        config.setSamplePrefix("all");
+        config.setTargets(model.getTargetsList());
+        ApplicationId appId = modelingService.reviewData(config);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "reviewData" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
@@ -247,7 +263,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
             String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
-            assertEquals(modelingService.getFeatures(model, false).size(), featuresThreshold, 
+            assertEquals(modelingService.getFeatures(model, false).size(), featuresThreshold,
                     String.format("Expected %d features after setting features_threshold=%d in algorithm_properties", //
                             featuresThreshold, featuresThreshold));
             assertNotNull(modelContents);

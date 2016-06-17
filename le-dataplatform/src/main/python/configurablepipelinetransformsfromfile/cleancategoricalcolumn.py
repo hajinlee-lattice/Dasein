@@ -24,7 +24,7 @@ Running The Code Plus Notes: #note, test is run for eventList floats but in prac
 logger = get_logger("pipeline")
 
 class CleanCategoricalColumn(PipelineStep):
-    
+
     cleanCategoriesWithThreshold = None
     cleanCategoriesWithTargetColumn = None
     columnsToPivot = {}
@@ -111,7 +111,7 @@ class CleanCategoricalColumn(PipelineStep):
         self.includedKeys[self.currentColumn] = includedKeys
 
         return map(self.applyEmptyValue, xlist)
-    
+
     '''
     This code revisits __cleanCateg results via eventList.
     cleanList is output of __cleanCateg

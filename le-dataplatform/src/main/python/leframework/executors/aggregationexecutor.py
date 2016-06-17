@@ -50,10 +50,10 @@ class AggregationExecutor(Executor):
 
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine(self.amHost, self.amPort)
-        stateMachine.addState(Initialize(), 1)  
-        stateMachine.addState(InitializeRevenue(), 22)  
-        stateMachine.addState(RevenueStatistics(), 23)  
-        stateMachine.addState(NormalizationGenerator(), 2)  
+        stateMachine.addState(Initialize(), 1)
+        stateMachine.addState(InitializeRevenue(), 22)
+        stateMachine.addState(RevenueStatistics(), 23)
+        stateMachine.addState(NormalizationGenerator(), 2)
         stateMachine.addState(CalibrationWithWidthGenerator(), 5)
         stateMachine.addState(AverageProbabilityGenerator(), 3)
         stateMachine.addState(BucketGenerator(), 4)
@@ -79,7 +79,7 @@ class AggregationExecutor(Executor):
     @overrides(Executor)
     def loadData(self):
         return False, True
-    
+
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         test = parser.createList(testFile, postProcessClf)
@@ -110,30 +110,12 @@ class AggregationExecutor(Executor):
         schema = params["schema"]
         test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
         params["allDataPreTransform"] = test
-        
-        metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
-        pipelineDriver = params["schema"]["pipeline_driver"]
-        pipelineLib = params["schema"]["python_pipeline_lib"]
 
-        # Execute the packaged script from the client and get the returned file
-        # that contains the generated data pipeline
-        script = params["pipelineScript"]
-        execfile(script, globals())
-
-        # Transform the categorical values in the metadata file into numerical values
-        globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
-
-        # Create the data pipeline
-        pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver,
-                                                               pipelineLib, 
-                                                               metadata[0], 
-                                                               stringColumns, 
-                                                               params["parser"].target)
-        params["pipeline"] = pipeline
-        params["scoringPipeline"] = scoringPipeline
+        pipeline, metadata, pipelineParams = self.createDataPipeline(params)
 
         test = pipeline.predict(test, None, True)
+        if "testDataRemediated" in pipelineParams:
+            params["allDataPreTransform"] = pipelineParams["testDataRemediated"]
         params["allDataPostTransform"] = test
         return (None, test, metadata)
 
@@ -168,7 +150,7 @@ class AggregationExecutor(Executor):
     @overrides(Executor)
     def getModelDirPath(self, schema):
         return self.getModelDirByContainerId(schema)
-    
+
     @overrides(Executor)
     def accept(self, filename):
         badSuffixes = [".p", ".dot", ".gz"]

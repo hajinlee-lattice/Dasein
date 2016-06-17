@@ -2,7 +2,6 @@ import sys
 
 from dataruletestbase import DataRuleTestBase
 
-
 class DataRuleProductionPipelineTest(DataRuleTestBase):
 
     def testExecuteRulePipeline(self):
@@ -14,5 +13,6 @@ class DataRuleProductionPipelineTest(DataRuleTestBase):
         launcher = Launcher("model-datarule.json")
         launcher.execute(False)
 
-        self.assertRuleOutputCount(1)
-        self.assertRuleOutput("./results/datarules/AnonymousLeadRule_Row.avro", ["34ds"])
+        self.assertRuleOutputCount(2)
+        self.assertColumnRuleOutput("./results/datarules/CountUniqueValueRule_ColumnRule.avro", [])
+        self.assertColumnRuleOutput("./results/datarules/PopulatedRowCount_ColumnRule.avro", [])

@@ -16,7 +16,7 @@ from scipy.stats import chisquare
 logger = get_logger("pipeline")
 
 class PivotStep(PipelineStep):
-    
+
     columnsToPivot = {}
     categoricalColumns = {}
     dataprofile = {}
@@ -24,10 +24,10 @@ class PivotStep(PipelineStep):
     minCategoricalCount = 5
     maxCategoricalCount = 10
     pValues = {}
-    
-    def __init__(self, columnsToPivot={}, 
-                        categoricalColumns={}, 
-                        dataprofile={}, 
+
+    def __init__(self, columnsToPivot={},
+                        categoricalColumns={},
+                        dataprofile={},
                         pvalueThreshold=0.10,
                         minCategoricalCount=5,
                         maxCategoricalCount=10):
@@ -37,7 +37,7 @@ class PivotStep(PipelineStep):
         self.pvalueThreshold = pvalueThreshold
         self.minCategoricalCount = minCategoricalCount
         self.maxCategoricalCount = maxCategoricalCount
-        
+
     def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
         learnedConfig = self.__learnPivotValuesFromData(trainingDataFrame, configMetadata)
         self.__setPivotColumns(configMetadata, learnedConfig)
@@ -50,10 +50,10 @@ class PivotStep(PipelineStep):
             columnsToRemove.add(v[0])
             dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values, str(k).endswith("__ISNULL__")))
             self.__appendMetadataEntry(configMetadata, k)
-        
+
         super(PivotStep, self).removeColumns(dataFrame, columnsToRemove)
         return dataFrame
-    
+
     def __learnPivotValuesFromData(self, trainingDataFrame, configMetadata):
         if configMetadata is None:
             return
@@ -65,12 +65,12 @@ class PivotStep(PipelineStep):
             observed = []
             observedValues = []
             expected = []
-            
+
             categoricalValues = self.dataprofile[column]
-            
+
             if len(categoricalValues) < self.minCategoricalCount or len(categoricalValues) > self.maxCategoricalCount:
                 self.pValues[column] = "Num values %d outside of range [%d,%d]" % (len(categoricalValues), self.minCategoricalCount, self.maxCategoricalCount)
-                continue 
+                continue
             for value in categoricalValues:
                 if "positiveEventCount" in value:
                     observed.append(value["positiveEventCount"])
@@ -88,16 +88,16 @@ class PivotStep(PipelineStep):
             if c < self.pvalueThreshold:
                 logger.info("Pivoting %s because chi-square returns %f < %f." % (column, c, self.pvalueThreshold))
                 learnedConfig[column] = self.__getPivotConfig(column, observedValues)
-                
+
         return learnedConfig
-                
+
     def __getPivotConfig(self, column, values):
         pivotValues = [{"PivotValue": v, \
                         "PivotColumn": "%s_%s" % (column, ''.join(e for e in v if e.isalnum() or e == '_')) \
                                     if v is not None else "%s___ISNULL__" % column, \
                         "IsNull": v is None} for v in values]
         return {"Extensions": [{"Key": "PivotValues", "Value": pivotValues}]}
-    
+
     def __getPivotedAttrByConfig(self, configMetadata):
         pivotedConfig = set()
         for config in configMetadata:
@@ -117,22 +117,22 @@ class PivotStep(PipelineStep):
         entry["FundamentalType"] = "numeric"
         entry["DataType"] = "Integer"
         super(PivotStep, self).appendMetadataEntry(configMetadata, entry)
-    
+
     def pivot(self, row, values, isNull):
         if isNull:
             return 1.0 if row is None or (isinstance(row, float) and math.isnan(row)) else 0.0
-        
+
         for value in values:
             if row == value:
                 return 1.0
         return 0.0
-    
+
     def __setPivotColumns(self, configMetadata, learnedConfig):
         if configMetadata is None:
             return
         for config in configMetadata:
             column = config["ColumnName"]
-            
+
             c = None
             if column in learnedConfig:
                 c = learnedConfig[column]["Extensions"]
@@ -176,7 +176,7 @@ class PivotStep(PipelineStep):
 
     def getRTSArtifacts(self):
         return [("pivotvalues.txt", self.pivotValuesFilePath)]
-    
+
     def doColumnCheck(self):
         return False
     

@@ -10,13 +10,13 @@ from trainingtestbase import TrainingTestBase
 
 
 class ScoringEngineTest(TrainingTestBase):
- 
+
     def testScoringEngineForMulesoft(self):
         self.__runScoringEngine("modeldriver-mulesoft-scoring.json")
 
     def testScoringEngineForClio(self):
         self.__runScoringEngine("modeldriver-clio.json")
-        
+
     def setUp(self):
         TestBase.setUpClass()
         TrainingTestBase.setUp(self)
@@ -24,7 +24,7 @@ class ScoringEngineTest(TrainingTestBase):
     def tearDown(self):
         TrainingTestBase.tearDown(self)
         TestBase.tearDownClass()
-        
+
     def __runScoringEngine(self, modelDriver):
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
@@ -33,7 +33,7 @@ class ScoringEngineTest(TrainingTestBase):
         traininglauncher = Launcher(modelDriver)
         traininglauncher.execute(False)
         traininglauncher.training
-        
+
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
@@ -51,17 +51,19 @@ class ScoringEngineTest(TrainingTestBase):
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", \
                                  "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                                  stdout = subprocess.PIPE, stderr=subprocess.PIPE)
-        _, stderr = popen.communicate()
-        
+        stdout, stderr = popen.communicate()
+
         if len(stderr) > 0:
+            print 'Stdout:'
+            print stdout
             print "Error:"
             print str(stderr)
-            print stderr
+
         self.assertEquals(len(stderr), 0)
 
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
         self.assertEquals(len(tokens), 2)
-        
+
         scored = []
         with open(glob.glob("./results/*_scored.txt")[0]) as fs:
             reader = csv.reader(fs)
@@ -72,7 +74,7 @@ class ScoringEngineTest(TrainingTestBase):
             reader = csv.reader(fs)
             for row in reader:
                 output.append(row[1])
-        
+
         for i in xrange(len(output)):
             self.assertEquals(scored[i], output[i])
 

@@ -157,6 +157,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFiles();
             modelExecutor.profile();
+            modelExecutor.review();
             String modelAppId = modelExecutor.model();
             modelApplicationIdToEventColumn.put(modelAppId, event.getName());
         }

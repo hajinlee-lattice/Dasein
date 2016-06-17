@@ -6,6 +6,31 @@ from pipelinefwk import PipelineStep
 
 class DataRulePipeline(Pipeline):
 
+    interfaceColumns = { 'Id',
+                         'InternalId',
+                         'Event',
+                         'Domain',
+                         'LastModifiedDate',
+                         'CreatedDate',
+                         'FirstName',
+                         'LastName',
+                         'Title',
+                         'Email',
+                         'City',
+                         'State',
+                         'PostalCode',
+                         'Country',
+                         'PhoneNumber',
+                         'Website',
+                         'CompanyName',
+                         'Industry',
+                         'LeadSource',
+                         'IsClosed',
+                         'StageName',
+                         'AnnualRevenue',
+                         'NumberOfEmployees',
+                         'YearStarted' }
+
     def __init__(self, pipelineSteps):
         super(DataRulePipeline, self).__init__(pipelineSteps)
 
@@ -15,19 +40,23 @@ class DataRulePipeline(Pipeline):
         return dataFrame
 
     def processResults(self, dataRulesLocalDir):
-        avroSchema = getSchema()
-
         for step in self.pipelineSteps:
             fileSuffix = ""
             if isinstance(step, ColumnRule):
-                fileSuffix = "Column"
+                avroSchema = getColumnSchema()
+                fileSuffix = "ColumnRule"
                 results = step.getColumnsToRemove()
             elif isinstance(step, RowRule):
-                fileSuffix = "Row"
+                avroSchema = getRowSchema()
+                fileSuffix = "RowRule"
                 results = step.getRowsToRemove()
             elif isinstance(step, TableRule):
-                fileSuffix = "Table"
+                avroSchema = getRowSchema()
+                fileSuffix = "TableRule"
                 results = step.getRowsToRemove()
+
+            if not results:
+                continue
 
             recordWriter = io.DatumWriter(avroSchema)
             outputFileName = step.__class__.__name__ + '_' + fileSuffix + '.avro'
@@ -35,19 +64,28 @@ class DataRulePipeline(Pipeline):
                                                  recordWriter, writers_schema=avroSchema, codec='deflate')
 
             index = 1
-            for itemId, toRemove in results.iteritems():
-                if toRemove:
+            if isinstance(step, ColumnRule):
+                for itemId, toRemove in results.iteritems():
+                    if toRemove and itemId not in self.interfaceColumns:
+                        datum = {}
+                        datum["id"] = index
+                        datum["itemid"] = itemId
+                        index = index + 1
+                        dataWriter.append(datum)
+            else:
+                for itemId, columns in results.iteritems():
                     datum = {}
                     datum["id"] = index
                     datum["itemid"] = itemId
+                    datum["columns"] = ','.join(columns)
                     index = index + 1
                     dataWriter.append(datum)
 
             dataWriter.close()
 
-def getSchema():
+def getColumnSchema():
     '''
-    Returns the schema of output avro file
+    Returns the schema of column rule output avro file
     Args:
         None
     Returns:
@@ -57,7 +95,7 @@ def getSchema():
     ruleSchema = """
     {
       "type" : "record",
-      "name" : "RuleOutput",
+      "name" : "ColumnRuleOutput",
       "doc" : "Rule output from data review",
       "fields" : [ {
         "name" : "id",
@@ -70,7 +108,41 @@ def getSchema():
         "columnName" : "itemid",
         "sqlType" : "-9"
       }],
-      "tableName" : "RuleOutput"
+      "tableName" : "ColumnRuleOutput"
+    }"""
+    return schema.parse(ruleSchema)
+
+def getRowSchema():
+    '''
+    Returns the schema of row rule output avro file
+    Args:
+        None
+    Returns:
+        Hardcoded schema
+    '''
+
+    ruleSchema = """
+    {
+      "type" : "record",
+      "name" : "RowRuleOutput",
+      "doc" : "Rule output from data review",
+      "fields" : [ {
+        "name" : "id",
+        "type" : [ "int", "null" ],
+        "columnName" : "id",
+        "sqlType" : "4"
+      }, {
+        "name" : "itemid",
+        "type" : [ "string", "null" ],
+        "columnName" : "itemid",
+        "sqlType" : "-9"
+      }, {
+        "name" : "columns",
+        "type" : [ "string", "null" ],
+        "columnName" : "columns",
+        "sqlType" : "-9"
+      }],
+      "tableName" : "RowRuleOutput"
     }"""
     return schema.parse(ruleSchema)
 

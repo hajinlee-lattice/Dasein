@@ -18,9 +18,10 @@ class TestColumnRule(ColumnRule):
 
     @overrides(ColumnRule)
     def getColumnsToRemove(self):
-        return { "AColumn" : True,
+        return { "BW_mapping" : True,
                  "BColumn" : False,
-                 "CColumn" : True
+                 "BW_seo_title" : True,
+                 "Email" : True
                }
 
     @overrides(ColumnRule)

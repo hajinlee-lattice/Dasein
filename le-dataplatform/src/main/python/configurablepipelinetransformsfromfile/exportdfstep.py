@@ -11,7 +11,7 @@ from pipelinefwk import get_logger
 logger = get_logger("pipeline")
 
 class ExportDataFrameStep(PipelineStep):
-    
+
     def __init__(self): pass
 
     def transform(self, dataFrame, configMetadata, test):

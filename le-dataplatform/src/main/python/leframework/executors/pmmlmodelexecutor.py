@@ -33,7 +33,7 @@ class PmmlModelExecutor(Executor):
 
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine()
-        stateMachine.addState(Initialize(), 1)  
+        stateMachine.addState(Initialize(), 1)
         stateMachine.addState(PmmlColumnMetadataGenerator(), 2)
         stateMachine.addState(PmmlModelSkeletonGenerator(), 3)
         stateMachine.addState(PmmlCopyFile(), 4)
@@ -48,7 +48,7 @@ class PmmlModelExecutor(Executor):
     @overrides(Executor)
     def loadData(self):
         return True, True
-    
+
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         training = parser.createList(trainingFile, postProcessClf)
@@ -62,43 +62,25 @@ class PmmlModelExecutor(Executor):
         test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
         params["allDataPreTransform"] = DataFrame.append(training, test)
         return (training, test)
-    
+
     @overrides(Executor)
     def postTransformData(self, training, test, params):
         params["allDataPostTransform"] = DataFrame.append(training, test)
         return (training, test)
-    
+
     @overrides(Executor)
     def transformData(self, params):
-        metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None 
-        stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
-        pipelineDriver = params["schema"]["pipeline_driver"]
-        pipelineLib = params["schema"]["python_pipeline_lib"]
-        pipelineProps = params["schema"]["pipeline_properties"] if "pipeline_properties" in params["schema"] else ""
-        
-        # Execute the packaged script from the client and get the returned file
-        # that contains the generated data pipeline
-        script = params["pipelineScript"]
-        execfile(script, globals())
-        
-        # Transform the categorical values in the metadata file into numerical values
-        globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
-        
-        # Create the data pipeline
-        pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, \
-                                                               pipelineLib, \
-                                                               metadata[0], \
-                                                               stringColumns, \
-                                                               params["parser"].target, \
-                                                               pipelineProps)
-        params["pipeline"] = pipeline
-        params["scoringPipeline"] = scoringPipeline
+        pipeline, metadata, pipelineParams = self.createDataPipeline(params)
+        configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
+
         pipeline.learnParameters(params["training"], params["test"], configMetadata)
         training = pipeline.predict(params["training"], configMetadata, False)
         test = pipeline.predict(params["test"], configMetadata, True)
+        if "trainingDataRemediated" in pipelineParams and "testDataRemediated" in pipelineParams:
+            params["allDataPreTransform"] = DataFrame.append(pipelineParams["trainingDataRemediated"], pipelineParams["testDataRemediated"])
+
         return (training, test, metadata)
-    
+
     @overrides(Executor)
     def postProcessClassifier(self, clf, params):
         stateMachine = self.__setupJsonGenerationStateMachine()
@@ -122,7 +104,7 @@ class PmmlModelExecutor(Executor):
         mediator.templateVersion = parser.templateVersion
         mediator.messages = []
         stateMachine.run()
-    
+
     @overrides(Executor)
     def writeToHdfs(self, hdfs, params):
         super(PmmlModelExecutor, self).writeToHdfs(hdfs, params)
@@ -130,7 +112,7 @@ class PmmlModelExecutor(Executor):
     @overrides(Executor)
     def getModelDirPath(self, schema):
         return self.getModelDirByContainerId(schema)
-    
+
     @overrides(Executor)
     def accept(self, filename):
         return True

@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.review.ModelReviewResults;
-import com.latticeengines.domain.exposed.modeling.review.RuleRemediationEnablement;
+import com.latticeengines.domain.exposed.modeling.review.DataRuleConfiguration;
 
 public interface ModelInterface {
 
@@ -30,9 +30,9 @@ public interface ModelInterface {
 
     AppSubmission createSamples(SamplingConfiguration config);
 
-    RuleRemediationEnablement getRuleEnablements(String modelId);
+    DataRuleConfiguration getRuleEnablements(String modelId);
 
-    Boolean setRuleEnablements(String modelId, RuleRemediationEnablement enablement);
+    Boolean setRuleEnablements(String modelId, DataRuleConfiguration enablement);
 
     ModelReviewResults getModelReviewResults(String modelId);
 }

@@ -1,6 +1,11 @@
+import logging
 import os
 from leframework.codestyle import overrides
 from leframework.executor import Executor
+
+logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='dataruleexecutor')
 
 class DataRuleExecutor(Executor):
     '''
@@ -56,9 +61,11 @@ class DataRuleExecutor(Executor):
                                                                metadata[0], \
                                                                stringColumns, \
                                                                params["parser"].target, \
+                                                               params, \
                                                                pipelineProps)
         params["pipeline"] = pipeline
         training = pipeline.apply(params["training"], configMetadata)
+        logger.info('Process results')
         pipeline.processResults(dataRulesLocalDir)
         return (training, test, metadata)
 

@@ -27,7 +27,7 @@ def encodeCategoricalColumnsForMetadata(metadata):
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.encode(value["hashValue"])
 
-def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
+def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata
@@ -44,8 +44,9 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                                                continuousColumns=continuousColumns, \
                                                targetColumn=targetColumn, \
                                                columnsToTransform=columnsToTransform, \
-                                               profile=metadata,
-                                               allColumns=allColumns)
+                                               profile=metadata, \
+                                               allColumns=allColumns, \
+                                               params=params)
 
     # If properties are empty, don't try and set values
     disabledSteps = []
@@ -74,8 +75,8 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
 
     return steps
 
-def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps)
+def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
+    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps)
 
     pipeline = Pipeline(steps)
 
@@ -84,8 +85,8 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
 
     return pipeline, scoringPipeline
 
-def setupRulePipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, pipelineProps)
+def setupRulePipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
+    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps )
 
     pipeline = DataRulePipeline(steps)
 

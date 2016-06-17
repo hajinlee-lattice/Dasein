@@ -6,27 +6,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ModelReviewResults {
 
-    private Map<DataRuleName, ColumnRuleResult> columnRuleResults;
+    private Map<DataRule, ColumnRuleResult> columnRuleResults;
 
-    private Map<DataRuleName, RowRuleResult> rowRuleResults;
+    private Map<DataRule, RowRuleResult> rowRuleResults;
 
     @JsonProperty
-    public Map<DataRuleName, ColumnRuleResult> getColumnRuleResults() {
+    public Map<DataRule, ColumnRuleResult> getColumnRuleResults() {
         return columnRuleResults;
     }
 
     @JsonProperty
-    public void setColumnRuleResults(Map<DataRuleName, ColumnRuleResult> columnRuleResults) {
+    public void setColumnRuleResults(Map<DataRule, ColumnRuleResult> columnRuleResults) {
         this.columnRuleResults = columnRuleResults;
     }
 
     @JsonProperty
-    public Map<DataRuleName, RowRuleResult> getRowRuleResults() {
+    public Map<DataRule, RowRuleResult> getRowRuleResults() {
         return rowRuleResults;
     }
 
     @JsonProperty
-    public void setRowRuleResults(Map<DataRuleName, RowRuleResult> rowRuleResults) {
+    public void setRowRuleResults(Map<DataRule, RowRuleResult> rowRuleResults) {
         this.rowRuleResults = rowRuleResults;
     }
 }

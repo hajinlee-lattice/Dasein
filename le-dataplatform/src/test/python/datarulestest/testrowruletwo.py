@@ -18,12 +18,12 @@ class TestRowRuleTwo(RowRule):
 
     @overrides(RowRule)
     def getRowsToRemove(self):
-        return { "Row1" : True,
-                 "Row2" : True,
-                 "Row3" : False,
-                 "Row4" : False,
+        return { "11869" : ['ColumnA', 'ColumnX', 'ColumnZ'],
+                 "43441" : ['ColumnB'],
+                 "Row3" : ['ColumnC'],
+                 "Row4" : ['ColumnD']
                }
 
     @overrides(RowRule)
     def getDescription(self):
-        return "A test column rule"
+        return "A test row rule"
