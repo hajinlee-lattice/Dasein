@@ -45,8 +45,7 @@ public class ScoringServiceImpl implements ScoringService {
         job.setCustomer(customerSpace);
 
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(),
-                String.format("customer%s", String.valueOf(System.currentTimeMillis())));
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
