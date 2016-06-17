@@ -10,6 +10,7 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
@@ -18,10 +19,10 @@ public class MatchContext implements Fact, Dimension {
 
     private Set<String> domains;
     private Set<NameLocation> nameLocations;
+    private ColumnSelection columnSelection;
     private MatchInput input;
     private MatchOutput output;
-    private Map<String, List<String>> sourceColumnsMap;
-    private Map<String, List<String>> columnPriorityMap;
+    private Map<String, Set<String>> partitionColumnsMap;
     private Map<String, List<Map<String, Object>>> resultsBySource;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
@@ -54,6 +55,14 @@ public class MatchContext implements Fact, Dimension {
         this.nameLocations = nameLocations;
     }
 
+    public ColumnSelection getColumnSelection() {
+        return columnSelection;
+    }
+
+    public void setColumnSelection(ColumnSelection columnSelection) {
+        this.columnSelection = columnSelection;
+    }
+
     @MetricFieldGroup
     @MetricTagGroup
     public MatchOutput getOutput() {
@@ -64,20 +73,12 @@ public class MatchContext implements Fact, Dimension {
         this.output = output;
     }
 
-    public Map<String, List<String>> getSourceColumnsMap() {
-        return sourceColumnsMap;
+    public Map<String, Set<String>> getPartitionColumnsMap() {
+        return partitionColumnsMap;
     }
 
-    public void setSourceColumnsMap(Map<String, List<String>> sourceColumnsMap) {
-        this.sourceColumnsMap = sourceColumnsMap;
-    }
-
-    public Map<String, List<String>> getColumnPriorityMap() {
-        return columnPriorityMap;
-    }
-
-    public void setColumnPriorityMap(Map<String, List<String>> columnPriorityMap) {
-        this.columnPriorityMap = columnPriorityMap;
+    public void setPartitionColumnsMap(Map<String, Set<String>> partitionColumnsMap) {
+        this.partitionColumnsMap = partitionColumnsMap;
     }
 
     public Map<String, List<Map<String, Object>>> getResultsBySource() {

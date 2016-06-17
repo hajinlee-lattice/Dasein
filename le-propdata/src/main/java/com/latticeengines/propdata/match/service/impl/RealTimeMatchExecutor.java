@@ -57,8 +57,8 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         return matchContexts;
     }
 
-    public MatchContext appendMetadataToContext(MatchContext matchContext) {
-        ColumnSelection.Predefined selection = matchContext.getInput().getPredefinedSelection();
+    MatchContext appendMetadataToContext(MatchContext matchContext) {
+        ColumnSelection selection = matchContext.getColumnSelection();
         matchContext.setOutput(appendMetadata(matchContext.getOutput(), selection));
         return matchContext;
     }

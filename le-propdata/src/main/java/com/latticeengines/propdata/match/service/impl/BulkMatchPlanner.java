@@ -15,6 +15,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
+        context.setColumnSelection(parseColumnSelection(input));
         context.setReturnUnmatched(input.getReturnUnmatched());
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
         MatchOutput output = initializeMatchOutput(input);

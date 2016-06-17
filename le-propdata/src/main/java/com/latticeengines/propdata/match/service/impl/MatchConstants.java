@@ -3,15 +3,19 @@ package com.latticeengines.propdata.match.service.impl;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public final class MatchConstants {
-    public static final String CACHE_TABLE = "DerivedColumnsCache";
-    public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
-    public static final String DISPOSABLE_EMAIL = "DisposableEmail";
-    public static final String OUTPUT_RECORD_PREFIX = "PropDataOutput";
-    public static final String SOURCE_FIELD_PREFIX = "Source_";
+    static final String CACHE_TABLE = "DerivedColumnsCache";
+    static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+    static final String DISPOSABLE_EMAIL = "DisposableEmail";
 
+    static final String DOMAIN_FIELD = "Domain";
+    static final String NAME_FIELD = "Name";
+    static final String COUNTRY_FIELD = "Country";
+    static final String STATE_FIELD = "State";
+    static final String CITY_FIELD = "City";
+    static final String LID_FIELD = "LatticeAccountID";
 
-    public static final String MODEL = ColumnSelection.Predefined.Model.getName();
-    public static final String DERIVED_COLUMNS = ColumnSelection.Predefined.DerivedColumns.getName();
-    public static final String RTS = ColumnSelection.Predefined.RTS.getName();
+    static final String MODEL = ColumnSelection.Predefined.Model.getName();
+    static final String DERIVED_COLUMNS = ColumnSelection.Predefined.DerivedColumns.getName();
+    static final String RTS = ColumnSelection.Predefined.RTS.getName();
 
 }

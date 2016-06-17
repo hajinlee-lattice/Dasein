@@ -7,6 +7,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 
 public interface ExternalColumnService {
 
-    List<ExternalColumn> columnSelection(ColumnSelection.Predefined selectName);
+    List<ExternalColumn> findByColumnSelection(ColumnSelection.Predefined selectName);
+
+    ExternalColumn getExternalColumn(String externalColumnId);
 
 }

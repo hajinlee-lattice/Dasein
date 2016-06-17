@@ -89,7 +89,7 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
         Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
     }
 
-    @Test(groups = { "api" }, enabled = true, dataProvider = "cachedMatchGoodDataProvider")
+    @Test(groups = { "api" }, dataProvider = "cachedMatchGoodDataProvider")
     public void testCachedLocationMatchGood(String name, String city, String state, String country) {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 
@@ -101,7 +101,7 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         if (StringUtils.isNotEmpty(state)) {
-            Assert.assertTrue(output.getResult().size() > 0, String.format("(%s, %s, %s, %s) gives %d results", name, city,
+            Assert.assertTrue(output.getResult().size() > 0, String.format("(%s, %s, %s, %s) should not give %d results", name, city,
                     state, country, output.getResult().size()));
             Assert.assertTrue(output.getStatistics().getRowsMatched() > 0,
                     String.format("(%s, %s, %s, %s) gives %d matched", name, city, state, country,
@@ -120,7 +120,7 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
         };
     }
 
-    @Test(groups = { "api" }, enabled = true, dataProvider = "cachedMatchBadDataProvider")
+    @Test(groups = { "api" }, dataProvider = "cachedMatchBadDataProvider")
     public void testCachedLocationMatchBad(String name, String city, String state, String country) {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -17,6 +18,20 @@ public class ColumnSelection {
     private List<Column> columns;
     private String name;
     private String version;
+
+    public ColumnSelection() {
+    }
+
+    public ColumnSelection(List<ExternalColumn> externalColumns) {
+        List<ColumnSelection.Column> columns = new ArrayList<>();
+        for (ExternalColumn externalColumn: externalColumns) {
+            ColumnSelection.Column column = new ColumnSelection.Column();
+            column.setColumnName(externalColumn.getDefaultColumnName());
+            column.setExternalColumnId(externalColumn.getExternalColumnID());
+            columns.add(column);
+        }
+        setColumns(columns);
+    }
 
     @JsonProperty("Columns")
     public List<Column> getColumns() {
@@ -46,6 +61,15 @@ public class ColumnSelection {
     @JsonProperty("Version")
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    @JsonIgnore
+    public List<String> getColumnNames() {
+        List<String> list = new ArrayList<>();
+        for (Column column: columns) {
+            list.add(column.getColumnName());
+        }
+        return list;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

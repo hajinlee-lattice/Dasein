@@ -12,6 +12,6 @@ public interface MatchExecutor {
 
     List<MatchContext> execute(List<MatchContext> matchContexts);
 
-    MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection.Predefined selection);
+    MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection);
 
 }

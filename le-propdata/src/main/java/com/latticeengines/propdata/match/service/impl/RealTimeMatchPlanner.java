@@ -20,6 +20,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
+        context.setColumnSelection(parseColumnSelection(input));
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);

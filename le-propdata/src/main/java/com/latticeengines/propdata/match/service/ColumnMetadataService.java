@@ -9,5 +9,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public interface ColumnMetadataService {
     List<ColumnMetadata> fromPredefinedSelection (ColumnSelection.Predefined selectionName);
+    List<ColumnMetadata> fromSelection(ColumnSelection selection);
     Schema getAvroSchema(ColumnSelection.Predefined selectionName, String recordName);
 }

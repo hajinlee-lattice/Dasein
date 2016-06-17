@@ -16,17 +16,17 @@ public class ExternalColumnEntityMgrImpl implements ExternalColumnEntityMgr {
 
     @Autowired
     private ExternalColumnDao externalColumnDao;
-    
-    @Override
-    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ExternalColumn> getLeadEnrichment() {
-        return externalColumnDao.getLeadEnrichment();
-    }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ExternalColumn> findByTag(String tag) {
         return externalColumnDao.findByTag(tag);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ExternalColumn> findAll() {
+        return externalColumnDao.findAll();
     }
 
 }

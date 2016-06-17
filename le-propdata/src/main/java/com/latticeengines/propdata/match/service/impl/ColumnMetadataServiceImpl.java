@@ -52,23 +52,25 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
 
     @Override
     public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined) {
-        try {
-            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
-                return predefinedMetaDataCache.get(predefined);
-            } else {
-                throw new UnsupportedOperationException("Only support selection "
-                        + ColumnSelection.Predefined.supportedSelections + " now");
-            }
-        } catch (Exception e) {
-            log.warn("Failed to find metadata for selection " + predefined + " in cache", e);
-            List<ColumnMetadata> metadatas = fromExternalColumnService(predefined);
-            predefinedMetaDataCache.put(predefined, metadatas);
-            return metadatas;
+        return predefinedMetaDataCache.get(predefined);
+    }
+
+    @Override
+    public List<ColumnMetadata> fromSelection(ColumnSelection selection) {
+        List<ExternalColumn> externalColumns  =  new ArrayList<>();
+        for (ColumnSelection.Column column : selection.getColumns()) {
+            externalColumns.add(externalColumnService.getExternalColumn(column.getExternalColumnId()));
         }
+        List<ColumnMetadata> metadatas = toColumnMetadata(externalColumns);
+        for (int i = 0; i < metadatas.size(); i++) {
+            ColumnMetadata metadata = metadatas.get(i);
+            metadata.setColumnName(selection.getColumnNames().get(i));
+        }
+        return metadatas;
     }
 
     private List<ColumnMetadata> fromExternalColumnService(ColumnSelection.Predefined selectionName) {
-        List<ExternalColumn> externalColumns = externalColumnService.columnSelection(selectionName);
+        List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection(selectionName);
         return toColumnMetadata(externalColumns);
     }
 
@@ -173,7 +175,7 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
     }
 
     private void loadCache() {
-        for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.supportedSelections) {
+        for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.values()) {
             try {
                 predefinedMetaDataCache.put(selection, fromExternalColumnService(selection));
             } catch (Exception e) {

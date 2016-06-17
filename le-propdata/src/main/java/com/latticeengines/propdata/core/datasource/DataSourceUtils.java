@@ -2,6 +2,7 @@ package com.latticeengines.propdata.core.datasource;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +46,7 @@ public class DataSourceUtils {
         for (DataSourceConnection conn: conns) {
             urlsToRetain.add(conn.getUrl());
         }
-        Set<String> urlsToRemove = jdbcTemplateMap.keySet();
+        Set<String> urlsToRemove = new HashSet<>(jdbcTemplateMap.keySet());
         urlsToRemove.removeAll(urlsToRetain);
         for (String url: urlsToRemove) {
             jdbcTemplateMap.remove(url);

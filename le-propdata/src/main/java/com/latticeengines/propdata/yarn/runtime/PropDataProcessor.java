@@ -51,7 +51,7 @@ import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
 import com.latticeengines.propdata.match.metric.MatchResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
@@ -90,7 +90,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private Configuration yarnConfiguration;
 
     @Autowired
-    private MatchCommandService matchCommandService;
+    private ColumnSelectionService columnSelectionService;
 
     @Autowired
     private MetricService metricService;
@@ -284,7 +284,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         if (inputSchema == null) {
             inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
             log.info("Using extracted input schema: \n"
-                            + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         } else {
             log.info("Using provited input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
@@ -351,7 +351,13 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         blockOutput.setReceivedAt(receivedAt);
         blockOutput.getStatistics().setRowsRequested(blockSize);
         blockOutput.getStatistics().setTimeElapsedInMsec(finishedAt.getTime() - receivedAt.getTime());
-        matchExecutor.appendMetadata(blockOutput, predefinedSelection);
+
+        ColumnSelection selection = customizedSelection;
+        if (predefinedSelection != null) {
+            selection = columnSelectionService.parsePredefined(predefinedSelection);
+        }
+        matchExecutor.appendMetadata(blockOutput, selection);
+
         HdfsUtils.writeToFile(yarnConfiguration, outputJson, JsonUtils.serialize(blockOutput));
     }
 

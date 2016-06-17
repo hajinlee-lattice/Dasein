@@ -13,13 +13,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.DisposableEmailService;
+import com.latticeengines.propdata.match.service.ExternalColumnService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
@@ -27,6 +30,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     private ColumnMetadataService columnMetadataService;
+
+    @Autowired
+    private ColumnSelectionService columnSelectionService;
+
+    @Autowired
+    private ExternalColumnService externalColumnService;
 
     @Autowired
     private PublicDomainService publicDomainService;
@@ -38,7 +47,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     protected MetricService metricService;
 
     @MatchStep
-    protected MatchContext complete(MatchContext matchContext) {
+    MatchContext complete(MatchContext matchContext) {
         List<InternalOutputRecord> internalOutputRecords = distributeResults(matchContext.getInternalResults(),
                 matchContext.getResultsBySource());
         matchContext.setInternalResults(internalOutputRecords);
@@ -54,34 +63,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Map<String, List<Map<String, Object>>> resultsMap) {
         for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
             String sourceName = result.getKey();
-            if (isCachedSource(sourceName)) {
-                distributeCachedSourceResults(records, sourceName, result.getValue());
-            } else if (isDomainSource(sourceName)) {
-                String domainField = getDomainField(sourceName);
-                for (InternalOutputRecord record : records) {
-                    String parsedDomain = record.getParsedDomain();
-                    if (StringUtils.isEmpty(parsedDomain) || publicDomainService.isPublicDomain(parsedDomain)) {
-                        continue;
-                    }
-
-                    for (Map<String, Object> row : result.getValue()) {
-                        if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
-                            record.getResultsInSource().put(sourceName, row);
-                        }
-                    }
-                }
-            }
+            distributeCachedSourceResults(records, sourceName, result.getValue());
         }
         return records;
     }
 
     private void distributeCachedSourceResults(List<InternalOutputRecord> records, String sourceName,
             List<Map<String, Object>> rows) {
-        String domainField = getDomainField(sourceName);
-        String nameField = getNameField(sourceName);
-        String cityField = getCityField(sourceName);
-        String stateField = getStateField(sourceName);
-        String countryField = getCountryField(sourceName);
         for (InternalOutputRecord record : records) {
             if (record.isFailed()) {
                 continue;
@@ -91,7 +79,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             String parsedDomain = record.getParsedDomain();
             if (StringUtils.isNotEmpty(parsedDomain)) {
                 for (Map<String, Object> row : rows) {
-                    if (row.containsKey(domainField) && parsedDomain.equals(row.get(domainField))) {
+                    if (row.containsKey(MatchConstants.DOMAIN_FIELD) && parsedDomain.equals(row.get(MatchConstants.DOMAIN_FIELD))) {
                         record.getResultsInSource().put(sourceName, row);
                         matched = true;
                         break;
@@ -108,14 +96,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     String parsedCity = nameLocation.getCity();
                     if (StringUtils.isNotEmpty(parsedName)) {
                         for (Map<String, Object> row : rows) {
-                            if (row.get(nameField) == null
-                                    || !parsedName.equalsIgnoreCase((String) row.get(nameField))) {
+                            if (row.get(MatchConstants.NAME_FIELD) == null
+                                    || !parsedName.equalsIgnoreCase((String) row.get(MatchConstants.NAME_FIELD))) {
                                 continue;
                             }
 
-                            Object countryInRow = row.get(countryField);
-                            Object stateInRow = row.get(stateField);
-                            Object cityInRow = row.get(cityField);
+                            Object countryInRow = row.get(MatchConstants.COUNTRY_FIELD);
+                            Object stateInRow = row.get(MatchConstants.STATE_FIELD);
+                            Object cityInRow = row.get(MatchConstants.CITY_FIELD);
 
                             if (countryInRow != null && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
                                 continue;
@@ -149,13 +137,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @MatchStep
     MatchContext mergeResults(MatchContext matchContext) {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
-        List<String> outputFields = matchContext.getOutput().getOutputFields();
-        Map<String, List<String>> columnPriorityMap = matchContext.getColumnPriorityMap();
+        List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
+        List<ColumnSelection.Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
 
         List<OutputRecord> outputRecords = new ArrayList<>();
-        Integer[] columnMatchCount = new Integer[outputFields.size()];
-        for (int i = 0; i < outputFields.size(); i++) {
+        Integer[] columnMatchCount = new Integer[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
             columnMatchCount[i] = 0;
         }
 
@@ -176,8 +164,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             List<Object> output = new ArrayList<>();
             Map<String, Map<String, Object>> results = internalRecord.getResultsInSource();
             boolean matchedAnyColumn = false;
-            for (int i = 0; i < outputFields.size(); i++) {
-                String field = outputFields.get(i);
+            for (int i = 0; i < columns.size(); i++) {
+                ColumnSelection.Column column = columns.get(i);
+                ExternalColumn externalColumn = externalColumnService.getExternalColumn(column.getExternalColumnId());
+                String field = (externalColumn != null) ? externalColumn.getDefaultColumnName()
+                        : column.getColumnName();
+
                 Object value = null;
                 boolean matched = false;
 
@@ -191,11 +183,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
                     matched = true;
                     value = true;
-                } else if (columnPriorityMap.containsKey(field)) {
-                    for (String targetSource : columnPriorityMap.get(field)) {
-                        if (results.containsKey(targetSource)) {
+                } else if (externalColumn != null && StringUtils.isNotEmpty(externalColumn.getTablePartition())) {
+                    String tableName = externalColumn.getTablePartition();
+                    if (results.containsKey(tableName)) {
+                        matched = true;
+                        Object objInResult = results.get(tableName).get(field);
+                        value = (objInResult == null ? value : objInResult);
+                    }
+                } else {
+                    for (Map<String, Object> resultSet : results.values()) {
+                        if (resultSet.containsKey(field)) {
                             matched = true;
-                            Object objInResult = results.get(targetSource).get(field);
+                            Object objInResult = resultSet.get(field);
                             value = (objInResult == null ? value : objInResult);
                         }
                     }
@@ -217,8 +216,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             }
 
             // make *_IsMatched columns not null
-            for (int i = 0; i < outputFields.size(); i++) {
-                String field = outputFields.get(i);
+            for (int i = 0; i < columnNames.size(); i++) {
+                String field = columnNames.get(i);
                 Object value = output.get(i);
                 if (field.toLowerCase().contains("ismatched") && value == null) {
                     output.set(i, false);
@@ -265,42 +264,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     @Override
-    public MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection.Predefined selection) {
-        if (ColumnSelection.Predefined.supportedSelections.contains(selection)) {
-            List<ColumnMetadata> metadata = columnMetadataService.fromPredefinedSelection(selection);
-            matchOutput.setMetadata(metadata);
-            return matchOutput;
-        }
-        throw new RuntimeException("Cannot find the requested metadata.");
-    }
-
-    private boolean isDomainSource(String sourceName) {
-        return true;
-    }
-
-    private boolean isCachedSource(String sourceName) {
-        return MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)
-                || MatchConstants.RTS.equals(sourceName);
-    }
-
-    private String getDomainField(String sourceName) {
-        return "Domain";
-    }
-
-    private String getNameField(String sourceName) {
-        return "Name";
-    }
-
-    private String getCityField(String sourceName) {
-        return "City";
-    }
-
-    private String getStateField(String sourceName) {
-        return "State";
-    }
-
-    private String getCountryField(String sourceName) {
-        return "Country";
+    public MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
+        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
+        matchOutput.setMetadata(metadata);
+        return matchOutput;
     }
 
 }

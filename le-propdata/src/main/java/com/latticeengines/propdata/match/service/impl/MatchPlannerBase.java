@@ -43,7 +43,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private MetricService metricService;
 
-    protected void assignAndValidateColumnSelectionVersion(MatchInput input) {
+    void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
             if (StringUtils.isEmpty(input.getPredefinedVersion())) {
                 String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
@@ -57,8 +57,16 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
+    protected ColumnSelection parseColumnSelection(MatchInput input) {
+        if (input.getPredefinedSelection() != null) {
+            return columnSelectionService.parsePredefined(input.getPredefinedSelection());
+        } else {
+            return input.getCustomSelection();
+        }
+    }
+
     @MatchStep
-    protected MatchContext scanInputData(MatchInput input, MatchContext context) {
+    MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
         List<InternalOutputRecord> records = new ArrayList<>();
@@ -79,23 +87,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep
-    protected MatchContext sketchExecutionPlan(MatchContext matchContext) {
-        ColumnSelection.Predefined predefined = matchContext.getInput().getPredefinedSelection();
-        if (predefined != null) {
-            matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(predefined));
-            matchContext.setColumnPriorityMap(columnSelectionService.getColumnPriorityMap(predefined));
-        }
+    MatchContext sketchExecutionPlan(MatchContext matchContext) {
+        ColumnSelection columnSelection = matchContext.getColumnSelection();
+        matchContext.setPartitionColumnsMap(columnSelectionService.getPartitionColumnMap(columnSelection));
         return matchContext;
     }
 
     @Override
     public void generateInputMetric(MatchInput input) {
         try {
-            Integer selectedCols = null;
-            if (input.getPredefinedSelection() != null) {
-                selectedCols = columnSelectionService.getTargetColumns(input.getPredefinedSelection()).size();
-            }
-
+            ColumnSelection columnSelection = parseColumnSelection(input);
+            Integer selectedCols = columnSelection.getColumns().size();
             MatchRequest request = new MatchRequest(input, selectedCols);
             metricService.write(MetricDB.LDC_Match, request);
         } catch (Exception e) {
@@ -104,13 +106,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep
-    protected MatchOutput initializeMatchOutput(MatchInput input) {
+    MatchOutput initializeMatchOutput(MatchInput input) {
         MatchOutput output = new MatchOutput(input.getUuid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
-        output.setOutputFields(columnSelectionService.getTargetColumns(input.getPredefinedSelection()));
+        output.setOutputFields(parseColumnSelection(input).getColumnNames());
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
         return output;

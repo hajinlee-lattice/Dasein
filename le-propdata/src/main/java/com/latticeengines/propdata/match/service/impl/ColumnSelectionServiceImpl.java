@@ -2,14 +2,17 @@ package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
@@ -31,8 +33,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Autowired
     private ExternalColumnService externalColumnService;
 
-    private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> sourceColumnMapCache = new ConcurrentHashMap<>();
-    private ConcurrentMap<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache = new ConcurrentHashMap<>();
+    private ConcurrentMap<ColumnSelection.Predefined, ColumnSelection> predefinedSelectionMap = new ConcurrentHashMap<>();
 
     @Autowired
     @Qualifier("pdScheduler")
@@ -50,47 +51,44 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     @Override
-    public List<ColumnMetadata> getMetaData(ColumnSelection selection) {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    @Override
-    public List<String> getTargetColumns(ColumnSelection.Predefined predefined) {
-        return getSourceColumnMap(predefined).get(predefined.getName());
-    }
-
-    @Override
-    public Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined) {
-        try {
-            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
-                return sourceColumnMapCache.get(predefined);
-            } else {
-                throw new UnsupportedOperationException(
-                        "Only support selections are " + ColumnSelection.Predefined.supportedSelections);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to find sourceColumnMap for selection " + predefined + " in cache");
-            Map<String, List<String>> value = getSourceColumnMapForSelection(predefined);
-            sourceColumnMapCache.put(predefined, value);
-            return value;
+    public ColumnSelection parsePredefined(ColumnSelection.Predefined predefined) {
+        if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
+            return predefinedSelectionMap.get(predefined);
+        } else {
+            throw new UnsupportedOperationException("Selection " + predefined + " is not supported.");
         }
     }
 
     @Override
-    public Map<String, List<String>> getColumnPriorityMap(ColumnSelection.Predefined predefined) {
-        try {
-            if (ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
-                return columnPriorityMapCache.get(predefined);
+    public List<String> getMatchedColumns(ColumnSelection selection) {
+        List<String> columnNames = new ArrayList<>();
+        for (ColumnSelection.Column column: selection.getColumns()) {
+            ExternalColumn externalColumn = externalColumnService.getExternalColumn(column.getExternalColumnId());
+            if (externalColumn != null) {
+                columnNames.add(externalColumn.getDefaultColumnName());
             } else {
-                throw new UnsupportedOperationException(
-                        "Only support selections are " + ColumnSelection.Predefined.supportedSelections);
+                columnNames.add(column.getColumnName());
             }
-        } catch (Exception e) {
-            log.warn("Failed to find columnPriorityMap for selection " + predefined + " in cache");
-            Map<String, List<String>> value = getColumnPriorityMapForSelection(predefined);
-            columnPriorityMapCache.put(predefined, value);
-            return value;
         }
+        return columnNames;
+    }
+
+    @Override
+    public Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection) {
+        Map<String, Set<String>> partitionColumnMap = new HashMap<>();
+        for (ColumnSelection.Column column : selection.getColumns()) {
+            String colId = column.getExternalColumnId();
+            ExternalColumn col = externalColumnService.getExternalColumn(colId);
+            String partition = col.getTablePartition();
+            if (partitionColumnMap.containsKey(partition)) {
+                partitionColumnMap.get(partition).add(col.getDefaultColumnName());
+            } else if (StringUtils.isNotEmpty(col.getTablePartition())) {
+                Set<String> set = new HashSet<>();
+                set.add(col.getDefaultColumnName());
+                partitionColumnMap.put(partition, set);
+            }
+        }
+        return partitionColumnMap;
     }
 
     @Override
@@ -103,38 +101,11 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         return "1.0".equals(version);
     }
 
-    private Map<String, List<String>> getSourceColumnMapForSelection(ColumnSelection.Predefined selection) {
-        List<ExternalColumn> columns = externalColumnService.columnSelection(selection);
-        Map<String, List<String>> map = new HashMap<>();
-        List<String> columnNames = new ArrayList<>();
-        for (ExternalColumn column : columns) {
-            columnNames.add(column.getDefaultColumnName());
-        }
-        map.put(selection.getName(), columnNames);
-        return map;
-    }
-
-    private Map<String, List<String>> getColumnPriorityMapForSelection(ColumnSelection.Predefined selection) {
-        List<ExternalColumn> columns = externalColumnService.columnSelection(selection);
-        Map<String, List<String>> map = new HashMap<>();
-        for (ExternalColumn column : columns) {
-            String columnName = column.getDefaultColumnName();
-            List<String> sourceList = new ArrayList<>();
-            sourceList.add(selection.getName());
-            map.put(columnName, sourceList);
-        }
-        return map;
-    }
-
     private void loadCaches() {
         for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.supportedSelections) {
             try {
-                sourceColumnMapCache.put(selection, getSourceColumnMapForSelection(selection));
-            } catch (Exception e) {
-                log.error(e);
-            }
-            try {
-                columnPriorityMapCache.put(selection, getColumnPriorityMapForSelection(selection));
+                List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection(selection);
+                predefinedSelectionMap.put(selection, new ColumnSelection(externalColumns));
             } catch (Exception e) {
                 log.error(e);
             }

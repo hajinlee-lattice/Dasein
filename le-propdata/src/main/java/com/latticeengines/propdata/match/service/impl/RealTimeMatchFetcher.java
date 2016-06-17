@@ -186,8 +186,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             for (MatchContext matchContext : matchContextList) {
                 domainSet.addAll(matchContext.getDomains());
                 nameLocationSet.addAll(matchContext.getNameLocations());
-                Map<String, List<String>> srcColMap1 = matchContext.getSourceColumnsMap();
-                for (Map.Entry<String, List<String>> entry : srcColMap1.entrySet()) {
+                Map<String, Set<String>> srcColMap1 = matchContext.getPartitionColumnsMap();
+                for (Map.Entry<String, Set<String>> entry : srcColMap1.entrySet()) {
                     String sourceName = entry.getKey();
                     if (srcColSetMap.containsKey(sourceName)) {
                         srcColSetMap.get(sourceName).addAll(entry.getValue());
@@ -197,14 +197,14 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                 }
             }
 
-            Map<String, List<String>> srcColMap = new HashMap<>();
+            Map<String, Set<String>> srcColMap = new HashMap<>();
             for (Map.Entry<String, Set<String>> entry : srcColSetMap.entrySet()) {
-                srcColMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                srcColMap.put(entry.getKey(), new HashSet<>(entry.getValue()));
             }
 
             mergedContext.setDomains(domainSet);
             mergedContext.setNameLocations(nameLocationSet);
-            mergedContext.setSourceColumnsMap(srcColMap);
+            mergedContext.setPartitionColumnsMap(srcColMap);
             return mergedContext;
         }
 
@@ -212,9 +212,9 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             Map<String, List<Map<String, Object>>> allResults = mergedContext.getResultsBySource();
 
             for (MatchContext context : matchContextList) {
-                Map<String, List<String>> srcColMap = context.getSourceColumnsMap();
+                Map<String, Set<String>> srcColMap = context.getPartitionColumnsMap();
                 Map<String, List<Map<String, Object>>> result = new HashMap<>();
-                for (Map.Entry<String, List<String>> entry : srcColMap.entrySet()) {
+                for (Map.Entry<String, Set<String>> entry : srcColMap.entrySet()) {
                     String sourceName = entry.getKey();
                     if (!allResults.containsKey(sourceName)) {
                         throw new RuntimeException("Merged result does not have required source " + sourceName);
