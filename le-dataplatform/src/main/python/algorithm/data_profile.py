@@ -361,7 +361,6 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         attributeStats["HighNullValueRate"].append(colName)
         filtered = True
 
-# bernard
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
@@ -376,7 +375,6 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
-# bernard
             return (index, diagnostics)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
