@@ -37,6 +37,11 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class AvroUtils {
 
     private static Log log = LogFactory.getLog(AvroUtils.class);
@@ -52,6 +57,40 @@ public class AvroUtils {
             throw new RuntimeException("Getting avro file reader from path: " + path.toString(), e);
         }
         return reader;
+    }
+
+    public static Schema alignFields(Schema shuffled, Schema ordered) {
+        ObjectNode shuffledJson = JsonUtils.deserialize(shuffled.toString(), ObjectNode.class);
+        JsonNode orderedJson = JsonUtils.deserialize(ordered.toString(), JsonNode.class);
+        ArrayNode shuffledFields = (ArrayNode) shuffledJson.get("fields");
+        ArrayNode orderedFields = (ArrayNode) orderedJson.get("fields");
+        Map<String, JsonNode> fieldMap = new HashMap<>();
+        for (JsonNode field: shuffledFields) {
+            fieldMap.put(field.get("name").asText(), field);
+        }
+        ArrayNode newFields = new ObjectMapper().createArrayNode();
+        List<String> errorMsgs = new ArrayList<>();
+        for (JsonNode field: orderedFields) {
+            String fieldName = field.get("name").asText();
+            if (fieldMap.containsKey(fieldName)) {
+                newFields.add(field);
+                fieldMap.remove(fieldName);
+            } else {
+                errorMsgs.add("Found field " + fieldName + " in ordered schema, but not shuffled one.");
+            }
+        }
+
+        for (String fieldName: fieldMap.keySet()) {
+            errorMsgs.add("Found field " + fieldName + " in shuffled schema, but not ordered one.");
+        }
+
+        if (!errorMsgs.isEmpty()) {
+            throw new IllegalArgumentException("Shuffled and ordered schemas do not match, cannot align.\n" +
+                    org.apache.commons.lang.StringUtils.join(errorMsgs, "\n"));
+        }
+
+        shuffledJson.set("fields", newFields);
+        return new Schema.Parser().parse(JsonUtils.serialize(shuffledJson));
     }
 
     public static Schema getSchema(Configuration config, Path path) {

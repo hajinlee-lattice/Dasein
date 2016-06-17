@@ -1,11 +1,17 @@
 package com.latticeengines.propdata.api.controller;
 
 import java.util.Collections;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.propdata.match.service.InternalService;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,6 +42,9 @@ public class InternalResource extends InternalResourceBase implements InternalIn
 
     @Autowired
     private PropDataYarnService yarnService;
+
+    @Autowired
+    private InternalService internalService;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {
@@ -82,6 +91,14 @@ public class InternalResource extends InternalResourceBase implements InternalIn
         checkHeader(request);
         ApplicationId applicationId = yarnService.submitPropDataJob(jobConfiguration);
         return new AppSubmission(Collections.singletonList(applicationId));
+    }
+
+    @RequestMapping(value = "/currentcachetableversion", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get version (creation timestamp) of DerivedColumnsCache table")
+    @Override
+    public Date currentCacheTableVersion() {
+        return internalService.currentCacheTableCreatedTime();
     }
 
 

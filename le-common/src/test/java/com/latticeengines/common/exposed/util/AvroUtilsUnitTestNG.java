@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.testng.Assert;
@@ -49,6 +50,24 @@ public class AvroUtilsUnitTestNG {
         Schema schema = Schema.parse(avscFile);
         String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", schema);
         System.out.println(hiveTableDDL);
+    }
+
+
+    @Test(groups = "unit")
+    public void testAlignFields() throws Exception {
+        Schema schema1 = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\","
+                + "\"fields\":[" //
+                + "{\"name\":\"Field2\",\"type\":\"int\"}," //
+                + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema2 = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Ordered\",\"doc\":\"Testing data\","
+                + "\"fields\":[" //
+                + "{\"name\":\"Field1\",\"type\":\"int\"}," //
+                + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema = AvroUtils.alignFields(schema1, schema2);
+        List<Schema.Field> fieldList = schema.getFields();
+        Assert.assertEquals(schema.getName(), "Shuffled");
+        Assert.assertEquals(fieldList.get(0).name(), "Field1");
+        Assert.assertEquals(fieldList.get(1).name(), "Field2");
     }
 
     @Test(groups = "unit")

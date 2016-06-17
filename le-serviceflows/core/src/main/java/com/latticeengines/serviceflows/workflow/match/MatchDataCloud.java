@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -114,12 +115,28 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
 
-        Schema schema;
+        Schema providedSchema;
         try {
-            schema = TableUtils.createSchema(preMatchEventTable.getName(), preMatchEventTable);
+            providedSchema = TableUtils.createSchema(preMatchEventTable.getName(), preMatchEventTable);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create avro schema from pre-match event table.", e);
         }
+
+        Schema extractedSchema;
+        try {
+            String avroGlob;
+            if (avroDir.endsWith(".avro")) {
+                avroGlob = avroDir;
+            } else {
+                avroGlob = avroDir.endsWith("/") ? avroDir + "*.avro" : avroDir + "/*.avro";
+            }
+            extractedSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to extract avro schema from input avro.", e);
+        }
+
+        Schema schema = AvroUtils.alignFields(providedSchema, extractedSchema);
+
         inputBuffer.setSchema(schema);
 
         matchInput.setInputBuffer(inputBuffer);

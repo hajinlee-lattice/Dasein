@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.propdata;
 
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -33,6 +35,12 @@ public class InternalProxy extends BaseRestApiProxy implements InternalInterface
     public AppSubmission submitYarnJob(PropDataJobConfiguration jobConfiguration) {
         String url = constructUrl("/yarnjobs");
         return post("submitYarnJob", url, jobConfiguration, AppSubmission.class);
+    }
+
+    @Override
+    public Date currentCacheTableVersion() {
+        String url = constructUrl("/currentcachetableversion");
+        return get("submitYarnJob", url, Date.class);
     }
 
 }

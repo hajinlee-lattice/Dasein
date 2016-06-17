@@ -219,35 +219,6 @@ CREATE TABLE [dbo].[QRTZ_TRIGGERS] (
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[JOB_HISTORY] (
-  [PID]                BIGINT IDENTITY NOT NULL UNIQUE,
-  [JobName]            VARCHAR(255)    NOT NULL,
-  [TenantId]           VARCHAR(255)    NOT NULL,
-  [TriggeredJobHandle] VARCHAR(255),
-  [TriggeredTime]      DATETIME2       NOT NULL,
-  [TriggeredJobStatus] INTEGER         NOT NULL,
-  [ErrorMessage]       VARCHAR(8000),
-  [ExecutionHost]      VARCHAR(8000),
-  PRIMARY KEY ([PID])
-)
-GO
-
-CREATE TABLE [dbo].[QUARTZ_ACTIVESTACK] (
-  [PID]         BIGINT IDENTITY NOT NULL UNIQUE,
-  [ActiveStack] VARCHAR(255)    NOT NULL,
-  PRIMARY KEY ([PID])
-)
-GO
-
-CREATE TABLE [dbo].[QUARTZ_JOBACTIVE] (
-  [PID]      BIGINT IDENTITY NOT NULL UNIQUE,
-  [JobName]  VARCHAR(255)    NOT NULL,
-  [TenantId] VARCHAR(255)    NOT NULL,
-  [IsActive] BIT             NOT NULL,
-  PRIMARY KEY ([PID])
-)
-GO
-
 ALTER TABLE [dbo].[QRTZ_CALENDARS]
   WITH NOCHECK ADD
   CONSTRAINT [PK_QRTZ_CALENDARS] PRIMARY KEY CLUSTERED
