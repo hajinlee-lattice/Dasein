@@ -319,7 +319,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "JOIN [ConfigTableColumn] CC on C.Column_Name = CC.Column_Lookup_ID "
                 + "JOIN [ConfigTable] CT ON CC.[ConfigTable_ID] = CT.ConfigTable_ID "
                 + "JOIN [ConfigResource] S ON CC.Column_Display_Key = S.Key_Name AND S.Locale_ID = -1 "
-                + "WHERE CC.IsActive = 1 and CC.Column_IsVisible = 1 and CT.External_ID = 'Sales-AccountList'";
+                + "WHERE CC.IsActive = 1 and CT.External_ID = 'Sales-AccountList'";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
