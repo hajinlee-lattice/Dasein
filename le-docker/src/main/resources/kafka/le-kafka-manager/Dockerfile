@@ -1,7 +1,7 @@
-FROM centos:7
+FROM sheepkiller/kafka-manager
 
-RUN yum -y update; yum clean all; 
-RUN yum -y install openssh-server passwd wget;
+RUN yum -y update; yum clean all;
+RUN yum -y install wget;
 
 # java
 RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
@@ -24,9 +24,6 @@ RUN tar xzf zookeeper-3.4.8.tar.gz \
 	&& rm zookeeper-3.4.8.tar.gz
 
 COPY zoo.cfg /usr/zookeeper/etc/zookeeper/zoo.cfg
-
-# kafka-manager
-ADD kafka-manager.tar.gz /opt
 
 EXPOSE 9000
 

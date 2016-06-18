@@ -63,11 +63,7 @@ TMP_DIR=.${KAFKA}_tmp
 rm -rf $TMP_DIR 2> /dev/null || true
 mkdir $TMP_DIR
 cp zookeeper.properties $TMP_DIR/zookeeper.properties
-
-CONF_DIR=${KAFKA}_conf
-rm -rf $CONF_DIR 2> /dev/null || true
-mkdir $CONF_DIR
-cp haproxy.cfg $CONF_DIR/haproxy.cfg
+cp haproxy.cfg $TMP_DIR/haproxy.cfg
 
 ZK_HOSTS=""
 BROKERS=""
@@ -95,8 +91,8 @@ done
 ZK_HOSTS=`echo $ZK_HOSTS | cut -d , -f 2-`
 BROKERS=`echo $BROKERS | cut -d , -f 2-`
 
-sed -i "s|{{SR_HOSTS}}|$SR_HOSTS|g" $CONF_DIR/haproxy.cfg
-sed -i "s|{{KR_HOSTS}}|$KR_HOSTS|g" $CONF_DIR/haproxy.cfg
+sed -i "s|{{SR_HOSTS}}|$SR_HOSTS|g" $TMP_DIR/haproxy.cfg
+sed -i "s|{{KR_HOSTS}}|$KR_HOSTS|g" $TMP_DIR/haproxy.cfg
 
 for i in $(seq 1 $KAFKA_NODES);
 do
@@ -137,7 +133,7 @@ do
 	rm $TMP_DIR/kafka-rest.properties
 done
 
-docker cp ${CONF_DIR}/haproxy.cfg ${KAFKA}-ha:/etc/haproxy/haproxy.cfg
+docker cp ${TMP_DIR}/haproxy.cfg ${KAFKA}-ha:/etc/haproxy/haproxy.cfg
 docker network connect kafka ${KAFKA}-ha
 
 rm -rf $TMP_DIR

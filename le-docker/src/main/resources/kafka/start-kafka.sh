@@ -28,7 +28,7 @@ sleep 2
 for i in $(seq 1 $KAFKA_NODES);
 do 
 	echo "starting schema-registry on ${KAFKA}$i"
-	docker exec ${KAFKA}$i bash -c 'nohup /usr/bin/schema-registry-start -daemon /etc/schema-registry/schema-registry.properties 2>&1 > /tmp/schemaRegistry.out &'
+	docker exec ${KAFKA}$i bash -c 'nohup /usr/bin/schema-registry-start -daemon /etc/schema-registry/schema-registry.properties 2>&1 > /tmp/schema-registry.out &'
 done
 
 sleep 2
@@ -36,7 +36,7 @@ sleep 2
 for i in $(seq 1 $KAFKA_NODES);
 do 
 	echo "starting kafka-rest on ${KAFKA}$i"
-	docker exec ${KAFKA}$i bash -c 'nohup /usr/bin/kafka-rest-start -daemon /etc/kafka-rest/kafka-rest.properties 2>&1 > /tmp/kafkaRest.out &'
+	docker exec ${KAFKA}$i bash -c 'nohup /usr/bin/kafka-rest-start -daemon /etc/kafka-rest/kafka-rest.properties 2>&1 > /tmp/kafka-rest.out &'
 done
 
 sleep 2
