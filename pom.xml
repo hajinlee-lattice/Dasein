@@ -48,12 +48,12 @@
         <module>le-pls</module>
         <module>le-dellebi</module>
         <module>le-job</module>
-        <module>le-admin</module>
         <module>le-release</module>
         <module>le-liaison</module>
         <module>le-workflow</module>
         <module>le-workflowapi</module>
         <module>le-quartz</module>
         <module>le-quartzclient</module>
+        <module>le-admin</module>
     </modules>
 </project>
