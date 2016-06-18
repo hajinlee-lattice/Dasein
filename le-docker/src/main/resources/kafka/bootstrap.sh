@@ -42,18 +42,21 @@ bash ./teardown.sh
 
 # run centos container
 echo "provisioning ${KAFKA}1"
-docker run -itd -p ${ZK_PORT}:2181 --name ${KAFKA}1 -l cluster.name=${KAFKA} latticeengines/kafka
+docker run -d --name ${KAFKA}1 -l cluster.name=${KAFKA} -e MY_ID=1 -p ${ZK_PORT}:2181 latticeengines/kafka
 echo "provisioning ${KAFKA}2"
-docker run -itd -p ${BK_PORT}:9092 --name ${KAFKA}2 -l cluster.name=${KAFKA} latticeengines/kafka
+docker run -d --name ${KAFKA}2 -l cluster.name=${KAFKA} -e MY_ID=2 -p ${BK_PORT}:9092 latticeengines/kafka
 echo "provisioning ${KAFKA}3"
-docker run -itd --name ${KAFKA}3 -l cluster.name=${KAFKA} latticeengines/kafka
+docker run -d --name ${KAFKA}3 -l cluster.name=${KAFKA} -e MY_ID=3 latticeengines/kafka
 for i in $(seq 4 $KAFKA_NODES);
 do
 	echo "provisioning ${KAFKA}${i}"
-	docker run -itd --name ${KAFKA}$i -l cluster.name=${KAFKA} latticeengines/kafka
+	docker run -d --name ${KAFKA}$i -e MY_ID=$i -l cluster.name=${KAFKA} latticeengines/kafka
 done
+
 echo "provisioning haproxy: ${KAFKA}-haproxy"
-docker run -itd --name ${KAFKA}-ha -p ${HA_PORT}:80 -p ${SR_PORT}:9022 -p ${KR_PORT}:9023 -l cluster.name=${KAFKA} latticeengines/kafka-haproxy
+docker run -d --name ${KAFKA}-ha \
+    -p ${HA_PORT}:80 -p ${SR_PORT}:9022 -p ${KR_PORT}:9023 \
+    -l cluster.name=${KAFKA} latticeengines/haproxy
 
 PROXY_IP=$(docker inspect --format '{{ .NetworkSettings.Networks.kafka.IPAddress }}' ${KAFKA}-ha)
 SR_PROXY=http://${PROXY_IP}:9022
@@ -62,30 +65,28 @@ TMP_DIR=.${KAFKA}_tmp
 
 rm -rf $TMP_DIR 2> /dev/null || true
 mkdir $TMP_DIR
-cp zookeeper.properties $TMP_DIR/zookeeper.properties
-cp haproxy.cfg $TMP_DIR/haproxy.cfg
+cp conf/zookeeper.properties $TMP_DIR/zookeeper.properties
+cp conf/haproxy.cfg $TMP_DIR/haproxy.cfg
 
 ZK_HOSTS=""
 BROKERS=""
 SR_HOSTS=""
 KR_HOSTS=""
 for i in $(seq 1 $KAFKA_NODES);
-do 
+do
 	CONTAINER_NAME=${KAFKA}$i
-	docker network connect kafka $CONTAINER_NAME 2> /dev/null
 
-	rm $TMP_DIR/myid 2> /dev/null; touch $TMP_DIR/myid; echo $i >> $TMP_DIR/myid
+    rm $TMP_DIR/myid 2> /dev/null; touch $TMP_DIR/myid; echo $i >> $TMP_DIR/myid
 	docker cp $TMP_DIR/myid $CONTAINER_NAME:/var/lib/zookeeper/myid
 	rm $TMP_DIR/myid
 
-	INTER_IP=$(docker inspect --format '{{ .NetworkSettings.Networks.kafka.IPAddress }}' ${CONTAINER_NAME})
 	HOST_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
-	ZK_HOSTS="${ZK_HOSTS},${INTER_IP}:2181"
-	BROKERS="${BROKERS},${HOST_IP}:9092"
-	SR_HOSTS="${SR_HOSTS}\n    server ${CONTAINER_NAME} ${INTER_IP}:9022 check"
-	KR_HOSTS="${KR_HOSTS}\n    server ${CONTAINER_NAME} ${INTER_IP}:9023 check"
+	ZK_HOSTS="${ZK_HOSTS},${HOST_IP}:2181"
+	BROKERS="${BROKERS},${CONTAINER_NAME}:9092"
+	SR_HOSTS="${SR_HOSTS}\n    server ${CONTAINER_NAME} ${HOST_IP}:9022 check"
+	KR_HOSTS="${KR_HOSTS}\n    server ${CONTAINER_NAME} ${HOST_IP}:9023 check"
 
-	echo "server.${i}=${INTER_IP}:2888:3888" >> $TMP_DIR/zookeeper.properties
+	echo "server.${i}=${HOST_IP}:2888:3888" >> $TMP_DIR/zookeeper.properties
 done
 
 ZK_HOSTS=`echo $ZK_HOSTS | cut -d , -f 2-`
@@ -99,11 +100,10 @@ do
 	for f in server schema-registry kafka-rest control-center;
 	do
 		rm $TMP_DIR/$f.properties 2> /dev/null
-		cp $f.properties $TMP_DIR/$f.properties
+		cp conf/$f.properties $TMP_DIR/$f.properties
 	done
 
-	CONTAINER_NAME=${KAFKA}$i	
-	INTER_IP=$(docker inspect --format '{{ .NetworkSettings.Networks.kafka.IPAddress }}' ${CONTAINER_NAME})
+	CONTAINER_NAME=${KAFKA}$i
 	HOST_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
 
 	sed -i "s|{{BROKER_ID}}|$i|g" $TMP_DIR/server.properties
@@ -114,7 +114,7 @@ do
 	sed -i "s|{{CONTROLCENTER_ID}}|$i|g" $TMP_DIR/control-center.properties
 	sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" $TMP_DIR/control-center.properties
 
-	sed -i "s|{{INTER_IP}}|$INTER_IP|g" $TMP_DIR/schema-registry.properties
+	sed -i "s|{{INTER_IP}}|$HOST_IP|g" $TMP_DIR/schema-registry.properties
 	sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" $TMP_DIR/schema-registry.properties
 
 	sed -i "s|{{BROKER_ID}}|$i|g" $TMP_DIR/kafka-rest.properties
@@ -134,12 +134,11 @@ do
 done
 
 docker cp ${TMP_DIR}/haproxy.cfg ${KAFKA}-ha:/etc/haproxy/haproxy.cfg
-docker network connect kafka ${KAFKA}-ha
 
 rm -rf $TMP_DIR
 
 bash start-kafka.sh ${KAFKA}
 
+sleep 5
 docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"
-
 echo 'you can use this zk connection to add cluster to kafka-manager: '${ZK_HOSTS}

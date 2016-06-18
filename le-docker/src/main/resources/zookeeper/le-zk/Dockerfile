@@ -1,6 +1,6 @@
 FROM centos:7
 
-RUN yum -y update; yum clean all; 
+RUN yum -y update; yum clean all;
 RUN yum -y install openssh-server passwd wget;
 
 # java
@@ -9,13 +9,24 @@ RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2
 	yum -y localinstall jdk-8u60-linux-x64.rpm; \
 	rm jdk-8u60-linux-x64.rpm
 
-# confluent
-ADD confluent.repo /etc/yum.repos.d/confluent.repo
-RUN yum clean all; yum -y -v install confluent-platform-2.11
+# zookeeper
+RUN wget http://supergsego.com/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
+
+ENV ZK_LOG_DIR /usr/zookeeper/logs
+ENV ZOOKEEPER_HOME /usr/zookeeper
+
+ENV PATH $PATH:$ZOOKEEPER_HOME/bin
+
+RUN tar xzf zookeeper-3.4.8.tar.gz \
+	&& mv zookeeper-3.4.8 /usr/zookeeper \
+	&& mkdir -p /usr/zookeeper/logs \
+	&& rm zookeeper-3.4.8.tar.gz
+
 RUN mkdir -p /var/lib/zookeeper; touch /var/lib/zookeeper/myid
-ADD kafka-server-stop /usr/bin/kafka-server-stop
+
+COPY zoo.cfg /usr/zookeeper/conf/zoo.cfg
 ADD start.sh /start.sh
 
-EXPOSE 9021-9023 9092 3333 2181 2888 3888 9199
+EXPOSE 2181 2888 3888
 
 CMD ["bash", "/start.sh"]

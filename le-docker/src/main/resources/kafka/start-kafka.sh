@@ -10,12 +10,13 @@ if [ -z ${KAFKA} ]; then
 fi
 
 for i in $(seq 1 $KAFKA_NODES);
-do 
+do
 	echo "starting zookeeper on ${KAFKA}$i"
-	docker exec ${KAFKA}$i bash -c '/usr/bin/zookeeper-server-start -daemon /etc/kafka/zookeeper.properties'	
+	docker restart ${KAFKA}$i
 done
 
 sleep 2
+
 
 for i in $(seq 1 $KAFKA_NODES);
 do 
@@ -42,7 +43,4 @@ done
 sleep 2
 
 echo "starting haproxy on ${KAFKA}-haproxy"
-docker exec ${KAFKA}-ha bash /haproxy-start
-
-# confluent control center
-# docker exec ${KAFKA}1 bash -c 'nohup /usr/bin/control-center-start /etc/confluent-control-center/control-center.properties 2>&1 > /tmp/controlCenter.out &'
+docker restart ${KAFKA}-ha

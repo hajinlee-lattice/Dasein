@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ -z ${KAFKA_NODES} ]; then
     KAFKA_NODES=3
 fi
