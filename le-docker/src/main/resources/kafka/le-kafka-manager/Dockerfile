@@ -13,7 +13,16 @@ RUN tar xzf zookeeper-3.4.8.tar.gz \
 	&& mkdir -p /usr/zookeeper/logs \
 	&& rm zookeeper-3.4.8.tar.gz
 
-COPY zoo.cfg /usr/zookeeper/conf/zoo.cfg
+RUN mkdir -p /usr/zookeeper/conf && \
+    touch /usr/zookeeper/conf/zoo.cfg && \
+    echo "dataDir=/var/lib/zookeeper" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "clientPort=2181" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "tickTime=2000" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "initLimit=10" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "syncLimit=5" >> /usr/zookeeper/conf/zoo.cfg
+
+VOLUME ["/usr/zookeeper/conf"]
+
 ADD start.sh /start.sh
 
 ENTRYPOINT [ "bash" ]

@@ -39,7 +39,6 @@ ZK_HOSTS=""
 for i in $(seq 1 $ZK_NODES);
 do
 	CONTAINER_NAME=${ZK}$i
-
 	INTER_IP=$(docker inspect --format "{{ .NetworkSettings.IPAddress }}" ${CONTAINER_NAME})
 	ZK_HOSTS="${ZK_HOSTS},${INTER_IP}:2181"
 	echo "server.${i}=${INTER_IP}:2888:3888" >> $TMP_DIR/zoo.cfg
@@ -49,7 +48,7 @@ ZK_HOSTS=`echo $ZK_HOSTS | cut -d , -f 2-`
 
 for i in $(seq 1 $ZK_NODES);
 do
-	docker cp $TMP_DIR/zoo.cfg $CONTAINER_NAME:/usr/zookeeper/conf/zoo.cfg
+	docker cp $TMP_DIR/zoo.cfg ${ZK}$i:/usr/zookeeper/conf/zoo.cfg
 done
 
 rm -rf $TMP_DIR

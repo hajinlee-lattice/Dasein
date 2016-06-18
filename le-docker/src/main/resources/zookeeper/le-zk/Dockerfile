@@ -24,7 +24,15 @@ RUN tar xzf zookeeper-3.4.8.tar.gz \
 
 RUN mkdir -p /var/lib/zookeeper; touch /var/lib/zookeeper/myid
 
-COPY zoo.cfg /usr/zookeeper/conf/zoo.cfg
+RUN touch /usr/zookeeper/conf/zoo.cfg && \
+    echo "dataDir=/var/lib/zookeeper" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "clientPort=2181" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "tickTime=2000" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "initLimit=10" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "syncLimit=5" >> /usr/zookeeper/conf/zoo.cfg
+
+VOLUME ["/usr/zookeeper/conf"]
+
 ADD start.sh /start.sh
 
 EXPOSE 2181 2888 3888
