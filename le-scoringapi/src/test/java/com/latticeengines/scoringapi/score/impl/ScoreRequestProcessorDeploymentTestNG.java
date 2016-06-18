@@ -1,0 +1,255 @@
+package com.latticeengines.scoringapi.score.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.Record;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
+import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNG;
+import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
+import com.latticeengines.scoringapi.controller.TestModelConfiguration;
+import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
+import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
+import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
+
+public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNG {
+    private static final int MAX_RECORD_COUNT = 19; // prime number for better
+                                                    // distribution of models
+    private ScoreRequestProcessor scoreRequestProcessor;
+    private ScoreRequestProcessorImpl scoreRequestProcessorImpl;
+    private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
+    private Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap = new HashMap<>();
+    private Map<String, ScoringArtifacts> uniqueScoringArtifactsMap = new HashMap<>();
+    private BulkRecordScoreRequest request;
+    private List<RecordModelTuple> originalOrderParsedTupleList;
+    private List<RecordModelTuple> partiallyOrderedParsedTupleList;
+    private List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList;
+    private Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap;
+    private Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords;
+    private List<ModelSummary> originalOrderModelSummaryList;
+    private Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap;
+    private Map<String, Map<String, Predefined>> recordModelIdSelectionMap;
+
+    @BeforeClass
+    public void init() throws IOException {
+        scoreRequestProcessor = applicationContext.getBean("customScoreRequestProcessor", ScoreRequestProcessor.class);
+        scoreRequestProcessorImpl = (ScoreRequestProcessorImpl) scoreRequestProcessor;
+        modelList = createModelList();
+        request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
+    }
+
+    private void overwritePredifinedSelection() {
+        int i = 0;
+        for (String modelId : uniqueScoringArtifactsMap.keySet()) {
+            ModelSummary modelSummary = uniqueScoringArtifactsMap.get(modelId).getModelSummary();
+            Predefined predefinedSelection = (i++ % 2 == 0 ? Predefined.Model : Predefined.RTS);
+            modelSummary.setPredefinedSelection(predefinedSelection);
+            System.out.println(modelSummary.getId() + " -- " + predefinedSelection);
+        }
+
+        recordModelIdSelectionMap = new HashMap<>();
+
+        for (Record record : request.getRecords()) {
+            Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
+
+            for (String modelId : record.getModelAttributeValuesMap().keySet()) {
+                modelIdSelectionMap.put(modelId,
+                        uniqueScoringArtifactsMap.get(modelId).getModelSummary().getPredefinedSelection());
+            }
+
+            recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
+        }
+
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testFetchModelArtifacts() {
+        List<Record> records = request.getRecords();
+        CustomerSpace space = ScoringApiControllerDeploymentTestNGBase.customerSpace;
+        scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
+        Assert.assertEquals(MAX_RECORD_COUNT, records.size());
+        Assert.assertEquals(modelList.size(), uniqueScoringArtifactsMap.size());
+        Assert.assertEquals(modelList.size(), uniqueFieldSchemasMap.size());
+        overwritePredifinedSelection();
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
+    public void testCheckForMissingFields() throws IOException {
+        originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
+                uniqueFieldSchemasMap, request);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderParsedTupleList.size());
+
+        int idx = 0;
+        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+            Record record = request.getRecords().get(idx / RECORD_MODEL_CARDINALITY);
+            Assert.assertEquals(record, tuple.getRecord());
+
+            Assert.assertEquals(RECORD_MODEL_CARDINALITY, record.getModelAttributeValuesMap().size());
+
+            boolean foundModelIdMatch = false;
+            for (String modelId : record.getModelAttributeValuesMap().keySet()) {
+                if (modelId.equals(tuple.getModelId())) {
+                    foundModelIdMatch = true;
+                }
+            }
+
+            Assert.assertTrue(foundModelIdMatch);
+            idx++;
+        }
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testCheckForMissingFields" })
+    public void testExtractParsedList() {
+        partiallyOrderedParsedTupleList = new ArrayList<>();
+        partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
+        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
+                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList);
+
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractParsedList" })
+    public void testExtractModelSummaries() {
+        originalOrderModelSummaryList = scoreRequestProcessorImpl.extractModelSummaries(originalOrderParsedTupleList,
+                uniqueScoringArtifactsMap);
+        Assert.assertNotNull(originalOrderModelSummaryList);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderModelSummaryList.size());
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
+    public void testBulkMatchAndJoin() {
+        unorderedMatchedRecordMap = scoreRequestProcessorImpl.bulkMatchAndJoin(customerSpace, uniqueFieldSchemasMap,
+                partiallyOrderedParsedTupleList, originalOrderModelSummaryList);
+        Assert.assertNotNull(unorderedMatchedRecordMap);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedMatchedRecordMap.size());
+
+        checkMatchedResults();
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testBulkMatchAndJoin" })
+    public void testAddMissingFields() {
+        scoreRequestProcessorImpl.addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap,
+                originalOrderParsedTupleList);
+        unorderedCombinedRecordMap = new HashMap<>();
+        unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
+        Assert.assertNotNull(unorderedCombinedRecordMap);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedCombinedRecordMap.size());
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testAddMissingFields" })
+    public void testTransform() {
+        unorderedTransformedRecords = scoreRequestProcessorImpl.transform(uniqueScoringArtifactsMap,
+                unorderedCombinedRecordMap, originalOrderParsedTupleList);
+
+        Assert.assertNotNull(unorderedTransformedRecords);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedTransformedRecords.size());
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testTransform" })
+    public void testGenerateDebugScoreResponse() {
+        List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl.generateDebugScoreResponse(
+                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
+
+        Assert.assertNotNull(recordScoreResponseDebugList);
+        Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
+
+        checkScoreResultList(recordScoreResponseDebugList, true);
+
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
+    public void testGenerateScoreResponse() {
+        List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl.generateScoreResponse(
+                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
+
+        Assert.assertNotNull(recordScoreResponseList);
+        Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
+
+        checkScoreResultList(recordScoreResponseList, false);
+    }
+
+    @Override
+    protected boolean shouldRunScoringTest() {
+        return false;
+    }
+
+    private void checkScoreResultList(List<RecordScoreResponse> recordScoreResponseList, boolean isDebug) {
+        for (RecordScoreResponse recordScoreResponse : recordScoreResponseList) {
+            if (isDebug) {
+                DebugRecordScoreResponse debugResponse = (DebugRecordScoreResponse) recordScoreResponse;
+                Assert.assertNotNull(debugResponse.getTransformedRecordMap());
+                Assert.assertTrue(debugResponse.getTransformedRecordMap().size() > 0);
+            }
+            Assert.assertEquals(RECORD_MODEL_CARDINALITY, recordScoreResponse.getScores().size());
+            for (ScoreModelTuple score : recordScoreResponse.getScores()) {
+                Assert.assertNotNull(score);
+                Assert.assertNotNull(score.getModelId());
+                Assert.assertNotNull(score.getScore());
+                System.out.println(score.getModelId() + " => " + score.getScore());
+            }
+        }
+    }
+
+    private void checkMatchedResults() {
+        Map<String, List<RecordModelTuple>> tempGrouping = new HashMap<>();
+
+        for (RecordModelTuple tuple : unorderedMatchedRecordMap.keySet()) {
+            List<RecordModelTuple> tupleList = tempGrouping.get(tuple.getRecord().getRecordId());
+            if (tupleList == null) {
+                tupleList = new ArrayList<>();
+                tempGrouping.put(tuple.getRecord().getRecordId(), tupleList);
+            }
+
+            tupleList.add(tuple);
+        }
+
+        for (String recordId : tempGrouping.keySet()) {
+            Map<String, Predefined> modelIdSelectionMap = recordModelIdSelectionMap.get(recordId);
+            List<RecordModelTuple> relatedRecordModelTuple = tempGrouping.get(recordId);
+            Assert.assertEquals(RECORD_MODEL_CARDINALITY, relatedRecordModelTuple.size());
+            for (RecordModelTuple tuple : relatedRecordModelTuple) {
+                Map<String, Object> matchedResult = unorderedMatchedRecordMap.get(tuple);
+                String modelId = tuple.getModelId();
+
+                Predefined columnSelection = uniqueScoringArtifactsMap.get(modelId).getModelSummary()
+                        .getPredefinedSelection();
+
+                Assert.assertEquals(modelIdSelectionMap.get(modelId), columnSelection);
+
+                if (columnSelection == Predefined.Model) {
+                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_CustomerOrderManagement"));
+                    Assert.assertNotNull(matchedResult.get("AlexaGBUsers"));
+                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_WCMS"));
+                    Assert.assertNotNull(matchedResult.get("AlexaAUUsers"));
+                    Assert.assertNotNull(matchedResult.get("HPA_New_Pivoted_Source_IsMatched"));
+                    Assert.assertNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
+                    Assert.assertNull(matchedResult.get("Bmbr30_FinanceIT_Total"));
+                } else if (columnSelection == Predefined.RTS) {
+                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_CustomerOrderManagement"));
+                    Assert.assertNotNull(matchedResult.get("AlexaGBUsers"));
+                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_WCMS"));
+                    Assert.assertNotNull(matchedResult.get("AlexaAUUsers"));
+                    Assert.assertNotNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
+                    Assert.assertNull(matchedResult.get("HPA_New_Pivoted_Source_IsMatched"));
+                } else {
+                    Assert.assertTrue(false, columnSelection.toString());
+                }
+            }
+        }
+
+    }
+}

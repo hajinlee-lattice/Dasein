@@ -24,13 +24,14 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
         List<Model> models = getModelList();
-        Assert.assertEquals(models.size(), 1);
+        Assert.assertTrue(models.size() >= 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
         Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
     }
@@ -156,7 +157,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {
         String url = apiHostPort + "/score/modeldetails/count?considerAllStatus=" + considerAllStatus;
         if (lastUpdateTime != null) {
-            url += "&start=" + dateFormat.format(lastUpdateTime);
+            url += "&start=" + BaseScoring.dateFormat.format(lastUpdateTime);
         }
 
         ResponseEntity<Integer> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, Integer.class);
@@ -170,7 +171,13 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getBaseModelsCount", "getModelsCountActive" })
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
-        runScoringTest(url);
+        if (shouldRunScoringTest()) {
+            runScoringTest(url);
+        }
+    }
+
+    protected boolean shouldRunScoringTest() {
+        return true;
     }
 
     @Override
@@ -188,7 +195,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             int offset, int maximum) {
         String url = serviceHostPort
                 + "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&start={start}";
-        String startStr = dateFormat.format(start);
+        String startStr = BaseScoring.dateFormat.format(start);
         System.out.println(url);
         ResponseEntity<List<ModelDetail>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<ModelDetail>>() {

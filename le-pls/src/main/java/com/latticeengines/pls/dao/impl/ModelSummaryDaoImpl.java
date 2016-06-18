@@ -114,7 +114,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
             basicQueryStr += " and status = :statusId ";
         }
 
-        basicQueryStr += " order by lastUpdateTime asc";
+        basicQueryStr += " order by lastUpdateTime, constructionTime asc";
 
         String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr).setFirstResult(offset).setMaxResults(maximum);

@@ -65,7 +65,8 @@ public class DefaultModelEvaluator implements ModelEvaluator {
     }
 
     @Override
-    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation) {
+    public Map<ScoreType, Object> evaluate(Map<String, Object> record, //
+            ScoreDerivation derivation) {
         ModelEvaluatorFactory modelEvaluatorFactory = ModelEvaluatorFactory.newInstance();
         Evaluator evaluator = modelEvaluatorFactory.newModelManager(manager.getPMML());
 
@@ -134,7 +135,14 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
         Map<FieldName, ?> results = null;
         try {
+            if (log.isInfoEnabled()) {
+                log.info("Invoke evaluate via jpmml api");
+            }
+
             results = evaluator.evaluate(arguments);
+            if (log.isInfoEnabled()) {
+                log.info("Invoke evaluate complete via jpmml api");
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
         }
@@ -152,7 +160,8 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         return result;
     }
 
-    protected void calculatePercentile(ScoreDerivation derivation, Map<FieldName, ?> results,
+    protected void calculatePercentile(ScoreDerivation derivation, //
+            Map<FieldName, ?> results, //
             Map<ScoreType, Object> result) {
         String target = derivation.target;
         if (target == null) {
@@ -208,7 +217,8 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         }
     }
 
-    private boolean withinRange(BucketRange range, double value) {
+    private boolean withinRange(BucketRange range, //
+            double value) {
         return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
     }
 

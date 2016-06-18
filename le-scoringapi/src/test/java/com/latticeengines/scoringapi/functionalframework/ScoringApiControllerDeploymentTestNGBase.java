@@ -52,7 +52,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String MODEL_VERSION = "8ba99b36-c222-4f93-ab8a-6dcc11ce45e9";
     protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
-    protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
+    public static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
     protected static final String LOCAL_PMML_MODEL_INPUT = "com/latticeengines/scoringapi/pmml_score_request.json";
     private static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
     private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);

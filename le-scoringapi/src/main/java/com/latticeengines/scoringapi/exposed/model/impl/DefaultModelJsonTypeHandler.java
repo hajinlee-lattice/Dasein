@@ -45,7 +45,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public ModelEvaluator getModelEvaluator(String hdfsScoreArtifactBaseDir, String modelJsonType,
+    public ModelEvaluator getModelEvaluator(String hdfsScoreArtifactBaseDir, //
+            String modelJsonType, //
             String localPathToPersist) {
         FSDataInputStream is = null;
         String path = hdfsScoreArtifactBaseDir + PMML_FILENAME;
@@ -67,7 +68,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public ScoreDerivation getScoreDerivation(String hdfsScoreArtifactBaseDir, String modelJsonType,
+    public ScoreDerivation getScoreDerivation(String hdfsScoreArtifactBaseDir, //
+            String modelJsonType, //
             String localPathToPersist) {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + SCORE_DERIVATION_FILENAME;
         String content = null;
@@ -88,7 +90,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public DataComposition getDataScienceDataComposition(String hdfsScoreArtifactBaseDir, String localPathToPersist) {
+    public DataComposition getDataScienceDataComposition(String hdfsScoreArtifactBaseDir, //
+            String localPathToPersist) {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
@@ -104,7 +107,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDir, String localPathToPersist) {
+    public DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDir, //
+            String localPathToPersist) {
         String path = hdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
@@ -121,7 +125,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts,
+    public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord) {
         ScoreResponse scoreResponse = new ScoreResponse();
         int percentile = score(scoringArtifacts, transformedRecord).getPercentile();
@@ -130,8 +134,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
-            Map<String, Object> transformedRecord, Map<String, Object> matchedRecord) {
+    public DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts, //
+            Map<String, Object> transformedRecord, //
+            Map<String, Object> matchedRecord) {
         DebugScoreResponse debugScoreResponse = new DebugScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbability());
@@ -143,7 +148,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public void checkForMissingEssentialFields(boolean hasOneOfDomain, boolean hasCompanyName, boolean hasCompanyState,
+    public void checkForMissingEssentialFields(boolean hasOneOfDomain, //
+            boolean hasCompanyName, //
+            boolean hasCompanyState, //
             List<String> missingMatchFields) {
         if (!hasOneOfDomain && (!hasCompanyName || !hasCompanyState)) {
             throw new ScoringApiException(LedpCode.LEDP_31199,
@@ -159,9 +166,16 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         return new DefaultModelEvaluator(is);
     }
 
-    private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
+    private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, //
+            Map<String, Object> transformedRecord) {
+        if (log.isInfoEnabled()) {
+            log.info("Call scoring evaluate");
+        }
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
+        if (log.isInfoEnabled()) {
+            log.info("Call complete scoring evaluate");
+        }
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 

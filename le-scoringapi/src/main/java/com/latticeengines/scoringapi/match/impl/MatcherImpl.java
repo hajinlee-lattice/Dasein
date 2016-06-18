@@ -1,6 +1,5 @@
 package com.latticeengines.scoringapi.match.impl;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.Matcher;
+import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component("matcher)")
 public class MatcherImpl implements Matcher {
@@ -50,7 +50,9 @@ public class MatcherImpl implements Matcher {
     @Autowired
     private Warnings warnings;
 
-    private MatchInput buildMatchInput(CustomerSpace space, InterpretedFields interpreted, Map<String, Object> record,
+    private MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
             ModelSummary modelSummary) {
         MatchInput matchInput = new MatchInput();
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
@@ -89,8 +91,11 @@ public class MatcherImpl implements Matcher {
     }
 
     @Override
-    public Map<String, Object> matchAndJoin(CustomerSpace space, InterpretedFields interpreted,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelSummary modelSummary) {
+    public Map<String, Object> matchAndJoin(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, FieldSchema> fieldSchemas, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary) {
         MatchInput matchInput = buildMatchInput(space, interpreted, record, modelSummary);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
@@ -104,8 +109,10 @@ public class MatcherImpl implements Matcher {
         return record;
     }
 
-    private void getRecordFromMatchOutput(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            MatchInput matchInput, MatchOutput matchOutput) {
+    private void getRecordFromMatchOutput(Map<String, FieldSchema> fieldSchemas, //
+            Map<String, Object> record, //
+            MatchInput matchInput, //
+            MatchOutput matchOutput) {
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH,
                     new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
@@ -139,53 +146,80 @@ public class MatcherImpl implements Matcher {
     }
 
     @Override
-    public List<Map<String, Object>> matchAndJoin(CustomerSpace space,
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsMap,
-            Map<String, Map<String, FieldSchema>> fieldSchemasMap, List<ModelSummary> modelSummaryList) {
-        BulkMatchInput matchInput = buildMatchInput(space, parsedRecordAndInterpretedFieldsMap, modelSummaryList);
+    public Map<RecordModelTuple, Map<String, Object>> matchAndJoin(CustomerSpace space, //
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
+            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
+            List<ModelSummary> originalOrderModelSummaryList) {
+        BulkMatchInput matchInput = buildMatchInput(space, partiallyOrderedParsedTupleList,
+                originalOrderModelSummaryList);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
+        if (log.isInfoEnabled()) {
+            log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
+        }
+
         BulkMatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
         if (log.isDebugEnabled()) {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
         }
+        if (log.isInfoEnabled()) {
+            log.info("Completed match for " + matchInput.getInputList().size() + " match inputs");
+        }
 
-        List<Map<String, Object>> results = new ArrayList<>();
+        Map<RecordModelTuple, Map<String, Object>> results = new HashMap<>();
         if (matchOutput != null) {
-            int idx = -1;
+            int idx = 0;
             List<MatchOutput> outputList = matchOutput.getOutputList();
             for (MatchOutput output : outputList) {
-                idx++;
-                Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.values().iterator().next();
+                String modelId = partiallyOrderedParsedTupleList.get(idx).getModelId();
+                Map<String, FieldSchema> fieldSchemas = uniqueFieldSchemasMap.get(modelId);
 
                 Map<String, Object> record = new HashMap<>();
                 getRecordFromMatchOutput(fieldSchemas, record, matchInput.getInputList().get(idx), output);
-                results.add(record);
+
+                results.put(partiallyOrderedParsedTupleList.get(idx), record);
+                idx++;
             }
         }
+        if (log.isInfoEnabled()) {
+            log.info("Completed post processing of matched result for " + matchInput.getInputList().size()
+                    + " match inputs");
+        }
+
         return results;
     }
 
-    private BulkMatchInput buildMatchInput(CustomerSpace space,
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordAndInterpretedFieldsMap,
-            List<ModelSummary> modelSummaryList) {
+    private BulkMatchInput buildMatchInput(CustomerSpace space, //
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
+            List<ModelSummary> originalOrderModelSummaryList) {
         BulkMatchInput bulkInput = new BulkMatchInput();
         List<MatchInput> matchInputList = new ArrayList<>();
         bulkInput.setInputList(matchInputList);
         bulkInput.setRequestId(UUID.randomUUID().toString());
-        Integer idx = 0;
-        for (String recordId : parsedRecordAndInterpretedFieldsMap.keySet()) {
-            ModelSummary modelSummary = modelSummaryList.get(idx);
-            matchInputList.add(buildMatchInput(space, parsedRecordAndInterpretedFieldsMap.get(recordId).getValue(),
-                    parsedRecordAndInterpretedFieldsMap.get(recordId).getKey(), modelSummary));
-            idx++;
+        for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
+            ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList, recordModelTuple.getModelId());
+            matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                    recordModelTuple.getParsedData().getKey(), modelSummary));
         }
         return bulkInput;
     }
 
-    private void mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+    private ModelSummary getModelSummary(List<ModelSummary> modelSummaryList, //
+            String modelId) {
+        for (ModelSummary summary : modelSummaryList) {
+            if (summary.getId().equals(modelId)) {
+                return summary;
+            }
+        }
+
+        return null;
+    }
+
+    private void mergeMatchedOutput(List<String> matchFieldNames, //
+            OutputRecord outputRecord, //
+            Map<String, FieldSchema> fieldSchemas, //
+            Map<String, Object> record) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
         if (matchFieldNames.size() != matchFieldValues.size()) {
@@ -215,7 +249,9 @@ public class MatcherImpl implements Matcher {
         }
     }
 
-    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String field,
+    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, //
+            MatchKey matchKey, //
+            String field, //
             Map<String, Object> record) {
         Object value = record.get(field);
 

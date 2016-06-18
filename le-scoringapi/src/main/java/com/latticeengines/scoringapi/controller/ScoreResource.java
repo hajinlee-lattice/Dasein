@@ -96,6 +96,15 @@ public class ScoreResource extends BaseScoring {
         return scorePercentileRecords(request, scoreRequest, customerSpace);
     }
 
+    @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
+            + " records are allowed in a request.")
+    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
+            @RequestBody BulkRecordScoreRequest scoreRequest) {
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace);
+    }
+
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")

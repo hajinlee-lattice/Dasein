@@ -2,7 +2,6 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
@@ -67,6 +65,7 @@ import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
+import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {
@@ -87,13 +86,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
                                                                                             // modelId
     private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
-    private static final String UTC = "UTC";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
 
     @Value("${scoringapi.pls.api.hostport}")
     private String internalResourceHostPort;
@@ -171,6 +163,32 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
 
+        // TODO: enable this logic once issue is fixed to populate predictors in
+        // model summary. This will increase performance as call to
+        // metadataProxy.getTable is too costly (veries from 8-27 seconds on QA
+        //
+        // List<Predictor> predictors =
+        // artifacts.getModelSummary().getPredictors();
+        //
+        // Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
+        // for (Predictor predictor : predictors) {
+        // String fieldName = predictor.getName();
+        // String displayName = predictor.getDisplayName();
+        //
+        // FieldSchema fieldSchema = mapFields.get(fieldName);
+        //
+        // if (fieldSchema.source.equals(FieldSource.REQUEST)) {
+        // Field field = null;
+        // if (StringUtils.isEmpty(displayName)) {
+        // field = new Field(fieldName, fieldSchema.type);
+        // } else {
+        // field = new Field(fieldName, fieldSchema.type, displayName);
+        // }
+        // fieldList.add(field);
+        // }
+        // }
+
+        // TODO: remove this code once above code is operational
         Table modelMetadataTable = metadataProxy.getTable(customerSpace.toString(),
                 StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelSummary().getEventTableName())));
         Map<String, Attribute> attributeMap = new HashMap<>();
@@ -431,7 +449,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 localPathToPersist);
     }
 
-    private String getModelJsonType(String eventTableName, String hdfsScoreArtifactBaseDir) {
+    private String getModelJsonType(String eventTableName, //
+            String hdfsScoreArtifactBaseDir) {
         String globPath = hdfsScoreArtifactBaseDir + "*" + MODEL_JSON_SUFFIX;
         FSDataInputStream is = null;
 
@@ -457,7 +476,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return modelJsonType;
     }
 
-    private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, CustomerSpace customerSpace, String modelId) {
+    private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //
+            CustomerSpace customerSpace, //
+            String modelId) {
         List<String> modelJsonHdfsPath = null;
         try {
             modelJsonHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
@@ -509,7 +530,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @Override
-    public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, String modelId) {
+    public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, //
+            String modelId) {
         return scoreArtifactCache
                 .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
@@ -520,7 +542,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
-                        return retrieveModelArtifactsFromHdfs(key.getKey(), key.getValue());
+                        if (log.isInfoEnabled()) {
+                            log.info("Load model artifacts for: " + key.getKey());
+                        }
+                        ScoringArtifacts artifact = retrieveModelArtifactsFromHdfs(key.getKey(), key.getValue());
+                        if (log.isInfoEnabled()) {
+                            log.info("Load completed model artifacts for: " + key.getKey());
+                        }
+                        return artifact;
                     }
                 });
     }
@@ -530,7 +559,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         this.localPathToPersist = localPathToPersist;
     }
 
-    private String determineIdFieldName(Map<String, FieldSchema> fieldSchemas) {
+    private String determineIdFieldName(Map<String, //
+            FieldSchema> fieldSchemas) {
         // find ID field
         String idFieldName = "";
         for (String fieldName : fieldSchemas.keySet()) {
@@ -547,7 +577,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @Override
-    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace,
+    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace,//
             String modelId) {
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
@@ -575,12 +605,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @Override
-    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
+    public int getModelsCount(CustomerSpace customerSpace, //
+            String start, //
+            boolean considerAllStatus) {
         return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus);
     }
 
     @Override
-    public List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
+    public List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, //
+            String start, //
+            int offset, //
+            int maximum,//
             boolean considerAllStatus) {
         List<?> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start, offset, maximum,
                 considerAllStatus);
@@ -589,7 +624,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return models;
     }
 
-    private void convertModelSummaryToModelDetail(List<ModelDetail> models, List<?> modelSummaries,
+    private void convertModelSummaryToModelDetail(List<ModelDetail> models, //
+            List<?> modelSummaries,//
             CustomerSpace customerSpace) {
         ObjectMapper om = new ObjectMapper();
         if (modelSummaries != null) {
@@ -598,9 +634,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 Map<String, Object> map = (Map<String, Object>) modelSummary;
                 ModelType modelType = getModelType((String) map.get("SourceSchemaInterpretation"));
 
-                Model model = new Model((String) map.get("Id"), (String) map.get("DisplayName"), modelType);
-                Long lastModifiedTimestamp = (Long) map.get("LastUpdateTime");
-                Fields fields = getModelFields(customerSpace, model.getModelId());
                 ModelSummaryStatus status = null;
                 try {
                     String statusStr = om.writeValueAsString(map.get("Status"));
@@ -608,8 +641,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                 }
+                Model model = new Model((String) map.get("Id"), (String) map.get("DisplayName"), modelType);
+                Long lastModifiedTimestamp = (Long) map.get("LastUpdateTime");
+
+                Fields fields = null;
+                if (ModelSummaryStatus.DELETED.equals(status)) {
+                    // if the model is deleted then there is no point in making
+                    // costly operation of loading filed details we return
+                    // deleted entries only to inform caller that model has been
+                    // deleted. Deleted models are not used for any other
+                    // purpose
+                    fields = new Fields(model.getModelId(), new ArrayList<Field>());
+                } else {
+                    fields = getModelFields(customerSpace, model.getModelId());
+                }
                 ModelDetail modelDetail = new ModelDetail(model, status, fields,
-                        dateFormat.format(new Date(lastModifiedTimestamp)));
+                        BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
                 models.add(modelDetail);
             }
         }

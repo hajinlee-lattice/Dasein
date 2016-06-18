@@ -69,7 +69,7 @@ public abstract class BaseScoring {
     @Autowired
     private Warnings warnings;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
@@ -114,6 +114,11 @@ public abstract class BaseScoring {
     protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
             BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
         return scoreRecords(request, scoreRequest, false, customerSpace);
+    }
+
+    protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
+            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
+        return scoreRecords(request, scoreRequest, true, customerSpace);
     }
 
     protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,

@@ -3,7 +3,6 @@ package com.latticeengines.scoringapi.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -44,8 +42,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final long MAX_UPPER_BOUND = TimeUnit.SECONDS.toMillis(120);
     protected static final double EXPECTED_SCORE_99 = 99.0d;
     protected static final int MAX_THREADS = 1;
-    protected static final int RECORD_MODEL_CARDINALITY = 2;
-    protected static final int MAX_MODELS = 2;
+    protected static final int RECORD_MODEL_CARDINALITY = 3;
+    protected static final int MAX_MODELS = 8;
     protected volatile Throwable exception = null;
     protected Map<String, List<String>> threadPerfMap = new HashMap<>();
     protected boolean shouldPrintPerformanceInfo = true;
@@ -54,14 +52,6 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
     @Autowired
     protected InternalScoringApiInterface internalScoringApiProxy;
-
-    protected static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-    protected static final String UTC = "UTC";
-    protected static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
 
     @Autowired
     protected MetadataProxy metadataProxy;
@@ -312,7 +302,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         return modelList;
     }
 
-    private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList() throws IOException {
+    protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList()
+            throws IOException {
         return createModelList(null, null, null, null);
     }
 

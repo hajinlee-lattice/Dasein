@@ -1,8 +1,6 @@
 package com.latticeengines.scoringapi.score.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
@@ -11,10 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
-
-import javax.mail.MethodNotSupportedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +43,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
+import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
@@ -57,17 +53,11 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
+import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 @Component("scoreRequestProcessor")
 public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private static final Log log = LogFactory.getLog(ScoreRequestProcessorImpl.class);
-
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
-    private static final String UTC = "UTC";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
 
     @Autowired
     private HttpStopWatch httpStopWatch;
@@ -119,6 +109,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         String recordId = getIdIfAvailable(parsedRecordAndInterpretedFields.getValue(), request.getRecord());
         requestInfo.put("RecordId", recordId);
         split("parseRecord");
+
         Map<String, Object> readyToTransformRecord = null;
 
         if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
@@ -162,122 +153,166 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     @Override
     public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, boolean isDebug) {
         split("requestPreparation");
+        if (log.isInfoEnabled()) {
+            log.info("Received bulk score request for " + request.getRecords().size() + " records");
+        }
         String rootOperationId = UUID.randomUUID().toString();
-        String requestTimestamp = dateFormat.format(new Date());
+        String requestTimestamp = BaseScoring.dateFormat.format(new Date());
         request.setRootOperationId(rootOperationId);
         request.setRequestTimestamp(requestTimestamp);
 
-        Map<String, ScoringArtifacts> scoringArtifactsMap = new HashMap<>();
-        Map<String, Map<String, FieldSchema>> fieldSchemasMap = new HashMap<>();
+        Map<String, ScoringArtifacts> uniqueScoringArtifactsMap = new HashMap<>();
+        Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap = new HashMap<>();
 
-        fetchModelArtifacts(space, request.getRecords(), scoringArtifactsMap, fieldSchemasMap);
+        fetchModelArtifacts(space, request.getRecords(), uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
         split("retrieveModelArtifacts");
 
-        List<Tuple> parsedTupleList = checkForMissingFields(scoringArtifactsMap, fieldSchemasMap, request);
+        List<RecordModelTuple> originalOrderParsedTupleList = checkForMissingFields(uniqueScoringArtifactsMap,
+                uniqueFieldSchemasMap, request);
 
         split("parseRecord");
 
-        Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordMap = new HashMap<>();
-        Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> pmmlParsedRecordMap = new HashMap<>();
-        extractParsedList(parsedTupleList, scoringArtifactsMap, parsedRecordMap, pmmlParsedRecordMap);
-        List<ModelSummary> modelSummaryList = extractModelSummaries(parsedTupleList, scoringArtifactsMap);
+        List<RecordModelTuple> partiallyOrderedParsedTupleList = new ArrayList<>();
+        List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
 
-        List<Map<String, Object>> combinedRecords = new ArrayList<>();
+        extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList,
+                partiallyOrderedPmmlParsedRecordList);
+        List<ModelSummary> originalOrderModelSummaryList = extractModelSummaries(originalOrderParsedTupleList,
+                uniqueScoringArtifactsMap);
 
-        if (!parsedRecordMap.isEmpty()) {
-            List<Map<String, Object>> matchedRecords = matcher.matchAndJoin(space, parsedRecordMap, fieldSchemasMap,
-                    modelSummaryList);
-            addMissingFields(fieldSchemasMap, matchedRecords, parsedTupleList);
-            combinedRecords.addAll(matchedRecords);
+        Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap = new HashMap<>();
+
+        if (!partiallyOrderedParsedTupleList.isEmpty()) {
+            Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkMatchAndJoin(space,
+                    uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList);
+            addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap, originalOrderParsedTupleList);
+            unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
         }
-        if (!pmmlParsedRecordMap.isEmpty()) {
-            List<Map<String, Object>> formattedPmmlRecords = format(pmmlParsedRecordMap);
-            addMissingFields(fieldSchemasMap, formattedPmmlRecords, parsedTupleList);
-            combinedRecords.addAll(formattedPmmlRecords);
+        if (!partiallyOrderedPmmlParsedRecordList.isEmpty()) {
+            Map<RecordModelTuple, Map<String, Object>> unorderedFormattedPmmlRecordMap = format(
+                    partiallyOrderedPmmlParsedRecordList);
+            addMissingFields(uniqueFieldSchemasMap, unorderedFormattedPmmlRecordMap, originalOrderParsedTupleList);
+            unorderedCombinedRecordMap.putAll(unorderedFormattedPmmlRecordMap);
         }
 
         split("matchRecord");
 
-        List<Map<String, Object>> transformedRecords = transform(scoringArtifactsMap, combinedRecords, parsedTupleList);
+        Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords = transform(uniqueScoringArtifactsMap,
+                unorderedCombinedRecordMap, originalOrderParsedTupleList);
         split("transformRecord");
 
         List<RecordScoreResponse> scoreResponse = new ArrayList<>();
         if (isDebug) {
-            scoreResponse = generateDebugScoreResponse(scoringArtifactsMap, transformedRecords, combinedRecords);
+            scoreResponse = generateDebugScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
+                    originalOrderParsedTupleList);
         } else {
-            scoreResponse = generateScoreResponse(scoringArtifactsMap, transformedRecords, parsedTupleList);
+            scoreResponse = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
+                    originalOrderParsedTupleList);
         }
         split("scoreRecord");
-
+        if (log.isInfoEnabled()) {
+            log.info("Processed bulk score request for " + request.getRecords().size() + " records");
+        }
         return scoreResponse;
     }
 
-    private List<Map<String, Object>> format(
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> pmmlParsedRecordMap) {
-        List<Map<String, Object>> formattedList = new ArrayList<>();
-        for (SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecord : pmmlParsedRecordMap.values()) {
-            formattedList.add(parsedRecord.getKey());
-        }
-        return formattedList;
+    Map<RecordModelTuple, Map<String, Object>> bulkMatchAndJoin(CustomerSpace space,
+            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList) {
+        Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = matcher.matchAndJoin(space,
+                partiallyOrderedParsedTupleList, uniqueFieldSchemasMap, originalOrderModelSummaryList);
+        return unorderedMatchedRecordMap;
     }
 
-    private void extractParsedList(List<Tuple> parsedTupleList, //
+    private Map<RecordModelTuple, Map<String, Object>> format(
+            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList) {
+        Map<RecordModelTuple, Map<String, Object>> formattedMap = new HashMap<>();
+        for (RecordModelTuple tuple : partiallyOrderedPmmlParsedRecordList) {
+            formattedMap.put(tuple, tuple.getParsedData().getKey());
+        }
+        return formattedMap;
+    }
+
+    void extractParsedList(List<RecordModelTuple> parsedTupleList, //
             Map<String, ScoringArtifacts> scoringArtifactsMap, //
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordMap, //
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> pmmlParsedRecordMap) {
-        for (Tuple tuple : parsedTupleList) {
-            extractParsedTuple(scoringArtifactsMap, parsedRecordMap, pmmlParsedRecordMap, tuple);
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
+            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList) {
+        for (RecordModelTuple tuple : parsedTupleList) {
+            extractParsedTuple(scoringArtifactsMap, partiallyOrderedParsedTupleList,
+                    partiallyOrderedPmmlParsedRecordList, tuple);
         }
     }
 
     private void extractParsedTuple(Map<String, ScoringArtifacts> scoringArtifactsMap, //
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> parsedRecordMap, //
-            Map<String, SimpleEntry<Map<String, Object>, InterpretedFields>> pmmlParsedRecordMap, //
-            Tuple tuple) {
-        String key = generateKey(tuple.getRecord().getRecordId(), tuple.getModelId());
-        // put this tuple in either pmmlParsedRecordMap or in parsedRecordMap
-        // based on model json type
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
+            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList, //
+            RecordModelTuple tuple) {
+        // put this tuple in either partiallyOrderedPmmlParsedRecordList or in
+        // partiallyOrderedParsedTupleList based on model json type
         if (ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifactsMap.get(tuple.getModelId()).getModelJsonType())) {
-            pmmlParsedRecordMap.put(key, tuple.getParsedData());
+            partiallyOrderedPmmlParsedRecordList.add(tuple);
         } else {
-            parsedRecordMap.put(key, tuple.getParsedData());
+            partiallyOrderedParsedTupleList.add(tuple);
         }
     }
 
-    private List<ModelSummary> extractModelSummaries(List<Tuple> parsedTupleList,
+    List<ModelSummary> extractModelSummaries(List<RecordModelTuple> originalOrderParsedTupleList,
             Map<String, ScoringArtifacts> scoringArtifactsMap) {
-        List<ModelSummary> modelSummaryList = new ArrayList<>();
-        for (Tuple tuple : parsedTupleList) {
+        List<ModelSummary> originalOrderModelSummaryList = new ArrayList<>();
+        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
             String modelId = tuple.getModelId();
             if (org.apache.commons.lang.StringUtils.isNotEmpty(modelId)) {
                 ModelSummary modelSummary = scoringArtifactsMap.get(modelId).getModelSummary();
-                modelSummaryList.add(modelSummary);
+                originalOrderModelSummaryList.add(modelSummary);
             } else {
-                modelSummaryList.add(null);
+                originalOrderModelSummaryList.add(null);
             }
         }
-        return modelSummaryList;
+        return originalOrderModelSummaryList;
     }
 
-    private List<RecordScoreResponse> generateDebugScoreResponse(Map<String, ScoringArtifacts> scoringArtifactsMap,
-            List<Map<String, Object>> transformedRecords, List<Map<String, Object>> matchedRecords) {
+    List<RecordScoreResponse> generateDebugScoreResponse(Map<String, ScoringArtifacts> uniqueScoringArtifactsMap,
+            Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
+            List<RecordModelTuple> originalOrderParsedTupleList) {
+        int idx = 0;
+
+        List<RecordScoreResponse> debugResponseList = new ArrayList<>();
+        List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
+                originalOrderParsedTupleList);
         try {
-            // NOTE: todo -this method will be implemented in next txn
-            throw new MethodNotSupportedException("Method not yet implemented");
-        } catch (MethodNotSupportedException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            for (RecordScoreResponse recordResponse : result) {
+                DebugRecordScoreResponse debugRecordResponse = new DebugRecordScoreResponse(recordResponse);
+                Map<String, Map<String, Object>> transformedDataMap = new HashMap<>();
+
+                for (ScoreModelTuple scoreModelTuple : recordResponse.getScores()) {
+                    RecordModelTuple tuple = originalOrderParsedTupleList.get(idx++);
+                    Map<String, Object> value = unorderedTransformedRecords.get(tuple);
+                    transformedDataMap.put(scoreModelTuple.getModelId(), value);
+                }
+
+                debugRecordResponse.setTransformedRecordMap(transformedDataMap);
+                debugResponseList.add(debugRecordResponse);
+            }
+            return debugResponseList;
+        } catch (Exception ex) {
+            // in case of any error just default to regular result
+            log.error(ex.getMessage(), ex);
+            return result;
         }
     }
 
-    private List<RecordScoreResponse> generateScoreResponse(Map<String, ScoringArtifacts> scoringArtifactsMap,
-            List<Map<String, Object>> transformedRecords, List<Tuple> parsedTupleList) {
-        int idx = 0;
+    List<RecordScoreResponse> generateScoreResponse(Map<String, ScoringArtifacts> uniqueScoringArtifactsMap,
+            Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
+            List<RecordModelTuple> originalOrderParsedTupleList) {
         Map<String, RecordScoreResponse> responseMap = new HashMap<>();
         List<RecordScoreResponse> responseList = new ArrayList<>();
-        for (Map<String, Object> transformedRecord : transformedRecords) {
-            Tuple tuple = parsedTupleList.get(idx++);
+        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+            Map<String, Object> transformedRecord = unorderedTransformedRecords.get(tuple);
+            if (log.isInfoEnabled()) {
+                log.info("Start scoring for " + tuple.getRecord().getRecordId() + "_" + tuple.getModelId());
+            }
 
-            ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(scoringArtifactsMap, tuple);
+            ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
             ModelJsonTypeHandler ModelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts.getModelJsonType());
 
             ScoreResponse resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
@@ -303,7 +338,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
                 scores = new ArrayList<>();
                 recordResp.setScores(scores);
-                recordResp.setWarnings(warnings.getWarnings(recordId));
+                recordResp.setWarnings(getWarnings(recordId));
             } else {
                 RecordScoreResponse recordResp = responseMap.get(recordId);
                 scores = recordResp.getScores();
@@ -313,52 +348,55 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             score.setModelId(tuple.getModelId());
 
             scores.add(score);
+            if (log.isInfoEnabled()) {
+                log.info("Completed scoring for " + tuple.getRecord().getRecordId() + "_" + tuple.getModelId());
+            }
 
         }
 
         return responseList;
     }
 
-    private ScoringArtifacts getScoringArtifactForTuple(Map<String, ScoringArtifacts> scoringArtifactsMap,
-            Tuple tuple) {
+    private ScoringArtifacts getScoringArtifactForTuple(Map<String, ScoringArtifacts> uniqueScoringArtifactsMap,
+            RecordModelTuple tuple) {
         String modelId = tuple.getModelId();
-        ScoringArtifacts scoringArtifacts = scoringArtifactsMap.get(modelId);
+        ScoringArtifacts scoringArtifacts = uniqueScoringArtifactsMap.get(modelId);
         return scoringArtifacts;
     }
 
     private Map<String, FieldSchema> getSchemaForTuple(Map<String, Map<String, FieldSchema>> fieldSchemasMap,
-            Tuple tuple) {
+            RecordModelTuple tuple) {
         String modelId = tuple.getModelId();
         Map<String, FieldSchema> schema = fieldSchemasMap.get(modelId);
         return schema;
     }
 
-    private List<Map<String, Object>> transform(Map<String, ScoringArtifacts> scoringArtifactsMap,
-            List<Map<String, Object>> matchedRecords, List<Tuple> parsedTupleList) {
-        List<Map<String, Object>> resultList = new ArrayList<>();
+    Map<RecordModelTuple, Map<String, Object>> transform(Map<String, ScoringArtifacts> uniqueScoringArtifactsMap,
+            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
+            List<RecordModelTuple> originalOrderParsedTupleList) {
+        Map<RecordModelTuple, Map<String, Object>> resultMap = new HashMap<>();
         int i = 0;
-        for (Map<String, Object> matchedRecord : matchedRecords) {
-            Tuple tuple = parsedTupleList.get(i++);
+        for (RecordModelTuple tuple : unorderedCombinedRecordMap.keySet()) {
+            Map<String, Object> matchedRecord = unorderedCombinedRecordMap.get(tuple);
 
-            ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(scoringArtifactsMap, tuple);
-            resultList.add(transform(scoringArtifacts, matchedRecord));
+            ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
+            resultMap.put(tuple, transform(scoringArtifacts, matchedRecord));
         }
-        return resultList;
+        return resultMap;
     }
 
-    private void addMissingFields(Map<String, Map<String, FieldSchema>> fieldSchemasMap,
-            List<Map<String, Object>> matchedRecords, List<Tuple> parsedTupleList) {
-        int i = 0;
-        for (Map<String, Object> matchedRecord : matchedRecords) {
-            Tuple tuple = parsedTupleList.get(i++);
+    void addMissingFields(Map<String, Map<String, FieldSchema>> fieldSchemasMap,
+            Map<RecordModelTuple, Map<String, Object>> matchedRecords, List<RecordModelTuple> parsedTupleList) {
+        for (RecordModelTuple tuple : matchedRecords.keySet()) {
+            Map<String, Object> matchedRecord = matchedRecords.get(tuple);
             Map<String, FieldSchema> schema = getSchemaForTuple(fieldSchemasMap, tuple);
             addMissingFields(schema, matchedRecord);
         }
     }
 
-    private List<Tuple> checkForMissingFields(Map<String, ScoringArtifacts> scoringArtifactsMap,
+    List<RecordModelTuple> checkForMissingFields(Map<String, ScoringArtifacts> scoringArtifactsMap,
             Map<String, Map<String, FieldSchema>> fieldSchemasMap, BulkRecordScoreRequest request) {
-        List<Tuple> recordAndFieldList = new ArrayList<>();
+        List<RecordModelTuple> recordAndFieldList = new ArrayList<>();
         for (Record record : request.getRecords()) {
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
                 Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.get(modelId);
@@ -376,7 +414,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 record.setRootOperationId(request.getRootOperationId());
                 record.setRequestTimestamp(request.getRequestTimestamp());
 
-                Tuple tuple = new Tuple(request.getRequestTimestamp(), latticeId, record,
+                RecordModelTuple tuple = new RecordModelTuple(request.getRequestTimestamp(), latticeId, record,
                         parseRecord(record.getRecordId(), fieldSchemas, attrValMap), modelId);
                 recordAndFieldList.add(tuple);
 
@@ -386,8 +424,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         return recordAndFieldList;
     }
 
-    private void fetchModelArtifacts(CustomerSpace space, List<Record> records,
-            Map<String, ScoringArtifacts> scoringArtifactsMap, Map<String, Map<String, FieldSchema>> fieldSchemasMap) {
+    void fetchModelArtifacts(CustomerSpace space, List<Record> records,
+            Map<String, ScoringArtifacts> uniqueScoringArtifactsMap,
+            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap) {
         // extract a set of unique modelIds across all modelIds
         Set<String> uniqueModelIds = new HashSet<>();
         for (Record record : records) {
@@ -404,8 +443,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         // for now it is simple for loop
         for (String modelId : uniqueModelIds) {
             ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, modelId);
-            scoringArtifactsMap.put(modelId, scoringArtifacts);
-            fieldSchemasMap.put(modelId, scoringArtifacts.getFieldSchemas());
+            uniqueScoringArtifactsMap.put(modelId, scoringArtifacts);
+            uniqueFieldSchemasMap.put(modelId, scoringArtifacts.getFieldSchemas());
         }
     }
 
@@ -422,6 +461,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private void split(String key) {
         httpStopWatch.split(key);
+        if (log.isInfoEnabled()) {
+            log.info(key);
+        }
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
@@ -449,8 +491,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             interpretFields(interpretedFields, fieldName, schema);
         }
         if (!extraFields.isEmpty()) {
-            warnings.addWarning(recordId,
-                    new Warning(WarningCode.EXTRA_FIELDS, new String[] { Joiner.on(",").join(extraFields) }));
+            addWarning(recordId, extraFields);
             for (String extraField : extraFields) {
                 parsedRecord.remove(extraField);
             }
@@ -531,8 +572,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 missingMatchFields);
 
         if (!missingFields.isEmpty()) {
-            warnings.addWarning(recordId,
-                    new Warning(WarningCode.MISSING_COLUMN, new String[] { Joiner.on(",").join(missingFields) }));
+            addWarning(recordId, missingFields);
         }
     }
 
@@ -600,44 +640,12 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
     }
 
-    private String generateKey(String recordId, String modelId) {
-        return recordId + "_" + modelId;
+    List<Warning> getWarnings(String recordId) {
+        return warnings.getWarnings(recordId);
     }
 
-    private class Tuple {
-        private String requstTimestamp;
-        private String latticeId;
-        private Record record;
-        private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedData;
-        private String modelId;
-
-        public Tuple(String requstTimestamp, String latticeId, Record record,
-                SimpleEntry<Map<String, Object>, InterpretedFields> parsedData, String modelId) {
-            this.requstTimestamp = requstTimestamp;
-            this.latticeId = latticeId;
-            this.record = record;
-            this.parsedData = parsedData;
-            this.modelId = modelId;
-        }
-
-        public String getRequstTimestamp() {
-            return requstTimestamp;
-        }
-
-        public String getLatticeId() {
-            return latticeId;
-        }
-
-        public Record getRecord() {
-            return record;
-        }
-
-        public AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> getParsedData() {
-            return parsedData;
-        }
-
-        public String getModelId() {
-            return modelId;
-        }
+    void addWarning(String recordId, List<String> missingFields) {
+        warnings.addWarning(recordId,
+                new Warning(WarningCode.MISSING_COLUMN, new String[] { Joiner.on(",").join(missingFields) }));
     }
 }
