@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-if [ -z ${KAFKA_NODES} ]; then
-    KAFKA_NODES=3
-fi
-
 KAFKA=$1
 if [ -z ${KAFKA} ]; then
     KAFKA=kafka
 fi
-
 
 bash ../zookeeper/teardown.sh ${KAFKA}
 
@@ -32,6 +27,9 @@ done
 
 echo "stopping haproxy ${KAFKA}-ha"
 docker stop ${KAFKA}-ha 2> /dev/null || true
+
+echo "stopping kafka manager ${KAFKA}-mgr"
+docker stop ${KAFKA}-mgr 2> /dev/null || true
 
 docker rm $(docker ps -a -q) 2> /dev/null || true
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

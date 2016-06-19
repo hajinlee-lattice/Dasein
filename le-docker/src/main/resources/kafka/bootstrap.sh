@@ -95,6 +95,9 @@ docker run -d --name ${KAFKA}-ha \
     -e KAFKA_CLUSTER=${KAFKA} \
     -l cluster.name=${KAFKA} latticeengines/kafka-haproxy
 
+echo "provisioning kafka-manager: ${KAFKA}-mgr"
+docker run -d -p 9000:9000 -e ZK_HOSTS="${ZK_HOSTS}" --name ${KAFKA}-mgr --net ${KAFKA_NETWORK} latticeengines/kafka-manager
+
 sleep 3
 docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"
 echo 'you can use this zk connection to add cluster to kafka-manager: '${ZK_HOSTS}
