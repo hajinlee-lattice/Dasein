@@ -23,6 +23,7 @@ RUN mkdir -p /usr/zookeeper/conf && \
 
 VOLUME ["/usr/zookeeper/conf"]
 
+RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD start.sh /start.sh
 
 ENTRYPOINT [ "bash" ]

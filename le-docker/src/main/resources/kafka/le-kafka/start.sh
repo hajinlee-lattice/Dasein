@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
-echo $MY_ID > /var/lib/zookeeper/myid
+if [ -z ADVERTISE_IP ]; then
+	ADVERTISE_IP=$HOSTNAME
+fi
 
-/usr/bin/zookeeper-server-start /etc/kafka/zookeeper.properties
+sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka/server.properties
+sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/kafka/server.properties
+
+JMX_PORT=9199 /usr/bin/kafka-server-start /etc/kafka/server.properties

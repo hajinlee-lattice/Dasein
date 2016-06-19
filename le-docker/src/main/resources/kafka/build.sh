@@ -1,14 +1,36 @@
 #!/bin/bash
 
-cd le-kafka
-docker build -t latticeengines/kafka . || true
-cd ..
+docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
 
-cd le-kafka-manager
-docker build -t latticeengines/kafka-manager . || true
-cd ..
+build_docker() {
+	IMAGE=$1	
+	sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
+	docker build -t $IMAGE . || true
+	mv Dockerfile.bak Dockerfile
+}
 
-cd ../common/le-haproxy
-docker build -t latticeengines/haproxy . || true
-cd ..
+pushd ../zookeeper/le-zk
+build_docker latticeengines/zookeeper
+popd
 
+pushd le-kafka
+build_docker latticeengines/kafka
+popd
+
+pushd le-kafka-schema-registry
+build_docker latticeengines/kafka-schema-registry
+popd
+
+pushd le-kafka-rest
+build_docker latticeengines/kafka-rest
+popd
+
+pushd le-kafka-haproxy
+build_docker latticeengines/kafka-haproxy
+popd
+
+pushd le-kafka-manager
+build_docker latticeengines/kafka-manager
+popd
+
+docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

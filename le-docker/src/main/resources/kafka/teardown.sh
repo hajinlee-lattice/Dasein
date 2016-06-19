@@ -9,20 +9,31 @@ if [ -z ${KAFKA} ]; then
     KAFKA=kafka
 fi
 
-# cleanup
-for i in $(seq 1 $KAFKA_NODES);
-do 
-    echo "stopping ${KAFKA}${i}"
-    docker stop ${KAFKA}${i} 2> /dev/null || true
+
+bash ../zookeeper/teardown.sh ${KAFKA}
+
+for container in $(docker ps -a --format 'table {{.Names}}' | grep ${KAFKA}-bkr);
+do
+	echo stopping $container
+	docker stop $container
 done
 
-echo "stopping haproxy ${KAFKA}-haproxy"
+for container in $(docker ps -a --format 'table {{.Names}}' | grep ${KAFKA}-sr);
+do
+	echo stopping $container
+	docker stop $container
+done
+
+for container in $(docker ps -a --format 'table {{.Names}}' | grep ${KAFKA}-rest);
+do
+	echo stopping $container
+	docker stop $container
+done
+
+echo "stopping haproxy ${KAFKA}-ha"
 docker stop ${KAFKA}-ha 2> /dev/null || true
 
 docker rm $(docker ps -a -q) 2> /dev/null || true
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
-
-PROXY_DIR=${KAFKA}_proxy
-rm -rf ${PROXY_DIR}
 
 docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"
