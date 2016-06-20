@@ -522,7 +522,7 @@ angular
                 },
                 "main@": {
                     controller: function(LoginService) {
-                        ShowSpinner('Signing Out...');
+                        ShowSpinner('Logging Out...');
                         LoginService.Logout();
                     }
                 }
