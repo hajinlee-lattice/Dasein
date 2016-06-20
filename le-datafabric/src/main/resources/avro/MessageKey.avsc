@@ -1,0 +1,9 @@
+{"type": "record",
+ "name": "messageKey",
+ "fields": [{"name": "producer", "type": "string"},
+            {"name": "timeStamp", "type": "long"},
+            {"name": "version", "type": "string"},
+            {"name": "id", "type": "string"},
+            {"name": "record", "type": "string"}]
+}
+

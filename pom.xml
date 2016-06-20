@@ -20,6 +20,7 @@
         <module>le-testframework</module>
         <module>le-network</module>
         <module>le-microservice</module>
+        <module>le-datafabric</module>
         <module>le-domain</module>
         <module>le-proxy</module>
         <module>le-remote</module>
