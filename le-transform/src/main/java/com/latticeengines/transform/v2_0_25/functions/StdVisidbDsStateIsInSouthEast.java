@@ -49,12 +49,12 @@ public class StdVisidbDsStateIsInSouthEast implements RealTimeTransform {
     @Override
     public TransformMetadata getMetadata() {
         TransformMetadata metadata = new TransformMetadata();
-        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setApprovedUsage(ApprovedUsage.MODEL);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.BOOLEAN);
         metadata.setStatisticalType(StatisticalType.NOMINAL);
-        metadata.setDescription("Region: SouthEast");
-        metadata.setDisplayName("Region: SouthEast");
+        metadata.setDescription("Region: Southeast");
+        metadata.setDisplayName("Region: Southeast");
         metadata.setTags(Tag.INTERNAL_TRANSFORM);
         return metadata;
     }

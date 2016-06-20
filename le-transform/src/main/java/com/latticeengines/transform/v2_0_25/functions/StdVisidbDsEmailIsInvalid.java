@@ -44,7 +44,7 @@ public class StdVisidbDsEmailIsInvalid implements RealTimeTransform {
     @Override
     public TransformMetadata getMetadata() {
         TransformMetadata metadata = new TransformMetadata();
-        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setApprovedUsage(ApprovedUsage.MODEL);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.BOOLEAN);
         metadata.setStatisticalType(StatisticalType.NOMINAL);

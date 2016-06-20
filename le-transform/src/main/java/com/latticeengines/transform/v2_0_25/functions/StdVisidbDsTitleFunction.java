@@ -65,7 +65,7 @@ public class StdVisidbDsTitleFunction implements RealTimeTransform {
     @Override
     public TransformMetadata getMetadata() {
         TransformMetadata metadata = new TransformMetadata();
-        metadata.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+        metadata.setApprovedUsage(ApprovedUsage.NONE);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.ALPHA);
         metadata.setStatisticalType(StatisticalType.NOMINAL);
