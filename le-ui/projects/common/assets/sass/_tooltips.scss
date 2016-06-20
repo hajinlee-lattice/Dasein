@@ -121,6 +121,9 @@ tooltip {
       display: block;
       margin-top: 10px;
     }
+    p {
+      font-size: 16px;
+    }
     &._hidden {
       display: block;
       visibility: hidden;
