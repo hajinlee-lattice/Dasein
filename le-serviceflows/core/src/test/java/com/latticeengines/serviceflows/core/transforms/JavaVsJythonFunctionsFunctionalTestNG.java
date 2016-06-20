@@ -94,8 +94,8 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
 
             for (CSVRecord record : CSVFormat.EXCEL.withHeader().parse(readerTestDataDSAPACMKTO)) {
 
-                if (i++ % 200 == 1)
-                    System.out.println(i);
+                if (++i % 500 == 0)
+                    System.out.println(String.format("...read and processed %d rows from test CSV", i));
 
                 long startReadTime = System.currentTimeMillis();
                 if (lastLoopEndTime > 0) {
@@ -465,11 +465,11 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
             long totalAttTime = 0;
             long totalFcn1Time = 0;
             long lastLoopEndTime = 0;
-            
+
             for (CSVRecord record : CSVFormat.EXCEL.withHeader().parse(readerTestDataDSAPACMKTO)) {
 
-                if (i++ % 200 == 1)
-                    System.out.println(i);
+                if (++i % 500 == 0)
+                    System.out.println(String.format("...read and processed %d rows from test CSV", i));
 
                 long startReadTime = System.currentTimeMillis();
                 if (lastLoopEndTime > 0) {
