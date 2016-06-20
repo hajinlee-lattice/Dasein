@@ -5,15 +5,12 @@ import os
 import subprocess
 import sys
 import time
-from boto3.s3.transfer import S3Transfer
 
 from .ec2 import EC2Instance
-from .stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
+from .stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack, S3_BUCKET
 from .template import TEMPLATE_DIR
 
-_S3_BUCKET='yintaosong'
 _S3_CF_PATH='cloudformation/zookeeper'
-_S3_REGION='us-east-1'
 _EC2_PEM = '~/aws.pem'
 
 def main():
@@ -21,35 +18,31 @@ def main():
     args.func(args)
 
 def template(args):
+    stack = template_internal(args.nodes)
+    if args.upload:
+        stack.validate()
+        stack.upload(_S3_CF_PATH)
+    else:
+        print stack.json()
+        stack.validate()
+
+def template_internal(nodes):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
-    for n in xrange(args.nodes):
+    for n in xrange(nodes):
         name = instance_name(n)
         subnet = "SubnetId%d" % ( (n % 2) + 1 )
         ec2 = EC2Instance(name, subnet_ref=subnet) \
             .metadata(ec2_metadata(n)) \
             .add_tag("lattice-engines.cluster.type", "Zookeeper")
         stack.add_ec2(ec2)
-    if args.upload:
-        upload_template(stack)
-    else:
-        print stack.json()
-
-def upload_template(stack):
-    temp_file = "/tmp/zookeeper.json"
-    with open(temp_file, 'w') as tf:
-        tf.write(stack.json())
-    print 'uploading template to %s' % (os.path.join(_S3_CF_PATH, 'template.json') + ' ..')
-    client = boto3.client('s3')
-    transfer = S3Transfer(client)
-    transfer.upload_file(temp_file, _S3_BUCKET, os.path.join(_S3_CF_PATH, 'template.json'))
-    print 'done.'
+    return stack
 
 def provision(args):
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, args.stackname)
     response = client.create_stack(
         StackName=args.stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(_S3_BUCKET, _S3_CF_PATH, 'template.json'),
+        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
         Parameters=[
             {
                 'ParameterKey': 'SubnetId1',

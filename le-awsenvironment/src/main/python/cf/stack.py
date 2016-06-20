@@ -1,10 +1,14 @@
+import boto3
 import json
 import os
 import time
+from boto3.s3.transfer import S3Transfer
 
 from .ec2 import _ec2_mappings, _ec2_params, _ec2_security_group, SECURITY_GROUP, EC2Instance
+from .resource import Resource
 from .template import Template, TEMPLATE_DIR
 
+S3_BUCKET= 'yintaosong'
 
 class Stack(Template):
     def __init__(self, description):
@@ -12,14 +16,12 @@ class Stack(Template):
         self._template["AWSTemplateFormatVersion"] = "2010-09-09"
         self._template["Description"] = description
         self._template["Parameters"] = Stack.__common_params()
-
-    def add_ec2(self, instance, create_sg=False):
-        assert isinstance(instance, EC2Instance)
-
         self.__ec2_params()
         self.__ec2_mappings()
 
-        name = instance.get_name()
+    def add_ec2(self, instance, create_sg=False):
+        assert isinstance(instance, EC2Instance)
+        name = instance.logical_id()
 
         # security group
         if create_sg:
@@ -53,22 +55,37 @@ class Stack(Template):
         self._merge_into_attr('Outputs', output)
         return self
 
-    def associate_eip(self, ec2_name, eip_name):
-        eip = {
-            "Type" : "AWS::EC2::EIP",
-            "Properties" : {
-                "InstanceId" : ec2_name,
-            }
-        }
-        self._merge_into_attr('Resources', eip)
-        ip_ass = {
-            "Type" : "AWS::EC2::EIPAssociation",
-            "Properties" : {
-                "InstanceId" : { "Ref" : ec2_name },
-                "EIP" : { "Ref" : eip_name }
-            }
-        }
-        self._merge_into_attr('Resources', ip_ass)
+    def add_resource(self, resource):
+        assert isinstance(resource, Resource)
+        self._merge_into_attr("Resources", {resource.logical_id(): resource.template()})
+
+    def add_resources(self, resources):
+        for resource in resources:
+            self.add_resource(resource)
+        return self
+
+    def add_params(self, params):
+        for k, v in params.items():
+            self._template["Parameters"][k] = v
+        return self
+
+    def validate(self):
+        print 'Validating template against AWS ...'
+        client = boto3.client('cloudformation')
+        client.validate_template(
+            TemplateBody=self.json()
+        )
+        print 'Stack template is valid.'
+
+    def upload(self, prefix):
+        temp_file = "/tmp/zookeeper.json"
+        with open(temp_file, 'w') as tf:
+            tf.write(self.json())
+        print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", S3_BUCKET, prefix, 'template.json') + ' ..')
+        client = boto3.client('s3')
+        transfer = S3Transfer(client)
+        transfer.upload_file(temp_file, S3_BUCKET, os.path.join(prefix, 'template.json'))
+        print 'done.'
 
     def __ec2_mappings(self):
         data = _ec2_mappings()

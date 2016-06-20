@@ -1,9 +1,4 @@
 {
-  "ServerType2AMIType": {
-    "default": {
-      "AMIType": "AmazonLinux"
-    }
-  },
   "AWSRegion2AMI": {
     "us-east-1": {
       "AmazonLinux": "ami-a4827dc9",
