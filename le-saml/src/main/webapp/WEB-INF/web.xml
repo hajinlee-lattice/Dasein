@@ -5,7 +5,12 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
     <display-name>SAML</display-name>
-    <description>SAML API</description>
+    <description>SAML Entry Point</description>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:saml-context.xml</param-value>
+    </context-param>
 
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
@@ -20,25 +25,4 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:security/securityContext.xml</param-value>
-    </context-param>
-
-    <servlet>
-        <servlet-name>saml</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <init-param>
-            <param-name>maxIdleTimeout</param-name>
-            <param-value>300000</param-value>
-        </init-param>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>saml</servlet-name>
-        <url-pattern>/saml/*</url-pattern>
-    </servlet-mapping>
-
 </web-app>
