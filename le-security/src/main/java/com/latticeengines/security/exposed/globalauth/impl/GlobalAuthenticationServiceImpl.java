@@ -1,142 +1,141 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.GlobalAuthAuthentication;
-import com.latticeengines.domain.exposed.security.GlobalAuthTenant;
-import com.latticeengines.domain.exposed.security.GlobalAuthTicket;
-import com.latticeengines.domain.exposed.security.GlobalAuthUser;
-import com.latticeengines.domain.exposed.security.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.security.entitymanager.GlobalAuthAuthenticationEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthTicketEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.util.GlobalAuthPasswordUtils;
+import com.latticeengines.security.globalauth.generated.service.AuthenticationService;
+import com.latticeengines.security.globalauth.generated.service.IAuthenticationService;
 
 @Component("globalAuthenticationService")
-public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
-        GlobalAuthenticationService {
+public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl implements GlobalAuthenticationService {
 
     private static final Log log = LogFactory.getLog(GlobalAuthenticationServiceImpl.class);
 
-    @Autowired
-    private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
-
-    @Autowired
-    private GlobalAuthUserEntityMgr gaUserEntityMgr;
-
-    @Autowired
-    private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
-
     @Override
+    @RestApiCall
     public synchronized Ticket authenticateUser(String user, String password) {
+        SSLUtils.turnOffSslChecking();
+
+        AuthenticationService service;
+        try {
+            service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18000, e, new String[] { globalAuthUrl });
+        }
+
+        IAuthenticationService ias = service.getBasicHttpBindingIAuthenticationService();
+        addMagicHeaderAndSystemProperty(ias);
         try {
             log.info(String.format("Authenticating user %s against Global Auth.", user));
-            return globalAuthAuthenticateUser(user, password);
+            return new TicketBuilder(ias.authenticateLattice(user, password)).build();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });
         }
 
     }
 
-    private Ticket globalAuthAuthenticateUser(String username, String password) throws Exception {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
-        if (latticeAuthenticationData == null) {
-            throw new Exception("The specified user doesn't exists");
-        }
-
-        boolean isActive = latticeAuthenticationData.getGlobalAuthUser().getIsActive();
-        if (!isActive) {
-            throw new Exception("The user is inactive!");
-        }
-        Ticket ticket = authenticate(username, password);
-        if (ticket != null) {
-            return ticket;
-        }
-
-        throw new Exception("The credentials provided for login are incorrect.");
-    }
-
-    private Ticket authenticate(String username, String password) {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
-        if (latticeAuthenticationData == null) {
-            return null;
-        }
-        if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils
-                .EncryptPassword(password))) {
-            return null;
-        }
-        Date lastModifiedInUTC = latticeAuthenticationData.getLastModificationDate();
-        Ticket ticket = new Ticket();
-        ticket.setUniqueness(UUID.randomUUID().toString());
-        ticket.setRandomness(GlobalAuthPasswordUtils.GetSecureRandomString(16));
-        ticket.setMustChangePassword(latticeAuthenticationData.getMustChangePassword());
-        ticket.setPasswordLastModified(lastModifiedInUTC.getTime());
-        GlobalAuthTicket ticketData = new GlobalAuthTicket();
-        ticketData.setUserId(latticeAuthenticationData.getGlobalAuthUser().getPid());
-        ticketData.setTicket(ticket.getData());
-        ticketData.setLastAccessDate(new Date(System.currentTimeMillis()));
-        GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
-        if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
-            Map<String, GlobalAuthTenant> distinctTenants = new HashMap<String, GlobalAuthTenant>();
-            for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
-                if (rightData.getGlobalAuthTenant() != null) {
-                    if (!distinctTenants.containsKey(rightData.getGlobalAuthTenant().getId())) {
-                        distinctTenants.put(rightData.getGlobalAuthTenant().getId(),
-                                rightData.getGlobalAuthTenant());
-                    }
-                }
-            }
-            List<Tenant> tenants = new ArrayList<Tenant>();
-            for (Entry<String, GlobalAuthTenant> tenantData : distinctTenants.entrySet()) {
-                Tenant tenant = new Tenant();
-                tenant.setId(tenantData.getKey());
-                tenant.setName(tenantData.getValue().getName());
-                tenants.add(tenant);
-            }
-            ticket.setTenants(tenants);
-        }
-        gaTicketEntityMgr.create(ticketData);
-        return ticket;
-    }
-
     @Override
+    @RestApiCall
     public synchronized boolean discard(Ticket ticket) {
+        SSLUtils.turnOffSslChecking();
+
+        AuthenticationService service;
+        try {
+            service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18000, e, new String[] { globalAuthUrl });
+        }
+
+        IAuthenticationService ias = service.getBasicHttpBindingIAuthenticationService();
+        addMagicHeaderAndSystemProperty(ias);
         try {
             log.info("Discarding ticket " + ticket + " against Global Auth.");
 
-            return globalDiscard(ticket);
+            return ias.discard(new SoapTicketBuilder(ticket).build());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18009, e, new String[] { ticket.toString() });
         }
 
     }
 
-    private boolean globalDiscard(Ticket ticket) {
-        GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
-        if (ticketData != null) {
-            gaTicketEntityMgr.delete(ticketData);
-        } else {
-            return false;
+    static class SoapTicketBuilder {
+        private Ticket ticket;
+
+        public SoapTicketBuilder(Ticket ticket) {
+            this.ticket = ticket;
         }
-        return true;
+
+        public com.latticeengines.security.globalauth.generated.service.Ticket build() {
+            com.latticeengines.security.globalauth.generated.service.Ticket t = new com.latticeengines.security.globalauth.generated.service.ObjectFactory().createTicket();
+            t.setUniquness(ticket.getUniqueness());
+            t.setRandomness(new JAXBElement<String>( //
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
+                    String.class, ticket.getRandomness()));
+            return t;
+        }
+    }
+
+    static class TicketBuilder {
+        private com.latticeengines.security.globalauth.generated.service.Ticket ticket;
+
+        public TicketBuilder(com.latticeengines.security.globalauth.generated.service.Ticket ticket) {
+            this.ticket = ticket;
+        }
+
+        public Ticket build() {
+            Ticket t = new Ticket();
+            t.setMustChangePassword(ticket.isMustChangePassword());
+            t.setRandomness(ticket.getRandomness().getValue());
+            t.setUniqueness(ticket.getUniquness().intern());
+            t.setPasswordLastModified(convertTicksToMilliseconds(ticket.getPasswordLastModifiedInTicks()));
+
+            List<Tenant> tenants = new ArrayList<>();
+
+            for (com.latticeengines.security.globalauth.generated.service.Tenant tenant : ticket.getTenants().getValue()
+                    .getTenant()) {
+                tenants.add(new TenantBuilder(tenant).build());
+            }
+
+            t.setTenants(tenants);
+
+            return t;
+        }
+    }
+
+    static class TenantBuilder {
+        private com.latticeengines.security.globalauth.generated.service.Tenant tenant;
+
+        public TenantBuilder(com.latticeengines.security.globalauth.generated.service.Tenant tenant) {
+            this.tenant = tenant;
+        }
+
+        public Tenant build() {
+            Tenant t = new Tenant();
+            t.setName(tenant.getDisplayName().getValue());
+            t.setId(tenant.getIdentifier().getValue());
+            return t;
+        }
+    }
+
+    private static long convertTicksToMilliseconds(long ticks) {
+        long januaryFirst1970 = 621355968000000000L;
+        long milliSecTo100NanoSec = 10000L;
+        return (ticks - januaryFirst1970) / milliSecTo100NanoSec;
     }
 
 }

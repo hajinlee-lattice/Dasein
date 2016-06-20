@@ -56,6 +56,9 @@ public class SessionServiceImpl implements SessionService {
         while (++retries <= MAX_RETRY) {
             try {
                 session = globalSessionManagementService.attach(ticket);
+                if (session != null) {
+                    break;
+                }
             } catch (Exception e) {
                 LOGGER.warn("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
                         + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
