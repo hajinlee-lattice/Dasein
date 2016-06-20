@@ -1,31 +1,37 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.EmailSettings;
+import com.latticeengines.domain.exposed.security.GlobalAuthAuthentication;
+import com.latticeengines.domain.exposed.security.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.security.GlobalAuthTicket;
+import com.latticeengines.domain.exposed.security.GlobalAuthUser;
+import com.latticeengines.domain.exposed.security.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.entitymanager.GlobalAuthAuthenticationEntityMgr;
+import com.latticeengines.security.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.security.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.security.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.globalauth.generated.usermgr.IUserManagementService;
-import com.latticeengines.security.globalauth.generated.usermgr.ObjectFactory;
-import com.latticeengines.security.globalauth.generated.usermgr.SOAPEmailSettings;
-import com.latticeengines.security.globalauth.generated.usermgr.UserManagementService;
+import com.latticeengines.security.exposed.service.EmailService;
+import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalUserManagementService")
 public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
@@ -51,81 +57,192 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Value("${security.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
-    @RestApiCall
-    private IUserManagementService getService() {
-        SSLUtils.turnOffSslChecking();
-        UserManagementService service;
-        try {
-            service = new UserManagementService(new URL(globalAuthUrl + "/GlobalAuthUserManager?wsdl"));
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18000, e, new String[] { globalAuthUrl });
-        }
-        return service.getBasicHttpBindingIUserManagementService();
-    }
+    @Autowired
+    private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
+
+    @Autowired
+    private GlobalAuthUserEntityMgr gaUserEntityMgr;
+
+    @Autowired
+    private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
+
+    @Autowired
+    private GlobalAuthUserTenantRightEntityMgr gaUserTenantRightEntityMgr;
+
+    @Autowired
+    private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
-    @RestApiCall
     public synchronized Boolean registerUser(User user, Credentials creds) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
-            return service.registerUser(new SoapUserBuilder(user).build(), new SoapCredentialsBuilder(creds).build());
+            return globalAuthRegisterUser(user, creds);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
         }
     }
 
-    @Override
-    @RestApiCall
-    public synchronized Boolean grantRight(String right, String tenant, String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
-        try {
-            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username, tenant));
-            return service.grantRight(right, tenant, username);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18005, e, new String[] { right, username, tenant });
+    private Boolean globalAuthRegisterUser(User user, Credentials creds) throws Exception {
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsername(creds.getUsername());
+        if (latticeAuthenticationData != null) {
+            throw new Exception("The specified user already exists");
         }
+
+        latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(user.getEmail());
+        if (latticeAuthenticationData != null) {
+            throw new Exception("The specified email already exists as a username.");
+        }
+
+        GlobalAuthUser userData = gaUserEntityMgr.findByEmailJoinAuthentication(user.getUsername());
+        if (userData != null) {
+            throw new Exception("The specified username already exists as an email.");
+        }
+
+        userData = gaUserEntityMgr.findByEmailJoinAuthentication(user.getEmail());
+        if (userData != null) {
+            throw new Exception("The specified email already exists.");
+        }
+
+        userData = new GlobalAuthUser();
+        userData.setEmail(user.getEmail());
+        userData.setFirstName(user.getFirstName());
+        userData.setLastName(user.getLastName());
+        userData.setTitle(user.getTitle());
+        userData.setPhoneNumber(user.getPhoneNumber());
+        userData.setIsActive(true);
+        gaUserEntityMgr.create(userData);
+
+        latticeAuthenticationData = new GlobalAuthAuthentication();
+        latticeAuthenticationData.setUsername(creds.getUsername());
+        latticeAuthenticationData.setPassword(creds.getPassword());
+        latticeAuthenticationData.setGlobalAuthUser(userData);
+        Date now = new Date(System.currentTimeMillis());
+        latticeAuthenticationData.setCreationDate(now);
+        latticeAuthenticationData.setLastModificationDate(now);
+        gaAuthenticationEntityMgr.create(latticeAuthenticationData);
+        return true;
     }
 
     @Override
-    @RestApiCall
+    public synchronized Boolean grantRight(String right, String tenant, String username) {
+        try {
+            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
+                    tenant));
+            return globalAuthGrantRight(right, tenant, username);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18005, e,
+                    new String[] { right, username, tenant });
+        }
+    }
+
+    public Boolean globalAuthGrantRight(String right, String tenant, String username)
+            throws Exception {
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsername(username);
+        if (latticeAuthenticationData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
+        if (tenantData == null) {
+            throw new Exception("Unable to find the tenant requested.");
+        }
+
+        GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantIdAndOperationName(
+                        latticeAuthenticationData.getGlobalAuthUser().getPid(),
+                        tenantData.getPid(), right);
+        if (rightData != null) {
+            return true;
+        }
+
+        rightData = new GlobalAuthUserTenantRight();
+        rightData.setGlobalAuthUser(latticeAuthenticationData.getGlobalAuthUser());
+        rightData.setGlobalAuthTenant(tenantData);
+        rightData.setOperationName(right);
+        gaUserTenantRightEntityMgr.create(rightData);
+        return true;
+    }
+
+    @Override
     public List<String> getRights(String username, String tenantId) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
-            return service.getRights(tenantId, username).getString();
+            return globalAuthGetRights(tenantId, username);
         } catch (Exception e) {
             if (e.getMessage().contains("Sequence contains no elements")) {
                 return new ArrayList<>();
             }
             throw new LedpException(LedpCode.LEDP_18000,
-                "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
+                    "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
         }
     }
 
+    private List<String> globalAuthGetRights(String tenantId, String username) {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        GlobalAuthAuthentication authenticationData = gaAuthenticationEntityMgr
+                .findByUsernameJoinUser(username);
+        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantId(authenticationData.getGlobalAuthUser().getPid(),
+                        tenantData.getPid());
+        if (rightsData != null) {
+
+            Set<String> distinctRights = new HashSet<String>();
+            for (GlobalAuthUserTenantRight rightData : rightsData) {
+                distinctRights.add(rightData.getOperationName());
+            }
+            List<String> rights = new ArrayList<String>(distinctRights);
+            return rights;
+        } else {
+            return null;
+        }
+
+    }
+
     @Override
-    @RestApiCall
     public synchronized Boolean revokeRight(String right, String tenant, String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
-            log.info(String.format("Revoking right %s from user %s for tenant %s.", right, username, tenant));
-            return service.revokeRight(right, tenant, username);
+            log.info(String.format("Revoking right %s from user %s for tenant %s.", right,
+                    username, tenant));
+            return globalAuthRevokeRight(right, tenant, username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18006, e, new String[] { right, username, tenant });
+            throw new LedpException(LedpCode.LEDP_18006, e,
+                    new String[] { right, username, tenant });
         }
     }
 
-    @Override
-    @RestApiCall
-    public synchronized Boolean forgotLatticeCredentials(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
+    private Boolean globalAuthRevokeRight(String right, String tenant, String username)
+            throws Exception {
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsername(username);
+        if (latticeAuthenticationData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
 
-        // Validate that username exists before reset
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
+        if (tenantData == null) {
+            throw new Exception("Unable to find the tenant requested.");
+        }
+
+        GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantIdAndOperationName(
+                        latticeAuthenticationData.getGlobalAuthUser().getPid(),
+                        tenantData.getPid(), right);
+        if (rightData == null) {
+            return true;
+        }
+
+        gaUserTenantRightEntityMgr.delete(rightData);
+        return true;
+    }
+
+    @Override
+    public synchronized Boolean forgotLatticeCredentials(String username) {
+
         if (getUserByUsername(username) == null) {
             throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
         }
@@ -140,79 +257,219 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
         try {
             log.info(String.format("Resetting credentials for user %s.", username));
-            return service.forgotLatticeCredentialsBySettings(username, new SoapEmailSettingsBuilder(emailsettings).build());
+            return globalAuthForgotLatticeCredentials(username, emailsettings);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
+    private Boolean globalAuthForgotLatticeCredentials(String username, EmailSettings emailsettings)
+            throws Exception {
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsername(username);
+        if (latticeAuthenticationData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+
+        GlobalAuthUser userData = gaUserEntityMgr
+                .findByUserIdWithTenantRightsAndAuthentications(latticeAuthenticationData
+                        .getGlobalAuthUser().getPid());
+        if (userData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+
+        if (!userData.getIsActive()) {
+            throw new Exception("The user is inactive!");
+        }
+        String userEmail = userData.getEmail();
+        if (userEmail == null || userEmail.isEmpty() || userEmail.trim().isEmpty()) {
+            throw new Exception("The specified user does not have an email address specified: "
+                    + userData.getPid().toString());
+        }
+
+        String password = GlobalAuthPasswordUtils.GetSecureRandomString(16);
+        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
+                .EncryptPassword(GlobalAuthPasswordUtils.Hash256(password)));
+        latticeAuthenticationData.setMustChangePassword(true);
+        gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+
+        emailService.sendGlobalAuthForgetCredsEmail(userData.getFirstName(),
+                userData.getLastName(), userData.getAuthentications().get(0)
+                        .getUsername(), password, userData.getEmail(), emailsettings);
+        return true;
+    }
+
     @Override
-    @RestApiCall
-    public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
+    public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds,
+            Credentials newCreds) {
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
-            return service.modifyLatticeCredentials(
-                new SoapTicketBuilder(ticket).build(),
-                new SoapCredentialsBuilder(oldCreds).build(),
-                new SoapCredentialsBuilder(newCreds).build()
-            );
+            return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
     }
 
+    private Boolean globalAuthModifyLatticeCredentials(Ticket ticket, Credentials oldCreds,
+            Credentials newCreds) throws Exception {
+        GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
+        if (ticketData == null) {
+            throw new Exception("Unable to find the ticket requested.");
+        }
+        GlobalAuthAuthentication latticeAuthenticationData = gaUserEntityMgr
+                .findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId())
+                .getAuthentications().get(0);
+        if (latticeAuthenticationData == null) {
+            throw new Exception("Unable to find the credentials requested.");
+        }
+        if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils
+                .EncryptPassword(oldCreds.getPassword()))) {
+            throw new Exception("Old password is incorrect for password change.");
+        }
+        if (oldCreds.getPassword().equals(newCreds.getPassword())) {
+            throw new Exception("The new password cannot be the same as the old password.");
+        }
+        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils.EncryptPassword(newCreds
+                .getPassword()));
+        latticeAuthenticationData.setMustChangePassword(false);
+        gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+        return true;
+    }
+
     @Override
-    @RestApiCall
     public synchronized String resetLatticeCredentials(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Resetting credentials for %s.", username));
-            return service.resetLatticeCredentials(username);
+            return globalAuthResetLatticeCredentials(username);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
+    private String globalAuthResetLatticeCredentials(String username) throws Exception {
+        String password = "";
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsername(username);
+        if (latticeAuthenticationData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+
+        GlobalAuthUser userData = latticeAuthenticationData.getGlobalAuthUser();
+        if (userData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+        if (!userData.getIsActive()) {
+            throw new Exception("The user is inactive!");
+        }
+        String userEmail = userData.getEmail();
+        if (userEmail == null || userEmail.isEmpty() || userEmail.trim().isEmpty()) {
+            throw new Exception("The specified user does not have an email address specified: "
+                    + userData.getPid().toString());
+        }
+        password = GlobalAuthPasswordUtils.GetSecureRandomString(16);
+        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
+                .EncryptPassword(GlobalAuthPasswordUtils.Hash256(password)));
+        latticeAuthenticationData.setMustChangePassword(true);
+        gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+        return password;
+    }
+
     @Override
-    @RestApiCall
     public User getUserByEmail(String email) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Getting user having the email %s.", email));
-            return new UserBuilder(service.findUserByEmail(email)).build();
+            return globalAuthFindUserByEmail(email);
         } catch (Exception e) {
-            //throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
-            //TODO: handle different exceptions returned from GlobalAuth
+            // TODO: handle different exceptions returned from GlobalAuth
             return null;
         }
     }
 
+    private User globalAuthFindUserByEmail(String email) throws Exception {
+        User user = new User();
+        GlobalAuthUser userData = gaUserEntityMgr.findByEmailJoinAuthentication(email);
+        if (userData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+        GlobalAuthAuthentication authData = userData.getAuthentications().get(0);
+
+        user.setUsername(authData.getUsername());
+        if (userData.getEmail() != null) {
+            user.setEmail(userData.getEmail());
+        }
+
+        if (userData.getFirstName() != null) {
+            user.setFirstName(userData.getFirstName());
+        }
+
+        if (userData.getLastName() != null) {
+            user.setLastName(userData.getLastName());
+        }
+
+        if (userData.getTitle() != null) {
+            user.setTitle(userData.getTitle());
+        }
+
+        if (userData.getPhoneNumber() != null) {
+            user.setPhoneNumber(userData.getPhoneNumber());
+        }
+
+        if (userData.getIsActive()) {
+            user.setActive(userData.getIsActive());
+        }
+        return user;
+    }
+
     @Override
-    @RestApiCall
     public User getUserByUsername(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Getting user %s.", username));
-            return new UserBuilder(service.findUserByUsername(username)).build();
+            return globalAuthFindUserByUsername(username);
         } catch (Exception e) {
-            //throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
-            //TODO: handle different exceptions returned from GlobalAuth
+            // TODO: handle different exceptions returned from GlobalAuth
             return null;
         }
     }
 
+    private User globalAuthFindUserByUsername(String username) throws Exception {
+        User user = new User();
+        GlobalAuthUser userData = gaAuthenticationEntityMgr.findByUsernameJoinUser(username)
+                .getGlobalAuthUser();
+        if (userData == null) {
+            throw new Exception("Unable to find the user requested.");
+        }
+        user.setUsername(username);
+        if (userData.getEmail() != null) {
+            user.setEmail(userData.getEmail());
+        }
+
+        if (userData.getFirstName() != null) {
+            user.setFirstName(userData.getFirstName());
+        }
+
+        if (userData.getLastName() != null) {
+            user.setLastName(userData.getLastName());
+        }
+
+        if (userData.getTitle() != null) {
+            user.setTitle(userData.getTitle());
+        }
+
+        if (userData.getPhoneNumber() != null) {
+            user.setPhoneNumber(userData.getPhoneNumber());
+        }
+
+        if (userData.getIsActive()) {
+            user.setActive(userData.getIsActive());
+        }
+
+        return user;
+    }
+
     @Override
-    @RestApiCall
     public synchronized Boolean deleteUser(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
-            boolean result = service.deleteUser(username);
+            boolean result = globalAuthDeleteUser(username);
             log.info(String.format("Deleting user %s success = %s", username, result));
             return result;
         } catch (Exception e) {
@@ -220,163 +477,120 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    private Boolean globalAuthDeleteUser(String username) throws Exception {
+        GlobalAuthAuthentication authenticationData = gaAuthenticationEntityMgr
+                .findByUsernameJoinUser(username);
+        if (authenticationData == null) {
+            return true;
+        }
+        GlobalAuthUser userData = authenticationData.getGlobalAuthUser();
+        if (userData == null) {
+            return true;
+        }
+        try {
+            gaUserEntityMgr.delete(userData);
+        } catch (Exception e) {
+            throw new Exception("Unable to delete the user requested.");
+        }
+        return true;
+    }
+
     @Override
-    @RestApiCall
     public Boolean isRedundant(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Checking if user %s is redundant.", username));
-            return service.isRedundant(username);
+            return globalAuthIsRedundant(username);
         } catch (Exception e) {
             return false;
         }
     }
 
+    private Boolean globalAuthIsRedundant(String username) throws Exception {
+        User user = globalAuthFindUserByUsername(username);
+        List<GlobalAuthUser> userDatas = gaUserEntityMgr
+                .findByEmailJoinUserTenantRight(user.getEmail());
+        Set<String> distinctRights = new HashSet<String>();
+        for (GlobalAuthUser userData : userDatas) {
+            if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
+                for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
+                    distinctRights.add(rightData.getOperationName());
+                }
+            }
+        }
+        return distinctRights.size() == 0;
+    }
+
     @Override
-    @RestApiCall
     public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();
-            for (com.latticeengines.security.globalauth.generated.usermgr.UserRights userRights : service
-                    .findAllUserRightsByTenant(tenantId).getUserRights()) {
-                userRightsList.add(new UserRightsBuilder(userRights).build());
-            }
-            return userRightsList;
+            return globalFindAllUserRightsByTenant(tenantId);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18016, e, new String[] { tenantId });
         }
     }
 
-    static class SoapUserBuilder {
-        private User user;
-
-        public SoapUserBuilder(User user) {
-            this.user = user;
+    private List<AbstractMap.SimpleEntry<User, List<String>>> globalFindAllUserRightsByTenant(
+            String tenantId) throws Exception {
+        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (tenantData == null) {
+            throw new Exception("Unable to find the tenant requested: " + tenantId);
         }
-
-        public com.latticeengines.security.globalauth.generated.usermgr.User build() {
-            com.latticeengines.security.globalauth.generated.usermgr.User u = new ObjectFactory().createUser();
-            u.setEmail(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Email"), //
-                    String.class, user.getEmail()));
-            u.setFirstName(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "FirstName"), //
-                    String.class, user.getFirstName()));
-            u.setLastName(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "LastName"), //
-                    String.class, user.getLastName()));
-            u.setPhoneNumber(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "PhoneNumber"), //
-                    String.class, user.getPhoneNumber()));
-            u.setTitle(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Title"), //
-                    String.class, user.getTitle()));
-            return u;
+        List<GlobalAuthUser> userDatas = gaUserEntityMgr
+                .findByTenantIdJoinAuthenticationJoinUserTenantRight(tenantData.getPid());
+        if (userDatas == null || userDatas.size() == 0) {
+            throw new Exception("Unable to find any user associated with the tenant requested.");
         }
+        for (GlobalAuthUser userData : userDatas) {
+            User user = new User();
+            GlobalAuthAuthentication authData = gaUserEntityMgr
+                    .findByUserIdWithTenantRightsAndAuthentications(userData.getPid())
+                    .getAuthentications().get(0);
+            user.setUsername(authData.getUsername());
+
+            if (userData.getEmail() != null) {
+                user.setEmail(userData.getEmail());
+            }
+
+            if (userData.getFirstName() != null) {
+                user.setFirstName(userData.getFirstName());
+            }
+
+            if (userData.getLastName() != null) {
+                user.setLastName(userData.getLastName());
+            }
+
+            if (userData.getTitle() != null) {
+                user.setTitle(userData.getTitle());
+            }
+
+            if (userData.getPhoneNumber() != null) {
+                user.setPhoneNumber(userData.getPhoneNumber());
+            }
+
+            if (userData.getIsActive()) {
+                user.setActive(userData.getIsActive());
+            }
+
+            AbstractMap.SimpleEntry<User, List<String>> uRights;
+            List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
+                    .findByUserIdAndTenantId(userData.getPid(), tenantData.getPid());
+            if (rightsData != null) {
+
+                Set<String> distinctRights = new HashSet<String>();
+                for (GlobalAuthUserTenantRight rightData : rightsData) {
+                    distinctRights.add(rightData.getOperationName());
+                }
+                List<String> rights = new ArrayList<String>(distinctRights);
+                uRights = new AbstractMap.SimpleEntry<>(user, rights);
+            } else {
+                uRights = new AbstractMap.SimpleEntry<>(user, null);
+            }
+
+            userRightsList.add(uRights);
+
+        }
+        return userRightsList;
     }
-
-    static class SoapCredentialsBuilder {
-        private Credentials creds;
-
-        public SoapCredentialsBuilder(Credentials creds) {
-            this.creds = creds;
-        }
-
-        public com.latticeengines.security.globalauth.generated.usermgr.Credentials build() {
-            com.latticeengines.security.globalauth.generated.usermgr.Credentials c = new ObjectFactory().createCredentials();
-            c.setUsername(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
-                String.class, creds.getUsername()));
-            c.setPassword(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
-                String.class, creds.getPassword()));
-
-            return c;
-
-        }
-    }
-
-    static class SoapTicketBuilder {
-        private Ticket ticket;
-
-        public SoapTicketBuilder(Ticket ticket) {
-            this.ticket = ticket;
-        }
-
-        public com.latticeengines.security.globalauth.generated.usermgr.Ticket build() {
-            com.latticeengines.security.globalauth.generated.usermgr.Ticket t = new ObjectFactory().createTicket();
-            t.setUniquness(ticket.getUniqueness());
-            t.setRandomness(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
-                String.class, ticket.getRandomness()));
-            return t;
-        }
-    }
-
-    static class SoapEmailSettingsBuilder {
-        private EmailSettings emailSettings;
-
-        public SoapEmailSettingsBuilder(EmailSettings emailSettings) {
-            this.emailSettings = emailSettings;
-        }
-
-        public SOAPEmailSettings build() {
-            SOAPEmailSettings s = new ObjectFactory().createSOAPEmailSettings();
-            s.setFrom(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "From"), //
-                String.class, emailSettings.getFrom()));
-            s.setPassword(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
-                String.class, emailSettings.getPassword()));
-            s.setServer(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Server"), //
-                String.class, emailSettings.getServer()));
-            s.setUsername(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
-                String.class, emailSettings.getUsername()));
-            s.setPort(emailSettings.getPort());
-            s.setUseSSL(emailSettings.isUseSSL());
-            return s;
-        }
-    }
-
-    static class UserBuilder {
-        private com.latticeengines.security.globalauth.generated.usermgr.User user;
-
-        public UserBuilder(com.latticeengines.security.globalauth.generated.usermgr.User user) {
-            this.user = user;
-        }
-
-        public User build() {
-            User u = new User();
-
-            u.setActive(user.getIsActive().getValue());
-            u.setEmail(user.getEmail().getValue());
-            u.setFirstName(user.getFirstName().getValue());
-            u.setLastName(user.getLastName().getValue());
-            u.setPhoneNumber(user.getPhoneNumber().getValue());
-            u.setTitle(user.getTitle().getValue());
-            u.setUsername(user.getUsername().getValue());
-
-            return u;
-        }
-    }
-
-    static class UserRightsBuilder {
-        private com.latticeengines.security.globalauth.generated.usermgr.UserRights userRights;
-
-        public UserRightsBuilder(com.latticeengines.security.globalauth.generated.usermgr.UserRights userRights) {
-            this.userRights = userRights;
-        }
-
-        public AbstractMap.SimpleEntry<User, List<String>> build() {
-            return new AbstractMap.SimpleEntry<>(new UserBuilder(userRights.getUser()).build(), userRights.getRights()
-                    .getValue().getString());
-        }
-    }
-
 }

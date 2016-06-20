@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -460,4 +462,29 @@ public class EmailServiceImpl implements EmailService {
             log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed", user.getEmail(), tenantId));
         }
     }
+
+    @Override
+    public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username,
+            String password, String emailAddress, EmailSettings settings) {
+        try {
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.SECURITY_GLOBALAUTH_EMAIL_TEMPLATE);
+
+            builder.replaceToken("{!FirstName}", firstName);
+            builder.replaceToken("{!LastName}", lastName);
+            builder.replaceToken("{!Username}", username);
+            builder.replaceToken("{!Password}", password);
+            
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(builder, "text/html");
+            mp.addBodyPart(htmlPart);
+            EmailUtils.sendMultiPartEmail("Lattice Password Reset", mp,
+                    Collections.singleton(emailAddress), settings);
+        } catch (Exception e) {
+            log.error(String.format("Sending global auth forget credentials email to :%s failed", emailAddress));
+        }
+        
+    }
+    
 }
