@@ -15,16 +15,16 @@ import org.springframework.yarn.client.ClientRmTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 
 public class CustomYarnClient extends CommandYarnClient {
-    
+
     private final static Log log = LogFactory.getLog(CommandYarnClient.class);
-    
+
     private ClientRmTemplate clientRmTemplate;
-    
+
     public CustomYarnClient(ClientRmOperations clientRmOperations) {
         super(clientRmOperations);
-        this.clientRmTemplate = (ClientRmTemplate)clientRmOperations;
+        this.clientRmTemplate = (ClientRmTemplate) clientRmOperations;
     }
-    
+
     @Override
     public ApplicationId submitApplication() {
         try {
@@ -34,7 +34,7 @@ public class CustomYarnClient extends CommandYarnClient {
         }
         return submitApplication(true);
     }
-    
+
     @Override
     public ApplicationId submitApplication(boolean distribute) {
         try {
@@ -49,15 +49,14 @@ public class CustomYarnClient extends CommandYarnClient {
             if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false))
             {
                 log.info("Retry submit application.");
-                //System.out.println("+++++++ need retry here");
                 performFailover();
                 return super.submitApplication(distribute);
             }
             throw e;
         }
-        
+
     }
-    
+
     @Override
     public List<ApplicationReport> listApplications() {
         try {
@@ -77,7 +76,47 @@ public class CustomYarnClient extends CommandYarnClient {
             throw e;
         }
     }
-    
+
+    @Override
+    public void killApplication(ApplicationId applicationId) {
+        try {
+            try {
+                clientRmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("clientRmTemplate refresh properties faied.");
+            }
+            super.killApplication(applicationId);
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false))
+            {
+                log.info("Retry list applications.");
+                performFailover();
+                super.killApplication(applicationId);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public ApplicationReport getApplicationReport(ApplicationId applicationId) {
+        try {
+            try {
+                clientRmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("clientRmTemplate refresh properties faied.");
+            }
+            return super.getApplicationReport(applicationId);
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false))
+            {
+                log.info("Retry list applications.");
+                performFailover();
+                return super.getApplicationReport(applicationId);
+            }
+            throw e;
+        }
+    }
+
     private void performFailover() {
         Configuration conf = getConfiguration();
         Collection<String> rmIds = HAUtil.getRMHAIds(conf);
@@ -93,8 +132,10 @@ public class CustomYarnClient extends CommandYarnClient {
         currentIndex = (currentIndex + 1) % rmServiceIds.length;
         conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
         String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
-        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
-        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
         conf.set(YarnConfiguration.RM_ADDRESS, address);
         conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
         conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);

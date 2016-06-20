@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
@@ -28,35 +29,62 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private YarnService yarnService;
 
-    @Test(groups = {"functional.platform", "functional.production"})
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
 
     }
 
-    @Test(groups = {"functional.platform", "functional.production"})
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApps() {
         AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
     }
 
-    @Test(groups = {"functional.platform", "functional.production"})
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
+                LedpQueueAssigner.getModelingQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient",
+                appMasterProperties,
                 containerProperties);
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);
 
-        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(applicationId,
+                FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    @Test(groups = { "functional.platform", "functional.production" })
+    public void getApplicationReportAndKillJob() throws Exception {
+        Properties appMasterProperties = new Properties();
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
+                LedpQueueAssigner.getModelingQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
+        Properties containerProperties = new Properties();
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "64");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient",
+                appMasterProperties,
+                containerProperties);
+        ApplicationReport applicationReport = modelingJobService.getJobReportById(applicationId);
+        AppInfo appInfo = yarnService.getApplication(applicationId.toString());
+        assertNotNull(appInfo);
+        assertNotNull(applicationReport);
+
+        modelingJobService.killJob(applicationId);
+
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
+        assertEquals(status, FinalApplicationStatus.KILLED);
     }
 
 }
