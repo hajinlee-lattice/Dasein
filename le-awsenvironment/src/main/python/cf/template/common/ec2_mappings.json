@@ -1,0 +1,21 @@
+{
+  "ServerType2AMIType": {
+    "default": {
+      "AMIType": "AmazonLinux"
+    }
+  },
+  "AWSRegion2AMI": {
+    "us-east-1": {
+      "AmazonLinux": "ami-a4827dc9",
+      "AmazonECSLinux": "ami-719e631c"
+    },
+    "us-west-1": {
+      "AmazonLinux": "ami-11790371",
+      "AmazonECSLinux": "ami-87d6ade7"
+    },
+    "us-west-2": {
+      "AmazonLinux": "ami-f303fb93",
+      "AmazonECSLinux": "ami-beba42de"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "AWS::CloudFormation::Init": {
+    "configSets": {
+      "Install": [
+        "prepare",
+        "install"
+      ]
+    },
+    "prepare": {
+      "files": {
+        "/tmp/zkserver-head.txt": {
+          "content": {
+            "Fn::Join": [
+              "\n",
+              [ "#!/usr/bin/env bash",
+                "# description: Zookeeper Start Stop Restart",
+                "# processname: zookeeper",
+                "# chkconfig: 244 30 80",
+                "ZOO_LOG_DIR=/var/log/zookeeper"
+              ]
+            ]
+          },
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        },
+        "/tmp/bootstrap.sh": {
+          "content": {
+            "Fn::Join": [
+              "\n",
+              [ "#!/usr/bin/env bash",
+                "wget http://apache-mirror.rbc.ru/pub/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz",
+                "tar xzf zookeeper-3.4.6.tar.gz",
+                "cp zookeeper-3.4.6/bin/zkServer.sh .",
+                "sed -i '/env bash/d' zkServer.sh",
+                "sed -i '/BASH_SOURCE-/ZOOBIN=`readlink $0`/g' zkServer.sh",
+                "cat /tmp/zkserver-head.txt zkServer.sh > zookeeper-3.4.6/bin/zkServer.sh",
+                "mv zookeeper-3.4.6 /opt",
+                "cp /opt/zookeeper-3.4.6/conf/zoo_sample.cfg /opt/zookeeper-3.4.6/conf/zoo.cfg",
+                "chmod a+w /opt/zookeeper-3.4.6/conf/zoo.cfg"
+              ]
+            ]
+          },
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        },
+        "/var/lib/zookeeper/myid": {
+          "content": "",
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        }
+      }
+    },
+    "install": {
+      "commands": {
+        "0": {
+          "command": "bash /tmp/bootstrap.sh"
+        }
+      }
+    }
+  }
+}
