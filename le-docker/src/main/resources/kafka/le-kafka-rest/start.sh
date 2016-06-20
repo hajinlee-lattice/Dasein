@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sed -i "s|{{CONSUMER_ID}}|$HOSTNAME|g" /etc/kafka-rest/kafka-rest.properties
+sed -i "s|{{CONSUMER_ID}}|$HOSTNAME-$(date +%s)|g" /etc/kafka-rest/kafka-rest.properties
 
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka-rest/kafka-rest.properties
 sed -i "s|{{SR_PROXY}}|$SR_PROXY|g" /etc/kafka-rest/kafka-rest.properties
