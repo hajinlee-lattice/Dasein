@@ -57,7 +57,7 @@ echo "provisioning ${KAFKA}-bkr1"
 docker run -d --name ${KAFKA}-bkr1 -h ${KAFKA}-bkr1 \
     --net ${KAFKA_NETWORK} \
     -e ZK_HOSTS=${ZK_HOSTS} \
-    -e ADVERTISE_IP=${KAFKA}-bkr1 \
+    -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
     -l cluster.name=${KAFKA} \
     -p ${BK_PORT}:9092 \
     latticeengines/kafka
@@ -68,7 +68,7 @@ do
     docker run -d --name ${KAFKA}-bkr${i} -h ${KAFKA}-bkr${i} \
         --net ${KAFKA_NETWORK} \
         -e ZK_HOSTS=${ZK_HOSTS} \
-        -e ADVERTISE_IP=${KAFKA}-bkr${i} \
+        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka
 done
@@ -81,7 +81,7 @@ do
     docker run -d --name ${KAFKA}-sr${i} -h ${KAFKA}-sr${i}\
         --net ${KAFKA_NETWORK} \
         -e ZK_HOSTS=${ZK_HOSTS} \
-        -e ADVERTISE_IP=${KAFKA}-sr${i} \
+        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-schema-registry
 
@@ -102,7 +102,13 @@ docker run -d --name ${KAFKA}-ha \
     -l cluster.name=${KAFKA} latticeengines/kafka-haproxy
 
 echo "provisioning kafka-manager: ${KAFKA}-mgr"
-docker run -d -p 9000:9000 -e ZK_HOSTS="${ZK_HOSTS}" --name ${KAFKA}-mgr --net ${KAFKA_NETWORK} latticeengines/kafka-manager
+docker run -d -p 9000:9000 \
+    -e ZK_HOSTS="${ZK_HOSTS}" \
+    --name ${KAFKA}-mgr \
+    -h ${KAFKA}-mgr \
+    --net ${KAFKA_NETWORK} \
+    -l cluster.name=${KAFKA} \
+    latticeengines/kafka-manager
 
 sleep 3
 docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"

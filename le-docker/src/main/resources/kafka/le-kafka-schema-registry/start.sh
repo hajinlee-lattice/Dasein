@@ -8,7 +8,7 @@ if [ -z "${ADVERTISE_IP}" ]; then
 	while [ -z "${ADVERTISE_IP}" ];
 	do
 	    echo "Attempt to get advertiser ip from external discover service ${DISCOVER_SERVICE}"
-	    ADVERTISE_IP=`curl -X GET ${DISCOVER_SERVICE}`
+	    ADVERTISE_IP=`curl -X GET ${DISCOVER_SERVICE}/advertiseip`
 	    echo "Got response \"${ADVERTISE_IP}\""
 	    sleep 3
 

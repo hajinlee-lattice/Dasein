@@ -8,11 +8,11 @@ if [ -z "${ADVERTISE_IP}" ]; then
 	while [ -z "${ADVERTISE_IP}" ];
 	do
 	    echo "Attempt to get advertiser ip from external discover service ${DISCOVER_SERVICE}"
-	    ADVERTISE_IP=`curl -X GET ${DISCOVER_SERVICE}`
+	    ADVERTISE_IP=`curl -X GET ${DISCOVER_SERVICE}/advertiseip`
 	    echo "Got response \"${ADVERTISE_IP}\""
 	    sleep 3
 
-	    ERROR=`echo $ADVERTISE_IP | grep "500 Internal Server Error"`
+	    ERROR=`echo $ADVERTISE_IP | grep "DOCTYPE HTML"`
 	    if [ -z "${ERROR}" ]; then
 	        echo "Great! there is no error."
 	    else
