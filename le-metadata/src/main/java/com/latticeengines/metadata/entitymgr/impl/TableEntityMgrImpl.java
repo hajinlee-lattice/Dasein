@@ -135,7 +135,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         final Table clone = TableUtils.clone(existing);
-        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_') + "_" + name);
+        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_'));
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
@@ -170,7 +170,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         final Table copy = TableUtils.clone(existing);
-        copy.setName("copy_" + UUID.randomUUID().toString().replace('-', '_') + "_" + name);
+        copy.setName("copy_" + UUID.randomUUID().toString().replace('-', '_'));
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
