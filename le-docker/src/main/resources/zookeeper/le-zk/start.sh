@@ -6,8 +6,8 @@ if [ -z ${ZK_CLUSTER_SIZE} ]; then
     ZK_CLUSTER_SIZE=3
 fi
 
-if [ -z ${ZK_CLUSTER} ]; then
-    ZK_CLUSTER=zookeeper
+if [ -z ${ZK_CLUSTER_NAME} ]; then
+    ZK_CLUSTER_NAME=zookeeper
 fi
 
 if [ -z "${DISCOVER_SERVICE}" ]; then
@@ -36,7 +36,7 @@ else
 	while [ -z "${QUORUM}" ];
 	do
 	    echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}"
-	    QUORUM=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER}?n=${ZK_CLUSTER_SIZE}`
+	    QUORUM=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}`
 	    echo "Got response \"${QUORUM}\""
 	    sleep 3
 
@@ -63,7 +63,7 @@ else
     while [ -z "${MY_ID}" ];
 	do
 	    echo "Attempt to get myid from external discover service ${DISCOVER_SERVICE}"
-	    MY_ID=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER}/myid`
+	    MY_ID=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid`
 	    echo "Got response \"${MY_ID}\""
 	    sleep 3
 

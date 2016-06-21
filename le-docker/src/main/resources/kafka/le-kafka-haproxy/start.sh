@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-if [ -z $KAFKA_CLUSTER ]; then
-	KAFKA_CLUSTER=kafka
+if [ -z $KAFKA_CLUSTER_NAME ]; then
+	KAFKA_CLUSTER_NAME=kafka
 fi
 
 if [ -z $SR_SERVER_PATTERN ]; then
-	SR_SERVER_PATTERN=${KAFKA_CLUSTER}-sr{i}
+	SR_SERVER_PATTERN=${KAFKA_CLUSTER_NAME}-sr{i}
 fi
 
 if [ -z $KR_SERVER_PATTERN ]; then
-	KR_SERVER_PATTERN=${KAFKA_CLUSTER}-rest{i}
+	KR_SERVER_PATTERN=${KAFKA_CLUSTER_NAME}-rest{i}
 fi
 
 if [ -z $NUM_SR_SERVER ]; then

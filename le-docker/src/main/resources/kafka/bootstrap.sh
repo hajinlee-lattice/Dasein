@@ -51,13 +51,15 @@ pushd ../zookeeper
 bash bootstrap.sh ${KAFKA} ${ZK_PORT} ${KAFKA_NETWORK}
 popd
 
+sleep 3
+
 ZK_HOSTS=${KAFKA}-zk1:2181,${KAFKA}-zk2:2181,${KAFKA}-zk3:2181
 
 echo "provisioning ${KAFKA}-bkr1"
 docker run -d --name ${KAFKA}-bkr1 -h ${KAFKA}-bkr1 \
     --net ${KAFKA_NETWORK} \
-    -e ZK_HOSTS=${ZK_HOSTS} \
-    -e ADVERTISE_IP=${KAFKA}-bkr1  \
+    -e KAFKA_CLUSTER_NAME=${KAFKA} \
+    -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
     -l cluster.name=${KAFKA} \
     -p ${BK_PORT}:9092 \
     latticeengines/kafka
@@ -67,8 +69,8 @@ do
     echo "provisioning ${KAFKA}-bkr${i}"
     docker run -d --name ${KAFKA}-bkr${i} -h ${KAFKA}-bkr${i} \
         --net ${KAFKA_NETWORK} \
-        -e ZK_HOSTS=${ZK_HOSTS} \
-        -e ADVERTISE_IP=${KAFKA}-bkr${i}  \
+        -e KAFKA_CLUSTER_NAME=${KAFKA} \
+        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka
 done
@@ -80,15 +82,16 @@ do
     echo "provisioning ${KAFKA}-sr$i"
     docker run -d --name ${KAFKA}-sr${i} -h ${KAFKA}-sr${i}\
         --net ${KAFKA_NETWORK} \
-        -e ZK_HOSTS=${ZK_HOSTS} \
-        -e ADVERTISE_IP=${KAFKA}-sr${i}  \
+        -e KAFKA_CLUSTER_NAME=${KAFKA} \
+        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-schema-registry
 
     echo "provisioning ${KAFKA}-rest${i}"
     docker run -d --name ${KAFKA}-rest${i} -h ${KAFKA}-rest${i} \
         --net ${KAFKA_NETWORK} \
-        -e ZK_HOSTS=${ZK_HOSTS} \
+        -e KAFKA_CLUSTER_NAME=${KAFKA} \
+        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
         -e SR_PROXY=http://${KAFKA}-proxy:9022 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-rest
@@ -103,7 +106,7 @@ docker run -d --name ${KAFKA}-ha \
 
 echo "provisioning kafka-manager: ${KAFKA}-mgr"
 docker run -d -p 9000:9000 \
-    -e ZK_HOSTS="${ZK_HOSTS}" \
+    -e ZK_HOSTS="localhost:2181" \
     --name ${KAFKA}-mgr \
     -h ${KAFKA}-mgr \
     --net ${KAFKA_NETWORK} \
