@@ -57,7 +57,7 @@ echo "provisioning ${KAFKA}-bkr1"
 docker run -d --name ${KAFKA}-bkr1 -h ${KAFKA}-bkr1 \
     --net ${KAFKA_NETWORK} \
     -e ZK_HOSTS=${ZK_HOSTS} \
-    -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
+    -e ADVERTISE_IP=${KAFKA}-bkr1  \
     -l cluster.name=${KAFKA} \
     -p ${BK_PORT}:9092 \
     latticeengines/kafka
@@ -68,7 +68,7 @@ do
     docker run -d --name ${KAFKA}-bkr${i} -h ${KAFKA}-bkr${i} \
         --net ${KAFKA_NETWORK} \
         -e ZK_HOSTS=${ZK_HOSTS} \
-        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
+        -e ADVERTISE_IP=${KAFKA}-bkr${i}  \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka
 done
@@ -81,7 +81,7 @@ do
     docker run -d --name ${KAFKA}-sr${i} -h ${KAFKA}-sr${i}\
         --net ${KAFKA_NETWORK} \
         -e ZK_HOSTS=${ZK_HOSTS} \
-        -e DISCOVER_SERVICE=http://${KAFKA}-discover:5000 \
+        -e ADVERTISE_IP=${KAFKA}-sr${i}  \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-schema-registry
 
