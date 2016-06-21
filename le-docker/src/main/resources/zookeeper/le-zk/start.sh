@@ -6,10 +6,6 @@ if [ -z ${ZK_CLUSTER_SIZE} ]; then
     ZK_CLUSTER_SIZE=3
 fi
 
-if [ -z ${ZK_CLUSTER_NAME} ]; then
-    ZK_CLUSTER_NAME=zookeeper
-fi
-
 if [ -z "${DISCOVER_SERVICE}" ]; then
 
     echo $MY_ID > /var/lib/zookeeper/myid
@@ -28,16 +24,48 @@ if [ -z "${DISCOVER_SERVICE}" ]; then
 
 else
 
-    if [ -z "${MY_ID}" ]; then
-        echo "Must provid either MY_ID or DISCOVER_SERVICE!"
+    if [ -z "${ZK_CLUSTER_NAME}" ]; then
+        echo "Must provide KAFKA_CLUSTER_NAME"
         exit -1
     fi
+
+    if [ "${RETRIEVE_INTERNAL_ADDR}" == "true" ]; then
+
+        SERVICE_ADDR=""
+        while [ -z "${SERVICE_ADDR}" ];
+        do
+            echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/internal_addr"
+            SERVICE_ADDR=`curl -X GET ${DISCOVER_SERVICE}/internal_addr`
+            echo "Got response \"${SERVICE_ADDR}\""
+            sleep 3
+
+            ERROR=`echo $SERVICE_ADDR | grep "500 Internal Server Error"`
+            if [ -z "${ERROR}" ]; then
+                echo "Great! there is no error."
+            else
+                echo "Error:\n${ERROR}"
+                SERVICE_ADDR=""
+                continue;
+            fi
+            if [ -z "${SERVICE_ADDR}" ]; then
+                continue
+            fi
+        done
+        echo "SERVICE_ADDR=${SERVICE_ADDR}"
+
+    else
+
+        SERVICE_ADDR=$DISCOVER_SERVICE
+
+    fi
+
+    echo using service address $SERVICE_ADDR
 
     QUORUM=""
 	while [ -z "${QUORUM}" ];
 	do
-	    echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}"
-	    QUORUM=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}`
+	    echo "Attempt to get quorum from external discover service ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}"
+	    QUORUM=`curl -X GET ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}`
 	    echo "Got response \"${QUORUM}\""
 	    sleep 3
 
@@ -63,8 +91,8 @@ else
     MY_ID=""
     while [ -z "${MY_ID}" ];
 	do
-	    echo "Attempt to get myid from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid"
-	    MY_ID=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid`
+	    echo "Attempt to get myid from external discover service ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}/myid"
+	    MY_ID=`curl -X GET ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}/myid`
 	    echo "Got response \"${MY_ID}\""
 	    sleep 3
 

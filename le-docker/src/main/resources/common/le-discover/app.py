@@ -9,6 +9,11 @@ master_lock = RLock()
 
 quorum_map = {}
 
+@app.route("/internal_addr")
+def expose_internal_addr():
+    with open('/etc/internaladdr.txt', 'r') as f:
+        return f.read()
+
 @app.route("/advertiseip")
 def get_advertise_ip():
     return request.remote_addr
@@ -31,6 +36,13 @@ def get_myid_in_quorum(quorum_name):
         quorum = quorum_map[quorum_name]
         if host in quorum:
             return "%d" % quorum[host]
+    return ""
+
+@app.route("/quorums/<quorum_name>/zkhosts")
+def get_zkhosts_in_quorum(quorum_name):
+    if quorum_name in quorum_map:
+        quorum = quorum_map[quorum_name]
+        return print_zkhosts(quorum)
     return ""
 
 def acquire_lock(quorum_name):
@@ -73,6 +85,9 @@ def register_quorum_internal(quorum_name, host):
 
 def print_quorum(quorum):
     return '\n'.join("server.%d=%s:2888:3888" % (i, h) for h, i in quorum.items())
+
+def print_zkhosts(quorum):
+    return ','.join("%s:2181" % h for h in quorum.keys())
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
