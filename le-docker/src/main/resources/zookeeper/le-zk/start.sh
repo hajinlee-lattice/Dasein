@@ -35,7 +35,7 @@ else
     QUORUM=""
 	while [ -z "${QUORUM}" ];
 	do
-	    echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}"
+	    echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}"
 	    QUORUM=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}`
 	    echo "Got response \"${QUORUM}\""
 	    sleep 3
@@ -62,7 +62,7 @@ else
     MY_ID=""
     while [ -z "${MY_ID}" ];
 	do
-	    echo "Attempt to get myid from external discover service ${DISCOVER_SERVICE}"
+	    echo "Attempt to get myid from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid"
 	    MY_ID=`curl -X GET ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid`
 	    echo "Got response \"${MY_ID}\""
 	    sleep 3

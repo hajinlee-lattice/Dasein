@@ -10,7 +10,7 @@ else
     ADVERTISE_IP=""
     while [ -z "${ADVERTISE_IP}" ];
 	do
-	    echo "Attempt to get advertiser ip from external discover service ${DISCOVER_SERVICE}"
+	    echo "Attempt to get advertiser ip from external discover service ${DISCOVER_SERVICE}/advertiseip"
 	    ADVERTISE_IP=`curl -X GET ${DISCOVER_SERVICE}/advertiseip`
 	    echo "Got response \"${ADVERTISE_IP}\""
 	    sleep 3
