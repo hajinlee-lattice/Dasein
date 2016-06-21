@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.mbean;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
@@ -106,6 +107,7 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
         executor.setMaxPoolSize(maxPoolSize);
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         dlOrchestrationJobTaskExecutor = executor;
     }

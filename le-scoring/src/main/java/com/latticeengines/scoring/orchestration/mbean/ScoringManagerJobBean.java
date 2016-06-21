@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.orchestration.mbean;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
@@ -66,15 +67,13 @@ public class ScoringManagerJobBean implements QuartzJobBean {
         executor.setMaxPoolSize(maxPoolSize);
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         scoringProcessorExecutor = executor;
     }
 
     @Override
     public Callable<Boolean> getCallable() {
-//        ScoringProcessorCallable scoringProcessorCallable = (ScoringProcessorCallable) appCtx
-//                .getBean("scoringProcessor");
-
         ScoringManagerCallable.Builder builder = new ScoringManagerCallable.Builder();
         builder.cleanUpInterval(cleanUpInterval)
                 .customerBaseDir(customerBaseDir)
@@ -86,7 +85,6 @@ public class ScoringManagerJobBean implements QuartzJobBean {
                 .scoringProcessorExecutor(scoringProcessorExecutor)
                 .yarnConfiguration(yarnConfiguration)
                 .applicationContext(appCtx);
-                //.scoringProcessorCallable(scoringProcessorCallable);
 
         return new ScoringManagerCallable(builder);
     }

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.mbean;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
@@ -59,6 +60,7 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
         executor.setMaxPoolSize(maxPoolSize);
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         modelSummaryDownloadExecutor = executor;
     }
