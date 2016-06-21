@@ -132,9 +132,11 @@ html input[disabled] {
     color: #b7b7b7;
     &:hover {
       background-color: #e7e7e7;
+      color: #b7b7b7;
     }
     &:active {
       background-color: #e7e7e7;
+      color: #b7b7b7;
     }
   }
 }
@@ -259,6 +261,9 @@ Use this structure for angled buttons:
     -moz-transform: skewX(20deg);
     transform: skewX(20deg);
     border-left: none;
+  }
+  &:hover {
+    cursor: default;
   }
   a {
     display: inline-block;

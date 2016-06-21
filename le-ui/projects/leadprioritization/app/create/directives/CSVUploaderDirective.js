@@ -33,7 +33,7 @@ angular
                     compressed: true,
                     csvFileName: null,
                     csvFileDisplayName: '',
-                    message: 'Choose a CSV file',
+                    message: 'Example: us-enterprise-model.csv',
                     params: vm_form.params || {}
                 },
                 element = this.element = $element[0];
