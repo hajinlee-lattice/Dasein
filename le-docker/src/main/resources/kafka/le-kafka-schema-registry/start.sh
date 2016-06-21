@@ -6,17 +6,7 @@ then
         echo "Must provide either ADVERTISE_IP or DISCOVER_SERVICE!"
         exit -1
     fi
-    if [ -z "${ZK_HOSTS}" ]; then
-        echo "Must provide either ZK_HOSTS or DISCOVER_SERVICE!"
-        exit -1
-    fi
-
 else
-    if [ -z "${KAFKA_CLUSTER_NAME}" ]; then
-        echo "Must provide KAFKA_CLUSTER_NAME!"
-        exit -1
-    fi
-
     ADVERTISE_IP=""
     while [ -z "${ADVERTISE_IP}" ];
 	do
@@ -38,29 +28,6 @@ else
 	    fi
 	done
 	echo "ADVERTISE_IP=${ADVERTISE_IP}"
-
-	ZK_HOSTS=""
-    while [ -z "${ZK_HOSTS}" ];
-	do
-	    echo "Attempt to get advertiser ip from external discover service ${ZK_HOSTS}"
-	    ZK_HOSTS=`curl -X GET ${DISCOVER_SERVICE}/quorums/${KAFKA_CLUSTER_NAME}/zkhosts`
-	    echo "Got response \"${ZK_HOSTS}\""
-	    sleep 3
-
-	    ERROR=`echo $ZK_HOSTS | grep "DOCTYPE HTML"`
-	    if [ -z "${ERROR}" ]; then
-	        echo "Great! there is no error."
-	    else
-	        echo "Error:\n${ERROR}"
-	        ZK_HOSTS=""
-	        continue;
-	    fi
-	    if [ -z "${ZK_HOSTS}" ]; then
-	        continue
-	    fi
-	done
-	echo "ZK_HOSTS=${ZK_HOSTS}"
-
 fi
 
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/schema-registry/schema-registry.properties
