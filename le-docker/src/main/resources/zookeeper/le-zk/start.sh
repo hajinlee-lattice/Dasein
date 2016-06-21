@@ -28,10 +28,11 @@ if [ -z "${DISCOVER_SERVICE}" ]; then
 
 else
 
-    if [ -z "${DISCOVER_SERVICE}" ]; then
+    if [ -z "${MY_ID}" ]; then
         echo "Must provid either MY_ID or DISCOVER_SERVICE!"
         exit -1
     fi
+
     QUORUM=""
 	while [ -z "${QUORUM}" ];
 	do
