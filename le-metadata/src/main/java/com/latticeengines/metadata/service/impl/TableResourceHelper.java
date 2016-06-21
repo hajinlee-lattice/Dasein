@@ -95,6 +95,13 @@ public class TableResourceHelper {
         return mdService.cloneTable(space, tableName);
     }
 
+    public Table copyTable(String customerSpace, //
+            String targetCustomerSpace, String tableName, HttpServletRequest request) {
+        log.info(String.format("copyTable(%s(", tableName));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.copyTable(space, CustomerSpace.parse(targetCustomerSpace), tableName);
+    }
+
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
             @RequestBody ModelingMetadata metadata) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);

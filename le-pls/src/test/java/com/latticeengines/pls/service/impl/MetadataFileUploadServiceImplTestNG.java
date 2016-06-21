@@ -1,5 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -8,6 +12,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -21,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MetadataFileUploadService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
     
@@ -32,6 +38,9 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        MetadataProxy proxy = mock(MetadataProxy.class);
+        when(proxy.createArtifact(anyString(), anyString(), anyString(), any(Artifact.class))).thenReturn(true);
+        ReflectionTestUtils.setField(metadataFileUploadService, "metadataProxy", proxy);
         setupMarketoEloquaTestEnvironment();
         switchToSuperAdmin();
     }

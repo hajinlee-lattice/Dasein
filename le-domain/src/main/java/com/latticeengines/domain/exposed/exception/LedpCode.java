@@ -204,6 +204,7 @@ public enum LedpCode {
     LEDP_18108("Could not find transformation group name from model {0}."), //
     LEDP_18109("Problem reading csv file header: {0}"), //
     LEDP_18110("Expected at least 1 record. Instead found 0"), //
+    LEDP_18111("Copying Model {0} from tenant {1} to tenant {2} failed"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -380,11 +381,13 @@ public enum LedpCode {
     LEDP_28017("Workflow execution to be restarted does not exist:{0}"), //
     LEDP_28018("Workflow execution {0} cannot be restarted since in non-terminated state:{1}"), //
     LEDP_28019("Problem modeling for PMML:{0}."), //
-    LEDP_28020("Could not find artifact with name {0}."), //
+    LEDP_28020("Module {0} must have a PMML file."), //
     LEDP_28021("Could not get customerspace from workflow configuration."), //
     LEDP_28022("Could not get workflow job from null applicationId."), //
     LEDP_28023("Could not find workflow job by applicationId {0}."), //
     LEDP_28024("Received Null propdata match status for this root operation uid: {0}."), //
+    LEDP_28025("PMML file {0} not found for module {1}."), //
+    LEDP_28026("Pivot file {0} not found for module {1}."), //
 
     // le-dellebi
     LEDP_29000(

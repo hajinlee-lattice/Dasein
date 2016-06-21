@@ -25,11 +25,16 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     private TableTypeHolder tableTypeHolder;
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..))")
-    public void allMethods(JoinPoint joinPoint) {
+    public void allTableMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
         log.info("Table type = " + tableTypeHolder.getTableType());
         sessionFactory.getCurrentSession().enableFilter("typeFilter").setParameter("typeFilterId", //
                 tableTypeHolder.getTableType().getCode());
 
+    }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ArtifactEntityMgrImpl.*(..))")
+    public void allArtifactMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

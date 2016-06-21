@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.service.MetadataFileUploadService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 
@@ -32,6 +33,9 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
     
     @Autowired
     private Configuration yarnConfiguration;
+    
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public String uploadFile(String urlToken, String moduleName, String artifactName, InputStream inputStream) {
@@ -49,6 +53,10 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
                 throw new LedpException(LedpCode.LEDP_18091, new String[] { artifactType.getCode(), artifactName, moduleName });
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, hdfsPath);
+            Artifact artifact = new Artifact();
+            artifact.setPath(hdfsPath);
+            artifact.setArtifactType(artifactType);
+            metadataProxy.createArtifact(customerSpace.toString(), moduleName, artifactName, artifact);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +100,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
                 org.apache.hadoop.fs.Path hadoopPath = new org.apache.hadoop.fs.Path(filePath);
                 artifact.setName(hadoopPath.getName());
                 artifact.setPath(org.apache.hadoop.fs.Path.getPathWithoutSchemeAndAuthority(hadoopPath).toString());
-                artifact.artifactType = artifactType;
+                artifact.setArtifactType(artifactType);
                 artifacts.add(artifact);
             }
         } catch (IOException e) {

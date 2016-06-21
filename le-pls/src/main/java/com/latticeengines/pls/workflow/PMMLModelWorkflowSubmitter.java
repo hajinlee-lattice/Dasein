@@ -26,23 +26,27 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
-    public ApplicationId submit(String modelName, String moduleName, String pmmlArtifactName, String pivotArtifactName) {
+    public ApplicationId submit(String modelName, String moduleName, String pivotFileName, String pmmlFileName) {
         Map<String, Artifact> pmmlArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
                 ArtifactType.PMML));
         Map<String, Artifact> pivotArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
                 ArtifactType.PivotMapping));
+        
+        if (pmmlArtifacts.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_28020, new String[] { moduleName });
+        }
 
-        Artifact pmmlArtifact = pmmlArtifacts.get(pmmlArtifactName);
-        Artifact pivotArtifact = pivotArtifacts.get(pivotArtifactName);
-
+        Artifact pmmlArtifact = pmmlArtifacts.get(pmmlFileName);
+        Artifact pivotArtifact = pivotArtifacts.get(pivotFileName);
+        
         if (pmmlArtifact == null) {
-            throw new LedpException(LedpCode.LEDP_28020, new String[] { pmmlArtifactName });
+            throw new LedpException(LedpCode.LEDP_28025, new String[] { pmmlFileName, moduleName });
         }
-
-        if (pivotArtifact == null) {
-            throw new LedpException(LedpCode.LEDP_28020, new String[] { pivotArtifactName });
+        
+        if (pivotFileName != null && pivotArtifact == null) {
+            throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
         }
-
+        
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "pmmlModelWorkflow");
 
@@ -54,8 +58,9 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName(modelName) //
                 .pmmlArtifactPath(pmmlArtifact.getPath()) //
-                .pivotArtifactPath(pivotArtifact.getPath()) //
+                .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .inputProperties(inputProperties) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .build();
         return workflowJobService.submit(configuration);
     }

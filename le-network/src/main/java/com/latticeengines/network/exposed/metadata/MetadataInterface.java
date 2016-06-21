@@ -27,4 +27,6 @@ public interface MetadataInterface {
     void updateTable(String customerSpace, String tableName, Table table);
 
     Table cloneTable(String customerSpace, String tableName);
+    
+    Table copyTable(String sourceTenantId, String targetCustomerSpace, String tableName);
 }

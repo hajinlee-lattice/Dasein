@@ -141,4 +141,9 @@ public class MetadataServiceImpl implements MetadataService {
     public Table cloneTable(CustomerSpace customerSpace, String tableName) {
         return tableEntityMgr.clone(tableName);
     }
+
+    @Override
+    public Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName) {
+        return tableEntityMgr.copy(tableName, targetCustomerSpace);
+    }
 }

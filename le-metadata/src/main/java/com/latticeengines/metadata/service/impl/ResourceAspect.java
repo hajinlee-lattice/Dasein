@@ -32,6 +32,11 @@ public class ResourceAspect {
         setTableType(joinPoint, TableType.DATATABLE);
     }
     
+    @Before("execution(* com.latticeengines.metadata.controller.ArtifactResource.*(..))")
+    public void allMethodsForArtifactResource(JoinPoint joinPoint) {
+        checkHeader(joinPoint);
+    }
+
     private void checkHeader(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         

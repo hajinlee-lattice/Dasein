@@ -31,4 +31,6 @@ public interface MetadataService {
     Table getImportTable(CustomerSpace customerSpace, String name);
 
     Table cloneTable(CustomerSpace customerSpace, String tableName);
+
+    Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName);
 }

@@ -17,6 +17,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -33,6 +34,7 @@ import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("tableEntityMgr")
@@ -60,6 +62,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private HiveTableDao hiveTableDao;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     private Configuration yarnConfiguration = new Configuration();
 
@@ -130,7 +135,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         final Table clone = TableUtils.clone(existing);
-        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_'));
+        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_') + "_" + name);
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
@@ -154,6 +159,43 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             }
         }
         return clone;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Table copy(String name, final CustomerSpace targetCustomerSpace) {
+        Table existing = findByName(name);
+        if (existing == null) {
+            throw new RuntimeException(String.format("No such table with name %s", name));
+        }
+
+        final Table copy = TableUtils.clone(existing);
+        copy.setName("copy_" + UUID.randomUUID().toString().replace('-', '_') + "_" + name);
+
+        DatabaseUtils.retry("createTable", new Closure() {
+            @Override
+            public void execute(Object input) {
+                Tenant t = tenantEntityMgr.findByTenantId(targetCustomerSpace.toString());
+                MultiTenantContext.setTenant(t);
+                copy.setTenant(t);
+                create(TableUtils.clone(copy));
+            }
+        });
+
+        if (copy.getExtracts().size() > 0) {
+            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace);
+
+            Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, copy));
+            Path destPath = tablesPath.append(copy.getName());
+            log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
+            try {
+                HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
+                        destPath.toString()), e);
+            }
+        }
+        return copy;
     }
 
     private static void inflateTable(Table table) {

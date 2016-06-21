@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface TableEntityMgr {
@@ -15,4 +16,6 @@ public interface TableEntityMgr {
     void deleteByName(String name);
 
     Table clone(String name);
+
+    Table copy(String name, CustomerSpace targetCustomerSpace);
 }

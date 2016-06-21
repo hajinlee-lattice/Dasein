@@ -19,8 +19,18 @@ public class SetTenantAspect {
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.metadata.service.impl.MetadataServiceImpl.*(..))")
-    public void allMethods(JoinPoint joinPoint) {
+    public void allMethodsMetadataService(JoinPoint joinPoint) {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace.toString());
+    }
+    
+    @Before("execution(* com.latticeengines.metadata.service.impl.ArtifactServiceImpl.*(..))")
+    public void allMethodsArtifactService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace);
+    }
+    
+    private void setSecurityContext(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant == null) {
             throw new RuntimeException(

@@ -6,12 +6,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.network.exposed.metadata.ArtifactInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface {
+public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -85,6 +87,13 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     }
 
     @Override
+    public Table copyTable(String sourceTenantId, String tableName, String targetTenantId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/copy?targetcustomerspace={targetCustomerSpace}", sourceTenantId,
+                tableName, targetTenantId);
+        return post("copyTable", url, null, Table.class);
+    }
+
+    @Override
     public List<String> getTableNames(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables", customerSpace);
         String[] importTableNames = get("getTables", url, String[].class);
@@ -107,6 +116,20 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
             }
         }
         return tables;
+    }
+
+    @Override
+    public Boolean createArtifact(String customerSpace, String moduleName, String artifactName, Artifact artifact) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}/artifacts/{artifactName}", //
+                customerSpace, moduleName, artifactName);
+        return post("createArtifact", url, artifact, Boolean.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Artifact> getArtifacts(String customerSpace, String moduleName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
+        return get("getArtifacts", url, List.class);
     }
 
 }

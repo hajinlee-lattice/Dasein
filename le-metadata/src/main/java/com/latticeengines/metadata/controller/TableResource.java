@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,6 +87,16 @@ public class TableResource {
             @PathVariable String tableName, //
             HttpServletRequest request) {
         return tableResourceHelper.cloneTable(customerSpace, tableName, request);
+    }
+
+    @RequestMapping(value = "/tables/{tableName}/copy", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Copy table and underlying extracts")
+    public Table copyTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            @RequestParam("targetcustomerspace") String targetCustomerSpace, //
+            HttpServletRequest request) {
+        return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName, request);
     }
 
     @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")
