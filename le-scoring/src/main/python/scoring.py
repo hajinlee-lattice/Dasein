@@ -25,6 +25,9 @@ COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
 PIVOT_SCRIPT_NAME="pivotstep.py"
 EXPORT_DF_SCRIPT_NAME="exportdfstep.py"
 ASSIGNCONVERSIONRATE_SCRIPT_NAME="assignconversionratetocategoricalcolumns.py"
+REMEDIATEDATARULESSTEP_SCRIPT_NAME="remediatedatarulesstep.py"
+WEBHDFS_SCRIPT_NAME="webhdfs.py"
+
 
 def main(argv):
     scoringFiles = [SCORING_SCRIPT_NAME,
@@ -45,7 +48,9 @@ def main(argv):
                     COLUMNTYPE_CONVERSION_SCRIPT_NAME,
                     PIVOT_SCRIPT_NAME,
                     EXPORT_DF_SCRIPT_NAME,
-                    ASSIGNCONVERSIONRATE_SCRIPT_NAME]
+                    ASSIGNCONVERSIONRATE_SCRIPT_NAME,
+                    REMEDIATEDATARULESSTEP_SCRIPT_NAME,
+                    WEBHDFS_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
