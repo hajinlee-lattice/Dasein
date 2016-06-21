@@ -3,15 +3,20 @@
 if [ -z "${DISCOVER_SERVICE}" ];
 then
     if [ -z "${ADVERTISE_IP}" ]; then
-        echo "Must provid either ADVERTISE_IP or DISCOVER_SERVICE!"
+        echo "Must provide either ADVERTISE_IP or DISCOVER_SERVICE!"
         exit -1
     fi
     if [ -z "${ZK_HOSTS}" ]; then
-        echo "Must provid either ZK_HOSTS or DISCOVER_SERVICE!"
+        echo "Must provide either ZK_HOSTS or DISCOVER_SERVICE!"
         exit -1
     fi
 
 else
+    if [ -z "${KAFKA_CLUSTER_NAME}" ]; then
+        echo "Must provide KAFKA_CLUSTER_NAME!"
+        exit -1
+    fi
+
     ADVERTISE_IP=""
     while [ -z "${ADVERTISE_IP}" ];
 	do
