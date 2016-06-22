@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.security.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 
 @Entity
 @Table(name = "SECURITY_IDENTITY_PROVIDER")

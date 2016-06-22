@@ -4,12 +4,14 @@ import java.util.Collection;
 
 import javax.mail.Multipart;
 
+import com.latticeengines.domain.exposed.security.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 
 public interface EmailService {
 
-    void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients);
+    void sendSimpleEmail(String subject, Object content, String contentType,
+            Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
@@ -50,4 +52,7 @@ public interface EmailService {
     void sendPlsScoreErrorEmail(User user, String hostport);
 
     void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
+
+    void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username,
+            String password, String emailAddress, EmailSettings settings);
 }

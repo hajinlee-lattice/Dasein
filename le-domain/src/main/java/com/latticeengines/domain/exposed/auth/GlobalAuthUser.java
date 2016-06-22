@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.security;
+package com.latticeengines.domain.exposed.auth;
 
 import java.util.Date;
 import java.util.List;

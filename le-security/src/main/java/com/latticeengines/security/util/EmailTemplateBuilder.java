@@ -63,7 +63,8 @@ public class EmailTemplateBuilder {
         PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
         PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
-        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html");
+        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"),
+        SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html");
 
         private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;

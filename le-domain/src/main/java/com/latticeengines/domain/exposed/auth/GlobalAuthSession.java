@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.security;
+package com.latticeengines.domain.exposed.auth;
 
 import java.util.Date;
 
@@ -18,27 +18,26 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalTicket")
-public class GlobalAuthTicket implements HasPid {
-
+@Table(name = "GlobalSession")
+public class GlobalAuthSession implements HasPid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
-    @Column(name = "GlobalTicket_ID", unique = true, nullable = false)
+    @Column(name = "GlobalSession_ID", nullable = false)
     private Long pid;
 
-    @JsonProperty("ticket")
-    @Column(name = "Ticket", nullable = false)
-    private String ticket;
+    @JsonProperty("ticket_id")
+    @Column(name = "Ticket_ID", nullable = false)
+    private Long ticketId;
 
     @JsonProperty("user_id")
     @Column(name = "User_ID", nullable = false)
     private Long userId;
 
-    @JsonProperty("last_access_date")
-    @Column(name = "Last_Access_Date", nullable = false)
-    private Date lastAccessDate;
+    @JsonProperty("tenant_id")
+    @Column(name = "Tenant_ID", nullable = false)
+    private Long tenantId;
 
     @JsonProperty("creation_date")
     @Column(name = "Creation_Date", nullable = false)
@@ -48,7 +47,7 @@ public class GlobalAuthTicket implements HasPid {
     @Column(name = "Last_Modification_Date", nullable = false)
     private Date lastModificationDate;
 
-    public GlobalAuthTicket() {
+    public GlobalAuthSession() {
         creationDate = new Date(System.currentTimeMillis());
         lastModificationDate = new Date(System.currentTimeMillis());
     }
@@ -63,12 +62,12 @@ public class GlobalAuthTicket implements HasPid {
         this.pid = pid;
     }
 
-    public String getTicket() {
-        return ticket;
+    public Long getTicketId() {
+        return ticketId;
     }
 
-    public void setTicket(String ticket) {
-        this.ticket = ticket;
+    public void setTicketId(Long ticketId) {
+        this.ticketId = ticketId;
     }
 
     public Long getUserId() {
@@ -79,12 +78,12 @@ public class GlobalAuthTicket implements HasPid {
         this.userId = userId;
     }
 
-    public Date getLastAccessDate() {
-        return lastAccessDate;
+    public Long getTenantId() {
+        return tenantId;
     }
 
-    public void setLastAccessDate(Date lastAccessDate) {
-        this.lastAccessDate = lastAccessDate;
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Date getCreationDate() {

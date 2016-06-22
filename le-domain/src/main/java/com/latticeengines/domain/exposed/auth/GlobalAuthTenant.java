@@ -1,43 +1,53 @@
-package com.latticeengines.domain.exposed.security;
+package com.latticeengines.domain.exposed.auth;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalSession")
-public class GlobalAuthSession implements HasPid {
+@Table(name = "GlobalTenant")
+public class GlobalAuthTenant implements HasName, HasId<String>, HasPid {
+
+    @JsonProperty("deployment_id")
+    @Column(name = "Deployment_ID", nullable = true, unique = true)
+    private String id;
+
+    @JsonProperty("display_name")
+    @Column(name = "Display_Name", nullable = true)
+    private String name;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
-    @Column(name = "GlobalSession_ID", nullable = false)
+    @Column(name = "GlobalTenant_ID", nullable = false, unique = true)
     private Long pid;
 
-    @JsonProperty("ticket_id")
-    @Column(name = "Ticket_ID", nullable = false)
-    private Long ticketId;
-
-    @JsonProperty("user_id")
-    @Column(name = "User_ID", nullable = false)
-    private Long userId;
-
-    @JsonProperty("tenant_id")
-    @Column(name = "Tenant_ID", nullable = false)
-    private Long tenantId;
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "globalAuthTenant")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<GlobalAuthUserTenantRight> gaUserTenantRights;
 
     @JsonProperty("creation_date")
     @Column(name = "Creation_Date", nullable = false)
@@ -47,7 +57,7 @@ public class GlobalAuthSession implements HasPid {
     @Column(name = "Last_Modification_Date", nullable = false)
     private Date lastModificationDate;
 
-    public GlobalAuthSession() {
+    public GlobalAuthTenant() {
         creationDate = new Date(System.currentTimeMillis());
         lastModificationDate = new Date(System.currentTimeMillis());
     }
@@ -60,30 +70,35 @@ public class GlobalAuthSession implements HasPid {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+
     }
 
-    public Long getTicketId() {
-        return ticketId;
+    @Override
+    public String getId() {
+        return id;
     }
 
-    public void setTicketId(Long ticketId) {
-        this.ticketId = ticketId;
+    @Override
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    @Override
+    public String getName() {
+        return name;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Long getTenantId() {
-        return tenantId;
+    public List<GlobalAuthUserTenantRight> getUserTenantRights() {
+        return gaUserTenantRights;
     }
 
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public void setUserTenantRights(List<GlobalAuthUserTenantRight> gaUserTenantRights) {
+        this.gaUserTenantRights = gaUserTenantRights;
     }
 
     public Date getCreationDate() {

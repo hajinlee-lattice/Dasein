@@ -96,10 +96,6 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertTrue(ticket.getTenants().size() >= 2);
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);
-        Assert.assertTrue(logs.get(2).contains(
-                "Metrics for API=GlobalAuthenticationService.authenticateUser(..) ElapsedTime="));
-        Assert.assertTrue(logs.get(2).contains("Track Id="));
-        Assert.assertTrue(logs.get(2).contains("Ticket Id="));
 
     }
 }
