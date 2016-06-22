@@ -30,6 +30,11 @@ class AutoScalingGroup(Resource):
             }
         }
 
+    def set_min_size(self, min_size):
+        self._template["Properties"]["MinSize"] = min_size
+        self._template["UpdatePolicy"]["MinInstancesInService"] = min_size
+        return self
+
     def add_pool(self, launchconfig):
         assert isinstance(launchconfig, LaunchConfiguration)
         self._merge_into_attr("Properties", { "LaunchConfigurationName" : launchconfig.ref() })
@@ -60,10 +65,24 @@ class LaunchConfiguration(Resource):
             "Metadata" : {
                 "AWS::CloudFormation::Init" : {
                     "config" : {
-
                         "commands" : {
-                            "01_add_instance_to_cluster" : {
-                                "command" : { "Fn::Join": [ "", [ "#!/bin/bash\n", "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config" ] ] }
+                            "01_save_ip" : {
+                                "command" : { "Fn::Join": [ "\n", [
+                                    "#!/bin/bash",
+                                    "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
+                                    "echo $ADDR >> /etc/internaladdr.txt",
+                                    "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
+                                    "echo $PUBADDR >> /etc/externaladdr.txt"
+                                ] ] }
+                            },
+                            "02_add_instance_to_cluster" : {
+                                "command" : { "Fn::Join": [ "", [
+                                    "#!/bin/bash\n",
+                                    "rm -rf /etc/ecs/ecs.config\n",
+                                    "touch /etc/ecs/ecs.config\n",
+                                    "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
+                                    "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
+                                ] ] }
                             }
                         },
 
@@ -83,7 +102,7 @@ class LaunchConfiguration(Resource):
                                     "[cfn-auto-reloader-hook]\n",
                                     "triggers=post.update\n",
                                     "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
-                                    "action=/opt/aws/bin/cfn-init -v ",
+                                    "action=/opt/aws/bin/cfn-init -v",
                                     "         --stack ", { "Ref" : "AWS::StackName" },
                                     "         --resource %s " % self.logical_id(),
                                     "         --region ", { "Ref" : "AWS::Region" }, "\n",
@@ -106,13 +125,14 @@ class LaunchConfiguration(Resource):
                 },
                 "InstanceType"   : { "Ref" : "InstanceType" },
                 "IamInstanceProfile": instanceprofile.ref(),
+                "InstanceMonitoring" : "true",
                 "KeyName"        : { "Ref" : "KeyName" },
                 "SecurityGroups" : [ { "Ref" : "SecurityGroupId" } ],
                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                     "#!/bin/bash -xe\n",
                     "yum install -y aws-cfn-bootstrap\n",
 
-                    "/opt/aws/bin/cfn-init -v ",
+                    "/opt/aws/bin/cfn-init -v",
                     "         --stack ", { "Ref" : "AWS::StackName" },
                     "         --resource %s " % self.logical_id(),
                     "         --region ", { "Ref" : "AWS::Region" }, "\n",
@@ -124,3 +144,7 @@ class LaunchConfiguration(Resource):
                 ]]}}
             }
         }
+
+    def set_metadata(self, metadata):
+        self._template["Metadata"] = metadata
+        return self

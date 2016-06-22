@@ -11,7 +11,7 @@ if [ -z "${DISCOVER_SERVICE}" ]; then
     echo $MY_ID > /var/lib/zookeeper/myid
 
     if [ -z ${ZK_HOST_PATTERN} ]; then
-        ZK_HOST_PATTERN="${ZK_CLUSTER}-zk{}"
+        ZK_HOST_PATTERN="${ZK_CLUSTER_NAME}-zk{}"
     fi
 
     for i in $(seq 1 ${ZK_CLUSTER_SIZE});
@@ -29,43 +29,24 @@ else
         exit -1
     fi
 
-    if [ "${RETRIEVE_INTERNAL_ADDR}" == "true" ]; then
-
-        SERVICE_ADDR=""
-        while [ -z "${SERVICE_ADDR}" ];
-        do
-            echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/internal_addr"
-            SERVICE_ADDR=`curl -X GET ${DISCOVER_SERVICE}/internal_addr`
-            echo "Got response \"${SERVICE_ADDR}\""
-            sleep 3
-
-            ERROR=`echo $SERVICE_ADDR | grep "500 Internal Server Error"`
-            if [ -z "${ERROR}" ]; then
-                echo "Great! there is no error."
-            else
-                echo "Error:\n${ERROR}"
-                SERVICE_ADDR=""
-                continue;
-            fi
-            if [ -z "${SERVICE_ADDR}" ]; then
-                continue
-            fi
-        done
-        echo "SERVICE_ADDR=${SERVICE_ADDR}"
-
-    else
-
-        SERVICE_ADDR=$DISCOVER_SERVICE
-
+    if [ -f /etc/internaladdr.txt ]; then
+        ADVERTISE_IP=`cat /etc/internaladdr.txt`
     fi
 
-    echo using service address $SERVICE_ADDR
+    echo "ADVERTISE_IP=${ADVERTISE_IP}"
+
+    if [ -z "${ADVERTISE_IP}" ]; then
+        echo "Must put advertis ip in /etc/internaladdr.txt"
+        exit -1
+    fi
 
     QUORUM=""
 	while [ -z "${QUORUM}" ];
 	do
-	    echo "Attempt to get quorum from external discover service ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}"
-	    QUORUM=`curl -X GET ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}`
+
+        echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}&ip=${ADVERTISE_IP}"
+        QUORUM=`curl -X GET -m 120 ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}\&ip=${ADVERTISE_IP}`
+
 	    echo "Got response \"${QUORUM}\""
 	    sleep 3
 
@@ -91,8 +72,10 @@ else
     MY_ID=""
     while [ -z "${MY_ID}" ];
 	do
-	    echo "Attempt to get myid from external discover service ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}/myid"
-	    MY_ID=`curl -X GET ${SERVICE_ADDR}/quorums/${ZK_CLUSTER_NAME}/myid`
+
+        echo "Attempt to get myid from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid?ip=${ADVERTISE_IP}"
+        MY_ID=`curl -X GET -m 120 ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}/myid?ip=${ADVERTISE_IP}`
+
 	    echo "Got response \"${MY_ID}\""
 	    sleep 3
 

@@ -1,5 +1,5 @@
-from cf.ec2 import EC2Instance
-from cf.stack import Stack
+from cf.module.ec2 import EC2Instance
+from cf.module.stack import Stack
 
 
 def test_template():

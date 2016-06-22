@@ -1,0 +1,37 @@
+{
+  "AWS::CloudFormation::Init": {
+    "configSets": {
+      "bootstrap": [
+        "install"
+      ]
+    },
+    "install": {
+      "files": {
+        "/var/lib/docker/docker.out": {
+          "content": "bootstrap",
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        }
+      },
+      "commands": {
+        "0": {
+          "command": "yum update -y"
+        },
+        "1": {
+          "command": "curl -sSL https://get.docker.com/ | sh"
+        },
+        "2": {
+          "command": "usermod -aG docker ec2-user"
+        },
+        "3": {
+          "command": "service cgconfig start"
+        },
+        "4": {
+          "command": "( docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock 2>&1 > /var/lib/docker/docker.out & ) & sleep 10 ;",
+          "test": "ps -axu | grep \"docker daemon\""
+        }
+      }
+    }
+  }
+}

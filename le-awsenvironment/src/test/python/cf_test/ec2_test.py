@@ -1,4 +1,4 @@
-from cf.ec2 import EC2Instance
+from cf.module.ec2 import EC2Instance
 
 def test_template():
     t = EC2Instance("EC2")

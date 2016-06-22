@@ -4,7 +4,7 @@ import os
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .ec2 import _ec2_mappings, _ec2_params, _ec2_security_group, SECURITY_GROUP, EC2Instance
+from .ec2 import _ec2_mappings, _ec2_params, EC2Instance
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
 
@@ -19,17 +19,9 @@ class Stack(Template):
         self.__ec2_params()
         self.__ec2_mappings()
 
-    def add_ec2(self, instance, create_sg=False):
+    def add_ec2(self, instance):
         assert isinstance(instance, EC2Instance)
         name = instance.logical_id()
-
-        # security group
-        if create_sg:
-            sg = _ec2_security_group()
-            data = {
-                SECURITY_GROUP: sg
-            }
-            self._merge_into_attr('Resources', data)
 
         # ec2 instance
         data = {
@@ -38,7 +30,7 @@ class Stack(Template):
         self._merge_into_attr('Resources', data)
 
         # output info
-        output = {
+        outputs = {
             name + "URL": {
                 "Description" : "URL for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ name, "PublicDnsName" ]}
@@ -52,16 +44,24 @@ class Stack(Template):
                 "Value" : { "Fn::GetAtt" : [ name, "PrivateIp" ]}
             }
         }
-        self._merge_into_attr('Outputs', output)
+        self.add_ouputs(outputs)
         return self
 
     def add_resource(self, resource):
         assert isinstance(resource, Resource)
-        self._merge_into_attr("Resources", {resource.logical_id(): resource.template()})
+
+        if isinstance(resource, EC2Instance):
+            self.add_ec2(resource)
+        else:
+            self._merge_into_attr("Resources", {resource.logical_id(): resource.template()})
 
     def add_resources(self, resources):
         for resource in resources:
             self.add_resource(resource)
+        return self
+
+    def add_ouputs(self, outputs):
+        self._merge_into_attr('Outputs', outputs)
         return self
 
     def add_params(self, params):

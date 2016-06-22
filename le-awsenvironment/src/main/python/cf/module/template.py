@@ -1,7 +1,7 @@
 import json
 import os
 
-TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template')
+TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'template')
 
 class Template:
     def __init__(self):

@@ -20,7 +20,7 @@ def expose_internal_addr():
         return ""
 
     with open('/etc/internaladdr.txt', 'r') as f:
-        return "http://%s:5000" % f.read()
+        return f.read()
 
 @app.route("/advertiseip")
 def get_advertise_ip():
@@ -28,18 +28,18 @@ def get_advertise_ip():
 
 @app.route("/quorums/<quorum_name>")
 def register_quorum_api(quorum_name):
-    host = request.args['ip'] if 'ip' in request.args else request.remote_addr
+    host = request.remote_addr
     quorum_size = int(request.args['n']) if 'n' in request.args else 3
     quorum = register_quorum_internal(quorum_name, host)
     if len(quorum) != quorum_size:
-        print "Only %d clients have been registered to the quorum of target size %d" % (len(quorum), quorum_size)
+        print "Only %d clients have been registered to the quorum of taget size %d" % (len(quorum), quorum_size)
         return ""
     else:
         return print_quorum(quorum)
 
 @app.route("/quorums/<quorum_name>/myid")
 def get_myid_in_quorum(quorum_name):
-    host = request.args['ip'] if 'ip' in request.args else request.remote_addr
+    host = request.remote_addr
     if quorum_name in quorum_map:
         quorum = quorum_map[quorum_name]
         if host in quorum:

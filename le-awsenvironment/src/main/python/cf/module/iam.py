@@ -1,6 +1,48 @@
 from .resource import Resource
 from .template import Template
 
+
+
+class User(Resource):
+    def __init__(self, logicalId):
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::IAM::User"
+        }
+
+
+class CfnUser(User):
+    def __init__(self, logicalId):
+        User.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::IAM::User",
+            "Properties" : {
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "root",
+                    "PolicyDocument": { "Statement":[{
+                        "Effect"   : "Allow",
+                        "Action"   : [
+                            "cloudformation:DescribeStackResource",
+                            "s3:GetObject"
+                        ],
+                        "Resource" :"*"
+                    }]}
+                }]
+            }
+        }
+
+class AccessKey(Resource):
+    def __init__(self, logicalId, user):
+        assert isinstance(user, User)
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::IAM::AccessKey",
+            "Properties" : {
+                "UserName" : user.ref()
+            }
+        }
+
 class Role(Resource):
     def __init__(self, logicalId):
         Resource.__init__(self, logicalId)
@@ -37,7 +79,6 @@ class Role(Resource):
         self._template["Properties"]["Policies"].append(policy.template())
 
 
-
 class ECSServiceRole(Role):
     def __init__(self, logicalId):
         Role.__init__(self, logicalId)
@@ -58,6 +99,28 @@ class ECSServiceRole(Role):
             "Principal": {
                 "Service": [
                     "ecs.amazonaws.com"
+                ]
+            },
+            "Action": [
+                "sts:AssumeRole"
+            ]
+        })
+
+class ECSContainerRole(Role):
+    def __init__(self, logicalId):
+        Role.__init__(self, logicalId)
+        allowed_actions = [
+            "ecs:*",
+            "ecr:*",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+        ]
+        self.add_policy(RolePolicy("ecs-service", allowed_actions))
+        self.add_statement({
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [
+                    "ec2.amazonaws.com"
                 ]
             },
             "Action": [

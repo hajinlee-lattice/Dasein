@@ -4,7 +4,7 @@
 
   "# Install the files and packages from the metadata\n",
   "/opt/aws/bin/cfn-init -v ",
-  " --configsets Install ",
+  " --configsets bootstrap ",
   " --stack ", {"Ref": "AWS::StackName"},
   " --resource ${INSTANCE_NAME}",
   " --region ", {"Ref": "AWS::Region"}, "\n",

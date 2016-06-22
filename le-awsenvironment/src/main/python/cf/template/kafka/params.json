@@ -1,0 +1,36 @@
+{
+  "ImageTag": {
+    "Description": " The tag of the docker images to use",
+    "Type": "String",
+    "Default": "latest"
+  },
+  "DesiredCapacity": {
+    "Type": "Number",
+    "Default" : "1",
+    "Description": "Number of instances to launch in your ECS cluster."
+  },
+  "MaxSize": {
+    "Type": "Number",
+    "Default" : "3",
+    "Description": "Maximum number of instances that can be launched in your ECS cluster."
+  },
+  "ZookeeperHosts": {
+    "Type": "String",
+    "Description": "Zookeeper connection string."
+  },
+  "BrokerMemory": {
+    "Type": "Number",
+    "Default" : "1024",
+    "Description": "Memory (MB) for each broker."
+  },
+  "PrimaryBrokers": {
+    "Type": "Number",
+    "Default" : "3",
+    "Description": "Brokers exposing 9092 port."
+  },
+  "SecondaryBrokers": {
+    "Type": "Number",
+    "Default" : "0",
+    "Description": "Brokers not exposing 9092 port."
+  }
+}

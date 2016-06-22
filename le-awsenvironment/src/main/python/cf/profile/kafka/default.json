@@ -1,0 +1,6 @@
+{
+  "Instances": 4,
+  "InstanceType": "t2.medium",
+  "Brokers": 3,
+  "BrokerMemory": 1536
+}

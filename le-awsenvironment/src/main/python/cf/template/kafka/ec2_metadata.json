@@ -1,0 +1,30 @@
+{
+  "AWS::CloudFormation::Init": {
+    "configSets": {
+      "bootstrap": [
+        "prepare"
+      ]
+    },
+    "prepare": {
+      "sources" : {
+        "/app.py" : "https://s3.amazonaws.com/{{APP_PATH}}"
+      },
+      "commands": {
+        "0": {
+          "command": "pip install Flask"
+        },
+        "1": {
+          "command": "python /app.py"
+        }
+      }
+    }
+  },
+  "AWS::CloudFormation::Authentication" : {
+    "S3AccessCreds" : {
+      "type" : "S3",
+      "accessKeyId" : { "Ref" : "{{CFN_KEYS}}" },
+      "secretKey" : {"Fn::GetAtt": ["{{CFN_KEYS}}", "SecretAccessKey"]},
+      "buckets" : [ "{{BUCKET}}" ]
+    }
+  }
+}

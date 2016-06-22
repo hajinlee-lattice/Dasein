@@ -14,12 +14,13 @@ class Resource(Template):
     def logical_id(self):
         return self._logicalId
 
-    def add_dependency(self, resource):
+    def depends_on(self, resource):
         assert isinstance(resource, Resource)
         if "DependsOn" not in self._template:
             self._template["DependsOn"] = [ resource.logical_id() ]
         else:
             self._template["DependsOn"].append(resource.logical_id())
+        return self
 
     def add_tag(self, key, value):
         self._template["Properties"]["Tags"].append({

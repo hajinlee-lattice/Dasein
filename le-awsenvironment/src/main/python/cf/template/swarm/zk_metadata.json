@@ -24,7 +24,7 @@
           "owner": "root",
           "group": "root"
         },
-        "/tmp/bootstrap.sh": {
+        "/tmp/bootstrap_zk.sh": {
           "content": {
             "Fn::Join": [
               "\n",
@@ -45,6 +45,12 @@
           "owner": "root",
           "group": "root"
         },
+        "/var/lib/docker/docker.out": {
+          "content": "bootstrap",
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        },
         "/var/lib/zookeeper/myid": {
           "content": "",
           "mode": "000777",
@@ -56,7 +62,23 @@
     "install": {
       "commands": {
         "0": {
-          "command": "bash /tmp/bootstrap.sh"
+          "command": "yum update -y"
+        },
+        "1": {
+          "command": "bash /tmp/bootstrap_zk.sh"
+        },
+        "2": {
+          "command": "curl -sSL https://get.docker.com/ | sh"
+        },
+        "3" : {
+          "command": "usermod -aG docker ec2-user"
+        },
+        "4": {
+          "command": "service cgconfig start"
+        },
+        "5": {
+          "command": "( docker daemon -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock 2>&1 > /var/lib/docker/docker.out & ) & sleep 10 ;",
+          "test": "ps -axu | grep \"docker daemon\""
         }
       }
     }

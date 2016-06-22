@@ -25,23 +25,13 @@ docker network create ${ZK_NETWORK} 2>/dev/null || true
 # cleanup
 bash ./teardown.sh ${ZK_CLUSTER}
 
-echo "provisioning discover service ${ZK_CLUSTER}-discover"
-docker run -d --name ${ZK_CLUSTER}-discover \
-	-h ${ZK_CLUSTER}-discover \
-    --net ${ZK_NETWORK} \
-	-l cluster.name=${ZK_CLUSTER} \
-	-p 5000 \
-	latticeengines/discover
-
-sleep 3
-
 # run centos container
 echo "provisioning ${ZK_CLUSTER}-zk1"
 docker run -d --name ${ZK_CLUSTER}-zk1 \
 	-h ${ZK_CLUSTER}-zk1 \
     --net ${ZK_NETWORK} \
+    -e MY_ID=1 \
     -e ZK_CLUSTER_NAME=${ZK_CLUSTER} \
-    -e DISCOVER_SERVICE=http://${ZK_CLUSTER}-discover:5000 \
 	-l cluster.name=${ZK_CLUSTER} \
 	-p ${ZK_PORT}:2181 \
 	latticeengines/zookeeper
@@ -52,8 +42,8 @@ do
 	docker run -d --name ${ZK_CLUSTER}-zk${i} \
 		-h ${ZK_CLUSTER}-zk${i} \
 		--net ${ZK_NETWORK} \
+		-e MY_ID=${i} \
 		-e ZK_CLUSTER_NAME=${ZK_CLUSTER} \
-		-e DISCOVER_SERVICE=http://${ZK_CLUSTER}-discover:5000 \
 		-l cluster.name=${ZK_CLUSTER} \
 		latticeengines/zookeeper
 done

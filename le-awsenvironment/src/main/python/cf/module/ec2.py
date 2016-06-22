@@ -1,10 +1,10 @@
 import json
 import os
 
+from .iam import InstanceProfile
 from .resource import Resource
 from .template import TEMPLATE_DIR
 
-SECURITY_GROUP="EC2SecurityGroup"
 
 def _ec2_mappings():
     json_file = os.path.join(TEMPLATE_DIR, 'common', 'ec2_mappings.json')
@@ -18,39 +18,35 @@ def _ec2_params():
         return json.load(f)
 
 
-def _ec2_security_group():
-    return {
-        "Type" : "AWS::EC2::SecurityGroup",
-        "Properties" : {
-            "GroupDescription" : "Enable all access to trust ips",
-            "SecurityGroupIngress" : [
-                {"IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : { "Ref" : "TrustedIPZone"}}
-            ],
-            "VpcId": { "Ref": "VpcId" }
-        }
-    }
-
-
 class EC2Instance(Resource):
-    def __init__(self, name, subnet_ref=None):
+    def __init__(self, name, subnet_ref=None, instance_type=None, os="AmazonLinux"):
         Resource.__init__(self, name)
         self._template = {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "ImageId": EC2Instance.__image_id(),
-                "InstanceType": {"Ref": "InstanceType"},
+                "ImageId": EC2Instance.__image_id(os),
+                "InstanceType": { "Ref": "InstanceType" },
                 "SecurityGroupIds": [{ "Ref": "SecurityGroupId" }],
                 "SubnetId": { "Ref": subnet_ref },
+                "Monitoring": "true",
                 "KeyName": { "Ref" : "KeyName" },
                 "UserData": EC2Instance.__userdata(name),
                 "Tags": []
             },
             "CreationPolicy": {
                 "ResourceSignal": {
-                    "Timeout": "PT5M"
+                    "Timeout": "PT20M"
                 }
             }
         }
+
+        if instance_type is not None:
+            self._template["Properties"]["InstanceType"] = instance_type
+
+    def set_instanceprofile(self, instanceprofile):
+        assert isinstance(instanceprofile, InstanceProfile)
+        self._template["Properties"]["IamInstanceProfile"] = instanceprofile.ref()
+        return self
 
     def metadata(self, metadata):
         self._template["Metadata"] = metadata
@@ -68,7 +64,7 @@ class EC2Instance(Resource):
             return json.loads(text)
 
     @classmethod
-    def __image_id(cls):
+    def __image_id(cls, os):
         return {
-            "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, "AmazonLinux" ]
+            "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, os ]
         }
