@@ -50,7 +50,6 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         scoreRequestProcessor = applicationContext.getBean("customScoreRequestProcessor", ScoreRequestProcessor.class);
         scoreRequestProcessorImpl = (ScoreRequestProcessorImpl) scoreRequestProcessor;
         modelList = createModelList();
-        request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
     }
 
     private void overwritePredifinedSelection() {
@@ -78,7 +77,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testFetchModelArtifacts() {
+    public void testFetchModelArtifacts() throws IOException {
+        request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
         CustomerSpace space = ScoringApiControllerDeploymentTestNGBase.customerSpace;
         scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
