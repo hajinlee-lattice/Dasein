@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -9,6 +8,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 /**
  * Front-end inputs for a modeling job.
  */
+
 public class ModelingParameters {
 
     @JsonProperty
@@ -34,6 +34,12 @@ public class ModelingParameters {
 
     @JsonProperty
     private String predefinedSelectionName;
+
+    @JsonProperty
+    private String moduleName;
+
+    @JsonProperty
+    private String pivotFileName;
 
     public String getFilename() {
         return filename;
@@ -97,6 +103,22 @@ public class ModelingParameters {
 
     public void setPredefinedSelectionName(String predefinedSelectionName) {
         this.predefinedSelectionName = predefinedSelectionName;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getPivotFileName() {
+        return pivotFileName;
+    }
+
+    public void setPivotFileName(String pivotFileName) {
+        this.pivotFileName = pivotFileName;
     }
 
     @Override

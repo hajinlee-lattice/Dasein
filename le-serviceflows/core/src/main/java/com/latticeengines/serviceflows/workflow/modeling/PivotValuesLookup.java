@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.steps.pmml;
+package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.AbstractMap;
 import java.util.List;

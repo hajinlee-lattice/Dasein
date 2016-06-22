@@ -49,7 +49,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId());
+        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
         final Long tenantRegistrationTime = tenant.getRegisteredTime();
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 

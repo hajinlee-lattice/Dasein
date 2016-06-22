@@ -207,9 +207,14 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             addStandardAttributes.setTransformationGroup(transformationGroup);
             return this;
         }
-        
+
         public Builder excludePropDataColumns(boolean excludePropDataColumns) {
             model.setExcludePropDataColumns(excludePropDataColumns);
+            return this;
+        }
+
+        public Builder pivotArtifactPath(String pivotArtifactPath) {
+            model.setPivotArtifactPath(pivotArtifactPath);
             return this;
         }
 

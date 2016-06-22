@@ -29,8 +29,10 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String transformationGroupName;
 
     private ModelSummary sourceModelSummary;
-    
+
     private boolean excludePropDataColumns;
+
+    private String pivotArtifactPath;
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
@@ -109,7 +111,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     public void setSourceModelSummary(ModelSummary sourceModelSummary) {
         this.sourceModelSummary = sourceModelSummary;
     }
-    
+
     @JsonProperty
     public boolean excludePropDataColumns() {
         return excludePropDataColumns;
@@ -118,5 +120,15 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     public void setExcludePropDataColumns(boolean excludePropDataColumns) {
         this.excludePropDataColumns = excludePropDataColumns;
+    }
+
+    @JsonProperty
+    public String getPivotArtifactPath() {
+        return pivotArtifactPath;
+    }
+
+    @JsonProperty
+    public void setPivotArtifactPath(String pivotArtifactPath) {
+        this.pivotArtifactPath = pivotArtifactPath;
     }
 }

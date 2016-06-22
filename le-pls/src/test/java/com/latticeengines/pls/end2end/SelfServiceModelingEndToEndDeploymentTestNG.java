@@ -108,6 +108,22 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
+
+        map = new LinkedMultiValueMap<>();
+        map.add("metadataFile", new ClassPathResource(
+                "com/latticeengines/pls/end2end/selfServiceModeling/pivotmappingfiles/pivotvalues.txt"));
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        requestEntity = new HttpEntity<>(map, headers);
+
+        response = restTemplate.postForObject( //
+                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s", getRestAPIHostPort(), "module1",
+                        "pivotmappings", "pivotvalues"), //
+                requestEntity, ResponseDocument.class);
+        String pivotFilePath = new ObjectMapper().convertValue(response.getResult(), String.class);
+        log.info(pivotFilePath);
+
     }
 
     @SuppressWarnings("rawtypes")
@@ -147,6 +163,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDescription("Test");
         parameters.setFilename(sourceFile.getName());
+        parameters.setModuleName("module1");
+        parameters.setPivotFileName("pivotvalues.csv");
         modelName = parameters.getName();
         model(parameters);
     }

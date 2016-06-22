@@ -34,6 +34,8 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.serviceflows.workflow.modeling.PivotValuesLookup;
+import com.latticeengines.serviceflows.workflow.util.ModelingUtils;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
@@ -141,6 +143,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             ModelStepConfiguration modelStepConfiguration, Table eventTable) {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
+        if (StringUtils.isNotEmpty(modelStepConfiguration.getPivotArtifactPath())) {
+            try {
+                PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration,
+                        modelStepConfiguration.getPivotArtifactPath());
+                metadataContents = ModelingUtils.addPivotValuesToMetadataContent(eventTable.getModelingMetadata(), pivotValues);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_00002, e);
+            }
+        }
+
         String dataCompositionContents = getDataCompositionContents(eventTable);
 
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
@@ -244,7 +256,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         } catch (ClassCastException e) {
             return null;
         }
-
     }
 
 }

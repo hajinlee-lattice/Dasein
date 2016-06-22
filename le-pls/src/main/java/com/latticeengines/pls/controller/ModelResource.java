@@ -58,7 +58,8 @@ public class ModelResource {
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
-    public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
+    public ResponseDocument<String> model(@PathVariable String modelName, //
+            @RequestBody ModelingParameters parameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);

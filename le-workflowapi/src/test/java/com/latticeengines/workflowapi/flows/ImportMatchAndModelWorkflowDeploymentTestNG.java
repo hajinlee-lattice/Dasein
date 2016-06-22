@@ -33,7 +33,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         ModelingParameters params = new ModelingParameters();
         params.setFilename(sourceFile.getName());
         params.setName("testWorkflowAccount");
-        model(params, TransformationGroup.STANDARD);
+        params.setTransformationGroup(TransformationGroup.STANDARD);
         String summary = getModelSummary(params.getName());
         JsonNode json = JsonUtils.deserialize(summary, JsonNode.class);
         JsonNode percentiles = json.get("PercentileBuckets");
@@ -46,7 +46,8 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         ModelingParameters params = new ModelingParameters();
         params.setFilename(sourceFile.getName());
         params.setName("testWorkflowLead");
-        model(params, TransformationGroup.STANDARD);
+        params.setTransformationGroup(TransformationGroup.STANDARD);
+        model(params);
     }
 
 }
