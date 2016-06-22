@@ -17,8 +17,33 @@ angular
                 views: {
                     "summary@": {
                         resolve: {
-                            ResourceString: function() {
-                                return 'MODEL_SCORING_SUMMARY_HEADER';
+                            ResourceString: function($q, $http, $stateParams) {
+
+                                var deferred = $q.defer(),
+                                    modelId = $stateParams.modelId;
+
+                                $http({
+                                    'method': "GET",
+                                    'url': '/pls/modelsummaries/' + modelId
+                                })
+                                .then(
+                                    function onSuccess(response) {
+                                        var sourceSchemaInterpretation = response.data.SourceSchemaInterpretation;   
+
+                                        if (sourceSchemaInterpretation == 'SalesforceAccount') {
+                                            var modelType = 'MODEL_SCORING_ACCOUNTS_SUMMARY_HEADER';
+                                        } else {
+                                            var modelType = 'MODEL_SCORING_LEADS_SUMMARY_HEADER';
+                                        }
+
+                                        deferred.resolve(modelType);
+
+                                    }, function onError(response) {
+                                        console.log("error");
+                                    }
+                                );
+                                return deferred.promise;
+                                
                             }
                         },
                         controller: 'OneLineController',
