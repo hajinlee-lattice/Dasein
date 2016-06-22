@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -156,6 +157,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Override
     public Fields getModelFields(CustomerSpace customerSpace, String modelId) {
+        return getModelFields(customerSpace, modelId, null);
+    }
+
+    @Override
+    public Fields getModelFields(CustomerSpace customerSpace, String modelId, List<Predictor> predictors) {
         Fields fields = new Fields();
         fields.setModelId(modelId);
         List<Field> fieldList = new ArrayList<>();
@@ -163,49 +169,45 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
 
-        // TODO: enable this logic once issue is fixed to populate predictors in
-        // model summary. This will increase performance as call to
-        // metadataProxy.getTable is too costly (veries from 8-27 seconds on QA
-        //
-        // List<Predictor> predictors =
-        // artifacts.getModelSummary().getPredictors();
-        //
-        // Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
-        // for (Predictor predictor : predictors) {
-        // String fieldName = predictor.getName();
-        // String displayName = predictor.getDisplayName();
-        //
-        // FieldSchema fieldSchema = mapFields.get(fieldName);
-        //
-        // if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-        // Field field = null;
-        // if (StringUtils.isEmpty(displayName)) {
-        // field = new Field(fieldName, fieldSchema.type);
-        // } else {
-        // field = new Field(fieldName, fieldSchema.type, displayName);
-        // }
-        // fieldList.add(field);
-        // }
-        // }
-
-        // TODO: remove this code once above code is operational
-        Table modelMetadataTable = metadataProxy.getTable(customerSpace.toString(),
-                StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelSummary().getEventTableName())));
-        Map<String, Attribute> attributeMap = new HashMap<>();
-        if (modelMetadataTable != null) {
-            attributeMap = modelMetadataTable.getNameAttributeMap();
-        }
         Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
-        for (String fieldName : mapFields.keySet()) {
-            FieldSchema fieldSchema = mapFields.get(fieldName);
-            if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                Field field = null;
-                if (attributeMap.containsKey(fieldName)) {
-                    field = new Field(fieldName, fieldSchema.type, attributeMap.get(fieldName).getDisplayName());
-                } else {
-                    field = new Field(fieldName, fieldSchema.type);
+
+        if (!CollectionUtils.isEmpty(predictors)) {
+            for (Predictor predictor : predictors) {
+                String fieldName = predictor.getName();
+                String displayName = predictor.getDisplayName();
+
+                FieldSchema fieldSchema = mapFields.get(fieldName);
+
+                if (fieldSchema.source.equals(FieldSource.REQUEST)) {
+                    Field field = null;
+                    if (StringUtils.isEmpty(displayName)) {
+                        field = new Field(fieldName, fieldSchema.type);
+                    } else {
+                        field = new Field(fieldName, fieldSchema.type, displayName);
+                    }
+                    fieldList.add(field);
                 }
-                fieldList.add(field);
+            }
+        } else {
+            // this is a fallback mechanism and tried to load field info via
+            // table if modelSummary metadata does not have predictors
+            Table modelMetadataTable = metadataProxy.getTable(customerSpace.toString(),
+                    StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelSummary().getEventTableName())));
+            Map<String, Attribute> attributeMap = new HashMap<>();
+            if (modelMetadataTable != null) {
+                attributeMap = modelMetadataTable.getNameAttributeMap();
+            }
+            for (String fieldName : mapFields.keySet()) {
+                FieldSchema fieldSchema = mapFields.get(fieldName);
+                if (fieldSchema.source.equals(FieldSource.REQUEST)) {
+                    Field field = null;
+                    if (attributeMap.containsKey(fieldName)) {
+                        field = new Field(fieldName, fieldSchema.type, attributeMap.get(fieldName).getDisplayName());
+                    } else {
+                        field = new Field(fieldName, fieldSchema.type);
+                    }
+                    fieldList.add(field);
+                }
             }
         }
 
@@ -240,7 +242,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @Override
-    public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
+    public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, //
+            String modelId) {
         log.info(String.format("Retrieving model artifacts from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
@@ -560,7 +563,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String determineIdFieldName(Map<String, //
-            FieldSchema> fieldSchemas) {
+    FieldSchema> fieldSchemas) {
         // find ID field
         String idFieldName = "";
         for (String fieldName : fieldSchemas.keySet()) {
@@ -577,7 +580,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @Override
-    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace,//
+    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace, //
             String modelId) {
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
@@ -615,34 +618,28 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, //
             String start, //
             int offset, //
-            int maximum,//
+            int maximum, //
             boolean considerAllStatus) {
-        List<?> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start, offset, maximum,
-                considerAllStatus);
+        List<ModelSummary> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start,
+                offset, maximum, considerAllStatus);
         List<ModelDetail> models = new ArrayList<>();
         convertModelSummaryToModelDetail(models, modelSummaries, customerSpace);
         return models;
     }
 
     private void convertModelSummaryToModelDetail(List<ModelDetail> models, //
-            List<?> modelSummaries,//
+            List<ModelSummary> modelSummaries, //
             CustomerSpace customerSpace) {
         ObjectMapper om = new ObjectMapper();
         if (modelSummaries != null) {
-            for (Object modelSummary : modelSummaries) {
+            for (ModelSummary modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
-                Map<String, Object> map = (Map<String, Object>) modelSummary;
-                ModelType modelType = getModelType((String) map.get("SourceSchemaInterpretation"));
+                ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
 
-                ModelSummaryStatus status = null;
-                try {
-                    String statusStr = om.writeValueAsString(map.get("Status"));
-                    status = om.readValue(statusStr, ModelSummaryStatus.class);
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-                Model model = new Model((String) map.get("Id"), (String) map.get("DisplayName"), modelType);
-                Long lastModifiedTimestamp = (Long) map.get("LastUpdateTime");
+                ModelSummaryStatus status = modelSummary.getStatus();
+
+                Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
+                Long lastModifiedTimestamp = modelSummary.getLastUpdateTime();
 
                 Fields fields = null;
                 if (ModelSummaryStatus.DELETED.equals(status)) {
@@ -653,7 +650,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     // purpose
                     fields = new Fields(model.getModelId(), new ArrayList<Field>());
                 } else {
-                    fields = getModelFields(customerSpace, model.getModelId());
+                    fields = getModelFields(customerSpace, model.getModelId(), modelSummary.getPredictors());
                 }
                 ModelDetail modelDetail = new ModelDetail(model, status, fields,
                         BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));

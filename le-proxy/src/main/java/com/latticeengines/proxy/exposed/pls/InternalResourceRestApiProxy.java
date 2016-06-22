@@ -1,11 +1,13 @@
 package com.latticeengines.proxy.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -111,7 +113,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<?> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
+    public List<ModelSummary> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
             boolean considerAllStatus) {
         try {
             String url = constructUrl("pls/internal/modelsummarydetails/paginate", customerSpace.toString());
@@ -122,7 +124,18 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             }
 
             log.debug("Get from " + url);
-            return restTemplate.getForObject(url, List.class);
+            List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
+            List<ModelSummary> modelSummaryList = new ArrayList<>();
+            if (modelSummaryObjList != null) {
+
+                for (Object obj : modelSummaryObjList) {
+                    String json = JsonUtils.serialize(obj);
+                    ModelSummary modelSummary = JsonUtils.deserialize(json, ModelSummary.class);
+                    modelSummaryList.add(modelSummary);
+                }
+            }
+
+            return modelSummaryList;
         } catch (Exception e) {
             throw new RuntimeException("getPaginatedModels: Remote call failure: " + e.getMessage(), e);
         }

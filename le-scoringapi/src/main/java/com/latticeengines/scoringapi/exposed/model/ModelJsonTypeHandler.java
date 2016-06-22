@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 
 public interface ModelJsonTypeHandler {
     static final String PMML_FILENAME = "rfpmml.xml";
@@ -32,6 +33,6 @@ public interface ModelJsonTypeHandler {
     DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
             Map<String, Object> transformedRecord, Map<String, Object> matchedRecord);
 
-    void checkForMissingEssentialFields(boolean hasOneOfDomain, boolean hasCompanyName, boolean hasCompanyState,
-            List<String> missingMatchFields);
+    ScoringApiException checkForMissingEssentialFields(String recordId, String modelId, boolean hasOneOfDomain,
+            boolean hasCompanyName, boolean hasCompanyState, List<String> missingMatchFields);
 }

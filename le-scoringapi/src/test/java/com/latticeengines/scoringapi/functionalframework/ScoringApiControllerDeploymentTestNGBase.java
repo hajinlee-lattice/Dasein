@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +37,7 @@ import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
+import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
@@ -74,6 +76,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
+
+    @Autowired
+    private TestModelSummaryParser testModelSummaryParser;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -160,6 +165,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         modelSummary.setLookupId(String.format("%s|%s|%s", TENANT_ID, EVENT_TABLE, MODEL_VERSION));
         modelSummary.setSourceSchemaInterpretation(SOURCE_INTERPRETATION);
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
+        testModelSummaryParser.setPredictors(modelSummary, MODELSUMMARYJSON_LOCALPATH);
 
         String modelId = modelSummary.getId();
         ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelId, customerSpace);
@@ -227,7 +233,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return scoreRequest;
     }
 
-    protected void checkModelDetails(List<ModelDetail> models, String modelNamePrefix, String fieldDisplayNamePrefix) {
+    protected void checkModelDetails(List<ModelDetail> models, String modelNamePrefix, String fieldDisplayNamePrefix) throws ParseException {
         Assert.assertNotNull(models);
         Assert.assertTrue(models.size() >= 1);
         Assert.assertTrue(models.size() <= 50);
@@ -240,6 +246,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             Assert.assertNotNull(model.getModel().getName());
             Assert.assertNotNull(model.getStatus());
             Assert.assertNotNull(model.getLastModifiedTimestamp());
+
+            Assert.assertNotNull(BaseScoring.dateFormat.parse(model.getLastModifiedTimestamp()));
 
             checkFields(model.getModel().getName(), model.getFields(), modelNamePrefix, fieldDisplayNamePrefix);
         }
@@ -263,6 +271,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected String getAppIdForOauth2() {
         return DUMMY_APP_ID;
+    }
+
+    public TestModelSummaryParser getTestModelSummaryParser() {
+        return testModelSummaryParser;
     }
 
 }

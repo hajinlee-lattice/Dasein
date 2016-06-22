@@ -18,7 +18,7 @@
     <context:annotation-config />
 
     <mvc:interceptors>
-        <bean class="com.latticeengines.common.exposed.rest.RequestLogInterceptor" />
+        <bean class="com.latticeengines.scoringapi.exposed.ScoringApiRequestLogInterceptor" />
     </mvc:interceptors>
 
 </beans>

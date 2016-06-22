@@ -25,9 +25,10 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     private HttpStopWatch httpStopWatch;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
 
-        String identifier = UUID.randomUUID().toString();
+        String identifier = getRequestId(request);
         request.setAttribute(IDENTIFIER_KEY, identifier);
         response.addHeader(REQUEST_ID, identifier);
         // It's safe to assume nothing has added to the MDC on this thread
@@ -61,4 +62,8 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
+    protected String getRequestId(HttpServletRequest request) {
+        String identifier = UUID.randomUUID().toString();
+        return identifier;
+    }
 }

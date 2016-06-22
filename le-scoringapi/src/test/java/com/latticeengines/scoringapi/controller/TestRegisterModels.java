@@ -26,6 +26,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
+import com.latticeengines.scoringapi.functionalframework.TestModelSummaryParser;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class TestRegisterModels {
@@ -34,8 +35,9 @@ public class TestRegisterModels {
 
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
             InternalResourceRestApiProxy plsRest, Tenant tenant, TestModelConfiguration modelConfiguration,
-            CustomerSpace customerSpace, MetadataProxy metadataProxy) throws IOException {
-        createModel(plsRest, tenant, modelConfiguration, customerSpace);
+            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser)
+            throws IOException {
+        createModel(plsRest, tenant, modelConfiguration, customerSpace, testModelSummaryParser);
         TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
                 tenant, modelConfiguration);
         createTableEntryForModel(modelConfiguration.getEventTable(),
@@ -44,7 +46,8 @@ public class TestRegisterModels {
     }
 
     private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
-            TestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
+            TestModelConfiguration modelConfiguration, CustomerSpace customerSpace,
+            TestModelSummaryParser testModelSummaryParser) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -56,6 +59,8 @@ public class TestRegisterModels {
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
+
+        testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelSummaryJsonLocalpath());
 
         ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),
                 customerSpace);

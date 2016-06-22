@@ -43,7 +43,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final double EXPECTED_SCORE_99 = 99.0d;
     protected static final int MAX_THREADS = 1;
     protected static final int RECORD_MODEL_CARDINALITY = 3;
-    protected static final int MAX_MODELS = 8;
+    protected static final int MAX_MODELS = 4;
     protected volatile Throwable exception = null;
     protected Map<String, List<String>> threadPerfMap = new HashMap<>();
     protected boolean shouldPrintPerformanceInfo = true;
@@ -287,8 +287,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
                 modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
                         (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
-                        modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace),
-                        metadataProxy);
+                        modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
+                        getTestModelSummaryParser());
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
                         modelVersion);

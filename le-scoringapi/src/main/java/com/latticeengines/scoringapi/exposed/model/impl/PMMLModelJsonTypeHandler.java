@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 @Component
@@ -31,7 +32,11 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
     }
 
     @Override
-    public void checkForMissingEssentialFields(boolean hasOneOfDomain, boolean hasCompanyName, boolean hasCompanyState,
-            List<String> missingMatchFields) {
+    public ScoringApiException checkForMissingEssentialFields(String recordId, //
+            String modelId, //
+            boolean hasOneOfDomain, //
+            boolean hasCompanyName, //
+            boolean hasCompanyState, List<String> missingMatchFields) {
+        return null;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -128,7 +128,16 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
             int maximum) {
-        return modelSummaryDao.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
+        List<ModelSummary> models = modelSummaryDao.findPaginatedModels(lastUpdateTime, considerAllStatus, offset,
+                maximum);
+
+        if (!CollectionUtils.isEmpty(models)) {
+            for (ModelSummary model : models) {
+                inflatePredictors(model);
+            }
+        }
+
+        return models;
     }
 
     private void inflateDetails(ModelSummary summary) {

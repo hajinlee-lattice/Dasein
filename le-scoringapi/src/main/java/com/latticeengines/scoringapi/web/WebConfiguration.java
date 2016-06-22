@@ -2,7 +2,6 @@ package com.latticeengines.scoringapi.web;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 import com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection;
 
@@ -21,9 +19,6 @@ import com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection;
 @ComponentScan(basePackages = { "com.latticeengines.db", "com.latticeengines.oauth2db", "com.latticeengines.scoringapi",
         "com.latticeengines.common.exposed.rest" })
 public class WebConfiguration extends WebMvcConfigurerAdapter {
-
-    @Autowired
-    private RequestLogInterceptor requestLogInterceptor;
 
     public WebConfiguration() {
         super();

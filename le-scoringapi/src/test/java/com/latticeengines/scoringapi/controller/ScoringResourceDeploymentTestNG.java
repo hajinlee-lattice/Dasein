@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -120,10 +121,12 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
-    public void getPaginatedModels() {
+    public void getPaginatedModels() throws ParseException {
         String url = apiHostPort + "/score";
-
+        Long start = System.currentTimeMillis();
         List<ModelDetail> models = getPaginatedModels(url, new Date(0), true, 1, 50);
+        System.out.println("Time taken in getPaginatedModels for " + models.size() + " models = "
+                + (System.currentTimeMillis() - start) + " ms");
         checkModelDetails(models, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
     }
 

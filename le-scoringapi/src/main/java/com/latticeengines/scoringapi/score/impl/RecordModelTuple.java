@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 
 public class RecordModelTuple {
     private String requstTimestamp;
@@ -13,14 +14,17 @@ public class RecordModelTuple {
     private Record record;
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedData;
     private String modelId;
+    private ScoringApiException exception;
 
     public RecordModelTuple(String requstTimestamp, String latticeId, Record record,
-            SimpleEntry<Map<String, Object>, InterpretedFields> parsedData, String modelId) {
+            SimpleEntry<Map<String, Object>, InterpretedFields> parsedData, String modelId,
+            ScoringApiException exception) {
         this.requstTimestamp = requstTimestamp;
         this.latticeId = latticeId;
         this.record = record;
         this.parsedData = parsedData;
         this.modelId = modelId;
+        this.exception = exception;
     }
 
     public String getRequstTimestamp() {
@@ -41,5 +45,9 @@ public class RecordModelTuple {
 
     public String getModelId() {
         return modelId;
+    }
+
+    public ScoringApiException getException() {
+        return exception;
     }
 }

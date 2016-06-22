@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.exposed.model;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
@@ -28,4 +29,6 @@ public interface ModelRetriever {
 
     List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
             boolean considerAllStatus);
+
+    Fields getModelFields(CustomerSpace customerSpace, String modelId, List<Predictor> predictors);
 }

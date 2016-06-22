@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class RecordScoreResponse {
     @JsonProperty("id")
@@ -87,7 +87,15 @@ public class RecordScoreResponse {
 
         @JsonProperty("score")
         @ApiModelProperty(value = "Score")
-        private double score;
+        private Double score;
+
+        @JsonProperty("error")
+        @ApiModelProperty(value = "Error")
+        private String error;
+
+        @JsonProperty("errorDescription")
+        @ApiModelProperty(value = "ErrorDescription")
+        private String errorDescription;
 
         public String getModelId() {
             return modelId;
@@ -97,12 +105,28 @@ public class RecordScoreResponse {
             this.modelId = modelId;
         }
 
-        public double getScore() {
+        public Double getScore() {
             return score;
         }
 
-        public void setScore(double score) {
+        public void setScore(Double score) {
             this.score = score;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public void setError(String error) {
+            this.error = error;
+        }
+
+        public String getErrorDescription() {
+            return errorDescription;
+        }
+
+        public void setErrorDescription(String errorDescription) {
+            this.errorDescription = errorDescription;
         }
     }
 }

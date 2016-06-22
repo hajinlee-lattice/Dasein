@@ -148,14 +148,18 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public void checkForMissingEssentialFields(boolean hasOneOfDomain, //
+    public ScoringApiException checkForMissingEssentialFields(String recordId, //
+            String modelId, //
+            boolean hasOneOfDomain, //
             boolean hasCompanyName, //
             boolean hasCompanyState, //
             List<String> missingMatchFields) {
         if (!hasOneOfDomain && (!hasCompanyName || !hasCompanyState)) {
-            throw new ScoringApiException(LedpCode.LEDP_31199,
+            return new ScoringApiException(LedpCode.LEDP_31199,
                     new String[] { Joiner.on(",").join(missingMatchFields) });
         }
+
+        return null;
     }
 
     protected boolean shouldStopCheckForScoreDerivation(String path) throws IOException {
