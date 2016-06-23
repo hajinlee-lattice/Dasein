@@ -174,7 +174,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
             return globalAuthGetRights(tenantId, username);
         } catch (Exception e) {
-            if (e.getMessage().contains("Sequence contains no elements")) {
+            if (e.getMessage() != null && e.getMessage().contains("Sequence contains no elements")) {
                 return new ArrayList<>();
             }
             throw new LedpException(LedpCode.LEDP_18000,
@@ -187,8 +187,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (tenantData == null) {
             return new ArrayList<>();
         }
+
         GlobalAuthAuthentication authenticationData = gaAuthenticationEntityMgr
                 .findByUsernameJoinUser(username);
+        if (authenticationData == null) {
+            return new ArrayList<>();
+        }
+
         List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
                 .findByUserIdAndTenantId(authenticationData.getGlobalAuthUser().getPid(),
                         tenantData.getPid());
