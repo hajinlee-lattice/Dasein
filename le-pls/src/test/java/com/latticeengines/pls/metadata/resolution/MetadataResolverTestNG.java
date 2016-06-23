@@ -4,16 +4,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import javax.annotation.Nullable;
-
 import com.latticeengines.domain.exposed.metadata.*;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -46,9 +41,6 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     String hdfsPath = "/tmp/test_metadata_resolution";
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
-
-    private static final String ADDITION_COLUMN_1 = "additionalCol1";
-    private static final String ADDITION_COLUMN_2 = "additionalCol2";
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -202,7 +194,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         }
         assertTrue(foundSomeColumn);
-        assertEquals(fieldMappings.size(), 32);
+        assertEquals(fieldMappings.size(), 33);
     }
 
     @AfterClass(groups = "functional")
