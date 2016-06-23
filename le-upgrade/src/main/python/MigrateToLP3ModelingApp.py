@@ -31,7 +31,7 @@ sequence.append(appsequence.WriteQueryToCSV('Q_LP3_ModelingLead_OneLeadPerDomain
 ## Scoring queries for validating LP3 score distributions
 sequence.append(lpmigration.LPMigration_1MoActivityForScoring())
 scoringQueryToBeCreated=True
-sequence.append(lpmigration.LPMigration_LP3ScoringRecentAllRowsQuery())
+sequence.append(lpmigration.LPMigration_LP3ScoringRecentAllRowsQuery(forceApply=scoringQueryToBeCreated))
 sequence.append(lpmigration.LPMigration_LP3ScoringQuery1MoActivity(forceApply=scoringQueryToBeCreated))
 sequence.append(appsequence.WriteQueryToCSV('Q_LP3_ScoringLead_RecentAllRows', timestamp, forceApply=scoringQueryToBeCreated))
 
