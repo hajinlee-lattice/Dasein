@@ -53,8 +53,7 @@ CREATE TABLE [dbo].[oauth_access_token](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 
-ALTER TABLE [oauth_access_token] ADD CONSTRAINT UNIQUE_USERNAME UNIQUE (user_name)
-
+ALTER TABLE [oauth_access_token] ADD CONSTRAINT UNIQUE_AUTH_ID UNIQUE (authentication_id);
 
 CREATE UNIQUE NONCLUSTERED INDEX [token_id_idx] ON [dbo].[oauth_access_token] 
 ([token_id] ASC
