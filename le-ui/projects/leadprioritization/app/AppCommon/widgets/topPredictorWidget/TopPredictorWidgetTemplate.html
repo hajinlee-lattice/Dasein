@@ -2,28 +2,28 @@
     <div class="row">
         <div class="twelve columns">
             <div data-ng-show="!backToSummaryView">
-                <span class="total-attr-values">{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="export-link" data-ng-click="exportClicked()">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
+                <span class="total-attr-values">{{::topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="export-link" data-ng-click="exportClicked()">{{::ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
                 
             </div>
             <div data-ng-show="backToSummaryView">
-                <a href="javascript:void(0)" id="back-to-summary-link" data-ng-click="backToSummaryClicked()"><i class="fa fa-angle-double-left"></i> {{ResourceUtility.getString('TOP_PREDICTORS_BACK_TO_SUMMARY_LABEL')}}</a>
+                <a href="javascript:void(0)" id="back-to-summary-link" data-ng-click="backToSummaryClicked()"><i class="fa fa-angle-double-left"></i> {{::ResourceUtility.getString('TOP_PREDICTORS_BACK_TO_SUMMARY_LABEL')}}</a>
             </div>
         </div>
     </div>
     <div id="top-predictor-wrapper">
         <div class="row">
             <div class="twelve columns">
-                <h3>{{chartHeader}}</h3>
+                <h3>{{::chartHeader}}</h3>
             </div>
         </div>
 
         <div class="row data">
             <div class="three columns">
                 <div class="attributes lattice-attributes" data-ng-show="showExternalCategories">
-                    <h4>{{externalPredictorTotal}}</h4>
+                    <h4>{{::externalPredictorTotal}}</h4>
                     <ul>    
                         <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                            <a href="javascript:void(0)" class="{{category.activeClass}}" data-ng-bind-html="generateCategoryLabel(category)"></a>
+                            <a href="javascript:void(0)" class="{{::category.activeClass}}" data-ng-bind-html="generateCategoryLabel(category)"></a>
                         </li>
                     </ul>
                 </div>
@@ -37,7 +37,7 @@
 
             <div class="three columns">
                 <div class="attributes lattice-attributes" data-ng-show="showInternalCategories">
-                    <h4>{{internalPredictorTotal}}</h4>
+                    <h4>{{::internalPredictorTotal}}</h4>
                     <ul>
                         <li data-ng-repeat="category in internalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
                             <a href="javascript:void(0)" data-ng-bind-html="generateCategoryLabel(category)"></a>

@@ -4,10 +4,10 @@
         <div class="three columns" ng-repeat="table in tables">
             <div class="stats black-summary-list stats-group">
                 
-                <h3 class="summary-title">{{table.name}}</h3>
-                <dl ng-repeat="(key, value) in table.items">
-                        <dt>{{key}}</dt>
-                        <dd id="detail-status">{{value}}</dd>
+                <h3 class="summary-title">{{::table.name}}</h3>
+                <dl ng-repeat="(key, value) in ::table.items">
+                        <dt>{{::key}}</dt>
+                        <dd id="detail-status">{{::value}}</dd>
                 </dl>
 
             </div><!-- End .summary-list -->

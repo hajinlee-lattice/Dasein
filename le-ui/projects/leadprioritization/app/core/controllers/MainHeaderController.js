@@ -14,7 +14,10 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.userDisplayName = clientSession.DisplayName;
     }
     $scope.showProfileNav = false;
+    var ClientSession = BrowserStorageUtility.getClientSession(),
+        Tenant = ClientSession ? ClientSession.Tenant : null;
 
+    $scope.tenantName = window.escape(Tenant.DisplayName);
     
     $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
         if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {

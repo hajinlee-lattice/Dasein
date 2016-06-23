@@ -21,116 +21,26 @@ angular.module('mainApp.create.csvBulkUpload', [
         schema: null
     }
 
-    vm.uploadFile = function() {
-        /*
-        vm.showImportError = false;
-        vm.importErrorMsg = "";
-        vm.importing = true;
+    vm.uploadFile = function() { }
 
-        var modelId = $stateParams.modelId,
-            startTime = new Date();
+    vm.processHeaders = function(headers) { }
 
-        csvImportService.Upload({
-            file: vm.csvFile, 
-            url: vm.API_URL,
-            params: {
-                modelId: modelId,
-                displayName: vm.csvFileName,
-                compressed: true
-            },
-            ServiceErrorMethod: 'modal|home.model.jobs',
-            progress: function(e) {
-                if (e.total / 1024 > 486000) {
-                    xhr.abort();
-                    $('div.loader').css({ 'display':'none' });
-
-                    html = 'ERROR: Over file size limit.  File must be below 486MB';
-                } else {
-                    var done = e.loaded / 1024,
-                        total = e.total / 1024,
-                        percent = Math.round(done / total * 100),
-                        currentTime = new Date(),
-                        seconds = Math.floor((currentTime - startTime) / 1000),
-                        minutes = Math.floor(seconds / 60),
-                        hours = Math.floor(minutes / 60),
-                        speed = done / seconds,
-                        seconds = seconds % 60,
-                        minutes = minutes % 60,
-                        hours = hours % 24,
-                        seconds = (seconds < 10 ? '0' + seconds : seconds),
-                        minutes = (minutes < 10 ? '0' + minutes : minutes),
-                        r = Math.round;
-
-                    if (percent < 100) {
-                        var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
-                                    '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>';
-                    } else {
-                        var html =  'Processing...';
-                    }
-                }
-
-                $('#file_progress').html(html);
-            }
-        }).then(function(response) {
-            var result = response.Result || {};
-
-            console.log('# Upload Successful:' + response.Success, result.state, response);
-            if (response.Success && result.state == "Uploaded" && result.name) {
-                var fileName = result.name;
-
-                console.log('# CSV Upload Complete', fileName, modelId);
-                //csvImportStore.Set(fileName, metaData);
-
-                csvImportService.StartTestingSet(modelId, fileName).then(function(result) {
-                    console.log('scoring testing set',result);
-                    $state.go('home.model.jobs', { 'jobCreationSuccess': true });
-                });
-            } else {
-                $('div.loader').css({'display':'none'});
-
-                var errorCode = result.errorCode || 'LEDP_ERR';
-                var errorMsg  = result.errorMsg || result.ResultErrors || 'Undefined error while uploading file.';
-
-                html = '<span style="display:block;margin:4em auto 0.5em;max-width:27em;">' + errorMsg + '</span><span style="margin-bottom:3em;display:block;font-size:8pt;color:#666;">' + errorCode + '</span>';
-                $('#file_progress').html(html);
-            }
-        });
-
-        $('#mainSummaryView .summary>h1').html('Uploading File');
-        $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
-
-        ShowSpinner('<div><h6 id="file_progress">Compressing...<br>This may take a moment.</h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
-
-        $('#fileUploadCancelBtn').on('click', vm.cancelClicked.bind(this));
-        */
-    };
-
-    vm.processHeaders = function(headers) {
-        //console.log('processHeaders', headers);
-    }
-
-    vm.generateModelName = function(fileName) {
-        //console.log('generateModelName', fileName);
-    }
+    vm.generateModelName = function(fileName) { }
     
     vm.uploadResponse = function(result) {
-        //console.log('upload response',result);
-
         if (result.Result && result.Result.name) {
             vm.fileName = result.Result.name;
         }
     }
 
     vm.cancelClicked = function() {
-        //console.log('# Upload Cancelled');
         csvImportStore.Get('cancelXHR', true).abort();
         $state.go('home.model.jobs');
-    };
+    }
 
     vm.clickNext = function() {
         ShowSpinner('Executing Scoring Job...');
         csvImportService.StartTestingSet(vm.params.modelId, vm.fileName).then(function(result) {
-            //console.log('scoring testing set', vm.fileName, result);
             $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
         });
     }

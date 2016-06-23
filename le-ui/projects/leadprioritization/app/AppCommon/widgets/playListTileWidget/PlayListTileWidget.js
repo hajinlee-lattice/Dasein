@@ -1,10 +1,9 @@
 angular.module('mainApp.appCommon.widgets.PlayListTileWidget', [
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.TrackingConstantsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.PlayTileService'
 ])
-.controller('PlayListTileWidgetController', function ($scope, $element, EvergageUtility, TrackingConstantsUtility, WidgetFrameworkService, PlayTileService) {
+.controller('PlayListTileWidgetController', function ($scope, $element, TrackingConstantsUtility, WidgetFrameworkService, PlayTileService) {
     
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
@@ -25,7 +24,7 @@ angular.module('mainApp.appCommon.widgets.PlayListTileWidget', [
     PlayTileService.GetTileData(data, widgetConfig, metadata, successCallback);
     
     $scope.playNameClicked = function () {
-        EvergageUtility.TrackAction(TrackingConstantsUtility.PLAY_LIST_TILE_CLICKED);
+        //EvergageUtility.TrackAction(TrackingConstantsUtility.PLAY_LIST_TILE_CLICKED);
         window.location.hash = '/Main/PlayDetails/' + $scope.tileData.ID;
     };
 })

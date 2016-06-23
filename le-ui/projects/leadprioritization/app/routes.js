@@ -71,13 +71,14 @@ angular
             },
             views: {
                 "navigation": {
-                    controller: function($stateParams, $state, BrowserStorageUtility) {
+                    controller: function($rootScope, $stateParams, $state, BrowserStorageUtility) {
                         var tenantId = $stateParams.tenantId,
                             ClientSession = BrowserStorageUtility.getClientSession(),
                             Tenant = ClientSession ? ClientSession.Tenant : null;
 
                         if (tenantId != Tenant.DisplayName) {
-                            $state.go('home.models', { tenantId: window.escape(Tenant.DisplayName) });
+                            $rootScope.tenantName = window.escape(Tenant.DisplayName);
+                            $state.go('home.models', { tenantId: $rootScope.tenantName });
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'

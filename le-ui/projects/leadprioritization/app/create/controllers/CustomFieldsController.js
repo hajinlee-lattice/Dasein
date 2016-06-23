@@ -1,7 +1,5 @@
-angular.module('mainApp.create.customFields', [
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.create.csvImport'
-])
+angular
+.module('mainApp.create.csvImport')
 .controller('CustomFieldsController', function($scope, $state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
     var vm = this;
 
@@ -31,7 +29,6 @@ angular.module('mainApp.create.customFields', [
         });
 
         vm.refreshLatticeFields();
-        console.log(this);
     }
 
     vm.changeMappingOption = function(mapping, selectedOption) {
@@ -58,7 +55,7 @@ angular.module('mainApp.create.customFields', [
 
         setTimeout(function() {
             vm.validateForm();
-            $scope.$apply();
+            $scope.$digest();
         },1);
     }
 
@@ -70,7 +67,7 @@ angular.module('mainApp.create.customFields', [
 
         setTimeout(function() {
             vm.validateForm();
-            $scope.$apply();
+            $scope.$digest();
         },1);
     }
 

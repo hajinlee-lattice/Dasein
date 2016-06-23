@@ -92,7 +92,7 @@ angular
 
                     vm.process_percent = 100 - (100 / seconds);
                     vm.message = 'Processing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
-                    $scope.$apply();
+                    $scope.$digest();
                 }, 500);
 
                 var deferred = $q.defer(),
@@ -160,7 +160,7 @@ angular
 
                     vm.compress_percent = (100 - (100 / seconds)) / 1.5;
                     vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
-                    $scope.$apply();
+                    $scope.$digest();
                 }, 1000);
 
                 try {
@@ -296,7 +296,7 @@ angular
                     if (vm.uploading) {
                         vm.message = 'Sending: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                         vm.percentage = Math.round(percent);
-                        $scope.$apply();
+                        $scope.$digest();
                     }
                 }
             }

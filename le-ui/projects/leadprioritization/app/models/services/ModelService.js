@@ -16,7 +16,7 @@ angular.module('mainApp.models.services.ModelService', [
         var deferred = $q.defer(),
             model = this.modelsMap[modelId];
         
-        if (typeof model == 'object') {
+        if (false && typeof model == 'object') {
             deferred.resolve(model);
         } else {
             ModelService.GetModelById(modelId).then(function(result) {
@@ -36,6 +36,7 @@ angular.module('mainApp.models.services.ModelService', [
         var deferred = $q.defer();
 
         if (use_cache) {
+            console.log(use_cache, ModelStore.models ? ModelStore.models.length : '_undefined', ModelStore.models);
             if (ModelStore.models && ModelStore.models.length > 0) {
                 deferred.resolve(ModelStore.models);
             } else {
@@ -46,7 +47,11 @@ angular.module('mainApp.models.services.ModelService', [
             ModelService.GetAllModels().then(function(response) {
                 var models = response.resultObj;
 
-                ModelStore.models = models;
+                ModelStore.models.length = 0;
+
+                models.forEach(function(model, index) {
+                    ModelStore.models.push(model);
+                });
 
                 deferred.resolve(models);
             });

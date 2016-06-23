@@ -3,8 +3,8 @@
 	<div class="row">
 		<div class="ten columns offset-one">
 			<hgroup>
-				<h3>{{ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
-					<span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{RequiredField}}</span></span>
+				<h3>{{::ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
+					<span ng-repeat="RequiredField in ::vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span>
 				</h3>
 			</hgroup>
 		</div>
@@ -15,17 +15,17 @@
 			<table class="unstyled">
 				<thead>
 					<tr>
-						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
-						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
-						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
-						<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 					</tr>
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="fieldMapping in vm.fieldMappings">
+                    <tr ng-repeat="fieldMapping in ::vm.fieldMappings">
 						<td class="field_mapping_label">
-							<label for="fieldType_{{ fieldMapping.userField }}">{{ fieldMapping.userField }}</label>
+							<label for="fieldType_{{ ::fieldMapping.userField }}">{{ ::fieldMapping.userField }}</label>
 						</td>
 
 						<td class="field_mapping_inputs">
@@ -33,13 +33,13 @@
 	                            	ng-model="selectedOption" 
 	                            	ng-change="vm.changeMappingOption(fieldMapping, selectedOption)"
 	                            	ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? vm.mappingOptions[1] : vm.mappingOptions[0]" 
-									ng-options="mappingOption as mappingOption.name for mappingOption in vm.mappingOptions">
+									ng-options="mappingOption as mappingOption.name for mappingOption in ::vm.mappingOptions">
                             </select>
 						</td>
 
 						<td class="field-mapping-inputs">
                             <select required
-                            		name="mapping_lattice_field_select_{{ fieldMapping.userField }}"
+                            		name="mapping_lattice_field_select_{{ ::fieldMapping.userField }}"
                             		class="form-control"
 	                            	ng-if="selectedOption.id == 1"
 	                            	ng-model="fieldMapping.mappedField"
@@ -61,7 +61,7 @@
 					        <input 	required
 									type="text"
 									class="form-control" 
-									name="mapping_custom_field_input_{{ fieldMapping.userField }}"
+									name="mapping_custom_field_input_{{ ::fieldMapping.userField }}"
           							ng-minlength="1"
                             		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
 									ng-model="fieldMapping.mappedField"
@@ -73,7 +73,7 @@
 						<td class="field_mapping_type">
 							<select 
 									class="custom-select" 
-									name="columnType_{{ fieldMapping.userField }}" 
+									name="columnType_{{ ::fieldMapping.userField }}" 
 									ng-model="fieldMapping.fieldType" 
 									ng-init="fieldMapping.fieldType=fieldMapping.fieldType" 
 									ng-disabled="selectedOption.id == 1"
@@ -99,10 +99,10 @@
     	</div>
   	</div>
 
-	<div class="row field-mapping-validation" ng-repeat="RequiredField in vm.RequiredFields" ng-if="!vm.fieldMappingsMapped[RequiredField]">
+	<div class="row field-mapping-validation" ng-repeat="RequiredField in ::vm.RequiredFields" ng-if="!vm.fieldMappingsMapped[RequiredField]">
 		<div class="ten columns offset-one has-error">
 			<p class="help-block">
-		    	* Required column is missing: <i class="orange-text">{{RequiredField}}</i>
+		    	* Required column is missing: <i class="orange-text">{{::RequiredField}}</i>
 			</p>
     	</div>
     </div>
@@ -111,7 +111,7 @@
 		<div class="ten columns offset-one field-mapping-actions">
 			<div class="pull-left">
 				<button ui-sref="home.models.import" class="button white-button" type="button">
-					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
+					{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
 				</button>
 			</div>
 			<div class="pull-right">
@@ -120,7 +120,7 @@
 						ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
 						class="button orange-button" 
 						type="button">
-					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
+					{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
 				</button>
 			</div>
 		</div>

@@ -1,5 +1,4 @@
 angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.TrackingConstantsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
@@ -13,7 +12,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.models.modals.DeactivateModelModal'
 ])
 .controller('ModelListTileWidgetController', function ($http, $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService) {
+    TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -43,21 +42,25 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if ($event != null) {
             $event.stopPropagation();
         }
+        
         $scope.showCustomMenu = !$scope.showCustomMenu;
+
+        if ($scope.showCustomMenu) {
+            $(document).bind('click', function(event){
+                var isClickedElementChildOfPopup = $element
+                    .find(event.target)
+                    .length > 0;
+
+                if (isClickedElementChildOfPopup)
+                    return;
+
+                $scope.$apply(function(){
+                    $scope.showCustomMenu = false;
+                    $(document).unbind(event);
+                });
+            });
+        }
     };
-    $(document).bind('click', function(event){
-        var isClickedElementChildOfPopup = $element
-            .find(event.target)
-            .length > 0;
-
-        if (isClickedElementChildOfPopup)
-            return;
-
-        $scope.$apply(function(){
-            $scope.showCustomMenu = false;
-        });
-    });
-
 
     $scope.refineAndCloneClick = function ($event) {
         if ($event != null) {

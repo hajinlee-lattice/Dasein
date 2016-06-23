@@ -139,6 +139,10 @@ Secondary Nav (Hamburger and Profile Nav)
     font-size: 22px;
     padding-top: 13px;
   }
+  .header-tenant-name {
+    padding: 20px 5px 20px;
+    display: inline-block;
+  }
   .profile-nav {
     float: right;
     & > a {

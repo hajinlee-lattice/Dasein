@@ -4,7 +4,6 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.modules.ServiceErrorModule',
@@ -23,27 +22,53 @@ var mainApp = angular.module('mainApp', [
     'pd.apiconsole'
 ])
 
-.config(['$httpProvider', function($httpProvider) {
-    /*
+// adds Authorization token to $http requests to access API
+.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtility) {
+    return {
+        request: function(config) {
+            config.headers = config.headers || {};
+            
+            if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
+                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+            }
+            
+            return config;
+        },
+        response: function(response) {
+            return response || $q.when(response);
+        }
+    };
+})
+
+.config(function ($httpProvider) {
+    $httpProvider.interceptors.push('authInterceptor');
+})
+
+// prevent $http caching of API results
+.config(function($httpProvider) {
     //initialize get if not there
     if (!$httpProvider.defaults.headers.get) {
         $httpProvider.defaults.headers.get = {};    
     }
-    // disable IE ajax request caching
+
+    //disable IE ajax request caching
     $httpProvider.defaults.headers.get['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
-    // extra
     $httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
-    */
-}])
+})
 
-// {{ foobar | escape }}
+// add escape filter to angular {{ foobar | escape }}
 .filter('escape', function() {
   return window.escape;
 })
 
+/*
+    We need to make the MainController as barebones as possible.
+    Please remove the idle timeout code and make that it's own module
+    placed in the /common area for all apps to utilize without dupe code
+*/
 .controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService) {
+    TimestampIntervalUtility, ResourceStringsService, HelpService, LoginService, ConfigService) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
 
@@ -85,16 +110,6 @@ var mainApp = angular.module('mainApp', [
             // Success
             function (data, status) {
                 if (data && data.Success === true) {
-                    //Initialize Evergage
-                    EvergageUtility.Initialize({
-                        userID: data.Result.User.Identifier,
-                        title: data.Result.User.Title,
-                        datasetPrefix: "pls",
-                        company: data.Ticket.Tenants[0].DisplayName
-                    });
-
-                    $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
-
                     startObservingUserActivtyThroughMouseAndKeyboard();
                     startCheckingIfSessionIsInactive();
                 }
@@ -115,27 +130,6 @@ var mainApp = angular.module('mainApp', [
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
         }
     });
-    
-    $scope.getLocaleSpecificResourceStrings = function (locale) {
-        /*
-        ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-            $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
-            $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
-        });
-        $scope.getWidgetConfigDoc();
-        */
-    };
-
-    $scope.getWidgetConfigDoc = function () {
-        /*
-        ConfigService.GetWidgetConfigDocument().then(function(result) {
-            $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
-                var scope = $rootScope.$new();
-                $compile($("#mainView").html(html))(scope);
-            });
-        });
-        */
-    };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
         $(this).mousemove(function (e) {
@@ -238,25 +232,4 @@ var mainApp = angular.module('mainApp', [
             });
         });
     }
-});
-
-mainApp.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtility) {
-    return {
-        request: function(config) {
-            config.headers = config.headers || {};
-            
-            if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
-                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
-            }
-            
-            return config;
-        },
-        response: function(response) {
-            return response || $q.when(response);
-        }
-    };
-});
-
-mainApp.config(function ($httpProvider) {
-    $httpProvider.interceptors.push('authInterceptor');
 });

@@ -1,11 +1,10 @@
 angular.module('mainApp.appCommon.widgets.PlayDetailsTileWidget', [
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.WidgetEventConstantUtility',
     'mainApp.appCommon.utilities.TrackingConstantsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.PlayTileService'
 ])
-.controller('PlayDetailsTileWidgetController', function ($scope, $rootScope, $element, EvergageUtility, TrackingConstantsUtility, WidgetEventConstantUtility, WidgetFrameworkService, PlayTileService) {
+.controller('PlayDetailsTileWidgetController', function ($scope, $rootScope, $element, TrackingConstantsUtility, WidgetEventConstantUtility, WidgetFrameworkService, PlayTileService) {
     
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
@@ -27,7 +26,7 @@ angular.module('mainApp.appCommon.widgets.PlayDetailsTileWidget', [
     
     $scope.isSelected = data.isSelected;
     $scope.playNameClicked = function () {
-        EvergageUtility.TrackAction(TrackingConstantsUtility.PLAY_DETAIL_TILE_CLICKED);
+        //EvergageUtility.TrackAction(TrackingConstantsUtility.PLAY_DETAIL_TILE_CLICKED);
         $rootScope.$broadcast(WidgetEventConstantUtility.PLAY_DETAILS_TAB_CLICKED, $scope.tileData.ID);
     };
     
