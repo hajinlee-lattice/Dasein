@@ -6,5 +6,6 @@ GRANT ALL ON GlobalAuthentication.* TO root;
 
 USE `GlobalAuthentication`;
 
-source WSHOME/le-security/src/test/schema/schema_mysql.sql
+source WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
 
+source WSHOME/le-security/src/test/schema/schema_mysql.sql

@@ -56,9 +56,9 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where Operation_Name = '%s'",
+                "from %s where Operation_Name = '%s' and Tenant_ID = %d",
                 entityClz.getSimpleName(),
-                tenantId, operationName);
+                operationName, tenantId);
         Query query = session.createQuery(queryStr);
         List list = query.list();
         if (list.size() == 0) {
