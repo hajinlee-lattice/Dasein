@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalTicket")
-public class GlobalAuthTicket implements HasPid {
+public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,19 +39,6 @@ public class GlobalAuthTicket implements HasPid {
     @JsonProperty("last_access_date")
     @Column(name = "Last_Access_Date", nullable = false)
     private Date lastAccessDate;
-
-    @JsonProperty("creation_date")
-    @Column(name = "Creation_Date", nullable = false)
-    private Date creationDate;
-
-    @JsonProperty("last_modification_date")
-    @Column(name = "Last_Modification_Date", nullable = false)
-    private Date lastModificationDate;
-
-    public GlobalAuthTicket() {
-        creationDate = new Date(System.currentTimeMillis());
-        lastModificationDate = new Date(System.currentTimeMillis());
-    }
 
     @Override
     public Long getPid() {
@@ -87,19 +74,4 @@ public class GlobalAuthTicket implements HasPid {
         this.lastAccessDate = lastAccessDate;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Date getLastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public void setLastModificationDate(Date lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
-    }
 }

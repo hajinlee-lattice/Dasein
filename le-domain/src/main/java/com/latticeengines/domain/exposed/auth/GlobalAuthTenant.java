@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.auth;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Access;
@@ -28,7 +27,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalTenant")
-public class GlobalAuthTenant implements HasName, HasId<String>, HasPid {
+public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, HasId<String>, HasPid {
 
     @JsonProperty("deployment_id")
     @Column(name = "Deployment_ID", nullable = true, unique = true)
@@ -48,19 +47,6 @@ public class GlobalAuthTenant implements HasName, HasId<String>, HasPid {
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "globalAuthTenant")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights;
-
-    @JsonProperty("creation_date")
-    @Column(name = "Creation_Date", nullable = false)
-    private Date creationDate;
-
-    @JsonProperty("last_modification_date")
-    @Column(name = "Last_Modification_Date", nullable = false)
-    private Date lastModificationDate;
-
-    public GlobalAuthTenant() {
-        creationDate = new Date(System.currentTimeMillis());
-        lastModificationDate = new Date(System.currentTimeMillis());
-    }
 
     @Override
     public Long getPid() {
@@ -101,19 +87,4 @@ public class GlobalAuthTenant implements HasName, HasId<String>, HasPid {
         this.gaUserTenantRights = gaUserTenantRights;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Date getLastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public void setLastModificationDate(Date lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
-    }
 }

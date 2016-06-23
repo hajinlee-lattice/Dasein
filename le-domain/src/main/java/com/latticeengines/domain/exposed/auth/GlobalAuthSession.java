@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.auth;
 
-import java.util.Date;
-
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
@@ -19,7 +17,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalSession")
-public class GlobalAuthSession implements HasPid {
+public class GlobalAuthSession extends BaseGlobalAuthObject implements HasPid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -38,19 +36,6 @@ public class GlobalAuthSession implements HasPid {
     @JsonProperty("tenant_id")
     @Column(name = "Tenant_ID", nullable = false)
     private Long tenantId;
-
-    @JsonProperty("creation_date")
-    @Column(name = "Creation_Date", nullable = false)
-    private Date creationDate;
-
-    @JsonProperty("last_modification_date")
-    @Column(name = "Last_Modification_Date", nullable = false)
-    private Date lastModificationDate;
-
-    public GlobalAuthSession() {
-        creationDate = new Date(System.currentTimeMillis());
-        lastModificationDate = new Date(System.currentTimeMillis());
-    }
 
     @Override
     public Long getPid() {
@@ -84,21 +69,5 @@ public class GlobalAuthSession implements HasPid {
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Date getLastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public void setLastModificationDate(Date lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
     }
 }

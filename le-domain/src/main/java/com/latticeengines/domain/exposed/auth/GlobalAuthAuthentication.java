@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalAuthentication")
-public class GlobalAuthAuthentication implements HasPid {
+public class GlobalAuthAuthentication extends BaseGlobalAuthObject implements HasPid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,19 +52,6 @@ public class GlobalAuthAuthentication implements HasPid {
     @JsonProperty("must_change_password")
     @Column(name = "MustChangePassword", nullable = false)
     private boolean mustChangePassword;
-
-    @JsonProperty("creation_date")
-    @Column(name = "Creation_Date", nullable = false)
-    private Date creationDate;
-
-    @JsonProperty("last_modification_date")
-    @Column(name = "Last_Modification_Date", nullable = false)
-    private Date lastModificationDate;
-
-    public GlobalAuthAuthentication() {
-        creationDate = new Date(System.currentTimeMillis());
-        lastModificationDate = new Date(System.currentTimeMillis());
-    }
 
     @Override
     public Long getPid() {
@@ -107,21 +94,5 @@ public class GlobalAuthAuthentication implements HasPid {
 
     public void setMustChangePassword(boolean mustChangePassword) {
         this.mustChangePassword = mustChangePassword;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Date getLastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public void setLastModificationDate(Date lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
     }
 }
