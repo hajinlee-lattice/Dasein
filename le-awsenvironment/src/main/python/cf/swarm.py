@@ -204,9 +204,9 @@ def configure_swarm(zk_ips, dkr_ips):
     start_swarm_manager(zk_ips["2"], zk_hosts)
 
     # join nodes
-    join_swarn_node(zk_ips["3"], zk_hosts)
-    for ip in dkr_ips:
-        join_swarn_node(ip, zk_hosts)
+    join_swarm_node(zk_ips["3"], zk_hosts)
+    for ip in dkr_ips.values():
+        join_swarm_node(ip, zk_hosts)
 
 
 def start_swarm_manager(ip, zk_hosts):
@@ -215,7 +215,7 @@ def start_swarm_manager(ip, zk_hosts):
     print 'Starting Swarm Manager on %s ...' % url
     t1 = time.time()
     ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", _EC2_PEM, url,
-                            "docker run -d -p 4000:4000 swarm manage -H :4000 --replication --addr %s:4000 zk://%s/swarm" % (private_ip, zk_hosts)],
+                            "docker run -d -p 4000:4000 --name swarm-mgr swarm manage -H :4000 --replication --advertise %s:4000 zk://%s/swarm" % (private_ip, zk_hosts)],
                            shell=False,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
@@ -227,13 +227,13 @@ def start_swarm_manager(ip, zk_hosts):
         print result
     print 'Done. %.2f seconds.' % (time.time() -t1)
 
-def join_swarn_node(ip, zk_hosts):
+def join_swarm_node(ip, zk_hosts):
     private_ip = ip["PrivateIp"]
     url = 'ec2-user@%s' % ip['URL']
     print 'Join Swarm Node on %s ...' % url
     t1 = time.time()
     ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", _EC2_PEM, url,
-                            "docker run -d swarm join --addr %s:2375 zk://%s/swarm" % (private_ip, zk_hosts)],
+                            "docker run -d --name swarm-node swarm join --advertise %s:2375 zk://%s/swarm" % (private_ip, zk_hosts)],
                            shell=False,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)

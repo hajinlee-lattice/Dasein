@@ -9,20 +9,20 @@ build_docker() {
 	mv Dockerfile.bak Dockerfile
 }
 
-pushd ../zookeeper/le-zk
-build_docker latticeengines/zookeeper
-popd
-
 pushd le-kafka
 build_docker latticeengines/kafka
 popd
 
-pushd le-kafka-schema-registry
-build_docker latticeengines/kafka-schema-registry
+pushd le-schema-registry
+build_docker latticeengines/schema-registry
 popd
 
 pushd le-kafka-rest
 build_docker latticeengines/kafka-rest
+popd
+
+pushd le-kafka-connect
+build_docker latticeengines/kafka-connect
 popd
 
 pushd le-kafka-haproxy

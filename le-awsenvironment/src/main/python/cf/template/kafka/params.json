@@ -18,19 +18,34 @@
     "Type": "String",
     "Description": "Zookeeper connection string."
   },
-  "BrokerMemory": {
-    "Type": "Number",
-    "Default" : "1024",
-    "Description": "Memory (MB) for each broker."
-  },
-  "PrimaryBrokers": {
+  "Brokers": {
     "Type": "Number",
     "Default" : "3",
-    "Description": "Brokers exposing 9092 port."
+    "Description": "Kafka Brokers."
   },
-  "SecondaryBrokers": {
+  "BrokerMemory": {
     "Type": "Number",
-    "Default" : "0",
-    "Description": "Brokers not exposing 9092 port."
+    "Default" : "2048",
+    "Description": "Memory (MB) for each broker."
+  },
+  "SchemaRegistries": {
+    "Type": "Number",
+    "Default" : "2",
+    "Description": "Schema Registries."
+  },
+  "SchemaRegistryMemory": {
+    "Type": "Number",
+    "Default" : "1024",
+    "Description": "Memory (MB) for each schema registry."
+  },
+  "ConnectWorkers": {
+    "Type": "Number",
+    "Default" : "2",
+    "Description": "Workers for Kafka Connect."
+  },
+  "ConnectWorkerMemory": {
+    "Type": "Number",
+    "Default" : "1024",
+    "Description": "Memory (MB) for each Kafka Connect worker."
   }
 }

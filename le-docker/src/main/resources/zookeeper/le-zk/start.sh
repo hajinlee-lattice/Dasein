@@ -6,6 +6,15 @@ if [ -z ${ZK_CLUSTER_SIZE} ]; then
     ZK_CLUSTER_SIZE=3
 fi
 
+if [ $ZK_CLUSTER_SIZE = 1 ]; then
+    echo 'Spin up a single node zookeeper'
+    while [ 1 = 1 ];
+    do
+        /usr/zookeeper/bin/zkServer.sh start-foreground || true
+        sleep 3
+    done
+fi
+
 if [ -z "${DISCOVER_SERVICE}" ]; then
 
     echo $MY_ID > /var/lib/zookeeper/myid
@@ -16,7 +25,7 @@ if [ -z "${DISCOVER_SERVICE}" ]; then
 
     for i in $(seq 1 ${ZK_CLUSTER_SIZE});
     do
-        HOST_NAME=`sed "s|{}|${i}|g" $ZK_HOST_PATTERN`
+        HOST_NAME=`echo $ZK_HOST_PATTERN | sed "s|{}|${i}|g"`
         SERVER="server.${i}=${HOST_NAME}:2888:3888"
         echo sed -i 's/$SERVER//g' $ZK_CONF
         echo $SERVER >> $ZK_CONF

@@ -46,10 +46,11 @@ def template_internal():
     ecscluster = ECSCluster("cluster")
     stack.add_resource(ecscluster)
 
-    # elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
+    elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     elb9022 = ElasticLoadBalancer("lb9022").listen("9022", protocol="http")
     elb9023 = ElasticLoadBalancer("lb9023").listen("9023", protocol="http")
-    stack.add_resources([elb9022, elb9023])
+    elb9024 = ElasticLoadBalancer("lb9024").listen("9024", protocol="http")
+    stack.add_resources([elb9092, elb9022, elb9023, elb9024])
 
     # Auto Scaling group
     asgroup = AutoScalingGroup("ScalingGroup")
@@ -57,26 +58,26 @@ def template_internal():
     instanceprofile = InstanceProfile("EC2InstanceProfile", ec2role)
     launchconfig = LaunchConfiguration("ContainerPool", ecscluster, asgroup, instanceprofile)
     asgroup.add_pool(launchconfig)
-    stack.add_resources(create_as_group(ecscluster, [elb9022, elb9023]))
+    stack.add_resources(create_as_group(ecscluster, [elb9092, elb9022, elb9023, elb9024]))
 
     # Docker service
     # ecsrole = ECSServiceRole("ECSServiceRole")
-    dockers = docker_resources(ecscluster)
+    dockers = docker_resources(ecscluster, asgroup, elb9092, elb9023)
     stack.add_resources(dockers)
 
     # Outputs
     outputs = {
-        # "BrokerLoadBalancer": {
-        #     "Description" : "URL for Schema Registry's load balancer",
-        #     "Value" : { "Fn::GetAtt" : [ elb9092.logical_id(), "DNSName" ]}
-        # },
+        "BrokerLoadBalancer": {
+            "Description" : "URL for Brokers' load balancer",
+            "Value" : { "Fn::GetAtt" : [ elb9092.logical_id(), "DNSName" ]}
+        },
         "SchemaRegistryLoadBalancer": {
             "Description" : "URL for Schema Registry's load balancer",
             "Value" : { "Fn::GetAtt" : [ elb9022.logical_id(), "DNSName" ]}
         },
-        "KafkaRESTLoadBalancer": {
-            "Description" : "URL for Schema Registry's load balancer",
-            "Value" : { "Fn::GetAtt" : [ elb9023.logical_id(), "DNSName" ]}
+        "KafkaConnectLoadBalancer": {
+            "Description" : "URL for Kafka Connect's load balancer",
+            "Value" : { "Fn::GetAtt" : [ elb9024.logical_id(), "DNSName" ]}
         }
     }
     stack.add_ouputs(outputs)
@@ -132,16 +133,28 @@ def provision(args):
                 'ParameterValue': args.zkhosts
             },
             {
-                'ParameterKey': 'PrimaryBrokers',
-                'ParameterValue': profile.num_pub_bkrs()
-            },
-            {
-                'ParameterKey': 'SecondaryBrokers',
-                'ParameterValue': profile.num_pri_bkrs()
+                'ParameterKey': 'Brokers',
+                'ParameterValue': profile.num_brokers()
             },
             {
                 'ParameterKey': 'BrokerMemory',
-                'ParameterValue': profile.bkr_mem()
+                'ParameterValue': profile.broker_mem()
+            },
+            {
+                'ParameterKey': 'SchemaRegistries',
+                'ParameterValue': profile.num_registries()
+            },
+            {
+                'ParameterKey': 'SchemaRegistryMemory',
+                'ParameterValue': profile.registry_mem()
+            },
+            {
+                'ParameterKey': 'ConnectWorkers',
+                'ParameterValue': profile.num_workers()
+            },
+            {
+                'ParameterKey': 'ConnectWorkerMemory',
+                'ParameterValue': profile.worker_mem()
             }
         ],
         TimeoutInMinutes=60,
@@ -181,16 +194,14 @@ def create_as_group(ecscluster, elbs):
     asgroup.attach_elbs(elbs)
     return asgroup, role, instanceprofile, launchconfig
 
-def docker_resources(ecscluster):
-    pri_bkr, pri_bkr_task= primary_broker_service(ecscluster)
-    sec_bkr, sec_bkr_task = secondary_broker_service(ecscluster)
-    sr, sr_task = schema_registry_service(ecscluster, [pri_bkr, sec_bkr])
+def docker_resources(ecscluster, asgroup, elb9092, elb9023):
+    bkr, bkr_task= broker_service(ecscluster, asgroup)
+    sr, sr_task = schema_registry_service(ecscluster, bkr)
+    conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9023, sr)
+    kr, kr_task = kafka_rest_service(ecscluster, elb9023, sr)
+    return bkr, bkr_task, sr, sr_task, conn, conn_task, kr, kr_task
 
-    return pri_bkr, pri_bkr_task, \
-           sec_bkr, sec_bkr_task, \
-           sr, sr_task
-
-def primary_broker_service(ecscluster):
+def broker_service(ecscluster, asgroup):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
     container = ContainerDefinition("bkr", os.path.join(_ECR_REPO, "latticeengines/kafka")) \
@@ -209,36 +220,14 @@ def primary_broker_service(ecscluster):
     task = TaskDefinition("BrokerTask")
     task.add_container(container).add_volume(intaddr).add_volume(extaddr)
 
-    service = ECSService("Broker", ecscluster, task, { "Ref": "PrimaryBrokers" })
+    service = ECSService("Broker", ecscluster, task, { "Ref": "Brokers" }).depends_on(asgroup)
     return service, task
 
-def secondary_broker_service(ecscluster):
+def schema_registry_service(ecscluster, broker):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
-    container = ContainerDefinition("bkr", os.path.join(_ECR_REPO, "latticeengines/kafka")) \
-        .mem_mb({ "Ref" : "BrokerMemory" }).publish_port(9093, 9093) \
-        .set_env("BROKER_PORT", "9093") \
-        .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
-        .set_logging({
-            "LogDriver": "awslogs",
-            "Options": {
-                "awslogs-group": "docker-kafka-broker",
-                "awslogs-region": { "Ref": "AWS::Region" }
-            }
-        }) \
-        .mount("/etc/internaladdr.txt", intaddr) \
-        .mount("/etc/externaladdr.txt", extaddr)
-    task = TaskDefinition("SecondaryBrokerTask")
-    task.add_container(container).add_volume(intaddr).add_volume(extaddr)
-
-    service = ECSService("SecondaryBroker", ecscluster, task, { "Ref": "SecondaryBrokers" })
-    return service, task
-
-def schema_registry_service(ecscluster, brokers):
-    intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
-    extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
-    container = ContainerDefinition("sr", os.path.join(_ECR_REPO, "latticeengines/kafka-schema-registry")) \
-        .mem_mb(1024).publish_port(9022, 9022) \
+    container = ContainerDefinition("sr", os.path.join(_ECR_REPO, "latticeengines/schema-registry")) \
+        .mem_mb({ "Ref": "SchemaRegistryMemory" }).publish_port(9022, 9022) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
         .set_logging({
             "LogDriver": "awslogs",
@@ -248,29 +237,48 @@ def schema_registry_service(ecscluster, brokers):
             }
         }) \
         .mount("/etc/internaladdr.txt", intaddr) \
-        .mount("/etc/externaladdr.txt", extaddr) \
-        .hostname("schema-registry")
+        .mount("/etc/externaladdr.txt", extaddr)
 
-    container2 = ContainerDefinition("kr", os.path.join(_ECR_REPO, "latticeengines/kafka-rest")) \
-        .mem_mb(512).publish_port(9023, 9023) \
+    task = TaskDefinition("SchemaRegistryTask")
+    task.add_container(container).add_volume(intaddr).add_volume(extaddr)
+
+    service = ECSService("SchemaRegistry", ecscluster, task, { "Ref": "SchemaRegistries" }).depends_on(broker)
+    return service, task
+
+def kafka_rest_service(ecscluster, elb9023, sr):
+    container = ContainerDefinition("kr", os.path.join(_ECR_REPO, "latticeengines/kafka-rest")) \
+        .mem_mb(1024).publish_port(9023, 9023) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
-        .set_env("SR_PROXY", "http://%s:9022" % container.get_name()) \
+        .set_env("SR_ADDRESS",
+                 {"Fn::Join" : [ "", [
+                     "http://", {"Fn::GetAtt": [ elb9023.logical_id(), "DNSName" ] } , ":9023"
+                 ]]})
+
+    task = TaskDefinition("KafkaRESTTask")
+    task.add_container(container)
+
+    service = ECSService("KafkaREST", ecscluster, task, 2).depends_on(sr)
+    return service, task
+
+def kafka_connect_service(ecscluster, elb9092, elb9023, sr):
+    container = ContainerDefinition("connect", os.path.join(_ECR_REPO, "latticeengines/kafka-connect")) \
+        .mem_mb( { "Ref": "ConnectWorkerMemory" } ).publish_port(9024, 9024) \
+        .set_env("BOOTSTRAP_SERVERS", { "Fn::Join" : [ "", [
+            "http://", { "Fn::GetAtt": [ elb9092.logical_id(), "DNSName" ] } , ":9092"] ]}) \
+        .set_env("SR_ADDRESS", { "Fn::Join" : [ "", [
+            "http://", { "Fn::GetAtt": [ elb9023.logical_id(), "DNSName" ] } , ":9023"] ]}) \
         .set_logging({
             "LogDriver": "awslogs",
             "Options": {
-                "awslogs-group": "docker-rest",
+                "awslogs-group": "docker-kafka-connect",
                 "awslogs-region": { "Ref": "AWS::Region" }
             }
-        }) \
-        .link(container)
+        })
 
-    task = TaskDefinition("SchemaRegistryTask")
-    task.add_container(container).add_container(container2)\
-        .add_volume(intaddr).add_volume(extaddr)
+    task = TaskDefinition("ConnectWorkerTask")
+    task.add_container(container)
 
-    service = ECSService("SchemaRegistry", ecscluster, task, 2)
-    for broker_service in brokers:
-        service.depends_on(broker_service)
+    service = ECSService("ConnectWorker", ecscluster, task, { "Ref": "ConnectWorkers" }).depends_on(sr)
     return service, task
 
 def get_elbs(stackname):

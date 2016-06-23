@@ -34,12 +34,18 @@ fi
 # on local we pass in host name, and here we resolve it to ip
 
 if ! valid_ip ${ADVERTISE_IP} ; then
-    ADVERTISE_IP=$(dig +short "${ADVERTISE_IP}")
+    ADVERTISE_IP=$(dig +short ${ADVERTISE_IP})
 fi
 
 echo "ADVERTISE_IP=${ADVERTISE_IP}"
 
-sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/kafka/server.properties
-sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka/server.properties
+sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/schema-registry/schema-registry.properties
+sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/schema-registry/schema-registry.properties
 
-JMX_PORT=9199 /usr/bin/kafka-server-start /etc/kafka/server.properties
+i=0
+while [ $i -le 100 ]; do
+    /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
+
+    sleep 5
+    i=$((i+1))
+done
