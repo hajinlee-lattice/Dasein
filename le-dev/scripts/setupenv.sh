@@ -8,6 +8,11 @@ cp $WSHOME/le-dev/hadoop/dev/mapred-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/tez-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/yarn-site.xml $HADOOP_CONF_DIR
 
+if [ ! -z "CATALINA_HOME" ]; then
+    cp $WSHOME/le-dev/tomcat/dev/server.xml $CATALINA_HOME/conf/server.xml
+fi
+
+
 mkdir -p $WSHOME/le-dev/hadoop/artifacts/
 export TEZ_TARBALL=$WSHOME/le-dev/hadoop/artifacts/tez-0.8.2.tar.gz
 hadoop fs -mkdir -p /apps/tez || true
@@ -18,7 +23,8 @@ scp -i $WSHOME/le-dev/sftpdevkey sftpdev@10.41.1.31:/artifactory/tez-0.8.2.tar.g
 hadoop fs -copyFromLocal $TEZ_TARBALL /apps/tez || true
 rm -rf $TEZ_TARBALL || true
 
-sudo pip install -r $WSHOME/le-dev/scripts/requirements.txt
+sudo pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
+pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
 
 sudo mkdir -p /etc/ledp
 sudo cp $WSHOME/le-security/certificates/laca-ldap.dev.lattice.local.jks /etc/ledp
@@ -28,4 +34,3 @@ sudo chmod a+w /var/log/scoring/mapper
 
 sudo mkdir -p /var/cache/scoringapi || true
 sudo chmod a+w /var/cache/scoringapi
-
