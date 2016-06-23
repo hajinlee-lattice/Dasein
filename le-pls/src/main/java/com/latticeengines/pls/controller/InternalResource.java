@@ -341,8 +341,14 @@ public class InternalResource extends InternalResourceBase {
     }
 
     private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries) {
+        return postProcessModelSummaryList(summaries, true);
+    }
+
+    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries, boolean dropPredictors) {
         for (ModelSummary summary : summaries) {
-            summary.setPredictors(new ArrayList<Predictor>());
+            if (dropPredictors) {
+                summary.setPredictors(new ArrayList<Predictor>());
+            }
             summary.setDetails(null);
         }
 
@@ -383,7 +389,8 @@ public class InternalResource extends InternalResourceBase {
         if (!StringUtils.isEmpty(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
-        return modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
+        return postProcessModelSummaryList(
+                modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum), false);
 
     }
 
