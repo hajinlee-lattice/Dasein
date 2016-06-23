@@ -2,6 +2,7 @@ import fastavro as avro
 import glob
 import os
 import shutil
+import sys
 
 from trainingtestbase import TrainingTestBase
 
@@ -9,12 +10,17 @@ class DataRuleTestBase(TrainingTestBase):
 
     def setUp(self):
         super(DataRuleTestBase, self).setUp()
-        os.symlink("../../main/python/rulefwk.py", "./rulefwk.py")
-        os.symlink("../../main/python/datarules/rulepipeline.json", "rulepipeline.json")
-        os.symlink("../../test/python/datarulestest/testrulepipeline.json", "testrulepipeline.json")
-        for filename in glob.glob(os.path.join("../../main/python/datarules", "*.py")):
+
+        basePath = "../../" if os.path.exists("../../main/python/rulefwk.py") else "../../../"
+
+        os.symlink(basePath + "main/python/rulefwk.py", "./rulefwk.py")
+        os.symlink(basePath + "main/python/datarules/rulepipeline.json", "rulepipeline.json")
+        if os.path.exists(os.path.join(os.getcwd() , "./datarulestest/testrulepipeline.json")):
+            if not os.path.exists("testrulepipeline.json"):
+                os.symlink(os.path.join(os.getcwd() , "./datarulestest/testrulepipeline.json"), "testrulepipeline.json")
+        for filename in glob.glob(os.path.join(basePath + "/main/python/datarules", "*.py")):
             shutil.copy(filename, self.pipelinefwkdir)
-        for filename in glob.glob(os.path.join("../../test/python/datarulestest", "*.py")):
+        for filename in glob.glob(os.path.join(basePath + "/test/python/datarulestest", "*.py")):
             shutil.copy(filename, self.pipelinefwkdir)
 
 
@@ -24,9 +30,14 @@ class DataRuleTestBase(TrainingTestBase):
     def assertRuleOutputCount(self, expectedCount):
         self.assertEqual(len(glob.glob("./results/datarules/*.avro")), expectedCount)
 
-    def assertColumnRuleOutput(self, ruleOutput, expectedColumns):
-        self.assertTrue(os.path.exists(ruleOutput))
+    def getDataDirectory(self):
+        cwd = os.getcwd()
+        if os.path.exists("./data/"):
+            return cwd + "/data/"
+        elif os.path.exists("../data/"):
+            return cwd + "/../data"
 
+    def assertColumnRuleOutput(self, ruleOutput, expectedColumns):
         actualColumns = []
         if os.path.isfile(ruleOutput):
             with open(ruleOutput) as fp:

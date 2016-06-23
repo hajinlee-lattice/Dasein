@@ -43,7 +43,8 @@ class FrequencyIssuesTest(DataRuleTestBase):
         pass
 
     def createDataFrameFromCSV(self):
-        fileName = "./data/DataRule/EventTable_MWB_NoCountryFilter_20160511.csv"
+        dataDirPath = DataRuleTestBase.getDataDirectory(self)
+        fileName = dataDirPath + "/DataRule/EventTable_MWB_NoCountryFilter_20160511.csv"
         dataFrame = pd.read_csv(fileName)
         colNames = dataFrame.columns
 

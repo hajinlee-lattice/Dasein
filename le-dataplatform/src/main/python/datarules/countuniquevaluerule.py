@@ -6,8 +6,7 @@ from rulefwk import ColumnRule
 logger = get_logger("countuniquevaluerule")
 
 class CountUniqueValueRule(ColumnRule):
-    columnsThatFailedTest = {}
-    uniqueCountThreshold = 200
+
 
     def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, uniqueCountThreshold=200):
         self.columns = columns
@@ -15,6 +14,7 @@ class CountUniqueValueRule(ColumnRule):
         self.catColumn = categoricalColumns
         self.numColumn = numericalColumns
         self.eventColumn = eventColumn
+        self.columnsThatFailedTest = {}
 
     def getColumnType(self, column):
         if column in self.catColumn:

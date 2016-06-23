@@ -126,6 +126,19 @@
         "eventColumn": "targetColumn"
       },
       "ColumnTransformFilePath": "nullissue.py"
+    },          
+    "UncertaintyThreshold": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "uncertaintythreshold",
+      "MainClassName": "UncertaintyThreshold",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "dataProfile": "dataprofile",
+        "miThreshold": 0.01
+      },
+      "ColumnTransformFilePath": "uncertaintyThreshold.py"
     }
   }
 }

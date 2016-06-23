@@ -10,9 +10,8 @@ import pandas as pd
 class FutureInformation(ColumnRule):
 
     futureInfoCols = {'Title_Length' : 1, 'CompanyName_Length': 1, 'Phone_Entropy':  float('nan'), 'CompanyName_Entropy': float('nan'), 'LeadSouce': None}
-    futureInfoPopPercThreshold = 0.01
     futureInfoLiftThreshold = 1.1
-    futureInfoSigThreshold = 2
+    futureInfoSigThreshold = 2.0
     columnsThatFailedTest = {}
     groupedCountAndConversionRate = {}
 
@@ -34,8 +33,8 @@ class FutureInformation(ColumnRule):
                     # What is default value
                     self.columnsThatFailedTest[columnName] = None
 
-    @overrides
-    def explain(self):
+    @overrides(ColumnRule)
+    def getDescription(self):
         return "Check if Conversion Rate and Significance are greater than threshold"
 
     def getColumnType(self, column):

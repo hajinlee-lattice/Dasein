@@ -30,5 +30,3 @@ class UniqueCountRuleTest(DataRuleTestBase):
         uniqueCountRule.apply(dataFrame, dictOfArguments)
 
         self.assertEqual(uniqueCountRule.getResults()['A'], False, "Rule should be False when there are less than 200 unique values")
-
-

@@ -14,9 +14,10 @@ class DataRuleTestPipelineTest(DataRuleTestBase):
         launcher = Launcher("model-datarule-test.json")
         launcher.execute(False)
 
-        self.assertRuleOutputCount(8)
+        self.assertRuleOutputCount(9)
         self.assertColumnRuleOutput("./results/datarules/TestColumnRule_ColumnRule.avro", ["BW_mapping", "BW_seo_title"])
         testRowRule = TestRowRule()
         self.assertRowRuleOutput("./results/datarules/TestRowRule_RowRule.avro", testRowRule.getRowsToRemove())
+        self.assertColumnRuleOutput("./results/datarules/UncertaintyThreshold_ColumnRule.avro", ['Activity_ClickEmail_cnt', 'BusinessVCFunded'])
 
         self.assertStandardRuleOutputs()

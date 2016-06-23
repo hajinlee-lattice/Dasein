@@ -57,13 +57,14 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
             for prop, value in props.iteritems():
                 try:
                     tokens = prop.split(".")
-                    step = stepMap[tokens[0]]
-                    if step is not None:
-                        if tokens[1] == 'enabled' and value.lower() == 'false':
-                            disabledSteps.append(step)
-                            continue
-                        currentValue = getattr(step, tokens[1])
-                        setattr(step, tokens[1], (type(currentValue))(value))
+                    if tokens[0] in stepMap:
+                        step = stepMap[tokens[0]]
+                        if step is not None:
+                            if tokens[1] == 'enabled' and value.lower() == 'false':
+                                disabledSteps.append(step)
+                                continue
+                            currentValue = getattr(step, tokens[1])
+                            setattr(step, tokens[1], (type(currentValue))(value))
                 except Exception as propError:
                     logger.error(str(propError))
         except Exception as e:
@@ -86,7 +87,7 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
     return pipeline, scoringPipeline
 
 def setupRulePipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps )
+    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps)
 
     pipeline = DataRulePipeline(steps)
 

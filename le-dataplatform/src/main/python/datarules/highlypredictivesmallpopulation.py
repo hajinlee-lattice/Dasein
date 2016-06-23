@@ -1,13 +1,11 @@
-from rulefwk import ColumnRule
+from rulefwk import ColumnRule, DataRule
 from leframework.codestyle import overrides
 from dataruleutils import calculateOverallConversionRate, getGroupedConversionRate, isCategorical, isNumerical
 
 class HighlyPredictiveSmallPopulation(ColumnRule):
 
-    columnsThatFailedTest = {}
     highlyPositivelyPredictiveSmallPopulationPopPercThreshold = 0.01
     highlyPositivelyPredictiveSmallPopulationLiftThreshold = 1.2
-    groupedCountAndConversionRate = {}
 
     def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, highlyPositivelyPredictiveSmallPopulationPopPercThreshold=0.01,
                 highlyPositivelyPredictiveSmallPopulationLiftThreshold=1.2):
@@ -17,9 +15,11 @@ class HighlyPredictiveSmallPopulation(ColumnRule):
         self.eventColumn = eventColumn
         self.highlyPositivelyPredictiveSmallPopulationPopPercThreshold = highlyPositivelyPredictiveSmallPopulationPopPercThreshold
         self.highlyPositivelyPredictiveSmallPopulationLiftThreshold = highlyPositivelyPredictiveSmallPopulationLiftThreshold
-        pass
+        self.columnsThatFailedTest = {}
+        self.groupedCountAndConversionRate = {}
 
-    def explain(self):
+    @overrides(DataRule)
+    def getDescription(self):
         return "given the conversion rate of each distinctive feature value in column \
          and the overall conversion rate, decide if the corresponding rows should be deleted"
 

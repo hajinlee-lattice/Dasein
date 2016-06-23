@@ -28,11 +28,12 @@ class ColumnTransform(object):
     resultOfCallingMainMethodNameKey = u"ResultOfCallingMainMethodName"
     sortingKey = u'KeyWhenSortingByAscending'
 
-    def __init__(self, pathToPipelineFiles = None):
+    def __init__(self, pathToPipelineFiles=None):
         if pathToPipelineFiles is not None:
             try:
                 for pipelineFile in pathToPipelineFiles:
                     logger.info("Opening file %s." % pipelineFile)
+                    logger.info(os.getcwd())
                     if os.path.isfile(pipelineFile):
                         with open(pipelineFile) as pipelineFileText:
                             self.pipelineFileAsJson = json.load(pipelineFileText)
@@ -202,7 +203,10 @@ class ColumnTransform(object):
                     if value is None:
                         value = {}
                     if categoricalColumns:
-                        value = categoricalColumns.copy()
+                        if type(categoricalColumns) is dict:
+                            value = categoricalColumns.copy()
+                        elif  isinstance(categoricalColumns, str) or isinstance(categoricalColumns, unicode):
+                            value = {categoricalColumns : categoricalColumns}
                     if continuousColumns and continuousColumns.keys():
                         value.update(continuousColumns)
                 else:

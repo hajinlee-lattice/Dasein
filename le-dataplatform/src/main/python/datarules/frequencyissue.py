@@ -11,14 +11,14 @@ class FrequencyIssue(ColumnRule):
     freqIssuesCols = ['Company', 'LastName', 'FirstName', 'Email']
     freqIssuesPopPercThreshold = 0.01
     pubEmailColName = 'Uses_Public_Email_Provider'
-    groupedCountAndConversionRate = {}
-    columnsThatFailedTest = {}
 
     def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn):
         self.columns = columns
         self.catColumn = categoricalColumns
         self.numColumn = numericalColumns
         self.eventColumn = eventColumn
+        self.columnsThatFailedTest = {}
+        self.groupedCountAndConversionRate = {}
 
     @overrides(ColumnRule)
     def apply(self, dataFrame, dictOfArguments):
@@ -50,7 +50,6 @@ class FrequencyIssue(ColumnRule):
         groupedCountAndConversionRate = ''
         if columnName in self.freqIssuesCols:
             if columnName == 'Email':
-                # print columnName, self.columns, dataColumn.values
                 colVal = [findDomain(x) for x in dataColumn.values]
                 col_cc = Counter(colVal)
                 groupedCountAndConversionRate = getGroupedConversionRate(pd.Series(colVal), eventColumn, overallPositiveCountAndConversionRate)

@@ -57,13 +57,13 @@ class NullIssue(ColumnRule):
         self.groupedCountAndConversionRate.update({columnName: groupedCountAndConversionRate})
 
         cntRateNull = [[x, y[0], y[1], y[2]]  for x, y in groupedCountAndConversionRate.items()
-                        if (isCategorical(colType) and x.lower() in self.nullIssueNullValCat) or (isNumerical(colType) and x == 'np.nan')]
+                        if (isCategorical(colType) and str(x).lower() in self.nullIssueNullValCat) or (isNumerical(colType) and x == 'np.nan')]
 
         if isNumerical(colType) and x == 'np.nan':
             cntRateNull = [[x, y[0], y[1], y[2]]  for x, y in groupedCountAndConversionRate.items() if x == 'np.nan']
 
-        if isCategorical(colType) and x.lower() in self.nullIssueNullValCat:
-            cntRateNull = [[x, y[0], y[1], y[2]]  for x, y in groupedCountAndConversionRate.items() if x.lower() in self.nullIssueNullValCat]
+        if isCategorical(colType) and str(x).lower() in self.nullIssueNullValCat:
+            cntRateNull = [[x, y[0], y[1], y[2]]  for x, y in groupedCountAndConversionRate.items() if str(x).lower() in self.nullIssueNullValCat]
 
         if len(cntRateNull) == 0:
             return False
@@ -71,11 +71,10 @@ class NullIssue(ColumnRule):
             cntRateNull = cntRateNull[0]
 
         if int(cntRateNull[1]) >= self.nullIssueToDelThreshold * overallPositiveCountAndConversionRate[0]:
-            "Returning True"
             return True
 
         cntRateNonNull = [[x, y[0], y[1], y[2]] for x, y in groupedCountAndConversionRate.items()
-                           if (isCategorical(colType) and x.lower() not in self.nullIssueNullValCat) or (isNumerical(colType)and x != 0)]
+                           if (isCategorical(colType) and str(x).lower() not in self.nullIssueNullValCat) or (isNumerical(colType)and x != 0)]
 
         cntRateNonNullSorted = sorted(cntRateNonNull, key=lambda x: x[2], reverse=True)
 

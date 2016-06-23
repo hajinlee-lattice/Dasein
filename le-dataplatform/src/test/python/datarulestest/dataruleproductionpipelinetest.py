@@ -16,3 +16,4 @@ class DataRuleProductionPipelineTest(DataRuleTestBase):
         self.assertRuleOutputCount(2)
         self.assertColumnRuleOutput("./results/datarules/CountUniqueValueRule_ColumnRule.avro", [])
         self.assertColumnRuleOutput("./results/datarules/PopulatedRowCount_ColumnRule.avro", [])
+

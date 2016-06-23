@@ -1,5 +1,7 @@
 from math import sqrt
+import re
 import pandas as pd
+from datetime import datetime, timedelta
 
 # Return Conversion Rate and Number of Positive Events
 def calculateOverallConversionRate(dataFrameColumn):
@@ -8,8 +10,19 @@ def calculateOverallConversionRate(dataFrameColumn):
 def calculateConversionRate(dataFrameColumn):
     zeroLabels = (dataFrameColumn == 0).sum()
     oneLabels = (dataFrameColumn == 1).sum()
-    conversionRate = float(oneLabels) / (oneLabels + zeroLabels)
-    return conversionRate
+    if (oneLabels + zeroLabels) > 0:
+        conversionRate = float(oneLabels) / (oneLabels + zeroLabels)
+        return conversionRate
+    else:
+        return 0.0
+
+def selectIdColumn(dataFrame):
+    if "Id" in dataFrame.columns:
+        return "Id"
+    elif "LeadID" in dataFrame.columns:
+        return "LeadID"
+    elif "ExternalID" in dataFrame.columns:
+        return "ExternalID"
 
 def isCategorical(columnType):
     return columnType == "categorical"
@@ -60,3 +73,58 @@ def ffloat(x):
         return float(x)
     except:
         return float('nan')
+
+def getDomainColumn(dataFrame):
+    if "Domain" in dataFrame.columns:
+        return normalizeDomain(dataFrame[u'Domain'])
+    elif "Website" in dataFrame.columns:
+        return normalizeDomain(dataFrame[u'Website'])
+    elif "Email" in dataFrame.columns:
+        return normalizeDomain(extractDomainFromEmail(dataFrame[u'Email']))
+
+def cleanDomainInEmail(emailAsString):
+    if emailAsString is None:
+        return emailAsString
+    elif '@' in emailAsString:
+        return emailAsString[emailAsString.index('@')]
+    else:
+        return emailAsString
+
+def cleanDomain(domainAsString):
+    if domainAsString is None:
+        return domainAsString
+    else:
+        if "http://" in domainAsString:
+            domainAsString = re.sub("^http://", "", domainAsString)
+        if "www." in domainAsString:
+            domainAsString = re.sub("^www[.]", "", domainAsString)
+        if "." in domainAsString:
+            domainAsString = re.sub(".*$", "", domainAsString)
+        if "NULL" in domainAsString:
+            domainAsString = None
+        return domainAsString.upper()
+
+def addSortColumn(dataFrame, domainColumn, eventColumn, leadCreationDateColumn):
+    dataFrame[u'sort'] = dataFrame.apply(applySort)
+    dataFrame = dataFrame.sort([u'sort'])
+
+    dataFrame = dataFrame.drop(u'sort', 1)
+
+    return dataFrame
+
+def applySort(dataFrameColumns):
+    optimalCreationTime = (datetime.utcnow() - timedelta(days=45)).total_seconds() * 1000
+    eventColumn = dataFrameColumns['target']
+    leadCreationDate = pd.to_datetime(dataFrameColumns['LeadCreationDate']).total_seconds() * 1000
+
+    if leadCreationDate is None:
+        return None
+    else:
+        return eventColumn + (1.0 / abs(leadCreationDate - optimalCreationTime))
+
+def extractDomainFromEmail(Domain):
+    return Domain.apply(cleanDomainInEmail)
+
+def normalizeDomain(Domain):
+    return Domain.apply(cleanDomain)
+

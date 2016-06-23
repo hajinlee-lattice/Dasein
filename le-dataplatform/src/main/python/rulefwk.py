@@ -55,13 +55,14 @@ class DataRulePipeline(Pipeline):
                 fileSuffix = "TableRule"
                 results = step.getRowsToRemove()
 
-            if not results:
-                continue
-
             recordWriter = io.DatumWriter(avroSchema)
             outputFileName = step.__class__.__name__ + '_' + fileSuffix + '.avro'
             dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
                                                  recordWriter, writers_schema=avroSchema, codec='deflate')
+
+            if not results:
+                dataWriter.close()
+                continue
 
             index = 1
             if isinstance(step, ColumnRule):

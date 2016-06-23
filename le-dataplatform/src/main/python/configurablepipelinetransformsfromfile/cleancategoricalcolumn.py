@@ -4,6 +4,7 @@ import pandas as pd
 from pipelinefwk import get_logger
 from pipelinefwk import create_column
 from pipelinefwk import PipelineStep
+import os
 '''
 Description:
 
@@ -34,6 +35,7 @@ class CleanCategoricalColumn(PipelineStep):
     targetColumn = ""
     currentColumn = None
     trainingMode = False
+    cleanCategoricalFilePath = None
 
     def __init__(self, columnsToPivot, targetColumn):
         self.columnsToPivot = columnsToPivot
@@ -65,6 +67,7 @@ class CleanCategoricalColumn(PipelineStep):
                 self.trainingMode = True
             else:
                 logger.info("CleanCategoricalColumn testing phase.")
+                self.__writeRTSArtifact()
                 for column, _ in self.columnsToPivot.iteritems():
                     if column in dataFrame.columns:
                         self.currentColumn = column
@@ -94,18 +97,18 @@ class CleanCategoricalColumn(PipelineStep):
 
     def __cleanCateg(self, xlist, thresh=.95, percMin=.01, nullValue='0'):
         self.nullValue = nullValue
-        cc=Counter(xlist)
-        total=len(xlist)*thresh
-        cd=sorted(cc.items(), key = lambda x: x[1], reverse=True)
-        newtotal=0
-        includedKeys=[]
-        threshCount=len(xlist)*percMin
+        cc = Counter(xlist)
+        total = len(xlist) * thresh
+        cd = sorted(cc.items(), key=lambda x: x[1], reverse=True)
+        newtotal = 0
+        includedKeys = []
+        threshCount = len(xlist) * percMin
         for cnt in range(len(cd)):
-            xcount=cd[cnt][1]
-            if xcount<threshCount: break
+            xcount = cd[cnt][1]
+            if xcount < threshCount: break
             newtotal += xcount
             includedKeys.append(cd[cnt][0])
-            if newtotal>total*thresh: break
+            if newtotal > total * thresh: break
         cd = None
         cc = None
         self.includedKeys[self.currentColumn] = includedKeys
@@ -118,21 +121,21 @@ class CleanCategoricalColumn(PipelineStep):
     The new list re-included those categories that are statistically signficant even though they are rare
     '''
     def __cleanCategFull(self, categoricalColumn, dataFrame):
-        includedKeys=set(self.cleanCategoriesWithThreshold)
-        excludedKeys=set(dataFrame[categoricalColumn])-set(self.cleanCategoriesWithThreshold)
+        includedKeys = set(self.cleanCategoriesWithThreshold)
+        excludedKeys = set(dataFrame[categoricalColumn]) - set(self.cleanCategoriesWithThreshold)
         xlist = dataFrame[categoricalColumn]
-        ylist=[x for x in enumerate(xlist)]
-        popCount=len(xlist)
-        popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
-        transferKeyList=[]
+        ylist = [x for x in enumerate(xlist)]
+        popCount = len(xlist)
+        popRate = (dataFrame[self.targetColumn].sum() * 1.0) / popCount
+        transferKeyList = []
         for k in excludedKeys:
-            ind=[i for i,x in ylist if x==k]
-            count=len(ind)
-            perc=round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind])*1.0/count, 2)
-            sd=math.sqrt(perc*(1.0-perc)/count + popRate*(1.0-popRate)/popCount)
-            if abs(perc-popRate)>2.0*sd:
+            ind = [i for i, x in ylist if x == k]
+            count = len(ind)
+            perc = round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind]) * 1.0 / count, 2)
+            sd = math.sqrt(perc * (1.0 - perc) / count + popRate * (1.0 - popRate) / popCount)
+            if abs(perc - popRate) > 2.0 * sd:
                 transferKeyList.append(k)
-        transferKeys=set(transferKeyList)
+        transferKeys = set(transferKeyList)
         includedKeys.update(transferKeys)
         self.includedKeys[self.currentColumn] = includedKeys
         return map(self.applyEmptyValue, xlist)
@@ -144,4 +147,12 @@ class CleanCategoricalColumn(PipelineStep):
         return [(create_column(k, "LONG"), [k]) for k in self.columnList]
 
     def getRTSMainModule(self):
-        return "encoder"
+        return "cleancategoricalvalues"
+
+    def getRTSArtifacts(self):
+        return [("cleancategoricalvalues.txt", self.cleanCategoricalFilePath)]
+
+    def __writeRTSArtifact(self):
+        with open("cleancategoricalvalues.txt", "w") as fp:
+            fp.write(str(self.includedKeys))
+            self.cleanCategoricalFilePath = os.path.abspath(fp.name)

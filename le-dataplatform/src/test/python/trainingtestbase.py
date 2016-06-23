@@ -53,22 +53,25 @@ class TrainingTestBase(TestBase):
 
         enginedir = "/leframework/scoringengine.py"
 
-        os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
-        os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
-        os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
-        os.symlink("../../main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
-        os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
-        os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
-        shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
+        basePath = "../../" if os.path.exists("../../main/python/rulefwk.py") else "../../../"
 
-        for filename in glob.glob(os.path.join("../../main/python/pipeline", "*.py")):
+        os.symlink(basePath + "/main/python/pipelinefwk.py", "./pipelinefwk.py")
+        os.symlink(basePath + "/main/python/pipeline/pipeline.py", "pipeline.py")
+        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
+        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
+        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
+        os.symlink(basePath + "/main/python/evpipeline/evpipeline.py", "evpipeline.py")
+
+        shutil.copy(basePath + "/main/python" + enginedir, fwkdir + enginedir)
+
+        for filename in glob.glob(os.path.join(basePath + "/main/python/pipeline", "*.py")):
             shutil.copy(filename, pipelinefwkdir)
 
-        for filename in glob.glob(os.path.join("../../main/python/evpipeline", "*.py")):
+        for filename in glob.glob(os.path.join(basePath + "/main/python/evpipeline", "*.py")):
             shutil.copy(filename, evpipelinefwkdir)
-        shutil.copy("../../main/python/pipeline/encoder.py", evpipelinefwkdir)
+        shutil.copy(basePath + "/main/python/pipeline/encoder.py", evpipelinefwkdir)
 
-        for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
+        for filename in glob.glob(os.path.join(basePath + "/main/python/configurablepipelinetransformsfromfile", "*")):
             if filename.find("/pipelinenullconversionrate.json") >= 0:
                 continue
             shutil.copy(filename, pipelinefwkdir)
@@ -78,7 +81,7 @@ class TrainingTestBase(TestBase):
         sys.path.append(evpipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
-        scriptDir = "../../main/python/algorithm/"
+        scriptDir = basePath + "/main/python/algorithm/"
         for f in os.listdir(scriptDir):
             fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
@@ -91,7 +94,10 @@ class TrainingTestBase(TestBase):
         self.__unzipSoftwareLibJar()
 
     def __unzipSoftwareLibJar(self):
-        with zipfile.ZipFile("data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip") as z:
+        zipFilePath = "data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip" if \
+            os.path.exists("data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip") \
+            else "../data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip"
+        with zipfile.ZipFile(zipFilePath) as z:
             z.extractall(self.swlibdir)
 
     def tearDown(self):
@@ -174,7 +180,7 @@ class TrainingTestBase(TestBase):
                     else:
                         line += ","
                     dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' else 'Float'
-                    #print ("Row %d Column = %s, Type = %s" % (i, field, type(value)))
+                    # print ("Row %d Column = %s, Type = %s" % (i, field, type(value)))
 
                     if row[1][field] is None or (dataType == 'Float' and np.isnan(float(row[1][field]))):
                         line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"%s|\"}}" % (field, dataType)
