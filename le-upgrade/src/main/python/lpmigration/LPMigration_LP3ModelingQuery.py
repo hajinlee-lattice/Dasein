@@ -73,8 +73,9 @@ class LPMigration_LP3ModelingQuery(StepBase):
         tables_supported = ['PD_DerivedColumns', 'PD_Alexa_Source']
 
         if template_type == 'SFDC':
-            print 'Unsupported template type \'{0}\'.'.format(template_type)
-            return Applicability.cannotApplyFail
+            tables_supported.append('SFDC_Account')
+            tables_supported.append('SFDC_Contact')
+            tables_supported.append('SFDC_Lead')
         elif template_type == 'MKTO':
             tables_supported.append('MKTO_LeadRecord')
         elif template_type == 'ELQ':
