@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import cascading.tuple.TupleEntry;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
+
+import cascading.tuple.TupleEntry;
 
 public class SimpleDepivotStragegyImpl implements DepivotStrategy {
 
@@ -25,12 +25,22 @@ public class SimpleDepivotStragegyImpl implements DepivotStrategy {
     @Override
     public List<List<Object>> depivot(TupleEntry arguments) {
         List<List<Object>> result = new ArrayList<>();
-        for (List<String> sourceTuple: sourceFieldTuples) {
+        for (List<String> sourceTuple : sourceFieldTuples) {
             List<Object> valueTuple = new ArrayList<>();
-            for (String field: sourceTuple) {
+            for (String field : sourceTuple) {
                 Object value = arguments.getObject(field);
+                if (value == null || (value instanceof String && StringUtils.isEmpty((String) value))) {
+                    // no need to handle null depivot field, skip
+                    continue;
+                }
                 valueTuple.add(value);
             }
+
+            if (valueTuple.size() == 0) {
+                // if there is no non-null depivot field then simply skip
+                continue;
+            }
+
             result.add(valueTuple);
         }
         return result;
@@ -41,14 +51,14 @@ public class SimpleDepivotStragegyImpl implements DepivotStrategy {
             throw new IllegalArgumentException("Target fields cannot be empty.");
         }
 
-        for (String field: targetFields) {
+        for (String field : targetFields) {
             if (StringUtils.isEmpty(field)) {
                 throw new IllegalArgumentException("Target fields cannot be null.");
             }
         }
 
         int numTargetFields = targetFields.size();
-        for (List<String> tuple: sourceFieldTuples) {
+        for (List<String> tuple : sourceFieldTuples) {
             if (tuple == null || tuple.size() != numTargetFields) {
                 int tupleSize = tuple == null ? 0 : tuple.size();
                 throw new IllegalArgumentException(
