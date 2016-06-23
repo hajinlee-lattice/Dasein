@@ -43,9 +43,16 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Session session = login(adminUsername, adminPassword);
-        ticket = session.getTicket();
-        testTenantId = session.getTenant().getId();
+        try {
+            Session session = login(adminUsername, adminPassword);
+            ticket = session.getTicket();
+            testTenantId = session.getTenant().getId();
+        } catch (Exception e) {
+            createAdminUser();
+            Session session = login(adminUsername, adminPassword);
+            ticket = session.getTicket();
+            testTenantId = session.getTenant().getId();
+        }
     }
 
     @AfterClass(groups = { "functional", "deployment" })
@@ -64,7 +71,6 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     public void afterMethod() {
         globalUserManagementService.deleteUser(testUsername);
     }
-
 
     @Test(groups = "functional")
     public void deleteUser() {
@@ -121,10 +127,11 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             userService.assignAccessLevel(randomAccessLevel, testTenantId, username);
         }
         try {
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList =
-                    globalUserManagementService.getAllUsersOfTenant(testTenantId);
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
+                    .getAllUsersOfTenant(testTenantId);
 
-            // this assertion may fail if multiple developers are testing against the same database simultaneously.
+            // this assertion may fail if multiple developers are testing
+            // against the same database simultaneously.
             assertEquals(userRightsList.size() - originalNumber, 10);
 
             for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {

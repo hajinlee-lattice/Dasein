@@ -6,10 +6,12 @@ import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -19,12 +21,21 @@ public class GlobalAuthenticationServiceImplTestNG extends SecurityFunctionalTes
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        try {
+            login(adminUsername, adminPassword);
+        } catch (Exception e) {
+            createAdminUser();
+        }
+    }
+
     @Test(groups = "functional")
     public void authenticateThenDiscardUser() {
         String passwd = DigestUtils.sha256Hex(adminPassword);
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
-        assertTrue(ticket.getTenants().size() >= 2);
+        assertTrue(ticket.getTenants().size() >= 1);
 
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);

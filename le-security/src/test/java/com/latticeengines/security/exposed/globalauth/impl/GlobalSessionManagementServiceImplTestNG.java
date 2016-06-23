@@ -15,11 +15,12 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 
 /**
  * Simulate login at the service level which authenticates then attaches.
+ * 
  * @author rgonzalez
  *
  */
 public class GlobalSessionManagementServiceImplTestNG extends SecurityFunctionalTestNGBase {
-    
+
     private Ticket ticket;
 
     @Autowired
@@ -27,14 +28,19 @@ public class GlobalSessionManagementServiceImplTestNG extends SecurityFunctional
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         String passwd = DigestUtils.sha256Hex(adminPassword);
-        ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
+        try {
+            ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
+        } catch (Exception e) {
+            createAdminUser();
+            ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
+        }
         assertNotNull(ticket);
     }
-    
+
     @Test(groups = "functional", expectedExceptions = NullPointerException.class)
     public void attachNullTicket() {
         globalSessionManagementService.attach(null);

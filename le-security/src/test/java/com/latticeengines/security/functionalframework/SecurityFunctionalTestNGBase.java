@@ -45,10 +45,12 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
 
@@ -79,6 +81,9 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
+
+    @Autowired
+    private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
     private SessionService sessionService;
@@ -210,6 +215,19 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected String getPLSRestAPIHostPort() {
         return plsHostPort;
+    }
+
+    protected void createAdminTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId("testAdminTenant");
+        tenant.setName("AdminTenant");
+        globalTenantManagementService.registerTenant(tenant);
+    }
+
+    protected void createAdminUser() {
+        createAdminTenant();
+        createUser(adminUsername, adminUsername, "bngu", "yen", adminPasswordHash);
+        globalUserManagementService.grantRight(AccessLevel.SUPER_ADMIN.name(), "testAdminTenant", adminUsername);
     }
 
     protected void createUser(String username, String email, String firstName, String lastName) {
