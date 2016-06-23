@@ -47,6 +47,10 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         modelSummary.setTenant(tenant);
 
+        if (modelSummary.getConstructionTime() == null) {
+            modelSummary.setConstructionTime(System.currentTimeMillis());
+        }
+        modelSummary.setLastUpdateTime(modelSummary.getConstructionTime());
         modelSummaryEntityMgr.create(modelSummary);
 
         return modelSummary;
@@ -108,7 +112,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public ModelSummary getModelSummaryByModelId(String modelId){
+    public ModelSummary getModelSummaryByModelId(String modelId) {
         return modelSummaryEntityMgr.getByModelId(modelId);
     }
 

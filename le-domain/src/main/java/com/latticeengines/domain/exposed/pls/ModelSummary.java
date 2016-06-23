@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -338,7 +337,6 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("ConstructionTime")
     public void setConstructionTime(Long constructionTime) {
         this.constructionTime = constructionTime;
-        this.lastUpdateTime = constructionTime;
     }
 
     @JsonProperty("LastUpdateTime")
@@ -516,9 +514,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.setPredefinedSelectionName(predefinedSelection.getName());
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        lastUpdateTime = System.currentTimeMillis();
-    }
+    // this annotation is not being called, for now I'll set lastUpdateTime
+    // explicitly
+    //
+    // @PreUpdate
+    // protected void onUpdate() {
+    // lastUpdateTime = System.currentTimeMillis();
+    // }
 
 }

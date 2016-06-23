@@ -268,6 +268,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             throw new LedpException(LedpCode.LEDP_18024);
         }
         summary.setStatus(status);
+        // need to set it explicitly as @PreUpdate is not being called
+        summary.setLastUpdateTime(System.currentTimeMillis());
         super.update(summary);
     }
 
@@ -284,6 +286,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (displayName != null) {
             summary.setDisplayName(displayName);
 
+            // need to set it explicitly as @PreUpdate is not being called
+            summary.setLastUpdateTime(System.currentTimeMillis());
             super.update(summary);
         }
     }
