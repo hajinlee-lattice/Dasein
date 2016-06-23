@@ -93,6 +93,10 @@ def bootstrap(args):
     print 'Found ips in output:\n', ips
     update_zoo_cfg(ips)
 
+def info(args):
+    ips = get_ips(args.stackname)
+    print_zk_hosts(ips)
+
 def get_ips(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
     ips = {}
@@ -155,6 +159,18 @@ def update_zoo_cfg(ips):
     print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
     print '================================================================================\n'
 
+
+def print_zk_hosts(ips):
+    public_zk_hosts=[]
+    private_zk_hosts=[]
+    for node_id, node_ips in ips.items():
+        public_zk_hosts.append(node_ips['PublicIp'] + ":2181")
+        private_zk_hosts.append(node_ips['PrivateIp'] + ":2181")
+    print '\n================================================================================'
+    print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)
+    print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
+    print '================================================================================\n'
+
 def teardown(args):
     client = boto3.client('cloudformation')
     teardown_stack(client, args.stackname)
@@ -199,6 +215,10 @@ def parse_args():
     parser1 = commands.add_parser("bootstrap")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=bootstrap)
+
+    parser1 = commands.add_parser("info")
+    parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
+    parser1.set_defaults(func=info)
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')

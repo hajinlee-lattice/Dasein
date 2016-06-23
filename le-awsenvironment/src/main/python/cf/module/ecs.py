@@ -167,6 +167,7 @@ class ContainerDefinition(Template):
         self._template["MountPoints"].append(mount_point.template())
         return self
 
+
 class Volume(Template):
     def __init__(self, name, host_path):
         Template.__init__(self)

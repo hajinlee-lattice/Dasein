@@ -2,10 +2,9 @@ import argparse
 import boto3
 import json
 import os
-from boto3.s3.transfer import S3Transfer
 
 from .kafka_profile import KafkaProfile, DEFAULT_PROFILE
-from .module.autoscaling import AutoScalingGroup, LaunchConfiguration
+from .module.autoscaling import AutoScalingGroup, ECSLaunchConfiguration
 from .module.ec2 import _ec2_params
 from .module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from .module.elb import ElasticLoadBalancer
@@ -27,14 +26,6 @@ def template(args):
     if args.upload:
         stack.validate()
         stack.upload(_S3_CF_PATH)
-
-        app_file = os.path.join(TEMPLATE_DIR, "kafka", "app.py")
-        print 'uploading app.py to %s' % (os.path.join("https://s3.amazonaws.com", S3_BUCKET, _S3_CF_PATH, 'app.py') + ' ..')
-        client = boto3.client('s3')
-        transfer = S3Transfer(client)
-        transfer.upload_file(app_file, S3_BUCKET, os.path.join(_S3_CF_PATH, 'app.py'))
-        print 'done.'
-
     else:
         print stack.json()
         stack.validate()
@@ -53,12 +44,8 @@ def template_internal():
     stack.add_resources([elb9092, elb9022, elb9023, elb9024])
 
     # Auto Scaling group
-    asgroup = AutoScalingGroup("ScalingGroup")
-    ec2role = ECSServiceRole("EC2Role")
-    instanceprofile = InstanceProfile("EC2InstanceProfile", ec2role)
-    launchconfig = LaunchConfiguration("ContainerPool", ecscluster, asgroup, instanceprofile)
-    asgroup.add_pool(launchconfig)
-    stack.add_resources(create_as_group(ecscluster, [elb9092, elb9022, elb9023, elb9024]))
+    asgroup, ec2role, instanceprofile, launchconfig = create_as_group(ecscluster, [elb9092, elb9022, elb9023, elb9024])
+    stack.add_resources([asgroup, ec2role, instanceprofile, launchconfig])
 
     # Docker service
     # ecsrole = ECSServiceRole("ECSServiceRole")
@@ -189,7 +176,7 @@ def create_as_group(ecscluster, elbs):
     asgroup = AutoScalingGroup("ScalingGroup")
     role = ECSServiceRole("EC2Role")
     instanceprofile = InstanceProfile("EC2InstanceProfile", role)
-    launchconfig = LaunchConfiguration("ContainerPool", ecscluster, asgroup, instanceprofile)
+    launchconfig = ECSLaunchConfiguration("ContainerPool", ecscluster, asgroup, instanceprofile)
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
     return asgroup, role, instanceprofile, launchconfig

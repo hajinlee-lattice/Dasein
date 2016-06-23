@@ -2,24 +2,18 @@ import json
 import os
 
 type_def = {
-    "t2.micro": {"core": 1, "mem_gb": 1},
-    "t2.small": {"core": 1, "mem_gb": 2},
-    "t2.medium": {"core": 2, "mem_gb": 4},
-    "t2.large": {"core": 2, "mem_gb": 8},
-    "m3.medium": {"core": 1, "mem_gb": 3.75},
-    "m3.large": {"core": 2, "mem_gb": 7.5},
-    "m3.xlarge": {"core": 4, "mem_gb": 15},
-    "m3.2xlarge": {"core": 8, "mem_gb": 30},
-    "m4.large": {"core": 2, "mem_gb": 8},
-    "m4.xlarge": {"core": 4, "mem_gb": 16},
-    "m4.2xlarge": {"core": 8, "mem_gb": 32},
-    "m4.4xlarge": {"core": 16, "mem_gb": 64},
-    "m4.10xlarge": {"core": 40, "mem_gb": 160},
-    "c4.large": {"core": 2, "mem_gb": 3.75},
-    "c4.xlarge": {"core": 4, "mem_gb": 7.5},
-    "c4.2xlarge": {"core": 8, "mem_gb": 15},
-    "c4.4xlarge": {"core": 16, "mem_gb": 30},
-    "c4.8xlarge": {"core": 36, "mem_gb": 60}
+    "t2.micro":   { "core": 1, "mem_gb": 1,     "on_demand": 0.013 },
+    "t2.medium":  { "core": 2, "mem_gb": 4,     "on_demand": 0.052 },
+    "m4.large":   { "core": 2, "mem_gb": 8,     "on_demand": 0.120 },
+    "m4.xlarge":  { "core": 4, "mem_gb": 16,    "on_demand": 0.239 },
+    "m4.2xlarge": { "core": 8, "mem_gb": 32,    "on_demand": 0.479 },
+    "m3.medium":  { "core": 1, "mem_gb": 3.75,  "on_demand": 0.067 },
+    "m3.large":   { "core": 2, "mem_gb": 7.5,   "on_demand": 0.133 },
+    "m3.xlarge":  { "core": 4, "mem_gb": 15,    "on_demand": 0.266 },
+    "m3.2xlarge": { "core": 8, "mem_gb": 30,    "on_demand": 0.532 },
+    "r3.large":   { "core": 2, "mem_gb": 15.25, "on_demand": 0.166 },
+    "r3.xlarge":  { "core": 4, "mem_gb": 30.5,  "on_demand": 0.333 },
+    "r3.2xlarge": { "core": 8, "mem_gb": 61,    "on_demand": 0.665 }
 }
 
 class KafkaProfile:

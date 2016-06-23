@@ -15,5 +15,16 @@
       "AmazonECSLinux": "ami-beba42de",
       "Ubuntu": "ami-13988772"
     }
+  },
+  "Instance2Options": {
+    "t2.micro"  : { "EBSOptimized" : "false" },
+    "t2.medium" : { "EBSOptimized" : "false" },
+    "m3.medium" : { "EBSOptimized" : "false" },
+    "m3.large"  : { "EBSOptimized" : "false" },
+    "m3.xlarge" : { "EBSOptimized" : "false" },
+    "m4.large"  : { "EBSOptimized" : "true" },
+    "m4.xlarge" : { "EBSOptimized" : "true" },
+    "r3.large"  : { "EBSOptimized" : "false" },
+    "r3.xlarge" : { "EBSOptimized" : "false" }
   }
 }

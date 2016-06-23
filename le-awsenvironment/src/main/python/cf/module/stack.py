@@ -4,6 +4,7 @@ import os
 import time
 from boto3.s3.transfer import S3Transfer
 
+from .condition import Condition
 from .ec2 import _ec2_mappings, _ec2_params, EC2Instance
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
@@ -60,6 +61,10 @@ class Stack(Template):
             self.add_resource(resource)
         return self
 
+    def add_condition(self, condition):
+        assert isinstance(condition, Condition)
+        self._merge_into_attr("Conditions", condition.template())
+
     def add_ouputs(self, outputs):
         self._merge_into_attr('Outputs', outputs)
         return self
@@ -67,6 +72,11 @@ class Stack(Template):
     def add_params(self, params):
         for k, v in params.items():
             self._template["Parameters"][k] = v
+        return self
+
+    def add_mappings(self, mappings):
+        for mapping in mappings:
+            self._merge_into_attr("Mappings", mapping)
         return self
 
     def validate(self):
