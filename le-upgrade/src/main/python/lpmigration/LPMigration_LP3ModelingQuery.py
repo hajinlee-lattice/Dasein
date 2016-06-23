@@ -47,25 +47,17 @@ class LPMigration_LP3ModelingQuery(StepBase):
 
 
     def getApplicability(self, appseq):
-        try:
-            q = appseq.getConnectionMgr().getQuery('Q_PLS_Modeling')
-            t = appseq.getConnectionMgr().getTable('PD_DerivedColumns')
-        except UnknownVisiDBSpec:
-            return Applicability.cannotApplyFail
-
-        return Applicability.canApply
-
-
-    def apply( self, appseq ):
-        print '\n    * Installing query (Q_LP3_ModelingLead_OneLeadPerDomain) for LP3 modeling . .',
-        sys.stdout.flush()
 
         conn_mgr = appseq.getConnectionMgr()
         template_type = appseq.getText('template_type')
 
-        q_pls_modeling = conn_mgr.getQuery('Q_PLS_Modeling')
+        try:
+            q_pls_modeling = conn_mgr.getQuery('Q_PLS_Modeling')
+            t_derivedcolumns = conn_mgr.getTable('PD_DerivedColumns')
+        except UnknownVisiDBSpec:
+            return Applicability.cannotApplyFail
+
         colnames_modeling = deepcopy(q_pls_modeling.getColumnNames())
-        t_derivedcolumns = conn_mgr.getTable('PD_DerivedColumns')
         colnames_dc = t_derivedcolumns.getColumnNames()
 
         colnames_as = []
@@ -76,9 +68,32 @@ class LPMigration_LP3ModelingQuery(StepBase):
             pass
 
         colnames_exclude = []
+        colnames_tablenotsupported = []
+        colnames_fcnnotsupported = []
+        tables_supported = ['PD_DerivedColumns', 'PD_Alexa_Source']
+
+        if template_type == 'SFDC':
+            print 'Unsupported template type \'{0}\'.'.format(template_type)
+            return Applicability.cannotApplyFail
+        elif template_type == 'MKTO':
+            tables_supported.append('MKTO_LeadRecord')
+        elif template_type == 'ELQ':
+            print 'Unsupported template type \'{0}\'.'.format(template_type)
+            return Applicability.cannotApplyFail
+        else:
+            print 'Unsupported template type \'{0}\'.'.format(template_type)
+            return Applicability.cannotApplyFail
+
         for c in q_pls_modeling.getColumns():
-            if c.getApprovedUsage() == 'None':                
+            if c.getApprovedUsage() == 'None':
                 colnames_exclude.append(c.getName())
+            elif type(c.getExpression()) is ExpressionVDBImplColRef:
+                if c.getExpression().TableName() not in tables_supported:
+                    colnames_tablenotsupported.append(c.getName())
+            else:
+                colnames_fcnnotsupported.append(c.getName())
+
+        supportedQuery = True
 
         for c in colnames_modeling:
             if c == 'EntityFunctionBoundary':
@@ -103,13 +118,40 @@ class LPMigration_LP3ModelingQuery(StepBase):
                 sys.stdout.flush()
                 q_pls_modeling.removeColumn(c)
                 continue
+            elif c in colnames_tablenotsupported:
+                print '\n      !! Source table not supported for "{0}"'.format(c),
+                sys.stdout.flush()
+                q_pls_modeling.removeColumn(c)
+                supportedQuery = False
+                continue
+            elif c not in self.STD_ACTIVITY_COLS and c in colnames_fcnnotsupported:
+                print '\n      !! Transformation not supported for "{0}"'.format(c),
+                sys.stdout.flush()
+                q_pls_modeling.removeColumn(c)
+                supportedQuery = False
+                continue
+
+        if not supportedQuery:
+            return Applicability.cannotApplyFail
+
+        self.q_pls_modeling = q_pls_modeling
+
+        return Applicability.canApply
+
+
+    def apply( self, appseq ):
+        print '\n    * Installing query (Q_LP3_ModelingLead_OneLeadPerDomain) for LP3 modeling . .',
+        sys.stdout.flush()
+
+        conn_mgr = appseq.getConnectionMgr()
+        template_type = appseq.getText('template_type')
 
         if template_type == 'SFDC':
-            self._adjustQuerySFDC(conn_mgr, q_pls_modeling)
+            self._adjustQuerySFDC(conn_mgr, self.q_pls_modeling)
         elif template_type == 'MKTO':
-            self._adjustQueryMKTO(conn_mgr, q_pls_modeling)
+            self._adjustQueryMKTO(conn_mgr, self.q_pls_modeling)
         elif template_type == 'ELQ':
-            self._adjustQueryELQ(conn_mgr, q_pls_modeling)
+            self._adjustQueryELQ(conn_mgr, self.q_pls_modeling)
         else:
             print 'Unsupported template type \'{0}\'; skipping'.format(template_type)
             return False

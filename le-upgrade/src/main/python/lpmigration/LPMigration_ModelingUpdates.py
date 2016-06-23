@@ -43,4 +43,9 @@ class LPMigration_ModelingUpdates(StepBase):
         exp_Const_DaysFromLeadCreationDate.Object().SetValue(90)
         conn_mgr.setNamedExpression(exp_Const_DaysFromLeadCreationDate)
 
+        ## Update "Const_DaysOfDataForModeling"
+        exp_Const_DaysOfDataForModeling = conn_mgr.getNamedExpression('Const_DaysOfDataForModeling')
+        exp_Const_DaysOfDataForModeling.Object().SetValue(455)
+        conn_mgr.setNamedExpression(exp_Const_DaysOfDataForModeling)
+
         return True
