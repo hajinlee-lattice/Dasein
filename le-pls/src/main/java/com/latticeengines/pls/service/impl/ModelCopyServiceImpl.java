@@ -1,19 +1,19 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -65,7 +65,8 @@ public class ModelCopyServiceImpl implements ModelCopyService {
                     cpEventTable.getName());
         } catch (IOException e) {
             log.error(e);
-            throw new LedpException(LedpCode.LEDP_18111, new String[]{modelSummary.getName(), sourceTenantId, targetTenantId});
+            throw new LedpException(LedpCode.LEDP_18111, new String[] { modelSummary.getName(), sourceTenantId,
+                    targetTenantId });
         }
         return true;
     }
@@ -76,32 +77,36 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         String sourceCustomerRoot = customerBase + sourceTenantId;
         String targetCustomerRoot = customerBase + targetTenantId;
 
-        copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName, cpEventTableName);
-
         String sourceModelRoot = sourceCustomerRoot + "/models/" + eventTableName + "/"
                 + UuidUtils.extractUuid(modelId);
-        String modelSummaryPath = findModelSummaryPath(sourceModelRoot);
-        String modelPath = getModelPath(modelSummaryPath);
+        String sourceModelSummaryPath = findModelSummaryPath(sourceModelRoot);
         String uuid = UUID.randomUUID().toString();
+        String sourceModelLocalRoot = new Path(sourceModelSummaryPath).getParent().getParent().getName();
+        String modelSummaryLocalPath = sourceModelLocalRoot + "/enhancements/modelsummary.json";
 
-        JsonNode newModel = constructNewModel(modelPath, uuid);
-        JsonNode newModelSummary = constructNewModelSummary(modelSummaryPath,
-                targetTenantId, cpTrainingTableName, cpEventTableName, uuid);
+        copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName, cpEventTableName);
+        FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
+        copyModelingModelsDirectoryToLocal(sourceModelSummaryPath, targetCustomerRoot, cpEventTableName, uuid);
 
-        copyModelingModelsDirectory(modelSummaryPath, targetCustomerRoot, cpEventTableName,
-                uuid);
- 
-        String newModelSummaryPath = getModelSummaryPathFromTargetDir(modelSummaryPath, targetTenantId, cpEventTableName, uuid);
-        HdfsUtils.rmdir(yarnConfiguration, newModelSummaryPath);
-        String newModelPath = getModelPath(newModelSummaryPath);
-        HdfsUtils.rmdir(yarnConfiguration, newModelPath);
+        String modelName = getModelName(sourceModelLocalRoot);
+        JsonNode newModelSummary = constructNewModelSummary(modelSummaryLocalPath, targetTenantId, cpTrainingTableName,
+                cpEventTableName, uuid);
+        JsonNode newModel = constructNewModel(sourceModelLocalRoot + "/" + modelName, uuid);
 
-        HdfsUtils.writeToFile(yarnConfiguration, newModelSummaryPath, newModelSummary.toString());
-        HdfsUtils.writeToFile(yarnConfiguration, newModelPath, newModel.toString());
+        FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
+        FileUtils.write(new File(modelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
+
+        String targetModelRoot = targetCustomerRoot + "/models/" + cpEventTableName + "/" + uuid;
+
+        FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + modelName + ".crc"));
+        FileUtils.write(new File(sourceModelLocalRoot + "/" + modelName), newModel.toString(), "UTF-8", false);
+
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
+        FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
     }
 
-    private JsonNode constructNewModel(String modelPath, String uuid) throws IOException {
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
+    private JsonNode constructNewModel(String modelLocalPath, String uuid) throws IOException {
+        String contents = FileUtils.readFileToString(new File(modelLocalPath), "UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
 
@@ -110,22 +115,23 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         return json;
     }
 
-    String getModelPath(String modelSummaryPath) throws IllegalArgumentException, IOException{
-        List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, new Path(modelSummaryPath).getParent().getParent().toString(), ".*.model.json");
+    String getModelName(String sourceModelLocalRoot) throws IllegalArgumentException, IOException {
+        Configuration localFileSystemConfig = new Configuration();
+        localFileSystemConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+        List<String> paths = HdfsUtils.getFilesForDir(localFileSystemConfig, sourceModelLocalRoot, ".*.model.json");
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);
         }
-        return paths.get(0);
+        return new Path(paths.get(0)).getName();
     }
 
-    JsonNode constructNewModelSummary(String modelSummaryPath, String targetTenantId, String cpTrainingTableName, String cpEventTableName, String uuid) throws IOException {
-
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelSummaryPath);
+    JsonNode constructNewModelSummary(String modelSummaryLocalPath, String targetTenantId, String cpTrainingTableName,
+            String cpEventTableName, String uuid) throws IOException {
+        String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
 
         ObjectNode detail = (ObjectNode) json.get("ModelDetails");
-
         detail.put("ModelID", "ms__" + uuid + "-PLSModel");
         detail.put("ConstructionTime", new DateTime().getMillis() / 1000);
         detail.put("LookupID", String.format("%s|%s|%s", targetTenantId, cpEventTableName, uuid));
@@ -160,25 +166,14 @@ public class ModelCopyServiceImpl implements ModelCopyService {
             String cpEventTableName) throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
         String targetDataRoot = targetCustomerRoot + "/data/";
-        HdfsUtils.mkdir(yarnConfiguration, targetDataRoot);
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
         HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName, targetDataRoot + cpEventTableName);
     }
 
-    void copyModelingModelsDirectory(String modelSummaryPath, String targetCustomerRoot,
+    void copyModelingModelsDirectoryToLocal(String sourceModelSummaryPath, String targetCustomerRoot,
             String cpEventTableName, String uuid) throws IOException {
-        String sourceModelRoot = new Path(modelSummaryPath).getParent().getParent().toString();
-        String targetModelRoot = targetCustomerRoot + "/models/" + cpEventTableName + "/" + uuid;
-        HdfsUtils.mkdir(yarnConfiguration, targetModelRoot);
-        HdfsUtils.copyFiles(yarnConfiguration, sourceModelRoot, targetModelRoot);
-    }
-
-    String getModelSummaryPathFromTargetDir(String modelSummaryPath, String targetTenantId, String cpEventTableName, String uuid) throws IOException {
-        String[] tokens = modelSummaryPath.split("/");
-        tokens[6] = targetTenantId;
-        tokens[8] = cpEventTableName;
-        tokens[9] = uuid;
-        return StringUtils.join(tokens, "/");
+        String sourceModelRoot = new Path(sourceModelSummaryPath).getParent().getParent().toString();
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelRoot, ".");
     }
 
     @Override
