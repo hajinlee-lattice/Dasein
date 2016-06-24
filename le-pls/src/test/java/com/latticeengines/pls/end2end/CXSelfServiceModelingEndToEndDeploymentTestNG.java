@@ -481,16 +481,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 displayName));
 
         ResponseDocument response = restTemplate.postForObject( //
-<<<<<<< .mine
 
                 String.format("%s/pls/models/uploadfile/unnamed?displayName=%s", getRestAPIHostPort(),
 
                         displayName), //
 
-=======
-                String.format("%s/pls/models/uploadfile/unnamed?schema=%s&displayName=%s", getRestAPIHostPort(),
-                        schemaInterpretation, "SelfServiceModeling Test File.csv"), //
->>>>>>> .r76333
                 requestEntity, ResponseDocument.class);
 
         SourceFile sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -510,14 +505,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         sourceFile.setSchemaInterpretation(schemaInterpretation);
 
         ResponseDocument response = restTemplate.getForObject(
-<<<<<<< .mine
-=======
-                String.format("%s/pls/models/uploadfile/%s/metadata/unknown", getRestAPIHostPort(),
-                        sourceFile.getName()), ResponseDocument.class);
-        @SuppressWarnings("unchecked")
-        List<LinkedHashMap<String, String>> unknownColumns = new ObjectMapper().convertValue(response.getResult(),
-                List.class);
->>>>>>> .r76333
 
                 String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
 
@@ -546,7 +533,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
             }
 
         }
-<<<<<<< .mine
 
 
 
@@ -568,11 +554,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
                         sourceFile.getName()), mappings, Void.class);
 
-=======
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/%s/metadata/unknown", getRestAPIHostPort(),
-                        sourceFile.getName()), unknownColumns, ResponseDocument.class);
->>>>>>> .r76333
     }
 
 
@@ -1104,4 +1085,3 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }  
 
 }
-
