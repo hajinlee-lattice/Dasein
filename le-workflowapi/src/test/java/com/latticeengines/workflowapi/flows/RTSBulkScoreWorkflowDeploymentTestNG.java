@@ -102,6 +102,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private Tenant setupTenant() throws Exception {
         Tenant returnTenant = setupTenant(customerSpace);
+        setupUsers(customerSpace);
         MultiTenantContext.setTenant(returnTenant);
         assertNotNull(MultiTenantContext.getTenant());
         return returnTenant;
