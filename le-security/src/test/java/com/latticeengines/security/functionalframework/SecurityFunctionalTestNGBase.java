@@ -224,7 +224,16 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         globalTenantManagementService.registerTenant(tenant);
     }
 
+    protected void deleteAdminTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId("testAdminTenant");
+        tenant.setName("AdminTenant");
+        globalTenantManagementService.discardTenant(tenant);
+    }
+
     protected void createAdminUser() {
+        globalUserManagementService.deleteUser(adminUsername);
+        deleteAdminTenant();
         createAdminTenant();
         createUser(adminUsername, adminUsername, "bngu", "yen", adminPasswordHash);
         globalUserManagementService.grantRight(AccessLevel.SUPER_ADMIN.name(), "testAdminTenant", adminUsername);
