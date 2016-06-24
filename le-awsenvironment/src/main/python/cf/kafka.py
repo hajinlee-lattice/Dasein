@@ -9,8 +9,7 @@ from .module.ec2 import _ec2_params
 from .module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from .module.elb import ElasticLoadBalancer
 from .module.iam import ECSServiceRole, InstanceProfile, AccessKey
-from .module.stack import Stack, teardown_stack
-from .module.stack import check_stack_not_exists, wait_for_stack_creation, S3_BUCKET
+from .module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation, S3_BUCKET
 from .module.template import TEMPLATE_DIR
 
 _S3_CF_PATH='cloudformation/kafka'
@@ -21,16 +20,19 @@ def main():
     args = parse_args()
     args.func(args)
 
-def template(args):
-    stack = template_internal()
-    if args.upload:
+def template_cli(args):
+    template(args.upload)
+
+def template(upload):
+    stack = create_template()
+    if upload:
         stack.validate()
         stack.upload(_S3_CF_PATH)
     else:
         print stack.json()
         stack.validate()
 
-def template_internal():
+def create_template():
     stack = Stack("AWS CloudFormation template for Kafka ECS container instances.")
     stack.add_params(extra_param()).add_params(_ec2_params())
 
@@ -49,7 +51,7 @@ def template_internal():
 
     # Docker service
     # ecsrole = ECSServiceRole("ECSServiceRole")
-    dockers = docker_resources(ecscluster, asgroup, elb9092, elb9023)
+    dockers = docker_resources(ecscluster, asgroup, elb9092, elb9022)
     stack.add_resources(dockers)
 
     # Outputs
@@ -71,34 +73,21 @@ def template_internal():
 
     return stack
 
-def provision(args):
-    if args.profile is None:
+def provision_cli(args):
+    return provision(args.stackname, args.zkhosts, profile=args.profile)
+
+def provision(stackname, zkhosts, profile=None):
+    if profile is None:
         profile = DEFAULT_PROFILE
     else:
-        profile = KafkaProfile(args.profile)
+        profile = KafkaProfile(profile)
 
     client = boto3.client('cloudformation')
-    check_stack_not_exists(client, args.stackname)
+    check_stack_not_exists(client, stackname)
     response = client.create_stack(
-        StackName=args.stackname,
+        StackName=stackname,
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
         Parameters=[
-            {
-                'ParameterKey': 'SubnetId1',
-                'ParameterValue': 'subnet-7550002d'
-            },
-            {
-                'ParameterKey': 'SubnetId2',
-                'ParameterValue': 'subnet-310d5a1b'
-            },
-            {
-                'ParameterKey': 'TrustedIPZone',
-                'ParameterValue': '0.0.0.0/0'
-            },
-            {
-                'ParameterKey': 'KeyName',
-                'ParameterValue': 'ysong-east'
-            },
             {
                 'ParameterKey': 'SecurityGroupId',
                 'ParameterValue': 'sg-b3dbb0c8'
@@ -117,7 +106,7 @@ def provision(args):
             },
             {
                 'ParameterKey': 'ZookeeperHosts',
-                'ParameterValue': args.zkhosts
+                'ParameterValue': zkhosts
             },
             {
                 'ParameterKey': 'Brokers',
@@ -152,7 +141,7 @@ def provision(args):
         Tags=[
             {
                 'Key': 'com.lattice-engines.cluster.name',
-                'Value': args.stackname
+                'Value': stackname
             },
             {
                 'Key': 'com.lattice-engines.cluster.type',
@@ -161,16 +150,19 @@ def provision(args):
         ]
     )
     print 'Got StackId: %s' % response['StackId']
-    wait_for_stack_creation(client, args.stackname)
-    get_elbs(args.stackname)
+    wait_for_stack_creation(client, stackname)
+    return get_elbs(stackname)
 
 def describe(args):
     stack = boto3.resource('cloudformation').Stack(args.stackname)
     print stack
 
-def teardown(args):
+def teardown_cli(args):
+    teardown(args.stackname)
+
+def teardown(stackname):
     client = boto3.client('cloudformation')
-    teardown_stack(client, args.stackname)
+    teardown_stack(client, stackname)
 
 def create_as_group(ecscluster, elbs):
     asgroup = AutoScalingGroup("ScalingGroup")
@@ -181,11 +173,11 @@ def create_as_group(ecscluster, elbs):
     asgroup.attach_elbs(elbs)
     return asgroup, role, instanceprofile, launchconfig
 
-def docker_resources(ecscluster, asgroup, elb9092, elb9023):
+def docker_resources(ecscluster, asgroup, elb9092, elb9022):
     bkr, bkr_task= broker_service(ecscluster, asgroup)
     sr, sr_task = schema_registry_service(ecscluster, bkr)
-    conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9023, sr)
-    kr, kr_task = kafka_rest_service(ecscluster, elb9023, sr)
+    conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9022, sr)
+    kr, kr_task = kafka_rest_service(ecscluster, elb9022, sr)
     return bkr, bkr_task, sr, sr_task, conn, conn_task, kr, kr_task
 
 def broker_service(ecscluster, asgroup):
@@ -232,13 +224,13 @@ def schema_registry_service(ecscluster, broker):
     service = ECSService("SchemaRegistry", ecscluster, task, { "Ref": "SchemaRegistries" }).depends_on(broker)
     return service, task
 
-def kafka_rest_service(ecscluster, elb9023, sr):
+def kafka_rest_service(ecscluster, elb9022, sr):
     container = ContainerDefinition("kr", os.path.join(_ECR_REPO, "latticeengines/kafka-rest")) \
         .mem_mb(1024).publish_port(9023, 9023) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
         .set_env("SR_ADDRESS",
                  {"Fn::Join" : [ "", [
-                     "http://", {"Fn::GetAtt": [ elb9023.logical_id(), "DNSName" ] } , ":9023"
+                     "http://", {"Fn::GetAtt": [ elb9022.logical_id(), "DNSName" ] } , ":9022"
                  ]]})
 
     task = TaskDefinition("KafkaRESTTask")
@@ -247,13 +239,13 @@ def kafka_rest_service(ecscluster, elb9023, sr):
     service = ECSService("KafkaREST", ecscluster, task, 2).depends_on(sr)
     return service, task
 
-def kafka_connect_service(ecscluster, elb9092, elb9023, sr):
+def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
     container = ContainerDefinition("connect", os.path.join(_ECR_REPO, "latticeengines/kafka-connect")) \
         .mem_mb( { "Ref": "ConnectWorkerMemory" } ).publish_port(9024, 9024) \
         .set_env("BOOTSTRAP_SERVERS", { "Fn::Join" : [ "", [
             "http://", { "Fn::GetAtt": [ elb9092.logical_id(), "DNSName" ] } , ":9092"] ]}) \
         .set_env("SR_ADDRESS", { "Fn::Join" : [ "", [
-            "http://", { "Fn::GetAtt": [ elb9023.logical_id(), "DNSName" ] } , ":9023"] ]}) \
+            "http://", { "Fn::GetAtt": [ elb9022.logical_id(), "DNSName" ] } , ":9022"] ]}) \
         .set_logging({
             "LogDriver": "awslogs",
             "Options": {
@@ -270,11 +262,14 @@ def kafka_connect_service(ecscluster, elb9092, elb9023, sr):
 
 def get_elbs(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
+    elbs = {}
     for output in stack.outputs:
         key = output['OutputKey']
         value = output['OutputValue']
         if 'LoadBalancer' in key:
+            elbs[key] = value
             print "DNS name for %s is %s" % (key, value)
+    return elbs
 
 def instance_name(idx):
     return "EC2Instance%d" % (idx + 1)
@@ -300,13 +295,13 @@ def parse_args():
 
     parser1 = commands.add_parser("template")
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
-    parser1.set_defaults(func=template)
+    parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
-    parser1.set_defaults(func=provision)
+    parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("describe")
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
@@ -314,7 +309,7 @@ def parse_args():
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
-    parser1.set_defaults(func=teardown)
+    parser1.set_defaults(func=teardown_cli)
 
     args = parser.parse_args()
     return args

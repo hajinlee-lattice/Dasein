@@ -9,7 +9,6 @@ class ElasticLoadBalancer(Resource):
         self.__name = {
             "Fn::Join": [ "-", [
                 { "Ref" : "AWS::StackName" },
-                { "Ref" : "AWS::Region" },
                 logicalId
             ] ] }
 

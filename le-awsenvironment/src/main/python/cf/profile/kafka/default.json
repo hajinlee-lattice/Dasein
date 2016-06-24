@@ -1,13 +1,13 @@
 {
   "Instances": 4,
-  "InstanceType": "m4.large",
+  "InstanceType": "t2.medium",
 
   "Brokers": 4,
-  "BrokerMemory": 2048,
+  "BrokerMemory": 1024,
 
   "SchemaRegistries": 2,
-  "SchemaRegistryMemory": 1024,
+  "SchemaRegistryMemory": 512,
 
   "ConnectWorkers": 2,
-  "ConnectWorkerMemory": 1536
+  "ConnectWorkerMemory": 512
 }

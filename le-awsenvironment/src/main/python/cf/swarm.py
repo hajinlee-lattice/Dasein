@@ -67,22 +67,6 @@ def provision(args):
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
         Parameters=[
             {
-                'ParameterKey': 'SubnetId1',
-                'ParameterValue': 'subnet-7550002d'
-            },
-            {
-                'ParameterKey': 'SubnetId2',
-                'ParameterValue': 'subnet-310d5a1b'
-            },
-            {
-                'ParameterKey': 'TrustedIPZone',
-                'ParameterValue': '0.0.0.0/0'
-            },
-            {
-                'ParameterKey': 'KeyName',
-                'ParameterValue': 'ysong-east'
-            },
-            {
                 'ParameterKey': 'SecurityGroupId',
                 'ParameterValue': 'sg-b3dbb0c8'
             },

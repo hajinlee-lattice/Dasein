@@ -1,4 +1,11 @@
 {
+  "VpcId": {
+    "Description": " The VPC in which the stack will reside",
+    "Type": "AWS::EC2::VPC::Id",
+    "Default": "vpc-10b01977",
+    "ConstraintDescription": "must be an existing vpc."
+  },
+
   "SubnetId1": {
     "Description": " The SubnetId in which the EC2 instances will reside",
     "Type": "AWS::EC2::Subnet::Id",

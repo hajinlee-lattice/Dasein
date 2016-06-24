@@ -17,16 +17,10 @@ def main():
     args = parse_args()
     args.func(args)
 
-def template(args):
-    stack = template_internal(args.nodes)
-    if args.upload:
-        stack.validate()
-        stack.upload(_S3_CF_PATH)
-    else:
-        print stack.json()
-        stack.validate()
+def template_cli(args):
+    template_internal(args.nodes, upload=args.upload)
 
-def template_internal(nodes):
+def template(nodes, upload=False):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
     for n in xrange(nodes):
         name = instance_name(n)
@@ -35,49 +29,41 @@ def template_internal(nodes):
             .metadata(ec2_metadata(n)) \
             .add_tag("lattice-engines.cluster.type", "Zookeeper")
         stack.add_ec2(ec2)
-    return stack
+    if upload:
+        stack.validate()
+        stack.upload(_S3_CF_PATH)
+    else:
+        print stack.json()
+        stack.validate()
 
-def provision(args):
+def provision_cli(args):
+    provision(args.stackname)
+
+def provision(stackname):
     client = boto3.client('cloudformation')
-    check_stack_not_exists(client, args.stackname)
+    check_stack_not_exists(client, stackname)
     response = client.create_stack(
-        StackName=args.stackname,
+        StackName=stackname,
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
         Parameters=[
-            {
-                'ParameterKey': 'SubnetId1',
-                'ParameterValue': 'subnet-7550002d'
-            },
-            {
-                'ParameterKey': 'SubnetId2',
-                'ParameterValue': 'subnet-310d5a1b'
-            },
-            {
-                'ParameterKey': 'TrustedIPZone',
-                'ParameterValue': '0.0.0.0/0'
-            },
-            {
-                'ParameterKey': 'KeyName',
-                'ParameterValue': 'ysong-east'
-            },
             {
                 'ParameterKey': 'SecurityGroupId',
                 'ParameterValue': 'sg-61fd941a'
             },
             {
                 'ParameterKey': 'InstanceType',
-                'ParameterValue': 't2.micro'
+                'ParameterValue': 't2.medium'
             }
         ],
         TimeoutInMinutes=60,
         ResourceTypes=[
             'AWS::*',
         ],
-        OnFailure='DELETE',
+        OnFailure='ROLLBACK',
         Tags=[
             {
                 'Key': 'com.lattice-engines.cluster.name',
-                'Value': args.stackname
+                'Value': stackname
             },
             {
                 'Key': 'com.lattice-engines.cluster.type',
@@ -86,16 +72,19 @@ def provision(args):
         ]
     )
     print 'Got StackId: %s' % response['StackId']
-    wait_for_stack_creation(client, args.stackname)
+    wait_for_stack_creation(client, stackname)
 
-def bootstrap(args):
-    ips = get_ips(args.stackname)
+def bootstrap_cli(args):
+    bootstrap(args.stackname)
+
+def bootstrap(stackname):
+    ips = get_ips(stackname)
     print 'Found ips in output:\n', ips
     update_zoo_cfg(ips)
 
 def info(args):
     ips = get_ips(args.stackname)
-    print_zk_hosts(ips)
+    return print_zk_hosts(ips)
 
 def get_ips(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
@@ -158,7 +147,7 @@ def update_zoo_cfg(ips):
     print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)
     print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
     print '================================================================================\n'
-
+    return ','.join(public_zk_hosts), ','.join(private_zk_hosts)
 
 def print_zk_hosts(ips):
     public_zk_hosts=[]
@@ -170,10 +159,14 @@ def print_zk_hosts(ips):
     print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)
     print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
     print '================================================================================\n'
+    return  ','.join(public_zk_hosts), ','.join(private_zk_hosts)
 
-def teardown(args):
+def teardown_cli(args):
+    teardown(args.stackname)
+
+def teardown(stackname):
     client = boto3.client('cloudformation')
-    teardown_stack(client, args.stackname)
+    teardown_stack(client, stackname)
 
 def instance_name(idx):
     return "EC2Instance%d" % (idx + 1)
@@ -206,15 +199,15 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-n', dest='nodes', type=int, default=3, help='number of nodes')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
-    parser1.set_defaults(func=template)
+    parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
-    parser1.set_defaults(func=provision)
+    parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
-    parser1.set_defaults(func=bootstrap)
+    parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
@@ -222,7 +215,7 @@ def parse_args():
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
-    parser1.set_defaults(func=teardown)
+    parser1.set_defaults(func=teardown_cli)
 
     args = parser.parse_args()
     return args

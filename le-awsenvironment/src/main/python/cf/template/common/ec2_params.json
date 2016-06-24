@@ -9,7 +9,7 @@
   "SecurityGroupId": {
     "Description": "The security group to be used by EC2",
     "Type": "AWS::EC2::SecurityGroup::Id",
-    "Default": "sg-61fd941a",
+    "Default": "sg-b3dbb0c8",
     "ConstraintDescription": "must be the name of an existing SecurityGroup ID."
   },
 
