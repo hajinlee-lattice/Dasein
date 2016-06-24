@@ -5,17 +5,19 @@ function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != 
 UNAME=`uname`
 threshold_version=5.6
 
+# Remove alter table drop foreign key statements from the script
+ls $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
+
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5
+    sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
 else
     echo "You are on ${UNAME}"
     mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1) || 5.5
+    sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
 fi
 
-# Remove alter table drop foreign key statements from the script
-ls $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
-sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
 
 if version_gt ${mysql_version} ${threshold_version}; then
     echo "MySQL version $mysql_version is greater than $threshold_version, replacing DATA by DATA LOCAL"
