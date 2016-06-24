@@ -6,7 +6,7 @@ import subprocess
 import sys
 import time
 
-from .module.ec2 import EC2Instance
+from .module.ec2 import EC2Instance, Volume, VolumeAttachement
 from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack, S3_BUCKET
 from .module.template import TEMPLATE_DIR
 
@@ -18,17 +18,19 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template_internal(args.nodes, upload=args.upload)
+    template(args.nodes, upload=args.upload)
 
 def template(nodes, upload=False):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
     for n in xrange(nodes):
-        name = instance_name(n)
+        name = "EC2Instance%d" % (n + 1)
         subnet = "SubnetId%d" % ( (n % 2) + 1 )
         ec2 = EC2Instance(name, subnet_ref=subnet) \
             .metadata(ec2_metadata(n)) \
             .add_tag("lattice-engines.cluster.type", "Zookeeper")
-        stack.add_ec2(ec2)
+        vol = Volume("Volume%d" % (n + 1), 5, 'gp2').for_ec2(ec2)
+        vol_att = VolumeAttachement("VolumeAttachement%d" % (n + 1), ec2, vol, "/dev/sdh")
+        stack.add_resources([ec2, vol, vol_att])
     if upload:
         stack.validate()
         stack.upload(_S3_CF_PATH)
@@ -123,12 +125,15 @@ def update_zoo_cfg(ips):
     private_zk_hosts=[]
     for node_id, node_ips in ips.items():
         url = 'ec2-user@%s' % node_ips['URL']
-        remote_path = '/opt/zookeeper-3.4.6/conf/zoo.cfg'
+        remote_path = '/opt/zookeeper-3.4.8/conf/zoo.cfg'
 
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
         t1 = time.time()
+
+        subprocess.call("ssh -oStrictHostKeyChecking=no -i %s %s 'sudo bash /tmp/mount_volume.sh'" % (_EC2_PEM, url), shell=True)
         subprocess.call("scp -oStrictHostKeyChecking=no -i %s %s %s:%s" % (_EC2_PEM, temp_file, url, remote_path), shell=True)
-        ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", _EC2_PEM, url, "sudo /opt/zookeeper-3.4.6/bin/zkServer.sh start"],
+        ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", _EC2_PEM, url,
+                                "sudo ZOO_LOG_DIR=/opt/zookeeper-3.4.8/logs ZOO_LOG4J_PROP='INFO,ROLLINGFILE' /opt/zookeeper-3.4.8/bin/zkServer.sh start"],
                                shell=False,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
@@ -182,6 +187,7 @@ def ec2_metadata(idx):
 def zk_properties(nodes, ips):
     lines = [
         "dataDir=/var/lib/zookeeper",
+        "dataLogDir=/mnt/zookeeper/logs",
         "clientPort=2181",
         "tickTime=2000",
         "initLimit=10",

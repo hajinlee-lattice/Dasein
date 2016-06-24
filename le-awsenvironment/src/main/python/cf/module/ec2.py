@@ -68,3 +68,34 @@ class EC2Instance(Resource):
         return {
             "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, os ]
         }
+
+class Volume(Resource):
+    def __init__(self, logicalId, size, type):
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type":"AWS::EC2::Volume",
+            "Properties" : {
+                "Size" : size,
+                "VolumeType" : type
+            }
+        }
+
+    def for_ec2(self, ec2):
+        assert isinstance(ec2, EC2Instance)
+        self._template["Properties"]["AvailabilityZone"] = { "Fn::GetAtt" : [ ec2.logical_id(), "AvailabilityZone" ] }
+        return self
+
+class VolumeAttachement(Resource):
+    def __init__(self, logicalId, instance, volume, device):
+        assert isinstance(instance, EC2Instance)
+        assert isinstance(volume, Volume)
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type":"AWS::EC2::VolumeAttachment",
+            "Properties" : {
+                "Device" : device,
+                "InstanceId" : instance.ref(),
+                "VolumeId" : volume.ref()
+            }
+        }
+
