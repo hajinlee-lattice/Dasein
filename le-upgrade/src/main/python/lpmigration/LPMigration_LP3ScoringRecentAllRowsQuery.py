@@ -39,18 +39,18 @@ class LPMigration_LP3ScoringRecentAllRowsQuery(StepBase):
 
         q_lp3_modeling = conn_mgr.getQuery('Q_LP3_ModelingLead_OneLeadPerDomain')
 
-        spec_email = None
+        #spec_email = None
         if template_type == 'MKTO':
-            spec_email = 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("MKTO_LeadRecord")), ContainerElementName("Email")))'
+        #    spec_email = 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("MKTO_LeadRecord")), ContainerElementName("Email")))'
             leadEntity = 'MKTO_LeadRecord_ID'
         elif template_type == 'SFDC':
-            spec_email = 'LatticeFunctionIdentifier(ContainerElementName("SFDC_Email"))'
+        #    spec_email = 'LatticeFunctionIdentifier(ContainerElementName("SFDC_Email"))'
             leadEntity = 'SFDC_Lead_Contact_ID'
         else:
             print '\n      => NOT SUPPORTED for template type {0}'.format(template_type),
             return False
 
-        q_lp3_modeling.getColumn('Email').setExpression(ExpressionVDBImplFactory.create(spec_email))
+        #q_lp3_modeling.getColumn('Email').setExpression(ExpressionVDBImplFactory.create(spec_email))
 
         filtersToRemove = []
         for f in q_lp3_modeling.getFilters():
