@@ -10,4 +10,6 @@ public interface ExternalColumnEntityMgr {
 
     List<ExternalColumn> findAll();
 
+    ExternalColumn findById(String externalColumnId);
+
 }

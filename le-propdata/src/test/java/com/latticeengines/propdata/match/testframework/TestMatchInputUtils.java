@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -18,7 +19,7 @@ public class TestMatchInputUtils {
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
         input.setReturnUnmatched(true);
-        input.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+        input.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         input.setTenant(new Tenant("PD_Test"));
         List<String> fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");
         input.setFields(fields);

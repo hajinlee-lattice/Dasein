@@ -1,12 +1,17 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
+import com.latticeengines.propdata.match.testframework.TestMatchInputService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -19,8 +24,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
+@Component
 public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
     private static final String MATCH_ENDPOINT = "propdata/matches/realtime";
+
+    @Autowired
+    private TestMatchInputService testMatchInputService;
 
     @Test(groups = { "api" })
     public void testPredefined() {
@@ -98,6 +107,28 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
         };
 
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
+        Assert.assertNotNull(output);
+        if (StringUtils.isNotEmpty(state)) {
+            Assert.assertTrue(output.getResult().size() > 0, String.format("(%s, %s, %s, %s) should not give %d results", name, city,
+                    state, country, output.getResult().size()));
+            Assert.assertTrue(output.getStatistics().getRowsMatched() > 0,
+                    String.format("(%s, %s, %s, %s) gives %d matched", name, city, state, country,
+                            output.getStatistics().getRowsMatched()));
+        }
+    }
+
+    @Test(groups = { "api" }, dataProvider = "cachedMatchGoodDataProvider")
+    public void testLocationEnrichment(String name, String city, String state, String country) {
+        String url = getRestAPIHostPort() + MATCH_ENDPOINT;
+
+        Object[][] data = new Object[][] {
+                { 1, null, name, city, state, country }
+        };
+
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        input.setPredefinedSelection(null);
+        input.setCustomSelection(testMatchInputService.enrichmentSelection());
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         if (StringUtils.isNotEmpty(state)) {

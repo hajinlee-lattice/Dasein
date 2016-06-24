@@ -49,7 +49,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @MatchStep
     MatchContext complete(MatchContext matchContext) {
         List<InternalOutputRecord> internalOutputRecords = distributeResults(matchContext.getInternalResults(),
-                matchContext.getResultsBySource());
+                matchContext.getResultSet());
         matchContext.setInternalResults(internalOutputRecords);
         matchContext = mergeResults(matchContext);
         matchContext.getOutput().setFinishedAt(new Date());
@@ -63,13 +63,26 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Map<String, List<Map<String, Object>>> resultsMap) {
         for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
             String sourceName = result.getKey();
-            distributeCachedSourceResults(records, sourceName, result.getValue());
+            distributeQueryResults(records, sourceName, result.getValue());
         }
         return records;
     }
 
-    private void distributeCachedSourceResults(List<InternalOutputRecord> records, String sourceName,
-            List<Map<String, Object>> rows) {
+    @VisibleForTesting
+    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
+                                                 List<Map<String, Object>> results) {
+        distributeQueryResults(records, results);
+        return records;
+    }
+
+    private void distributeQueryResults(List<InternalOutputRecord> records, List<Map<String, Object>> rows) {
+        distributeQueryResults(records, null, rows);
+    }
+
+    private void distributeQueryResults(List<InternalOutputRecord> records, String sourceName,
+                                        List<Map<String, Object>> rows) {
+        boolean singlePartitionMode = StringUtils.isEmpty(sourceName);
+
         for (InternalOutputRecord record : records) {
             if (record.isFailed()) {
                 continue;
@@ -80,7 +93,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             if (StringUtils.isNotEmpty(parsedDomain)) {
                 for (Map<String, Object> row : rows) {
                     if (row.containsKey(MatchConstants.DOMAIN_FIELD) && parsedDomain.equals(row.get(MatchConstants.DOMAIN_FIELD))) {
-                        record.getResultsInSource().put(sourceName, row);
+                        if (singlePartitionMode) {
+                            record.setQueryResult(row);
+                        } else {
+                            record.getResultsInPartition().put(sourceName, row);
+                        }
                         matched = true;
                         break;
                     }
@@ -123,7 +140,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                                 continue;
                             }
 
-                            record.getResultsInSource().put(sourceName, row);
+                            if (singlePartitionMode) {
+                                record.setQueryResult(row);
+                            } else {
+                                record.getResultsInPartition().put(sourceName, row);
+                            }
+
                             break;
                         }
                     }
@@ -162,7 +184,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             internalRecord.setColumnMatched(new ArrayList<Boolean>());
             List<Object> output = new ArrayList<>();
-            Map<String, Map<String, Object>> results = internalRecord.getResultsInSource();
+            // currently make the code easy to be switched between query by partiion vs query by join
+            // after we gain more data on the performance, we can pick one
+            Map<String, Map<String, Object>> resultsByPartition = internalRecord.getResultsInPartition();
+            Map<String, Object> results = internalRecord.getQueryResult();
             boolean matchedAnyColumn = false;
             for (int i = 0; i < columns.size(); i++) {
                 ColumnSelection.Column column = columns.get(i);
@@ -183,15 +208,19 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
                     matched = true;
                     value = true;
+                } else if (results.containsKey(field)) {
+                    matched = true;
+                    Object objInResult = results.get(field);
+                    value = (objInResult == null ? value : objInResult);
                 } else if (externalColumn != null && StringUtils.isNotEmpty(externalColumn.getTablePartition())) {
                     String tableName = externalColumn.getTablePartition();
-                    if (results.containsKey(tableName)) {
+                    if (resultsByPartition.containsKey(tableName)) {
                         matched = true;
-                        Object objInResult = results.get(tableName).get(field);
+                        Object objInResult = resultsByPartition.get(tableName).get(field);
                         value = (objInResult == null ? value : objInResult);
                     }
                 } else {
-                    for (Map<String, Object> resultSet : results.values()) {
+                    for (Map<String, Object> resultSet : resultsByPartition.values()) {
                         if (resultSet.containsKey(field)) {
                             matched = true;
                             Object objInResult = resultSet.get(field);
@@ -242,7 +271,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 internalRecord.getErrorMessages().add("The input does not match to any source.");
             }
 
-            internalRecord.setResultsInSource(null);
+            internalRecord.setResultsInPartition(null);
             OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || matchedAnyColumn) {
                 outputRecord.setOutput(internalRecord.getOutput());

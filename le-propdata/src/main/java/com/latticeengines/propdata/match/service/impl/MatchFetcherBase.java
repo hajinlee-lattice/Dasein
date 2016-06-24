@@ -85,21 +85,35 @@ public abstract class MatchFetcherBase {
 
         String sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
                 context.getNameLocations());
-
-        for (Map.Entry<String, Set<String>> partitionColumns : partitionColumnsMap.entrySet()) {
-            List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
-                    MAX_RETRIES);
-            for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
-                try {
-                    List<Map<String, Object>> queryResult = query(jdbcTemplate, sql);
-                    resultMap.put(partitionColumns.getKey(), queryResult);
-                    break;
-                } catch (Exception e) {
-                    log.error("Attempt to execute query failed.", e);
-                }
+        List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
+                MAX_RETRIES);
+        for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
+            try {
+                List<Map<String, Object>> queryResult = query(jdbcTemplate, sql);
+                context.setResultSet(queryResult);
+                break;
+            } catch (Exception e) {
+                log.error("Attempt to execute query failed.", e);
             }
         }
-        context.setResultsBySource(resultMap);
+
+//        // currently make the code easy to be switched between query by partiion vs query by join
+//        // after we gain more data on the performance, we can pick one
+//        for (Map.Entry<String, Set<String>> partitionColumns : partitionColumnsMap.entrySet()) {
+//            List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
+//                    MAX_RETRIES);
+//            for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
+//                try {
+//                    List<Map<String, Object>> queryResult = query(jdbcTemplate, sql);
+//                    resultMap.put(partitionColumns.getKey(), queryResult);
+//                    break;
+//                } catch (Exception e) {
+//                    log.error("Attempt to execute query failed.", e);
+//                }
+//            }
+//        }
+//        context.setResultsByPartition(resultMap);
+
         return context;
     }
 

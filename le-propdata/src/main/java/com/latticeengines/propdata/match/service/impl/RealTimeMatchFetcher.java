@@ -209,7 +209,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         }
 
         private void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
-            Map<String, List<Map<String, Object>>> allResults = mergedContext.getResultsBySource();
+            Map<String, List<Map<String, Object>>> allResults = mergedContext.getResultsByPartition();
 
             for (MatchContext context : matchContextList) {
                 Map<String, Set<String>> srcColMap = context.getPartitionColumnsMap();
@@ -222,7 +222,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                     List<Map<String, Object>> mergedResult = allResults.get(sourceName);
                     result.put(sourceName, new ArrayList<>(mergedResult));
                 }
-                context.setResultsBySource(result);
+                context.setResultsByPartition(result);
                 String rootUid = context.getOutput().getRootOperationUID();
                 map.putIfAbsent(rootUid, context);
                 log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);

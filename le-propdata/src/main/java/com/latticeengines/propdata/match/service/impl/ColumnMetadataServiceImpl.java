@@ -64,7 +64,12 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         List<ColumnMetadata> metadatas = toColumnMetadata(externalColumns);
         for (int i = 0; i < metadatas.size(); i++) {
             ColumnMetadata metadata = metadatas.get(i);
-            metadata.setColumnName(selection.getColumnNames().get(i));
+            String overwrittenName = selection.getColumnNames().get(i);
+            if (StringUtils.isNotEmpty(overwrittenName)) {
+                metadata.setColumnName(selection.getColumnNames().get(i));
+            } else if (StringUtils.isEmpty(metadata.getColumnName())) {
+                throw new IllegalArgumentException(String.format("Cannot find column name for column No.%d", i));
+            }
         }
         return metadatas;
     }

@@ -351,13 +351,6 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         blockOutput.setReceivedAt(receivedAt);
         blockOutput.getStatistics().setRowsRequested(blockSize);
         blockOutput.getStatistics().setTimeElapsedInMsec(finishedAt.getTime() - receivedAt.getTime());
-
-        ColumnSelection selection = customizedSelection;
-        if (predefinedSelection != null) {
-            selection = columnSelectionService.parsePredefined(predefinedSelection);
-        }
-        matchExecutor.appendMetadata(blockOutput, selection);
-
         HdfsUtils.writeToFile(yarnConfiguration, outputJson, JsonUtils.serialize(blockOutput));
     }
 

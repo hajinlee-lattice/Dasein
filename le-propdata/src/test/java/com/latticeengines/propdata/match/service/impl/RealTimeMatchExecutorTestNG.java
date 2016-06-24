@@ -146,7 +146,7 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
 
     private void verifyDistributedResults(List<InternalOutputRecord> records) {
         for (InternalOutputRecord record : records) {
-            Map<String, Map<String, Object>> results = record.getResultsInSource();
+            Map<String, Map<String, Object>> results = record.getResultsInPartition();
             if (record.getParsedDomain() != null) {
                 switch (record.getParsedDomain()) {
                     case "a.com":

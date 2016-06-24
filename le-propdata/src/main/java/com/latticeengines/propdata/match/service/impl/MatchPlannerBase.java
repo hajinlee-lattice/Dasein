@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.metric.MatchRequest;
+import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.PublicDomainService;
@@ -36,6 +38,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Autowired
     protected ColumnSelectionService columnSelectionService;
+
+    @Autowired
+    protected ColumnMetadataService columnMetadataService;
 
     @Autowired
     private PublicDomainService publicDomainService;
@@ -112,7 +117,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
-        output.setOutputFields(parseColumnSelection(input).getColumnNames());
+        output = appendMetadata(output, parseColumnSelection(input));
+        output = parseOutputFields(output);
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
         return output;
@@ -232,6 +238,22 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
 
         return posMap;
+    }
+
+    private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
+        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
+        matchOutput.setMetadata(metadata);
+        return matchOutput;
+    }
+
+    private MatchOutput parseOutputFields(MatchOutput matchOutput) {
+        List<ColumnMetadata> metadata = matchOutput.getMetadata();
+        List<String> fields = new ArrayList<>();
+        for (ColumnMetadata column: metadata) {
+            fields.add(column.getColumnName());
+        }
+        matchOutput.setOutputFields(fields);
+        return matchOutput;
     }
 
 }

@@ -23,7 +23,8 @@ public class MatchContext implements Fact, Dimension {
     private MatchInput input;
     private MatchOutput output;
     private Map<String, Set<String>> partitionColumnsMap;
-    private Map<String, List<Map<String, Object>>> resultsBySource;
+    private Map<String, List<Map<String, Object>>> resultsByPartition;
+    private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
     private Long numRows;
@@ -81,12 +82,20 @@ public class MatchContext implements Fact, Dimension {
         this.partitionColumnsMap = partitionColumnsMap;
     }
 
-    public Map<String, List<Map<String, Object>>> getResultsBySource() {
-        return resultsBySource;
+    public Map<String, List<Map<String, Object>>> getResultsByPartition() {
+        return resultsByPartition;
     }
 
-    public void setResultsBySource(Map<String, List<Map<String, Object>>> resultsBySource) {
-        this.resultsBySource = resultsBySource;
+    public void setResultsByPartition(Map<String, List<Map<String, Object>>> resultsByPartition) {
+        this.resultsByPartition = resultsByPartition;
+    }
+
+    public List<Map<String, Object>> getResultSet() {
+        return resultSet;
+    }
+
+    public void setResultSet(List<Map<String, Object>> resultSet) {
+        this.resultSet = resultSet;
     }
 
     public List<InternalOutputRecord> getInternalResults() {

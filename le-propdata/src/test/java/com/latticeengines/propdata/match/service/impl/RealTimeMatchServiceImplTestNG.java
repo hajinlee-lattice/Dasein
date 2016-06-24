@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import com.latticeengines.propdata.match.testframework.TestMatchInputService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -17,11 +18,27 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
     @Autowired
     private RealTimeMatchService matchService;
 
+    @Autowired
+    private TestMatchInputService testMatchInputService;
+
     @Test(groups = "functional")
     public void testSimpleMatch() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = matchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+    }
+
+    @Test(groups = "functional")
+    public void testMatchEnrichment() {
+        Object[][] data = new Object[][] {
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        input.setPredefinedSelection(null);
+        input.setCustomSelection(testMatchInputService.enrichmentSelection());
         MatchOutput output = matchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);

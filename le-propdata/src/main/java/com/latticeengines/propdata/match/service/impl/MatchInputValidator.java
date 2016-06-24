@@ -115,7 +115,8 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Must specify predefined or custom column selection.");
         }
 
-        if (!ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
+        if (input.getCustomSelection() == null
+                && !ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
             throw new UnsupportedOperationException("Only Predefined selection "
                     + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
         }

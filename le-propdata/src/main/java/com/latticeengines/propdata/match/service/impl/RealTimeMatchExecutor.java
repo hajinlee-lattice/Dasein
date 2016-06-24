@@ -41,7 +41,6 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     private MatchContext doPostProcessing(MatchContext matchContext) {
         matchContext = complete(matchContext);
-        matchContext = appendMetadataToContext(matchContext);
         return matchContext;
     }
 
@@ -55,12 +54,6 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         }
         generateOutputMetric(matchContexts);
         return matchContexts;
-    }
-
-    MatchContext appendMetadataToContext(MatchContext matchContext) {
-        ColumnSelection selection = matchContext.getColumnSelection();
-        matchContext.setOutput(appendMetadata(matchContext.getOutput(), selection));
-        return matchContext;
     }
 
     private void generateOutputMetric(final MatchContext matchContext) {

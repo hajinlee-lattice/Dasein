@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnMetadata {
 
+
+    private String columnId;
     private String columnName;
     private String description;
     private String dataType;
@@ -25,6 +27,16 @@ public class ColumnMetadata {
     private String discretizationStrategy;
     private String matchDestination;
     private Boolean isPremium = Boolean.FALSE;
+
+    @JsonProperty("ColumnId")
+    public String getColumnId() {
+        return columnId;
+    }
+
+    @JsonProperty("ColumnId")
+    public void setColumnId(String columnId) {
+        this.columnId = columnId;
+    }
 
     @JsonProperty("ColumnName")
     public String getColumnName() {
@@ -117,10 +129,6 @@ public class ColumnMetadata {
     }
 
     @JsonProperty("IsPremium")
-    private Boolean getIsPremium() {
-        return isPremium;
-    }
-
     public Boolean isPremium() {
         return isPremium;
     }

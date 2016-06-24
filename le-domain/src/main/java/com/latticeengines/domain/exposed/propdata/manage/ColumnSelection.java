@@ -26,7 +26,6 @@ public class ColumnSelection {
         List<ColumnSelection.Column> columns = new ArrayList<>();
         for (ExternalColumn externalColumn: externalColumns) {
             ColumnSelection.Column column = new ColumnSelection.Column();
-            column.setColumnName(externalColumn.getDefaultColumnName());
             column.setExternalColumnId(externalColumn.getExternalColumnID());
             columns.add(column);
         }

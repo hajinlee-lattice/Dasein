@@ -29,4 +29,10 @@ public class ExternalColumnEntityMgrImpl implements ExternalColumnEntityMgr {
         return externalColumnDao.findAll();
     }
 
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ExternalColumn findById(String externalColumnId) {
+        return externalColumnDao.findByField("ExternalColumnID", externalColumnId);
+    }
+
 }

@@ -314,6 +314,7 @@ public class ExternalColumn implements HasPid, Serializable {
 
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
+        metadata.setColumnId(getExternalColumnID());
         metadata.setColumnName(getDefaultColumnName());
         metadata.setDescription(getDescription());
         metadata.setDataType(getDataType());
