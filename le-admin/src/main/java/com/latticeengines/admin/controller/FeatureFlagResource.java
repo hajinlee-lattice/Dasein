@@ -1,5 +1,8 @@
 package com.latticeengines.admin.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,13 +17,10 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 @Api(value = "featureflagsadmin", description = "REST resource for managing feature flags")
 @RestController
 @RequestMapping(value = "/featureflags")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')or hasRole('QA') or hasRole('TENANT_CONSOLE')")
 public class FeatureFlagResource {
 
     @Autowired
