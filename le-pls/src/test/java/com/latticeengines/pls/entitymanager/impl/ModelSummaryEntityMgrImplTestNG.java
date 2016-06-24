@@ -101,6 +101,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         summary1.setTestConversionCount(20L);
         summary1.setTotalConversionCount(100L);
         summary1.setConstructionTime(System.currentTimeMillis());
+        if (summary1.getConstructionTime() == null) {
+            summary1.setConstructionTime(System.currentTimeMillis());
+        }
+        summary1.setLastUpdateTime(summary1.getConstructionTime());
         summary1.setTenant(tenant1);
         setDetails(summary1);
         Predictor s1p1 = new Predictor();
@@ -174,6 +178,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         summary2.setTestConversionCount(200L);
         summary2.setTotalConversionCount(1000L);
         summary2.setConstructionTime(System.currentTimeMillis());
+        if (summary2.getConstructionTime() == null) {
+            summary2.setConstructionTime(System.currentTimeMillis());
+        }
+        summary2.setLastUpdateTime(summary2.getConstructionTime());
         summary2.setTenant(tenant2);
         setDetails(summary2);
         Predictor s2p1 = new Predictor();

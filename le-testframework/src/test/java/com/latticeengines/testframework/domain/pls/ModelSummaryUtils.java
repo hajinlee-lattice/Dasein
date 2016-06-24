@@ -28,6 +28,10 @@ public class ModelSummaryUtils {
         summary.setTestConversionCount(20L);
         summary.setTotalConversionCount(100L);
         summary.setConstructionTime(System.currentTimeMillis());
+        if (summary.getConstructionTime() == null) {
+            summary.setConstructionTime(System.currentTimeMillis());
+        }
+        summary.setLastUpdateTime(summary.getConstructionTime());
         summary.setTenant(tenant);
 
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);

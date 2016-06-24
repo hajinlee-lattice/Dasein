@@ -104,8 +104,8 @@ public class ModelSummaryParser {
             constructionTime = System.currentTimeMillis();
         }
         String lookupId = JsonUtils.getOrDefault(details.get("LookupID"), String.class, "");
-        summary.setName(String.format("%s-%s", name.replace(' ', '_'),
-                getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
+        summary.setName(
+                String.format("%s-%s", name.replace(' ', '_'), getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
         summary.setDisplayName(JsonUtils.getOrDefault(details.get("DisplayName"), String.class, ""));
         summary.setLookupId(lookupId);
         summary.setRocScore(JsonUtils.getOrDefault(details.get("RocScore"), Double.class, 0.0));
@@ -116,6 +116,10 @@ public class ModelSummaryParser {
         summary.setTestConversionCount(JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
         summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
+        if (summary.getConstructionTime() == null) {
+            summary.setConstructionTime(System.currentTimeMillis());
+        }
+        summary.setLastUpdateTime(summary.getConstructionTime());
         summary.setIncomplete(isIncomplete(json));
         setLiftStatistics(json.get(MODEL_SUMMARY_SEGMENTATIONS), summary);
 
@@ -131,15 +135,15 @@ public class ModelSummaryParser {
 
         JsonNode eventTableProvenance = json.get("EventTableProvenance");
         if (eventTableProvenance != null) {
-            summary.setEventTableName(JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class,
-                    ""));
-            summary.setSourceSchemaInterpretation(JsonUtils.getOrDefault(
-                    eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
-            summary.setTrainingTableName(JsonUtils.getOrDefault(eventTableProvenance.get("TrainingTableName"),
-                    String.class, ""));
-            summary.setTransformationGroupName(JsonUtils.getOrDefault(
-                    eventTableProvenance.get("TransformationGroupName"), String.class,
-                    TransformationGroup.STANDARD.getName()));
+            summary.setEventTableName(
+                    JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class, ""));
+            summary.setSourceSchemaInterpretation(
+                    JsonUtils.getOrDefault(eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
+            summary.setTrainingTableName(
+                    JsonUtils.getOrDefault(eventTableProvenance.get("TrainingTableName"), String.class, ""));
+            summary.setTransformationGroupName(
+                    JsonUtils.getOrDefault(eventTableProvenance.get("TransformationGroupName"), String.class,
+                            TransformationGroup.STANDARD.getName()));
         }
 
         // the Id will be used to find hdfs path, make sure they are in sync.
@@ -238,15 +242,15 @@ public class ModelSummaryParser {
             predictor.setName(JsonUtils.getOrDefault(predictorJson.get(NAME), String.class, DEFAULT_PREDICTOR_NAME));
             predictor.setDisplayName(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_DISPLAY_NAME), String.class,
                     DEFAULT_PREDICTOR_DISPLAY_NAME));
-            predictor.setApprovedUsage(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE),
-                    String.class, DEFAULT_PREDICTOR_APPROVED_USAGE));
+            predictor.setApprovedUsage(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE), String.class,
+                    DEFAULT_PREDICTOR_APPROVED_USAGE));
             predictor.setCategory(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_CATEGORY), String.class,
                     DEFAULT_PREDICTOR_CATEGORY));
             predictor.setFundamentalType(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_FUNDAMENTAL_TYPE),
                     String.class, DEFAULT_PREDICTOR_FUNDAMENTAL_TYPE));
-            predictor.setUncertaintyCoefficient(JsonUtils.getOrDefault(
-                    predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT), Double.class,
-                    DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
+            predictor.setUncertaintyCoefficient(
+                    JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT), Double.class,
+                            DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
             predictor.setModelSummary(summary);
             predictor.setTenantId(summary.getTenantId());
 
@@ -299,7 +303,7 @@ public class ModelSummaryParser {
 
     public boolean isIncomplete(JsonNode summaryJson) {
         return !(summaryJson.has("Segmentations") && summaryJson.has("Predictors") && summaryJson.has("ModelDetails")
-                && summaryJson.has("TopSample") && summaryJson.has("BottomSample") && summaryJson
-                    .has("EventTableProvenance"));
+                && summaryJson.has("TopSample") && summaryJson.has("BottomSample")
+                && summaryJson.has("EventTableProvenance"));
     }
 }
