@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -21,10 +22,12 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
         return "MySQL";
     }
 
-    public String getConnectionString(DbCreds creds) {
-        String url = "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
-        return replaceUrlWithParamsAndTestConnection(url, getDriverClass(), creds);
-    }
+    // public String getConnectionString(DbCreds creds) {
+    // String url =
+    // "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
+    // return replaceUrlWithParamsAndTestConnection(url, getDriverClass(),
+    // creds);
+    // }
 
     public ConnManager getConnectionManager(SqoopOptions options) {
         return new MySQLManager(options);
@@ -89,6 +92,39 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
+    public String getConnectionUrl(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringBefore(completeUrl, "?user=");
+    }
+
+    @Override
+    public String getConnectionUserName(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringBetween(completeUrl, "user=", "&password=");
+    }
+
+    @Override
+    public String getConnectionPassword(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringAfter(completeUrl, "password=");
+    }
+
+    @Override
+    public String getConnectionUrl(String completeUrl) {
+        return StringUtils.substringBefore(completeUrl, "?user=");
+    }
+
+    @Override
+    public String getConnectionUserName(String completeUrl) {
+        return StringUtils.substringBetween(completeUrl, "user=", "&password=");
+    }
+
+    @Override
+    public String getConnectionPassword(String completeUrl) {
+        return StringUtils.substringAfter(completeUrl, "password=");
+    }
+
+    @Override
     public Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName) {
         Integer positiveEventCount = jdbcTemplate.queryForObject( //
                 String.format("SELECT COUNT(*) FROM `%s` WHERE %s = 1", tableName, eventColName), //
@@ -119,6 +155,7 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
-        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT `%s` FROM `%s`", column, tableName), String.class);
+        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT `%s` FROM `%s`", column, tableName),
+                String.class);
     }
 }

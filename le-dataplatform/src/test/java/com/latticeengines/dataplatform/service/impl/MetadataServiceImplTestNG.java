@@ -24,16 +24,15 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Autowired
     private MetadataService metadataService;
-    
+
     private NetworkServerControl serverControl;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         serverControl = new NetworkServerControl();
         serverControl.start(null);
     }
-    
-    
+
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         serverControl.shutdown();
@@ -72,7 +71,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
 
     }
-    
+
     @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrl() {
         String url = "jdbc:sqlserver://10.41.1.250:1433;databaseName=SP_7_Tests;user=root;password=welcome";
@@ -82,6 +81,10 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         DbCreds creds = new DbCreds(builder);
 
         assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
+        assertEquals(metadataService.getConnectionUrl(creds),
+                "jdbc:sqlserver://10.41.1.250:1433;databaseName=SP_7_Tests");
+        assertEquals(metadataService.getConnectionUserName(creds), "root");
+        assertEquals(metadataService.getConnectionPassword(creds), "welcome");
     }
 
     @Test(groups = { "functional" }, enabled = true)
@@ -101,15 +104,16 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(metadataService.getJdbcConnectionUrl(dbInfo.getKey()), dbInfo.getValue());
     }
 
-    @Test(groups = { "functional" }, enabled = true)
+    @Test(groups = { "functional" }, enabled = false)
     public void createDataSchema() throws Exception {
         AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
         DataSchema schema = metadataService.createDataSchema(dbInfo.getKey(), "Nutanix");
         assertTrue(schema.getFields().size() > 0);
     }
-    
+
     private AbstractMap.SimpleEntry<DbCreds, String> buildCredsForFile() {
-        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();

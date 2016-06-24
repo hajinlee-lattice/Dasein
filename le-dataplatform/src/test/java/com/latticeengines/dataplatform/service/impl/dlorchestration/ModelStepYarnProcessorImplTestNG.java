@@ -89,9 +89,10 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     }
 
     @Test(groups = "functional")
-    public void testModelSelectionUsingCamille(String customer) throws Exception{
+    public void testModelSelectionUsingCamille() throws Exception {
         int featureThreshold = -1;
         String modelingServiceName = "Modeling";
+        String customer = "testCustomer";
 
         Camille camille = CamilleEnvironment.getCamille();
         Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
@@ -103,7 +104,8 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
         Path featuresThresholdDocPath = docPath.append("FeaturesThreshold");
         try {
-            camille.create(featuresThresholdDocPath, new Document(String.valueOf(featureThreshold)), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(featuresThresholdDocPath, new Document(String.valueOf(featureThreshold)),
+                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (Exception e) {
             log.error("Failed to create FeaturesThreshold document in Camille. " + e.toString());
         }

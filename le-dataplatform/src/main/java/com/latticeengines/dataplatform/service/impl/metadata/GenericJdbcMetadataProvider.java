@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class GenericJdbcMetadataProvider extends MetadataProvider {
@@ -93,6 +94,36 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
 
     @Override
     public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionUrl(DbCreds creds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionUserName(DbCreds creds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionPassword(DbCreds creds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionUrl(String completeUrl) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionUserName(String completeUrl) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getConnectionPassword(String completeUrl) {
         throw new UnsupportedOperationException();
     }
 

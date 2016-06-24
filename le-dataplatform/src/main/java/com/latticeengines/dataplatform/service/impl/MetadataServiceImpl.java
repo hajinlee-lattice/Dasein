@@ -59,6 +59,27 @@ public class MetadataServiceImpl implements MetadataService {
         return provider.getConnectionString(creds);
     }
 
+    @Override
+    public String getConnectionUrl(DbCreds creds) {
+        String dbType = creds.getDbType();
+        MetadataProvider provider = metadataProviders.get(dbType);
+        return provider.getConnectionUrl(this.getJdbcConnectionUrl(creds));
+    }
+
+    @Override
+    public String getConnectionUserName(DbCreds creds) {
+        String dbType = creds.getDbType();
+        MetadataProvider provider = metadataProviders.get(dbType);
+        return provider.getConnectionUserName(this.getJdbcConnectionUrl(creds));
+    }
+
+    @Override
+    public String getConnectionPassword(DbCreds creds) {
+        String dbType = creds.getDbType();
+        MetadataProvider provider = metadataProviders.get(dbType);
+        return provider.getConnectionPassword(this.getJdbcConnectionUrl(creds));
+    }
+
     private MetadataProvider getProvider(JdbcTemplate jdbcTemplate) {
         try {
             return metadataProviders.get(jdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName());
@@ -139,7 +160,7 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public JdbcTemplate constructJdbcTemplate(DbCreds creds) {
-        DataSource dataSource = new DriverManagerDataSource(this.getJdbcConnectionUrl(creds), creds.getUser(),
+        DataSource dataSource = new DriverManagerDataSource(this.getConnectionUrl(creds), creds.getUser(),
                 creds.getDecryptedPassword());
         return new JdbcTemplate(dataSource);
     }
@@ -157,7 +178,7 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column){
+    public boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.checkIfColumnExists(jdbcTemplate, tableName, column);
     }

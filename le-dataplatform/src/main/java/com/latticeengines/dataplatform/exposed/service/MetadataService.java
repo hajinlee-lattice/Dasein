@@ -45,4 +45,10 @@ public interface MetadataService {
     boolean checkIfColumnExists(JdbcTemplate jdbcTemplate, String tableName, String column);
 
     List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column);
+
+    String getConnectionUrl(DbCreds creds);
+
+    String getConnectionPassword(DbCreds creds);
+
+    String getConnectionUserName(DbCreds creds);
 }

@@ -57,7 +57,11 @@ public class SqoopJobServiceImpl {
         cmds.add("export");
         cmds.add("-Dmapreduce.job.queuename=" + overwriteQueue(queue));
         cmds.add("--connect");
-        cmds.add(metadataService.getJdbcConnectionUrl(creds));
+        cmds.add(metadataService.getConnectionUrl(creds));
+        cmds.add("--username");
+        cmds.add(metadataService.getConnectionUserName(creds));
+        cmds.add("--password");
+        cmds.add(metadataService.getConnectionPassword(creds));
         cmds.add("--table");
         cmds.add(table);
         cmds.add("--mapreduce-job-name");
@@ -111,7 +115,11 @@ public class SqoopJobServiceImpl {
             }
         }
         cmds.add("--connect");
-        cmds.add(metadataService.getJdbcConnectionUrl(exporter.getDbCreds()));
+        cmds.add(metadataService.getConnectionUrl(exporter.getDbCreds()));
+        cmds.add("--username");
+        cmds.add(metadataService.getConnectionUserName(exporter.getDbCreds()));
+        cmds.add("--password");
+        cmds.add(metadataService.getConnectionPassword(exporter.getDbCreds()));
         cmds.add("--table");
         cmds.add(exporter.getTable());
         cmds.add("--mapreduce-job-name");
@@ -197,7 +205,11 @@ public class SqoopJobServiceImpl {
             }
         }
         cmds.add("--connect");
-        cmds.add(connectionUrl);
+        cmds.add(metadataService.getConnectionUrl(importer.getDbCreds()));
+        cmds.add("--username");
+        cmds.add(metadataService.getConnectionUserName(importer.getDbCreds()));
+        cmds.add("--password");
+        cmds.add(metadataService.getConnectionPassword(importer.getDbCreds()));
 
         if (SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
             cmds.add("--table");
@@ -313,11 +325,14 @@ public class SqoopJobServiceImpl {
         }
 
         List<String> cmds = new ArrayList<>();
-        String connectionUrl = metadataService.getJdbcConnectionUrl(creds);
         cmds.add("import");
         cmds.add("-Dmapreduce.job.queuename=" + overwriteQueue(queue));
         cmds.add("--connect");
-        cmds.add(connectionUrl);
+        cmds.add(metadataService.getConnectionUrl(creds));
+        cmds.add("--username");
+        cmds.add(metadataService.getConnectionUserName(creds));
+        cmds.add("--password");
+        cmds.add(metadataService.getConnectionPassword(creds));
 
         if (query == null) {
             cmds.add("--table");
@@ -424,6 +439,7 @@ public class SqoopJobServiceImpl {
         // yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
         // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
+        System.out.println("cmds are " + cmds);
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
         } finally {

@@ -3,11 +3,13 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.SQLServerManager;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class SQLServerMetadataProvider extends MetadataProvider {
@@ -73,6 +75,36 @@ public class SQLServerMetadataProvider extends MetadataProvider {
         return "jdbc:sqlserver://$$HOST$$:$$PORT$$;databaseName=$$DB$$;user=$$USER$$;password=$$PASSWD$$";
     }
 
+    public String getConnectionUrl(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringBefore(completeUrl, ";user=");
+    }
+
+    public String getConnectionUserName(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringBetween(completeUrl, "user=", ";password=");
+    }
+
+    public String getConnectionPassword(DbCreds creds) {
+        String completeUrl = getConnectionString(creds);
+        return StringUtils.substringAfter(completeUrl, "password=");
+    }
+
+    @Override
+    public String getConnectionUrl(String completeUrl) {
+        return StringUtils.substringBefore(completeUrl, ";user=");
+    }
+
+    @Override
+    public String getConnectionUserName(String completeUrl) {
+        return StringUtils.substringBetween(completeUrl, "user=", ";password=");
+    }
+
+    @Override
+    public String getConnectionPassword(String completeUrl) {
+        return StringUtils.substringAfter(completeUrl, "password=");
+    }
+
     @Override
     public void addPrimaryKeyColumn(JdbcTemplate jdbcTemplate, String tableName, String pid) {
         jdbcTemplate.execute(String.format(
@@ -109,6 +141,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
-        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT [%s] FROM [%s]", column, tableName), String.class);
+        return jdbcTemplate.queryForList(String.format("SELECT DISTINCT [%s] FROM [%s]", column, tableName),
+                String.class);
     }
 }
