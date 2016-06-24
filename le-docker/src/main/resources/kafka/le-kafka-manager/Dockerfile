@@ -1,5 +1,8 @@
 FROM sheepkiller/kafka-manager
 
+RUN yum -y update; yum clean all;
+RUN yum -y install cronie;
+
 # zookeeper
 RUN wget http://supergsego.com/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
 

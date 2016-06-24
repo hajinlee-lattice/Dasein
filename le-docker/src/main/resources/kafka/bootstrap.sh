@@ -38,6 +38,24 @@ bash bootstrap.sh ${ZK_NODES} ${KAFKA} ${ZK_PORT} ${KAFKA_NETWORK}
 popd
 sleep 3
 
+if [ $KAFKA_NODES != 1 ]; then
+    echo "Provisioning Kafka Manager: ${KAFKA}-mgr"
+    docker run -d -p 9001:9000 \
+        --name ${KAFKA}-mgr \
+        -h ${KAFKA}-mgr \
+        --net ${KAFKA_NETWORK} \
+        -e ZK_HOSTS="localhost:2181" \
+        -l cluster.name=${KAFKA} \
+        latticeengines/kafka-manager
+
+    echo 'wait 20 sec for kafka manager to wake up'
+    for i in $(seq 1 20);
+    do
+        echo $i
+        sleep 1
+    done
+fi
+
 HOSTS=""
 BROKER_ADDRS=""
 for i in $(seq 1 ${KAFKA_NODES});
@@ -136,7 +154,7 @@ else
          HOSTS="${HOSTS} ${KAFKA}-sr${i} ${KAFKA}-rest${i}"
     done
 
-    sleep 5
+    sleep 3
 
     for i in $(seq 1 2);
     do
@@ -163,18 +181,10 @@ else
         -e HOSTS="${HOSTS}" \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-haproxy
-
-    echo "Provisioning Kafka Manager: ${KAFKA}-mgr"
-    docker run -d -p 9000:9000 \
-        -e ZK_HOSTS="localhost:2181" \
-        --name ${KAFKA}-mgr \
-        -h ${KAFKA}-mgr \
-        --net ${KAFKA_NETWORK} \
-        -l cluster.name=${KAFKA} \
-        latticeengines/kafka-manager
 fi
 
 sleep 2
+
 docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"
 
 if [ $KAFKA_NODES != 1 ]; then
