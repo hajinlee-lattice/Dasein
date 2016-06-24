@@ -79,8 +79,7 @@ class LPMigration_LP3ModelingQuery(StepBase):
         elif template_type == 'MKTO':
             tables_supported.append('MKTO_LeadRecord')
         elif template_type == 'ELQ':
-            print 'Unsupported template type \'{0}\'.'.format(template_type)
-            return Applicability.cannotApplyFail
+            tables_supported.append('ELQ_Contact')
         else:
             print 'Unsupported template type \'{0}\'.'.format(template_type)
             return Applicability.cannotApplyFail
@@ -132,8 +131,8 @@ class LPMigration_LP3ModelingQuery(StepBase):
                 supportedQuery = False
                 continue
 
-        if not supportedQuery:
-            return Applicability.cannotApplyFail
+        #if not supportedQuery:
+        #    return Applicability.cannotApplyFail
 
         self.q_pls_modeling = q_pls_modeling
 
