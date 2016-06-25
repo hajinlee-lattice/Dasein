@@ -2,8 +2,5 @@
 
 rm -rf /tmp/ledp
 
-mkdir -p /etc/ledp
-rm -rf /etc/ledp/*.properties
-
 mkdir -p /var/log/ledp
 chmod a+w /var/log/ledp
