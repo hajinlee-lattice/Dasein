@@ -21,7 +21,7 @@ def provision(stackname, profile):
     pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk")
 
     # provision kafka cloud formation
-    elbs = kafka.provision(stackname, pri_zk_hosts, profile)
+    elbs = kafka.provision(stackname, pri_zk_hosts + "/" + stackname, profile)
 
     print pub_zk_hosts
     print pri_zk_hosts

@@ -1,4 +1,3 @@
-from .ecs import ECSCluster
 from .elb import ElasticLoadBalancer
 from .iam import InstanceProfile
 from .resource import Resource
@@ -30,6 +29,14 @@ class AutoScalingGroup(Resource):
             }
         }
 
+    def set_capacity(self, capacity):
+        self._template["Properties"]["DesiredCapacity"] = capacity
+        return self
+
+    def set_max_size(self, max_size):
+        self._template["Properties"]["MaxSize"] = max_size
+        return self
+
     def set_min_size(self, min_size):
         self._template["Properties"]["MinSize"] = min_size
         self._template["UpdatePolicy"]["MinInstancesInService"] = min_size
@@ -53,8 +60,7 @@ class AutoScalingGroup(Resource):
         return self
 
 class LaunchConfiguration(Resource):
-    def __init__(self, logicalId, asgroup, instanceprofile):
-        assert isinstance(asgroup, AutoScalingGroup)
+    def __init__(self, logicalId, instanceprofile, instance_type_ref="InstanceType"):
         assert isinstance(instanceprofile, InstanceProfile)
 
         Resource.__init__(self, logicalId)
@@ -64,26 +70,13 @@ class LaunchConfiguration(Resource):
                 "ImageId" : {
                     "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, "AmazonECSLinux"]
                 },
-                "InstanceType"   : { "Ref" : "InstanceType" },
+                "InstanceType"   : { "Ref" : instance_type_ref },
                 "IamInstanceProfile": instanceprofile.ref(),
                 "EbsOptimized" : { "Fn::FindInMap" : [ "Instance2Options", { "Ref" : "InstanceType" }, "EBSOptimized" ] },
                 "InstanceMonitoring" : "true",
                 "KeyName"        : { "Ref" : "KeyName" },
                 "SecurityGroups" : [ { "Ref" : "SecurityGroupId" } ],
-                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
-                    "#!/bin/bash -xe\n",
-                    "yum install -y aws-cfn-bootstrap\n",
-
-                    "/opt/aws/bin/cfn-init -v",
-                    "         --stack ", { "Ref" : "AWS::StackName" },
-                    "         --resource %s " % self.logical_id(),
-                    "         --region ", { "Ref" : "AWS::Region" }, "\n",
-
-                    "/opt/aws/bin/cfn-signal -e $? ",
-                    "         --stack ", { "Ref" : "AWS::StackName" },
-                    "         --resource %s " % asgroup.logical_id(),
-                    "         --region ", { "Ref" : "AWS::Region" }, "\n"
-                ]]}}
+                "UserData"       : ""
             }
         }
 
@@ -91,73 +84,23 @@ class LaunchConfiguration(Resource):
         self._template["Metadata"] = metadata
         return self
 
+    def set_userdata(self, userdata):
+        self._template["Properties"]["UserData"] = userdata
+        return self
 
-class ECSLaunchConfiguration(LaunchConfiguration):
-    def __init__(self, logicalId, ecscluster, asgroup, instanceprofile):
-        LaunchConfiguration.__init__(self, logicalId, asgroup, instanceprofile)
-        assert isinstance(ecscluster, ECSCluster)
-        self.set_metadata(self.__metadata(ecscluster))
-
-    def __metadata(self, ecscluster):
-        return {
-            "AWS::CloudFormation::Init" : {
-                "config" : {
-                    "commands" : {
-                        "01_save_ip" : {
-                            "command" : { "Fn::Join": [ "\n", [
-                                "#!/bin/bash",
-                                "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
-                                "echo $ADDR >> /etc/internaladdr.txt",
-                                "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
-                                "echo $PUBADDR >> /etc/externaladdr.txt"
-                            ] ] }
-                        },
-                        "02_add_instance_to_cluster" : {
-                            "command" : { "Fn::Join": [ "", [
-                                "#!/bin/bash\n",
-                                "rm -rf /etc/ecs/ecs.config\n",
-                                "touch /etc/ecs/ecs.config\n",
-                                "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
-                                "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
-                            ] ] }
-                        }
-                    },
-
-                    "files" : {
-                        "/etc/cfn/cfn-hup.conf" : {
-                            "content" : { "Fn::Join" : ["", [
-                                "[main]\n",
-                                "stack=", { "Ref" : "AWS::StackId" }, "\n",
-                                "region=", { "Ref" : "AWS::Region" }, "\n"
-                            ]]},
-                            "mode"    : "000400",
-                            "owner"   : "root",
-                            "group"   : "root"
-                        },
-                        "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
-                            "content": { "Fn::Join" : ["", [
-                                "[cfn-auto-reloader-hook]\n",
-                                "triggers=post.update\n",
-                                "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
-                                "action=/opt/aws/bin/cfn-init -v",
-                                "         --stack ", { "Ref" : "AWS::StackName" },
-                                "         --resource %s " % self.logical_id(),
-                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
-                                "runas=root\n"
-                            ]]}
-                        }
-                    },
-
-                    "services" : {
-                        "sysvinit" : {
-                            "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
-                        }
-                    }
-                }
+    def mount(self, device, size, type='gp2'):
+        if "BlockDeviceMappings" not in self._template["Properties"]:
+            self._template["Properties"]["BlockDeviceMappings"] = []
+        device = {
+            "DeviceName" : device,
+            "Ebs" : {
+                "DeleteOnTermination" : "true",
+                "VolumeSize" : size,
+                "VolumeType" : type
             }
         }
-
-
+        self._template["Properties"]["BlockDeviceMappings"].append(device)
+        return self
 
 
 

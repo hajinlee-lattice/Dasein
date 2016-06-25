@@ -48,8 +48,8 @@ if [ $KAFKA_NODES != 1 ]; then
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-manager
 
-    echo 'wait 20 sec for kafka manager to wake up'
-    for i in $(seq 1 20);
+    echo 'wait 10 sec for kafka manager to wake up'
+    for i in $(seq 1 10);
     do
         echo $i
         sleep 1

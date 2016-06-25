@@ -7,18 +7,14 @@
       ]
     },
     "prepare": {
+      "packages" : {
+        "yum" : {
+          "xfsprogs" : []
+        }
+      },
       "files": {
-        "/tmp/zkserver-head.txt": {
-          "content": {
-            "Fn::Join": [
-              "\n",
-              [ "#!/usr/bin/env bash",
-                "# description: Zookeeper Start Stop Restart",
-                "# processname: zookeeper",
-                "# chkconfig: 244 30 80"
-              ]
-            ]
-          },
+        "/etc/init.d/zookeeper": {
+          "content": "",
           "mode": "000777",
           "owner": "root",
           "group": "root"
@@ -28,11 +24,25 @@
             "Fn::Join": [
               "\n",
               [ "#!/usr/bin/env bash",
-                "mkdir -p /mnt/zookeeper/logs",
-                "file -s /dev/xvdh",
-                "mkfs -t ext4 /dev/xvdh",
-                "echo '/dev/xvdh       /mnt/zookeeper/logs   ext4    defaults,nofail        0       2' >> /etc/fstab",
+                "mkdir -p /mnt/zookeeper/data-log",
+                "file -s /dev/xvdb",
+                "mkfs -t xfs /dev/xvdb",
+                "echo '/dev/xvdb       /mnt/zookeeper/data-log   xfs    defaults,nofail        0       2' >> /etc/fstab",
                 "mount -a"
+              ]
+            ]
+          },
+          "mode": "000777",
+          "owner": "root",
+          "group": "root"
+        },
+        "/tmp/0_java.env": {
+          "content": {
+            "Fn::Join": [
+              "\n",
+              [ "JVMFLAGS=\"-Xms3g -Xmx3584m\"",
+                "ZOO_LOG4J_PROP=\"INFO,ROLLINGFILE\"",
+                "ZOO_LOG_DIR=\"/var/log/zookeeper/\""
               ]
             ]
           },
@@ -47,13 +57,11 @@
               [ "#!/usr/bin/env bash",
                 "wget http://mirrors.ocf.berkeley.edu/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz",
                 "tar xzf zookeeper-3.4.8.tar.gz",
-                "cp zookeeper-3.4.8/bin/zkServer.sh .",
-                "sed -i '/env bash/d' zkServer.sh",
-                "sed -i '/BASH_SOURCE-/ZOOBIN=`readlink $0`/g' zkServer.sh",
-                "cat /tmp/zkserver-head.txt zkServer.sh > zookeeper-3.4.8/bin/zkServer.sh",
-                "mv zookeeper-3.4.8 /opt",
-                "cp /opt/zookeeper-3.4.8/conf/zoo_sample.cfg /opt/zookeeper-3.4.8/conf/zoo.cfg",
-                "chmod a+w /opt/zookeeper-3.4.8/conf/zoo.cfg"
+                "mv zookeeper-3.4.8 /opt/zookeeper",
+                "cp /opt/zookeeper/conf/zoo_sample.cfg /opt/zookeeper/conf/zoo.cfg",
+                "chmod a+w /opt/zookeeper/conf/zoo.cfg",
+                "mv /tmp/0_java.env /opt/zookeeper/conf/java.env",
+                "chkconfig zookeeper on"
               ]
             ]
           },
@@ -71,11 +79,11 @@
     },
     "install": {
       "commands": {
+        "0": {
+          "command": "bash /tmp/mount_volume.sh"
+        },
         "1": {
           "command": "bash /tmp/bootstrap.sh"
-        },
-        "2": {
-          "command" : "crontab -l | { cat; echo \"0 */4 * * * bash -c /opt/zookeeper-3.4.8/bin/zkCleanup.sh 5\"; } | crontab -"
         }
       }
     }

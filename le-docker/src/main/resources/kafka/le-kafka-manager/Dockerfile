@@ -18,11 +18,14 @@ RUN tar xzf zookeeper-3.4.8.tar.gz \
 
 RUN mkdir -p /usr/zookeeper/conf && \
     touch /usr/zookeeper/conf/zoo.cfg && \
-    echo "dataDir=/var/lib/zookeeper" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "dataDir=/usr/zookeeper/data" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "dataLogDir=/usr/zookeeper/data-log" >> /usr/zookeeper/conf/zoo.cfg && \
     echo "clientPort=2181" >> /usr/zookeeper/conf/zoo.cfg && \
     echo "tickTime=2000" >> /usr/zookeeper/conf/zoo.cfg && \
     echo "initLimit=10" >> /usr/zookeeper/conf/zoo.cfg && \
-    echo "syncLimit=5" >> /usr/zookeeper/conf/zoo.cfg
+    echo "syncLimit=5" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "autopurge.snapRetainCount=5" >> /usr/zookeeper/conf/zoo.cfg && \
+    echo "autopurge.purgeInterval=2" >> /usr/zookeeper/conf/zoo.cfg
 
 VOLUME ["/usr/zookeeper/conf"]
 

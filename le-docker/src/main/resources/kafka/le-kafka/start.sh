@@ -32,14 +32,18 @@ if [ -z "${ADVERTISE_IP}" ]; then
 fi
 
 # on local we pass in host name, and here we resolve it to ip
-
 if ! valid_ip ${ADVERTISE_IP} ; then
     ADVERTISE_IP=$(dig +short "${ADVERTISE_IP}")
 fi
 
-echo "ADVERTISE_IP=${ADVERTISE_IP}"
+if [ -z "${LOG_DIRS}" ]; then LOG_DIRS="/var/lib/kafka" ; fi
+if [ -z "${RACK_ID}" ]; then RACK_ID="1" ; fi
 
 sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/kafka/server.properties
+sed -i "s|{{RACK_ID}}|$RACK_ID|g" /etc/kafka/server.properties
+sed -i "s|{{LOG_DIRS}}|$LOG_DIRS|g" /etc/kafka/server.properties
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka/server.properties
+
+cat /etc/kafka/server.properties
 
 JMX_PORT=9199 /usr/bin/kafka-server-start /etc/kafka/server.properties

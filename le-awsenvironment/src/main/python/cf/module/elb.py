@@ -1,6 +1,7 @@
+from .ec2 import EC2Instance
 from .resource import Resource
 from .template import Template
-from .ec2 import EC2Instance
+
 
 class ElasticLoadBalancer(Resource):
     def __init__(self, logicalId):
@@ -34,11 +35,11 @@ class ElasticLoadBalancer(Resource):
         self._template["Properties"]["Listeners"].append(listener.template())
         return self
 
-    def listen(self, port, protocol="tcp"):
+    def listen(self, port, lb_port=None, protocol="tcp"):
         if protocol in ("http", "https"):
-            return self.add_listener(ElbListener(port, protocol=protocol))
+            return self.add_listener(ElbListener(port, lb_port=lb_port, protocol=protocol))
         else:
-            return self.add_listener(ElbListener(port, protocol=protocol))
+            return self.add_listener(ElbListener(port, lb_port=lb_port, protocol=protocol))
 
     def add_listeners(self, listeners):
         for l in listeners:
