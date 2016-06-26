@@ -27,6 +27,13 @@ class ECSService(Resource):
             }
         }
 
+    def set_min_max_percent(self, min_pct, max_pct):
+        self._template["Properties"]["DeploymentConfiguration"] = {
+            "MaximumPercent" : min_pct,
+            "MinimumHealthyPercent" : max_pct
+        }
+        return self
+
     def add_elb(self, elb, role, container, port):
         assert isinstance(elb, ElasticLoadBalancer)
         assert isinstance(container, ContainerDefinition)

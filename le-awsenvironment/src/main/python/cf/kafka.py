@@ -213,7 +213,8 @@ def broker_service(ecscluster, asgroup):
     for v in log_vols:
         task.add_volume(v)
 
-    service = ECSService("Broker", ecscluster, task, { "Ref": "Brokers" }).depends_on(asgroup)
+    service = ECSService("Broker", ecscluster, task, { "Ref": "Brokers" }).set_min_max_percent(50, 200)\
+        .depends_on(asgroup)
     return service, task
 
 def sr_resources(instanceprofile, bkr_service, elb9092):
@@ -257,7 +258,8 @@ def schema_registry_service(ecscluster, broker):
     task = TaskDefinition("SchemaRegistryTask")
     task.add_container(container).add_volume(intaddr).add_volume(extaddr)
 
-    service = ECSService("SchemaRegistry", ecscluster, task, 2).depends_on(broker)
+    service = ECSService("SchemaRegistry", ecscluster, task, 2).set_min_max_percent(50, 200)\
+        .depends_on(broker)
     return service, task
 
 def kafka_rest_service(ecscluster, elb9022, sr):
@@ -273,7 +275,7 @@ def kafka_rest_service(ecscluster, elb9022, sr):
     task = TaskDefinition("KafkaRESTTask")
     task.add_container(container)
 
-    service = ECSService("KafkaREST", ecscluster, task, 2).depends_on(sr)
+    service = ECSService("KafkaREST", ecscluster, task, 2).set_min_max_percent(50, 200).depends_on(sr)
     return service, task
 
 def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
@@ -296,7 +298,7 @@ def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
     task = TaskDefinition("ConnectWorkerTask")
     task.add_container(container)
 
-    service = ECSService("ConnectWorker", ecscluster, task, 2).depends_on(sr)
+    service = ECSService("ConnectWorker", ecscluster, task, 2).set_min_max_percent(50, 200).depends_on(sr)
     return service, task
 
 def get_elbs(stackname):

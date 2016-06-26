@@ -174,7 +174,7 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                     splitContext(mergedContext, matchContextList);
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error("Failed to fetch multi-context match input.", e);
             }
         }
 
@@ -209,20 +209,9 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         }
 
         private void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
-            Map<String, List<Map<String, Object>>> allResults = mergedContext.getResultsByPartition();
-
+            List<Map<String, Object>> resultSet = mergedContext.getResultSet();
             for (MatchContext context : matchContextList) {
-                Map<String, Set<String>> srcColMap = context.getPartitionColumnsMap();
-                Map<String, List<Map<String, Object>>> result = new HashMap<>();
-                for (Map.Entry<String, Set<String>> entry : srcColMap.entrySet()) {
-                    String sourceName = entry.getKey();
-                    if (!allResults.containsKey(sourceName)) {
-                        throw new RuntimeException("Merged result does not have required source " + sourceName);
-                    }
-                    List<Map<String, Object>> mergedResult = allResults.get(sourceName);
-                    result.put(sourceName, new ArrayList<>(mergedResult));
-                }
-                context.setResultsByPartition(result);
+                context.setResultSet(resultSet);
                 String rootUid = context.getOutput().getRootOperationUID();
                 map.putIfAbsent(rootUid, context);
                 log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);

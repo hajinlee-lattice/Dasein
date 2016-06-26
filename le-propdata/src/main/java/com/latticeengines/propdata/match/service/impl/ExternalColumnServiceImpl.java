@@ -33,7 +33,8 @@ public class ExternalColumnServiceImpl implements ExternalColumnService {
 
     @PostConstruct
     private void postConstruct() {
-        columnCache = CacheBuilder.newBuilder().concurrencyLevel(20).weakKeys().expireAfterWrite(10, TimeUnit.MINUTES)
+        columnCache = CacheBuilder.newBuilder().concurrencyLevel(20).initialCapacity(1000)
+                .weakKeys().expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, ExternalColumn>() {
                     public ExternalColumn load(String key) {
                         return externalColumnEntityMgr.findById(key);

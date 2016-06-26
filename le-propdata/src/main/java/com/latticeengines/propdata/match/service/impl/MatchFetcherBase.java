@@ -96,24 +96,6 @@ public abstract class MatchFetcherBase {
                 log.error("Attempt to execute query failed.", e);
             }
         }
-
-//        // currently make the code easy to be switched between query by partiion vs query by join
-//        // after we gain more data on the performance, we can pick one
-//        for (Map.Entry<String, Set<String>> partitionColumns : partitionColumnsMap.entrySet()) {
-//            List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
-//                    MAX_RETRIES);
-//            for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
-//                try {
-//                    List<Map<String, Object>> queryResult = query(jdbcTemplate, sql);
-//                    resultMap.put(partitionColumns.getKey(), queryResult);
-//                    break;
-//                } catch (Exception e) {
-//                    log.error("Attempt to execute query failed.", e);
-//                }
-//            }
-//        }
-//        context.setResultsByPartition(resultMap);
-
         return context;
     }
 
