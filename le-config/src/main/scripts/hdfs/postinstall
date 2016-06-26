@@ -21,7 +21,7 @@ fi
 echo $VERSION
 
 echo "replace tokens"
-cd /tmp/ledp/$LE_ENVIRONMENT
+cd /tmp/ledp
 
 python replace_token.py -d /tmp/ledp/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
 
