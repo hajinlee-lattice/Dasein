@@ -152,7 +152,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
     this.ShowBasedOnInternalOrExternal = function (predictor, isExternal) {
         var toReturn = false;
-        if (predictor != null && predictor.Tags != null) {
+        if (predictor != null) {
             var tag = isExternal ? "External" : "Internal";
 
             // DP-1883
@@ -164,6 +164,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
 
+            if (predictor.Tags == null) {
+                if (tag == "Internal") {
+                    return true;
+                }
+                return false;
+            }
+
             for (var x=0; x<predictor.Tags.length; x++) {
                 if (tag == predictor.Tags[x]) {
                     toReturn = true;
@@ -171,7 +178,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
         }
-        
+
         return toReturn;
     };
     
