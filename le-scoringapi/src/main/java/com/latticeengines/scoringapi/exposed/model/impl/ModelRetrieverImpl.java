@@ -172,20 +172,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
 
         if (!CollectionUtils.isEmpty(predictors)) {
-            for (Predictor predictor : predictors) {
-                String fieldName = predictor.getName();
-                String displayName = predictor.getDisplayName();
+            for (String fieldName : mapFields.keySet()) {
+                String displayName = null;
 
                 FieldSchema fieldSchema = mapFields.get(fieldName);
 
                 if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                    Field field = null;
-                    if (StringUtils.isEmpty(displayName)) {
-                        field = new Field(fieldName, fieldSchema.type);
-                    } else {
-                        field = new Field(fieldName, fieldSchema.type, displayName);
+                    // use predictors to just get display name
+                    for (Predictor predictor : predictors) {
+                        if (fieldName.equals(predictor.getName())) {
+                            // break loop as soon as we got matching predictor
+                            displayName = predictor.getDisplayName();
+                            break;
+                        }
                     }
-                    fieldList.add(field);
+
+                    setField(fieldList, fieldName, displayName, fieldSchema);
                 }
             }
         } else {
@@ -198,20 +200,32 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 attributeMap = modelMetadataTable.getNameAttributeMap();
             }
             for (String fieldName : mapFields.keySet()) {
+                String displayName = null;
+
                 FieldSchema fieldSchema = mapFields.get(fieldName);
+
                 if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                    Field field = null;
                     if (attributeMap.containsKey(fieldName)) {
-                        field = new Field(fieldName, fieldSchema.type, attributeMap.get(fieldName).getDisplayName());
-                    } else {
-                        field = new Field(fieldName, fieldSchema.type);
+                        displayName = attributeMap.get(fieldName).getDisplayName();
                     }
-                    fieldList.add(field);
+
+                    setField(fieldList, fieldName, displayName, fieldSchema);
                 }
             }
         }
 
         return fields;
+    }
+
+    private void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema) {
+        if (StringUtils.isEmpty(displayName)) {
+            // by default use field name as display name
+            displayName = fieldName;
+        }
+
+        Field field = new Field(fieldName, fieldSchema.type, displayName);
+
+        fieldList.add(field);
     }
 
     private ModelSummary getModelSummary(CustomerSpace customerSpace, String modelId) {
