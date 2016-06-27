@@ -185,17 +185,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             try {
                 csvFieldValue = String.valueOf(csvRecord.get(header));
             } catch (Exception e) { // This catch is for the row error
-                rowError = true;
                 LOG.error(e);
-                errorMap.put(header, e.getMessage());
-                return null;
+                csvFieldValue = null;
             }
             Object avroFieldValue = null;
 
             List<InputValidator> validators = attr.getValidators();
             try {
                 validateAttribute(validators, csvRecord, attr);
-                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", header));
                 if (attr.isNullable() && StringUtils.isEmpty(csvFieldValue)) {
                     avroFieldValue = null;
                 } else {
@@ -256,17 +253,19 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             default:
                 LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType:" + avroType + ", physicalDatalType:"
+                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
                         + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
             LOG.error(e);
-            throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType + ".");
+            throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s", fieldCsvValue,
+                    avroType, attr.getDisplayName()));
         } catch (Exception e) {
             fieldMalFormed = true;
             LOG.error(e);
-            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp.");
+            throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
+                    fieldCsvValue, attr.getDisplayName()));
         }
 
     }
