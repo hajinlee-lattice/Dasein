@@ -319,6 +319,28 @@ angular
                 }   
             }
         })
+        .state('home.model.review', {
+            url: '/review',
+            views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/RefineModelSummaryView.html'
+                },
+                "main@": {
+                    templateUrl: 'app/models/views/RefineModelRowsView.html'
+                }   
+            }
+        })
+        .state('home.model.review.columns', {
+            url: '/columns',
+            views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/RefineModelSummaryView.html'
+                },
+                "main@": {
+                    templateUrl: 'app/models/views/RefineModelColumnsView.html'
+                }   
+            }
+        })
         .state('home.marketosettings', {
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',

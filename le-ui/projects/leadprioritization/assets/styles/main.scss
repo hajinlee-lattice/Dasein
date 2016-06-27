@@ -1,3 +1,4 @@
+@import "../../app/models/views/RefineModelStyles.scss";
 @import "../../app/create/views/CSVImportStyles.scss";
 @import "../../app/jobs/status/StatusStyles.scss";
 @import "../../app/navigation/pagination/PaginationStyles";
@@ -650,7 +651,7 @@ Create Model: Setup & Import Page
 ================================================================== */
 .setup-import {
   .form-actions {
-    margin-top: 4em;
+    margin-top: 2em;
     padding-top: 1em;
     border-top: 1px solid #ccc;
   }

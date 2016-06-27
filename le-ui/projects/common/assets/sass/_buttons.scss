@@ -228,8 +228,8 @@ Use this structure for angled buttons:
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;         
-  margin-right: 8px;
-  margin-bottom: 0;
+  margin-right: 4px;
+  margin-bottom: 4px;
   width: 169px;
   padding: 0;
 
@@ -275,7 +275,7 @@ Use this structure for angled buttons:
     color: #fff;
   }
   &.active {
-    margin-bottom: -2px;
+    margin-bottom: -6px;
     &:before, &:after {
       background: #fff;
     }
@@ -288,6 +288,7 @@ Use this structure for angled buttons:
     }
     a {
       background: #fff;
+      padding: 16px 24px 16px 0;
     }
     span {
       color: #333;

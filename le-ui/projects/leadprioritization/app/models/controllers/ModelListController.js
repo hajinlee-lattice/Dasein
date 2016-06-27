@@ -52,5 +52,6 @@ angular.module('mainApp.models.controllers.ModelListController', [
 
     getModels(true);
     getModels();
+    
 
 });

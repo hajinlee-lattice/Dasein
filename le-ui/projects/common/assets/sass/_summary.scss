@@ -61,6 +61,18 @@ Page Summary / Sub-Nav Headers
       margin-right: 20px;
       font-style: italic;
     }
+    .nav-primary-button {
+      margin-right: 6px;
+      padding: 10px 16px;
+    }
+    &.review-model {
+      .button.angled-button:before, .button.angled-button:after {
+        width: 101px;
+      }
+      .button.angled-button {
+        width: 190px;
+      }
+    }
   }
 
   

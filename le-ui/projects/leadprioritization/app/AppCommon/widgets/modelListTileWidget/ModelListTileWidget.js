@@ -68,6 +68,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         }
     };
 
+    $scope.reviewClick = function ($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+    };
+
     $scope.updateAsActiveClick = function ($event) {
 
         if ($event != null) {
