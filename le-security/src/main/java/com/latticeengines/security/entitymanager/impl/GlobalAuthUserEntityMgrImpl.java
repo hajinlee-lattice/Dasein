@@ -17,8 +17,7 @@ import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
 @Component("globalAuthUserEntityMgr")
 public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements GlobalAuthUserEntityMgr {
 
-    @Autowired
-    private Logger log = Logger.getLogger(GlobalAuthUserEntityMgrImpl.class);
+    private static final Logger log = Logger.getLogger(GlobalAuthUserEntityMgrImpl.class);
 
     @Autowired
     private GlobalAuthUserDao gaUserDao;
