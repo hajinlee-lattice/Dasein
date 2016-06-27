@@ -111,8 +111,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
 
-        log.info("wait 15 sec for model to be downloaded.");
-        Thread.sleep(15000L);
+        log.info("wait 20 sec for model to be downloaded.");
+        Thread.sleep(20000L);
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
             if (field.getColumnName().equals(InterfaceName.Website.name())) {

@@ -34,6 +34,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         params.setFilename(sourceFile.getName());
         params.setName("testWorkflowAccount");
         params.setTransformationGroup(TransformationGroup.STANDARD);
+        model(params);
         String summary = getModelSummary(params.getName());
         JsonNode json = JsonUtils.deserialize(summary, JsonNode.class);
         JsonNode percentiles = json.get("PercentileBuckets");
