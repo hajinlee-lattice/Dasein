@@ -259,7 +259,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
             LOG.error(e);
-            throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s", fieldCsvValue,
+            throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.", fieldCsvValue,
                     avroType, attr.getDisplayName()));
         } catch (Exception e) {
             fieldMalFormed = true;
