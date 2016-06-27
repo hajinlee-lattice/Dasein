@@ -87,7 +87,16 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
      * @throws Exception
      */
     protected void setupTestEnvironmentWithOneGATenant() throws Exception {
-        testBed.bootstrap(1);
+        setupTestEnvironmentWithGATenants(1);
+    }
+
+    /**
+     * bootstrap N tenant with random tenantId
+     *
+     * @throws Exception
+     */
+    protected void setupTestEnvironmentWithGATenants(int numTenants) throws Exception {
+        testBed.bootstrap(numTenants);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
     }
