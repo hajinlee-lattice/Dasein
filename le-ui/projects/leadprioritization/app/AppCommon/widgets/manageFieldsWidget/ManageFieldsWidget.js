@@ -124,6 +124,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     model: {
                         fields: {
                             DisplayName: { type: "string" },
+                            ColumnName: { type: "string" },
                             Category: { type: "string" },
                             ApprovedUsage: { type: "string" },
                             FundamentalType: { type: "string" }
@@ -151,6 +152,11 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     {
                         field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
                         template: kendo.template($("#displayNameTemplate").html()),
+                        width: 150
+                    },
+                    {
+                        field: "ColumnName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_COLUMN_NAME'),
+                        template: kendo.template($("#columnNameTemplate").html()),
                         width: 150
                     },
                     {
@@ -229,7 +235,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             var nameFiler = {
                 logic: "or",
                 filters: [
-                    { field: "DisplayName", operator: "contains", value: $scope.field }
+                    { field: "DisplayName", operator: "contains", value: $scope.field },
+                    { field: "ColumnName", operator: "contains", value: $scope.field }
                 ]
             };
             orFilters.push(nameFiler);

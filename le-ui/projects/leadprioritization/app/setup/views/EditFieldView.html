@@ -28,6 +28,10 @@
                        <td>{{field.DisplayName}}</td>
                    </tr>
                    <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_COLUMN_NAME')}}</td>
+                       <td>{{field.ColumnName}}</td>
+                   </tr>
+                   <tr data-ng-class="shaded">
                        <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE')}}</td>
                        <td><select class="form-control" data-ng-options="u as u for u in approvedUsagesToSelect" data-ng-model="field.ApprovedUsage"></select></td>
                    </tr>
