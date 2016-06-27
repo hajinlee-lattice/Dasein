@@ -50,19 +50,21 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     function getFieldsToDisplay(metadataFields) {
         var fields = [];
+        $scope.fieldsNotDisplayed = [];
         for (var i = 0; i < metadataFields.length; i++) {
             var dataItem = metadataFields[i];
             if (dataItem == null) {
-                continue;
-            } else if (dataItem.ApprovedUsage == null && ManageFieldsService.IsLatticeAttribute(dataItem)) {
                 continue;
             }
 
             if (dataItem.ApprovedUsage == null || dataItem.ApprovedUsage.toLowerCase() == "none") {
                 dataItem.ApprovedUsage = "None";
             }
+
             if (dataItem.ApprovedUsage != "None" || ! ManageFieldsService.IsLatticeAttribute(dataItem)) {
                 fields.push(dataItem);
+            } else {
+                $scope.fieldsNotDisplayed.push(dataItem);
             }
         }
         return fields;
@@ -404,7 +406,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var editedData = getAllEditedData();
         if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, $scope.fields);
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, editedData.concat($scope.fieldsNotDisplayed));
 
             $scope.saveInProgress = false;
         } else {

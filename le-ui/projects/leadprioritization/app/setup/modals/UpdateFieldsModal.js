@@ -5,12 +5,12 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 ])
 .service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
-    this.show = function (oneLeadPerDomain, modelSummaryId, editedData) {
+    this.show = function (oneLeadPerDomain, modelSummaryId, allMetadataFields) {
         $http.get('app/setup/views/UpdateFieldsView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.modelSummaryId = modelSummaryId;
-            scope.editedData = editedData;
+            scope.allMetadataFields = allMetadataFields;
             var deduplicationTypes = [ "ONELEADPERDOMAIN", "MULTIPLELEADSPERDOMAIN" ];
             if (oneLeadPerDomain) {
                 scope.dedupType = deduplicationTypes[0];
@@ -54,7 +54,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 
         $scope.saveInProgress = true;
 
-        MetadataService.UpdateAndCloneFields($scope.dedupType, modelName, $scope.modelDisplayName, $scope.modelSummaryId, $scope.editedData).then(function(result){
+        MetadataService.UpdateAndCloneFields($scope.dedupType, modelName, $scope.modelDisplayName, $scope.modelSummaryId, $scope.allMetadataFields).then(function(result){
             if (result.Success) {
                 $("#modalContainer").modal('hide');
 
