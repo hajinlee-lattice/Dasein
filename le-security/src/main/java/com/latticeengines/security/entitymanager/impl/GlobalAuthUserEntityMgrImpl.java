@@ -2,6 +2,7 @@ package com.latticeengines.security.entitymanager.impl;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,6 +17,9 @@ import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
 @Component("globalAuthUserEntityMgr")
 public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements
         GlobalAuthUserEntityMgr {
+
+    @Autowired
+    private Logger log = Logger.getLogger(GlobalAuthUserEntityMgrImpl.class);
 
     @Autowired
     private GlobalAuthUserDao gaUserDao;
@@ -58,6 +62,7 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthUser gaUser) {
+        log.info(String.format("Deleting user %d (%s)", gaUser.getPid(), gaUser));
         super.delete(gaUser);
     }
 
