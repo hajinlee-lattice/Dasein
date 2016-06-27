@@ -406,7 +406,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var editedData = getAllEditedData();
         if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, editedData.concat($scope.fieldsNotDisplayed));
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, $scope.fields.concat($scope.fieldsNotDisplayed));
 
             $scope.saveInProgress = false;
         } else {
