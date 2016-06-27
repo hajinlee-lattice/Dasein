@@ -24,7 +24,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
             List<Integer> playIds) {
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
-                + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, "
+                + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, A.External_ID AS LEAccountExternalID, "
                 + "COALESCE(PL.[Description], L.[Description]) AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
@@ -63,7 +63,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     protected String getSfdcContactIDFromLEContact() {
-        return  "[CrmLink_ID] AS SfdcContactID, ";
+        return "[CrmLink_ID] AS SfdcContactID, ";
     }
 
     protected String getMonetaryValue() {
@@ -83,7 +83,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                     if (contactArray.length >= 10) {
                         // On recommendation record as well.
                         record.put("SfdcContactID", contactArray[9]);
-                        
+
                         List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
                         contactMap.put("Name", contactArray[0]);
@@ -98,7 +98,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactMap.put("SfdcContactID", contactArray[9]);
                         contactList.add(contactMap);
                         record.put("Contacts", contactList);
-                        
+
                     }
 
                 }
@@ -250,14 +250,16 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds) {
+    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum,
+            List<Integer> accountIds, String filterBy) {
         String extensionColumns = getAccountExtensionColumns();
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
+                + "A.External_ID AS LEAccountExternalID, "
                 + extensionColumns + " "
                 + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date], [Item_ID]) RowNum "
-                + getAccountExtensionFromWhereClause(accountIds)
+                + getAccountExtensionFromWhereClause(accountIds, filterBy)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
@@ -287,8 +289,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<Integer> accountIds) {
-        String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds);
+    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy) {
+        String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         if (!CollectionUtils.isEmpty(accountIds)) {
@@ -297,9 +299,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return queryForObject(sql, source, Integer.class);
     }
 
-    private String getAccountExtensionFromWhereClause(List<Integer> accountIds) {
-        String whereClause = "FROM [LEAccount_Extensions] E WITH (NOLOCK) JOIN [LEAccount] A WITH (NOLOCK) ON E.Item_ID = A.LEAccount_ID AND A.IsActive = 1 "
-                + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
+    private String getAccountExtensionFromWhereClause(List<Integer> accountIds, String filterBy) {
+        if (StringUtils.isNotEmpty(filterBy)) {
+            return getAccountExtensionFromWhereClauseWithFilterBy(filterBy);
+        }
+        String whereClause = getAccountExtensionFromClause() + "%s "
+                + "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(accountIds)) {
@@ -308,6 +313,23 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             extraFilter.append("AND E.[Item_ID] IN (:accountIds) ");
         }
         return String.format(whereClause, extraFilter.toString());
+    }
+
+    private String getAccountExtensionFromClause() {
+        return "FROM [LEAccount_Extensions] E WITH (NOLOCK) JOIN [LEAccount] A WITH (NOLOCK) ON E.Item_ID = A.LEAccount_ID AND A.IsActive = 1 ";
+    }
+
+    private String getAccountExtensionFromWhereClauseWithFilterBy(String filterBy) {
+        filterBy = filterBy.trim().toUpperCase();
+        String whereClause = null;
+        if (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS")) {
+            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :start) ";
+            String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
+            whereClause = String.format(whereClause, oper);
+        } else { // ALL or other
+            whereClause = "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
+        }
+        return getAccountExtensionFromClause() + whereClause;
     }
 
     @Override
@@ -356,7 +378,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         return results;
     }
-    
+
     @Override
     public int getContactCount(long start, List<Integer> contactIds) {
         String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds);
@@ -368,11 +390,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return queryForObject(sql, source, Integer.class);
     }
 
-    
     private String getContactFromWhereClause(List<Integer> contactIds) {
-        String whereClause = 
-             "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 "
-                    + "%s AND DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
+        String whereClause = "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 "
+                + "%s AND DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(contactIds)) {
@@ -382,14 +402,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         }
         return String.format(whereClause, extraFilter.toString());
     }
-        
+
     @Override
     public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<Integer> contactIds) {
         String extensionColumns = getContactExtensionColumns();
-        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
-                + getSfdcContactIDFromLEContact()
-                + extensionColumns + " "
-                + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, " + getSfdcContactIDFromLEContact() + extensionColumns
+                + " " + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], [Item_ID]) RowNum "
                 + getContactExtensionFromWhereClause(contactIds)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
@@ -433,15 +451,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         }
         return String.format(whereClause, extraFilter.toString());
     }
-    
+
     @Override
     public List<Map<String, Object>> getContactExtensionSchema() {
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
                 + "(SELECT DISTINCT S.value FROM ConfigResource S "
                 + "WHERE C.Display_Name_Key IS NOT NULL AND S.Key_Name = C.Display_Name_Key AND S.Locale_ID = -1) AS DisplayName "
                 + "FROM [ExtensionColumn] C JOIN [ExtensionTable] T ON C.Parent_ID = T.ExtensionTable_ID "
-                + "AND T.Table_Notion = 'LEContact' "
-                + "WHERE C.IsActive = 1 ";
+                + "AND T.Table_Notion = 'LEContact' " + "WHERE C.IsActive = 1 ";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         List<Map<String, Object>> result = queryForListOfMap(sql, source);

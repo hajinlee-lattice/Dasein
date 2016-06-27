@@ -28,7 +28,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Api(value = "Playmaker recommendation api", description = "REST resource for getting playmaker recomendationss")
 @Configuration
-@EnableAutoConfiguration(exclude = {VelocityAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @RestController
 @ImportResource(value = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
 @RequestMapping(value = "/playmaker")
@@ -113,10 +113,14 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
+            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, start changes to Last Modification Date "
+                    + "in Unix timestamp on Recommendations.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountExtensions(tenantName, start, offset, maximum, accountIds);
+        return playmakerRecommendationMgr
+                .getAccountExtensions(tenantName, start, offset, maximum, accountIds, filterBy);
     }
 
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -124,11 +128,14 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @ApiOperation(value = "Get record count of account extension")
     public Map<String, Object> getAccountExtensionCount(
             HttpServletRequest request,
-            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
+            @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
+            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, start changes to Last Modification Date "
+                    + "in Unix timestamp on Recommendations.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, start, accountIds);
+        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, start, accountIds, filterBy);
     }
 
     @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -172,7 +179,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactCount(tenantName, start, contactIds);
     }
-    
+
     @RequestMapping(value = "/contactextensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get contact extensions")
@@ -214,7 +221,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactExtensionColumnCount(tenantName);
     }
-    
+
     @RequestMapping(value = "/playvalues", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")
@@ -264,7 +271,8 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @RequestMapping(value = "/playgroups", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all play groups' IDs and Names")
-    public List<Map<String, Object>> getPlayGroups(HttpServletRequest request,
+    public List<Map<String, Object>> getPlayGroups(
+            HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum) {
