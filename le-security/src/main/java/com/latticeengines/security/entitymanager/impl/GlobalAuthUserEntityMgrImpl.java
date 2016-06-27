@@ -15,8 +15,7 @@ import com.latticeengines.security.dao.GlobalAuthUserDao;
 import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
 
 @Component("globalAuthUserEntityMgr")
-public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements
-        GlobalAuthUserEntityMgr {
+public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements GlobalAuthUserEntityMgr {
 
     @Autowired
     private Logger log = Logger.getLogger(GlobalAuthUserEntityMgrImpl.class);
@@ -62,7 +61,7 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthUser gaUser) {
-        log.info(String.format("Deleting user %d (%s)", gaUser.getPid(), gaUser));
+        log.info(String.format("Deleting user %s (%d)", gaUser.getEmail(), gaUser.getPid()));
         super.delete(gaUser);
     }
 
