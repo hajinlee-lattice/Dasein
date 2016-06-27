@@ -6,18 +6,18 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.core.services.FeatureFlagService'
 ])
 .controller('MainHeaderController', function ($scope, $rootScope, $routeParams, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
-    
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
+    
     if (clientSession != null) {
-        $scope.userDisplayName = clientSession.DisplayName;
-    }
-    $scope.showProfileNav = false;
-    var ClientSession = BrowserStorageUtility.getClientSession(),
-        Tenant = ClientSession ? ClientSession.Tenant : null;
+        var Tenant = clientSession ? clientSession.Tenant : null;
 
-    $scope.tenantName = window.escape(Tenant.DisplayName);
+        $scope.userDisplayName = clientSession.DisplayName;
+        $scope.tenantName = window.escape(Tenant.DisplayName);
+    }
+
+    $scope.showProfileNav = false;
     
     $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
         if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
@@ -37,7 +37,6 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.isModelDetailsPage = true;
         $scope.displayName = args.displayName;
     });
-
     
     checkBrowserWidth();
     $(window).resize(checkBrowserWidth);
@@ -64,5 +63,4 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $("body").removeClass("open-nav");
         }
     }
-
 });
