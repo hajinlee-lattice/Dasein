@@ -323,7 +323,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         filterBy = filterBy.trim().toUpperCase();
         String whereClause = null;
         if (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS")) {
-            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :start) ";
+            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :start) ";
             String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
             whereClause = String.format(whereClause, oper);
         } else { // ALL or other
