@@ -97,6 +97,7 @@ public class ScoreResource extends BaseScoring {
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiIgnore
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,

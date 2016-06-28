@@ -1,10 +1,10 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class ScoreRequest {
 
@@ -21,7 +21,10 @@ public class ScoreRequest {
     private String rule;
 
     @JsonProperty("record")
-    @ApiModelProperty(value = "A record is represented as a JSON Object; ie. { \"field1\" : value1, \"field2\" : value2, .......}", required = true)
+    @ApiModelProperty(value = "A record is represented as a JSON Object; "
+            + "ie. { \"field1\" : value1, \"field2\" : value2, .......}. "
+            + "At the minimum, make sure to specify either 'Email' "
+            + "or specify both 'CompanyName' and 'State' fields", required = true)
     private Map<String, Object> record;
 
     public String getModelId() {

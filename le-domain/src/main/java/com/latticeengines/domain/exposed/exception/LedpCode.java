@@ -435,8 +435,9 @@ public enum LedpCode {
     LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
     LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31107("unsupported_model_type", "Unsupported model type {0}"), //
-    LEDP_31199("missing_domain", "Domain field(s) are missing {0}"), //
-
+    LEDP_31199("missing_domain", "Domain field(s) are missing {0}. Make sure to specify either 'Email' " //
+            + "or specify both 'CompanyName' and 'State' fields."), //
+    
     // le-serviceflows
     LEDP_32000("Validations failed: {0}");
 
