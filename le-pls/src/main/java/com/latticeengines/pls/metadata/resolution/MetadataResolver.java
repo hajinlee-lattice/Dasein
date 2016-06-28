@@ -88,6 +88,7 @@ public class MetadataResolver {
                     if (isUserFieldMatchWithAttribute(fieldMapping.getMappedField(), attribute)) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
+                        attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         break;
                     }
                 }
@@ -285,9 +286,9 @@ public class MetadataResolver {
 
         String fieldType;
         if (userDefinedType == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString();
+            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString().toLowerCase();
         } else {
-            fieldType = userDefinedType.getAvroType().toString();
+            fieldType = userDefinedType.getAvroType().toString().toLowerCase();
         }
 
         log.info(String.format("The fieldType is: %s", fieldType));
@@ -339,23 +340,6 @@ public class MetadataResolver {
         }
         log.info(String.format("The statistical type is %s", statisticalType));
         return statisticalType;
-    }
-
-    private String getFieldTypeFromFieldTypeName(String fieldTypeName) {
-        String fieldType;
-        switch (fieldTypeName.toUpperCase()) {
-            case "BOOLEAN":
-                fieldType = UserDefinedType.BOOLEAN.getAvroType().toString();
-                break;
-            case "NUMBER":
-                fieldType = UserDefinedType.NUMBER.getAvroType().toString();
-                break;
-            case "TEXT":
-            default:
-                fieldType = UserDefinedType.TEXT.getAvroType().toString();
-                break;
-        }
-        return fieldType;
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {

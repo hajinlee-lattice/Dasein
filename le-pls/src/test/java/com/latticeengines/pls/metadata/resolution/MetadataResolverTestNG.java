@@ -92,16 +92,16 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(attribute.getTags().size(), 1);
         assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
         assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
 
         attribute = table.getAttribute("Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
         attribute = table.getAttribute("Number_Column");
-        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.NUMBER.getAvroType().toString());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.NUMBER.getAvroType().toString().toLowerCase());
         attribute = table.getAttribute("Almost_Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
 
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);
@@ -154,7 +154,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         Table table = resolver.getMetadata();
         Attribute attribute = table.getAttribute("Almost_Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
     }
 
     @Test(groups = "functional")
