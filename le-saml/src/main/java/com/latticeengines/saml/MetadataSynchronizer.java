@@ -1,41 +1,62 @@
 package com.latticeengines.saml;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Logger;
+import org.opensaml.Configuration;
+import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.io.Unmarshaller;
+import org.opensaml.xml.parse.ParserPool;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.metadata.MetadataMemoryProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 
 @Component
 public class MetadataSynchronizer {
+    private static Logger log = Logger.getLogger(MetadataSynchronizer.class);
+
     @Autowired
     private MetadataManager metadataManager;
 
     @Autowired
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
-    private Timer timer;
+    @Autowired
+    private ExtendedMetadata baseServiceProviderMetadata;
 
-    public MetadataSynchronizer() {
-    }
+    @Autowired
+    private ParserPool parserPool;
+
+    @Value("${saml.base.address}")
+    private String baseAddress;
+
+    private Timer timer;
 
     @PostConstruct
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
-        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 5000, 10000);
+        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, 10000);
     }
 
     @Transactional
@@ -45,30 +66,99 @@ public class MetadataSynchronizer {
 
         public void run() {
             try {
-                List<MetadataProvider> providers = getServiceProviders();
-                providers.addAll(getIdentityProviders());
+                List<Tenant> tenants = getTenants();
+                List<MetadataProvider> providers = new ArrayList<>();
+
+                for (Tenant tenant : tenants) {
+                    providers.add(tenant.serviceProvider);
+                    providers.addAll(tenant.identityProviders);
+                }
                 metadataManager.setProviders(providers);
-            } catch (MetadataProviderException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                log.error("Exception encountered in MetadataSynchronizer refresh task", e);
             }
         }
     }
 
-    public List<MetadataProvider> getIdentityProviders() {
-        List<IdentityProvider> idps = identityProviderEntityMgr.findAll();
-        return new ArrayList<>();
-    }
-
-    private List<MetadataProvider> getServiceProviders() {
-        return new ArrayList<>();
-    }
-
-    private String getEntityId(MetadataProvider provider) throws MetadataProviderException {
-        XMLObject object = provider.getMetadata();
-        if (object instanceof EntityDescriptor) {
-            return ((EntityDescriptor) object).getEntityID();
+    public List<Tenant> getTenants() {
+        List<IdentityProvider> identityProviders = identityProviderEntityMgr.findAll();
+        Map<String, List<IdentityProvider>> grouped = new HashMap<>();
+        for (IdentityProvider identityProvider : identityProviders) {
+            String tenantId = identityProvider.getGlobalAuthTenant().getId();
+            List<IdentityProvider> list;
+            if (!grouped.containsKey(tenantId)) {
+                grouped.put(tenantId, new ArrayList<IdentityProvider>());
+            }
+            list = grouped.get(tenantId);
+            list.add(identityProvider);
         }
-        throw new RuntimeException("Multiple entity ids are not supported");
+
+        List<Tenant> tenants = new ArrayList<>();
+        for (String tenantId : grouped.keySet()) {
+            try {
+                log.info(String.format("Refreshing metadata for tenant %s", tenantId));
+                tenants.add(constructTenant(tenantId, grouped.get(tenantId)));
+            } catch (Exception e) {
+                log.error(
+                        String.format("Exception encountered attempting to construct provider for tenant %s", tenantId),
+                        e);
+            }
+        }
+
+        return tenants;
     }
 
+    private Tenant constructTenant(String tenantId, List<IdentityProvider> identityProviders) {
+        Tenant tenant = new Tenant();
+        for (IdentityProvider identityProvider : identityProviders) {
+            IdentityProviderMetadataAdaptor adaptor = new IdentityProviderMetadataAdaptor(parserPool, identityProvider);
+            tenant.identityProviders.add(adaptor);
+        }
+
+        tenant.serviceProvider = constructServiceProvider(tenantId);
+        return tenant;
+    }
+
+    private MetadataProvider constructServiceProvider(String tenantId) {
+
+        try (InputStream metadataInput = getClass().getResourceAsStream("/metadata/applatticeenginescom_sp.xml")) {
+            Document e = parserPool.parse(metadataInput);
+            Unmarshaller unmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(e.getDocumentElement());
+            EntityDescriptor entityDescriptor = (EntityDescriptor) unmarshaller.unmarshall(e.getDocumentElement());
+            ExtendedMetadata extendedMetadata = baseServiceProviderMetadata.clone();
+            extendedMetadata.setAlias(tenantId);
+
+            String entityId = "app.lattice-engines.com/" + tenantId;
+            entityDescriptor.setEntityID(entityId);
+
+            MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(entityDescriptor);
+            memoryProvider.initialize();
+
+            MetadataProvider serviceProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
+            RoleDescriptor descriptor = serviceProvider.getRole(entityId, SPSSODescriptor.DEFAULT_ELEMENT_NAME,
+                    "urn:oasis:names:tc:SAML:2.0:protocol");
+
+            for (Endpoint endpoint : descriptor.getEndpoints()) {
+                endpoint.setLocation(endpoint.getLocation().replace("___TENANT_ID___", tenantId));
+                endpoint.setLocation(endpoint.getLocation().replace("___BASE_ADDRESS___", baseAddress));
+            }
+            extendedMetadata.setIdpDiscoveryResponseURL(extendedMetadata.getIdpDiscoveryResponseURL().replace(
+                    "___TENANT_ID___", tenantId));
+            extendedMetadata.setIdpDiscoveryResponseURL(extendedMetadata.getIdpDiscoveryResponseURL().replace(
+                    "___BASE_ADDRESS___", baseAddress));
+            extendedMetadata.setIdpDiscoveryURL(extendedMetadata.getIdpDiscoveryURL().replace("___TENANT_ID___",
+                    tenantId));
+            extendedMetadata.setIdpDiscoveryURL(extendedMetadata.getIdpDiscoveryURL().replace("___BASE_ADDRESS___",
+                    baseAddress));
+
+            return serviceProvider;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private class Tenant {
+        public List<MetadataProvider> identityProviders = new ArrayList<>();
+        public MetadataProvider serviceProvider;
+    }
 }

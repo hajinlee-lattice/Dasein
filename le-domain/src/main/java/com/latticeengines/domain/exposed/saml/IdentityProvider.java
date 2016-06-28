@@ -14,15 +14,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 
 @Entity
 @Table(name = "SECURITY_IDENTITY_PROVIDER")
@@ -40,6 +41,11 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     @JoinColumn(name = "TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GlobalAuthTenant globalAuthTenant;
+
+    @JsonProperty("entity_id")
+    @Index(name = "IX_ENTITY_ID")
+    @Column(name = "ENTITY_ID", nullable = false)
+    private String entityId;
 
     @JsonProperty("metadata")
     @Column(name = "METADATA", nullable = false)
@@ -70,6 +76,14 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
 
     public void setMetadata(String metadata) {
         this.metadata = metadata;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 
     public GlobalAuthTenant getGlobalAuthTenant() {

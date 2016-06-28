@@ -23,6 +23,7 @@ export MICROSERVICE_PROPDIR=$WSHOME/le-microservice/core/conf/env/dev
 export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
 export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
 export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
+export SAML_PROPDIR=$WSHOME/le-saml/conf/env/dev
 
 if [ -f $WSHOME/le-dev/aliases ]; then
     . $WSHOME/le-dev/aliases

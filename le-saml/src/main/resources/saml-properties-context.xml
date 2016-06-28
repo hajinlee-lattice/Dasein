@@ -10,6 +10,7 @@
             <list>
                 <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
+                <value>file:${SAML_PROPDIR}/saml.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false"/>

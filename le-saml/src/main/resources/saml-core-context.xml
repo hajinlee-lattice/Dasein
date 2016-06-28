@@ -65,6 +65,7 @@
         <property name="defaultProfileOptions">
             <bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
                 <property name="includeScoping" value="false"/>
+                <property name="forceAuthN" value="true"/>
             </bean>
         </property>
     </bean>
@@ -79,66 +80,28 @@
     </bean>
     -->
 
+    <bean id="baseServiceProviderMetadata" class="org.springframework.security.saml.metadata.ExtendedMetadata">
+        <property name="local" value="true"/>
+        <property name="securityProfile" value="metaiop"/>
+        <property name="sslSecurityProfile" value="pkix"/>
+        <property name="sslHostnameVerification" value="default"/>
+        <property name="signMetadata" value="true"/>
+        <property name="signingKey" value="apollo"/>
+        <property name="encryptionKey" value="apollo"/>
+        <property name="requireArtifactResolveSigned" value="false"/>
+        <property name="requireLogoutRequestSigned" value="false"/>
+        <property name="requireLogoutResponseSigned" value="false"/>
+        <property name="idpDiscoveryEnabled" value="true"/>
+        <property name="idpDiscoveryURL"
+                  value="___BASE_ADDRESS___/discovery/alias/___TENANT_ID___"/>
+        <property name="idpDiscoveryResponseURL"
+                  value="___BASE_ADDRESS___/login/alias/___TENANT_ID___"/>
+    </bean>
+
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
-    <bean id="metadataManager" class="org.springframework.security.saml.metadata.CachingMetadataManager">
+    <bean id="metadataManager" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg>
             <list>
-                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
-                    <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
-                            <constructor-arg>
-                                <bean class="java.util.Timer"/>
-                            </constructor-arg>
-                            <constructor-arg>
-                                <bean class="org.opensaml.util.resource.ClasspathResource">
-                                    <constructor-arg value="/metadata/okta.xml"/>
-                                </bean>
-                            </constructor-arg>
-                            <property name="parserPool" ref="parserPool"/>
-                        </bean>
-                    </constructor-arg>
-                    <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
-                            <property name="alias" value="foo"/>
-                        </bean>
-                    </constructor-arg>
-                </bean>
-
-                <bean class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
-                    <constructor-arg>
-                        <bean class="org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider">
-                            <constructor-arg>
-                                <bean class="java.util.Timer"/>
-                            </constructor-arg>
-                            <constructor-arg>
-                                <bean class="org.opensaml.util.resource.ClasspathResource">
-                                    <constructor-arg value="/metadata/applatticeenginescom_sp.xml"/>
-                                </bean>
-                            </constructor-arg>
-                            <property name="parserPool" ref="parserPool"/>
-                        </bean>
-                    </constructor-arg>
-                    <constructor-arg>
-                        <bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
-                            <property name="local" value="true"/>
-                            <property name="alias" value="foo"/>
-                            <property name="securityProfile" value="metaiop"/>
-                            <property name="sslSecurityProfile" value="pkix"/>
-                            <property name="sslHostnameVerification" value="default"/>
-                            <property name="signMetadata" value="true"/>
-                            <property name="signingKey" value="apollo"/>
-                            <property name="encryptionKey" value="apollo"/>
-                            <property name="requireArtifactResolveSigned" value="false"/>
-                            <property name="requireLogoutRequestSigned" value="false"/>
-                            <property name="requireLogoutResponseSigned" value="false"/>
-                            <property name="idpDiscoveryEnabled" value="true"/>
-                            <property name="idpDiscoveryURL"
-                                      value="http://localhost:8080/saml/discovery/alias/foo"/>
-                            <property name="idpDiscoveryResponseURL"
-                                      value="http://localhost:8080/saml/login/alias/foo?disco=true"/>
-                        </bean>
-                    </constructor-arg>
-                </bean>
 
             </list>
         </constructor-arg>
@@ -155,7 +118,18 @@
     </bean>
 
     <!-- Provider of default SAML Context -->
-    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl"/>
+    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+        <property name="metadataResolver" ref="latticeMetadataCredentialResolver"/>
+    </bean>
+
+    <bean id="latticeMetadataCredentialResolver" class="com.latticeengines.saml.LatticeMetadataCredentialResolver">
+        <constructor-arg>
+            <ref bean="metadataManager"/>
+        </constructor-arg>
+        <constructor-arg>
+            <ref bean="keyManager"/>
+        </constructor-arg>
+    </bean>
 
     <!-- Processing filter for WebSSO profile messages -->
     <bean id="samlWebSSOProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
