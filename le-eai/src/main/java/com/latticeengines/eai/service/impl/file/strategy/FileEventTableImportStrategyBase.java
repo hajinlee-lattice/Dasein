@@ -146,7 +146,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         Attribute internalId = new Attribute();
         internalId.setName(InterfaceName.InternalId.name());
         internalId.setDisplayName(internalId.getName());
-        internalId.setPhysicalDataType(Type.LONG.name());
+        internalId.setPhysicalDataType(Type.LONG.getName());
         internalId.setSourceLogicalDataType("");
         internalId.setLogicalDataType(LogicalDataType.InternalId);
         internalId.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
