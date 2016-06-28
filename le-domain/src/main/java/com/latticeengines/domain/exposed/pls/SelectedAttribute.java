@@ -34,9 +34,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Access(AccessType.FIELD)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "ENRICHMENT_ATTRIBUTER", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "COLUMN_ID" }) })
+@Table(name = "SELECTED_ATTRIBUTE", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "COLUMN_ID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class EnrichmentAttribute implements HasPid, HasTenant, Serializable {
+public class SelectedAttribute implements HasPid, HasTenant, Serializable {
 
     @Id
     @JsonProperty("PID")
@@ -48,6 +48,10 @@ public class EnrichmentAttribute implements HasPid, HasTenant, Serializable {
     @Column(name = "COLUMN_ID", nullable = false, length = 64)
     private String columnId;
 
+    @JsonProperty("CustomerColumnName")
+    @Column(name = "CUSTOMER_COLUMN_NAME", nullable = true, length = 64)
+    private String customerColumnName;
+
     @JsonIgnore
     @Column(name = "TENANT_PID", nullable = false)
     private Long tenantPid;
@@ -58,13 +62,13 @@ public class EnrichmentAttribute implements HasPid, HasTenant, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    public EnrichmentAttribute(String columnId, Tenant tenant) {
+    public SelectedAttribute(String columnId, Tenant tenant) {
         this.setColumnId(columnId);
         this.setTenant(tenant);
     }
 
     // for json de-ser
-    private EnrichmentAttribute() {
+    private SelectedAttribute() {
     }
 
     @Override
@@ -106,6 +110,14 @@ public class EnrichmentAttribute implements HasPid, HasTenant, Serializable {
         this.columnId = columnId;
     }
 
+    public String getCustomerColumnName() {
+        return customerColumnName;
+    }
+
+    public void setCustomerColumnName(String customerColumnName) {
+        this.customerColumnName = customerColumnName;
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 31).append(columnId).append(tenant.getId()).toHashCode();
@@ -113,12 +125,12 @@ public class EnrichmentAttribute implements HasPid, HasTenant, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof EnrichmentAttribute))
+        if (!(obj instanceof SelectedAttribute))
             return false;
         if (obj == this)
             return true;
 
-        EnrichmentAttribute rhs = (EnrichmentAttribute) obj;
+        SelectedAttribute rhs = (SelectedAttribute) obj;
         return new EqualsBuilder() //
                 .append(columnId, rhs.getColumnId()) //
                 .append(tenant.getId(), rhs.getTenant().getId()) //

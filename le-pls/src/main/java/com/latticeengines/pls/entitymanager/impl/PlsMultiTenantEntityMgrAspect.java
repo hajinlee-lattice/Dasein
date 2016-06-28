@@ -103,12 +103,12 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.EnrichmentAttrEntityMgr.find*(..))")
+    @Before("execution(* com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr.find*(..))")
     public void findEnrichmentAttrs(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.EnrichmentAttrEntityMgr.upsert(..))")
+    @Before("execution(* com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr.upsert(..))")
     public void updateEnrichmentAttrs(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }

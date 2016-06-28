@@ -26,10 +26,12 @@ public class ColumnSelectionMgrImpl implements ColumnSelectionMgr {
 
         List<ColumnSelection.Column> columns = new ArrayList<>();
         for (ExternalColumn externalColumn: externalColumns) {
-            ColumnSelection.Column column = new ColumnSelection.Column();
-            column.setExternalColumnId(externalColumn.getExternalColumnID());
-            column.setColumnName(externalColumn.getDefaultColumnName());
-            columns.add(column);
+            if (externalColumn.getTagList().contains(predefined.getName())) {
+                ColumnSelection.Column column = new ColumnSelection.Column();
+                column.setExternalColumnId(externalColumn.getExternalColumnID());
+                column.setColumnName(externalColumn.getDefaultColumnName());
+                columns.add(column);
+            }
         }
         columnSelection.setColumns(columns);
         return null;

@@ -100,6 +100,7 @@ public class ColumnSelection {
 
     public enum Predefined implements Dimension {
         LeadEnrichment("LeadEnrichment"), //
+        Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
         RTS("RTS");
