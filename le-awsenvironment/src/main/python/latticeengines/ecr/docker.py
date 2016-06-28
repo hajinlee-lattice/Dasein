@@ -1,7 +1,7 @@
 import argparse
 import subprocess
 
-_ECR_REPO="894091243412.dkr.ecr.us-east-1.amazonaws.com"
+_ECR_REPO="158854640770.dkr.ecr.us-east-1.amazonaws.com"
 _NAMESPACE="latticeengines"
 
 def main():

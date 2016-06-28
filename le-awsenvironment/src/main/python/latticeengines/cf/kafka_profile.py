@@ -30,7 +30,8 @@ class KafkaProfile:
         self._profile = profile
 
         self._instances = self.__read_from_profile("Instances", 3)
-        self._instance_type = self.__read_from_profile("InstanceType", "t2.medium")
+        self._instance_type = self.__read_from_profile("BrokerInstanceType", "t2.medium")
+        self._sr_instance_type = self.__read_from_profile("SRInstanceType", "t2.medium")
 
         self._brokers = self.__read_from_profile("Brokers", 4)
         self._set_broker_mem(self.__read_from_profile("BrokerMemory", 2048))
@@ -57,6 +58,9 @@ class KafkaProfile:
 
     def instance_type(self):
         return self._instance_type
+
+    def sr_instance_type(self):
+        return self._sr_instance_type
 
     def max_instances(self):
         return str(max(2 * self._instances, 3))

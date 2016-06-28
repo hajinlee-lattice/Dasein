@@ -29,5 +29,10 @@ class Resource(Template):
         })
         return self
 
+    def require(self, condition):
+        assert isinstance(condition, Condition)
+        self._template["Condition"] = condition.get_name()
+        return self
+
     def ref(self):
         return { "Ref" : self._logicalId }

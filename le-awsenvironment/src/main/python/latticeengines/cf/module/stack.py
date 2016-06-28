@@ -5,11 +5,11 @@ import time
 from boto3.s3.transfer import S3Transfer
 
 from .condition import Condition
-from .ec2 import _ec2_mappings, _ec2_params, EC2Instance
+from .ec2 import _ec2_params, EC2Instance
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
+from ...conf import AwsEnvironment
 
-S3_BUCKET= 'yintaosong'
 
 class Stack(Template):
     def __init__(self, description):
@@ -18,7 +18,7 @@ class Stack(Template):
         self._template["Description"] = description
         self._template["Parameters"] = Stack.__common_params()
         self.__ec2_params()
-        self.__ec2_mappings()
+        self.__mappings()
 
     def add_ec2(self, instance):
         assert isinstance(instance, EC2Instance)
@@ -87,20 +87,24 @@ class Stack(Template):
         )
         print 'Stack template is valid.'
 
-    def upload(self, prefix):
+    def upload(self, environment, prefix):
+        bucket = AwsEnvironment(environment).cf_bucket()
         temp_file = "/tmp/zookeeper.json"
         with open(temp_file, 'w') as tf:
             tf.write(self.json())
-        print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", S3_BUCKET, prefix, 'template.json') + ' ..')
+        print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", bucket, prefix, 'template.json') + ' ..')
         client = boto3.client('s3')
         transfer = S3Transfer(client)
-        transfer.upload_file(temp_file, S3_BUCKET, os.path.join(prefix, 'template.json'))
+        transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'))
         print 'done.'
 
-    def __ec2_mappings(self):
-        data = _ec2_mappings()
-        self._merge_into_attr('Mappings', data)
-        return self
+    def __mappings(self):
+        json_file = os.path.join(TEMPLATE_DIR, 'common', 'common_mappings.json')
+        with open(json_file) as f:
+            data = json.load(f)
+            data["Environment2Props"] = AwsEnvironment.create_env_props_map()
+            self._merge_into_attr('Mappings', data)
+            return self
 
     def __ec2_params(self):
         data = _ec2_params()

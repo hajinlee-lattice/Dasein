@@ -9,13 +9,13 @@ from .module.autoscaling import AutoScalingGroup, LaunchConfiguration
 from .module.ec2 import _ec2_params, EC2Instance
 from .module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from .module.elb import ElasticLoadBalancer
-from .module.iam import ECSServiceRole, InstanceProfile, AccessKey
-from .module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation, S3_BUCKET
+from .module.iam import ECSServiceRole, InstanceProfile
+from .module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from .module.template import TEMPLATE_DIR
+from ..conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/kafka'
 _EC2_PEM = '~/aws.pem'
-_ECR_REPO="894091243412.dkr.ecr.us-east-1.amazonaws.com"
 
 _LOG_SIZE=10
 
@@ -80,13 +80,15 @@ def create_template():
     return stack
 
 def provision_cli(args):
-    return provision(args.stackname, args.zkhosts, profile=args.profile)
+    return provision(args.environment, args.stackname, args.zkhosts, profile=args.profile)
 
-def provision(stackname, zkhosts, profile=None):
+def provision(environment, stackname, zkhosts, profile=None):
     if profile is None:
         profile = DEFAULT_PROFILE
     else:
         profile = KafkaProfile(profile)
+
+    config = AwsEnvironment(environment)
 
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -95,16 +97,28 @@ def provision(stackname, zkhosts, profile=None):
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
         Parameters=[
             {
+                'ParameterKey': 'VpcId',
+                'ParameterValue': config.zk_sg()
+            },
+            {
+                'ParameterKey': 'SubnetId1',
+                'ParameterValue': config.public_subnet_1()
+            },
+            {
+                'ParameterKey': 'SubnetId2',
+                'ParameterValue': config.public_subnet_2()
+            },
+            {
                 'ParameterKey': 'SecurityGroupId',
-                'ParameterValue': 'sg-b3dbb0c8'
+                'ParameterValue': config.kafka_sg()
             },
             {
                 'ParameterKey': 'BrokerInstanceType',
                 'ParameterValue': profile.instance_type()
             },
             {
-                'ParameterKey': 'SchemaRegistryInstanceType',
-                'ParameterValue': "t2.medium"
+                'ParameterKey': 'SRInstanceType',
+                'ParameterValue': profile.sr_instance_type()
             },
             {
                 'ParameterKey': 'DesiredCapacity',
@@ -184,7 +198,10 @@ def broker_service(ecscluster, asgroup):
     disks = broker_log_devices(_LOG_SIZE)
     log_vols = [Volume("log%s" % d['label'], "/mnt/kafka/log/%s" % d['label']) for d in disks]
 
-    container = ContainerDefinition("bkr", os.path.join(_ECR_REPO, "latticeengines/kafka")) \
+    container = ContainerDefinition("bkr", { "Fn::Join" : [ "", [
+        { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
+        "/latticeengines/kafka"
+        ] ]}) \
         .mem_mb({ "Ref" : "BrokerMemory" }).publish_port(9092, 9092) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
         .set_env("LOG_DIRS", ",".join("/mnt/kafka/log/%s" % d['label'] for d in disks)) \
@@ -240,7 +257,10 @@ def create_sr_asgroup(ecscluster, instanceprofile, elbs):
 def schema_registry_service(ecscluster, broker):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
-    container = ContainerDefinition("sr", os.path.join(_ECR_REPO, "latticeengines/schema-registry")) \
+    container = ContainerDefinition("sr", { "Fn::Join" : [ "", [
+            { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
+            "/latticeengines/schema-registry"
+        ] ]}) \
         .mem_mb(1500).publish_port(9022, 9022) \
         .set_env("SCHEMA_REGISTRY_HEAP_OPTS", "-Xms1400m -Xms1400m") \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
@@ -263,7 +283,10 @@ def schema_registry_service(ecscluster, broker):
     return service, task
 
 def kafka_rest_service(ecscluster, elb9022, sr):
-    container = ContainerDefinition("kr", os.path.join(_ECR_REPO, "latticeengines/kafka-rest")) \
+    container = ContainerDefinition("kr", { "Fn::Join" : [ "", [
+            { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
+            "/latticeengines/kafka-rest"
+        ] ]}) \
         .mem_mb(600).publish_port(9023, 9023) \
         .set_env("KAFKAREST_HEAP_OPTS", "-Xms512m -Xms512m") \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
@@ -279,7 +302,10 @@ def kafka_rest_service(ecscluster, elb9022, sr):
     return service, task
 
 def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
-    container = ContainerDefinition("connect", os.path.join(_ECR_REPO, "latticeengines/kafka-connect")) \
+    container = ContainerDefinition("connect", { "Fn::Join" : [ "", [
+            { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
+            "/latticeengines/kafka-connect"
+        ] ]}) \
         .mem_mb(1500).publish_port(9024, 9024) \
         .set_env("KAFKA_HEAP_OPTS", "-Xms1400m -Xms1400m") \
         .set_env("BOOTSTRAP_SERVERS", { "Fn::Join" : [ "", [
@@ -314,15 +340,6 @@ def get_elbs(stackname):
 
 def instance_name(idx):
     return "EC2Instance%d" % (idx + 1)
-
-def discover_metadata(key):
-    assert isinstance(key, AccessKey)
-
-    json_file = os.path.join(TEMPLATE_DIR, 'kafka', 'ec2_metadata.json')
-    with open(json_file) as f:
-        text = f.read().replace('{{APP_PATH}}', os.path.join(S3_BUCKET, _S3_CF_PATH, "app.py"))\
-                .replace('{{BUCKET}}', S3_BUCKET).replace('{{CFN_KEYS}}', key.logical_id())
-    return json.loads(text)
 
 def extra_param():
     json_file = os.path.join(TEMPLATE_DIR, 'kafka', 'params.json')
@@ -477,7 +494,7 @@ def sr_metadata(ec2, ecscluster):
 
 def calc_heap_log(peak, avg):
     heap = peak * 1024 * 30
-    log_size = avg * 48
+    log_size = avg * 2
     print 'for expected peak throughput %.2f GB/sec, average throughput %.2f GB/hour' % (peak, avg)
     print 'total heap size recommended: %d MB' % int(heap)
     print 'total log size recommended: %d GB' % int(log_size)
@@ -507,12 +524,14 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('--peak-throughput', dest='pth', type=float, default='0.5', help='expected peak throughput in GB/sec')
-    parser1.add_argument('--avg-throughput', dest='ath', type=float, default='0.1', help='expected average throughput in GB/hour')
+    parser1.add_argument('--avg-throughput', dest='ath', type=float, default='0.1', help='expected average throughput in GB/day')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')

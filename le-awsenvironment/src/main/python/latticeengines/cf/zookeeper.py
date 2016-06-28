@@ -7,20 +7,20 @@ import sys
 import time
 
 from .module.ec2 import EC2Instance
-from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack, S3_BUCKET
+from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
+from ..conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/zookeeper'
-_EC2_PEM = '~/aws.pem'
 
 def main():
     args = parse_args()
     args.func(args)
 
 def template_cli(args):
-    template(args.nodes, upload=args.upload)
+    template(args.environment, args.nodes, upload=args.upload)
 
-def template(nodes, upload=False):
+def template(environment, nodes, upload=False):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
     for n in xrange(nodes):
         name = "EC2Instance%d" % (n + 1)
@@ -32,24 +32,38 @@ def template(nodes, upload=False):
         stack.add_resource(ec2)
     if upload:
         stack.validate()
-        stack.upload(_S3_CF_PATH)
+        stack.upload(environment, _S3_CF_PATH)
     else:
         print stack.json()
         stack.validate()
 
 def provision_cli(args):
-    provision(args.stackname)
+    provision(args.environment, args.stackname)
 
-def provision(stackname):
+def provision(environment, stackname):
+    config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
+    bucket = AwsEnvironment(environment).cf_bucket()
     response = client.create_stack(
         StackName=stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
+        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(bucket, _S3_CF_PATH, 'template.json'),
         Parameters=[
             {
+                'ParameterKey': 'VpcId',
+                'ParameterValue': config.zk_sg()
+            },
+            {
+                'ParameterKey': 'SubnetId1',
+                'ParameterValue': config.public_subnet_1()
+            },
+            {
+                'ParameterKey': 'SubnetId2',
+                'ParameterValue': config.public_subnet_2()
+            },
+            {
                 'ParameterKey': 'SecurityGroupId',
-                'ParameterValue': 'sg-61fd941a'
+                'ParameterValue': config.zk_sg()
             },
             {
                 'ParameterKey': 'InstanceType',
@@ -76,12 +90,12 @@ def provision(stackname):
     wait_for_stack_creation(client, stackname)
 
 def bootstrap_cli(args):
-    bootstrap(args.stackname)
+    bootstrap(args.stackname, args.pem)
 
-def bootstrap(stackname):
+def bootstrap(stackname, pem):
     ips = get_ips(stackname)
     print 'Found ips in output:\n', ips
-    return update_zoo_cfg(ips)
+    return update_zoo_cfg(pem, ips)
 
 def info(args):
     ips = get_ips(args.stackname)
@@ -107,7 +121,7 @@ def get_ips(stackname):
                 ips[node_id]['PublicIp'] = output['OutputValue']
     return ips
 
-def update_zoo_cfg(ips):
+def update_zoo_cfg(pem, ips):
     private_ips = [None] * len(ips)
     for node_id, node_ips in ips.items():
         private_ips[int(node_id) - 1] = node_ips['PrivateIp']
@@ -129,8 +143,8 @@ def update_zoo_cfg(ips):
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
         t1 = time.time()
 
-        subprocess.call("scp -oStrictHostKeyChecking=no -i %s %s %s:%s" % (_EC2_PEM, temp_file, url, remote_path), shell=True)
-        ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", _EC2_PEM, url,
+        subprocess.call("scp -oStrictHostKeyChecking=no -i %s %s %s:%s" % (pem, temp_file, url, remote_path), shell=True)
+        ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", pem, url,
                                 "sudo service zookeeper restart"],
                                shell=False,
                                stdout=subprocess.PIPE,
@@ -209,19 +223,24 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-n', dest='nodes', type=int, default=3, help='number of nodes')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=info)
 
