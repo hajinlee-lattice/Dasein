@@ -535,7 +535,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             interpretation = FieldInterpretation.Date;
         } else {
             String avroType = attr.getPhysicalDataType();
-            fieldSchema.type = FieldType.getFromAvroType(avroType);
+            fieldSchema.type = FieldType.getFromAvroType(avroType.toLowerCase());
         }
         fieldSchema.interpretation = interpretation;
 
