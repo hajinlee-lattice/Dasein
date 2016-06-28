@@ -37,11 +37,11 @@ public class AttributeUtils {
                             || (sourceValue instanceof Set && ((Set<?>) sourceValue).size() == 0);
                     if (includeEmptySourceValues || !sourceEmpty) {
                         setValue(dest, descriptor, sourceValue);
-                        log.info(String.format("Setting property %s to be %s from source.  Value was previously %s",
-                                descriptor.getName(), sourceValue, destValue));
+                        log.info(String.format("Setting property %s on attribute %s to be %s from source %s.  Value was previously %s",
+                                descriptor.getName(), dest.getName(), sourceValue, source.getName(), destValue));
                     } else {
-                        log.debug(String.format("Ignoring property %s because it is null/empty on source",
-                                descriptor.getName()));
+                        log.debug(String.format("Ignoring property %s on attribute %s because it is null/empty on source %s",
+                                descriptor.getName(), dest.getName(), source.getName()));
                     }
                 }
             }
