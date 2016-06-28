@@ -47,7 +47,7 @@ public class Algorithm implements HasName, HasPid {
     private String script;
     
     @JsonProperty("algorithm_property_defs")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "algorithm")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "algorithm")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<AlgorithmPropertyDef> algorithmPropertyDefs = new ArrayList<>();
     

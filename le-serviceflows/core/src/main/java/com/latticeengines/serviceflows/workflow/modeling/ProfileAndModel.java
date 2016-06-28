@@ -111,7 +111,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         for (Attribute event : events) {
             excludedColumns.add(event.getName());
         }
-        
+
         log.info("Exclude prop data columns = " + configuration.excludePropDataColumns());
 
         for (Attribute attr : eventTable.getAttributes()) {
@@ -121,7 +121,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                 excludedColumns.add(attr.getName());
             } else if (configuration.excludePropDataColumns() && attr.getTags() != null) {
                 Set<String> tags = new HashSet<>(attr.getTags());
-                
+
                 if (tags.contains(Tag.EXTERNAL.getName()) || tags.contains(Tag.EXTERNAL_TRANSFORM.getName())) {
                     excludedColumns.add(attr.getName());
                 }
@@ -140,7 +140,8 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                     .trainingTableName(getConfiguration().getTrainingTableName()) //
                     .transformationGroupName(getTransformationGroupName()) //
-                    .productType(configuration.getProductType());
+                    .productType(configuration.getProductType()) //
+                    .runTimeParams(configuration.runTimeParams());
             if (getPredefinedSelection() != null) {
                 bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
             } else if (getCustomizedSelection() != null) {

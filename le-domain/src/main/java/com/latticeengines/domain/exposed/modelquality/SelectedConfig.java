@@ -26,6 +26,9 @@ public class SelectedConfig {
     @JsonProperty("data_flow")
     private DataFlow dataFlow;
 
+    @JsonProperty("sampliing")
+    private Sampling sampling;
+
 
     public Pipeline getPipeline() {
         return pipeline;
@@ -65,5 +68,9 @@ public class SelectedConfig {
 
     public void setDataFlow(DataFlow dataFlow) {
         this.dataFlow = dataFlow;
+    }
+
+    public void setSampling(Sampling sampling) {
+        this.sampling = sampling;
     }
 }

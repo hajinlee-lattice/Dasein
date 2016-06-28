@@ -22,12 +22,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
 @Table(name = "MODELQUALITY_MODELRUN")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class ModelRun implements HasPid {
+public class ModelRun implements HasPid, HasName, HasAuditingFields {
     
     private static final Log log = LogFactory.getLog(ModelRun.class);
 
@@ -37,16 +39,30 @@ public class ModelRun implements HasPid {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
+    @Column(name = "NAME", nullable = false)
+    private String name;
+
+    @Column(name = "STATUS", nullable = false)
+    private ModelRunStatus status;
     
     @Column(name = "CONFIG_DATA", nullable = false)
     @Lob
     private byte[] configData;
     
-    @Temporal(TemporalType.TIME)
+    @Column(name = "CREATION_DATE", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     
+    @Column(name = "UPDATE_DATE", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updateDate;
+
     @Column(name = "DESCRIPTION", length = 4000)
     private String description;
+    
+    @Column(name = "ERROR_MESSAGE")
+    private String errorMessage;
     
     @Transient
     private SelectedConfig selectedConfig;
@@ -59,6 +75,16 @@ public class ModelRun implements HasPid {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+    
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Transient
@@ -93,14 +119,6 @@ public class ModelRun implements HasPid {
         this.configData = configData;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -110,4 +128,39 @@ public class ModelRun implements HasPid {
     }
 
     
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public ModelRunStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ModelRunStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public Date getCreated() {
+        return creationDate;
+    }
+
+    @Override
+    public void setCreated(Date date) {
+        this.creationDate = date;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return updateDate;
+    }
+
+    @Override
+    public void setUpdated(Date date) {
+        this.updateDate = date;
+    }
 }

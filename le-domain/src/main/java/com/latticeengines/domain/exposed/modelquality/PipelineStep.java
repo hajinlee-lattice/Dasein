@@ -15,6 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -31,7 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
  */
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE_STEP")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PipelineStep implements HasName, HasPid {
 
     @Id
@@ -40,27 +42,28 @@ public class PipelineStep implements HasName, HasPid {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @Column(name = "NAME", nullable = false)
     private String name;
-    
-    @Column(name = "SCRIPT", unique=true, nullable = false)
+
+    @Column(name = "SCRIPT", unique = true, nullable = false)
     private String script;
-    
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "pipelineSteps")
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pipelineSteps")
     @JsonIgnore
     private List<Pipeline> pipelines = new ArrayList<>();
 
     @JsonProperty("pipeline_property_defs")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pipelineStep")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "pipelineStep")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(FetchMode.SELECT)
     private List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
 
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public void setName(String name) {
         this.name = name;
@@ -83,9 +86,13 @@ public class PipelineStep implements HasName, HasPid {
     public void setPid(Long pid) {
         this.pid = pid;
     }
-    
+
     public void addPipeline(Pipeline pipeline) {
         pipelines.add(pipeline);
+    }
+
+    public List<Pipeline> getPipelines() {
+        return pipelines;
     }
 
     public List<PipelinePropertyDef> getPipelinePropertyDefs() {
@@ -95,10 +102,14 @@ public class PipelineStep implements HasName, HasPid {
     public void setPipelinePropertyDefs(List<PipelinePropertyDef> pipelinePropertyDefs) {
         this.pipelinePropertyDefs = pipelinePropertyDefs;
     }
-    
+
     public void addPipelinePropertyDef(PipelinePropertyDef pipelinePropertyDef) {
         pipelinePropertyDefs.add(pipelinePropertyDef);
         pipelinePropertyDef.setPipelineStep(this);
+    }
+
+    public void setPipeline(List<Pipeline> pipelines) {
+        this.pipelines = pipelines;
     }
 
 }

@@ -9,4 +9,5 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 @ContextConfiguration(locations = { "classpath:test-modelquality-context.xml" })
 public class ModelQualityFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
+
 }

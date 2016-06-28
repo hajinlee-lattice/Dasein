@@ -212,6 +212,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             model.setExcludePropDataColumns(excludePropDataColumns);
             return this;
         }
+        
+        public Builder runTimeParams(Map<String, String> runTimeParams) {
+            model.setRunTimeParams(runTimeParams);
+            return this;
+        }
 
         public Builder pivotArtifactPath(String pivotArtifactPath) {
             model.setPivotArtifactPath(pivotArtifactPath);

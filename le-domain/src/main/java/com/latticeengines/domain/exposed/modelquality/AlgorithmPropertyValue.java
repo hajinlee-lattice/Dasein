@@ -14,11 +14,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-/**
- * 
- * @startuml
- *
- */
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM_PROPERTY_VALUE")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -36,6 +31,7 @@ public class AlgorithmPropertyValue implements HasPid {
     
     @ManyToOne
     @JoinColumn(name = "FK_ALGORITHM_PROPDEF_ID", nullable = false)
+    @JsonIgnore
     private AlgorithmPropertyDef algorithmPropertyDef;
     
     public AlgorithmPropertyValue() {}

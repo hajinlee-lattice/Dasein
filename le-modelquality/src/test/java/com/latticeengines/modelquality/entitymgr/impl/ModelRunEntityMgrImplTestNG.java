@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyDef;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
@@ -31,14 +32,16 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         modelRunEntityMgr.deleteAll();
         modelRun = new ModelRun();
         SelectedConfig config = new SelectedConfig();
-        config.setPipeline(createPipeline());
+        config.setPipeline(createLocalPipeline());
         
         modelRun.setDescription("Test pipeline for persistence.");
-        modelRun.setCreationDate(new Date());
+        modelRun.setCreated(new Date());
         modelRun.setSelectedConfig(config);
+        modelRun.setName("ModelRun1");
+        modelRun.setStatus(ModelRunStatus.NEW);;
     }
     
-    private Pipeline createPipeline() {
+    private Pipeline createLocalPipeline() {
         Pipeline pipeline = new Pipeline();
         pipeline.setName("Test pipeline");
         PipelineStep pipelineStep = new PipelineStep();
@@ -60,8 +63,12 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         
         List<ModelRun> retrievedModelRuns = modelRunEntityMgr.findAll();
         assertEquals(retrievedModelRuns.size(), 1);
-        
         ModelRun retrievedModelRun = retrievedModelRuns.get(0);
+        assertEquals(retrievedModelRun.getName(), modelRun.getName());
+        assertEquals(retrievedModelRun.getDescription(), modelRun.getDescription());
+        assertEquals(retrievedModelRun.getStatus(), modelRun.getStatus());
+        
+        
         SelectedConfig config = retrievedModelRun.getSelectedConfig();
         System.out.println(JsonUtils.serialize(config));
     }

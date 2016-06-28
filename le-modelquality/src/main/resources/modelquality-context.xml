@@ -9,8 +9,12 @@
 
     <context:annotation-config />
 
-    <context:component-scan base-package="com.latticeengines.modelquality"/>
+    <context:component-scan base-package="com.latticeengines.modelquality">
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.modelquality.controller.*" />
+    </context:component-scan>
     
     <import resource="classpath:db-context.xml"/>
+    <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:proxy-context.xml"/>
 
 </beans>

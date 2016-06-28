@@ -56,5 +56,6 @@
         <module>le-quartz</module>
         <module>le-quartzclient</module>
         <module>le-admin</module>
+        <module>le-modelquality</module>
     </modules>
 </project>

@@ -54,4 +54,20 @@ public class PropData implements HasName, HasPid {
         this.pid = pid;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getMetadataVersion() {
+        return metadataVersion;
+    }
+
+    public void setMetadataVersion(String metadataVersion) {
+        this.metadataVersion = metadataVersion;
+    }
+
 }

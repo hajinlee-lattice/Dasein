@@ -16,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -47,11 +49,13 @@ public class AlgorithmPropertyDef implements HasName, HasPid {
     
     @ManyToOne
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
+    @JsonIgnore
     private Algorithm algorithm;
 
     @JsonProperty("algorithm_property_values")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "algorithmPropertyDef")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "algorithmPropertyDef")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<AlgorithmPropertyValue> algorithmPropertyValues = new ArrayList<>();
     
     public AlgorithmPropertyDef() {}

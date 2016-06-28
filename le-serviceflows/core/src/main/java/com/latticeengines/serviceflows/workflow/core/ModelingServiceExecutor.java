@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
@@ -164,14 +165,11 @@ public class ModelingServiceExecutor {
     }
 
     public String model() throws Exception {
-        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(0);
-
-        randomForestAlgorithm.setSampleName("all");
+        Algorithm algorithm = getAlgorithm();
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
-        modelDef.addAlgorithms(Collections.singletonList((Algorithm) randomForestAlgorithm));
+        modelDef.addAlgorithms(Collections.singletonList((Algorithm) algorithm));
 
         Model model = new Model();
         model.setModelDefinition(modelDef);
@@ -227,6 +225,19 @@ public class ModelingServiceExecutor {
             System.out.println(String.format("No result directory for modeling job %s", appId));
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
+    }
+
+    private Algorithm getAlgorithm() {
+        Algorithm algo = AlgorithmFactory.createAlgorithm(builder.runTimeParams);
+        if (algo != null) {
+            return algo;
+        }
+        
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(0);
+        randomForestAlgorithm.setSampleName("all");
+        
+        return randomForestAlgorithm;
     }
 
     protected JobStatus waitForAppId(String appId) throws Exception {
@@ -318,6 +329,7 @@ public class ModelingServiceExecutor {
         private ModelProxy modelProxy;
         private JobProxy jobProxy;
         private Map<ArtifactType, String> metadataArtifacts;
+        private Map<String, String> runTimeParams;
 
         public Builder() {
         }
@@ -522,6 +534,11 @@ public class ModelingServiceExecutor {
             return this;
         }
 
+        public Builder runTimeParams(Map<String, String> runTimeParams) {
+            this.runTimeParams = runTimeParams ;
+            return this;
+        }
+        
         public void setHdfsDirToSample(String hdfsDirToSample) {
             this.hdfsDirToSample = hdfsDirToSample;
         }
@@ -844,6 +861,5 @@ public class ModelingServiceExecutor {
         public Map<ArtifactType, String> getMetadataArtifacts() {
             return metadataArtifacts;
         }
-
     }
 }

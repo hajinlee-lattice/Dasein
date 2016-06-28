@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -33,6 +35,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private boolean excludePropDataColumns;
 
     private String pivotArtifactPath;
+
+    private Map<String, String> runTimeParams;
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
@@ -130,5 +134,15 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     public void setPivotArtifactPath(String pivotArtifactPath) {
         this.pivotArtifactPath = pivotArtifactPath;
+    }
+
+    @JsonProperty
+    public Map<String, String> runTimeParams() {
+        return this.runTimeParams;
+    }
+
+    @JsonProperty
+    public void setRunTimeParams(Map<String, String> runTimeParams) {
+        this.runTimeParams = runTimeParams;
     }
 }

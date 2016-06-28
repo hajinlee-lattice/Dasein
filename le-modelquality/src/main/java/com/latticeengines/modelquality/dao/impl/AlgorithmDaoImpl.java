@@ -6,7 +6,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.modelquality.dao.AlgorithmDao;
 
-@Component("algorithmDao")
+@Component("qualityAlgorithmDao")
 public class AlgorithmDaoImpl extends BaseDaoImpl<Algorithm> implements AlgorithmDao {
 
     @Override

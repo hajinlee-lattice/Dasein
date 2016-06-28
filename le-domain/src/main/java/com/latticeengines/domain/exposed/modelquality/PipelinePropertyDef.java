@@ -16,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -51,8 +53,9 @@ public class PipelinePropertyDef implements HasName, HasPid {
     private PipelineStep pipelineStep;
 
     @JsonProperty("pipeline_property_values")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pipelinePropertyDef")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "pipelinePropertyDef")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(FetchMode.SELECT)
     private List<PipelinePropertyValue> pipelinePropertyValues = new ArrayList<>();
     
     public PipelinePropertyDef() {}

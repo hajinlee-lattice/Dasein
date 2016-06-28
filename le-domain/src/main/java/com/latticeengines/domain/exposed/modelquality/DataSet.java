@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -51,6 +52,9 @@ public class DataSet implements HasName, HasTenant, HasPid {
     @Column(name = "TYPE", nullable = false)
     private DataSetType dataSetType;
     
+    @Column(name = "SCHEMA_INTERPRETATION", nullable = false)
+    private SchemaInterpretation schemaInterpretation;
+    
     @JsonProperty("training_hdfs_path")
     @Column(name = "TRAINING_HDFS_PATH")
     private String trainingSetHdfsPath;
@@ -60,7 +64,7 @@ public class DataSet implements HasName, HasTenant, HasPid {
     private String testSetHdfsPath;
     
     @JsonProperty("scoring_data_sets")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataSet")
+    @OneToMany(cascade = { CascadeType.ALL  }, fetch = FetchType.EAGER, mappedBy = "dataSet")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
     
@@ -93,6 +97,24 @@ public class DataSet implements HasName, HasTenant, HasPid {
 
     public void setIndustry(String industry) {
         this.industry = industry;
+    }
+
+    
+    public DataSetType getDataSetType() {
+        return dataSetType;
+    }
+
+    public void setDataSetType(DataSetType dataSetType) {
+        this.dataSetType = dataSetType;
+    }
+
+    
+    public SchemaInterpretation getSchemaInterpretation() {
+        return schemaInterpretation;
+    }
+
+    public void setSchemaInterpretation(SchemaInterpretation schemaInterpretation) {
+        this.schemaInterpretation = schemaInterpretation;
     }
 
     public Long getPid() {
@@ -128,6 +150,7 @@ public class DataSet implements HasName, HasTenant, HasPid {
     }
     
     public void addScoringDataSet(ScoringDataSet scoringDataSet) {
+        scoringDataSet.setDataSet(this);
         scoringDataSets.add(scoringDataSet);
     }
 

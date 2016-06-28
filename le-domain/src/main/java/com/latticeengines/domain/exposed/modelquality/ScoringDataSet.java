@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.modelquality;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +17,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_SCORE_DATASET")
+@Table(name = "MODELQUALITY_SCORING_DATASET")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ScoringDataSet implements HasName, HasPid {
     
@@ -37,7 +36,7 @@ public class ScoringDataSet implements HasName, HasPid {
     private String dataHdfsPath;
     
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne
     @JoinColumn(name = "FK_DATASET_ID", nullable = false)
     private DataSet dataSet;
     
@@ -60,7 +59,8 @@ public class ScoringDataSet implements HasName, HasPid {
         this.pid = pid;
     }
 
-    public String getTrainingSetHdfsPath() {
+    
+    public String getDataHdfsPath() {
         return dataHdfsPath;
     }
 

@@ -1,6 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Map;
+
 import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -40,6 +43,9 @@ public class ModelingParameters {
 
     @JsonProperty
     private String pivotFileName;
+
+    @JsonProperty
+    public Map<String, String> runTimeParams;
 
     public String getFilename() {
         return filename;
@@ -120,10 +126,19 @@ public class ModelingParameters {
     public void setPivotFileName(String pivotFileName) {
         this.pivotFileName = pivotFileName;
     }
+    
+    public Map<String, String> getRunTimeParams() {
+        return runTimeParams;
+    }
+
+    public void setRunTimeParams(Map<String, String> runTimeParams) {
+        this.runTimeParams = runTimeParams;
+    }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 
 }

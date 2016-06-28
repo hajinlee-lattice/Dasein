@@ -139,6 +139,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .transformationGroup(parameters.getTransformationGroup()) //
                 .excludePropDataColumns(parameters.getExcludePropDataColumns()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
+                .runTimeParams(parameters.runTimeParams) //
                 .build();
         return configuration;
     }
