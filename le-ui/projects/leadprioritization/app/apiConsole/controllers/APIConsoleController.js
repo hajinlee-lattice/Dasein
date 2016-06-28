@@ -12,11 +12,12 @@ angular.module('pd.apiconsole', [
     ModelService.GetAllModels(true).then(function(result) {
         if (result != null && result.success === true) {
             $scope.models = result.resultObj;
-            $scope.models.forEach(function(model, index) {
-                if (model.Status.toLowerCase() != 'active') {
-                    $scope.models.splice(index, 1);
+            var i = $scope.models.length;
+            while (i--) {
+                if ($scope.models[i].Status.toLowerCase() != 'active') {
+                    $scope.models.splice(i, 1);
                 }
-            });
+            }
         } else {
             $scope.showLoadingError = true;
             $scope.loadingError = resultErrors;
