@@ -19,9 +19,12 @@ public class Record {
 
     @JsonProperty("modelAttributeValuesMap")
     @ApiModelProperty(value = "Map of model ID and attributeValues. "
-            + "In attributeValues (Map < String, Object > ) for a corresponding model ID, "
-            + "field names and values should be specified. At the minimum, make sure to "
-            + "specify either 'Email' or specify both 'CompanyName' and 'State' fields", required = true)
+            + "In attributeValues (Map < String, Object > ) for a corresponding model ID, " //
+            + "field names and values should be specified. At the minimum, in case of " //
+            + "lead type model, make sure to specify 'Email' field and for non-lead " //
+            + "type model specify either 'Website' or 'Domain' fields. If these fields " //
+            + "are not specified then specify both 'CompanyName' and 'State' fields", //
+            required = true)
     Map<String, Map<String, Object>> modelAttributeValuesMap;
 
     @JsonProperty("performEnrichment")

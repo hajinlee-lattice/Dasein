@@ -21,10 +21,13 @@ public class ScoreRequest {
     private String rule;
 
     @JsonProperty("record")
-    @ApiModelProperty(value = "A record is represented as a JSON Object; "
-            + "ie. { \"field1\" : value1, \"field2\" : value2, .......}. "
-            + "At the minimum, make sure to specify either 'Email' "
-            + "or specify both 'CompanyName' and 'State' fields", required = true)
+    @ApiModelProperty(value = "A record is represented as a JSON Object; " //
+            + "ie. { \"field1\" : value1, \"field2\" : value2, .......}. " //
+            + "At the minimum, in case of lead type model, make sure to specify " //
+            + "'Email' field and for non-lead type model specify either 'Website' " //
+            + "or 'Domain' fields. If these fields are not specified then specify " //
+            + "both 'CompanyName' and 'State' fields", //
+            required = true)
     private Map<String, Object> record;
 
     public String getModelId() {
