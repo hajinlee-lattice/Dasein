@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.modeling;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -147,6 +149,8 @@ public class DbCreds {
 
     public static class Builder {
 
+        private static Log log = LogFactory.getLog(Builder.class);
+
         private String user;
         private String password;
         private String encryptedPassword;
@@ -211,12 +215,31 @@ public class DbCreds {
 
         public Builder jdbcUrl(String jdbcUrl) {
             this.jdbcUrl = jdbcUrl;
+            String parsedDbType = findDbTypeFromJdbcUrl(jdbcUrl);
+            if (StringUtils.isNotEmpty(dbType) && !dbType.equals(parsedDbType)) {
+                log.warn(String.format("Overwrite dbType from [%s] to [%s]", dbType, parsedDbType));
+            }
+            this.dbType = parsedDbType;
             return this;
         }
 
         public Builder driverClass(String driverClass) {
             this.driverClass = driverClass;
             return this;
+        }
+
+        private String findDbTypeFromJdbcUrl(String jdbcUrl) {
+            String jdbcProtocal = jdbcUrl.split(":")[1];
+            switch (jdbcProtocal) {
+                case "sqlserver":
+                    return "SQLServer";
+                case "mysql":
+                    return "MySQL";
+                case "h2":
+                    return "H2";
+                default:
+                    return "GenericJDBC";
+            }
         }
 
     }
