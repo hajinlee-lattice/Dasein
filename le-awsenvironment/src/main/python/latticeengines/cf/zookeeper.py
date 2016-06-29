@@ -51,7 +51,7 @@ def provision(environment, stackname):
         Parameters=[
             {
                 'ParameterKey': 'VpcId',
-                'ParameterValue': config.zk_sg()
+                'ParameterValue': config.vpc()
             },
             {
                 'ParameterKey': 'SubnetId1',
@@ -60,6 +60,10 @@ def provision(environment, stackname):
             {
                 'ParameterKey': 'SubnetId2',
                 'ParameterValue': config.public_subnet_2()
+            },
+            {
+                'ParameterKey': 'KeyName',
+                'ParameterValue': config.ec2_key()
             },
             {
                 'ParameterKey': 'SecurityGroupId',
@@ -90,7 +94,7 @@ def provision(environment, stackname):
     wait_for_stack_creation(client, stackname)
 
 def bootstrap_cli(args):
-    bootstrap(args.stackname, args.pem)
+    bootstrap(args.stackname, args.keyfile)
 
 def bootstrap(stackname, pem):
     ips = get_ips(stackname)
@@ -230,12 +234,12 @@ def parse_args():
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
-    parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
     parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=bootstrap_cli)
 

@@ -16,7 +16,7 @@
     ],
     "ConstraintDescription": "must be a valid EC2 instance type."
   },
-  "SchemaRegistryInstanceType": {
+  "SRInstanceType": {
     "Description": "EC2 instance type",
     "Type": "String",
     "Default": "t2.medium",

@@ -24,14 +24,14 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.upload)
+    template(args.environment, args.upload)
     calc_heap_log(args.pth, args.ath)
 
-def template(upload):
+def template(environment, upload):
     stack = create_template()
     if upload:
         stack.validate()
-        stack.upload(_S3_CF_PATH)
+        stack.upload(environment, _S3_CF_PATH)
     else:
         print stack.json()
         stack.validate()
@@ -94,11 +94,11 @@ def provision(environment, stackname, zkhosts, profile=None):
     check_stack_not_exists(client, stackname)
     response = client.create_stack(
         StackName=stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(S3_BUCKET, _S3_CF_PATH, 'template.json'),
+        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json'),
         Parameters=[
             {
                 'ParameterKey': 'VpcId',
-                'ParameterValue': config.zk_sg()
+                'ParameterValue': config.vpc()
             },
             {
                 'ParameterKey': 'SubnetId1',
@@ -107,6 +107,10 @@ def provision(environment, stackname, zkhosts, profile=None):
             {
                 'ParameterKey': 'SubnetId2',
                 'ParameterValue': config.public_subnet_2()
+            },
+            {
+                'ParameterKey': 'KeyName',
+                'ParameterValue': config.ec2_key()
             },
             {
                 'ParameterKey': 'SecurityGroupId',
@@ -247,7 +251,7 @@ def sr_resources(instanceprofile, bkr_service, elb9092):
 
 def create_sr_asgroup(ecscluster, instanceprofile, elbs):
     asgroup = AutoScalingGroup("SchemaRegistryScalingGroup").set_capacity(2).set_max_size(4)
-    launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instanceprofile, instance_type_ref="SchemaRegistryInstanceType")
+    launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instanceprofile, instance_type_ref="SRInstanceType")
     launchconfig.set_metadata(sr_metadata(launchconfig, ecscluster))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
     asgroup.add_pool(launchconfig)
