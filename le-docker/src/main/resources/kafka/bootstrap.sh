@@ -67,6 +67,7 @@ do
                 --net ${KAFKA_NETWORK} \
                 -e ADVERTISE_IP=${KAFKA}-bkr \
                 -e ZK_HOSTS=${ZK_HOSTS} \
+                -e SINGLE_NODE=true \
                 -l cluster.name=${KAFKA} \
                 -p ${BK_PORT}:9092 \
                 latticeengines/kafka
@@ -116,7 +117,7 @@ if [ $KAFKA_NODES = 1 ]; then
     docker run -d --name ${KAFKA}-rest -h ${KAFKA}-rest \
         --net ${KAFKA_NETWORK} \
         -e ZK_HOSTS=${ZK_HOSTS} \
-        -e SR_PROXY=http://${KAFKA}-sr:9022 \
+        -e SR_ADDRESS=http://${KAFKA}-sr:9022 \
         -p ${KR_PORT}:9023 \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-rest
@@ -127,6 +128,7 @@ if [ $KAFKA_NODES = 1 ]; then
         -e BOOTSTRAP_SERVERS=kafka-bkr:9092 \
         -e SR_ADDRESS=http://${KAFKA}-sr:9022 \
         -p ${KC_PORT}:9024 \
+        -v hadoop_conf:/hadoop-2.7.1/etc/hadoop \
         -l cluster.name=${KAFKA} \
         latticeengines/kafka-connect
 
@@ -163,10 +165,11 @@ else
             --net ${KAFKA_NETWORK} \
             -e BOOTSTRAP_SERVERS="${BROKER_ADDRS}" \
             -e SR_ADDRESS=http://${KAFKA}-proxy:9022 \
+            -v hadoop_conf:/hadoop-2.7.1/etc/hadoop \
             -l cluster.name=${KAFKA} \
             latticeengines/kafka-connect
 
-         HOSTS="${HOSTS} ${KAFKA}-conn${i}"
+        HOSTS="${HOSTS} ${KAFKA}-conn${i}"
     done
 
     sleep 3

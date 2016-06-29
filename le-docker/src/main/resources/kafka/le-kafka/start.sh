@@ -44,6 +44,10 @@ sed -i "s|{{RACK_ID}}|$RACK_ID|g" /etc/kafka/server.properties
 sed -i "s|{{LOG_DIRS}}|$LOG_DIRS|g" /etc/kafka/server.properties
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka/server.properties
 
+if [  ${SINGLE_NODE} == "true" ]; then
+    sed -i "s|default.replication.factor=2|default.replication.factor=1|g" /etc/kafka/server.properties
+fi
+
 cat /etc/kafka/server.properties
 
 JMX_PORT=9199 /usr/bin/kafka-server-start /etc/kafka/server.properties
