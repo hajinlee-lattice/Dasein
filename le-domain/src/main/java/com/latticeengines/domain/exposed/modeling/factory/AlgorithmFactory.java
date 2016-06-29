@@ -58,7 +58,7 @@ public class AlgorithmFactory {
     private static com.latticeengines.domain.exposed.modelquality.Algorithm getModelAlgorithm(
             Map<String, String> runTimeParams) {
 
-        if (!runTimeParams.containsKey(MODEL_CONFIG)) {
+        if (runTimeParams == null || !runTimeParams.containsKey(MODEL_CONFIG)) {
             log.info("There's no model config!");
             return null;
         }
