@@ -55,10 +55,11 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     
     @Override
-    public Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds, String filterBy) {
+    public Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds, String filterBy,
+            String columns) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum, accountIds, filterBy);
+        List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum, accountIds, filterBy, columns);
         Map<String, Object> result = wrapResult(extensions);
         return result;
     }

@@ -18,7 +18,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds, String filterBy);
+    Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds, String filterBy, String columns);
 
     Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 

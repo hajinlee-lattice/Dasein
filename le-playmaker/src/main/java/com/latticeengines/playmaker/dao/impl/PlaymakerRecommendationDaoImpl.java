@@ -3,8 +3,10 @@ package com.latticeengines.playmaker.dao.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -251,12 +253,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy) {
-        String extensionColumns = getAccountExtensionColumns();
+            List<Integer> accountIds, String filterBy, String columns) {
+        String extensionColumns = getAccountExtensionColumns(columns);
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
-                + "A.External_ID AS LEAccountExternalID, "
-                + extensionColumns + " "
+                + "A.External_ID AS LEAccountExternalID, " + extensionColumns + " "
                 + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date], [Item_ID]) RowNum "
                 + getAccountExtensionFromWhereClause(accountIds, filterBy)
@@ -278,14 +279,40 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return result;
     }
 
-    private String getAccountExtensionColumns() {
+    private String getAccountExtensionColumns(String columns) {
+       
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
+        Set<String> columnsInDb = new HashSet<>();
         for (Map<String, Object> field : schema) {
             builder.append("E.").append(field.get("Field")).append(", ");
+            columnsInDb.add(field.get("Field").toString());
         }
-
+        
+        String selectedColumns = getSelectedColumns(columns, columnsInDb);
+        if (StringUtils.isNotEmpty(selectedColumns)) {
+            return selectedColumns;
+        }
+        
         return builder.toString();
+    }
+
+    private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb) {
+        StringBuilder builder = new StringBuilder();
+        if (StringUtils.isNotEmpty(selectedColumns)) {
+            selectedColumns = selectedColumns.trim();
+            String[] columns = StringUtils.split(selectedColumns, ",");
+            for (String column : columns) {
+                column = column.trim();
+                if (StringUtils.isNotEmpty(column) && columnsInDb.contains(column)) {
+                    builder.append("E.").append(column).append(", ");
+                }
+            }
+        }
+        if (builder.length() > 0) {
+            return builder.toString();
+        }
+        return null;
     }
 
     @Override

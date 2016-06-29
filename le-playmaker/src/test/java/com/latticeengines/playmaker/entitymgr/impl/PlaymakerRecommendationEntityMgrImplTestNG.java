@@ -122,7 +122,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getAccountExtensions() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                1000, 1, 100, null, null);
+                1000, 1, 100, null, null, null);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
@@ -334,7 +334,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         accountIds.add(10);
         accountIds.add(12);
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                0, 0, 100, accountIds, null);
+                0, 0, 100, accountIds, null, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -345,7 +345,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getAccountExtensionsWithFilterBy() throws Exception {
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                0, 0, 100, null, "RECOMMENDATIONS");
+                0, 0, 100, null, "RECOMMENDATIONS", null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -353,7 +353,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertTrue(accountextensions.size() > 0);
 
         mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), 0, 0, 100, null,
-                "NORECOMMENDATIONS");
+                "NORECOMMENDATIONS", null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions2 = (List<Map<String, Object>>) mapResult
@@ -373,6 +373,38 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
                 "NORECOMMENDATIONS");
         count = (Integer) mapResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
         Assert.assertTrue(count > 0);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test(groups = "functional", enabled = true)
+    public void getAccountExtensionsWithSelectedColumns() throws Exception {
+
+        Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
+                0, 0, 100, null, null, null);
+        Assert.assertNotNull(mapResult);
+        List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertTrue(accountextensions.size() > 0);
+        Map<String, Object> extension = accountextensions.get(0);
+        Assert.assertTrue(extension.containsKey("CrmRefreshDate"));
+        Assert.assertTrue(extension.containsKey("RevenueGrowth"));
+        
+        mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
+                0, 0, 100, null, null, " yyy, CrmRefreshDate, DnBSites,xxxx, ,,,,");
+        Assert.assertNotNull(mapResult);
+        accountextensions = (List<Map<String, Object>>) mapResult
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertTrue(accountextensions.size() > 0);
+        extension = accountextensions.get(0);
+        Assert.assertTrue(extension.containsKey(""
+                + ""
+                + ""
+                + ""));
+        Assert.assertTrue(extension.containsKey("DnBSites"));
+        
+        Assert.assertFalse(extension.containsKey("RevenueGrowth"));
+        Assert.assertFalse(extension.containsKey("Item_ID"));
+        Assert.assertFalse(extension.containsKey("yyy"));
 
     }
 
