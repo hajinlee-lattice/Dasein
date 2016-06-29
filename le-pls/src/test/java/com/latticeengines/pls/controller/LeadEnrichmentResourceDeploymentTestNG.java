@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributeOperation;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -229,14 +231,22 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     @Test(groups = "deployment", enabled = true)
     public void testGetLP3Categories() {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/categories";
-        List<String> categoryList = restTemplate.getForObject(url, List.class);
-        assertNotNull(categoryList);
+        List<String> categoryStrList = restTemplate.getForObject(url, List.class);
+        assertNotNull(categoryStrList);
+
+        Assert.assertEquals(categoryStrList.size(), Category.values().length);
+
+        for (String categoryStr : categoryStrList) {
+            Assert.assertNotNull(categoryStr);
+            Category category = Category.fromName(categoryStr);
+            Assert.assertNotNull(category);
+        }
     }
 
     @Test(groups = "deployment", enabled = true)
     public void testSaveLP3Attributes() {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
-        Map<LeadEnrichmentAttributeOperation, List<LeadEnrichmentAttribute>> attributesOperationMap = new HashMap<>();
+        LeadEnrichmentAttributesOperationMap attributesOperationMap = new LeadEnrichmentAttributesOperationMap();
         List<LeadEnrichmentAttribute> newSelectedAttributeList = new ArrayList<>();
         LeadEnrichmentAttribute attr1 = new LeadEnrichmentAttribute();
         LeadEnrichmentAttribute attr2 = new LeadEnrichmentAttribute();
@@ -249,8 +259,8 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         unselectedAttributeList.add(attr3);
         unselectedAttributeList.add(attr4);
 
-        attributesOperationMap.put(LeadEnrichmentAttributeOperation.SELECT, newSelectedAttributeList);
-        attributesOperationMap.put(LeadEnrichmentAttributeOperation.DESELECT, unselectedAttributeList);
+        attributesOperationMap.setSelectedAttributes(newSelectedAttributeList);
+        attributesOperationMap.setDeselectedAttributes(unselectedAttributeList);
 
         restTemplate.put(url, attributesOperationMap);
     }
@@ -272,14 +282,14 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @Test(groups = "deployment", enabled = true)
     public void testGetLP3SelectedAttributeCount() {
-        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedAttributeCount";
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void testGetLP3SelectedAttributePremiumCount() {
-        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedPremiumAttributeCount";
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
     }

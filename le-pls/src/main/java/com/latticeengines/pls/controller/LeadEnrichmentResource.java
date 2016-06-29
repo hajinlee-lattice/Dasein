@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributeOperation;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.LeadEnrichmentService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -107,14 +108,11 @@ public class LeadEnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLP3Categories(HttpServletRequest request) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
-
-        // this one is global list
-        List<String> categoryList = new ArrayList<String>();
-        categoryList.add("DUMMY_CATEGORY1");
-        categoryList.add("DUMMY_CATEGORY2");
-        return categoryList;
+        List<String> categoryStrList = new ArrayList<>();
+        for (Category category : Category.values()) {
+            categoryStrList.add(category.getName());
+        }
+        return categoryStrList;
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH, //
@@ -123,7 +121,7 @@ public class LeadEnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Save attributes")
     public Boolean saveLP3Attributes(HttpServletRequest request, //
-            @RequestBody Map<LeadEnrichmentAttributeOperation, List<LeadEnrichmentAttribute>> attributesOperationMap) {
+            @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         // TODO - anoop - for now this returns dummy data for early integration.
         // Will replace it with actual code in upcoming txns
         return true;
@@ -142,7 +140,7 @@ public class LeadEnrichmentResource {
             @ApiParam(value = "Get attributes " //
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
-            String category) {
+            Category category) {
         // TODO - anoop - for now this returns dummy data for early integration.
         // Will replace it with actual code in upcoming txns
         List<LeadEnrichmentAttribute> combinedAttributeList = new ArrayList<>();
@@ -152,7 +150,7 @@ public class LeadEnrichmentResource {
         selectedAttribute.setFieldName("DUMMY_SELECTED_ATTR");
         selectedAttribute.setDisplayName("Display name DUMMY_SELECTED_ATTR");
         selectedAttribute.setFieldType("String");
-        selectedAttribute.setCategory("DUMMY_CATEGORY1");
+        selectedAttribute.setCategory(Category.FIRMOGRAPHICS);
         selectedAttribute.setIsPremium(true);
         selectedAttribute.setIsSelected(true);
 
@@ -163,7 +161,7 @@ public class LeadEnrichmentResource {
         unselectedAttribute.setFieldName("DUMMY_UNSELECTED_ATTR");
         unselectedAttribute.setDisplayName("Display name DUMMY_UNSELECTED_ATTR");
         unselectedAttribute.setFieldType("String");
-        unselectedAttribute.setCategory("DUMMY_CATEGORY2");
+        unselectedAttribute.setCategory(Category.LEAD_INFORMATION);
         selectedAttribute.setIsPremium(false);
         selectedAttribute.setIsSelected(false);
 
@@ -180,7 +178,7 @@ public class LeadEnrichmentResource {
             combinedAttributeList = filteredAttributeList;
         }
 
-        if (!StringUtils.isEmpty(category)) {
+        if (category != null) {
             List<LeadEnrichmentAttribute> filteredAttributeList = new ArrayList<>();
             for (LeadEnrichmentAttribute attr : combinedAttributeList) {
                 if (attr.getCategory().equals(category)) {
@@ -205,7 +203,7 @@ public class LeadEnrichmentResource {
         return 10;
     }
 
-    @RequestMapping(value = LP3_ENRICH_PATH + "/selectedAttributeCount", //
+    @RequestMapping(value = LP3_ENRICH_PATH + "/selectedattributes/count", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
@@ -216,7 +214,7 @@ public class LeadEnrichmentResource {
         return 1;
     }
 
-    @RequestMapping(value = LP3_ENRICH_PATH + "/selectedPremiumAttributeCount", //
+    @RequestMapping(value = LP3_ENRICH_PATH + "/selectedpremiumattributes/count", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
