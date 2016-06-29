@@ -207,6 +207,8 @@ public abstract class BaseScoring {
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 
+        requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
+
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split("getTenantFromOAuth");
             if (log.isInfoEnabled()) {
@@ -219,6 +221,8 @@ public abstract class BaseScoring {
             }
 
             return response;
+        } finally {
+            requestInfo.logSummary();
         }
     }
 
