@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreType
 public class LeadEnrichmentAttribute {
 
     @JsonProperty("DisplayName")
@@ -24,6 +26,15 @@ public class LeadEnrichmentAttribute {
 
     @JsonProperty("Description")
     private String description;
+
+    @JsonProperty("IsSelected")
+    private Boolean isSelected;
+
+    @JsonProperty("IsPremium")
+    private Boolean isPremium;
+
+    @JsonProperty("Category")
+    private String category;
 
     public String getDisplayName() {
         return displayName;
@@ -79,5 +90,29 @@ public class LeadEnrichmentAttribute {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getIsSelected() {
+        return isSelected;
+    }
+
+    public void setIsSelected(Boolean isSelected) {
+        this.isSelected = isSelected;
+    }
+
+    public Boolean getIsPremium() {
+        return isPremium;
+    }
+
+    public void setIsPremium(Boolean isPremium) {
+        this.isPremium = isPremium;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

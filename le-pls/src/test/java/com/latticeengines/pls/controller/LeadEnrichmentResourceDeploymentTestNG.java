@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributeOperation;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -24,6 +25,7 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA);
     }
 
+    // ------------START for LP v2-------------------//
     @Test(groups = "deployment", enabled = false)
     public void testGetAvariableAttributes() {
         switchToSuperAdmin();
@@ -104,9 +106,9 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     @Test(groups = "deployment", enabled = false)
     public void testVerifyAttributes() {
         // Target tables:
-        //     Marketo --> LeadRecord
-        //     Eloqua --> Contact
-        //     SFDC --> Contact, Lead
+        // Marketo --> LeadRecord
+        // Eloqua --> Contact
+        // SFDC --> Contact, Lead
         // The main test tenant is Marketo.
         switchToSuperAdmin();
         LeadEnrichmentAttribute[] attributes = new LeadEnrichmentAttribute[3];
@@ -135,7 +137,8 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     public void testSaveAttributes() {
         switchToSuperAdmin();
         String avariableUrl = getRestAPIHostPort() + "/pls/leadenrichment/avariableattributes";
-        LeadEnrichmentAttribute[] avariableAttributes = restTemplate.getForObject(avariableUrl, LeadEnrichmentAttribute[].class);
+        LeadEnrichmentAttribute[] avariableAttributes = restTemplate.getForObject(avariableUrl,
+                LeadEnrichmentAttribute[].class);
         if (avariableAttributes != null && avariableAttributes.length > 0) {
             Map<String, LeadEnrichmentAttribute> avariableAttrsMap = new HashMap<String, LeadEnrichmentAttribute>();
             for (LeadEnrichmentAttribute attribute : avariableAttributes) {
@@ -183,7 +186,8 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
             restTemplate.put(url, attrsToSave, new HashMap<>());
             attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
             assertEquals(attrsToSave.size(), attrsSaved.length);
-            // Test we cannot remove one of 2 attributes with 2 different data source
+            // Test we cannot remove one of 2 attributes with 2 different data
+            // source
             attrsToSave.remove(0);
             restTemplate.put(url, attrsToSave, new HashMap<>());
             attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
@@ -217,4 +221,67 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         Integer limitation = restTemplate.getForObject(url, Integer.class);
         assertNotNull(limitation);
     }
+
+    // ------------END for LP v2-------------------//
+
+    // ------------START for LP v3-------------------//
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLP3Categories() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/categories";
+        List<String> categoryList = restTemplate.getForObject(url, List.class);
+        assertNotNull(categoryList);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testSaveLP3Attributes() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
+        Map<LeadEnrichmentAttributeOperation, List<LeadEnrichmentAttribute>> attributesOperationMap = new HashMap<>();
+        List<LeadEnrichmentAttribute> newSelectedAttributeList = new ArrayList<>();
+        LeadEnrichmentAttribute attr1 = new LeadEnrichmentAttribute();
+        LeadEnrichmentAttribute attr2 = new LeadEnrichmentAttribute();
+        newSelectedAttributeList.add(attr1);
+        newSelectedAttributeList.add(attr2);
+
+        List<LeadEnrichmentAttribute> unselectedAttributeList = new ArrayList<>();
+        LeadEnrichmentAttribute attr3 = new LeadEnrichmentAttribute();
+        LeadEnrichmentAttribute attr4 = new LeadEnrichmentAttribute();
+        unselectedAttributeList.add(attr3);
+        unselectedAttributeList.add(attr4);
+
+        attributesOperationMap.put(LeadEnrichmentAttributeOperation.SELECT, newSelectedAttributeList);
+        attributesOperationMap.put(LeadEnrichmentAttributeOperation.DESELECT, unselectedAttributeList);
+
+        restTemplate.put(url, attributesOperationMap);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLP3Attributes() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
+        List<LeadEnrichmentAttribute> combinedAttributeList = restTemplate.getForObject(url, List.class);
+        assertNotNull(combinedAttributeList);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLP3PremiumAttributesLimitation() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/premiumattributeslimitation";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLP3SelectedAttributeCount() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedAttributeCount";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLP3SelectedAttributePremiumCount() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedPremiumAttributeCount";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+    }
+    // ------------END for LP v3-------------------//
 }
