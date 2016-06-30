@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.apache.log4j.Logger;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.xml.parse.ParserPool;
@@ -132,8 +131,9 @@ public class MetadataSynchronizer {
             memoryProvider.initialize();
 
             MetadataProvider serviceProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
-            RoleDescriptor descriptor = serviceProvider.getRole(entityId, SPSSODescriptor.DEFAULT_ELEMENT_NAME,
-                    "urn:oasis:names:tc:SAML:2.0:protocol");
+            SPSSODescriptor descriptor = (SPSSODescriptor) serviceProvider.getRole(entityId,
+                    SPSSODescriptor.DEFAULT_ELEMENT_NAME, "urn:oasis:names:tc:SAML:2.0:protocol");
+            descriptor.setWantAssertionsSigned(true);
 
             for (Endpoint endpoint : descriptor.getEndpoints()) {
                 endpoint.setLocation(endpoint.getLocation().replace("___TENANT_ID___", tenantId));

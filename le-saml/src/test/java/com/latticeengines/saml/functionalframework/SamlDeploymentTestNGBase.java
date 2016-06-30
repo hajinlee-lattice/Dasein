@@ -9,12 +9,19 @@ import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.xml.Configuration;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.security.SecurityException;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.x509.X509Credential;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.Signer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.security.saml.key.KeyManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -48,6 +55,9 @@ public abstract class SamlDeploymentTestNGBase extends AbstractTestNGSpringConte
 
     @Autowired
     protected ParserPool parserPool;
+
+    @Autowired
+    private KeyManager keyManager;
 
     @Value("${saml.base.address}")
     private String baseUrl;
@@ -86,14 +96,44 @@ public abstract class SamlDeploymentTestNGBase extends AbstractTestNGSpringConte
             SubjectConfirmationData scd = sc.getSubjectConfirmationData();
             scd.setNotOnOrAfter(DateTime.now().plus(60000));
             scd.setRecipient(getSSOEndpointUrl());
+            assertion.getAuthnStatements().get(0).setAuthnInstant(DateTime.now());
+
             assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
                     SAMLUtils.getEntityIdFromTenantId(globalAuthFunctionalTestBed.getMainTestTenant().getId()));
             assertion.getSubject().getNameID()
                     .setValue(globalAuthFunctionalTestBed.getCurrentUser().getResult().getUser().getEmailAddress());
+            signResponse(response);
             return response;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void signResponse(Response response) {
+        Signature signature = getTestingIdPSignature();
+        response.setSignature(signature);
+        try {
+            Configuration.getMarshallerFactory().getMarshaller(response).marshall(response);
+            Signer.signObject(signature);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Signature getTestingIdPSignature() {
+        Signature signature = (Signature) Configuration.getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME)
+                .buildObject(Signature.DEFAULT_ELEMENT_NAME);
+        X509Credential credential = (X509Credential) keyManager.getCredential("testidp");
+
+        try {
+            signature.setSigningCredential(credential);
+            SecurityHelper.prepareSignatureParams(signature, credential,
+                    Configuration.getGlobalSecurityConfiguration(), null);
+        } catch (SecurityException e) {
+            throw new RuntimeException("Error attempting to build signature", e);
+        }
+
+        return signature;
     }
 
     protected String getSSOEndpointUrl() {
