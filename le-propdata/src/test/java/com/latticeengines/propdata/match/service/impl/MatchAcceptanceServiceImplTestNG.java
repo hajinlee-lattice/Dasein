@@ -18,7 +18,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -35,8 +34,6 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
 
     private static final Logger log = LoggerFactory.getLogger(MatchAcceptanceServiceImplTestNG.class);
 
-    private static final String DerivedColumns = "DerivedColumns";
-
     @Autowired
     private MatchCommandsService matchCommandsService;
 
@@ -45,13 +42,12 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-    @BeforeMethod(groups = "acceptance")
-    public void beforeMethod() {
+    private void beforeMethod() {
         jdbcTemplate.setDataSource(dataSource);
     }
 
     @Test(groups = "acceptance", dataProvider = "matchDataProvider", threadPoolSize = 3)
-    public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
+    public void testMatch(String sourceTable, String destTables, String contractId) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match
                                                                    // client for
                                                                    // current
@@ -59,7 +55,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
 
         log.info("Match test with SourceTable=" + sourceTable + " DestTables=" + destTables + " ContractID="
                 + contractId);
-
+        MatchVerifier verifier = new sqlDataValidatorVerifier();
         CreateCommandRequest request = new CreateCommandRequest();
         request.setContractExternalID(contractId);
         request.setDestTables(destTables);
@@ -75,8 +71,8 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
 
     @DataProvider(name = "matchDataProvider", parallel = true)
     private Object[][] MatchDataProvider() {
-        return new Object[][] {
-                { "LocationData_1000_US", "DerivedColumns", "PD_Test", new DerivedColumnsLocationVerifier() } };
+        beforeMethod();
+        return retrieveTestcases();
     }
 
     // ==================================================
@@ -113,12 +109,13 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         abstract void verifyResults(Long commandId, CreateCommandRequest request);
     }
 
-    private class DerivedColumnsLocationVerifier extends AbstractMatchVerifier {
+    private class sqlDataValidatorVerifier extends AbstractMatchVerifier {
         @Override
         public void verifyResults(Long commandId, CreateCommandRequest request) {
+            String destTables = request.getDestTables();
             verifyResultTablesAreGenerated(commandId, 30);
 
-            verifyDerivedColumnsResultByRules(commandId);
+            verifyResultByTypes(commandId, destTables);
         }
     }
 
@@ -173,14 +170,12 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         }
     }
 
-    private Boolean verifyDerivedColumnsResultByRules(Long commandId) {
+    private Boolean verifyResultByTypes(Long commandId, String type) {
         Commands command = matchCommandsService.findMatchCommandById(commandId);
         String processUid = command.getProcessUID();
         String sourceTable = command.getSourceTable();
 
-        verifyResultsByRules(sourceTable, DerivedColumns, commandId, processUid);
-
-        return verifyResultsByRules(sourceTable, DerivedColumns, commandId, processUid);
+        return verifyResultsByRules(sourceTable, type, commandId, processUid);
     }
 
     private boolean tableExists(String tableName) {
@@ -243,6 +238,23 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         for (Object result : results) {
             log.error(result.toString());
         }
+    }
+
+    private Object[][] retrieveTestcases() {
+        List results = jdbcTemplate.queryForList(
+                "SELECT * FROM [PropDataMatchDB].[dbo].[AcceptanceTestcases] where IsActive = 1");
+        Object [][] obj = new Object[results.size()][];
+        List<Object[]> list = new ArrayList<>();
+        for (Object result : results) {
+            Map mResult = (Map) result;
+            List<String> aL = new ArrayList<>();
+            aL.add((String)mResult.get("SourceTable"));
+            aL.add((String)mResult.get("DestTables"));
+            aL.add((String)mResult.get("ContractID"));
+            list.add(aL.toArray());
+        }
+        list.toArray(obj);
+        return obj;
     }
 
 }
