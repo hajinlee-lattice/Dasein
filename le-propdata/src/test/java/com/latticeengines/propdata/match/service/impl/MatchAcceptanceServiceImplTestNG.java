@@ -40,6 +40,8 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     @Autowired
     private MatchClientRoutingDataSource dataSource;
 
+    private String tag;
+
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     private void beforeMethod() {
@@ -47,14 +49,14 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     @Test(groups = "acceptance", dataProvider = "matchDataProvider", threadPoolSize = 3)
-    public void testMatch(String sourceTable, String destTables, String contractId) {
+    public void testMatch(String sourceTable, String destTables, String contractId, String tag) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match
                                                                    // client for
                                                                    // current
                                                                    // thread.
 
         log.info("Match test with SourceTable=" + sourceTable + " DestTables=" + destTables + " ContractID="
-                + contractId);
+                + contractId + " Tag=" + tag);
         MatchVerifier verifier = new sqlDataValidatorVerifier();
         CreateCommandRequest request = new CreateCommandRequest();
         request.setContractExternalID(contractId);
@@ -63,7 +65,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         Commands command = matchCommandsService.createMatchCommand(request);
 
         try {
-            verifier.verify(command.getPid(), request);
+            verifier.verify(command.getPid(), request, tag);
         } finally {
             verifier.cleanupResultTales(command.getPid(), request);
         }
@@ -79,16 +81,16 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     // Verifiers
     // ==================================================
     private interface MatchVerifier {
-        void verify(Long commandId, CreateCommandRequest request);
+        void verify(Long commandId, CreateCommandRequest request, String tag);
 
         void cleanupResultTales(Long commandId, CreateCommandRequest request);
     }
 
     private abstract class AbstractMatchVerifier implements MatchVerifier {
         @Override
-        public void verify(Long commandId, CreateCommandRequest request) {
+        public void verify(Long commandId, CreateCommandRequest request, String tag) {
             verifyCreateCommandRequest(commandId, request);
-            verifyResults(commandId, request);
+            verifyResults(commandId, request, tag);
         }
 
         @Override
@@ -106,16 +108,16 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
             }
         }
 
-        abstract void verifyResults(Long commandId, CreateCommandRequest request);
+        abstract void verifyResults(Long commandId, CreateCommandRequest request, String tag);
     }
 
     private class sqlDataValidatorVerifier extends AbstractMatchVerifier {
         @Override
-        public void verifyResults(Long commandId, CreateCommandRequest request) {
+        public void verifyResults(Long commandId, CreateCommandRequest request, String tag) {
             String destTables = request.getDestTables();
             verifyResultTablesAreGenerated(commandId, 30);
 
-            verifyResultByTypes(commandId, destTables);
+            verifyResultByTypes(commandId, destTables, tag);
         }
     }
 
@@ -170,12 +172,12 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         }
     }
 
-    private Boolean verifyResultByTypes(Long commandId, String type) {
+    private Boolean verifyResultByTypes(Long commandId, String type, String tag) {
         Commands command = matchCommandsService.findMatchCommandById(commandId);
         String processUid = command.getProcessUID();
         String sourceTable = command.getSourceTable();
 
-        return verifyResultsByRules(sourceTable, type, commandId, processUid);
+        return verifyResultsByRules(sourceTable, type, commandId, processUid, tag);
     }
 
     private boolean tableExists(String tableName) {
@@ -189,21 +191,22 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         }
     }
 
-    private Boolean verifyResultsByRules(String testName, String targetTable, Long commandId, String processUID) {
+    private Boolean verifyResultsByRules(String testName, String targetTable, Long commandId, String processUID,
+            String tag) {
         Boolean isPassed;
-        isPassed = executeVerifyResultsByRulesSP(testName, targetTable, commandId, processUID);
+        isPassed = executeVerifyResultsByRulesSP(testName, targetTable, commandId, processUID, tag);
 
         if (!isPassed) {
-            findResultsByCommandID(commandId);
+            showViolationResultsByCommandID(commandId);
         }
         Assert.assertTrue(isPassed);
         return isPassed;
     }
 
     private Boolean executeVerifyResultsByRulesSP(final String testName, final String targetTable, final Long commandId,
-            final String rootUID) {
+            final String rootUID, final String tag) {
         List<SqlParameter> declaredParameters = new ArrayList<>();
-        final String tag = "location";
+
         declaredParameters.add(new SqlParameter("testName", Types.VARCHAR));
         declaredParameters.add(new SqlParameter("destTables", Types.VARCHAR));
         declaredParameters.add(new SqlParameter("tag", Types.VARCHAR));
@@ -227,10 +230,10 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
                 return stmnt;
             }
         }, declaredParameters);
-        return (Boolean)resultsMap.get("isPassed");
+        return (Boolean) resultsMap.get("isPassed");
     }
 
-    private void findResultsByCommandID(final Long commandId) {
+    private void showViolationResultsByCommandID(final Long commandId) {
         Object[] parameters = new Object[] { commandId };
         List results = jdbcTemplate.queryForList(
                 "SELECT * FROM [PropDataMatchDB].[dbo].[DataValidator_ViolationTable] where CommandID = ?", parameters);
@@ -241,20 +244,29 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Object[][] retrieveTestcases() {
-        List results = jdbcTemplate.queryForList(
-                "SELECT * FROM [PropDataMatchDB].[dbo].[AcceptanceTestcases] where IsActive = 1");
-        Object [][] obj = new Object[results.size()][];
+        List results = jdbcTemplate
+                .queryForList("SELECT * FROM [PropDataMatchDB].[dbo].[AcceptanceTestcases] where IsActive = 1");
+        Object[][] obj = new Object[results.size()][];
         List<Object[]> list = new ArrayList<>();
         for (Object result : results) {
             Map mResult = (Map) result;
             List<String> aL = new ArrayList<>();
-            aL.add((String)mResult.get("SourceTable"));
-            aL.add((String)mResult.get("DestTables"));
-            aL.add((String)mResult.get("ContractID"));
+            aL.add((String) mResult.get("SourceTable"));
+            aL.add((String) mResult.get("DestTables"));
+            aL.add((String) mResult.get("ContractID"));
+            aL.add((String) mResult.get("Tag"));
             list.add(aL.toArray());
         }
         list.toArray(obj);
         return obj;
+    }
+
+    private void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    private String getTag() {
+        return this.tag;
     }
 
 }
