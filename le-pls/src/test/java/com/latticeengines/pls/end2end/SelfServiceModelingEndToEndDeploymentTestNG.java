@@ -77,9 +77,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
 
-    // private Function<List<LinkedHashMap<String, String>>, Void>
-    // unknownColumnHandler;
-
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
@@ -377,9 +374,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         if (schemaInterpretation != null) {
             this.schemaInterpretation = schemaInterpretation;
         }
-        // if (unknownColumnHandler != null) {
-        // this.unknownColumnHandler = unknownColumnHandler;
-        // }
+
         log.info("Uploading File");
         uploadFile();
         sourceFile = getSourceFile();

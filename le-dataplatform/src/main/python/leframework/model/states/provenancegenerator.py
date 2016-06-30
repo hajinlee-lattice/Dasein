@@ -35,6 +35,8 @@ class ProvenanceGenerator(State):
                 self.result["Predefined_ColumnSelection_Version"] = properties["Predefined_ColumnSelection_Version"]
             elif "Customized_ColumnSelection" in properties.keys():
                 self.result["Customized_ColumnSelection"] = properties["Customized_ColumnSelection"]
+            if "Pivot_Artifact_Path" in properties.keys():
+                self.result["Pivot_Artifact_Path"] = properties["Pivot_Artifact_Path"]
         else:
             self.logger.error("Provenance property is null.")
             self.result = OrderedDict()

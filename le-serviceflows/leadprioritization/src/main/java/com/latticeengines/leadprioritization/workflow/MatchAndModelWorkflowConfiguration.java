@@ -192,6 +192,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder pivotArtifactPath(String pivotArtifactPath) {
+            model.setPivotArtifactPath(pivotArtifactPath);
+            return this;
+        }
+
         public Builder dataRules(List<DataRule> dataRules) {
             model.setDataRules(dataRules);
             return this;

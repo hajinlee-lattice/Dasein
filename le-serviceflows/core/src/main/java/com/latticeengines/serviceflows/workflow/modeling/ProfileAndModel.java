@@ -140,8 +140,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                     .trainingTableName(getConfiguration().getTrainingTableName()) //
                     .transformationGroupName(getTransformationGroupName()) //
+                    .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                     .productType(configuration.getProductType()) //
                     .runTimeParams(configuration.runTimeParams());
+
             if (getPredefinedSelection() != null) {
                 bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
             } else if (getCustomizedSelection() != null) {

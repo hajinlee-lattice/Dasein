@@ -86,6 +86,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null
                                                                                               // means
                                                                                               // latest
+                .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(parameters.getDataRules()) //
                 .userRefinedAttributes(userRefinedAttributes);

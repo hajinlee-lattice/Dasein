@@ -238,6 +238,9 @@ public class ModelingServiceExecutor {
         } else if (builder.getCustomizedColumnSelection() != null) {
             props.add("Customized_ColumnSelection=" + JsonUtils.serialize(builder.getCustomizedColumnSelection()));
         }
+        if (builder.getPivotArtifactPath() != null) {
+            props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
 
@@ -362,6 +365,7 @@ public class ModelingServiceExecutor {
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
         private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
+        private String pivotArtifactPath;
 
         private ModelProxy modelProxy;
         private JobProxy jobProxy;
@@ -565,11 +569,24 @@ public class ModelingServiceExecutor {
 
         public Builder customizedColumnSelection(ColumnSelection columnSelection) {
             if (this.getPredefinedColumnSelection() != null) {
-                log.warn("When both predefined and customized column selections are provided, " +
-                        "customized one will be ignored");
+                log.warn("When both predefined and customized column selections are provided, "
+                        + "customized one will be ignored");
             }
             this.setCustomizedColumnSelection(columnSelection);
             return this;
+        }
+
+        public Builder pivotArtifactPath(String pivotArtifactPath) {
+            this.setPivotArtifactPath(pivotArtifactPath);
+            return this;
+        }
+
+        public void setPivotArtifactPath(String pivotArtifactPath) {
+            this.pivotArtifactPath = pivotArtifactPath;
+        }
+
+        public String getPivotArtifactPath() {
+            return pivotArtifactPath;
         }
 
         public Builder dataRules(List<DataRule> dataRules) {
