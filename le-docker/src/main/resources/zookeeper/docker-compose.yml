@@ -1,45 +1,22 @@
 version: '2'
 services:
-  zk:
+  zk1:
     image: latticeengines/zookeeper
     ports:
       - "2181:2181"
     environment:
-      ZK_CLUSTER_SIZE: 1
-  bkr:
-    image: latticeengines/kafka
-    ports:
-      - "9092:9092"
+      ZK_CLUSTER_SIZE: 3
+      ZK_HOST_PATTERN: zookeeper_zk{}_1
+      MY_ID: 1
+  zk2:
+    image: latticeengines/zookeeper
     environment:
-      ADVERTISE_IP: "kafka_bkr_1"
-      ZK_HOSTS: "kafka_zk_1:2181"
-      SINGLE_NODE: "true"
-    depends_on:
-      - "zk"
-  sr:
-    image: latticeengines/schema-registry
-    ports:
-          - "9022:9022"
+      ZK_CLUSTER_SIZE: 3
+      ZK_HOST_PATTERN: zookeeper_zk{}_1
+      MY_ID: 2
+  zk3:
+    image: latticeengines/zookeeper
     environment:
-      ADVERTISE_IP: "kafka_sr_1"
-      ZK_HOSTS: "kafka_zk_1:2181"
-    depends_on:
-      - "bkr"
-  kr:
-    image: latticeengines/kafka-rest
-    ports:
-      - "9023:9023"
-    environment:
-      SR_ADDRESS: "http://kafka_sr_1:9022"
-      ZK_HOSTS: "kafka_zk_1:2181"
-    depends_on:
-      - "sr"
-  conn:
-    image: latticeengines/kafka-connect
-    ports:
-          - "9024:9024"
-    environment:
-      BOOTSTRAP_SERVERS: "kafka_bkr_1:9092"
-      ZK_HOSTS: "kafka_zk_1:2181"
-    depends_on:
-      - "sr"
+      ZK_CLUSTER_SIZE: 3
+      ZK_HOST_PATTERN: zookeeper_zk{}_1
+      MY_ID: 3
