@@ -24,20 +24,20 @@ public abstract class BaseRuleResult implements HasPid{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
-    private Long pid;
+    protected Long pid;
 
     @JsonProperty
     @Transient
-    private int flaggedItemCount;
+    protected int flaggedItemCount;
 
     @JsonProperty
     @Column(name = "RULENAME", nullable = false)
-    private String dataRuleName;
+    protected String dataRuleName;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
-    private Table table;
+    protected Table table;
 
     @Override
     public Long getPid() {

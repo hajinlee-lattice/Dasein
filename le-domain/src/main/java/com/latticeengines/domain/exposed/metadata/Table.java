@@ -590,26 +590,26 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.dataRules = dataRules;
     }
 
-    @JsonIgnore
+    @JsonProperty("columnrule_results")
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<ColumnRuleResult> getColumnRuleResults() {
         return columnRuleResults;
     }
 
-    @JsonIgnore
+    @JsonProperty("columnrule_results")
     public void setColumnRuleResults(List<ColumnRuleResult> columnRuleResults) {
         this.columnRuleResults = columnRuleResults;
     }
 
-    @JsonIgnore
+    @JsonProperty("rowrule_results")
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<RowRuleResult> getRowRuleResults() {
         return rowRuleResults;
     }
 
-    @JsonIgnore
+    @JsonProperty("rowrule_results")
     public void setRowRuleResults(List<RowRuleResult> rowRuleResults) {
         this.rowRuleResults = rowRuleResults;
     }
