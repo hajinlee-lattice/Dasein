@@ -104,7 +104,6 @@ if [ $KAFKA_NODES = 1 ]; then
     echo "Provisioning Schema Registry ${KAFKA}-sr"
     docker run -d --name ${KAFKA}-sr -h ${KAFKA}-sr\
         --net ${KAFKA_NETWORK} \
-        -e KAFKA_CLUSTER_SIZE=${KAFKA_NODES} \
         -e ZK_HOSTS=${ZK_HOSTS} \
         -e ADVERTISE_IP=${KAFKA}-bkr \
         -l cluster.name=${KAFKA} \
@@ -138,7 +137,6 @@ else
         echo "Provisioning Schema Registry ${KAFKA}-sr$i"
         docker run -d --name ${KAFKA}-sr${i} -h ${KAFKA}-sr${i}\
             --net ${KAFKA_NETWORK} \
-            -e KAFKA_CLUSTER_SIZE=${KAFKA_NODES} \
             -e ZK_HOSTS=${ZK_HOSTS} \
             -e ADVERTISE_IP=${KAFKA}-sr${i} \
             -l cluster.name=${KAFKA} \

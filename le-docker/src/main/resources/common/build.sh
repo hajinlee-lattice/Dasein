@@ -13,4 +13,12 @@ pushd le-discover
 build_docker latticeengines/discover
 popd
 
+pushd le-centos
+build_docker latticeengines/centos
+popd
+
+pushd le-ubuntu
+build_docker latticeengines/ubuntu
+popd
+
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
