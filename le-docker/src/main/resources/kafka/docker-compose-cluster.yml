@@ -110,4 +110,5 @@ services:
     depends_on:
       - "rest1"
       - "rest2"
-      - "conn"
+      - "conn1"
+      - "conn2"
