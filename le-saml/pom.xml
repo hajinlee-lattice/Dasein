@@ -14,6 +14,7 @@
         <le.domain.version>2.0.35-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.35-SNAPSHOT</le.db.version>
         <le.security.version>2.0.35-SNAPSHOT</le.security.version>
+        <le.testfwk.version>2.0.35-SNAPSHOT</le.testfwk.version>
         <spring.saml.version>1.0.2.RELEASE</spring.saml.version>
     </properties>
 
@@ -96,6 +97,19 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
 
         <dependency>

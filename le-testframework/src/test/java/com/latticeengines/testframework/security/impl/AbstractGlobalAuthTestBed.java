@@ -49,6 +49,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
             "");
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
 
+    private UserDocument currentUser;
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -73,7 +75,9 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     @Override
-    public LedpResponseErrorHandler getErrorHandler() { return errorHandler; }
+    public LedpResponseErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
 
     @Override
     public List<Tenant> getTestTenants() {
@@ -162,7 +166,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Override
     public void cleanupPlsHdfs() {
-        for (Map.Entry<String, UserDocument> entry: userTenantSessions.entrySet()) {
+        for (Map.Entry<String, UserDocument> entry : userTenantSessions.entrySet()) {
             log.info("Logging out token for " + entry.getKey());
             UserDocument userDoc = entry.getValue();
             if (userDoc != null) {
@@ -174,7 +178,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
             }
         }
 
-        for (Tenant tenant: testTenants) {
+        for (Tenant tenant : testTenants) {
             log.info("Clean up test tenant " + tenant.getId());
             deleteTenant(tenant);
         }
@@ -193,7 +197,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     /**
-     * add an extra test tenant with given name: tenantName.tenantName.Production
+     * add an extra test tenant with given name:
+     * tenantName.tenantName.Production
      */
     @Override
     public Tenant addExtraTestTenant(String tenantName) {
@@ -211,6 +216,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
      * @param doc
      */
     public void useSessionDoc(UserDocument doc) {
+        currentUser = doc;
         authHeaderInterceptor.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { authHeaderInterceptor }));
     }
@@ -252,7 +258,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         } catch (Exception e) {
             return;
         }
-        for (Tenant tenant: testTenants) {
+        for (Tenant tenant : testTenants) {
             String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
             log.info("Clean up contract in HDFS: " + contractId);
             String customerSpace = CustomerSpace.parse(contractId).toString();
@@ -314,11 +320,16 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     private String getCacheKey(AccessLevel level, Tenant tenant) {
-        return level.name() + "|" +  tenant.getId();
+        return level.name() + "|" + tenant.getId();
     }
 
     public abstract UserDocument loginAndAttach(String username, String password, Tenant tenant);
+
     protected abstract void logout(UserDocument userDocument);
+
     protected abstract void bootstrapUser(AccessLevel accessLevel, Tenant tenant);
 
+    public UserDocument getCurrentUser() {
+        return currentUser;
+    }
 }

@@ -11,13 +11,11 @@ import java.util.TimerTask;
 import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
-import org.opensaml.Configuration;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.parse.ParserPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,10 +25,10 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.metadata.MetadataMemoryProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
+import com.latticeengines.saml.util.SAMLUtils;
 
 @Component
 public class MetadataSynchronizer {
@@ -56,7 +54,7 @@ public class MetadataSynchronizer {
     @PostConstruct
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
-        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, 10000);
+        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, 5000);
     }
 
     @Transactional
@@ -74,6 +72,7 @@ public class MetadataSynchronizer {
                     providers.addAll(tenant.identityProviders);
                 }
                 metadataManager.setProviders(providers);
+                metadataManager.refreshMetadata();
             } catch (Exception e) {
                 log.error("Exception encountered in MetadataSynchronizer refresh task", e);
             }
@@ -122,13 +121,11 @@ public class MetadataSynchronizer {
     private MetadataProvider constructServiceProvider(String tenantId) {
 
         try (InputStream metadataInput = getClass().getResourceAsStream("/metadata/applatticeenginescom_sp.xml")) {
-            Document e = parserPool.parse(metadataInput);
-            Unmarshaller unmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(e.getDocumentElement());
-            EntityDescriptor entityDescriptor = (EntityDescriptor) unmarshaller.unmarshall(e.getDocumentElement());
+            EntityDescriptor entityDescriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool, metadataInput);
             ExtendedMetadata extendedMetadata = baseServiceProviderMetadata.clone();
             extendedMetadata.setAlias(tenantId);
 
-            String entityId = "app.lattice-engines.com/" + tenantId;
+            String entityId = SAMLUtils.LOCAL_ENTITY_ID_BASE + tenantId;
             entityDescriptor.setEntityID(entityId);
 
             MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(entityDescriptor);

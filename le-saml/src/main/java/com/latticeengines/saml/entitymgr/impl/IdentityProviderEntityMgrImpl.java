@@ -25,9 +25,26 @@ public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityPro
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public void create(IdentityProvider identityProvider) {
+        super.create(identityProvider);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public void delete(IdentityProvider identityProvider) {
+        super.delete(identityProvider);
+    }
+
+    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<IdentityProvider> findAll() {
         return getDao().findAll();
     }
 
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<IdentityProvider> findByTenantId(String tenantId) {
+        return identityProviderDao.findByTenantId(tenantId);
+    }
 }

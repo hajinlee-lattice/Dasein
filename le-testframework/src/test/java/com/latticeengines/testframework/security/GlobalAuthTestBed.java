@@ -25,6 +25,7 @@ public interface GlobalAuthTestBed {
 
     UserDocument loginAndAttach(String username, String password, Tenant tenant);
 
+    UserDocument getCurrentUser();
     void switchToSuperAdmin();
     void switchToInternalAdmin();
     void switchToInternalUser();

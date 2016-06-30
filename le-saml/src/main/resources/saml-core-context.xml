@@ -114,7 +114,7 @@
 
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
     <bean id="samlAuthenticationProvider" class="org.springframework.security.saml.SAMLAuthenticationProvider">
-        <property name="userDetails" ref="leUserDetailsService"/>
+        <property name="userDetails" ref="latticeUserDetailsService"/>
     </bean>
 
     <!-- Provider of default SAML Context -->

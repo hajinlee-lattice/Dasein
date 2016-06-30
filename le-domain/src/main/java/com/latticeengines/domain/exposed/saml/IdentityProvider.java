@@ -44,7 +44,7 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
 
     @JsonProperty("entity_id")
     @Index(name = "IX_ENTITY_ID")
-    @Column(name = "ENTITY_ID", nullable = false)
+    @Column(name = "ENTITY_ID", nullable = false, unique = true)
     private String entityId;
 
     @JsonProperty("metadata")
