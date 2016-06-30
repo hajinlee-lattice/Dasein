@@ -6,6 +6,7 @@ RUN echo invalidate cache 12311345 > /dev/null
 ADD schema-registry.properties /etc/schema-registry/schema-registry.properties
 ADD start.sh /start.sh
 
+EXPOSE
 EXPOSE 9022
 
 CMD [ "bash", "/start.sh" ]

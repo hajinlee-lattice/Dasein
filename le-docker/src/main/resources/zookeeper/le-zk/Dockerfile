@@ -22,7 +22,7 @@ RUN tar xzf zookeeper-3.4.8.tar.gz \
 	&& mkdir -p /usr/zookeeper/logs \
 	&& rm zookeeper-3.4.8.tar.gz
 
-RUN mkdir -p /var/lib/zookeeper; touch /var/lib/zookeeper/myid
+RUN mkdir -p /usr/zookeeper/data; touch /usr/zookeeper/data/myid
 
 RUN touch /usr/zookeeper/conf/zoo.cfg && \
     echo "dataDir=/usr/zookeeper/data" >> /usr/zookeeper/conf/zoo.cfg && \

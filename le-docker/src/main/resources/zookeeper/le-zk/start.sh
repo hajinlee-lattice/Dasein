@@ -17,7 +17,7 @@ fi
 
 if [ -z "${DISCOVER_SERVICE}" ]; then
 
-    echo $MY_ID > /var/lib/zookeeper/myid
+    echo $MY_ID > /usr/zookeeper/data/myid
 
     if [ -z ${ZK_HOST_PATTERN} ]; then
         ZK_HOST_PATTERN="${ZK_CLUSTER_NAME}-zk{}"
@@ -102,7 +102,7 @@ else
 	done
 
 	echo "MY_ID=${MY_ID}"
-    echo $MY_ID > /var/lib/zookeeper/myid
+    echo $MY_ID > /usr/zookeeper/data/myid
 fi
 
 while [ 1 = 1 ];
