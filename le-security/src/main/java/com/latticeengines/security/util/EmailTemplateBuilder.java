@@ -60,10 +60,12 @@ public class EmailTemplateBuilder {
         PLS_EXISTING_INTERNAL_USER("old_user.html"), //
         PLS_FORGET_PASSWORD("forget_password.html"), //
         PD_NEW_EXTERNAL_USER("pd_new_external_user.html"), //
-        PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
+        PD_NEW_INTERNAL_USER("pd_new_internal_user.html"), //
+        PD_EXISTING_EXTERNAL_USER("pd_old_external_user.html"), //
+        PD_EXISTING_INTERNAL_USER("pd_old_internal_user.html"), //
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
         PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
-        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"),
+        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), //
         SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html");
 
         private final static String templateRoot = "com/latticeengines/security/";

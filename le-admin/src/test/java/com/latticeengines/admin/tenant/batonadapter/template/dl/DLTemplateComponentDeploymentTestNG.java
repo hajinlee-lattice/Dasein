@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentDeploymentTestNG;
@@ -84,7 +84,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
 
         sDir = new SerializableDocumentDirectory(batonService.getDefaultConfiguration(getServiceName()));
         properties.put(getServiceName(), sDir.flatten());
-        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
+        ProductAndAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
     }

@@ -58,6 +58,9 @@ public class TenantServiceImpl implements TenantService {
     private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
     private static final String spaceConfigNode = LatticeComponent.spaceConfigNode;
     private static final String danteFeatureFlag = "Dante";
+    private static final String EXTERNAL_ADMIN_EMAILS = "ExternalAdminEmails";
+    private static final String INTERNAL_ADMIN_EMAILS = "LatticeAdminEmails";
+    private static final String SUPER_ADMIN_EMAILS = "SuperAdminEmails";
 
     private final BatonService batonService = new BatonServiceImpl();
 
@@ -81,7 +84,7 @@ public class TenantServiceImpl implements TenantService {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    private ProductAndExternalAdminInfo prodAndExternalAminInfo;
+    private ProductAndAdminInfo prodAndAminInfo;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
@@ -141,7 +144,7 @@ public class TenantServiceImpl implements TenantService {
             @Override
             public void run() {
                 orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                        orchestratorProps, prodAndExternalAminInfo);
+                        orchestratorProps, prodAndAminInfo);
             }
         });
 
@@ -152,47 +155,72 @@ public class TenantServiceImpl implements TenantService {
         // as a short term patch, waking up Dante's .NET App Pool is necessary
         // for it to pick up the bootstrap command.
         danteComponent.wakeUpAppPool();
-        prodAndExternalAminInfo = getProductAndExternalAdminInfo(spaceConfig, configDirectories);
+        prodAndAminInfo = getProductAndAdminEmailInfo(spaceConfig, configDirectories);
 
     }
 
-    private ProductAndExternalAdminInfo getProductAndExternalAdminInfo(SpaceConfiguration spaceConfig,
+    private ProductAndAdminInfo getProductAndAdminEmailInfo(SpaceConfiguration spaceConfig,
             List<SerializableDocumentDirectory> configDirectories) {
         // Check if PD is external user existed
         if (configDirectories == null || spaceConfig == null) {
             return null;
         }
-        ProductAndExternalAdminInfo prodAndExternalEmail = new ProductAndExternalAdminInfo();
+        ProductAndAdminInfo prodAndAdminEmail = new ProductAndAdminInfo();
         List<LatticeProduct> selectedProducts = spaceConfig.getProducts();
-        List<String> externalEmailList = null;
+        List<String> externalAdminEmailList = null;
+        List<String> internalAdminEmailList = null;
         log.info(selectedProducts);
         for (SerializableDocumentDirectory configDirectory : configDirectories) {
             if (configDirectory.getRootPath().equals("/PLS")) {
                 Collection<Node> nodes = configDirectory.getNodes();
                 for (Node node : nodes) {
-                    if (node.getNode().equals("ExternalAdminEmails")) {
+                    if (node.getNode().equals(EXTERNAL_ADMIN_EMAILS)) {
                         String externalAminEmailsString = node.getData();
-                        log.info(externalAminEmailsString);
-                        externalEmailList = EmailUtils.parseEmails(externalAminEmailsString);
+                        log.info(String.format("External admin email is %s.", externalAminEmailsString));
+                        externalAdminEmailList = EmailUtils.parseEmails(externalAminEmailsString);
+                    } else if (node.getNode().equals(INTERNAL_ADMIN_EMAILS)) {
+                        String internalAdminEmailsString = node.getData();
+                        log.info(String.format("Internal admin email is %s.", internalAdminEmailsString));
+                        if (internalAdminEmailList == null) {
+                            internalAdminEmailList = EmailUtils.parseEmails(internalAdminEmailsString);
+                        } else {
+                            internalAdminEmailList.addAll(EmailUtils.parseEmails(internalAdminEmailsString));
+                        }
+                    } else if (node.getNode().equals(SUPER_ADMIN_EMAILS)) {
+                        String superAminEmailsString = node.getData();
+                        log.info(String.format("Super admin email is %s.", superAminEmailsString));
+                        if (internalAdminEmailList == null) {
+                            internalAdminEmailList = EmailUtils.parseEmails(superAminEmailsString);
+                        } else {
+                            internalAdminEmailList.addAll(EmailUtils.parseEmails(superAminEmailsString));
+                        }
                     }
                 }
             }
         }
 
-        Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
-
-        if (externalEmailList != null) {
-            for (String email : externalEmailList) {
-                externalEmailMap.put(email, checkExternalAdminUserExistence(email));
+        Map<String, Boolean> externalAdminEmailMap = new HashMap<String, Boolean>();
+        if (externalAdminEmailList != null) {
+            for (String externalEmail : externalAdminEmailList) {
+                externalAdminEmailMap.put(externalEmail, checkAdminUserExistence(externalEmail));
             }
         }
-        prodAndExternalEmail.setProducts(selectedProducts);
-        prodAndExternalEmail.setExternalEmailMap(externalEmailMap);
 
-        return prodAndExternalEmail;
+        Map<String, Boolean> internalAdminEmailMap = new HashMap<String, Boolean>();
+        if (internalAdminEmailList != null) {
+            for (String internalEmail : internalAdminEmailList) {
+                internalAdminEmailMap.put(internalEmail, checkAdminUserExistence(internalEmail));
+            }
+        }
+
+        prodAndAdminEmail.setProducts(selectedProducts);
+        prodAndAdminEmail.setExternalAdminEmailMap(externalAdminEmailMap);
+        prodAndAdminEmail.setInternalAdminEmailMap(internalAdminEmailMap);
+
+        return prodAndAdminEmail;
     }
 
-    private boolean checkExternalAdminUserExistence(String externalEmail) {
+    private boolean checkAdminUserExistence(String externalEmail) {
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -265,15 +293,15 @@ public class TenantServiceImpl implements TenantService {
                         newState = BootstrapState.createInitialState();
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(
-                            String.format("Error getting the newState of the Service: %s", serviceName));
+                    throw new RuntimeException(String.format("Error getting the newState of the Service: %s",
+                            serviceName));
                 }
 
                 if (newState != null) {
                     if (state == null) {
                         state = newState;
-                    } else
-                        if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
+                    } else if (!serviceName.equals(DanteComponent.componentName)
+                            || danteIsEnabled(contractId, tenantId)) {
                         state = mergeBootstrapStates(state, newState, serviceName);
                     }
                 }
@@ -289,10 +317,9 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId,
-            String serviceName) {
-        SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId,
-                serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
+        SerializableDocumentDirectory rawDir = tenantEntityMgr
+                .getTenantServiceConfig(contractId, tenantId, serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
@@ -331,11 +358,10 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
-            String serviceName) {
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
-            return BootstrapState.constructErrorState(0, 0,
-                    "At least one of the components encountered an error : " + serviceName);
+            return BootstrapState.constructErrorState(0, 0, "At least one of the components encountered an error : "
+                    + serviceName);
         }
 
         if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {
@@ -355,11 +381,12 @@ public class TenantServiceImpl implements TenantService {
         return !productsBelongTo.isEmpty();
     }
 
-    public static class ProductAndExternalAdminInfo {
+    public static class ProductAndAdminInfo {
         public List<LatticeProduct> products;
-        public Map<String, Boolean> externalEmailMap;
+        public Map<String, Boolean> externalAdminEmailMap;
+        public Map<String, Boolean> internalAdminEmailMap;
 
-        public ProductAndExternalAdminInfo() {
+        public ProductAndAdminInfo() {
         }
 
         public List<LatticeProduct> getProducts() {
@@ -370,12 +397,20 @@ public class TenantServiceImpl implements TenantService {
             this.products = products;
         }
 
-        public Map<String, Boolean> getExternalEmailMap() {
-            return this.externalEmailMap;
+        public Map<String, Boolean> getExternalAdminEmailMap() {
+            return this.externalAdminEmailMap;
         }
 
-        public void setExternalEmailMap(Map<String, Boolean> externalEmailMap) {
-            this.externalEmailMap = externalEmailMap;
+        public void setExternalAdminEmailMap(Map<String, Boolean> externalAdminEmailMap) {
+            this.externalAdminEmailMap = externalAdminEmailMap;
+        }
+
+        public Map<String, Boolean> getInternalAdminEmailMap() {
+            return this.internalAdminEmailMap;
+        }
+
+        public void setInternalAdminEmailMap(Map<String, Boolean> internalAdminEmailMap) {
+            this.internalAdminEmailMap = internalAdminEmailMap;
         }
     }
 }

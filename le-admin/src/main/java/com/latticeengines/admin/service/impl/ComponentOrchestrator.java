@@ -23,7 +23,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -124,17 +124,17 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrate(String contractId, String tenantId, String spaceId,
-            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
+            Map<String, Map<String, String>> properties, ProductAndAdminInfo prodAndAminInfo) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
 
-        postInstall(visitor, prodAndExternalAminInfo, tenantId);
+        postInstall(visitor, prodAndAminInfo, tenantId);
     }
 
-    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
+    void postInstall(OrchestratorVisitor visitor, ProductAndAdminInfo prodAndAminInfo, String tenantId) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
-        emailService(installSuccess, prodAndExternalAminInfo, tenantId);
+        emailService(installSuccess, prodAndAminInfo, tenantId);
     }
 
     private boolean checkComponentsBootStrapStatus(OrchestratorVisitor visitor) {
@@ -144,29 +144,100 @@ public class ComponentOrchestrator {
         return false;
     }
 
-    private void emailService(boolean allComponentsSuccessful, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId) {
-        List<String> newEmailList = new ArrayList<String>();
-        List<String> existingEmailList = new ArrayList<String>();
-        List<LatticeProduct> products = prodAndExternalAminInfo.products;
+    private void emailService(boolean allComponentsSuccessful, ProductAndAdminInfo prodAndAminInfo, String tenantId) {
+        List<String> newExternalEmailList = new ArrayList<String>();
+        List<String> existingExternalEmailList = new ArrayList<String>();
+        List<String> newInternalEmailList = new ArrayList<String>();
+        List<String> existingInternalEmailList = new ArrayList<String>();
+
+        List<LatticeProduct> products = prodAndAminInfo.products;
         if (allComponentsSuccessful) {
-            if (products.contains(LatticeProduct.PD) || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
-                Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
-                Set<String> externalEmails = externalEmailMap.keySet();
-                for (String externalEmail : externalEmails) {
-                    if (!externalEmailMap.get(externalEmail)) {
-                        newEmailList.add(externalEmail);
+            if (products.contains(LatticeProduct.PD) || prodAndAminInfo.products.contains(LatticeProduct.LPA3)) {
+                Map<String, Boolean> externalAdminEmailMap = prodAndAminInfo.getExternalAdminEmailMap();
+                Set<String> externaldminEmails = externalAdminEmailMap.keySet();
+                for (String adminEmail : externaldminEmails) {
+                    if (!externalAdminEmailMap.get(adminEmail)) {
+                        newExternalEmailList.add(adminEmail);
                     } else {
-                        existingEmailList.add(externalEmail);
+                        existingExternalEmailList.add(adminEmail);
+                    }
+                }
+
+                Map<String, Boolean> internalAdminEmailMap = prodAndAminInfo.getInternalAdminEmailMap();
+                Set<String> internalAdminEmails = internalAdminEmailMap.keySet();
+                for (String adminEmail : internalAdminEmails) {
+                    if (!internalAdminEmailMap.get(adminEmail)) {
+                        newInternalEmailList.add(adminEmail);
+                    } else {
+                        existingInternalEmailList.add(adminEmail);
                     }
                 }
             }
         }
-        sendExistingEmails(existingEmailList, tenantId, products);
-        sendNewEmails(newEmailList, products);
+        sendExistingExternalEmails(existingExternalEmailList, tenantId, products);
+        sendNewExternalEmails(newExternalEmailList, products);
+        sendExistingInternalEmails(existingInternalEmailList, tenantId, products);
+        sendNewInternalEmails(newInternalEmailList, products, tenantId);
     }
 
-    private void sendNewEmails(List<String> emailList, List<LatticeProduct> products) {
+    private void sendNewInternalEmails(List<String> newInternalEmailList, List<LatticeProduct> products, String tenantId) {
+        for (String email : newInternalEmailList) {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                log.error(String.format("User: %s cannot be found", email));
+                throw new RuntimeException(String.format("User: %s cannot be found", email));
+            }
+            // le-pls and le-admin uses the same encoding schema to be in synch
+            log.info("The username is " + user.getUsername());
+
+            // reset temp password so that user will have to change it when
+            // login
+            addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+            restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+            headers.add("Accept", "application/json");
+            HttpEntity<String> requestEntity = new HttpEntity<>(user.toString(), headers);
+
+            ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/temppassword",
+                    HttpMethod.PUT, requestEntity, String.class);
+
+            log.info("tenantId is " + tenantId);
+            Tenant tenant = new Tenant();
+            tenant.setName(tenantId);
+            if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
+                emailService.sendPdNewInternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
+            } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
+                emailService.sendPlsNewInternalUserEmail(tenant, user, tempPassword.getBody(), appPublicUrl);
+            } else {
+                log.info("The user clicked both PD and LPA3");
+            }
+        }
+
+    }
+
+    private void sendExistingInternalEmails(List<String> existingInternalEmailList, String tenantId,
+            List<LatticeProduct> products) {
+        for (String email : existingInternalEmailList) {
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                log.error(String.format("User: %s cannot be found", email));
+                throw new RuntimeException(String.format("User: %s cannot be found", email));
+            }
+            log.info("tenantId is " + tenantId);
+            Tenant tenant = new Tenant();
+            tenant.setName(tenantId);
+            if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
+                emailService.sendPdExistingInternalUserEmail(tenant, user, appPublicUrl);
+            } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
+                emailService.sendPlsExistingInternalUserEmail(tenant, user, appPublicUrl);
+            } else {
+                log.info("The user clicked both PD and LPA3");
+            }
+        }
+    }
+
+    private void sendNewExternalEmails(List<String> emailList, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -198,7 +269,7 @@ public class ComponentOrchestrator {
         }
     }
 
-    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
+    private void sendExistingExternalEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {

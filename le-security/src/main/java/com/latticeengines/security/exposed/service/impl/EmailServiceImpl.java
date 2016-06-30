@@ -180,7 +180,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending existing PD external user email to " + user.getEmail() + " succeeded.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PD_EXISITING_EXTERNAL_USER);
+                    EmailTemplateBuilder.Template.PD_EXISTING_EXTERNAL_USER);
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
@@ -194,6 +194,49 @@ public class EmailServiceImpl implements EmailService {
                     "Failed to send exisiting PD external user email for to %s with the error message: %s",
                     user.getEmail(), e.getMessage()));
         }
+    }
+
+    @Override
+    public void sendPdNewInternalUserEmail(User user, String password, String hostport) {
+        try {
+            log.info("Sending new PD internal user email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PD_NEW_INTERNAL_USER);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{tenantmsg}}", "You have been added to the Lattice Prospect Discovery Tenant.");
+            builder.replaceToken("{{username}}", user.getUsername());
+            builder.replaceToken("{{password}}", password);
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Welcome to Lattice Prospect Discovery", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending new PD internal user email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send new PD internal user email to " + user.getEmail() + " " + e.getMessage());
+        }
+
+    }
+
+    @Override
+    public void sendPdExistingInternalUserEmail(Tenant tenant, User user, String hostport) {
+        try {
+            log.info("Sending existing PD internal user email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PD_EXISTING_INTERNAL_USER);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending existing PD internal user email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send existing PD internal user email to " + user.getEmail() + " " + e.getMessage());
+        }
+
     }
 
     @Override
@@ -457,15 +500,17 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Salesforce Access Token", mp, Collections.singleton(user.getEmail()));
-            log.info(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s succeeded", user.getEmail(), tenantId));
+            log.info(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s succeeded",
+                    user.getEmail(), tenantId));
         } catch (Exception e) {
-            log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed", user.getEmail(), tenantId));
+            log.error(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s failed",
+                    user.getEmail(), tenantId));
         }
     }
 
     @Override
-    public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username,
-            String password, String emailAddress, EmailSettings settings) {
+    public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
+            String emailAddress, EmailSettings settings) {
         try {
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.SECURITY_GLOBALAUTH_EMAIL_TEMPLATE);
@@ -479,8 +524,7 @@ public class EmailServiceImpl implements EmailService {
             MimeBodyPart htmlPart = new MimeBodyPart();
             htmlPart.setContent(builder, "text/html");
             mp.addBodyPart(htmlPart);
-            EmailUtils.sendMultiPartEmail("Lattice Password Reset", mp,
-                    Collections.singleton(emailAddress), settings);
+            EmailUtils.sendMultiPartEmail("Lattice Password Reset", mp, Collections.singleton(emailAddress), settings);
         } catch (Exception e) {
             log.error(String.format("Sending global auth forget credentials email to :%s failed", emailAddress));
         }

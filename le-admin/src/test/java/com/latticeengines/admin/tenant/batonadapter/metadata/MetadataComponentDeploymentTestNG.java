@@ -15,7 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
@@ -44,7 +44,7 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
         sDir = new SerializableDocumentDirectory(batonService.getDefaultConfiguration(getServiceName()));
         properties.put(getServiceName(), sDir.flatten());
-        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
+        ProductAndAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
     }
