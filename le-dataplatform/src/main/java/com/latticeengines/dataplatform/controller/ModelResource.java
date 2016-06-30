@@ -22,13 +22,12 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modeling.review.DataRuleConfiguration;
-import com.latticeengines.domain.exposed.modeling.review.ModelReviewResults;
+import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 
 @Api(value = "models", description = "REST resource for machine learning models")
@@ -105,7 +104,7 @@ public class ModelResource implements ModelInterface {
     @RequestMapping(value = "/reviews", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Review data")
-    public AppSubmission review(@RequestBody DataReviewConfiguration config) {
+    public AppSubmission review(@RequestBody ModelReviewConfiguration config) {
         AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.reviewData(config)));
         return submission;
     }
@@ -117,26 +116,11 @@ public class ModelResource implements ModelInterface {
         return new StringList(modelingService.getFeatures(model, false));
     }
 
-    @RequestMapping(value = "/reviewenablements/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reviewdata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get model review rule enablements for a model")
-    public DataRuleConfiguration getRuleEnablements(@PathVariable String modelId) {
-        return modelReviewService.getDataRuleConfiguration(modelId);
-    }
-
-    @RequestMapping(value = "/reviewenablements/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Set model review rule enablements for a model")
-    public Boolean setRuleEnablements(@PathVariable String modelId, @RequestBody DataRuleConfiguration ruleConfig) {
-        modelReviewService.setDataRuleConfiguration(modelId, ruleConfig);
-        return true;
-    }
-
-    @RequestMapping(value = "/reviewresults/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get model review results for a model")
-    public ModelReviewResults getModelReviewResults(@PathVariable String modelId) {
-        return modelReviewService.getReviewResults(modelId);
+    @ApiOperation(value = "Get model review data for a model")
+    public ModelReviewData getReviewData(@PathVariable String modelId) {
+        return modelReviewService.getReviewData(modelId);
     }
 
 }

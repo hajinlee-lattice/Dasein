@@ -9,6 +9,7 @@ import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterMo
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesViaJavaFunction;
 import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
+import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -36,7 +37,10 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private AddStandardAttributesViaJavaFunction addStandardAttributesViaJavaFunction;
 
     @Autowired
-    private ModelWorkflow modelWorkflow;
+    private InitialModelWorkflow initialModelWorkflow;
+
+    @Autowired
+    private RemediateDataRules remediateDataRules;
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -54,7 +58,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(modelValidationWorkflow) //
                 .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributesViaJavaFunction) //
-                .next(modelWorkflow) //
+                .next(initialModelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

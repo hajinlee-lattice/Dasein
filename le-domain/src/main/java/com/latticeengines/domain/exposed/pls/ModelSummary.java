@@ -155,6 +155,14 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return tenant;
     }
 
+    public void addPredictor(Predictor predictor) {
+        if (predictor != null) {
+            predictors.add(predictor);
+            predictor.setModelSummary(this);
+            predictor.setTenantId(getTenantId());
+        }
+    }
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "modelSummary")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Predictor> getPredictors() {
@@ -163,14 +171,6 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     public void setPredictors(List<Predictor> predictors) {
         this.predictors = predictors;
-    }
-
-    public void addPredictor(Predictor predictor) {
-        if (predictor != null) {
-            predictors.add(predictor);
-            predictor.setModelSummary(this);
-            predictor.setTenantId(getTenantId());
-        }
     }
 
     @Override

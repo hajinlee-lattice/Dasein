@@ -4,9 +4,11 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +17,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -26,15 +29,16 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
@@ -70,6 +74,13 @@ public class ModelingServiceExecutor {
     }
 
     public void init() throws Exception {
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(
+                new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
+                        builder.getTable())), true);
+    }
+
+    public void cleanCustomerDataDir() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(
                 new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
@@ -150,13 +161,14 @@ public class ModelingServiceExecutor {
     }
 
     public String review() throws Exception {
-        DataReviewConfiguration config = new DataReviewConfiguration();
+        ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
         config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
         config.setTargets(Arrays.asList(builder.getTargets()));
+        config.setDataRules(builder.getDataRules());
         AppSubmission submission = modelProxy.review(config);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for review: %s", appId));
@@ -164,8 +176,33 @@ public class ModelingServiceExecutor {
         return appId;
     }
 
+    @VisibleForTesting
+    String getEnabledRulesAsPipelineProp(List<DataRule> dataRules) {
+        String enabledRulesProp = "";
+        if (CollectionUtils.isNotEmpty(dataRules)) {
+            StringBuilder enabledRules = new StringBuilder();
+            for (Iterator<DataRule> iterator = dataRules.iterator(); iterator.hasNext();) {
+                DataRule dataRule = iterator.next();
+                if (dataRule.isEnabled()) {
+                    enabledRules.append("\"").append(dataRule.getName()).append("\"");
+                    if (iterator.hasNext()) {
+                        enabledRules.append(", ");
+                    }
+                }
+            }
+            enabledRulesProp = String.format("remediatedatarulestep.enabledrules=[%s]", enabledRules.toString());
+        }
+        return enabledRulesProp;
+    }
+
     public String model() throws Exception {
         Algorithm algorithm = getAlgorithm();
+
+        String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
+        if (StringUtils.isNotEmpty(enabledRulesProp)) {
+            algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " "
+                    + enabledRulesProp);
+        }
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
@@ -232,11 +269,11 @@ public class ModelingServiceExecutor {
         if (algo != null) {
             return algo;
         }
-        
+
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setSampleName("all");
-        
+
         return randomForestAlgorithm;
     }
 
@@ -329,6 +366,7 @@ public class ModelingServiceExecutor {
         private ModelProxy modelProxy;
         private JobProxy jobProxy;
         private Map<ArtifactType, String> metadataArtifacts;
+        private List<DataRule> dataRules;
         private Map<String, String> runTimeParams;
 
         public Builder() {
@@ -534,11 +572,16 @@ public class ModelingServiceExecutor {
             return this;
         }
 
+        public Builder dataRules(List<DataRule> dataRules) {
+            this.dataRules = dataRules;
+            return this;
+        }
+
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             this.runTimeParams = runTimeParams ;
             return this;
         }
-        
+
         public void setHdfsDirToSample(String hdfsDirToSample) {
             this.hdfsDirToSample = hdfsDirToSample;
         }
@@ -861,5 +904,9 @@ public class ModelingServiceExecutor {
         public Map<ArtifactType, String> getMetadataArtifacts() {
             return metadataArtifacts;
         }
+        public List<DataRule> getDataRules() {
+            return dataRules;
+        }
+
     }
 }

@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
-import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
-import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
+import com.latticeengines.serviceflows.workflow.modeling.CleanInitialReview;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
 import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
@@ -17,8 +17,8 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("modelWorkflow")
-public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
+@Component("initialModelWorkflow")
+public class InitialModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
     @Autowired
     private Sample sample;
@@ -36,16 +36,19 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     private Profile profile;
 
     @Autowired
+    private RemediateDataRules remediateDataRules;
+
+    @Autowired
     private ReviewModel reviewModel;
 
     @Autowired
-    private CreateModel createModel;
+    private CleanInitialReview cleanInitialReview;
 
     @Autowired
-    private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
+    private ModelWorkflow modelWorkflow;
 
     @Bean
-    public Job modelWorkflowJob() throws Exception {
+    public Job initialModelWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 
@@ -57,8 +60,9 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
                 .next(writeMetadataFiles) //
                 .next(profile) //
                 .next(reviewModel) //
-                .next(createModel) //
-                .next(downloadAndProcessModelSummaries) //
+                .next(remediateDataRules) //
+                .next(cleanInitialReview) //
+                .next(modelWorkflow) //
                 .build();
     }
 }

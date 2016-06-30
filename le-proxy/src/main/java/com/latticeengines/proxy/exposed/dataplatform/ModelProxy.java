@@ -6,13 +6,12 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modeling.review.ModelReviewResults;
-import com.latticeengines.domain.exposed.modeling.review.DataRuleConfiguration;
+import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -54,7 +53,7 @@ public class ModelProxy extends BaseRestApiProxy implements ModelInterface {
     }
 
     @Override
-    public AppSubmission review(DataReviewConfiguration config) {
+    public AppSubmission review(ModelReviewConfiguration config) {
         String url = constructUrl("/reviews");
         return post("review", url, config, AppSubmission.class);
     }
@@ -72,21 +71,9 @@ public class ModelProxy extends BaseRestApiProxy implements ModelInterface {
     }
 
     @Override
-    public DataRuleConfiguration getRuleEnablements(String modelId) {
-        String url = constructUrl("reviewenablements/{modelId}", modelId);
-        return get("getRuleEnablements", url, DataRuleConfiguration.class);
+    public ModelReviewData getReviewData(String modelId) {
+        String url = constructUrl("reviewdata/{modelId}", modelId);
+        return get("getReviewData", url, ModelReviewData.class);
     }
 
-    @Override
-    public Boolean setRuleEnablements(String modelId, DataRuleConfiguration enablement) {
-        String url = constructUrl("/reviewenablements/{modelId}", modelId);
-        put("setRuleEnablements", url, enablement);
-        return true;
-    }
-
-    @Override
-    public ModelReviewResults getModelReviewResults(String modelId) {
-        String url = constructUrl("reviewresults/{modelId}", modelId);
-        return get("getModelReviewResults", url, ModelReviewResults.class);
-    }
 }

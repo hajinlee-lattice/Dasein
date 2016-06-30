@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 
 public class CloneModelingParameters {
     @JsonProperty
@@ -24,6 +25,9 @@ public class CloneModelingParameters {
 
     @JsonProperty
     private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
+
+    @JsonProperty
+    private List<DataRule> dataRules;
 
     public String getName() {
         return name;
@@ -71,6 +75,14 @@ public class CloneModelingParameters {
 
     public void setDeduplicationType(DedupType deduplicationType) {
         this.deduplicationType = deduplicationType;
+    }
+
+    public List<DataRule> getDataRules() {
+        return dataRules;
+    }
+
+    public void setDataRules(List<DataRule> dataRules) {
+        this.dataRules = dataRules;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
@@ -140,6 +143,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .excludePropDataColumns(parameters.getExcludePropDataColumns()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .runTimeParams(parameters.runTimeParams) //
+                .isDefaultDataRules(true) //
+                .dataRules(createDefaultDataRules(sourceFile.getSchemaInterpretation())) //
                 .build();
         return configuration;
     }
@@ -159,6 +164,32 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
         return applicationId;
+    }
+
+    private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {
+        List<DataRule> defaultRules = new ArrayList<>();
+
+        DataRule countUniqueValueRule = new DataRule();
+        countUniqueValueRule.setName("CountUniqueValueRule");
+        countUniqueValueRule.setEnabled(true);
+        Map<String, String> countUniqueValueRuleProps = new HashMap<>();
+        countUniqueValueRuleProps.put("uniqueCountThreshold", String.valueOf(200));
+        countUniqueValueRule.setProperties(countUniqueValueRuleProps);
+        defaultRules.add(countUniqueValueRule);
+
+        DataRule populatedRowCount = new DataRule();
+        populatedRowCount.setName("PopulatedRowCount");
+        populatedRowCount.setEnabled(true);
+        defaultRules.add(populatedRowCount);
+
+        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+            DataRule leadPerDomainRule = new DataRule();
+            leadPerDomainRule.setName("LeadPerDomainRule");
+            leadPerDomainRule.setEnabled(true);
+            defaultRules.add(leadPerDomainRule);
+        }
+
+        return defaultRules;
     }
 
 }

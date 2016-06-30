@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 
@@ -33,5 +33,5 @@ public interface ModelingService {
 
     ApplicationId exportData(ExportConfiguration config);
 
-    ApplicationId reviewData(DataReviewConfiguration config);
+    ApplicationId reviewData(ModelReviewConfiguration config);
 }

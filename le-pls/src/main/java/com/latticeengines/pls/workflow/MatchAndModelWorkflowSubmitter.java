@@ -86,6 +86,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null
                                                                                               // means
                                                                                               // latest
+                .isDefaultDataRules(false) //
+                .dataRules(parameters.getDataRules()) //
                 .userRefinedAttributes(userRefinedAttributes);
         if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
             builder.dedupTargetTableName(cloneTableName + "_deduped");

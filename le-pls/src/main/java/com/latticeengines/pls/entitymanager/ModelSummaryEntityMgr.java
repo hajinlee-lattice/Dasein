@@ -41,4 +41,5 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     List<Predictor> findAllPredictorsByModelId(String modelId);
 
     List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId);
+
 }

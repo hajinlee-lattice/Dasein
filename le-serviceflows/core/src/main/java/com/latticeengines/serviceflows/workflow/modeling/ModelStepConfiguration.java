@@ -1,10 +1,12 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
@@ -33,10 +35,34 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private ModelSummary sourceModelSummary;
 
     private boolean excludePropDataColumns;
-
+    
     private String pivotArtifactPath;
 
     private Map<String, String> runTimeParams;
+    
+    private boolean defaultDataRuleConfiguration;
+
+    private List<DataRule> dataRules;
+
+    @JsonProperty
+    public List<DataRule> getDataRules() {
+        return dataRules;
+    }
+
+    @JsonProperty
+    public void setDataRules(List<DataRule> dataRules) {
+        this.dataRules = dataRules;
+    }
+
+    @JsonProperty
+    public boolean isDefaultDataRuleConfiguration() {
+        return defaultDataRuleConfiguration;
+    }
+
+    @JsonProperty
+    public void setDefaultDataRuleConfiguration(boolean defaultDataRuleConfiguration) {
+        this.defaultDataRuleConfiguration = defaultDataRuleConfiguration;
+    }
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {

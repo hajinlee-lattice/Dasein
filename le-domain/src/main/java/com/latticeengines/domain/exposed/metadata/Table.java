@@ -53,6 +53,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
+import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
@@ -86,6 +89,9 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private Integer tableTypeCode;
     private String interpretation;
     private boolean markedForPurge;
+    private List<DataRule> dataRules = new ArrayList<>();
+    private List<ColumnRuleResult> columnRuleResults = new ArrayList<>();
+    private List<RowRuleResult> rowRuleResults = new ArrayList<>();
 
     public Table() {
         setTableTypeCode(TableType.DATATABLE.getCode());
@@ -570,6 +576,42 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public void setTableTypeCode(Integer tableTypeCode) {
         this.tableTypeCode = tableTypeCode;
         setTableType(TableType.getTableTypeByCode(tableTypeCode));
+    }
+
+    @JsonProperty("data_rules")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<DataRule> getDataRules() {
+        return dataRules;
+    }
+
+    @JsonProperty("data_rules")
+    public void setDataRules(List<DataRule> dataRules) {
+        this.dataRules = dataRules;
+    }
+
+    @JsonIgnore
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<ColumnRuleResult> getColumnRuleResults() {
+        return columnRuleResults;
+    }
+
+    @JsonIgnore
+    public void setColumnRuleResults(List<ColumnRuleResult> columnRuleResults) {
+        this.columnRuleResults = columnRuleResults;
+    }
+
+    @JsonIgnore
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<RowRuleResult> getRowRuleResults() {
+        return rowRuleResults;
+    }
+
+    @JsonIgnore
+    public void setRowRuleResults(List<RowRuleResult> rowRuleResults) {
+        this.rowRuleResults = rowRuleResults;
     }
 
     @Override

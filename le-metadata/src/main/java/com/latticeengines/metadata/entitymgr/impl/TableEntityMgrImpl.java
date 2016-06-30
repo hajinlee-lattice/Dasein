@@ -22,14 +22,20 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
+import com.latticeengines.metadata.dao.ColumnRuleResultDao;
+import com.latticeengines.metadata.dao.DataRuleDao;
 import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
+import com.latticeengines.metadata.dao.RowRuleResultDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
@@ -47,6 +53,15 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private AttributeDao attributeDao;
+
+    @Autowired
+    private ColumnRuleResultDao columnRuleResultDao;
+
+    @Autowired
+    private RowRuleResultDao rowRuleResultDao;
+
+    @Autowired
+    private DataRuleDao dataRuleDao;
 
     @Autowired
     private ExtractDao extractDao;
@@ -91,6 +106,24 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (entity.getAttributes() != null) {
             for (Attribute attr : entity.getAttributes()) {
                 attributeDao.create(attr);
+            }
+        }
+
+        if (entity.getDataRules() != null) {
+            for (DataRule dataRule : entity.getDataRules()) {
+                dataRuleDao.create(dataRule);
+            }
+        }
+
+        if (entity.getColumnRuleResults() != null) {
+            for (ColumnRuleResult result : entity.getColumnRuleResults()) {
+                columnRuleResultDao.create(result);
+            }
+        }
+
+        if (entity.getRowRuleResults() != null) {
+            for (RowRuleResult result : entity.getRowRuleResults()) {
+                rowRuleResultDao.create(result);
             }
         }
 
@@ -204,6 +237,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             Hibernate.initialize(table.getExtracts());
             Hibernate.initialize(table.getPrimaryKey());
             Hibernate.initialize(table.getLastModifiedKey());
+            Hibernate.initialize(table.getDataRules());
+            Hibernate.initialize(table.getColumnRuleResults());
+            Hibernate.initialize(table.getRowRuleResults());
         }
     }
 
@@ -253,6 +289,24 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (table.getAttributes() != null) {
             for (Attribute attr : table.getAttributes()) {
                 attr.setTable(table);
+            }
+        }
+
+        if (table.getDataRules() != null) {
+            for (DataRule dataRule : table.getDataRules()) {
+                dataRule.setTable(table);
+            }
+        }
+
+        if (table.getColumnRuleResults() != null) {
+            for (ColumnRuleResult result : table.getColumnRuleResults()) {
+                result.setTable(table);
+            }
+        }
+
+        if (table.getRowRuleResults() != null) {
+            for (RowRuleResult result : table.getRowRuleResults()) {
+                result.setTable(table);
             }
         }
     }

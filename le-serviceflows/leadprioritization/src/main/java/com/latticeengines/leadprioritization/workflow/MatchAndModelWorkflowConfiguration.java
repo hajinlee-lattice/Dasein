@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.Dedup
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
@@ -162,7 +163,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used.
-         * 
+         *
          * @param customizedColumnSelection
          * @return
          */
@@ -175,7 +176,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         * 
+         *
          * @param predefinedColumnSelection
          * @return
          */
@@ -188,6 +189,16 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder userRefinedAttributes(List<Attribute> userRefinedAttributes) {
             resolveAttributes.setUserRefinedAttributes(userRefinedAttributes);
+            return this;
+        }
+
+        public Builder dataRules(List<DataRule> dataRules) {
+            model.setDataRules(dataRules);
+            return this;
+        }
+
+        public Builder isDefaultDataRules(boolean isDefaultDataRules) {
+            model.setDefaultDataRuleConfiguration(isDefaultDataRules);
             return this;
         }
 
@@ -204,6 +215,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             configuration.add(matchResult);
             configuration.add(addStandardAttributes);
             configuration.add(resolveAttributes);
+
             return configuration;
         }
 

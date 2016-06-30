@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +57,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
@@ -64,6 +64,7 @@ import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
@@ -71,6 +72,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("modelingService")
@@ -226,7 +228,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId reviewData(DataReviewConfiguration dataReviewConfig) {
+    public ApplicationId reviewData(ModelReviewConfiguration dataReviewConfig) {
         if (dataReviewConfig.getCustomer() == null) {
             throw new LedpException(LedpCode.LEDP_15002);
         }
@@ -246,7 +248,9 @@ public class ModelingServiceImpl implements ModelingService {
         m.setModelHdfsDir(m.getMetadataHdfsPath());
         ModelDefinition modelDefinition = new ModelDefinition();
         modelDefinition.setName(m.getName());
+
         AlgorithmBase dataReviewAlgorithm = new DataReviewAlgorithm();
+        dataReviewAlgorithm.setPipelineProperties(getReviewPipelineProps(dataReviewConfig.getDataRules()));
         dataReviewAlgorithm.setSampleName(dataReviewConfig.getSamplePrefix());
         dataReviewAlgorithm.setMapperSize("0");
         if (StringUtils.isEmpty(dataReviewConfig.getContainerProperties())) {
@@ -264,6 +268,24 @@ public class ModelingServiceImpl implements ModelingService {
         ModelingJob modelingJob = createJob(m, dataReviewAlgorithm, assignedQueue, "reviewing");
         m.addModelingJob(modelingJob);
         return dispatchService.submitJob(modelingJob, dataReviewConfig.isParallelEnabled(), false);
+    }
+
+    @VisibleForTesting
+    String getReviewPipelineProps(List<DataRule> dataRules) {
+        List<String> pipelineProps = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(dataRules)) {
+            for (DataRule dataRule : dataRules) {
+                if (MapUtils.isNotEmpty(dataRule.getProperties())) {
+                    for (String key : dataRule.getProperties().keySet()) {
+                        String value = dataRule.getProperties().get(key);
+                        String pipelineProp = String.format("%s.%s=%s", dataRule.getName().toLowerCase(), key, value);
+                        pipelineProps.add(pipelineProp);
+                    }
+                }
+            }
+        }
+
+        return StringUtils.join(pipelineProps, " ");
     }
 
     @Override

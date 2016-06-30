@@ -12,10 +12,10 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.service.impl.ModelingServiceImpl;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 
 public class ModelingServiceImplUnitTestNG {
 
@@ -107,4 +107,37 @@ public class ModelingServiceImplUnitTestNG {
         assertEquals(features.get(1), "column2");
         assertEquals(features.get(2), "column1");
     }
+
+    @Test(groups = "unit")
+    public void getReviewPipelineProps() {
+
+        List<DataRule> dataRules = new ArrayList<>();
+        Map<String, String> propA = new HashMap<>();
+        propA.put("threshold", "200");
+        propA.put("limit", "10");
+        DataRule ruleA = new DataRule();
+        ruleA.setName("RuleA");
+        ruleA.setEnabled(true);
+        ruleA.setProperties(propA);
+        dataRules.add(ruleA);
+
+        Map<String, String> propB = new HashMap<>();
+        propB.put("Battr", "200");
+        propB.put("Battr2", "10");
+        DataRule ruleB = new DataRule();
+        ruleB.setName("RuleB");
+        // confirm that rule enablement does not impact review configuration
+        ruleB.setEnabled(false);
+        ruleB.setProperties(propB);
+        dataRules.add(ruleB);
+
+        DataRule ruleC = new DataRule();
+        ruleC.setName("RuleC");
+        ruleC.setEnabled(true);
+        dataRules.add(ruleC);
+
+        String pipelineProps = modelingService.getReviewPipelineProps(dataRules);
+        assertEquals(pipelineProps, "rulea.limit=10 rulea.threshold=200 ruleb.Battr2=10 ruleb.Battr=200");
+    }
+
 }

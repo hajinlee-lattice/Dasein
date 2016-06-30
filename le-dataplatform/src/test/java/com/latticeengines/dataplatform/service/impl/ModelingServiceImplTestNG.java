@@ -39,7 +39,7 @@ import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
@@ -183,7 +183,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "profileData" })
     public void reviewData() throws Exception {
-        DataReviewConfiguration config = new DataReviewConfiguration();
+        ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());

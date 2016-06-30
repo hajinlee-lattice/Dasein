@@ -172,6 +172,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 .table(eventTable.getName()) //
                 .modelProxy(modelProxy) //
                 .jobProxy(jobProxy) //
+                .dataRules(modelStepConfiguration.getDataRules()) //
                 .productType(modelStepConfiguration.getProductType());
 
         return bldr;

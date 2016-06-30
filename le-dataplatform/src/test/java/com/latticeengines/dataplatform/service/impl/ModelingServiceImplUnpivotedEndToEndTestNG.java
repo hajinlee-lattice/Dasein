@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.modeling.DataReviewConfiguration;
+import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
@@ -236,7 +236,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
     public void reviewData() throws Exception {
-        DataReviewConfiguration config = new DataReviewConfiguration();
+        ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());

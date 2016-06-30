@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -7,6 +8,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -154,7 +156,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used.
-         * 
+         *
          * @param customizedColumnSelection
          * @return
          */
@@ -167,7 +169,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         * 
+         *
          * @param predefinedColumnSelection
          * @return
          */
@@ -215,6 +217,16 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             model.setRunTimeParams(runTimeParams);
+            return this;
+        }
+
+        public Builder dataRules(List<DataRule> dataRules) {
+            model.setDataRules(dataRules);
+            return this;
+        }
+
+        public Builder isDefaultDataRules(boolean isDefaultDataRules) {
+            model.setDefaultDataRuleConfiguration(isDefaultDataRules);
             return this;
         }
 

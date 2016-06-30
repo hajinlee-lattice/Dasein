@@ -42,18 +42,6 @@ class RemediateDataRulesStep(PipelineStep):
 
 
     def transform(self, dataFrame, configMetadata, test):
-        columnsToRemove = set()
-        for filename in glob.glob(os.path.join("./", "*ColumnRule.avro")):
-            columnsToRemove.update(self.getItemsToRemove(filename))
-
-        if columnsToRemove:
-            logger.info("Removing columns %s" % columnsToRemove)
-            logger.info('Number of columns before rule remediation: %d' % len(dataFrame.columns))
-            super(RemediateDataRulesStep, self).removeColumns(dataFrame, columnsToRemove)
-            logger.info('Number of columns after rule remediation: %d' % len(dataFrame.columns))
-        else:
-            logger.info("No columns to remove")
-
         idColumn = None
         if 'Id' in dataFrame.columns:
             idColumn = 'Id'

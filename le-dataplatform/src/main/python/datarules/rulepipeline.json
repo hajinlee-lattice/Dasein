@@ -1,6 +1,6 @@
 {
   "columnTransformFiles": {
-    "CountUniqueValue": {
+    "CountUniqueValueRule": {
       "KeyWhenSortingByAscending": "4",
       "Name": "countuniquevaluerule",
       "MainClassName": "CountUniqueValueRule",

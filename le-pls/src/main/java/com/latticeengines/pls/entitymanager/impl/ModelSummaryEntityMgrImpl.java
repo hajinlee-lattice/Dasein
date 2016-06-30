@@ -458,4 +458,5 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
         return missingNameList;
     }
+
 }
