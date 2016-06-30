@@ -43,7 +43,6 @@ public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<R
                         if (tags.get(0).equals(Tag.EXTERNAL.toString())) {
                             attr.setApprovedUsage(userRefinedAttribute.getApprovedUsage());
                         } else {
-                            attr.setDisplayName(userRefinedAttribute.getDisplayName());
                             AttributeUtils.copyPropertiesFromAttribute(userRefinedAttribute, attr, false);
                         }
                     } else {
