@@ -81,7 +81,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testFetchModelArtifacts() throws IOException {
         request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
@@ -93,7 +93,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         overwritePredifinedSelection();
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
     public void testCheckForMissingFields() throws IOException {
         originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
                 uniqueFieldSchemasMap, request);
@@ -118,7 +118,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         }
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testCheckForMissingFields" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testCheckForMissingFields" })
     public void testExtractParsedList() {
         partiallyOrderedParsedTupleList = new ArrayList<>();
         partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
@@ -127,7 +127,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testExtractParsedList" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractParsedList" })
     public void testExtractModelSummaries() {
         originalOrderModelSummaryList = scoreRequestProcessorImpl.extractModelSummaries(originalOrderParsedTupleList,
                 uniqueScoringArtifactsMap);
@@ -135,7 +135,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderModelSummaryList.size());
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
     public void testBulkMatchAndJoin() {
         unorderedMatchedRecordMap = simulateBulkMatchAndJoin();
         Assert.assertNotNull(unorderedMatchedRecordMap);
@@ -153,7 +153,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         return matchedData;
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testBulkMatchAndJoin" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testBulkMatchAndJoin" })
     public void testAddMissingFields() {
         scoreRequestProcessorImpl.addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap,
                 originalOrderParsedTupleList);
@@ -163,7 +163,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedCombinedRecordMap.size());
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testAddMissingFields" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testAddMissingFields" })
     public void testTransform() {
         unorderedTransformedRecords = scoreRequestProcessorImpl.transform(uniqueScoringArtifactsMap,
                 unorderedCombinedRecordMap, originalOrderParsedTupleList);
@@ -172,7 +172,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedTransformedRecords.size());
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testTransform" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testTransform" })
     public void testGenerateDebugScoreResponse() {
         List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl.generateDebugScoreResponse(
                 uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
@@ -184,7 +184,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
     public void testGenerateScoreResponse() {
         List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl.generateScoreResponse(
                 uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
@@ -194,11 +194,6 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
         checkScoreResultList(recordScoreResponseList, false);
     }
-
-    // @Override
-    // protected boolean shouldRunScoringTest() {
-    // return false;
-    // }
 
     private void checkScoreResultList(List<RecordScoreResponse> recordScoreResponseList, boolean isDebug) {
         for (RecordScoreResponse recordScoreResponse : recordScoreResponseList) {
