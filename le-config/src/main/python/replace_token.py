@@ -26,6 +26,8 @@ def replace(dir, profile):
                             value = value.replace('${%s}' % k, v).replace('\n', '').strip()
                         print 'Setting %s to %s' % (key.strip(), value)
                         new_file.write('%s=%s\n' % (key.strip(), value))
+                    else:
+                        new_file.write(line)
         os.rename(f + NEW_SUFFIX, f)
 
 def load_tokens(profile):
