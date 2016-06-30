@@ -1,10 +1,14 @@
 package com.latticeengines.dellebi.dataprocess;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dellebi.flowdef.DailyFlow;
@@ -12,6 +16,8 @@ import com.latticeengines.dellebi.functionalframework.DellEbiTestNGBase;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+
+import java.io.File;
 
 public class LocalFileTestNG extends DellEbiTestNGBase {
 
@@ -29,6 +35,13 @@ public class LocalFileTestNG extends DellEbiTestNGBase {
 
     @Autowired
     private ExportAndReportService exportAndReportService;
+
+    @BeforeMethod(groups = "manual")
+    public void setUpBeforeMethod() throws Exception {
+
+        Configuration configuration = new Configuration();
+        HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
+    }
 
     @Test(groups = "manual")
     public void process() {

@@ -121,7 +121,8 @@ public abstract class BaseFileFlowService implements FileFlowService {
         String typeName = getFileType(zipFileName);
         String headers = dellEbiConfigEntityMgr.getHeaders(typeName);
         while (entry != null) {
-            txtFileName = entry.getName();
+            //Set the txt file name as replacing zip with txt instead of using decompressed file name. txtFileName = entry.getName();
+            txtFileName = zipFileName.replace("zip", "txt");
             String txtFilePath = txtDir + "/" + txtFileName;
             if (!entry.isDirectory()) {
                 FSDataOutputStream os = fs.create(new Path(txtFilePath));
