@@ -40,8 +40,6 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     @Autowired
     private MatchClientRoutingDataSource dataSource;
 
-    private String tag;
-
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
     private void beforeMethod() {
@@ -260,13 +258,4 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         list.toArray(obj);
         return obj;
     }
-
-    private void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    private String getTag() {
-        return this.tag;
-    }
-
 }
