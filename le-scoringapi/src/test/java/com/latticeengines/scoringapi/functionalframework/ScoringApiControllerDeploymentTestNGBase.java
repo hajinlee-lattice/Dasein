@@ -96,29 +96,38 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
-        userEntityMgr = applicationContext.getBean(OAuthUserEntityMgr.class);
-        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
-        oAuthUser = getOAuthUser(TENANT_ID);
+        if (shouldInit()) {
+            userEntityMgr = applicationContext.getBean(OAuthUserEntityMgr.class);
+            oAuthUser = getOAuthUser(TENANT_ID);
 
-        if (shouldUseAppId()) {
-            System.out.println("Requesting access token for appi id: " + getAppIdForOauth2());
-            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, CLIENT_ID_LP,
-                    getAppIdForOauth2(), authHostPort);
-        } else {
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
-                    oAuthUser.getPassword(), CLIENT_ID_LP);
+            if (shouldUseAppId()) {
+                System.out.println("Requesting access token for appi id: " + getAppIdForOauth2());
+                oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, CLIENT_ID_LP,
+                        getAppIdForOauth2(), authHostPort);
+            } else {
+                oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
+                        oAuthUser.getPassword(), CLIENT_ID_LP);
+            }
+            OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+            log.info(accessToken.getValue());
+
+            System.out.println(accessToken.getValue());
         }
-        OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
-        log.info(accessToken.getValue());
 
-        System.out.println(accessToken.getValue());
+        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
     }
 
+    protected boolean shouldInit() {
+        return true;
+    }
+
     @AfterClass(groups = "deployment")
     public void afterClass() {
-        userEntityMgr.delete(oAuthUser.getUserId());
+        if (userEntityMgr != null) {
+            userEntityMgr.delete(oAuthUser.getUserId());
+        }
     }
 
     protected OAuthUser getOAuthUser(String userId) {
@@ -261,8 +270,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             if (modelName.startsWith(modelNamePrefix)) {
                 String displayName = field.getDisplayName();
                 Assert.assertNotNull(displayName);
-                // Assert.assertEquals(displayName, fieldDisplayNamePrefix +
-                // field.getFieldName());
             }
         }
     }
