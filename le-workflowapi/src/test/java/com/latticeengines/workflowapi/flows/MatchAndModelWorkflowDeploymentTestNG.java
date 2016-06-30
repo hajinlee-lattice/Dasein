@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,8 +111,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
 
-        log.info("wait 30 sec for model to be downloaded.");
-        Thread.sleep(30000L);
+        log.info("wait 60 sec for model to be downloaded.");
+        Thread.sleep(60000L);
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
             if (field.getColumnName().equals(InterfaceName.Website.name())) {
