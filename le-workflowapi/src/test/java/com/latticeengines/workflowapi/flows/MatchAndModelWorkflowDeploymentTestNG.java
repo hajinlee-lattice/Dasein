@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +45,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(MatchAndModelWorkflowDeploymentTestNG.class);
 
     protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
@@ -110,9 +111,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     public void modelAccountData() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
+        internalResourceProxy.createModelSummary(summary, DEMO_CUSTOMERSPACE);
 
-        log.info("wait 60 sec for model to be downloaded.");
-        Thread.sleep(60000L);
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
             if (field.getColumnName().equals(InterfaceName.Website.name())) {
