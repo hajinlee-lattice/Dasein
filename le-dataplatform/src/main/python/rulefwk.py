@@ -147,6 +147,22 @@ def getRowSchema():
     }"""
     return schema.parse(ruleSchema)
 
+class RuleResults(object):
+
+    def __init__(self, ruleIsPassed, mesg, pardict):
+        self.ruleIsPassed = ruleIsPassed
+        self.mesg = mesg
+        self.pardict = pardict
+
+    def isPassed(self):
+        return self.ruleIsPassed
+
+    def getMessage(self):
+        return self.mesg
+
+    def getParDict(self):
+        return self.pardict
+
 class DataRule(PipelineStep):
 
     def __init__(self, props):
@@ -158,6 +174,14 @@ class DataRule(PipelineStep):
 
     @abstractmethod
     def getDescription(self):
+        return
+
+    @abstractmethod
+    def getConfParameters(self):
+        return
+
+    @abstractmethod
+    def getResults(self):
         return
 
 class RowRule(DataRule):
