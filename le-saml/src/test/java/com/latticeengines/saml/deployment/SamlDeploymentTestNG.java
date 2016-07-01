@@ -1,4 +1,4 @@
-package com.latticeengines.saml;
+package com.latticeengines.saml.deployment;
 
 import java.io.UnsupportedEncodingException;
 
@@ -8,7 +8,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testng.annotations.Test;
 
-import com.latticeengines.saml.functionalframework.SamlDeploymentTestNGBase;
 import com.latticeengines.saml.util.SAMLUtils;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
-                     entityID="http://www.okta.com/exk6g63nlfTEMP8VC0h7">
+                     entityID="http://testidp.lattice-engines.com">
     <md:IDPSSODescriptor WantAuthnRequestsSigned="true"
                          protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <md:KeyDescriptor use="signing">

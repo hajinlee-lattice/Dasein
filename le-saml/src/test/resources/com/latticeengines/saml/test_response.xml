@@ -3,7 +3,7 @@
                  Destination="http://localhost:8080/saml/SSO/alias/LETest1467295626183.LETest1467295626183.Production"
                  ID="id10241193629439846699440553" IssueInstant="2016-06-30T14:14:26.686Z" Version="2.0">
     <saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
-                  Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">http://www.okta.com/exk6g63nlfTEMP8VC0h7
+                  Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">http://testidp.lattice-engines.com
     </saml2:Issuer>
     <saml2p:Status xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol">
         <saml2p:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
@@ -11,10 +11,10 @@
     <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="id102411936294834421881197395"
                      IssueInstant="2016-06-30T14:14:26.686Z" Version="2.0">
         <saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity"
-                      xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">http://www.okta.com/exk6g63nlfTEMP8VC0h7
+                      xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">http://testidp.lattice-engines.com
         </saml2:Issuer>
         <saml2:Subject xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
-            <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">bross@lattice-engines.com
+            <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">test@lattice-engines.com
             </saml2:NameID>
             <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
                 <saml2:SubjectConfirmationData NotOnOrAfter="2016-06-30T14:19:26.686Z"

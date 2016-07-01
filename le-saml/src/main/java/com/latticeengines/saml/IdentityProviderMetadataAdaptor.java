@@ -27,7 +27,7 @@ public class IdentityProviderMetadataAdaptor extends ExtendedMetadataDelegate {
                 try (InputStream is = new ByteArrayInputStream(underlying.getMetadata().getBytes("UTF-8"))) {
                     return unmarshallMetadata(is);
                 } catch (Exception e) {
-                    throw new RuntimeException("Failure creating IdentityProvider", e);
+                    throw new MetadataProviderException("Failure creating IdentityProvider", e);
                 }
             }
         };
