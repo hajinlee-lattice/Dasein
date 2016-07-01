@@ -3,7 +3,7 @@ services:
   zk:
     image: latticeengines/zookeeper
     ports:
-      - "2181:2181"
+      - "2080:2181"
     environment:
       ZK_CLUSTER_SIZE: 1
   bkr:
