@@ -38,7 +38,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
 public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -55,9 +54,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
-    
-    @Autowired
-    private TenantService tenantService;
 
     private static final String localPathBase = ClassLoader.getSystemResource(
             "com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
@@ -88,8 +84,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                         .toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
-        tenantService.discardTenant(tenant1);
-        tenantService.discardTenant(tenant2);
     }
 
     private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
@@ -108,7 +102,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Extract extract = trainingTable.getExtracts().get(0);
         extract.setPath(PathBuilder
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-                .append("SourceFile_Account_csv").append("Extracts").append("2016-03-31-18-26-19").toString()
+                .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19").toString()
                 + "/*.avro");
         trainingTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
         metadataProxy.createTable(tenant1.getId(), trainingTable.getName(), trainingTable);
@@ -133,7 +127,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 yarnConfiguration, //
                 localPathBase + "/data/AccountModel/Samples/allTest-r-00000.avro", //
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-                        .append("SourceFile_Account_csv").append("Extracts").append("2016-03-31-18-26-19")
+                        .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19")
                         .append("part1.avro").toString());
     }
 

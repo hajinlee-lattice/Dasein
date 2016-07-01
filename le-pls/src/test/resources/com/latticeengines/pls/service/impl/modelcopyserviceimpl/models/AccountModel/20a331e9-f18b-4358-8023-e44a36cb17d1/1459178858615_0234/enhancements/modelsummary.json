@@ -18879,7 +18879,7 @@
     "BottomSample": [], 
     "EventTableProvenance": {
         "EventTableName": "AccountModel",
-        "TrainingTableName": "SourceFile_Account_csv",
+        "TrainingTableName": "SourceFile_Account_copy_csv",
         "SourceSchemaInterpretation": "SalesforceAccount"
     }
 }

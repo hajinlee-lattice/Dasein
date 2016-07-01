@@ -1,5 +1,5 @@
 {
-  "name": "SourceFile_Account_csv",
+  "name": "SourceFile_Account_copy_csv",
   "attributes": [
     {
       "name": "Id",
@@ -495,7 +495,7 @@
   "extracts": [
     {
       "name": "*.avro",
-      "path": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19/*.avro",
+      "path": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_copy_csv/Extracts/2016-03-31-18-26-19/*.avro",
       "extraction_ts": 1459463179000,
       "processed_records": 0
     }
@@ -520,5 +520,5 @@
     "last_modified_ts": 1459463181708
   },
   "marked_for_purge": true,
-  "extracts_directory": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_csv/Extracts/2016-03-31-18-26-19"
+  "extracts_directory": "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/File/SourceFile_Account_copy_csv/Extracts/2016-03-31-18-26-19"
 }
