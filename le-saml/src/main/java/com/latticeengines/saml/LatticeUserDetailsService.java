@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
@@ -44,7 +43,8 @@ public class LatticeUserDetailsService implements SAMLUserDetailsService {
             }
         }, null);
         if (match == null) {
-            throw new AccessDeniedException(String.format("IdP %s cannot be used", samlCredential.getRemoteEntityID()));
+            throw new UsernameNotFoundException(String.format("IdP %s cannot be used",
+                    samlCredential.getRemoteEntityID()));
         }
 
         User user = userService.findByEmail(samlCredential.getNameID().getValue());
@@ -55,7 +55,7 @@ public class LatticeUserDetailsService implements SAMLUserDetailsService {
 
         AccessLevel level = userService.getAccessLevel(tenantId, user.getUsername());
         if (level == null) {
-            throw new AccessDeniedException("Unauthorized");
+            throw new UsernameNotFoundException("Unauthorized");
         }
 
         return user;

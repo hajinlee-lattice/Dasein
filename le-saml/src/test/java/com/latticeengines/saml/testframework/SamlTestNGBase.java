@@ -22,12 +22,11 @@ public abstract class SamlTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected void setupTenant() {
         // Create test tenant
-        globalAuthFunctionalTestBed.bootstrap(1);
+        globalAuthFunctionalTestBed.bootstrap(2);
         MultiTenantContext.setTenant(globalAuthFunctionalTestBed.getMainTestTenant());
 
         // Create test user
         globalAuthFunctionalTestBed.switchToInternalAdmin();
-
     }
 
 }

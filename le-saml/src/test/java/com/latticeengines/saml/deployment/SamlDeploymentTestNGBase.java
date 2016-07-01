@@ -2,6 +2,7 @@ package com.latticeengines.saml.deployment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
@@ -17,12 +18,15 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
+import org.opensaml.xml.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
@@ -42,7 +46,7 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
     private GlobalAuthTenantEntityMgr globalAuthTenantEntityMgr;
 
     @Autowired
-    private IdentityProviderService identityProviderService;
+    protected IdentityProviderService identityProviderService;
 
     @Autowired
     protected ParserPool parserPool;
@@ -53,7 +57,7 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
     @Value("${saml.base.address}")
     private String baseUrl;
 
-    private IdentityProvider identityProvider;
+    protected IdentityProvider identityProvider;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws InterruptedException {
@@ -66,7 +70,7 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
         Thread.sleep(10000);
     }
 
-    protected Response getTestSAMLResponse() {
+    protected Response getTestSAMLResponse(IdentityProvider idp) {
         try (InputStream stream = getClass().getResourceAsStream(RESOURCE_BASE + "test_response.xml")) {
             Response response = (Response) SAMLUtils.deserialize(parserPool, stream);
             response.setIssueInstant(DateTime.now());
@@ -84,15 +88,20 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
                     SAMLUtils.getEntityIdFromTenantId(globalAuthFunctionalTestBed.getMainTestTenant().getId()));
             assertion.getSubject().getNameID()
                     .setValue(globalAuthFunctionalTestBed.getCurrentUser().getResult().getUser().getEmailAddress());
-            signResponse(response);
+            setResponseIssuedBy(response, idp);
             return response;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void signResponse(Response response) {
-        Signature signature = getTestingIdPSignature();
+    protected void setResponseIssuedBy(Response response, IdentityProvider identityProvider) {
+        response.getIssuer().setValue(identityProvider.getEntityId());
+        response.getAssertions().get(0).getIssuer().setValue(identityProvider.getEntityId());
+    }
+
+    protected void signResponse(Response response) {
+        Signature signature = getIdPSignature();
         response.setSignature(signature);
         try {
             Configuration.getMarshallerFactory().getMarshaller(response).marshall(response);
@@ -102,7 +111,7 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
         }
     }
 
-    private Signature getTestingIdPSignature() {
+    private Signature getIdPSignature() {
         Signature signature = new SignatureBuilder().buildObject();
         Credential credential = keyManager.getCredential("testidp");
 
@@ -130,20 +139,32 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
         return restTemplate;
     }
 
-    private IdentityProvider constructIdp() {
+    protected IdentityProvider constructIdp() {
         IdentityProvider idp = new IdentityProvider();
-        idp.setEntityId("http://testidp.lattice-engines.com");
-        String metadata = generateMetadata();
+        idp.setEntityId("http://testidp.lattice-engines.com/" + UUID.randomUUID().toString());
+        String metadata = generateMetadata(idp.getEntityId());
         idp.setMetadata(metadata);
         return idp;
     }
 
-    private String generateMetadata() {
+    protected String generateMetadata(String entityId) {
         try (InputStream stream = getClass().getResourceAsStream(RESOURCE_BASE + "idp_metadata.xml")) {
             EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool, stream);
+            descriptor.setEntityID(entityId);
             return SAMLUtils.serialize(descriptor);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    protected void sendSamlResponse(Response response) {
+        signResponse(response);
+        String xml = SAMLUtils.serialize(response);
+        String encoded = Base64.encodeBytes(xml.getBytes());
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("SAMLResponse", encoded);
+        String url = getSSOEndpointUrl();
+        getSamlRestTemplate().postForObject(url, map, Void.class);
+    }
+
 }
