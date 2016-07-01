@@ -1,7 +1,6 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
-import com.latticeengines.datafabric.util.RedisIndex;
-
+import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 import javax.persistence.Entity;

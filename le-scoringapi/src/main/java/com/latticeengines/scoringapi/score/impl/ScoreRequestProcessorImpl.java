@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
+import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
 import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
@@ -78,6 +79,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     @Autowired
     private List<ModelJsonTypeHandler> modelJsonTypeHandlers;
+
+    @Autowired
+    private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
 
     private DateTimeFormatter timestampFormatter = ISODateTimeFormat.dateTime();
 
@@ -140,6 +144,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+        scoreHistoryEntityMgr.publish(request, scoreResponse);
         split("scoreRecord");
 
         return scoreResponse;
@@ -212,6 +217,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             scoreResponse = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
                     originalOrderParsedTupleList);
         }
+
+        scoreHistoryEntityMgr.publish(request.getRecords(),  scoreResponse);
+
         split("scoreRecord");
         if (log.isInfoEnabled()) {
             log.info("Processed bulk score request for " + request.getRecords().size() + " records");

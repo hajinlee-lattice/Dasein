@@ -32,21 +32,21 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
+import redis.clients.util.Pool;
 
 public class RedisDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(RedisDataStoreImpl.class);
 
-    private JedisPool jedisPool;
+    private Pool<Jedis> jedisPool;
 
     private String repository;
     private String recordType;
     private Schema schema;
 
     private final String REPO = "_REPO_";
-    private final String RECORD = "_REPO_";
+    private final String RECORD = "_RECORD_";
     private final String KEY = "_KEY_";
     private final String INDEX = "_INDEX_";
     private final String INDEXKEY = "_INDEXKEY";
@@ -55,23 +55,29 @@ public class RedisDataStoreImpl implements FabricDataStore {
 
     private Map<String, List<String>> indexes = null;
 
-    public RedisDataStoreImpl(JedisPool jedisPool, String repository, String recordType, Schema schema) {
+    public RedisDataStoreImpl(Pool<Jedis> jedisPool, String repository, String recordType, Schema schema) {
+
         this.jedisPool = jedisPool;
         this.repository = repository;
         this.recordType = recordType;
         this.schema = schema;
+        this.indexes = null;
 
         Jedis jedis = jedisPool.getResource();
         String redisIndex = schema.getProp(RedisUtil.INDEX);
         if (redisIndex == null) {
             redisIndex = jedis.get(buildIndexKey());
-            schema.addProp(RedisUtil.INDEX, redisIndex);
+            if (redisIndex != null)
+                schema.addProp(RedisUtil.INDEX, redisIndex);
         } else {
             jedis.set(buildIndexKey(), redisIndex);
         }
+
         jedisPool.returnResource(jedis);
 
-        this.indexes = RedisUtil.getIndex(schema);
+        if (redisIndex != null) {
+            this.indexes = RedisUtil.getIndex(redisIndex);
+        }
         log.info("Constructed redis data store repo " + repository + " record " + recordType +
                  " index " + redisIndex);
     }
@@ -230,4 +236,5 @@ public class RedisDataStoreImpl implements FabricDataStore {
         }
         return builder.toString();
     }
+
 }

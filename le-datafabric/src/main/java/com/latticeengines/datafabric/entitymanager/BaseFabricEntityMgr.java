@@ -21,6 +21,8 @@ public interface BaseFabricEntityMgr<T> {
 
     void removeConsumer(String processorName, int waitTime);
 
+    boolean isDisabled();
+
 }
 
 

@@ -9,6 +9,7 @@
 
     <import resource="classpath:scoringapi-properties-context.xml" />
     <import resource="classpath:scoringapi-yarn-config-context.xml" />
+    <import resource="classpath:datafabric-context.xml" />
     <import resource="classpath:proxy-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />

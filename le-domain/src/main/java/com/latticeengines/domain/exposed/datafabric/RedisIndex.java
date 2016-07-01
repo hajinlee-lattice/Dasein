@@ -1,4 +1,4 @@
-package com.latticeengines.datafabric.util;
+package com.latticeengines.domain.exposed.datafabric;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

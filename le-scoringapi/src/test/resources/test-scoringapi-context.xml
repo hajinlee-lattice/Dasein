@@ -15,6 +15,7 @@
     <!--import resource="classpath:test-scoringapi-properties-context.xml" />
     <import resource="classpath:test-scoringapi-yarn-config-context.xml" />
     <import resource="classpath:proxy-context.xml" />
+    <import resource="classpath:datafabric-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:oauth2db-persistence-context.xml" />

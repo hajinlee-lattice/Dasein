@@ -169,7 +169,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
 
     private void buildKeySchema() {
          try {
-//             File keyFile = new File(getClass().getClassLoader().getResource("MessageKey.avsc").getFile());
              InputStream is = Thread.currentThread().getContextClassLoader()
                                .getResourceAsStream("avro/MessageKey.avsc");
              Schema.Parser parser = new Schema.Parser();

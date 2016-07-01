@@ -31,6 +31,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
+                <datafabric.properties.path>../le-datafabric/conf/env/buildmachine</datafabric.properties.path>
                 <scoringapi.properties.path>conf/env/buildmachine</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/buildmachine</oauth2db.properties.path>
             </properties>
@@ -47,6 +48,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/development</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/development</proxy.properties.path>
+                <datafabric.properties.path>../le-datafabric/conf/env/development</datafabric.properties.path>
                 <scoringapi.properties.path>conf/env/development</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/development</oauth2db.properties.path>
             </properties>
@@ -62,6 +64,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
+                <datafabric.properties.path>../le-datafabric/conf/env/qacluster</datafabric.properties.path>
                 <scoringapi.properties.path>conf/env/qacluster</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/qacluster</oauth2db.properties.path>
             </properties>
@@ -77,6 +80,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
+                <datafabric.properties.path>../le-datafabric/conf/env/prodcluster</datafabric.properties.path>
                 <scoringapi.properties.path>conf/env/prodcluster</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/prodcluster</oauth2db.properties.path>
             </properties>
@@ -117,6 +121,9 @@
                                 </source>
                                 <source>
                                     <location>${scoringapi.properties.path}/scoringapi.properties</location>
+                                </source>
+                                <source>
+                                    <location>${datafabric.properties.path}/datafabric.properties</location>
                                 </source>
                                 <source>
                                     <location>${proxy.properties.path}/proxy.properties</location>

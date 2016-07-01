@@ -28,6 +28,18 @@ public class RedisSinkConnectorConfig extends AbstractConfig {
     public static final int REDIS_PORT_DEFAULT = 6379;
     private static final String REDIS_PORT_DISPLAY = "Redis port";
 
+    public static final String REDIS_HA_CONFIG = "redis.ha";
+    private static final String REDIS_HA_DOC =
+        "Is Ha enabled for redis cluster";
+    public static final boolean REDIS_HA_DEFAULT = false;
+    private static final String REDIS_HA_DISPLAY = "Redis HA Enabled";
+
+    public static final String REDIS_MASTER_CONFIG = "redis.master";
+    private static final String REDIS_MASTER_DOC =
+        "Master node of  redis cluster";
+    public static final String REDIS_MASTER_DEFAULT = "mymaster";
+    private static final String REDIS_MASTER_DISPLAY = "Redis cluster master";
+
     public static final String REDIS_REPO_CONFIG = "redis.repo";
     private static final String REDIS_REPO_DOC =
         "The repository inside Redis data store";
@@ -79,6 +91,8 @@ public class RedisSinkConnectorConfig extends AbstractConfig {
         // Define Redis configuration group.
         config.define(REDIS_SERVERS_CONFIG, Type.STRING, REDIS_SERVERS_DEFAULT, Importance.HIGH, REDIS_SERVERS_DOC, REDIS_GROUP, 2, Width.MEDIUM, REDIS_SERVERS_DISPLAY)
               .define(REDIS_PORT_CONFIG, Type.INT, REDIS_PORT_DEFAULT, Importance.HIGH, REDIS_PORT_DOC, REDIS_GROUP, 4, Width.SHORT, REDIS_PORT_DISPLAY)
+              .define(REDIS_HA_CONFIG, Type.BOOLEAN, REDIS_HA_DEFAULT, Importance.HIGH, REDIS_HA_DOC, REDIS_GROUP, 4, Width.SHORT, REDIS_HA_DISPLAY)
+              .define(REDIS_MASTER_CONFIG, Type.STRING, REDIS_MASTER_DEFAULT, Importance.HIGH, REDIS_MASTER_DOC, REDIS_GROUP, 4, Width.SHORT, REDIS_MASTER_DISPLAY)
               .define(REDIS_REPO_CONFIG, Type.STRING, REDIS_REPO_DEFAULT, Importance.HIGH, REDIS_REPO_DOC, REDIS_GROUP, 4, Width.SHORT, REDIS_REPO_DISPLAY)
               .define(REDIS_RECORD_CONFIG, Type.STRING, REDIS_RECORD_DEFAULT, Importance.HIGH, REDIS_RECORD_DOC, REDIS_GROUP, 4, Width.SHORT, REDIS_RECORD_DISPLAY);
 

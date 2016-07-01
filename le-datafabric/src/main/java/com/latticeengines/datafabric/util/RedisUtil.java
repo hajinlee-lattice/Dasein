@@ -1,6 +1,7 @@
 package com.latticeengines.datafabric.util;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

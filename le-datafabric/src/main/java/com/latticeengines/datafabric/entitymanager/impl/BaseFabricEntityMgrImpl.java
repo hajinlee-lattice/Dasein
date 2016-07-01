@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value; 
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
 
@@ -50,6 +51,9 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Autowired
     private FabricDataService dataService;
+
+    @Value("${datafabric.disabled:false}")
+    private boolean disabled;
 
     private String store;
 
@@ -79,8 +83,20 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         this.topic = builder.topic;
         this.sharedTopic = builder.sharedTopic;
+        this.disabled = false;
         if (builder.messageService != null) this.messageService = builder.messageService;
         if (builder.dataService != null) this.dataService = builder.dataService;
+    }
+
+    @PostConstruct
+    public void init() {
+
+        log.info("Initing Datafabric " + topic);
+
+        if (disabled) {
+            log.info("Datafabric disabled");
+            return;
+        }
 
         entityClass = getTypeParameterClass();
         // get the reflected schema for Entity
@@ -100,28 +116,33 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void create(T entity) {
+        if (disabled) return;
         GenericRecord record = entityToRecord(entity);
         dataStore.createRecord(entity.getId(), record);
     }
 
     @Override
     public void update(T entity) {
+        if (disabled) return;
         GenericRecord record = entityToRecord(entity);
         dataStore.updateRecord(entity.getId(), record);
     }
 
     @Override
     public void delete(T entity) {
+        if (disabled) return;
         GenericRecord record = entityToRecord(entity);
         dataStore.deleteRecord(entity.getId(), record);
     }
 
     public T findByKey(T entity) {
+        if (disabled) return null;
         GenericRecord record = dataStore.findRecord(entity.getId());
         return (record == null) ? null : recordToEntity(record);
     }
 
     public List<T> findByProperties(Map<String, String> properties) {
+        if (disabled) return null;
         List<GenericRecord> records = dataStore.findRecords(properties);
         List<T> entities = new ArrayList<T>();
         for (GenericRecord record : records) {
@@ -132,11 +153,18 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void publish(T entity) {
-        GenericRecord record = entityToRecord(entity);
-        producer.send(recordType, entity.getId(), record);
+        if (disabled || (entity == null)) return;
+        try {
+            GenericRecord record = entityToRecord(entity);
+            producer.send(recordType, entity.getId(), record);
+        } catch (Exception e) {
+            log.info("Publish entity failed " + recordType + " " + entity.getId());
+            log.info(e);
+        }
     }
 
     public void addConsumer(String consumerGroup, FabricEntityProcessor processor, int numThreads) {
+        if (disabled) return;
 
         FabricStreamProc streamProc = new BaseFabricEntityStreamProc(recordType, processor);
 
@@ -152,6 +180,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     public void removeConsumer(String consumerGroup, int timeWaits) {
+        if (disabled) return;
         FabricMessageConsumer consumer =  (FabricMessageConsumer)consumers.get(consumerGroup);
         if (consumer != null) {
             log.info("Remove consumer " + consumerGroup + " " + consumer + "\n");
@@ -160,6 +189,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
         consumer.stop(timeWaits);
         consumers.remove(consumerGroup);
+    }
+
+    public boolean isDisabled() {
+        return disabled;
     }
 
     private GenericRecord entityToRecord(T entity) {
@@ -178,7 +211,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             Decoder decoder = DecoderFactory.get().directBinaryDecoder(input, null);
             record = reader.read(null, decoder);
         } catch (Exception e) {
-            log.error("Failed to convert generic record to entity");
+            log.error("Failed to convert entity to generic record");
             log.error(e);
             return null;
         } finally {

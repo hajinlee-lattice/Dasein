@@ -56,10 +56,12 @@ public class RedisSinkTask extends SinkTask {
             avroData = new AvroData(schemaCacheSize);
             String servers = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_SERVERS_CONFIG);
             int port = connectorConfig.getInt(RedisSinkConnectorConfig.REDIS_PORT_CONFIG);
+            boolean haEnabled = connectorConfig.getBoolean(RedisSinkConnectorConfig.REDIS_HA_CONFIG);
+            String master = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_MASTER_CONFIG);
             repository = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_REPO_CONFIG);
             recordType = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_RECORD_CONFIG);
 
-            dataService = new FabricDataServiceImpl(servers, port, 4);
+            dataService = new FabricDataServiceImpl(master, servers, port, 4, haEnabled);
             dataService.init();
             dataStore = null;
 
@@ -87,6 +89,7 @@ public class RedisSinkTask extends SinkTask {
             for (SinkRecord record: records) {
                 Struct value = (Struct)record.value();
                 Struct key = (Struct)record.key();
+                if ((value == null) || (key == null)) continue;
                 GenericRecord valueRec = (GenericRecord)avroData.fromConnectData(value.schema(), value);
                 GenericRecord keyRec = (GenericRecord)avroData.fromConnectData(key.schema(), key);
                 String id = keyRec.get("id").toString();;

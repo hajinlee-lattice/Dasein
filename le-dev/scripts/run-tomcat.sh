@@ -9,6 +9,7 @@ export EAI_PROPDIR=$WSHOME/le-eai/conf/env/dev
 export METADATA_PROPDIR=$WSHOME/le-metadata/conf/env/dev
 export MICROSERVICE_PROPDIR=$WSHOME/le-microservice/core/conf/env/dev
 export DATAFLOWAPI_PROPDIR=$WSHOME/le-dataflowapi/conf/env/dev
+export DATAFABRIC_PROPDIR=$WSHOME/le-datafabric/conf/env/dev
 export PROPDATA_PROPDIR=$WSHOME/le-propdata/conf/env/dev
 export MONITOR_PROPDIR=$WSHOME/le-monitor/conf/env/dev
 export WORKFLOWAPI_PROPDIR=$WSHOME/le-workflowapi/conf/env/dev

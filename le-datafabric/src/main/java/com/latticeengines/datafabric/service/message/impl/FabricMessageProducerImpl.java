@@ -6,12 +6,16 @@ import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import java.util.concurrent.Future;
 import java.util.Properties;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FabricMessageProducerImpl implements FabricMessageProducer {
+
+    private static final Log log = LogFactory.getLog(FabricMessageProducerImpl.class);
 
     private String producerName;
 
@@ -60,6 +64,8 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
         GenericRecord key = messageService.buildKey(producerName, recordType, id);
 
         ProducerRecord<Object, Object> record = new ProducerRecord<Object, Object>(derivedTopic, key, value);
+
+        log.debug("Send Message to " + derivedTopic);
         return producer.send(record);
     }
 

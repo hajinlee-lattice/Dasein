@@ -1,6 +1,7 @@
 export ADMIN_PROPDIR=$WSHOME/le-admin/conf/env/dev
 export API_PROPDIR=$WSHOME/le-api/conf/env/dev
 export DATAPLATFORM_PROPDIR=$WSHOME/le-dataplatform/conf/env/dev
+export DATAFABRIC_PROPDIR=$WSHOME/le-datafabric/conf/env/dev
 export DB_PROPDIR=$WSHOME/le-db/conf/env/dev
 export SECURITY_PROPDIR=$WSHOME/le-security/conf/env/dev
 export EAI_PROPDIR=$WSHOME/le-eai/conf/env/dev

@@ -65,6 +65,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
                                                            recordType(recordType);
 
         entityManager = new SampleFabricEntityMgr(builder);
+        entityManager.init();
 
         processor = new SampleEntityProcessor();
         entityManager.addConsumer(group, processor, 1);
