@@ -67,6 +67,10 @@ pushd $WSHOME/le-propdata; mvn -DskipTests clean install; popd;
 bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
 processErrors
 
+echo "Rebuild admin war"
+pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
+processErrors
+
 echo "Success!!!"
 
 
