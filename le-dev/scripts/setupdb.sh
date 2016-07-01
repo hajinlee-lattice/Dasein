@@ -20,7 +20,7 @@ processErrors
 
 for project in 'db' 'dataplatform' 'propdata' 'scoring'
 do
-    echo "Deploying ${service} to local MySQL using ${cmd}" &&
+    echo "Deploying ${project} to local MySQL" &&
     pushd $WSHOME/le-$project &&
     mvn -DskipTests clean install 2> /tmp/errors.txt &&
     popd &&

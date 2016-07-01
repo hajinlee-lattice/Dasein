@@ -9,13 +9,14 @@ if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     # Remove alter table drop foreign key statements from the script
     sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
-    mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script
     sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
-    mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1) || 5.5
 fi
+
+
+mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5
 
 if version_gt ${mysql_version} ${threshold_version}; then
     echo "MySQL version $mysql_version is greater than $threshold_version, replacing DATA by DATA LOCAL"
