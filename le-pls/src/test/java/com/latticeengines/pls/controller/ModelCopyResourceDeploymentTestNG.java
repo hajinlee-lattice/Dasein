@@ -38,6 +38,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 
 public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -54,6 +55,9 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+    
+    @Autowired
+    private TenantService tenantService;
 
     private static final String localPathBase = ClassLoader.getSystemResource(
             "com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
@@ -84,6 +88,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                         .toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+        tenantService.discardTenant(tenant1);
+        tenantService.discardTenant(tenant2);
     }
 
     private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
@@ -134,7 +140,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testModelCopy() throws Exception {
         setupSecurityContext(tenant1);
-        modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17dd-testWork");
+        modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
         log.info("Wait for 10 seconds to download model summary");
         Thread.sleep(15000L);

@@ -54,7 +54,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
         ((ModelCopyServiceImpl) modelCopyService).processHdfsData(eloquaTenant.getId(), marketoTenant.getId(),
-                "ms__20a331e9-f18b-4358-8023-e44a36cb17dd-testWork", "AccountModel", "cpTrainingTable", "cpEventTable");
+                "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel", "cpTrainingTable", "cpEventTable");
         List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + marketoTenant.getId()
                 + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
 
