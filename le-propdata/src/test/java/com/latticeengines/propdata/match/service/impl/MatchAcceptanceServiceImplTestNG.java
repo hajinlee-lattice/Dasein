@@ -49,13 +49,14 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     @Test(groups = "acceptance", dataProvider = "matchDataProvider", threadPoolSize = 3)
     public void testMatch(String sourceTable, String destTables, String contractId, String tag) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match
-                                                                   // client for
-                                                                   // current
-                                                                   // thread.
+        // client for
+        // current
+        // thread.
 
         log.info("Match test with SourceTable=" + sourceTable + " DestTables=" + destTables + " ContractID="
                 + contractId + " Tag=" + tag);
-        MatchVerifier verifier = new sqlDataValidatorVerifier();
+        sqlDataValidatorVerifier verifier = new sqlDataValidatorVerifier();
+        verifier.setTag(tag);
         CreateCommandRequest request = new CreateCommandRequest();
         request.setContractExternalID(contractId);
         request.setDestTables(destTables);
@@ -63,7 +64,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
         Commands command = matchCommandsService.createMatchCommand(request);
 
         try {
-            verifier.verify(command.getPid(), request, tag);
+            verifier.verify(command.getPid(), request);
         } finally {
             verifier.cleanupResultTales(command.getPid(), request);
         }
@@ -79,16 +80,16 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     // Verifiers
     // ==================================================
     private interface MatchVerifier {
-        void verify(Long commandId, CreateCommandRequest request, String tag);
+        void verify(Long commandId, CreateCommandRequest request);
 
         void cleanupResultTales(Long commandId, CreateCommandRequest request);
     }
 
     private abstract class AbstractMatchVerifier implements MatchVerifier {
         @Override
-        public void verify(Long commandId, CreateCommandRequest request, String tag) {
+        public void verify(Long commandId, CreateCommandRequest request) {
             verifyCreateCommandRequest(commandId, request);
-            verifyResults(commandId, request, tag);
+            verifyResults(commandId, request);
         }
 
         @Override
@@ -106,16 +107,27 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
             }
         }
 
-        abstract void verifyResults(Long commandId, CreateCommandRequest request, String tag);
+        abstract void verifyResults(Long commandId, CreateCommandRequest request);
     }
 
     private class sqlDataValidatorVerifier extends AbstractMatchVerifier {
+        private String tag;
+
         @Override
-        public void verifyResults(Long commandId, CreateCommandRequest request, String tag) {
+        public void verifyResults(Long commandId, CreateCommandRequest request) {
             String destTables = request.getDestTables();
+            String tag = getTag();
             verifyResultTablesAreGenerated(commandId, 30);
 
             verifyResultByTypes(commandId, destTables, tag);
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+
+        public String getTag() {
+            return this.tag;
         }
     }
 
@@ -190,7 +202,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Boolean verifyResultsByRules(String testName, String targetTable, Long commandId, String processUID,
-            String tag) {
+                                         String tag) {
         Boolean isPassed;
         isPassed = executeVerifyResultsByRulesSP(testName, targetTable, commandId, processUID, tag);
 
@@ -202,7 +214,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Boolean executeVerifyResultsByRulesSP(final String testName, final String targetTable, final Long commandId,
-            final String rootUID, final String tag) {
+                                                  final String rootUID, final String tag) {
         List<SqlParameter> declaredParameters = new ArrayList<>();
 
         declaredParameters.add(new SqlParameter("testName", Types.VARCHAR));
