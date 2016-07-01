@@ -295,9 +295,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                     + userData.getPid().toString());
         }
 
-        String password = GlobalAuthPasswordUtils.GetSecureRandomString(16);
+        String password = GlobalAuthPasswordUtils.getSecureRandomString(16);
         latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
-                .EncryptPassword(GlobalAuthPasswordUtils.Hash256(password)));
+                .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
 
@@ -331,13 +331,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new Exception("Unable to find the credentials requested.");
         }
         if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils
-                .EncryptPassword(oldCreds.getPassword()))) {
+                .encryptPassword(oldCreds.getPassword()))) {
             throw new Exception("Old password is incorrect for password change.");
         }
         if (oldCreds.getPassword().equals(newCreds.getPassword())) {
             throw new Exception("The new password cannot be the same as the old password.");
         }
-        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils.EncryptPassword(newCreds
+        latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils.encryptPassword(newCreds
                 .getPassword()));
         latticeAuthenticationData.setMustChangePassword(false);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
@@ -374,9 +374,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new Exception("The specified user does not have an email address specified: "
                     + userData.getPid().toString());
         }
-        password = GlobalAuthPasswordUtils.GetSecureRandomString(16);
+        password = GlobalAuthPasswordUtils.getSecureRandomString(16);
         latticeAuthenticationData.setPassword(GlobalAuthPasswordUtils
-                .EncryptPassword(GlobalAuthPasswordUtils.Hash256(password)));
+                .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
         return password;

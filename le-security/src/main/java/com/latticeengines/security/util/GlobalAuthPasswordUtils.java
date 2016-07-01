@@ -19,7 +19,7 @@ public class GlobalAuthPasswordUtils {
 
     }
 
-    public static String EncryptPassword(String encryptThis) {
+    public static String encryptPassword(String encryptThis) {
         if (encryptThis == null || encryptThis.isEmpty())
             return "";
 
@@ -36,7 +36,7 @@ public class GlobalAuthPasswordUtils {
         }
     }
 
-    public static String GetSecureRandomString(int length) {
+    public static String getSecureRandomString(int length) {
         SecureRandom random = new SecureRandom();
         byte bytes[] = new byte[length];
         random.nextBytes(bytes);
@@ -46,7 +46,7 @@ public class GlobalAuthPasswordUtils {
         return randomStr;
     }
 
-    public static String Hash256(String input) {
+    public static String hash256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(input.getBytes());

@@ -21,6 +21,7 @@ import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -157,14 +158,15 @@ public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
         }
     }
 
-    protected void sendSamlResponse(Response response) {
+    protected ResponseEntity<Void> sendSamlResponse(Response response) {
         signResponse(response);
         String xml = SAMLUtils.serialize(response);
         String encoded = Base64.encodeBytes(xml.getBytes());
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("SAMLResponse", encoded);
         String url = getSSOEndpointUrl();
-        getSamlRestTemplate().postForObject(url, map, Void.class);
+        ResponseEntity<Void> httpResponse = getSamlRestTemplate().postForEntity(url, map, Void.class);
+        return httpResponse;
     }
 
 }

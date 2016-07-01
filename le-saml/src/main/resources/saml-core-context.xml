@@ -26,12 +26,13 @@
     <!-- Handler deciding where to redirect user after successful login -->
     <bean id="successRedirectHandler"
           class="com.latticeengines.saml.SuccessHandler">
-        <property name="defaultTargetUrl" value="/"/>
+        <property name="defaultTargetUrl" value="${saml.success.redirect.address}"/>
     </bean>
 
     <!-- Handler deciding where to redirect user after failed login -->
     <bean id="failureRedirectHandler"
           class="com.latticeengines.saml.FailureHandler">
+        <property name="defaultFailureUrl" value="${saml.failure.redirect.address}"/>
     </bean>
 
     <!-- Handler for successful logout -->

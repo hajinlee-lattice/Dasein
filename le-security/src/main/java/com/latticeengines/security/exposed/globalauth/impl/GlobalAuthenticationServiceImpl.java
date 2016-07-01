@@ -13,13 +13,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.entitymanager.GlobalAuthAuthenticationEntityMgr;
@@ -55,8 +55,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     private Ticket globalAuthAuthenticateUser(String username, String password) throws Exception {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(username);
         if (latticeAuthenticationData == null) {
             throw new Exception("The specified user doesn't exists");
         }
@@ -74,33 +73,36 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     private Ticket authenticate(String username, String password) {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(username);
         if (latticeAuthenticationData == null) {
             return null;
         }
-        if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils
-                .EncryptPassword(password))) {
+        if (!latticeAuthenticationData.getPassword().equals(GlobalAuthPasswordUtils.encryptPassword(password))) {
             return null;
         }
-        Date lastModifiedInUTC = latticeAuthenticationData.getLastModificationDate();
+
+        Ticket ticket = constructTicket(latticeAuthenticationData.getGlobalAuthUser());
+        ticket.setMustChangePassword(latticeAuthenticationData.getMustChangePassword());
+        ticket.setPasswordLastModified(latticeAuthenticationData.getLastModificationDate().getTime());
+        return ticket;
+    }
+
+    private Ticket constructTicket(GlobalAuthUser user) {
         Ticket ticket = new Ticket();
         ticket.setUniqueness(UUID.randomUUID().toString());
-        ticket.setRandomness(GlobalAuthPasswordUtils.GetSecureRandomString(16));
-        ticket.setMustChangePassword(latticeAuthenticationData.getMustChangePassword());
-        ticket.setPasswordLastModified(lastModifiedInUTC.getTime());
+        ticket.setRandomness(GlobalAuthPasswordUtils.getSecureRandomString(16));
         GlobalAuthTicket ticketData = new GlobalAuthTicket();
-        ticketData.setUserId(latticeAuthenticationData.getGlobalAuthUser().getPid());
+        ticketData.setUserId(user.getPid());
         ticketData.setTicket(ticket.getData());
         ticketData.setLastAccessDate(new Date(System.currentTimeMillis()));
-        GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
+        GlobalAuthUser userData = gaUserEntityMgr
+                .findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
         if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
             Map<String, GlobalAuthTenant> distinctTenants = new HashMap<String, GlobalAuthTenant>();
             for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
                 if (rightData.getGlobalAuthTenant() != null) {
                     if (!distinctTenants.containsKey(rightData.getGlobalAuthTenant().getId())) {
-                        distinctTenants.put(rightData.getGlobalAuthTenant().getId(),
-                                rightData.getGlobalAuthTenant());
+                        distinctTenants.put(rightData.getGlobalAuthTenant().getId(), rightData.getGlobalAuthTenant());
                     }
                 }
             }
@@ -115,6 +117,35 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         }
         gaTicketEntityMgr.create(ticketData);
         return ticket;
+    }
+
+    @Override
+    public synchronized Ticket externallyAuthenticated(String emailAddress) {
+        try {
+            log.info(String.format("Retrieving ticket for already authenticated user %s", emailAddress));
+            return globalAuthExternallyAuthenticated(emailAddress);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18001, new String[] { emailAddress });
+        }
+    }
+
+    private Ticket globalAuthExternallyAuthenticated(String emailAddress) throws Exception {
+        GlobalAuthUser user = gaUserEntityMgr.findByEmailJoinAuthentication(emailAddress);
+        if (user == null) {
+            throw new Exception("The specified user doesn't exists");
+        }
+
+        boolean isActive = user.getIsActive();
+        if (!isActive) {
+            throw new Exception("The user is inactive!");
+        }
+
+        Ticket ticket = constructTicket(user);
+        if (ticket != null) {
+            return ticket;
+        }
+
+        throw new Exception("The credentials provided for login are incorrect.");
     }
 
     @Override

@@ -1,20 +1,25 @@
 package com.latticeengines.saml.deployment;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
+
+    @Value("${saml.failure.redirect.address}")
+    private String errorPage;
 
     @Test(groups = "deployment")
     public void testIdPInitiatedAuth() throws UnsupportedEncodingException {
@@ -28,15 +33,7 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         Assertion assertion = response.getAssertions().get(0);
         assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
                 "invalidEntityId");
-        boolean thrown = false;
-        try {
-            sendSamlResponse(response);
-        } catch (HttpClientErrorException e) {
-            assertEquals(e.getStatusCode(), HttpStatus.UNAUTHORIZED);
-            thrown = true;
-        }
-
-        assertTrue(thrown);
+        assertRedirectedToErrorPage(sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
@@ -44,15 +41,7 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         Response response = getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
         assertion.getSubject().getNameID().setValue("unknown@lattice-engines.com");
-        boolean thrown = false;
-        try {
-            sendSamlResponse(response);
-        } catch (HttpClientErrorException e) {
-            assertEquals(e.getStatusCode(), HttpStatus.UNAUTHORIZED);
-            thrown = true;
-        }
-
-        assertTrue(thrown);
+        assertRedirectedToErrorPage(sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
@@ -72,14 +61,13 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
         Response response = getTestSAMLResponse(otherIdentityProvider);
 
-        boolean thrown = false;
-        try {
-            sendSamlResponse(response);
-        } catch (HttpClientErrorException e) {
-            assertEquals(e.getStatusCode(), HttpStatus.UNAUTHORIZED);
-            thrown = true;
-        }
+        assertRedirectedToErrorPage(sendSamlResponse(response));
+    }
 
-        assertTrue(thrown);
+    private void assertRedirectedToErrorPage(ResponseEntity<Void> httpResponse) {
+        List<String> inner = httpResponse.getHeaders().get("Location");
+        assertNotNull(inner);
+        assertEquals(inner.size(), 1);
+        assertTrue(inner.get(0).contains(errorPage));
     }
 }

@@ -53,6 +53,11 @@ public class LatticeUserDetailsService implements SAMLUserDetailsService {
                     .getNameID().getValue()));
         }
 
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException(String.format("User with email %s is not active", samlCredential
+                    .getNameID().getValue()));
+        }
+
         AccessLevel level = userService.getAccessLevel(tenantId, user.getUsername());
         if (level == null) {
             throw new UsernameNotFoundException("Unauthorized");

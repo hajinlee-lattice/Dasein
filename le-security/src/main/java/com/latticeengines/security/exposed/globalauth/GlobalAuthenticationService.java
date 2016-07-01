@@ -6,5 +6,7 @@ public interface GlobalAuthenticationService {
 
     Ticket authenticateUser(String user, String password);
 
+    Ticket externallyAuthenticated(String emailAddress);
+
     boolean discard(Ticket ticket);
 }
