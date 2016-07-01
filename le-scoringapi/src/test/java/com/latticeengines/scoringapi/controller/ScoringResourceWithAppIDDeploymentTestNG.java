@@ -24,7 +24,7 @@ public class ScoringResourceWithAppIDDeploymentTestNG extends ScoringResourceDep
 
     @Override
     protected boolean shouldUseAppId() {
-        return false;
+        return true;
     }
 
     @Override
@@ -32,4 +32,3 @@ public class ScoringResourceWithAppIDDeploymentTestNG extends ScoringResourceDep
         return "DUMMY_APP";
     }
 }
-

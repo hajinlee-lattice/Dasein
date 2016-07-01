@@ -185,13 +185,12 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
 
     @Override
     protected boolean shouldUseAppId() {
-        // disabling it for now to make pipeline pass
-        return false;
+        return true;
     }
 
     @Override
     protected String getAppIdForOauth2() {
-        return "DUMMY_APP";
+        return "DUMMY_APP2";
     }
 
     private List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus,
