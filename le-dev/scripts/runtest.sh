@@ -22,6 +22,7 @@ export OAUTH2_DB_PROPDIR=$WSHOME/le-oauth2db/conf/env/dev
 export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
 export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
 export MODELQUALITY_PROPDIR=$WSHOME/le-modelquality/conf/env/dev
+export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 
 PRODUCT=$1
 TEST_TYPE=$2

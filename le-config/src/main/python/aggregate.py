@@ -36,10 +36,12 @@ def main():
 
 def aggregate_props(dir):
     prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
-    aggregated = "# ========================================\n# " + dir.replace(WSHOME + "/", "") \
-                 + "\n# ========================================\n"
+    aggregated = ""
     for prop_file in prop_files:
         if 'log4j' not in prop_file:
+            aggregated += "# ==================================================\n# " \
+                          + prop_file.replace(WSHOME + "/", "") \
+                          + "\n# ==================================================\n"
             with open(prop_file, 'r') as f:
                 aggregated += f.read()
     return aggregated + "\n"

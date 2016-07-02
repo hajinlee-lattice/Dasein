@@ -30,8 +30,8 @@ echo "Top-level playmaker compile"
 mvn -T6 -f playmaker-pom.xml -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-echo "Deploying framework properties to local Hadoop"
-fwkdpl 2> /tmp/errors.txt
+echo "Deploying latticeengines properties to local Hadoop"
+cfgdpl 2> /tmp/errors.txt
 processErrors
 
 echo "Top-level shaded yarn compile"
@@ -50,7 +50,7 @@ do
 done
 wait
 
-for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld' 'config|cfgdpl'
+for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&

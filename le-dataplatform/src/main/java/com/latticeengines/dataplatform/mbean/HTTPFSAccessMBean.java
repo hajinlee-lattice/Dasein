@@ -27,11 +27,11 @@ public class HTTPFSAccessMBean {
         try {
             String s = versionManager.getCurrentVersionInStack(stackName).equals("") ? "" : "/";
             String url = String.format(
-                    "%s/app/%s%sdataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
+                    "%s/app/%s%conf/latticeengines.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
                     versionManager.getCurrentVersionInStack(stackName), s);
-            return "dataplatform.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
+            return "latticeengines.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {
-            return "Failed to access dataplatform.properties from HttpFS due to: " + e.getMessage();
+            return "Failed to access latticeengines.properties from HttpFS due to: " + e.getMessage();
         }
     }
 }

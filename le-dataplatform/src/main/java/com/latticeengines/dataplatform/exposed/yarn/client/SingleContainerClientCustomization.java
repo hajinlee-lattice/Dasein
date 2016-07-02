@@ -87,30 +87,6 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersionInStack(stackName), module, module), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/db/db.properties", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/security/security.properties", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/proxy/proxy.properties", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/camille/camille.properties", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/monitor/monitor.properties", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersionInStack(stackName), module), //
                 false));
         if (softwareLibraryService != null) {

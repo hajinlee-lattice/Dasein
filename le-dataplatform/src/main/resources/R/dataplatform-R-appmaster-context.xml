@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
     <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
@@ -14,7 +13,7 @@
         <constructor-arg value="info" />
     </bean>
 
-    <context:property-placeholder location="dataplatform.properties" />
+    <context:property-placeholder location="latticeengines.properties" />
     <import resource="classpath:dataplatform-yarn-config-context.xml" />
 
     <yarn:localresources>

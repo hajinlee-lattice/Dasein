@@ -27,6 +27,7 @@ export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
 export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
 export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
 export MODELQUALITY_PROPDIR=$WSHOME/le-modelquality/conf/env/dev
+export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 
 export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=1g -Xmx4g"

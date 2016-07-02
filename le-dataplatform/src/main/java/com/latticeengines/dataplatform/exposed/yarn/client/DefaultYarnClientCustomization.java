@@ -87,7 +87,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/dataplatform/*.properties", versionManager.getCurrentVersionInStack(stackName)), //
+                String.format("/app/%s/conf/latticeengines.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
 
         if (!excludeDataplatformLib) {

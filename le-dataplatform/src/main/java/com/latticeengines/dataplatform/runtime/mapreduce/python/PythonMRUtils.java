@@ -54,7 +54,7 @@ public class PythonMRUtils {
     }
 
     private static String setupCacheFiles(List<String> paths, Classifier classifier, String version) {
-        paths.add(String.format("/app/%s/dataplatform/hadoop-metrics2.properties", version));
+        paths.add(String.format("/app/%s/conf/latticeengines.properties", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/rulefwk.py", version));
