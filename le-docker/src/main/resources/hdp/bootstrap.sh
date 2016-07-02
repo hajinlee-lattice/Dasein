@@ -9,6 +9,7 @@ docker run -d --name hdp \
     -p 50010:50010 \
     -p 8088:8088 \
     -p 8188:8188 \
+    -p 10200:10200 \
     -p 19888:19888 \
     -e NAMENODE=hdp \
     latticeengines/hdp

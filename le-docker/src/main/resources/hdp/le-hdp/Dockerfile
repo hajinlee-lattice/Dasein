@@ -45,7 +45,7 @@ ADD start.sh /start.sh
 
 EXPOSE 22
 EXPOSE 9000 50010 50020 50075
-EXPOSE 8141 8050 8030 8025 8088 45454
+EXPOSE 8141 8050 8030 8025 8088 45454 10200 8188
 
 VOLUME ["/home/yarn/hdfs/namenode", "/home/yarn/hdfs/datanode"]
 

@@ -227,24 +227,24 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-n', dest='nodes', type=int, default=3, help='number of nodes')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.set_defaults(func=info)
 

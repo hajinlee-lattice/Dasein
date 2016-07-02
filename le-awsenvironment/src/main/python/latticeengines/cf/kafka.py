@@ -499,7 +499,7 @@ def sr_metadata(ec2, ecscluster):
 def calc_heap_log(peak, avg):
     heap = peak * 1024 * 30
     log_size = avg * 2
-    print 'for expected peak throughput %.2f GB/sec, average throughput %.2f GB/hour' % (peak, avg)
+    print 'for expected peak throughput %.2f GB/sec, average throughput %.2f GB/day' % (peak, avg)
     print 'total heap size recommended: %d MB' % int(heap)
     print 'total log size recommended: %d GB' % int(log_size)
 
@@ -521,6 +521,7 @@ def broker_log_devices(log_size):
             'size': max(log_size, 500),
             'type': 'st1'
         })
+    print ('According to log size of %d GB, going to mount disks [ ' % log_size) + ','.join(str(d['size']) for d in disks) + ' ] GB'
     return disks
 
 def parse_args():
@@ -528,14 +529,14 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('--peak-throughput', dest='pth', type=float, default='0.5', help='expected peak throughput in GB/sec')
-    parser1.add_argument('--avg-throughput', dest='ath', type=float, default='0.1', help='expected average throughput in GB/day')
+    parser1.add_argument('--avg-throughput', dest='ath', type=float, default='2', help='expected average throughput in GB/day')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
