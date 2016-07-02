@@ -10,4 +10,10 @@ public interface SelectedAttrEntityMgr {
 
     List<SelectedAttribute> upsert(List<SelectedAttribute> attributes);
 
+    List<SelectedAttribute> add(List<SelectedAttribute> newAttrList);
+
+    List<SelectedAttribute> delete(List<SelectedAttribute> dropAttrList);
+
+    Integer count(boolean onlyPremium);
+
 }

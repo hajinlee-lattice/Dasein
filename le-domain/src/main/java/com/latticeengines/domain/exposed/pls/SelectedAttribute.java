@@ -34,7 +34,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Access(AccessType.FIELD)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "SELECTED_ATTRIBUTE", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "COLUMN_ID" }) })
+@Table(name = "SELECTED_ATTRIBUTE", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "TENANT_PID", "COLUMN_ID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class SelectedAttribute implements HasPid, HasTenant, Serializable {
 
@@ -45,12 +46,12 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
     private Long pid;
 
     @JsonProperty("ColumnId")
-    @Column(name = "COLUMN_ID", nullable = false, length = 64)
+    @Column(name = "COLUMN_ID", nullable = false, length = 100)
     private String columnId;
 
-    @JsonProperty("CustomerColumnName")
-    @Column(name = "CUSTOMER_COLUMN_NAME", nullable = true, length = 64)
-    private String customerColumnName;
+    @JsonProperty("IsPremium")
+    @Column(name = "IS_PREMIUM", nullable = false)
+    private Boolean isPremium;
 
     @JsonIgnore
     @Column(name = "TENANT_PID", nullable = false)
@@ -62,13 +63,20 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    // for json de-ser
+    public SelectedAttribute() {
+        this.isPremium = false;
+    }
+
     public SelectedAttribute(String columnId, Tenant tenant) {
+        this();
         this.setColumnId(columnId);
         this.setTenant(tenant);
     }
 
-    // for json de-ser
-    private SelectedAttribute() {
+    public SelectedAttribute(String columnId, Tenant tenant, boolean isPremium) {
+        this(columnId, tenant);
+        this.isPremium = isPremium;
     }
 
     @Override
@@ -110,12 +118,12 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
         this.columnId = columnId;
     }
 
-    public String getCustomerColumnName() {
-        return customerColumnName;
+    public Boolean getIsPremium() {
+        return isPremium;
     }
 
-    public void setCustomerColumnName(String customerColumnName) {
-        this.customerColumnName = customerColumnName;
+    public void setIsPremium(Boolean isPremium) {
+        this.isPremium = isPremium;
     }
 
     @Override

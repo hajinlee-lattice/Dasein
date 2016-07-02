@@ -205,6 +205,7 @@ public enum LedpCode {
     LEDP_18109("Problem reading csv file header: {0}"), //
     LEDP_18110("Expected at least 1 record. Instead found 0"), //
     LEDP_18111("Copying Model {0} from tenant {1} to tenant {2} failed"), //
+    LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes can be selected."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

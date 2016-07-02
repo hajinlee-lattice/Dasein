@@ -8,6 +8,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class ScoreRequest {
 
+    @JsonProperty("recordId")
+    @ApiModelProperty(value = "Record ID")
+    private String recordId;
+
+    @JsonProperty("idType")
+    @ApiModelProperty(value = "Type of record ID")
+    private String idType;
+
     @JsonProperty("modelId")
     @ApiModelProperty(required = true)
     private String modelId;
@@ -15,6 +23,10 @@ public class ScoreRequest {
     @JsonProperty("source")
     @ApiModelProperty(value = "Name of the source system that originated this score request.")
     private String source;
+
+    @JsonProperty("performEnrichment")
+    @ApiModelProperty(value = "Should perform enrichment or not")
+    private boolean performEnrichment;
 
     @JsonProperty("rule")
     @ApiModelProperty(value = "Name of the rule that initiated this score request")
@@ -29,6 +41,22 @@ public class ScoreRequest {
             + "both 'CompanyName' and 'State' fields", //
             required = true)
     private Map<String, Object> record;
+
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
+    }
+
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
+    }
 
     public String getModelId() {
         return modelId;
@@ -52,6 +80,14 @@ public class ScoreRequest {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public boolean isPerformEnrichment() {
+        return performEnrichment;
+    }
+
+    public void setPerformEnrichment(boolean performEnrichment) {
+        this.performEnrichment = performEnrichment;
     }
 
     public String getRule() {

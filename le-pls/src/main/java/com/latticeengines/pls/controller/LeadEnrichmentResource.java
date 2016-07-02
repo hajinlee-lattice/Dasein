@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.LeadEnrichmentService;
+import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -43,6 +43,9 @@ public class LeadEnrichmentResource {
 
     @Autowired
     private LeadEnrichmentService leadEnrichmentService;
+
+    @Autowired
+    private SelectedAttrService selectedAttrService;
 
     // ------------START for LP v2-------------------//
     @RequestMapping(value = LP2_ENRICH_PATH
@@ -122,8 +125,9 @@ public class LeadEnrichmentResource {
     @ApiOperation(value = "Save attributes")
     public Boolean saveLP3Attributes(HttpServletRequest request, //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        selectedAttrService.save(attributes, tenant, getPremiumAttributesLimitation(request));
+
         return true;
     }
 
@@ -134,62 +138,19 @@ public class LeadEnrichmentResource {
     @ApiOperation(value = "Get list of attributes with selection flag")
     public List<LeadEnrichmentAttribute> getLP3Attributes(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeNameFilter", required = false) //
-            @RequestParam(value = "attributeNameFilter", required = false) //
-            String attributeNameFilter, //
+                    + "text for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
+            String attributeDisplayNameFilter, //
             @ApiParam(value = "Get attributes " //
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
-            Category category) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
-        List<LeadEnrichmentAttribute> combinedAttributeList = new ArrayList<>();
-
-        // =============//
-        LeadEnrichmentAttribute selectedAttribute = new LeadEnrichmentAttribute();
-        selectedAttribute.setFieldName("DUMMY_SELECTED_ATTR");
-        selectedAttribute.setDisplayName("Display name DUMMY_SELECTED_ATTR");
-        selectedAttribute.setFieldType("String");
-        selectedAttribute.setCategory(Category.FIRMOGRAPHICS);
-        selectedAttribute.setIsPremium(true);
-        selectedAttribute.setIsSelected(true);
-
-        combinedAttributeList.add(selectedAttribute);
-
-        // =============//
-        LeadEnrichmentAttribute unselectedAttribute = new LeadEnrichmentAttribute();
-        unselectedAttribute.setFieldName("DUMMY_UNSELECTED_ATTR");
-        unselectedAttribute.setDisplayName("Display name DUMMY_UNSELECTED_ATTR");
-        unselectedAttribute.setFieldType("String");
-        unselectedAttribute.setCategory(Category.LEAD_INFORMATION);
-        selectedAttribute.setIsPremium(false);
-        selectedAttribute.setIsSelected(false);
-
-        combinedAttributeList.add(unselectedAttribute);
-
-        if (!StringUtils.isEmpty(attributeNameFilter)) {
-            List<LeadEnrichmentAttribute> filteredAttributeList = new ArrayList<>();
-            for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-                if (attr.getFieldName().toLowerCase().contains(attributeNameFilter.toLowerCase())) {
-                    filteredAttributeList.add(attr);
-                }
-            }
-
-            combinedAttributeList = filteredAttributeList;
-        }
-
-        if (category != null) {
-            List<LeadEnrichmentAttribute> filteredAttributeList = new ArrayList<>();
-            for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-                if (attr.getCategory().equals(category)) {
-                    filteredAttributeList.add(attr);
-                }
-            }
-
-            combinedAttributeList = filteredAttributeList;
-        }
-        // =============//
-        return combinedAttributeList;
+            Category category, //
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, category, onlySelectedAttributes);
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH + "/premiumattributeslimitation", //
@@ -198,9 +159,8 @@ public class LeadEnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Integer getLP3PremiumAttributesLimitation(HttpServletRequest request) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
-        return 10;
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH + "/selectedattributes/count", //
@@ -209,9 +169,8 @@ public class LeadEnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLP3SelectedAttributeCount(HttpServletRequest request) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
-        return 1;
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return selectedAttrService.getSelectedAttributeCount(tenant);
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH + "/selectedpremiumattributes/count", //
@@ -220,9 +179,8 @@ public class LeadEnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLP3SelectedAttributePremiumCount(HttpServletRequest request) {
-        // TODO - anoop - for now this returns dummy data for early integration.
-        // Will replace it with actual code in upcoming txns
-        return 1;
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return selectedAttrService.getSelectedAttributePremiumCount(tenant);
     }
     // ------------END for LP v3-------------------//
 }

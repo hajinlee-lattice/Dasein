@@ -24,15 +24,15 @@ public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public List<SelectedAttribute> upsert(List<SelectedAttribute> newAttrs) {
         List<SelectedAttribute> oldAttrs = dao.findAll();
-        for (SelectedAttribute attribute: oldAttrs) {
+        for (SelectedAttribute attribute : oldAttrs) {
             if (!newAttrs.contains(attribute)) {
                 dao.delete(attribute);
             }
         }
-        for (SelectedAttribute attribute: newAttrs) {
+        for (SelectedAttribute attribute : newAttrs) {
             if (!oldAttrs.contains(attribute)) {
                 dao.create(attribute);
             }
@@ -40,4 +40,33 @@ public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {
         return dao.findAll();
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public List<SelectedAttribute> add(List<SelectedAttribute> newAttrList) {
+        List<SelectedAttribute> oldAttrs = dao.findAll();
+        for (SelectedAttribute attribute : newAttrList) {
+            if (!oldAttrs.contains(attribute)) {
+                dao.create(attribute);
+            }
+        }
+        return dao.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public List<SelectedAttribute> delete(List<SelectedAttribute> dropAttrList) {
+        List<SelectedAttribute> oldAttrs = dao.findAll();
+        for (SelectedAttribute attribute : oldAttrs) {
+            if (dropAttrList.contains(attribute)) {
+                dao.delete(attribute);
+            }
+        }
+        return dao.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Integer count(boolean onlyPremium) {
+        return dao.count(onlyPremium);
+    }
 }

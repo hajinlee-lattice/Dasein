@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,6 +31,9 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void upsert() {
+        setupSecurityContext(tenant1);
+        entityMgr.upsert(new ArrayList<SelectedAttribute>());
+
         setupSecurityContext(tenant1);
 
         Assert.assertEquals(entityMgr.findAll().size(), 0, "There should be no attribute in the beginning");
@@ -64,6 +68,88 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         setupSecurityContext(tenant2);
         Assert.assertEquals(entityMgr.findAll().size(), 0, "There should 0 attribute in the other tenant");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "tenantSafe" })
+    public void add() {
+        setupSecurityContext(tenant1);
+        Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute after inserting");
+        List<SelectedAttribute> attrs = new ArrayList<>();
+        attrs.add(new SelectedAttribute("column1", tenant1));
+        attrs.add(new SelectedAttribute("column2", tenant1));
+        entityMgr.add(attrs);
+        Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute after inserting");
+
+        attrs = new ArrayList<>();
+        attrs.add(new SelectedAttribute("column3", tenant1));
+        attrs.add(new SelectedAttribute("column4", tenant1));
+
+        entityMgr.add(attrs);
+        Assert.assertEquals(entityMgr.findAll().size(), 4, "There should be 4 attribute after inserting");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "add" })
+    public void delete() {
+        setupSecurityContext(tenant1);
+        Assert.assertEquals(entityMgr.findAll().size(), 4, "There should be 4 attribute");
+        List<SelectedAttribute> deleteAttrs = new ArrayList<>();
+        deleteAttrs.add(new SelectedAttribute("column2", tenant1));
+        deleteAttrs.add(new SelectedAttribute("column3", tenant1));
+
+        List<SelectedAttribute> remainingAttrs = entityMgr.delete(deleteAttrs);
+
+        List<SelectedAttribute> expectedRemainingAttr = new ArrayList<>();
+        expectedRemainingAttr.add(new SelectedAttribute("column1", tenant1));
+        expectedRemainingAttr.add(new SelectedAttribute("column4", tenant1));
+
+        Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute after deleting");
+
+        for (SelectedAttribute remainingAttr : remainingAttrs) {
+            Assert.assertTrue(expectedRemainingAttr.contains(remainingAttr));
+            Assert.assertFalse(deleteAttrs.contains(remainingAttr));
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "delete" })
+    public void count() {
+        setupSecurityContext(tenant1);
+        Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute");
+        boolean onlyPremium = false;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 2);
+
+        onlyPremium = true;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 0);
+
+        List<SelectedAttribute> premiumAttrs = new ArrayList<>();
+        premiumAttrs.add(new SelectedAttribute("column5", tenant1, true));
+        premiumAttrs.add(new SelectedAttribute("column6", tenant1, true));
+
+        entityMgr.add(premiumAttrs);
+
+        onlyPremium = false;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 4);
+
+        onlyPremium = true;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 2);
+
+        List<SelectedAttribute> deleteAttrs = new ArrayList<>();
+        deleteAttrs.add(new SelectedAttribute("column1", tenant1, true));
+        deleteAttrs.add(new SelectedAttribute("column6", tenant1, true));
+
+        entityMgr.delete(deleteAttrs);
+
+        onlyPremium = false;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 2);
+
+        onlyPremium = true;
+        Assert.assertEquals(entityMgr.count(onlyPremium).intValue(), 1);
+
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanup() throws Exception {
+        setupSecurityContext(tenant1);
+        entityMgr.upsert(new ArrayList<SelectedAttribute>());
     }
 
 }
