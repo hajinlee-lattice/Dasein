@@ -21,7 +21,8 @@ def replace(dir, profile):
             with open(f + NEW_SUFFIX, 'w') as new_file:
                 for line in old_file:
                     if len(line.strip()) > 0 and ('#' != line.strip()[0]):
-                        key, value = line.strip().replace('\n', '').split('=')[:2]
+                        key = line.strip().replace('\n', '').split('=')[0]
+                        value = line.strip().replace('\n', '').replace('%s=' % key, '')
                         for k, v in tokens.items():
                             value = value.replace('${%s}' % k, v).replace('\n', '').strip()
                         print 'Setting %s to %s' % (key.strip(), value)
