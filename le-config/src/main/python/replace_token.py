@@ -24,9 +24,10 @@ def replace(dir, profile):
                         key = line.strip().replace('\n', '').split('=')[0]
                         value = line.strip().replace('\n', '')[len(key) + 1:]
                         for k, v in tokens.items():
-                            value = value.replace('${%s}' % k, v).replace('\n', '').strip()
-                        print 'Setting %s to %s' % (key.strip(), value)
-                        new_file.write('%s=%s\n' % (key.strip(), value))
+                            new_value = value.replace('${%s}' % k, v).strip()
+                        if new_value != value:
+                            print 'Set %s=%s' % (key.strip(), new_value)
+                        new_file.write('%s=%s\n' % (key.strip(), new_value))
                     else:
                         new_file.write(line)
         os.rename(f + NEW_SUFFIX, f)
