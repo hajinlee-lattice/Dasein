@@ -240,7 +240,7 @@ def zk_properties(nodes, ips):
     return lines
 
 def write_to_consul(server, key, value):
-    conn = httplib.HTTPSConnection(server)
+    conn = httplib.HTTPConnection(server)
     conn.request("PUT", "/v1/kv/%s" % key, value)
     response = conn.getresponse()
     print response.status, response.reason
