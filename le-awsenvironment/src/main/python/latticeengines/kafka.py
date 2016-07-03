@@ -1,6 +1,7 @@
 import argparse
 
-from cf import zookeeper, kafka
+from cf import zookeeper
+from cf.kafka import manage as kafka
 
 
 def main():

@@ -8,6 +8,7 @@ import sys
 import time
 
 from .module.ec2 import EC2Instance
+from .module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP, PARAM_VPC_ID, PARAM_SUBNET_1
 from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
 from ..conf import AwsEnvironment
@@ -23,6 +24,7 @@ def template_cli(args):
 
 def template(environment, nodes, upload=False):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
+    stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP])
     for n in xrange(nodes):
         name = "EC2Instance%d" % (n + 1)
         subnet = "SubnetId%d" % ( (n % 2) + 1 )
@@ -50,30 +52,11 @@ def provision(environment, stackname):
         StackName=stackname,
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(bucket, _S3_CF_PATH, 'template.json'),
         Parameters=[
-            {
-                'ParameterKey': 'VpcId',
-                'ParameterValue': config.vpc()
-            },
-            {
-                'ParameterKey': 'SubnetId1',
-                'ParameterValue': config.public_subnet_1()
-            },
-            {
-                'ParameterKey': 'SubnetId2',
-                'ParameterValue': config.public_subnet_2()
-            },
-            {
-                'ParameterKey': 'KeyName',
-                'ParameterValue': config.ec2_key()
-            },
-            {
-                'ParameterKey': 'SecurityGroupId',
-                'ParameterValue': config.zk_sg()
-            },
-            {
-                'ParameterKey': 'InstanceType',
-                'ParameterValue': 't2.medium'
-            }
+            PARAM_VPC_ID.config(config.vpc()),
+            PARAM_SUBNET_1.config(config.public_subnet_1()),
+            PARAM_SUBNET_1.config(config.public_subnet_2()),
+            PARAM_SECURITY_GROUP.config(config.zk_sg()),
+            PARAM_INSTANCE_TYPE.config("t2.medium")
         ],
         TimeoutInMinutes=60,
         ResourceTypes=[

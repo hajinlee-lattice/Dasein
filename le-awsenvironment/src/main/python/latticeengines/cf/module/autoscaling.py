@@ -1,5 +1,6 @@
 from .elb import ElasticLoadBalancer
 from .iam import InstanceProfile
+from .parameter import ArnParameter
 from .resource import Resource
 
 
@@ -78,7 +79,7 @@ class LaunchConfiguration(Resource):
         }
 
     def set_instance_profile(self, profile):
-        assert isinstance(profile, InstanceProfile)
+        assert isinstance(profile, InstanceProfile) or isinstance(profile, ArnParameter)
         self._template["Properties"]["IamInstanceProfile"] = profile.ref()
         return self
 

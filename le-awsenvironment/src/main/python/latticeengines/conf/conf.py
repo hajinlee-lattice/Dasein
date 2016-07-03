@@ -38,6 +38,9 @@ class AwsEnvironment:
     def cf_bucket(self):
         return self._props['cf.s3.bucket']
 
+    def ecs_instance_profile(self):
+        return self._props['ecs.instance.profile.arn']
+
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry()

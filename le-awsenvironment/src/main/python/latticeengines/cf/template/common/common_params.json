@@ -1,6 +1,6 @@
 {
   "VpcId": {
-    "Description": " The VPC in which the stack will reside",
+    "Description": "The VPC in which the stack will reside",
     "Type": "AWS::EC2::VPC::Id",
     "Default": "vpc-10b01977",
     "ConstraintDescription": "must be an existing vpc."

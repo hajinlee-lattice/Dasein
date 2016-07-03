@@ -67,9 +67,8 @@
     "Default" : "2g",
     "Description": "Heap size (e.g. 2g, 1024m) for brokers."
   },
-  "BrokerHeapSize": {
+  "EcsInstanceProfile": {
     "Type": "String",
-    "Default" : "2g",
-    "Description": "Heap size (e.g. 2g, 1024m) for brokers."
+    "Description": "EC2 Role for ecs instances"
   }
 }

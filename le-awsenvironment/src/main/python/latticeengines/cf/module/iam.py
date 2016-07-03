@@ -1,6 +1,6 @@
+from .parameter import Parameter
 from .resource import Resource
 from .template import Template
-
 
 
 class User(Resource):
@@ -145,14 +145,17 @@ class RolePolicy(Template):
         }
 
 class InstanceProfile(Resource):
-    def __init__(self, logicalId, role):
-        assert isinstance(role, Role)
-
+    def __init__(self, logicalId):
         Resource.__init__(self, logicalId)
         self._template =  {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [ role.ref() ]
+                "Roles": [ ]
             }
         }
+
+    def add_role(self, role):
+        assert isinstance(role, Role) or isinstance(role, Parameter)
+        self._template["Properties"]["Roles"].append(role.ref())
+        return self

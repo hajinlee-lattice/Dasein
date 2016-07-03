@@ -75,5 +75,5 @@ class KafkaProfile:
         return str(self._broker_heap)
 
 
-PROFILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile', 'kafka')
+PROFILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile')
 DEFAULT_PROFILE = KafkaProfile(os.path.join(PROFILE_DIR, "default.json"))

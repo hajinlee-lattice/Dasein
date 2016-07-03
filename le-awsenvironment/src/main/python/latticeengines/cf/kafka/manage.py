@@ -4,14 +4,16 @@ import json
 import math
 import os
 
-from .kafka_profile import KafkaProfile, DEFAULT_PROFILE
-from .module.autoscaling import AutoScalingGroup, LaunchConfiguration
-from .module.ec2 import _ec2_params, EC2Instance
-from .module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
-from .module.elb import ElasticLoadBalancer
-from .module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
-from .module.template import TEMPLATE_DIR
-from ..conf import AwsEnvironment
+from .params import *
+from .profile import KafkaProfile, DEFAULT_PROFILE
+from ..module.autoscaling import AutoScalingGroup, LaunchConfiguration
+from ..module.ec2 import EC2Instance
+from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
+from ..module.elb import ElasticLoadBalancer
+from ..module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP
+from ..module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
+from ..module.template import TEMPLATE_DIR
+from ...conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/kafka'
 _EC2_PEM = '~/aws.pem'
@@ -37,7 +39,7 @@ def template(environment, upload):
 
 def create_template():
     stack = Stack("AWS CloudFormation template for Kafka ECS container instances.")
-    stack.add_params(extra_param()).add_params(_ec2_params())
+    stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(KAFKA_PARAMS)
 
     #ec2role = ECSServiceRole("EC2Role")
     #instanceprofile = InstanceProfile("EC2InstanceProfile", ec2role)
@@ -142,7 +144,8 @@ def provision(environment, stackname, zkhosts, profile=None):
             {
                 'ParameterKey': 'BrokerHeapSize',
                 'ParameterValue': profile.broker_heap()
-            }
+            },
+            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile())
         ],
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',

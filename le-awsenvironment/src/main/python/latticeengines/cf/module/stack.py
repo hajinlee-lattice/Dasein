@@ -6,7 +6,8 @@ import time
 from boto3.s3.transfer import S3Transfer
 
 from .condition import Condition
-from .ec2 import _ec2_params, EC2Instance
+from .ec2 import EC2Instance
+from .parameter import COMMON_PARAMETERS, Parameter
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
 from ...conf import AwsEnvironment
@@ -17,8 +18,8 @@ class Stack(Template):
         Template.__init__(self)
         self._template["AWSTemplateFormatVersion"] = "2010-09-09"
         self._template["Description"] = description
-        self._template["Parameters"] = Stack.__common_params()
-        self.__ec2_params()
+        self._template["Parameters"] = {}
+        self.add_params(COMMON_PARAMETERS)
         self.__mappings()
 
     def add_ec2(self, instance):
@@ -71,8 +72,13 @@ class Stack(Template):
         return self
 
     def add_params(self, params):
-        for k, v in params.items():
-            self._template["Parameters"][k] = v
+        for param in params:
+            self.add_param(param)
+        return self
+
+    def add_param(self, param):
+        assert isinstance(param, Parameter)
+        self._template["Parameters"].update(param.definition())
         return self
 
     def add_mappings(self, mappings):
@@ -106,17 +112,6 @@ class Stack(Template):
             data["Environment2Props"] = AwsEnvironment.create_env_props_map()
             self._merge_into_attr('Mappings', data)
             return self
-
-    def __ec2_params(self):
-        data = _ec2_params()
-        self._merge_into_attr('Parameters', data)
-        return self
-
-    @classmethod
-    def __common_params(cls):
-        json_file = os.path.join(TEMPLATE_DIR, 'common', 'common_params.json')
-        with open(json_file) as f:
-            return json.load(f)
 
 def check_stack_not_exists(client, stackname):
     print 'verifying stack name "%s"...' % stackname
