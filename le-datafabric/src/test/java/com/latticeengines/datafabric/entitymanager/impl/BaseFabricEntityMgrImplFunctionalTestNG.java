@@ -119,7 +119,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         processor.entityCount = 0;
         processor.invalidEntities = 0;
 
-        if (true) return;
+        // if (true) return;
 
         for (SampleEntity entity: entities) {
              entityManager.publish(entity);

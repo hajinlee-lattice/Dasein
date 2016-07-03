@@ -66,6 +66,10 @@ def updateContents(environment, filename, conents, dictionary, file):
                 line = pair[0] + '=' + pair[1] \
                     .replace('${API_TOMCAT}', dictionary['%s.api.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
+            if '${LE_STACK}' in pair[1]:
+                line = pair[0] + '=' + pair[1] \
+                    .replace('${LE_STACK}', dictionary['%s.le.stack' % environment])
+                print filename + ' : ' + environment + " : " + line.replace('\n', '')
         file.write(line)
 
 def loadContents(conents):
