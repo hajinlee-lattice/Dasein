@@ -27,7 +27,7 @@ public class HTTPFSAccessMBean {
         try {
             String s = versionManager.getCurrentVersionInStack(stackName).equals("") ? "" : "/";
             String url = String.format(
-                    "%s/app/%s%conf/latticeengines.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
+                    "%s/app/%s%sconf/latticeengines.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
                     versionManager.getCurrentVersionInStack(stackName), s);
             return "latticeengines.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {
