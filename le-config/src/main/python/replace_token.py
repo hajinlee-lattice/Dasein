@@ -22,7 +22,7 @@ def replace(dir, profile):
                 for line in old_file:
                     if len(line.strip()) > 0 and ('#' != line.strip()[0]):
                         key = line.strip().replace('\n', '').split('=')[0]
-                        value = line.strip().replace('\n', '').replace('%s=' % key, '')
+                        value = line.strip().replace('\n', '')[len(key + 1):]
                         for k, v in tokens.items():
                             value = value.replace('${%s}' % k, v).replace('\n', '').strip()
                         print 'Setting %s to %s' % (key.strip(), value)
