@@ -60,9 +60,7 @@ class AutoScalingGroup(Resource):
         return self
 
 class LaunchConfiguration(Resource):
-    def __init__(self, logicalId, instanceprofile, instance_type_ref="InstanceType"):
-        assert isinstance(instanceprofile, InstanceProfile)
-
+    def __init__(self, logicalId, instance_type_ref="InstanceType"):
         Resource.__init__(self, logicalId)
         self._template = {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
@@ -71,7 +69,6 @@ class LaunchConfiguration(Resource):
                     "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, "AmazonECSLinux"]
                 },
                 "InstanceType"   : { "Ref" : instance_type_ref },
-                "IamInstanceProfile": instanceprofile.ref(),
                 "EbsOptimized" : { "Fn::FindInMap" : [ "Instance2Options", { "Ref" : "InstanceType" }, "EBSOptimized" ] },
                 "InstanceMonitoring" : "true",
                 "KeyName"        : { "Ref" : "KeyName" },
@@ -79,6 +76,11 @@ class LaunchConfiguration(Resource):
                 "UserData"       : ""
             }
         }
+
+    def set_instance_profile(self, profile):
+        assert isinstance(profile, InstanceProfile)
+        self._template["Properties"]["IamInstanceProfile"] = profile.ref()
+        return self
 
     def set_metadata(self, metadata):
         self._template["Metadata"] = metadata

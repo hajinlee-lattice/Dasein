@@ -39,16 +39,8 @@ fi
 
 echo "ADVERTISE_IP=${ADVERTISE_IP}"
 
-if [ -z "${ZK_NAMESPACE}" ]; then ZK_NAMESPACE="schema_registry" ; fi
-
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/schema-registry/schema-registry.properties
 sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/schema-registry/schema-registry.properties
-sed -i "s|{{ZK_NAMESPACE}}|$ZK_NAMESPACE|g" /etc/schema-registry/schema-registry.properties
+sed -i "s|{{ZK_NAMESPACE}}|${ZK_NAMESPACE:=schemaRegistry}|g" /etc/schema-registry/schema-registry.properties
 
-i=0
-while [ $i -le 100 ]; do
-    /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
-
-    sleep 5
-    i=$((i+1))
-done
+/usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties

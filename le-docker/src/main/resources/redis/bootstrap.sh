@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 CLUSTER=$1
-PORT=$2
+REDIS_PORT=$2
 NETWORK=$3
 
-CLUSTER="${CLUSTER:=zookeeper}"
+CLUSTER="${CLUSTER:=redis}"
 NETWORK="${NETWORK:=lenet}"
-PORT="${PORT:=2181}"
+REDIS_PORT="${REDIS_PORT:=6379}"
 
-SERVICE="zookeeper"
+SERVICE="redis"
 
 source ../functions.sh
 verify_consul
@@ -16,16 +16,15 @@ teardown_simple_service ${SERVICE} ${CLUSTER}
 create_network ${NETWORK}
 
 docker run -d \
-    --name ${CLUSTER}_zk \
-    -h ${CLUSTER}-zk \
+    --name ${CLUSTER}_redis \
+    -h ${CLUSTER}-redis \
     --net ${NETWORK} \
-    -e ZK_CLUSTER_SIZE=1 \
+    -p ${REDIS_PORT}:6379 \
     -l ${SERVICE}.group=${CLUSTER} \
     -l cluster=${CLUSTER} \
-    -p ${PORT}:2181 \
-    latticeengines/zookeeper
+    redis
 
-register_service ${SERVICE} ${CLUSTER}_zk ${PORT}
+register_service ${SERVICE} ${CLUSTER}_redis ${REDIS_PORT}
 
 docker_ps
 show_service ${SERVICE}

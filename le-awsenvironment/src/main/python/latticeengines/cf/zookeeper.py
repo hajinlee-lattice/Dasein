@@ -147,12 +147,21 @@ def update_zoo_cfg(pem, ips):
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
         t1 = time.time()
 
-        subprocess.call("scp -oStrictHostKeyChecking=no -i %s %s %s:%s" % (pem, temp_file, url, remote_path), shell=True)
-        ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", pem, url,
+        if pem == "ssh-agent":
+            subprocess.call("scp -oStrictHostKeyChecking=no %s %s:%s" % (temp_file, url, remote_path), shell=True)
+            ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", url,
                                 "sudo service zookeeper restart"],
                                shell=False,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
+        else:
+            subprocess.call("scp -oStrictHostKeyChecking=no -i %s %s %s:%s" % (pem, temp_file, url, remote_path), shell=True)
+            ssh = subprocess.Popen(["ssh", "-oStrictHostKeyChecking=no", "-i", pem, url,
+                                    "sudo service zookeeper restart"],
+                                   shell=False,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+
         result = ssh.stdout.readlines()
         if result == []:
             error = ssh.stderr.readlines()

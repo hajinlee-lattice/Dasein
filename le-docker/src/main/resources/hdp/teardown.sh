@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
-echo "stopping container hdp ... "
-docker stop hdp || true
-docker rm hdp  || true
+source functions.sh
+teardown_hdp $1

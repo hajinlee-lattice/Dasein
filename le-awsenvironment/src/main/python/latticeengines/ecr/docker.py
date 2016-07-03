@@ -4,7 +4,6 @@ import subprocess
 from ..conf import AwsEnvironment
 
 _ECR_REPO="158854640770.dkr.ecr.us-east-1.amazonaws.com"
-_NAMESPACE="latticeengines"
 
 def main():
     args = parse_args()
@@ -13,15 +12,15 @@ def main():
 def push(args):
     tag(args)
     config = AwsEnvironment(args.environment)
-    print "pushing image %s:%s to repo ..." % (_NAMESPACE + "/" + args.image, args.remotetag)
-    destination = config.ecr_registry() + "/" + _NAMESPACE + "/" +  args.image + ":" + args.remotetag
+    print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
+    destination = config.ecr_registry() + "/" + args.image + ":" + args.remotetag
     subprocess.call(["docker", "push", destination])
 
 def tag(args):
     config = AwsEnvironment(args.environment)
-    print "tagging image %s:%s as %s ..." % (_NAMESPACE + "/" + args.image, args.localtag, args.remotetag)
-    source = _NAMESPACE + "/" +  args.image + ":" + args.localtag
-    destination = config.ecr_registry() + "/" + _NAMESPACE + "/" +  args.image + ":" + args.remotetag
+    print "tagging image %s:%s as %s ..." % (args.image, args.localtag, args.remotetag)
+    source = "latticeengines/" +  args.image + ":" + args.localtag
+    destination = config.ecr_registry() + "/" + args.image + ":" + args.remotetag
     subprocess.call(["docker", "tag", source, destination])
 
 

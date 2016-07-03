@@ -29,8 +29,8 @@ class ECSService(Resource):
 
     def set_min_max_percent(self, min_pct, max_pct):
         self._template["Properties"]["DeploymentConfiguration"] = {
-            "MaximumPercent" : min_pct,
-            "MinimumHealthyPercent" : max_pct
+            "MaximumPercent" : max_pct,
+            "MinimumHealthyPercent" : min_pct
         }
         return self
 
@@ -102,6 +102,10 @@ class ContainerDefinition(Template):
 
     def hostname(self, hostname):
         self._template["Hostname"] = hostname
+        return self
+
+    def command(self, cmds):
+        self._template["Command"] = cmds
         return self
 
     def link(self, container, alias=None):

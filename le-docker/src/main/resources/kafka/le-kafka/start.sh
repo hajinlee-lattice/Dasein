@@ -36,12 +36,21 @@ if ! valid_ip ${ADVERTISE_IP} ; then
     ADVERTISE_IP=$(dig +short "${ADVERTISE_IP}")
 fi
 
-if [ -z "${LOG_DIRS}" ]; then LOG_DIRS="/var/lib/kafka" ; fi
-if [ -z "${RACK_ID}" ]; then RACK_ID="1" ; fi
+LOG_DIRS="${LOG_DIRS:=/var/lib/kafka}"
+RACK_ID="${RACK_ID:=1}"
+REPLICATION_FACTOR="${REPLICATION_FACTOR:=3}"
+NUM_PARTITIONS="${NUM_PARTITIONS:=16}"
+
+if [  ${SINGLE_NODE} == "true" ]; then
+    REPLICATION_FACTOR=1
+    NUM_PARTITIONS=2
+fi
 
 sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/kafka/server.properties
 sed -i "s|{{RACK_ID}}|$RACK_ID|g" /etc/kafka/server.properties
 sed -i "s|{{LOG_DIRS}}|$LOG_DIRS|g" /etc/kafka/server.properties
+sed -i "s|{{NUM_PARTITIONS}}|$NUM_PARTITIONS|g" /etc/kafka/server.properties
+sed -i "s|{{REPLICATION_FACTOR}}|$REPLICATION_FACTOR|g" /etc/kafka/server.properties
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/kafka/server.properties
 
 if [  ${SINGLE_NODE} == "true" ]; then
