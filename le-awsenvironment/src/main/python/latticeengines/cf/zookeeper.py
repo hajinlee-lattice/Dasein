@@ -91,6 +91,7 @@ def provision(environment, stackname):
         ]
     )
     print 'Got StackId: %s' % response['StackId']
+    sys.stdout.flush()
     wait_for_stack_creation(client, stackname)
 
 def bootstrap_cli(args):
@@ -172,6 +173,7 @@ def update_zoo_cfg(pem, ips):
 
         public_zk_hosts.append(node_ips['PublicIp'] + ":2181")
         private_zk_hosts.append(node_ips['PrivateIp'] + ":2181")
+        sys.stdout.flush()
 
     print '\n================================================================================'
     print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)

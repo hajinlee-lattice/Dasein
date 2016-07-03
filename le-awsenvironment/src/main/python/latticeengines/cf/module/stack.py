@@ -124,9 +124,11 @@ def check_stack_not_exists(client, stackname):
         if stack['StackStatus'] != 'DELETE_COMPLETE' and stack['StackName'] == stackname:
             raise ValueError('There is already a stack named "%s": %s' % (stackname, stack))
     print 'Great! The name "%s" has not been used.' % stackname
+    sys.stdout.flush()
 
 def wait_for_stack_creation(client, stackname):
     print 'Waiting for the stack to be ready ...'
+    sys.stdout.flush()
     t1 = time.time()
     waiter = client.get_waiter('stack_create_complete')
     waiter.wait(StackName=stackname)
@@ -139,6 +141,7 @@ def teardown_stack(client, stackname):
 
 def wait_for_stack_teardown(client, stackname):
     print 'Waiting for the stack to be teardown ...'
+    sys.stdout.flush()
     t1 = time.time()
     waiter = client.get_waiter('stack_delete_complete')
     waiter.wait(StackName=stackname)
