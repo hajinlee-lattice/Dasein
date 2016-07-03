@@ -9,16 +9,16 @@ def main():
 
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.profile, args.keyfile)
+    provision(args.environment, args.stackname, args.profile, args.keyfile, consul=args.consul)
 
-def provision(environment, stackname, profile, keyfile):
+def provision(environment, stackname, profile, keyfile, consul=None):
     # update cloud formation templates
     zookeeper.template(environment, 4, upload=True)
     kafka.template(environment, upload=True)
 
     # provision and bootstrap zookeeper
     zookeeper.provision(environment, stackname + "-zk")
-    pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile)
+    pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile, consul)
 
     # provision kafka cloud formation
     elbs = kafka.provision(environment, stackname, pri_zk_hosts + "/" + stackname, profile)
@@ -46,6 +46,7 @@ def parse_args():
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
+    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("describe")

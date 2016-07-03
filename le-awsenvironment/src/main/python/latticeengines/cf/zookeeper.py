@@ -1,5 +1,6 @@
 import argparse
 import boto3
+import httplib
 import json
 import os
 import subprocess
@@ -95,12 +96,17 @@ def provision(environment, stackname):
     wait_for_stack_creation(client, stackname)
 
 def bootstrap_cli(args):
-    bootstrap(args.stackname, args.keyfile)
+    bootstrap(args.stackname, args.keyfile, args.consul)
 
-def bootstrap(stackname, pem):
+def bootstrap(stackname, pem, consul):
     ips = get_ips(stackname)
     print 'Found ips in output:\n', ips
-    return update_zoo_cfg(pem, ips)
+    pub_zk, pri_zk = update_zoo_cfg(pem, ips)
+    if consul is not None:
+        print 'Saving zk connection strings to consul server %s' % consul
+        write_to_consul(consul, "%s_public_zk" % stackname, pub_zk)
+        write_to_consul(consul, "%s_private_zk" % stackname, pri_zk)
+    return pub_zk, pri_zk
 
 def info(args):
     ips = get_ips(args.stackname)
@@ -233,6 +239,12 @@ def zk_properties(nodes, ips):
         lines.append("server.%d=%s:2888:3888" % (i + 1, ips[i]))
     return lines
 
+def write_to_consul(server, key, value):
+    conn = httplib.HTTPSConnection(server)
+    conn.request("PUT", "/v1/kv/%s" % key, value)
+    response = conn.getresponse()
+    print response.status, response.reason
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Zookeeper CloudFormation management')
     commands = parser.add_subparsers(help="commands")
@@ -252,6 +264,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
+    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")
