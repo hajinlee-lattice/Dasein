@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
-import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
@@ -31,9 +30,6 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private DataFlowService dataFlowService;
 
     @Autowired
     private SoftwareLibraryService softwareLibraryService;

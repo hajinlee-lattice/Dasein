@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
@@ -19,9 +18,6 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dataFlowService")
 public class DataFlowServiceImpl implements DataFlowService {
-
-    @Autowired
-    private DataTransformationService dataTransformationService;
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
