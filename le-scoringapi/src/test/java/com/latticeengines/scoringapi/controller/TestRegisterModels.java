@@ -169,8 +169,4 @@ public class TestRegisterModels {
         return scoreResultTable;
     }
 
-    private static void createTable(String name, Table table, CustomerSpace customerSpace,
-            MetadataProxy metadataProxy) {
-
-    }
 }
