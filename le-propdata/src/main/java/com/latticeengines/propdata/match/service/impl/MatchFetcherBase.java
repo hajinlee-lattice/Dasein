@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,6 @@ import com.latticeengines.propdata.core.datasource.DataSourceService;
 
 public abstract class MatchFetcherBase {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(MatchFetcherBase.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
     private static final Integer MAX_RETRIES = 2;
@@ -60,7 +58,6 @@ public abstract class MatchFetcherBase {
     }
 
     MatchContext fetchSync(MatchContext context) {
-        Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Map<String, Set<String>> partitionColumnsMap = context.getPartitionColumnsMap();
 
         Set<String> involvedPartitions = new HashSet<>(partitionColumnsMap.keySet());

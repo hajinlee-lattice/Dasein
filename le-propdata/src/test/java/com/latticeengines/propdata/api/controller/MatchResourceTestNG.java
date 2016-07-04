@@ -1,14 +1,11 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.match.testframework.TestMatchInputService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +19,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
+import com.latticeengines.propdata.match.testframework.TestMatchInputService;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
 @Component

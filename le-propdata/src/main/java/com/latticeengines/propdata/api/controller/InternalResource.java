@@ -5,20 +5,13 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.propdata.match.service.InternalService;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -26,11 +19,13 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
+import com.latticeengines.propdata.match.service.InternalService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "inernal", description = "Internal REST resource for propdata jobs.")
 @RestController

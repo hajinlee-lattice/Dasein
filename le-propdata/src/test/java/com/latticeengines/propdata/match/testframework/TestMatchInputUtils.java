@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
