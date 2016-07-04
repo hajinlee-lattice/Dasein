@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 public class DataFlowSource implements HasName {
 
     private String name;
-    private String rawDataPath;
     private List<ExtractFilter> extractFilters;
 
     @Override

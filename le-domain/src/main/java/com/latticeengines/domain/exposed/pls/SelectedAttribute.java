@@ -39,6 +39,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class SelectedAttribute implements HasPid, HasTenant, Serializable {
 
+    private static final long serialVersionUID = -113839858922514415L;
+
     @Id
     @JsonProperty("PID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
