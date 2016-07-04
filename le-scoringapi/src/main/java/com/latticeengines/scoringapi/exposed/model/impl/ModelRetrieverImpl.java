@@ -644,10 +644,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private void convertModelSummaryToModelDetail(List<ModelDetail> models, //
             List<ModelSummary> modelSummaries, //
             CustomerSpace customerSpace) {
-        ObjectMapper om = new ObjectMapper();
         if (modelSummaries != null) {
             for (ModelSummary modelSummary : modelSummaries) {
-                @SuppressWarnings("unchecked")
                 ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
 
                 ModelSummaryStatus status = modelSummary.getStatus();

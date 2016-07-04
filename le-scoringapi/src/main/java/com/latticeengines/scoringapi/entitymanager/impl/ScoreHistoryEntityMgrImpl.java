@@ -1,25 +1,22 @@
 package com.latticeengines.scoringapi.entitymanager.impl;
 
-import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
-import com.latticeengines.domain.exposed.scoringapi.Record;
-import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
-import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
-import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
+import com.latticeengines.domain.exposed.scoringapi.Record;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
+import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
 
 @Component("scoreHistoryEntityMgr")
 public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreRecordHistory> implements ScoreHistoryEntityMgr {
