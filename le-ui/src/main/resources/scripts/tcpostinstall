@@ -2,21 +2,24 @@
 source /etc/profile
 
 echo "getting environment information"
-echo $ENV_TYPE
+echo $LE_ENVIRONMENT
+echo $LE_STACK
+echo $STACK_PROFILE
+
 
 echo "copying files"
 cd /tmp/le-ui
 tar xzf le-ui.tar.gz
+
+cat ${STACK_PROFILE}
+python replace_token.py -d /tmp/le-ui/conf/env/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+
 cd le-ui
 cp -rf . /opt/node/latest
-cp /opt/node/latest/conf/env/$ENV_TYPE/ENV_VARS /opt/node/latest
+cp /opt/node/latest/conf/env/$LE_ENVIRONMENT/ENV_VARS /opt/node/latest
 chmod -R 755 /opt/node/latest
 
 echo "cleaning up"
 rm -rf /opt/node/latest/conf
-
-echo "finishing"
-chown -R root:tomcat $CATALINA_HOME/webapps
-chown -R root:tomcat $CATALINA_HOME/webapps
 
 
