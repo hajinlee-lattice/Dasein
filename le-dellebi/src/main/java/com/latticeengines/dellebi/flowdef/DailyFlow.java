@@ -8,13 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-
-import cascading.flow.FlowConnector;
-import cascading.flow.FlowDef;
-import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
-import cascading.flow.planner.PlannerException;
-import cascading.property.AppProps;
 
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
@@ -27,6 +20,12 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowDef;
+import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
+import cascading.flow.planner.PlannerException;
+import cascading.property.AppProps;
 
 public class DailyFlow {
 
@@ -80,9 +79,6 @@ public class DailyFlow {
 
     @Autowired
     private FlowDefinition flowDefinition;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     public DataFlowContext doDailyFlow(String[] typesList) {
 
