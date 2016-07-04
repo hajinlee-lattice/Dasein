@@ -8,7 +8,7 @@ PARAM_BROKER_GROUP_MAX_SIZE = Parameter("MaxSize", "Maximum number of Kafka brok
 PARAM_ZK_HOSTS = Parameter("ZookeeperHosts", "Zookeeper cluster connection string")
 PARAM_BROKERS = Parameter("Brokers", "Desired number of Kafka broker tasks", type="Number", default="4")
 PARAM_BROKER_MEMORY = Parameter("BrokerMemory", "Desired number of Kafka broker tasks", type="Number", default="4")
-PARAM_BROKER_HEAP_SIZE = Parameter("BrokerHeapSize", "Desired number of Kafka broker tasks", type="Number", default="4")
+PARAM_BROKER_HEAP_SIZE = Parameter("BrokerHeapSize", "Desired number of Kafka broker tasks", default="3072m")
 PARAM_ECS_INSTANCE_PROFILE = ArnParameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
 
 KAFKA_PARAMS = [

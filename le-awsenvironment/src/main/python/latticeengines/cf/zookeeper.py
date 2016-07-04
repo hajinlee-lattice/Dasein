@@ -8,7 +8,7 @@ import sys
 import time
 
 from .module.ec2 import EC2Instance
-from .module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP, PARAM_VPC_ID, PARAM_SUBNET_1
+from .module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP, PARAM_VPC_ID, PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_KEY_NAME, PARAM_ENVIRONMENT
 from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
 from ..conf import AwsEnvironment
@@ -54,9 +54,11 @@ def provision(environment, stackname):
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
             PARAM_SUBNET_1.config(config.public_subnet_1()),
-            PARAM_SUBNET_1.config(config.public_subnet_2()),
+            PARAM_SUBNET_2.config(config.public_subnet_2()),
             PARAM_SECURITY_GROUP.config(config.zk_sg()),
-            PARAM_INSTANCE_TYPE.config("t2.medium")
+            PARAM_INSTANCE_TYPE.config("t2.medium"),
+            PARAM_KEY_NAME.config(config.ec2_key()),
+            PARAM_ENVIRONMENT.config(environment)
         ],
         TimeoutInMinutes=60,
         ResourceTypes=[

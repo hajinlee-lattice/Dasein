@@ -1,7 +1,8 @@
 {
   "Environment2Props": {
-    "qa"  : { "Key" : "value" },
-    "prod" : { "Key" : "value" }
+    "dev"  : { "Key" : "dynamic values" },
+    "qa"  : { "Key" : "dynamic values" },
+    "prod" : { "Key" : "dynamic values" }
   },
   "AWSRegion2AMI": {
     "us-east-1": {

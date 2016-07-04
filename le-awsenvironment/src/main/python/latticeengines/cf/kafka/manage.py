@@ -10,7 +10,7 @@ from ..module.autoscaling import AutoScalingGroup, LaunchConfiguration
 from ..module.ec2 import EC2Instance
 from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from ..module.elb import ElasticLoadBalancer
-from ..module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP
+from ..module.parameter import *
 from ..module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from ..module.template import TEMPLATE_DIR
 from ...conf import AwsEnvironment
@@ -84,7 +84,6 @@ def provision(environment, stackname, zkhosts, profile=None):
         profile = DEFAULT_PROFILE
     else:
         profile = KafkaProfile(profile)
-
     config = AwsEnvironment(environment)
 
     client = boto3.client('cloudformation')
@@ -145,6 +144,7 @@ def provision(environment, stackname, zkhosts, profile=None):
                 'ParameterKey': 'BrokerHeapSize',
                 'ParameterValue': profile.broker_heap()
             },
+            PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile())
         ],
         TimeoutInMinutes=60,
