@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +38,6 @@ import com.latticeengines.leadprioritization.workflow.MatchAndModelAndEmailWorkf
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -55,9 +54,6 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
 
     @Autowired
     private ModelSummaryService modelSummaryService;
