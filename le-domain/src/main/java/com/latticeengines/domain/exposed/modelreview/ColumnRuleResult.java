@@ -6,25 +6,18 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 
 @Entity
 @javax.persistence.Table(name = "MODELREVIEW_COLUMNRESULT")
 public class ColumnRuleResult extends BaseRuleResult {
 
-    @JsonIgnore
+    @JsonProperty
     @Column(name = "FLAGGED_COLUMNS", nullable = true)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<String> flaggedColumnNames = new ArrayList<>();
-
-    @JsonProperty
-    @Transient
-    private List<AttributeMetadata> flaggedColumns = new ArrayList<>();
 
     public List<String> getFlaggedColumnNames() {
         return flaggedColumnNames;
@@ -34,12 +27,29 @@ public class ColumnRuleResult extends BaseRuleResult {
         this.flaggedColumnNames = flaggedColumnNames;
     }
 
-    public List<AttributeMetadata> getFlaggedColumns() {
-        return flaggedColumns;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((flaggedColumnNames == null) ? 0 : flaggedColumnNames.hashCode());
+        return result;
     }
 
-    public void setFlaggedColumns(List<AttributeMetadata> flaggedColumns) {
-        this.flaggedColumns = flaggedColumns;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ColumnRuleResult other = (ColumnRuleResult) obj;
+        if (flaggedColumnNames == null) {
+            if (other.flaggedColumnNames != null)
+                return false;
+        } else if (!flaggedColumnNames.equals(other.flaggedColumnNames))
+            return false;
+        return true;
     }
 
 }

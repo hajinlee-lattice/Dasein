@@ -68,6 +68,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     protected static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
     protected static final String TRANSFORMATION_GROUP_NAME = "TRANSFORMATION_GROUP_NAME";
+    protected static final String COLUMN_RULE_RESULTS = "COLUMN_RULE_RESULTS";
+    protected static final String ROW_RULE_RESULTS = "ROW_RULE_RESULTS";
 
     @Autowired
     protected Configuration yarnConfiguration;

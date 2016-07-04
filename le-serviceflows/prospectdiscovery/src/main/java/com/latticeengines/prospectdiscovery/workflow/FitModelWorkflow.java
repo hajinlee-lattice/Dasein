@@ -14,8 +14,12 @@ import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
-import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
+import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
+import com.latticeengines.serviceflows.workflow.modeling.Profile;
+import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
+import com.latticeengines.serviceflows.workflow.modeling.SetMatchSelection;
+import com.latticeengines.serviceflows.workflow.modeling.WriteMetadataFiles;
 import com.latticeengines.serviceflows.workflow.scoring.Score;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -43,7 +47,19 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private Sample sample;
 
     @Autowired
-    private ProfileAndModel profileAndModel;
+    private SetMatchSelection setMatchSelection;
+
+    @Autowired
+    private WriteMetadataFiles writeMetadataFiles;
+
+    @Autowired
+    private Profile profile;
+
+    @Autowired
+    private ReviewModel reviewModel;
+
+    @Autowired
+    private CreateModel createModel;
 
     @Autowired
     private ChooseModel chooseModel;
@@ -70,7 +86,11 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(matchWorkflow) //
                 .next(createImportSummaryWorkflow) //
                 .next(sample) //
-                .next(profileAndModel) //
+                .next(setMatchSelection) //
+                .next(writeMetadataFiles) //
+                .next(profile) //
+                .next(reviewModel) //
+                .next(createModel) //
                 .next(chooseModel) //
                 .next(activateModel) //
                 .next(score) //

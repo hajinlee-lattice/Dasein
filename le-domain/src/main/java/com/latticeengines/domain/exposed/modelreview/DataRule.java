@@ -52,6 +52,10 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
 
     @JsonProperty
     @Transient
+    private String displayName;
+
+    @JsonProperty
+    @Transient
     private String description;
 
     @JsonProperty
@@ -100,6 +104,14 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDescription() {

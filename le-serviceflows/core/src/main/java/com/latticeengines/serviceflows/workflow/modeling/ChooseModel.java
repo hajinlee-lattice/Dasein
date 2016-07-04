@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +32,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
     private static final Log log = LogFactory.getLog(ChooseModel.class);
 
     private InternalResourceRestApiProxy proxy = null;
-    
+
     @Autowired
     private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
 
@@ -49,11 +50,13 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         if (proxy == null) {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
-        List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries.wait(configuration, modelApplicationIdToEventColumn.keySet());
+        Collection<ModelSummary> modelSummaries = waitForDownloadedModelSummaries.wait(configuration,
+                modelApplicationIdToEventColumn).values();
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
         String modelId = bestModelIdAndEventColumn.getKey();
-        executionContext.putString(ACTIVATE_MODEL_IDS, JsonUtils.serialize(Arrays.<String> asList(new String[]{modelId})));
+        executionContext.putString(ACTIVATE_MODEL_IDS,
+                JsonUtils.serialize(Arrays.<String> asList(new String[] { modelId })));
         executionContext.putString(SCORING_MODEL_ID, modelId);
         executionContext.putString(EVENT_COLUMN, bestModelIdAndEventColumn.getValue());
 
@@ -65,7 +68,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
     }
 
     @VisibleForTesting
-    Entry<String, String> chooseBestModelIdAndEventColumn(List<ModelSummary> models,
+    Entry<String, String> chooseBestModelIdAndEventColumn(Collection<ModelSummary> models,
             Map<String, String> modelApplicationIdToEventColumn) {
         Entry<String, String> chosenModelIdAndEventColumn = null;
         List<ModelSummary> validModels = new ArrayList<>();
@@ -114,7 +117,8 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         }
 
         if (chosenModel != null) {
-            double avgProbability = (double) chosenModel.getTotalConversionCount() / (double) chosenModel.getTotalRowCount();
+            double avgProbability = (double) chosenModel.getTotalConversionCount()
+                    / (double) chosenModel.getTotalRowCount();
             executionContext.putDouble(MODEL_AVG_PROBABILITY, avgProbability);
         }
         if (chosenModelIdAndEventColumn == null) {
@@ -126,7 +130,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         return chosenModelIdAndEventColumn;
     }
 
-    private ModelSummary chooseModelWithHighestLift(List<ModelSummary> models) {
+    private ModelSummary chooseModelWithHighestLift(Collection<ModelSummary> models) {
         ModelSummary chosenModel = null;
         double highestLift = Double.MIN_VALUE;
         for (ModelSummary model : models) {

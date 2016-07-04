@@ -389,6 +389,7 @@ public enum LedpCode {
     LEDP_28024("Received Null propdata match status for this root operation uid: {0}."), //
     LEDP_28025("PMML file {0} not found for module {1}."), //
     LEDP_28026("Pivot file {0} not found for module {1}."), //
+    LEDP_28027("Problem reading data rules from {0}."), //
 
     // le-dellebi
     LEDP_29000(

@@ -141,12 +141,13 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         bldr = bldr.profileExcludeList(excludeList);
 
         bldr = bldr.targets(getTargets(eventTable, currentEvent)) //
-                .metadataTable(String.format("%s-%s-Metadata", eventTable.getName(), currentEvent.getDisplayName())) //
+                .metadataTable(getMetadataTableFolderName(eventTable, currentEvent)) //
                 .keyColumn("Id").modelName(configuration.getModelName()) //
                 .eventTableName(getEventTable().getName()) //
                 .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
                 .transformationGroupName(getTransformationGroupName()) //
+                .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .productType(configuration.getProductType()) //
                 .runTimeParams(configuration.runTimeParams());
         if (getPredefinedSelection() != null) {
@@ -164,6 +165,10 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         }
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
         return modelExecutor;
+    }
+
+    protected String getMetadataTableFolderName(Table eventTable, Attribute currentEvent) {
+        return String.format("%s-%s-Metadata", eventTable.getName(), currentEvent.getDisplayName());
     }
 
 }

@@ -8,12 +8,16 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
+import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
+import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
+import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface {
+public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface, RuleResultInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -130,6 +134,38 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     public List<Artifact> getArtifacts(String customerSpace, String moduleName) {
         String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
         return get("getArtifacts", url, List.class);
+    }
+
+    @Override
+    public Boolean createColumnResults(List<ColumnRuleResult> results) {
+        String url = constructUrl("/ruleresults/column");
+        return post("createColumnResults", url, results, Boolean.class);
+    }
+
+    @Override
+    public Boolean createRowResults(List<RowRuleResult> results) {
+        String url = constructUrl("/ruleresults/row");
+        return post("createRowResults", url, results, Boolean.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ColumnRuleResult> getColumnResults(String modelId) {
+        String url = constructUrl("/ruleresults/column/{modelId}", modelId);
+        return get("getColumnResults", url, List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RowRuleResult> getRowResults(String modelId) {
+        String url = constructUrl("/ruleresults/row/{modelId}", modelId);
+        return get("getRowResults", url, List.class);
+    }
+
+    @Override
+    public ModelReviewData getReviewData(String modelId) {
+        String url = constructUrl("/ruleresults/reviewdata/{modelId}", modelId);
+        return get("getReviewData", url, ModelReviewData.class);
     }
 
 }

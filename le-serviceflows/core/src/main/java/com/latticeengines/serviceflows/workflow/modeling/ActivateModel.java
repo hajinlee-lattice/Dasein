@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
         if (proxy == null) {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
-        List<String> modelIds;
+        Collection<String> modelIds;
         if (executionContext.get(ACTIVATE_MODEL_IDS) == null) {
             Map<String, String> modelApplicationIdToEventColumn = JsonUtils.deserialize(
                     executionContext.getString(MODEL_APP_IDS), Map.class);
@@ -36,7 +37,7 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
             modelIds = waitForDownloadedModelSummaries.retrieveModelIds(configuration,
-                    modelApplicationIdToEventColumn.keySet());
+                    modelApplicationIdToEventColumn).values();
         } else {
             modelIds = JsonUtils.deserialize(executionContext.getString(ACTIVATE_MODEL_IDS), List.class);
         }

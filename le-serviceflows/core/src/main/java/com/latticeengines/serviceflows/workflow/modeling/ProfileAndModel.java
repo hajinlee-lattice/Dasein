@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -28,7 +27,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
-@Component("profileAndModel")
+@Deprecated
+//@Component("profileAndModel")
 public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ProfileAndModel.class);

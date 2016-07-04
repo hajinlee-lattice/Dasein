@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -68,12 +67,6 @@ public class ModelProxy extends BaseRestApiProxy implements ModelInterface {
     public AppSubmission createSamples(SamplingConfiguration config) {
         String url = constructUrl("/samples");
         return post("createSamples", url, config, AppSubmission.class);
-    }
-
-    @Override
-    public ModelReviewData getReviewData(String modelId) {
-        String url = constructUrl("reviewdata/{modelId}", modelId);
-        return get("getReviewData", url, ModelReviewData.class);
     }
 
 }

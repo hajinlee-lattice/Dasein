@@ -1,7 +1,10 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -14,6 +17,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -38,7 +42,8 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             eventTable = remediateAttributes(dataRules, eventTable, configuration.isDefaultDataRuleConfiguration());
             eventTable.setDataRules(dataRules);
             if (configuration.isDefaultDataRuleConfiguration()) {
-                metadataProxy.updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
+                metadataProxy
+                        .updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
             }
             putObjectInContext(EVENT_TABLE, JsonUtils.serialize(eventTable));
         }
@@ -47,18 +52,34 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
     public Table remediateAttributes(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
         Set<String> columnsToRemove = new HashSet<>();
 
-        if (isDefault) {
-            // TODO bernard go fetch the ruleoutput for the columns to remediate
-        }
-
         for (DataRule dataRule : dataRules) {
-            if (dataRule.isEnabled() && !CollectionUtils.isEmpty(dataRule.getColumnsToRemediate())) {
-                for (String columnName : dataRule.getColumnsToRemediate()) {
+            if (dataRule.isEnabled()) {
+                List<String> columnNames = new ArrayList<>();
+                if (isDefault) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, List<ColumnRuleResult>> eventToColumnResults = (Map<String, List<ColumnRuleResult>>) executionContext
+                            .get(COLUMN_RULE_RESULTS);
+                    Iterator<List<ColumnRuleResult>> iter = eventToColumnResults.values().iterator();
+                    if (iter.hasNext()) {
+                        List<ColumnRuleResult> results = iter.next();
+                        for (ColumnRuleResult result : results) {
+                            if (result.getDataRuleName().equals(dataRule.getName())) {
+                                columnNames = result.getFlaggedColumnNames();
+                            }
+                        }
+                    }
+                } else {
+                    if (!CollectionUtils.isEmpty(dataRule.getColumnsToRemediate())) {
+                        columnNames = dataRule.getColumnsToRemediate();
+                    }
+                }
+                for (String columnName : columnNames) {
                     columnsToRemove.add(columnName);
                 }
             }
         }
 
+        log.info("Remediating these columns: " + JsonUtils.serialize(columnsToRemove));
         for (Attribute attr : eventTable.getAttributes()) {
             if (columnsToRemove.contains(attr.getName())) {
                 attr.setApprovedUsage(ApprovedUsage.NONE);

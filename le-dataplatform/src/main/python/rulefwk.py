@@ -39,7 +39,7 @@ class DataRulePipeline(Pipeline):
             step.apply(dataFrame, configMetadata)
         return dataFrame
 
-    def processResults(self, dataRulesLocalDir):
+    def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
         for step in self.pipelineSteps:
             fileSuffix = ""
             if isinstance(step, ColumnRule):
@@ -78,6 +78,7 @@ class DataRulePipeline(Pipeline):
                     datum = {}
                     datum["id"] = index
                     datum["itemid"] = itemId
+                    datum["isPositiveEvent"] = False
                     datum["columns"] = ','.join(columns)
                     index = index + 1
                     dataWriter.append(datum)
@@ -137,6 +138,11 @@ def getRowSchema():
         "type" : [ "string", "null" ],
         "columnName" : "itemid",
         "sqlType" : "-9"
+      }, {
+        "name" : "isPositiveEvent",
+        "type" : [ "boolean", "null" ],
+        "columnName" : "itemid",
+        "sqlType" : "16"
       }, {
         "name" : "columns",
         "type" : [ "string", "null" ],

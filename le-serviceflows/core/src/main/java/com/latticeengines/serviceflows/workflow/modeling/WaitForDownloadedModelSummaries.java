@@ -1,9 +1,8 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -24,25 +23,26 @@ public class WaitForDownloadedModelSummaries {
 
     private static final int MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES = 60;
 
-    public <T extends MicroserviceStepConfiguration> List<ModelSummary> wait(T configuration,
-            Collection<String> modelApplicationIds) {
+    public <T extends MicroserviceStepConfiguration> Map<String, ModelSummary> wait(T configuration,
+            Map<String, String> modelApplicationIdToEventColumn) {
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(
                 configuration.getInternalResourceHostPort());
-        List<ModelSummary> modelSummaries = new ArrayList<>();
+        Map<String, ModelSummary> eventToModelSummary = new HashMap<>();
         Set<String> foundModels = new HashSet<>();
 
         int maxTries = MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES;
         int i = 0;
 
-        log.info("Expecting to retrieve models with these application ids:" + Joiner.on(", ").join(modelApplicationIds));
+        log.info("Expecting to retrieve models with these application ids:"
+                + Joiner.on(", ").join(modelApplicationIdToEventColumn.keySet()));
 
         do {
-            for (String modelApplicationId : modelApplicationIds) {
+            for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
                 if (!foundModels.contains(modelApplicationId)) {
                     ModelSummary model = proxy.getModelSummaryFromApplicationId(modelApplicationId, configuration
                             .getCustomerSpace().toString());
                     if (model != null) {
-                        modelSummaries.add(model);
+                        eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                         foundModels.add(modelApplicationId);
                     } else {
                         log.info("Still waiting for model:" + modelApplicationId);
@@ -60,25 +60,25 @@ public class WaitForDownloadedModelSummaries {
             if (i == maxTries) {
                 break;
             }
-        } while (modelSummaries.size() < modelApplicationIds.size());
+        } while (eventToModelSummary.size() < modelApplicationIdToEventColumn.size());
 
-        if (modelSummaries.size() < modelApplicationIds.size()) {
+        if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
             Joiner joiner = Joiner.on(",").skipNulls();
-            throw new LedpException(LedpCode.LEDP_28013, new String[] { joiner.join(modelApplicationIds),
-                    joiner.join(foundModels) });
+            throw new LedpException(LedpCode.LEDP_28013, new String[] {
+                    joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels) });
         }
 
-        return modelSummaries;
+        return eventToModelSummary;
     }
 
-    public <T extends MicroserviceStepConfiguration> List<String> retrieveModelIds(T configuration,
-            Collection<String> modelApplicationIds) {
-        List<String> modelIds = new ArrayList<>();
-        List<ModelSummary> modelSummaries = wait(configuration, modelApplicationIds);
-        for (ModelSummary modelSummary : modelSummaries) {
-            modelIds.add(modelSummary.getId());
+    public <T extends MicroserviceStepConfiguration> Map<String, String> retrieveModelIds(T configuration,
+            Map<String, String> modelApplicationIdToEventColumn) {
+        Map<String, ModelSummary> eventToModelSummary = wait(configuration, modelApplicationIdToEventColumn);
+        Map<String, String> eventToModelId = new HashMap<>();
+        for (String event : eventToModelSummary.keySet()) {
+            eventToModelId.put(event, eventToModelSummary.get(event).getId());
         }
-        return modelIds;
+        return eventToModelId;
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,29 +168,80 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     }
 
     private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {
-        List<DataRule> defaultRules = new ArrayList<>();
+        List<DataRule> defaultRules = getMasterList();
 
-        DataRule countUniqueValueRule = new DataRule();
-        countUniqueValueRule.setName("CountUniqueValueRule");
-        countUniqueValueRule.setEnabled(true);
-        Map<String, String> countUniqueValueRuleProps = new HashMap<>();
-        countUniqueValueRuleProps.put("uniqueCountThreshold", String.valueOf(200));
-        countUniqueValueRule.setProperties(countUniqueValueRuleProps);
-        defaultRules.add(countUniqueValueRule);
-
-        DataRule populatedRowCount = new DataRule();
-        populatedRowCount.setName("PopulatedRowCount");
-        populatedRowCount.setEnabled(true);
-        defaultRules.add(populatedRowCount);
-
-        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            DataRule leadPerDomainRule = new DataRule();
-            leadPerDomainRule.setName("LeadPerDomainRule");
-            leadPerDomainRule.setEnabled(true);
-            defaultRules.add(leadPerDomainRule);
+        for (DataRule dataRule : defaultRules) {
+            if (dataRule.getName() == "CountUniqueValueRule") {
+                dataRule.setEnabled(true);
+                Map<String, String> countUniqueValueRuleProps = new HashMap<>();
+                countUniqueValueRuleProps.put("uniqueCountThreshold", String.valueOf(200));
+                dataRule.setProperties(countUniqueValueRuleProps);
+            } else if (dataRule.getName() == "PopulatedRowCount") {
+                dataRule.setEnabled(true);
+            } else if (dataRule.getName() == "OneRecordPerDomain"
+                    && schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+                dataRule.setEnabled(true);
+            }
         }
 
         return defaultRules;
+    }
+
+    private List<DataRule> getMasterList() {
+        List<Triple<String, String, Boolean>> masterColumnConfig = new ArrayList<>();
+        List<Triple<String, String, Boolean>> masterRowConfig = new ArrayList<>();
+
+        Triple<String, String, Boolean> overlyPredictiveColumns = Triple.of("Overly Predictive Columns",
+                "overly predictive single category / value range", false);
+        masterColumnConfig.add(overlyPredictiveColumns);
+        Triple<String, String, Boolean> lowCoverage = Triple.of("Low Coverage", "Low coverage (empty exceeds x%)",
+                false);
+        masterColumnConfig.add(lowCoverage);
+        Triple<String, String, Boolean> populatedRowCount = Triple.of("Populated Row Count",
+                "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ", false);
+        masterColumnConfig.add(populatedRowCount);
+        Triple<String, String, Boolean> positivelyPredictiveNulls = Triple.of("Positively Predictive Nulls",
+                "Positively predictive nulls", false);
+        masterColumnConfig.add(positivelyPredictiveNulls);
+        Triple<String, String, Boolean> uniqueValueCount = Triple.of("Count Unique Value Rule",
+                "Unique value count in column - Integrated from Profiling", false);
+        masterColumnConfig.add(uniqueValueCount);
+        Triple<String, String, Boolean> publicDomains = Triple.of("Public Domains",
+                "Exclude Records with Public Domains ", false);
+        masterRowConfig.add(publicDomains);
+        Triple<String, String, Boolean> customDomains = Triple
+                .of("Custom Domains", "Exclude specific domain(s)", false);
+        masterRowConfig.add(customDomains);
+        Triple<String, String, Boolean> oneRecordPerDomain = Triple.of("One Record Per Domain",
+                "One Record Per Domain", false);
+        masterRowConfig.add(oneRecordPerDomain);
+        Triple<String, String, Boolean> oneLeadPerAccount = Triple.of("One Lead Per Account", "One Lead Per Account",
+                false);
+        masterRowConfig.add(oneLeadPerAccount);
+        Triple<String, String, Boolean> highPredictiveLowPopulation = Triple.of("High Predictive Low Population",
+                "High predictive, low population", false);
+        masterRowConfig.add(highPredictiveLowPopulation);
+
+        List<DataRule> masterRuleList = new ArrayList<>();
+        for (Triple<String, String, Boolean> config : masterColumnConfig) {
+            DataRule rule = generateDataRule(config);
+            masterRuleList.add(rule);
+        }
+
+        return masterRuleList;
+    }
+
+    private DataRule generateDataRule(Triple<String, String, Boolean> config) {
+        DataRule rule = new DataRule();
+        rule.setName(org.springframework.util.StringUtils.trimAllWhitespace(config.getLeft()));
+        rule.setDisplayName(config.getLeft());
+        rule.setDescription(config.getMiddle());
+        rule.setFrozenEnablement(config.getRight());
+        rule.setColumnsToRemediate(new ArrayList<String>());
+        rule.setEnabled(false);
+        rule.setProperties(new HashMap<String, String>());
+
+        return rule;
     }
 
 }

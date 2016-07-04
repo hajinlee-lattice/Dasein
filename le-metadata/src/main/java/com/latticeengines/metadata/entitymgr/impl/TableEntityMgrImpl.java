@@ -22,9 +22,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
-import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
@@ -112,18 +110,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (entity.getDataRules() != null) {
             for (DataRule dataRule : entity.getDataRules()) {
                 dataRuleDao.create(dataRule);
-            }
-        }
-
-        if (entity.getColumnRuleResults() != null) {
-            for (ColumnRuleResult result : entity.getColumnRuleResults()) {
-                columnRuleResultDao.create(result);
-            }
-        }
-
-        if (entity.getRowRuleResults() != null) {
-            for (RowRuleResult result : entity.getRowRuleResults()) {
-                rowRuleResultDao.create(result);
             }
         }
 
@@ -238,8 +224,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             Hibernate.initialize(table.getPrimaryKey());
             Hibernate.initialize(table.getLastModifiedKey());
             Hibernate.initialize(table.getDataRules());
-            Hibernate.initialize(table.getColumnRuleResults());
-            Hibernate.initialize(table.getRowRuleResults());
         }
     }
 
@@ -295,18 +279,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (table.getDataRules() != null) {
             for (DataRule dataRule : table.getDataRules()) {
                 dataRule.setTable(table);
-            }
-        }
-
-        if (table.getColumnRuleResults() != null) {
-            for (ColumnRuleResult result : table.getColumnRuleResults()) {
-                result.setTable(table);
-            }
-        }
-
-        if (table.getRowRuleResults() != null) {
-            for (RowRuleResult result : table.getRowRuleResults()) {
-                result.setTable(table);
             }
         }
     }
