@@ -19,11 +19,11 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.security.entitymanager.GlobalAuthSessionEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthTenantEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthTicketEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 
 @Component("globalSessionManagementService")

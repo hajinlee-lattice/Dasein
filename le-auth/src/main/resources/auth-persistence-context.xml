@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:jee="http://www.springframework.org/schema/jee" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-4.0.xsd
+      http://www.springframework.org/schema/jee
+      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <bean id="dataSourceGlobalAuth" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="${auth.globalauth.datasource.url}" />
+        <property name="username" value="${auth.globalauth.datasource.user}" />
+        <property name="password" value="${auth.globalauth.datasource.password.encrypted}" />
+    </bean>
+
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactoryGlobalAuth" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceGlobalAuth" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.auth, com.latticeengines.domain.exposed" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${auth.globalauth.hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerGlobalAuth" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryGlobalAuth">
+        <qualifier value="globalAuth" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManagerGlobalAuth" />
+
+    <!--  DAOs for GlobalAuth database  -->
+    <bean id="globalAuthUserTenantRightDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthUserTenantRightDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+    <bean id="globalAuthUserDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthUserDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+    <bean id="globalAuthTicketDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthTicketDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+    <bean id="globalAuthTenantDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthTenantDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+    <bean id="globalAuthSessionDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthSessionDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+    <bean id="globalAuthAuthenticationDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthAuthenticationDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
+</beans>

@@ -31,6 +31,7 @@
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
                 <value>file:${PROXY_PROPDIR}/proxy.properties</value>
                 <value>file:${QUARTZCLIENT_PROPDIR}/quartzclient.properties</value>
+                <value>file:${AUTH_PROPDIR}/auth.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

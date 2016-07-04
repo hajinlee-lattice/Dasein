@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 
 @Component("globalTenantManagementService")

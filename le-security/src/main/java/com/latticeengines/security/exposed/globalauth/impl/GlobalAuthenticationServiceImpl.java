@@ -22,9 +22,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.security.entitymanager.GlobalAuthAuthenticationEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthTicketEntityMgr;
-import com.latticeengines.security.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
