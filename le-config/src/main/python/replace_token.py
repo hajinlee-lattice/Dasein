@@ -11,7 +11,7 @@ def main():
 
 def replace(dir, profile):
     tokens = load_tokens(profile)
-    print "Found tokens:", tokens
+    print "\nFound tokens:", tokens
 
     files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
     for f in files:
@@ -23,8 +23,9 @@ def replace(dir, profile):
                     if len(line.strip()) > 0 and ('#' != line.strip()[0]):
                         key = line.strip().replace('\n', '').split('=')[0]
                         value = line.strip().replace('\n', '')[len(key) + 1:]
+                        new_value = value
                         for k, v in tokens.items():
-                            new_value = value.replace('${%s}' % k, v).strip()
+                            new_value = new_value.replace('${%s}' % k, v).strip()
                         if new_value != value:
                             print 'Set %s=%s' % (key.strip(), new_value)
                         new_file.write('%s=%s\n' % (key.strip(), new_value))
