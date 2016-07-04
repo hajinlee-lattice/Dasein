@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 
 public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase {
@@ -42,9 +41,6 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private EaiMetadataService eaiMetadataService;
 
     private URL metadataUrl;
 
