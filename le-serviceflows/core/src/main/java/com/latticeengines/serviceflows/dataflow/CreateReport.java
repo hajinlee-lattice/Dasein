@@ -43,7 +43,6 @@ public class CreateReport extends TypesafeDataFlowBuilder<CreateReportParameters
     private Node addReport(ReportColumn column, Node source) {
         Node ret = null;
         if (column instanceof GroupByDomainReportColumn) {
-            GroupByDomainReportColumn casted = (GroupByDomainReportColumn) column;
             List<Aggregation> aggregationList = new ArrayList<>();
             source = DataFlowUtils.extractDomain(source, DOMAIN);
             aggregationList.add(new Aggregation(DOMAIN, TEMPORARY_FIELD_NAME, AggregationType

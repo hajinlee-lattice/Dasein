@@ -103,7 +103,6 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 }
 
                 String leadID = record.get("LeadID");
-                String email = record.get("Email");
                 String emailDomain = record.get("EmailDomain");
                 String firstName = record.get("FirstName");
                 String lastName = record.get("LastName");
@@ -308,19 +307,6 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 else if (resultMonthsSinceOnline != null && value == null)
                     Assert.assertTrue(false);
 
-                Boolean passesMonthsSinceOnline = passesIntegerValues(resultMonthsSinceOnline, alexaMonthsSinceOnline);
-                //
-                // This function can only be properly tested when the dataset is
-                // produced on the same day as the test
-                // is run. For now, just check that it executes.
-                //
-                // if (!passesMonthsSinceOnline) {
-                // System.out.println(String.format("ID=%s, Src=%s, Orig=%s,
-                // New=%d", leadID, alexaOnlineSince,
-                // alexaMonthsSinceOnline, (int) resultMonthsSinceOnline));
-                // }
-                // assertEquals(passesMonthsSinceOnline, Boolean.TRUE);
-
                 functionName = "std_visidb_ds_firstname_sameas_lastname";
                 Object resultFirstLastName = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_firstname_sameas_lastname", "std_visidb_ds_firstname_sameas_lastname", //
@@ -476,7 +462,6 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                     totalReadTime += startReadTime - lastLoopEndTime;
                 }
 
-                String leadID = record.get("LeadID");
                 String email = record.get("Email");
                 String dsEmailIsInvalid = record.get("DS_Email_IsInvalid");
                 String dsEmailLength = record.get("DS_Email_Length");
