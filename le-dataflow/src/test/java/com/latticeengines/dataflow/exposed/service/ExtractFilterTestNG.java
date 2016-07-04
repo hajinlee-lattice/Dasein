@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.joda.time.DateTime;
@@ -18,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.ExtractFilterBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
@@ -41,7 +42,6 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
     private Configuration configuration = new Configuration();
 
     @BeforeClass(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void setup() throws Exception {
         HdfsUtils.rmdir(configuration, INPUT_PATH);
 
@@ -50,8 +50,8 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
         FileSystem fs = FileSystem.get(configuration);
         extractFilterBuilder.setLocal(false);
         List<AbstractMap.SimpleEntry<String, String>> copyEntries = new ArrayList<>();
-        copyEntries.add(new AbstractMap.SimpleEntry(extract1, INPUT_PATH));
-        copyEntries.add(new AbstractMap.SimpleEntry(extract2, INPUT_PATH));
+        copyEntries.add(new AbstractMap.SimpleEntry<>(extract1, INPUT_PATH));
+        copyEntries.add(new AbstractMap.SimpleEntry<>(extract2, INPUT_PATH));
         doCopy(fs, copyEntries);
     }
 

@@ -18,7 +18,6 @@ public class CustomDelimitedParser extends DelimitedParser {
     private static final String COMMA = ",";
     private static final String QUOTE = "\"";
     private static final String EQUAL_QUOTE = "=" + QUOTE;
-    private static final int MAX_LOOPS = 1000;
 
     private CsvToAvroFieldMapping fieldMap;
 
