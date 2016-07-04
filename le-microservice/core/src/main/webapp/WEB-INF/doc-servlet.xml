@@ -4,7 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <import resource="classpath:microservice-properties-context.xml" />
+    <import resource="classpath:common-properties-context.xml" />
     <import resource="classpath:microservice-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.microservice">

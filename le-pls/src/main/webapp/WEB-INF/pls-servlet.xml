@@ -9,7 +9,7 @@
 
     <import resource="classpath:pls-context.xml" />
     <import resource="classpath:quartzclient-context.xml"/>
-    <import resource="classpath:pls-properties-context.xml" />
+    <import resource="classpath:common-properties-context.xml" />
     <bean class="com.latticeengines.pls.swagger.SwaggerConfig" />
 
     <bean id="multipartResolver"

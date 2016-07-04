@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
-@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml", })
+@ContextConfiguration(locations = { "classpath:common-properties-context.xml", })
 public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(BatchDownloadTestNG.class);

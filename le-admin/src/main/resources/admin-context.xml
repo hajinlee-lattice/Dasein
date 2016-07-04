@@ -8,7 +8,7 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <import resource="classpath:camille-bootstrap-context.xml" />
-    <import resource="classpath:admin-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:admin-bardjams-persistence-context.xml" />
     <import resource="classpath:security-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>

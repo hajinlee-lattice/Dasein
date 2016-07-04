@@ -9,7 +9,7 @@
 
     <!-- <import resource="classpath:quartz-security-context.xml" /> -->
     <import resource="classpath:quartz-context.xml" />
-    <import resource="classpath:quartz-properties-context.xml" />
+    <import resource="classpath:common-properties-context.xml" />
     <!-- <import resource="classpath:quartz-aspects-context.xml" /> -->
     
 

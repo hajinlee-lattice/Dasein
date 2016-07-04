@@ -4,18 +4,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-
     <import resource="classpath:dataflow-context.xml"/>
-    <import resource="classpath:dataflow-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
-    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
-        <property name="locations">
-            <list>
-                <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false"/>
-        <property name="ignoreResourceNotFound" value="false"/>
-    </bean>
 
 </beans>

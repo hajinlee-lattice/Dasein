@@ -21,6 +21,6 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
     <import resource="classpath:eai-context.xml"/>
-    <import resource="classpath:eai-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
 
 </beans>

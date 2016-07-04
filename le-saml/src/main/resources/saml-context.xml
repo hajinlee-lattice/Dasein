@@ -10,6 +10,6 @@
 
     <import resource="classpath:saml-core-context.xml"/>
     <import resource="classpath:saml-persistence-context.xml"/>
-    <import resource="classpath:saml-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:security-context.xml"/>
 </beans>

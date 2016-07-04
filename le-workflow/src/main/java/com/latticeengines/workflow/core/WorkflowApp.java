@@ -15,7 +15,7 @@ public class WorkflowApp {
     private static final Log log = LogFactory.getLog(WorkflowApp.class);
 
     public static void main(String[] args) {
-        String[] springConfig = { "workflow-context.xml", "workflow-properties-context.xml" };
+        String[] springConfig = { "workflow-context.xml", "common-properties-context.xml" };
 
         try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(springConfig)) {
             WorkflowService workflowService = (WorkflowService) context.getBean("workflowService");

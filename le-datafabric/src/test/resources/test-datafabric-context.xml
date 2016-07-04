@@ -4,6 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="classpath:datafabric-context.xml" />
-    <import resource="classpath:datafabric-properties-context.xml" />
+    <import resource="classpath:common-properties-context.xml" />
 
 </beans>

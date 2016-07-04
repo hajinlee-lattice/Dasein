@@ -13,7 +13,7 @@
     </context:component-scan>
 
     <import resource="classpath:monitor-alerts-context.xml"/>
-    <import resource="classpath:metadata-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:metadata-aspects-context.xml"/>
     <import resource="classpath:metadata-hive-context.xml"/>
     <import resource="classpath:metadata-camille-context.xml"/>

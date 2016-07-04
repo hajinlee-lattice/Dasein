@@ -19,7 +19,7 @@ import com.latticeengines.cassandra.exposed.dao.data.ColumnTypeMapper;
 import com.latticeengines.propdata.matching.service.MatchService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:propdata-matching-context.xml", "classpath:propdata-matching-properties-context.xml" })
+@ContextConfiguration(locations = { "classpath:propdata-matching-context.xml", "classpath:common-properties-context.xml" })
 public class MatchServicemplTestNG extends AbstractTestNGSpringContextTests {
 
     @Resource(name = "propDataCassandraGenericDao")

@@ -9,7 +9,7 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
     <import resource="classpath:microservice-dellebi-context.xml"/>
-    <import resource="classpath:microservice-dellebi-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <bean class="com.latticeengines.microservice.swagger.SwaggerConfig" />
 
 </beans>

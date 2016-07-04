@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Configuration
 @EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @RestController
-@ImportResource(value = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
+@ImportResource(value = { "classpath:playmaker-context.xml", "classpath:common-properties-context.xml" })
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource extends SpringBootServletInitializer {
 

@@ -14,7 +14,7 @@
 
     <import resource="classpath:test-propdata-match-context.xml"/>
     <import resource="classpath:test-propdata-collection-context.xml"/>
-    <import resource="classpath:test-propdata-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:propdata-persistence-entitlements-context.xml"/>
 
 </beans>

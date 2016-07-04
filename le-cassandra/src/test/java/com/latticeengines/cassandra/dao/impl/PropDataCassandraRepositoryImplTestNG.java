@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.cassandra.exposed.dao.CassandraGenericDao;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:cassandra-context.xml", "classpath:cassandra-properties-context.xml" })
+@ContextConfiguration(locations = { "classpath:cassandra-context.xml", "classpath:common-properties-context.xml" })
 public class PropDataCassandraRepositoryImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Resource(name = "propDataCassandraGenericDao")

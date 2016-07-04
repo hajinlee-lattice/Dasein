@@ -29,7 +29,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
-@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml", "classpath:dellebi-context.xml" })
+@ContextConfiguration(locations = { "classpath:common-properties-context.xml", "classpath:dellebi-context.xml" })
 public class DellEbiTestNGBase extends AbstractTestNGSpringContextTests {
 
     static final Log log = LogFactory.getLog(DellEbiTestNGBase.class);

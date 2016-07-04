@@ -21,7 +21,7 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
     <import resource="classpath:monitor-alerts-context.xml"/>
-    <import resource="classpath:monitor-alerts-properties-context.xml"/> 
+    <import resource="classpath:common-properties-context.xml"/>
     <context:component-scan base-package="com.latticeengines.monitor.exposed"/>
 
 </beans>

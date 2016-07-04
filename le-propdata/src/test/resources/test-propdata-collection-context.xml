@@ -5,6 +5,6 @@
 
     <import resource="classpath:propdata-collection-context.xml"/>
     <import resource="classpath:propdata-zk-runtime-context.xml" />
-    <import resource="classpath:test-propdata-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
 
 </beans>

@@ -4,6 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:security-context.xml"/>
-    <import resource="classpath:test-security-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
 
 </beans>

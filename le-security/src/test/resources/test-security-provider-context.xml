@@ -9,7 +9,7 @@
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:security-context.xml"/>
-    <import resource="classpath:test-security-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
 
     <security:http auto-config="false"

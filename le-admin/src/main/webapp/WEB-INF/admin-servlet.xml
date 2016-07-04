@@ -6,7 +6,7 @@
        http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:admin-context.xml"/>
-    <import resource="classpath:admin-properties-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <bean class="com.latticeengines.admin.swagger.SwaggerConfig" />
 
     <bean id="adminHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">

@@ -27,7 +27,7 @@ import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
 @Configuration
 @EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:oauth2-properties-context.xml" })
+@ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:common-properties-context.xml" })
 public class OAuthServer extends SpringBootServletInitializer {
 
     @Autowired
