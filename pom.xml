@@ -43,6 +43,7 @@
         <module>le-serviceflows</module>
         <module>le-cassandra</module>
         <module>le-propdata</module>
+        <module>le-auth</module>
         <module>le-security</module>
         <module>le-oauth2db</module>
         <module>le-scoringapi</module>
