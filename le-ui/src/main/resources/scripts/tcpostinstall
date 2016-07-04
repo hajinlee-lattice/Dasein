@@ -12,7 +12,15 @@ cd /tmp/le-ui
 tar xzf le-ui.tar.gz
 
 cat ${STACK_PROFILE}
-python replace_token.py -d /tmp/le-ui/conf/env/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+
+for kv in $(cat ${STACK_PROFILE});
+do
+	key=$(echo $kv | cut -d = -f 1)
+	value=$(echo $kv | cut -d = -f 2-)
+	echo $key $value
+	sed -i "s|\${${key}}|${value}|g" /tmp/le-ui/conf/env/${LE_ENVIRONMENT}/ENV_VARS
+done
+
 
 cd le-ui
 cp -rf . /opt/node/latest

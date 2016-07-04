@@ -65,9 +65,6 @@
                                 <source>
                                     <location>../le-ui.tar.gz</location>
                                 </source>
-                                <source>
-                                    <location>../le-config/src/main/python/replace_token.py</location>
-                                </source>
                             </sources>
                         </mapping>
                     </mappings>
