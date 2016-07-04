@@ -287,7 +287,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
                 modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
                         (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
-                        modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
+                        modelConfiguration, (customerSpace != null ? customerSpace : customerSpace), metadataProxy,
                         getTestModelSummaryParser());
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
