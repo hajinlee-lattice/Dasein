@@ -8,7 +8,7 @@ echo $STACK_PROFILE
 echo "replace tokens"
 cd /tmp/ledp
 cat ${STACK_PROFILE}
-python replace_token.py -d /tmp/ledp/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
 
 echo "copying files from temporary folders"
 mkdir -p /etc/ledp

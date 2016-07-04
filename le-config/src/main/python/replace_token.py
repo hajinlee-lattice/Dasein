@@ -1,13 +1,13 @@
-import argparse
 import glob
 import os
+import sys
 
 PROPERTY_FILE_SUFFIX = "*.properties"
 NEW_SUFFIX=".new"
 
 def main():
-    args = parse_args()
-    replace(args.dir, args.profile)
+    dir, profile = sys.argv[:2]
+    replace(dir, profile)
 
 def replace(dir, profile):
     tokens = load_tokens(profile)

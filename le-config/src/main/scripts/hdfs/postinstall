@@ -25,7 +25,7 @@ cd /tmp/ledp
 
 cat ${STACK_PROFILE}
 
-python replace_token.py -d /tmp/ledp/${LE_ENVIRONMENT} -p ${STACK_PROFILE}
+python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
 
 su -l yarn -c "hdfs dfs -rm -r -f /app/${VERSION}/conf"
 su -l yarn -c "hdfs dfs -mkdir -p /app/${VERSION}/conf"
