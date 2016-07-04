@@ -1,16 +1,11 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Map;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
-//import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.Record;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class ScoreRecordHistory implements HasId<String> {

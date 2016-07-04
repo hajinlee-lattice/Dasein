@@ -1,9 +1,8 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FieldMappingDocument {
     @JsonProperty

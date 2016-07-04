@@ -4,16 +4,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
-import com.latticeengines.domain.exposed.metadata.Tag;
 
 public class ColumnMetadataUnitTestNG {
 

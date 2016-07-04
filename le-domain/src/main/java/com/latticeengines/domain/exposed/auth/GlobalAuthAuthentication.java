@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.auth;
 
-import java.util.Date;
-
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
