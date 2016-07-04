@@ -3,6 +3,7 @@ import boto3
 import json
 import math
 import os
+from kazoo.client import KazooClient
 
 from .params import *
 from .profile import KafkaProfile, DEFAULT_PROFILE
@@ -41,15 +42,10 @@ def create_template():
     stack = Stack("AWS CloudFormation template for Kafka ECS container instances.")
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(KAFKA_PARAMS)
 
-    #ec2role = ECSServiceRole("EC2Role")
-    #instanceprofile = InstanceProfile("EC2InstanceProfile", ec2role)
-    #stack.add_resources([ec2role, instanceprofile])
-
     # Broker resources
     elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     ecscluster = ECSCluster("BrokerCluster")
     asgroup, launchconfig = create_bkr_asgroup(ecscluster, [ elb9092 ])
-    # ecsrole = ECSServiceRole("ECSServiceRole")
     bkr, bkr_task = broker_service(ecscluster, asgroup)
     stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, bkr, bkr_task])
 
@@ -85,6 +81,8 @@ def provision(environment, stackname, zkhosts, profile=None):
     else:
         profile = KafkaProfile(profile)
     config = AwsEnvironment(environment)
+
+    cleanup_zk(zkhosts, stackname)
 
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -130,7 +128,7 @@ def provision(environment, stackname, zkhosts, profile=None):
             },
             {
                 'ParameterKey': 'ZookeeperHosts',
-                'ParameterValue': zkhosts
+                'ParameterValue': zkhosts + "/" + stackname
             },
             {
                 'ParameterKey': 'Brokers',
@@ -179,6 +177,13 @@ def teardown(stackname):
     teardown_stack(client, stackname)
 
 
+def cleanup_zk(zkhosts, chroot):
+    print "clean up %s from %s" % (chroot, zkhosts)
+    zk = KazooClient(zkhosts)
+    zk.start()
+    zk.delete(chroot, recursive=True)
+    zk.stop()
+
 def consul_master_service(ecscluster, asgroup):
     container = ContainerDefinition("consul", "progrium/consul") \
         .mem_mb(1000).publish_port(8500, 8500) \
@@ -209,6 +214,7 @@ def create_bkr_asgroup(ecscluster, elbs):
     launchconfig = LaunchConfiguration("BrokerContainerPool", instance_type_ref="BrokerInstanceType")
     launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
+    launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
     launchconfig.mount("/dev/xvda", 8)
 
     disks = broker_log_devices(_LOG_SIZE)
@@ -278,6 +284,7 @@ def create_sr_asgroup(ecscluster, elbs):
     launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instance_type_ref="SRInstanceType")
     launchconfig.set_metadata(sr_metadata(launchconfig, ecscluster))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
+    launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
     return asgroup, launchconfig
@@ -289,8 +296,8 @@ def schema_registry_service(ecscluster, broker):
             { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
             "/schema-registry"
         ] ]}) \
-        .mem_mb(1800).publish_port(9022, 9022) \
-        .set_env("SCHEMA_REGISTRY_HEAP_OPTS", "-Xms1400m -Xms1400m") \
+        .mem_mb(1900).publish_port(9022, 9022) \
+        .set_env("SCHEMA_REGISTRY_HEAP_OPTS", "-Xms1800m -Xms1800m") \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
         .set_env("ZK_NAMESPACE", {"Fn::Join" : ["", [ { "Ref" : "AWS::StackName" }, "_schema_registry" ]]}) \
         .set_logging({
@@ -334,13 +341,14 @@ def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
             { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
             "/kafka-connect"
         ] ]}) \
-        .mem_mb(1800).publish_port(9024, 9024) \
-        .set_env("KAFKA_HEAP_OPTS", "-Xms1400m -Xms1400m") \
+        .mem_mb(1900).publish_port(9024, 9024) \
+        .set_env("KAFKA_HEAP_OPTS", "-Xms1800m -Xms1800m") \
         .set_env("BOOTSTRAP_SERVERS", { "Fn::Join" : [ "", [
             { "Fn::GetAtt": [ elb9092.logical_id(), "DNSName" ] } , ":9092"] ]}) \
         .set_env("SR_ADDRESS", { "Fn::Join" : [ "", [
             "http://", { "Fn::GetAtt": [ elb9022.logical_id(), "DNSName" ] }] ]}) \
         .set_env("GROUP_ID", { "Fn::Join" : [ "", [ "cf-", { "Ref": "AWS::StackName" } ] ]}) \
+        .set_env("REPLICATION_FACTOR", "2") \
         .set_logging({
             "LogDriver": "awslogs",
             "Options": {
@@ -482,6 +490,7 @@ def bkr_metadata(ec2, ecscluster):
     }
 
     disks = broker_log_devices(_LOG_SIZE)
+    print ('According to log size of %d GB, going to mount disks [ ' % _LOG_SIZE) + ','.join(str(d['size']) for d in disks) + ' ] GB'
     for d in disks:
         metadata["AWS::CloudFormation::Init"]["prepare"]["files"]["/tmp/mount_volume.sh"]["content"]["Fn::Join"][1]\
             .append("mountebs /dev/xvd%s /mnt/kafka/log/%s" % (d['label'], d['label']))
@@ -545,7 +554,6 @@ def broker_log_devices(log_size):
             'size': max(log_size, 500),
             'type': 'st1'
         })
-    print ('According to log size of %d GB, going to mount disks [ ' % log_size) + ','.join(str(d['size']) for d in disks) + ' ] GB'
     return disks
 
 def parse_args():

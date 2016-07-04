@@ -185,11 +185,14 @@ def print_zk_hosts(ips):
     return  ','.join(public_zk_hosts), ','.join(private_zk_hosts)
 
 def teardown_cli(args):
-    teardown(args.stackname)
+    teardown(args.stackname, consul=args.consul)
 
-def teardown(stackname):
+def teardown(stackname, consul=None):
     client = boto3.client('cloudformation')
     teardown_stack(client, stackname)
+    if consul is not None:
+        remove_from_consul(consul, "%s_public_zk" % stackname)
+        remove_from_consul(consul, "%s_private_zk" % stackname)
 
 def instance_name(idx):
     return "EC2Instance%d" % (idx + 1)
@@ -230,6 +233,12 @@ def write_to_consul(server, key, value):
     response = conn.getresponse()
     print response.status, response.reason
 
+def remove_from_consul(server, key):
+    conn = httplib.HTTPConnection(server)
+    conn.request("DELETE", "/v1/kv/%s" % key)
+    response = conn.getresponse()
+    print response.status, response.reason
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Zookeeper CloudFormation management')
     commands = parser.add_subparsers(help="commands")
@@ -259,6 +268,7 @@ def parse_args():
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
+    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=teardown_cli)
 
     args = parser.parse_args()

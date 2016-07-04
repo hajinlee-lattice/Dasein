@@ -29,11 +29,11 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     print elbs
 
 def teardown_cli(args):
-    teardown(args.stackname)
+    teardown(args.stackname, consul=args.consul)
 
-def teardown(stackname):
+def teardown(stackname, consul=None):
     kafka.teardown(stackname)
-    zookeeper.teardown(stackname+"-zk")
+    zookeeper.teardown(stackname+"-zk", consul)
 
 def describe(args):
     pass
@@ -57,6 +57,7 @@ def parse_args():
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
+    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=teardown_cli)
 
     args = parser.parse_args()
