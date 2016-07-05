@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,14 @@ public class ExternalColumnEntityMgrImpl implements ExternalColumnEntityMgr {
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ExternalColumn> findByTag(String tag) {
-        return externalColumnDao.findByTag(tag);
+        List<ExternalColumn> columns = externalColumnDao.findByTag(tag);
+        List<ExternalColumn> toReturn = new ArrayList<>();
+        for (ExternalColumn column: columns) {
+            if (column.getTagList().contains(tag)) {
+                toReturn.add(column);
+            }
+        }
+        return toReturn;
     }
 
     @Override
