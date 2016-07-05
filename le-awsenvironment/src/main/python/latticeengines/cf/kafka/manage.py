@@ -1,8 +1,10 @@
 import argparse
 import boto3
 import json
+import logging
 import math
 import os
+import sys
 import time
 from kazoo.client import KazooClient
 
@@ -19,8 +21,11 @@ from ...conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/kafka'
 _EC2_PEM = '~/aws.pem'
-
 _LOG_SIZE=10
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.INFO)
+logging.getLogger('kazoo.client').addHandler(ch)
 
 def main():
     args = parse_args()
@@ -182,13 +187,14 @@ def cleanup_zk(zkhosts, chroot):
     zk = KazooClient(zkhosts)
     for _ in xrange(600):
         try:
+            zk = KazooClient(zkhosts)
             zk.start()
+            zk.delete(chroot, recursive=True)
             break
         except:
+            print "failed to cleanup zookeeper, sleep 10 sec and retry"
             time.sleep(10)
             continue
-
-    zk.delete(chroot, recursive=True)
     zk.stop()
 
 def consul_master_service(ecscluster, asgroup):
