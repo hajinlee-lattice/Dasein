@@ -210,7 +210,7 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Import a report to score';
+                            return 'Import a Report to Score';
                         }
                     },
                     controller: 'OneLineController',

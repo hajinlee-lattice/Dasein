@@ -23,7 +23,7 @@
                       ng-if="isScoringJob && job.status != 'Failed'">
                     <a href="javascript:void(0)" data-ng-click="clickGetScoringResults()">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
-                        <i data-ng-show="showProgress" class="fa fa-refresh fa-spin"></i>
+                        <span data-ng-show="showProgress" class="loading-small"></span>
                         Download
                     </a>
                 </span>
@@ -59,7 +59,7 @@
                     Processing File<br><span class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.load_data">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.load_data">
                     <i class="fa fa-check"></i>
@@ -70,7 +70,7 @@
                     Matching to Data Cloud<br><span class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.generate_insights">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.generate_insights">
                     <i class="fa fa-check"></i>
@@ -81,7 +81,7 @@
                     Building Model<br><span class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.create_global_target_market">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.create_global_target_market">
                     <i class="fa fa-check"></i>
@@ -94,7 +94,7 @@
                     Load Data
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.load_data">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.load_data">
                     <i class="fa fa-check"></i>
@@ -105,7 +105,7 @@
                     Match Data
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.match_data">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.match_data">
                     <i class="fa fa-check"></i>
@@ -116,7 +116,7 @@
                     Generate<br>Insights
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.generate_insights">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.generate_insights">
                     <i class="fa fa-check"></i>
@@ -127,7 +127,7 @@
                     Create Universal<br>Model
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.create_global_model">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.create_global_model">
                     <i class="fa fa-check"></i>
@@ -138,7 +138,7 @@
                     Create Universal<br>Target Market
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.create_global_target_market">
-                    <i class="fa fa-spinner fa-pulse"></i>
+                    <span class="loading-small"></span>
                 </span>
                 <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.create_global_target_market">
                     <i class="fa fa-check"></i>
