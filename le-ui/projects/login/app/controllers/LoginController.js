@@ -13,9 +13,10 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, EvergageUtility,
-                                         BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService) {
-
+.controller('LoginController', function (
+    $scope, $templateCache, $http, $rootScope, $compile, $timeout, ResourceUtility, TimestampIntervalUtility, NavUtility, EvergageUtility,
+    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService
+) {
     $("body").addClass("login-body");
     $('[autofocus]').focus();
 
@@ -48,17 +49,20 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.loginClick = function () {
         $scope.showLoginError = false;
         $scope.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
+        
         if ($scope.loginInProgess) {
             return;
         }
 
         $scope.usernameInvalid = $scope.username === "";
         $scope.passwordInvalid = $scope.password === "";
+
         if ($scope.usernameInvalid || $scope.passwordInvalid) {
             return;
         }
 
         $scope.loginInProgess = true;
+
         LoginService.Login($scope.username, $scope.password).then(function(result) {
             $scope.loginInProgess = false;
             $scope.loginMessage = null;

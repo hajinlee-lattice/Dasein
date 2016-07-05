@@ -1,31 +1,32 @@
 angular
-.module('mainApp.create.csvImport', [
+.module('lp.create.import', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.create.importJob',
-    'mainApp.create.csvReport',
-    //'mainApp.create.pmmlImport',
+    'lp.create.import.job',
+    'lp.create.import.report',
     '720kb.tooltips'
 ])
-.controller('csvImportController', function($scope, $state, $q, ResourceUtility, StringUtility, csvImportService, csvImportStore) {
+.controller('csvImportController', function($scope, $state, $q, ResourceUtility, StringUtility, ImportService, ImportStore) {
     var vm = this;
 
     angular.extend(vm, {
-        importErrorMsg: '',
+        importErrorMsg: 'hgiu',
         accountLeadCheck: '',
         modelDisplayName: '',
         modelDescription: '',
+        uploaded: false,
         showTypeDefault: false,
         showNameDefault: false,
         showImportError: false,
         showImportSuccess: false,
         ResourceUtility: ResourceUtility,
         params: {
+            infoTemplate: "<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>",
             compressed: true
         }
     });
 
-    vm.processHeaders = function(headers) {
+    vm.fileLoad = function(headers) {
         var columns = headers.split(','),
             schemaSuggestion;
 
@@ -48,7 +49,9 @@ angular
         }
     }
     
-    vm.generateModelName = function(fileName) {
+    vm.fileSelect = function(fileName) {
+        vm.uploaded = false;
+
         if (vm.modelDisplayName) {
             return;
         }
@@ -83,7 +86,30 @@ angular
             .parent('div.form-group')
             .removeClass('is-pristine');
     }
+
+    vm.fileDone = function(result) {
+        vm.uploaded = true;
+        vm.fileName = result.Result.name;
+    }
     
+    vm.fileCancel = function() {
+        if (vm.showTypeDefault) {
+            vm.showTypeDefault = false;
+            vm.accountLeadCheck = '';
+        }
+
+        if (vm.showNameDefault) {
+            vm.showNameDefault = false;
+            vm.modelDisplayName = '';
+        }
+
+        var xhr = ImportStore.Get('cancelXHR', true);
+        
+        if (xhr) {
+            xhr.abort();
+        }
+    }
+
     vm.changeType = function() {
         vm.showTypeDefault = false;
     }
@@ -98,7 +124,8 @@ angular
     }
     
     vm.clickNext = function(fileName) {
-        var metaData = vm.metadata = vm.metadata || {},
+        var fileName = fileName || vm.fileName,
+            metaData = vm.metadata = vm.metadata || {},
             displayName = vm.modelDisplayName,
             modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName),
             schemaInterpretation = vm.accountLeadCheck;
@@ -108,29 +135,11 @@ angular
         metaData.displayName = displayName;
         metaData.description = vm.modelDescription;
         metaData.schemaInterpretation = schemaInterpretation;
-        csvImportStore.Set(fileName, metaData);
+        ImportStore.Set(fileName, metaData);
 
         setTimeout(function() {
             $state.go('home.models.import.columns', { csvFileName: fileName });
         }, 1);
-    }
-    
-    vm.clickCancel = function() {
-        if (vm.showTypeDefault) {
-            vm.showTypeDefault = false;
-            vm.accountLeadCheck = '';
-        }
-
-        if (vm.showNameDefault) {
-            vm.showNameDefault = false;
-            vm.modelDisplayName = '';
-        }
-
-        var xhr = csvImportStore.Get('cancelXHR', true);
-        
-        if (xhr) {
-            xhr.abort();
-        }
     }
     
     vm.keyupTextArea = function(event) {

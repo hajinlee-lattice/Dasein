@@ -16,7 +16,7 @@ angular.module('mainApp.models.services.ModelService', [
         var deferred = $q.defer(),
             model = this.modelsMap[modelId];
         
-        if (false && typeof model == 'object') {
+        if (typeof model == 'object') {
             deferred.resolve(model);
         } else {
             ModelService.GetModelById(modelId).then(function(result) {

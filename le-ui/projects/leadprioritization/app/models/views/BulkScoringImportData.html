@@ -3,12 +3,17 @@
   
     <div class="row">
         <div class="six columns offset-three">
-            <div 
-                class="form-group file-upload" 
-                csv-uploader-container="vm_uploader_container.csvFile"
-                url='/pls/scores/fileuploads' 
-                ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
-            </div>
+          <div 
+              file-uploader-container
+              label="Testing Set"
+              params="vm.params"
+              input-name="csvFileName"
+              default-message="vm.params.defaultMessage"
+              file-done="vm.fileDone(result)"
+              file-cancel="vm.fileCancel()"
+              class="form-group file-upload" 
+              ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+          </div>
         </div>
     </div>
 

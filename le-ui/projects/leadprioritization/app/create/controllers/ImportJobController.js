@@ -1,9 +1,9 @@
-angular.module('mainApp.create.importJob', [
+angular.module('lp.create.import.job', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.create.csvImport',
+    'lp.create.import',
     'pd.jobs'
 ])
-.controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService, csvImportStore) {
+.controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService, ImportStore) {
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
     var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;

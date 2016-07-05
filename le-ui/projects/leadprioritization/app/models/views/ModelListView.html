@@ -15,8 +15,17 @@
 
         <div class="row" data-ng-hide="showNoModels || loading">
             <div class="twelve columns list-header">
-                <div class="pull-left number-of-items">{{::ResourceUtility.getString('MODEL_LIST_TOTAL_MODELS', [length])}}</div>
-                <button ui-sref="home.models.import" type="button" class="button orange-button pull-right create-model">Create Model</button>
+                <div class="pull-left number-of-items" ng-if="totalLength">
+                    <!--{{::ResourceUtility.getString('MODEL_LIST_TOTAL_MODELS', [totalLength, activeLength])}}-->
+                    <span class="badge blue-badge">Total: {{totalLength}}</span>,&nbsp;
+                    <span class="badge grey-badge">Active: {{activeLength}} / {{totalLength - activeLength}}</span>
+                </div>
+
+                <div class="pull-right" style="width: 20em;">
+                    <label for="">Create Model:&nbsp;&nbsp;</label>
+                    <button ui-sref="home.models.import" type="button" class="button icon-button orange-button create-model">CSV</button>/
+                    <button ui-sref="home.models.pmml" type="button" class="button icon-button orange-button create-model">PMML</button>
+                </div>
             </div>
         </div>
 

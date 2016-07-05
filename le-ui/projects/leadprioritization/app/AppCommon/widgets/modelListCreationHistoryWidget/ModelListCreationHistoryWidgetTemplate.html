@@ -1,11 +1,15 @@
 <div data-ng-controller="ModelListCreationHistoryWidgetController" class="model-list-creation-history">
-    <div data-ng-if="showUploadModel" class="row table-header">
-        <div class="eight columns offset-two">
-            <button id="model-mgmt-import-model-btn" class="button orange-button" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
+    <div data-ng-if="showUploadModel" class="row">
+        <div class="ten columns offset-one">
+            <div class="pull-left number-of-items" ng-if="models.length > 0">
+                <span class="badge blue-badge">Models: {{models.length}}</span>,&nbsp;
+                <span class="badge gray-badge">Active: {{(models | filter: {'Status':'!Inactive'}).length}} / {{models.length - (models | filter: {'Status':'!Inactive'}).length}}</span>
+            </div>
+            <button class="pull-right button orange-button" id="model-mgmt-import-model-btn" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
         </div>
-    </div>
+    </div><br>
     <div class="row">
-        <div class="eight columns offset-two">
+        <div class="ten columns offset-one">
             <table>
                 <thead>
                   <tr>

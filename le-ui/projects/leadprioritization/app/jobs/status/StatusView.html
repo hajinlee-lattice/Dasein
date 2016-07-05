@@ -22,7 +22,10 @@
         -->
         <div class="row">
             <div class="four columns meta">
-                <!-- <small>Displaying 1-8 of 12</small> -->
+                <div class="pull-left number-of-items" ng-if="jobs.length > 0">
+                    <span class="badge blue-badge">Total: {{jobs.length}}</span>,&nbsp;
+                    <span class="badge gray-badge">Completed: {{(jobs | filter: {jobStatus:'Completed'}).length}} / {{jobs.length - (jobs | filter: {jobStatus:'Completed'}).length}}</span>
+                </div>
             </div>
             <div class="eight columns text-right">
                 

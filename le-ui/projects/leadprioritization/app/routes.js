@@ -18,22 +18,6 @@ angular
     });
 }])
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    var ModelDependencies = {
-            Model: function($q, $stateParams, ModelStore) {
-                var deferred = $q.defer(),
-                    id = $stateParams.modelId;
-                
-                ModelStore.getModel(id).then(function(result) {
-                    deferred.resolve(result);
-                });
-
-                return deferred.promise;
-            },
-            loadAlaSQL: ['$ocLazyLoad', function($ocLazyLoad) {
-                return $ocLazyLoad.load('lib/js/alasql.min.js');
-            }]
-        };
-
     $urlRouterProvider.otherwise('/tenant/');
 
     $stateProvider
@@ -84,7 +68,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 }
             }
-        })
+        }) 
         .state('home.models', {
             url: '/models',
             views: {
@@ -96,69 +80,26 @@ angular
                 },
                 "main@": {
                     templateUrl: 'app/models/views/ModelListView.html'
-                }   
-            }
-        })
-        .state('home.models.import', {
-            url: '/import',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/create/views/CSVImportView.html'
-                }   
-            }
-        })
-        .state('home.models.import.columns', {
-            url: '/:csvFileName/columns',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
-                },
-                "main@": {
-                    resolve: {
-                        FieldDocument: function($q, $stateParams, csvImportService, csvImportStore) {
-                            var deferred = $q.defer();
-
-                            csvImportService.GetFieldDocument($stateParams.csvFileName).then(function(result) {
-                                csvImportStore.SetFieldDocument($stateParams.csvFileName, result.Result);
-                                deferred.resolve(result.Result);
-                            });
-
-                            return deferred.promise;
-                        },
-                        UnmappedFields: function($q, $stateParams, csvImportService, csvImportStore) {
-                            var deferred = $q.defer();
-
-                            csvImportService.GetSchemaToLatticeFields().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
-                    controllerAs: 'vm',
-                    controller: 'CustomFieldsController',
-                    templateUrl: 'app/create/views/CustomFieldsView.html'
-                }   
-            }
-        })
-        .state('home.models.import.job', {
-            url: '/:applicationId/job',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/ModelCreateView.html'
-                },
-                "main@": {
-                    controller: 'ImportJobController',
-                    templateUrl: 'app/create/views/ImportJobView.html'
                 }
             }
         })
         .state('home.model', {
             url: '/model/:modelId',
-            resolve: ModelDependencies,
+            resolve: {
+                Model: function($q, $stateParams, ModelStore) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+                    
+                    ModelStore.getModel(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                loadAlaSQL: function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/alasql.min.js');
+                }
+            },
             views: {
                 "navigation@": {
                     controller: function($scope, $rootScope, Model, FeatureFlagService) {
@@ -269,7 +210,7 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Import testing set';
+                            return 'Import a report to score';
                         }
                     },
                     controller: 'OneLineController',
@@ -278,21 +219,16 @@ angular
                 "main@": {
                     resolve: {
                         RequiredFields: function($q, $http, $stateParams) {
-                            
                             var deferred = $q.defer(),
                                 modelId = $stateParams.modelId;
 
                             $http({
                                 'method': "GET",
                                 'url': '/pls/modelsummaries/metadata/required/' + modelId
-                            })
-                            .then(
-                                function onSuccess(response) {
-                                    deferred.resolve(response.data);
-                                }, function onError(response) {
-                                    deferred.reject(response.data);
-                                }
-                            );
+                            }).then(function(response) {
+                                deferred.resolve(response.data);
+                            });
+
                             return deferred.promise; 
                         }
                     },

@@ -1,6 +1,6 @@
 angular
-.module('mainApp.create.csvImport')
-.controller('CustomFieldsController', function($scope, $state, $stateParams, ResourceUtility, csvImportService, csvImportStore, FieldDocument, UnmappedFields) {
+.module('lp.create.import')
+.controller('CustomFieldsController', function($scope, $state, $stateParams, ResourceUtility, ImportService, ImportStore, FieldDocument, UnmappedFields) {
     var vm = this;
 
     angular.extend(vm, {
@@ -18,7 +18,7 @@ angular
     });
 
     vm.init = function() {
-        vm.csvMetadata = csvImportStore.Get($stateParams.csvFileName) || {};
+        vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
@@ -98,10 +98,10 @@ angular
             }
         });
 
-        csvImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
+        ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
             ShowSpinner('Executing Modeling Job...');
 
-            csvImportService.StartModeling(vm.csvMetadata).then(function(result) {
+            ImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {
                     setTimeout(function() {
                         $state.go('home.models.import.job', { applicationId: result.Result });

@@ -1,4 +1,4 @@
-angular.module('mainApp.create.csvReport', [
+angular.module('lp.create.import.report', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('CSVReportController', function($scope, JobsService, JobResult, ResourceUtility) {

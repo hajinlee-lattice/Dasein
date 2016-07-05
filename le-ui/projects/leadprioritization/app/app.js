@@ -15,8 +15,8 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.controllers.LoginController',
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
-    'mainApp.create.csvImport',
     'mainApp.sfdc.sfdcCredentials',
+    'lp.create.import',
     'pd.navigation',
     'pd.jobs',
     'pd.apiconsole'

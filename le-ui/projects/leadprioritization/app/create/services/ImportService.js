@@ -1,7 +1,7 @@
 angular
-.module('mainApp.create.csvImport')
-.service('csvImportStore', function($q) {
-    var csvImportStore = this;
+.module('lp.create.import')
+.service('ImportStore', function($q) {
+    var ImportStore = this;
     this.files = {};
     this.FieldDocuments = {};
     this.CurrentFieldMapping = null;
@@ -32,23 +32,31 @@ angular
         this.FieldDocuments[name] = data;
     }
 })
-.service('csvImportService', function($q, $http, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
+.service('ImportService', function($q, $http, ResourceUtility, BrowserStorageUtility, ImportStore, ServiceErrorUtility) {
     this.Upload = function(options) {
         var deferred = $q.defer(),
             formData = new FormData(),
-            params = options.params,
-            whitelist = ['schema','modelId','description','compressed'];
-        
-        whitelist.forEach(function(key, value) {
-            if (params[key]) {
-                formData.append(key, params[key]);
-            }
-        })
+            params = options.params || {},
+            whitelist = [
+                'schema','modelId','description','compressed',
+                'displayName','file','metadataFile'
+            ];
+
+        if (params.metadataFile) {
+            params['metadataFile'] = options.file;
+        } else if (options.file) {
+            params['file'] = options.file;
+        }
         
         if (params.displayName) {
-            var name = params.displayName.replace('C:\\fakepath\\','');
-            formData.append('displayName', name);
+            params['displayName'] = params.displayName.replace('C:\\fakepath\\','');
         }
+
+        whitelist.forEach(function(key, value) {
+            if (params[key] && (params[key] != null || params[key] != undefined)) {
+                formData.append(key, params[key]);
+            }
+        });
 
         // can't use $http because it does not expose onprogress event
         var xhr = new XMLHttpRequest();
@@ -89,9 +97,7 @@ angular
         xhr.setRequestHeader("ErrorDisplayMethod", (options.ErrorDisplayMethod || 'banner'));
         //xhr.setRequestHeader("Content-Encoding", "gzip");
 
-        csvImportStore.Set('cancelXHR', xhr, true);
-
-        formData.append('file', options.file);
+        ImportStore.Set('cancelXHR', xhr, true);
 
         xhr.send(formData);
         
@@ -116,13 +122,13 @@ angular
         return deferred.promise;
     }
 
-    this.GetFieldDocument = function(csvFileName) {
+    this.GetFieldDocument = function(FileName) {
         var deferred = $q.defer();
-        var schema = csvImportStore.Get(csvFileName).schemaInterpretation;
+        var schema = ImportStore.Get(FileName).schemaInterpretation;
 
         $http({
             method: 'GET',
-            url: '/pls/models/uploadfile/' + csvFileName + '/fieldmappings',
+            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',
             headers: { 'Content-Type': 'application/json' },
             params: { 'schema': schema }
         })
@@ -158,7 +164,7 @@ angular
         return deferred.promise;
     };
 
-    this.SaveFieldDocuments = function(csvFileName, FieldDocument) {
+    this.SaveFieldDocuments = function(FileName, FieldDocument) {
         var deferred = $q.defer();
         var result;
 
@@ -166,7 +172,7 @@ angular
             method: 'POST',
             url: '/pls/models/uploadfile/fieldmappings',
             headers: { 'Content-Type': 'application/json' },
-            params: { 'displayName': csvFileName },
+            params: { 'displayName': FileName },
             data: {
                 'fieldMappings': FieldDocument.fieldMappings,
                 'ignoredFields': FieldDocument.ignoredFields
@@ -182,17 +188,17 @@ angular
         return deferred.promise;
     };
 
-    this.StartModeling = function(csvMetaData) {
+    this.StartModeling = function(MetaData) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/models/' + csvMetaData.modelName,
+            url: '/pls/models/' + MetaData.modelName,
             data: {
-                'description': csvMetaData.description,
-                'filename': csvMetaData.name,
-                'name': csvMetaData.modelName,
-                'displayName': csvMetaData.displayName
+                'description': MetaData.description,
+                'filename': MetaData.name,
+                'name': MetaData.modelName,
+                'displayName': MetaData.displayName
             },
             headers: { 'Content-Type': 'application/json' }
         })

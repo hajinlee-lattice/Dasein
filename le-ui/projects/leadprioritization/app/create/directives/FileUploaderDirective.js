@@ -1,11 +1,34 @@
 angular
-.module('mainApp.create.csvImport')
-.directive('csvUploader', function ($parse) {
+.module('lp.create.import')
+.directive('fileUploaderContainer', function ($parse) {
+    return {
+        restrict: 'A',
+        scope: {
+            params:'=',
+            label:'@',
+            inputName:'@',
+            inputDisabled:'=',
+            infoTemplate:'=',
+            defaultMessage:'=',
+            fileAccept:'@',
+            fileSelect:'&',
+            fileLoad:'&',
+            fileDone:'&',
+            fileCancel:'&'
+        },
+        templateUrl: 'app/create/directives/CSVUploaderTemplate.html',
+        controllerAs: 'vm_uploader_container',
+        controller: function ($scope) {
+            angular.extend(this, $scope);
+        }
+    };
+})
+.directive('fileUploader', function ($parse) {
     return {
         restrict: 'A',
         require:'ngModel',
         link: function(scope, element, attrs, ngModel) {
-            var model = $parse(attrs.csvUploader);
+            var model = $parse(attrs.fileUploader);
             var modelSetter = model.assign;
 
             element.bind('change', function(){
@@ -19,9 +42,8 @@ angular
             });
         },
         controllerAs: 'vm_uploader',
-        controller: function ($scope, $state, $q, $element, ResourceUtility, StringUtility, csvImportService, csvImportStore, ServiceErrorUtility) {
-            var vm_form = $scope.vm,
-                vm = this,
+        controller: function ($scope, $state, $q, $element, $timeout, ResourceUtility, StringUtility, ImportService, ImportStore, ServiceErrorUtility) {
+            var vm = this,
                 options = {
                     process_percent: 0,
                     compress_percent: 0,
@@ -31,15 +53,18 @@ angular
                     processing: false,
                     compressing: false,
                     compressed: true,
-                    csvFileName: null,
-                    csvFileDisplayName: '',
-                    message: 'Example: us-enterprise-model.csv',
-                    params: vm_form.params || {}
+                    selectedFileDisplayName: '',
+                    message: $scope.defaultMessage || 'Example: us-enterprise-model.csv'
                 },
                 element = this.element = $element[0];
 
+            vm.init = function() {
+                console.log('init', vm, this);
+                vm.params.scope = vm;
+            }
+
             vm.startUpload = function() {
-                if (!vm.csvFile) {
+                if (!vm.selectedFile) {
                     return false;
                 }
 
@@ -50,11 +75,12 @@ angular
                 vm.processing = true;
 
                 vm.changeFile();
-                vm.readHeaders(vm.csvFile).then(function(headers) {
-                    // FIXME: emit an event, change from form controller
-                    vm_form.processHeaders(headers);
+                vm.readHeaders(vm.selectedFile).then(function(headers) {
+                    if (typeof vm.fileLoad == 'function') {
+                        vm.params = vm.fileLoad({headers:headers}) || vm.params;
+                    }
 
-                    vm.readFile(vm.csvFile)
+                    vm.readFile(vm.selectedFile)
                         .then(vm.gzipFile)
                         .then(vm.uploadFile);
                 });
@@ -69,11 +95,10 @@ angular
                 var input = element,
                     fileName = vm.getFileName(input.value);
 
-                vm.csvFileDisplayName = fileName;
+                vm.selectedFileDisplayName = fileName;
 
-                // FIXME: emit an event, change from form controller
-                if (fileName) {
-                    vm_form.generateModelName(fileName);
+                if (fileName && typeof vm.fileSelect == 'function') {
+                    vm.fileSelect({fileName:fileName});
                 }
             }
 
@@ -97,7 +122,7 @@ angular
 
                 var deferred = $q.defer(),
                     FR = new FileReader(),
-                    sliced = file.slice(0, 2048); // grab first 2048 chars
+                    sliced = file.slice(0, 1024); // grab first 1024 chars
 
                 FR.onload = function(e) {
                     var lines = e.target.result.split(/[\r\n]+/g);
@@ -146,7 +171,7 @@ angular
                     };
 
                 if (!vm.isCompressed()) {
-                    fnComplete(vm.csvFile);
+                    fnComplete(vm.selectedFile);
                     return deferred.promise;
                 }
 
@@ -203,13 +228,13 @@ angular
                             fnComplete(blob);
                         } catch(err) {
                             // compression error, turn it off & send uncompressed
-                            if (vm_form.params) {
-                                vm_form.params.compressed = false;
+                            if (vm.params) {
+                                vm.params.compressed = false;
                             } else {
                                 vm.compressed = false;
                             }
 
-                            fnComplete(vm.csvFile);
+                            fnComplete(vm.selectedFile);
                         }
                     }, 1);
                 }
@@ -221,40 +246,41 @@ angular
                 vm.uploading = true;
                 vm.upload_percent = 0;
 
-                if (!vm_form.params) {
-                    vm_form.params = {};
+                if (!vm.params) {
+                    vm.params = {};
                 }
 
                 var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'SalesforceLead',
-                    modelName = vm.modelDisplayName = vm.modelDisplayName || vm.csvFileName,
+                    modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName,
                     options = {
                         file: file, 
-                        url: vm_form.params.url || '/pls/models/uploadfile/unnamed',
+                        url: vm.params.url || '/pls/models/uploadfile/unnamed',
                         params: {
-                            schema: vm_form.params.schema || fileType,
-                            modelId: vm_form.params.modelId || false,
+                            schema: vm.params.schema || fileType,
+                            modelId: vm.params.modelId || false,
+                            metadataFile: vm.params.metadataFile || null,
                             compressed: vm.isCompressed(),
-                            displayName: vm.csvFileName
+                            displayName: vm.selectedFileDisplayName
                         },
                         progress: vm.uploadProgress
                     };
                 
                 vm.cancelDeferred = cancelDeferred = $q.defer();
 
-                csvImportService.Upload(options).then(vm.uploadResponse);
+                ImportService.Upload(options).then(vm.uploadResponse);
             }
 
             vm.isCompressed = function() {
-                if (!vm_form.params) {
-                    vm_form.params = {};
+                if (!vm.params) {
+                    vm.params = {};
                 }
 
-                return (vm_form.params.compressed || vm_form.params.compressed === false ? vm_form.params.compressed : vm.compressed);
+                return (vm.params.compressed || vm.params.compressed === false ? vm.params.compressed : vm.compressed);
             }
 
             vm.uploadResponse = function(result) {
-                if (typeof vm_form.uploadResponse == 'function') {
-                    vm_form.uploadResponse(result);
+                if (typeof vm.fileDone == 'function') {
+                    vm.fileDone({ result: result });
                 }
 
                 vm.uploading = false;
@@ -265,7 +291,7 @@ angular
 
                     vm.upload_percent = 0;
                     vm.uploaded = true;
-                    vm.message = 'Done in ' + vm.getElapsedTime(vm.startTime);
+                    vm.message = 'Done in ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 } else {
                     vm.cancel(true);
                     vm.message = 'Transfer aborted';
@@ -283,7 +309,7 @@ angular
                 if (e.total / 1024 > 486000) {
                     vm.message = 'ERROR: Over 486MB file size limit.';
 
-                    var xhr = csvImportStore.Get('cancelXHR', true);
+                    var xhr = ImportStore.Get('cancelXHR', true);
 
                     if (xhr) {
                         xhr.abort();
@@ -333,30 +359,18 @@ angular
                 vm.message = '';
 
                 if (!IGNORE_FILENAME) {
-                    //vm.csvFileName = null;
-                    vm.csvFileDisplayName = '';
+                    //vm.selectedFileName = null;
+                    vm.selectedFileDisplayName = '';
                     vm.choosenFileName = '';
+                }
+
+                if (typeof vm.fileCancel == 'function') {
+                    vm.fileCancel();
                 }
             }
 
-            angular.extend(vm, options);
-        }
-    };
-})
-.directive('csvUploaderContainer', function ($parse) {
-    return {
-        restrict: 'A',
-        templateUrl: 'app/create/directives/CSVUploaderTemplate.html',
-        controllerAs: 'vm_uploader_container',
-        controller: function ($scope, $state, $q, $element) {
-            var vm_form = $scope.vm,
-                vm = this,
-                options = {
-
-                },
-                element = this.element = $element[0];
-
-            angular.extend(vm, options);
+            angular.extend(vm, $scope, options);
+            vm.init();
         }
     };
 });

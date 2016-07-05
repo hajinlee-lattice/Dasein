@@ -25,7 +25,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
     }
 
     $scope.showNoModels = false;
-    $scope.length = 0;
+
     function getModels(use_cache) {
         ModelStore.getModels(use_cache).then(function(result) {
             $scope.loading = false;
@@ -34,7 +34,14 @@ angular.module('mainApp.models.controllers.ModelListController', [
                 if (modelList == null || modelList.length === 0) {
                     $scope.showNoModels = true;
                 } else {
-                    $scope.length = modelList.length;
+                    $scope.totalLength = modelList.length;
+
+                    var active = modelList.filter(function(item) {
+                        return item.Status == 'Active';
+                    });
+
+                    $scope.activeLength = active.length;
+
                     var contentContainer = $('#modelListContainer');
                     WidgetFrameworkService.CreateWidget({
                         element: contentContainer,
