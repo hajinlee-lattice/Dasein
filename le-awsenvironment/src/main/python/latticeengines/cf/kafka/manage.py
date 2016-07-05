@@ -20,7 +20,7 @@ from ..module.template import TEMPLATE_DIR
 from ...conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/kafka'
-_EC2_PEM = '~/aws.pem'
+_EC2_PEM='~/aws.pem'
 _LOG_SIZE=10
 
 ch = logging.StreamHandler(sys.stdout)
@@ -79,16 +79,17 @@ def create_template():
     return stack
 
 def provision_cli(args):
-    return provision(args.environment, args.stackname, args.zkhosts, profile=args.profile)
+    return provision(args.environment, args.stackname, args.zkhosts, profile=args.profile, cleanupzk=args.cleanupzk)
 
-def provision(environment, stackname, zkhosts, profile=None):
+def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
     if profile is None:
         profile = DEFAULT_PROFILE
     else:
         profile = KafkaProfile(profile)
     config = AwsEnvironment(environment)
 
-    cleanup_zk(zkhosts, stackname)
+    if cleanupzk:
+        cleanup_zk(zkhosts, stackname)
 
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -584,6 +585,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
+    parser1.add_argument('--cleanup-zk', dest='cleanupzk', type=str, action='store_true', help='cleanup kafka root node from zk')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
     parser1.set_defaults(func=provision_cli)
 
