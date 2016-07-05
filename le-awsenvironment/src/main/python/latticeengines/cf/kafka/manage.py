@@ -3,6 +3,7 @@ import boto3
 import json
 import math
 import os
+import time
 from kazoo.client import KazooClient
 
 from .params import *
@@ -176,11 +177,17 @@ def teardown(stackname):
     client = boto3.client('cloudformation')
     teardown_stack(client, stackname)
 
-
 def cleanup_zk(zkhosts, chroot):
     print "clean up %s from %s" % (chroot, zkhosts)
     zk = KazooClient(zkhosts)
-    zk.start()
+    for _ in xrange(600):
+        try:
+            zk.start()
+            break
+        except:
+            time.sleep(10)
+            continue
+
     zk.delete(chroot, recursive=True)
     zk.stop()
 
