@@ -153,7 +153,13 @@ public class SamlTestBed {
     }
 
     public ResponseEntity<Void> sendSamlResponse(Response response) {
-        signResponse(response);
+        return sendSamlResponse(response, true);
+    }
+
+    public ResponseEntity<Void> sendSamlResponse(Response response, boolean sign) {
+        if (sign) {
+            signResponse(response);
+        }
         String xml = SAMLUtils.serialize(response);
         String encoded = Base64.encodeBytes(xml.getBytes());
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();

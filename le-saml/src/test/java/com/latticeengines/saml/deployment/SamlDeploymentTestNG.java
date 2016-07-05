@@ -32,6 +32,12 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
+    public void testIdPInitiatedAuth_ResponseNotSigned() throws UnsupportedEncodingException {
+        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response, false));
+    }
+
+    @Test(groups = "deployment")
     public void testIdpInitiatedAuth_IncorrectEntityId() {
         Response response = samlTestBed.getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
