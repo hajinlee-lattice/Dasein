@@ -89,11 +89,20 @@
                   value="___BASE_ADDRESS___/login/alias/___TENANT_ID___"/>
     </bean>
 
+    <bean id="baseIdentityProviderMetadata" class="org.springframework.security.saml.metadata.ExtendedMetadata">
+        <property name="local" value="false"/>
+        <property name="securityProfile" value="metaiop"/>
+        <property name="sslSecurityProfile" value="pkix"/>
+        <property name="sslHostnameVerification" value="default"/>
+        <property name="requireLogoutRequestSigned" value="true"/>
+        <property name="requireArtifactResolveSigned" value="true"/>
+        <property name="supportUnsolicitedResponse" value="true"/>
+    </bean>
+
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <bean id="metadataManager" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg>
             <list>
-
             </list>
         </constructor-arg>
 

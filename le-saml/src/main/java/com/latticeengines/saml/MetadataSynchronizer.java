@@ -41,6 +41,9 @@ public class MetadataSynchronizer {
     private ExtendedMetadata baseServiceProviderMetadata;
 
     @Autowired
+    private ExtendedMetadata baseIdentityProviderMetadata;
+
+    @Autowired
     private ParserPool parserPool;
 
     @Value("${saml.base.address}")
@@ -107,7 +110,8 @@ public class MetadataSynchronizer {
     private Tenant constructTenant(String tenantId, List<IdentityProvider> identityProviders) {
         Tenant tenant = new Tenant();
         for (IdentityProvider identityProvider : identityProviders) {
-            IdentityProviderMetadataAdaptor adaptor = new IdentityProviderMetadataAdaptor(parserPool, identityProvider);
+            IdentityProviderMetadataAdaptor adaptor = new IdentityProviderMetadataAdaptor(parserPool, identityProvider,
+                    baseIdentityProviderMetadata);
             tenant.identityProviders.add(adaptor);
         }
 

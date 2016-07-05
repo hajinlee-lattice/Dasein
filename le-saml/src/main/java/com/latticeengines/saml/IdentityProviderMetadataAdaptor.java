@@ -15,8 +15,10 @@ import com.latticeengines.domain.exposed.saml.IdentityProvider;
 
 public class IdentityProviderMetadataAdaptor extends ExtendedMetadataDelegate {
 
-    public IdentityProviderMetadataAdaptor(ParserPool parserPool, IdentityProvider underlying) {
-        super(getMetadataProvider(parserPool, underlying), getExtendedMetadata(underlying));
+    public IdentityProviderMetadataAdaptor(ParserPool parserPool, IdentityProvider underlying,
+            ExtendedMetadata baseIdentityProviderMetadata) {
+        super(getMetadataProvider(parserPool, underlying),
+                getExtendedMetadata(underlying, baseIdentityProviderMetadata));
     }
 
     private static MetadataProvider getMetadataProvider(final ParserPool pool, final IdentityProvider underlying) {
@@ -33,15 +35,10 @@ public class IdentityProviderMetadataAdaptor extends ExtendedMetadataDelegate {
         };
     }
 
-    private static ExtendedMetadata getExtendedMetadata(final IdentityProvider underlying) {
-        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
+    private static ExtendedMetadata getExtendedMetadata(IdentityProvider underlying,
+            ExtendedMetadata baseIdentityProviderMetadata) {
+        ExtendedMetadata extendedMetadata = baseIdentityProviderMetadata.clone();
         extendedMetadata.setAlias(underlying.getGlobalAuthTenant().getId());
-        extendedMetadata.setSecurityProfile("metaiop");
-        extendedMetadata.setSslSecurityProfile("pkix");
-        extendedMetadata.setSslHostnameVerification("default");
-        extendedMetadata.setRequireLogoutRequestSigned(true);
-        extendedMetadata.setRequireArtifactResolveSigned(true);
-        extendedMetadata.setSupportUnsolicitedResponse(true);
         return extendedMetadata;
     }
 
