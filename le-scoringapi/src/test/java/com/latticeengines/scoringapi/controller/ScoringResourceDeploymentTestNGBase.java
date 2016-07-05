@@ -119,8 +119,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             long timeDuration = System.currentTimeMillis();
             System.out.println(om.writeValueAsString(bulkScoreRequest));
 
+            @SuppressWarnings("rawtypes")
             ResponseEntity<List> response = null;
-            List resultObjList = null;
+            List<?> resultObjList = null;
             if (isInternalScoring) {
                 resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
                         customerSpace.toString());
@@ -287,8 +288,10 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
                 modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
                         (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
-                        modelConfiguration, (customerSpace != null ? customerSpace : customerSpace), metadataProxy,
-                        getTestModelSummaryParser());
+                        modelConfiguration,
+                        (customerSpace != null ? customerSpace
+                                : ScoringApiControllerDeploymentTestNGBase.customerSpace),
+                        metadataProxy, getTestModelSummaryParser());
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
                         modelVersion);

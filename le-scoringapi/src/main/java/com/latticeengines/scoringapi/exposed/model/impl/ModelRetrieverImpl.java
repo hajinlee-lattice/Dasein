@@ -57,7 +57,6 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
@@ -96,9 +95,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private Warnings warnings;
 
     @Autowired
     private Configuration yarnConfiguration;

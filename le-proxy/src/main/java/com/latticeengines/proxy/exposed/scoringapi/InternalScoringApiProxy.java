@@ -9,7 +9,6 @@ import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -90,9 +89,9 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
         } else {
             url = constructUrl(internalScoringApiHostPort, url, considerAllStatus, offset, maximum, tenantIdentifier);
         }
-        List resultList = get("getPaginatedModels", url, List.class);
+        List<?> resultList = get("getPaginatedModels", url, List.class);
         List<ModelDetail> paginatedModels = new ArrayList<>();
-        ObjectMapper om = new ObjectMapper();
+
         if (resultList != null) {
 
             for (Object obj : resultList) {
@@ -116,7 +115,7 @@ public class InternalScoringApiProxy extends GenericBaseRestApiProxy implements 
             String tenantIdentifier) {
         String url = constructUrl(internalScoringApiHostPort, "/records?tenantIdentifier={tenantIdentifier}",
                 tenantIdentifier);
-        List resultList = post("scorePercentileRecords", url, scoreRequest, List.class);
+        List<?> resultList = post("scorePercentileRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {
 

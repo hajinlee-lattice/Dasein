@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.testng.annotations.Test;
@@ -22,9 +21,6 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     @Autowired
     private ModelRetriever modelRetriever;
 
-    @Autowired
-    private Configuration yarnConfiguration;
-
     @Test(groups = "deployment", enabled = true)
     public void testRetrieveModelArtifacts() throws Exception {
         tenant = setupTenantAndModelSummary(false);
@@ -33,7 +29,9 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     }
 
     /**
-     * Use this as a tool to download a model into test resources for running scoring tests against.
+     * Use this as a tool to download a model into test resources for running
+     * scoring tests against.
+     * 
      * @throws Exception
      */
     @Test(groups = "deployment", enabled = false)

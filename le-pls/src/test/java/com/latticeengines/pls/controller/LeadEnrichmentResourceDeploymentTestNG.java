@@ -3,7 +3,9 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +16,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -21,6 +27,14 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    private static final int MAX_DESELECT = 5;
+    private static final int MAX_SELECT = 4;
+    private static final int MAX_PREMIUM_SELECT = 2;
+    private int selectCount = 0;
+    private int premiumSelectCount = 0;
+    private int deselectCount = 0;
+    private int totalLeadEnrichmentCount;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
@@ -244,54 +258,262 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testSaveLP3Attributes() {
+    public void testGetLP3AttributesBeforeSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+        totalLeadEnrichmentCount = combinedAttributeList.size();
+
+        List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
+        assertNotNull(selectedAttributeList);
+        assertTrue(selectedAttributeList.isEmpty());
+
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3AttributesBeforeSave" })
+    public void testGetLP3PremiumAttributesLimitationBeforeSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/premiumattributeslimitation";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLP3PremiumAttributesLimitationBeforeSave" })
+    public void testGetLP3SelectedAttributeCountBeforeSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedattributes/count";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+        assertEquals(count.intValue(), 0);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3SelectedAttributeCountBeforeSave" })
+    public void testGetLP3SelectedAttributePremiumCountBeforeSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedpremiumattributes/count";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+        assertEquals(count.intValue(), 0);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLP3SelectedAttributePremiumCountBeforeSave" })
+    public void testSaveLP3Attributes()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+        LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
+
+        assertEquals(selectCount, MAX_SELECT);
+        assertEquals(premiumSelectCount, MAX_PREMIUM_SELECT);
+        assertEquals(deselectCount, 0);
+        assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
+
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
-        LeadEnrichmentAttributesOperationMap attributesOperationMap = new LeadEnrichmentAttributesOperationMap();
-        List<LeadEnrichmentAttribute> newSelectedAttributeList = new ArrayList<>();
-        LeadEnrichmentAttribute attr1 = new LeadEnrichmentAttribute();
-        LeadEnrichmentAttribute attr2 = new LeadEnrichmentAttribute();
-        newSelectedAttributeList.add(attr1);
-        newSelectedAttributeList.add(attr2);
-
-        List<LeadEnrichmentAttribute> unselectedAttributeList = new ArrayList<>();
-        LeadEnrichmentAttribute attr3 = new LeadEnrichmentAttribute();
-        LeadEnrichmentAttribute attr4 = new LeadEnrichmentAttribute();
-        unselectedAttributeList.add(attr3);
-        unselectedAttributeList.add(attr4);
-
-        attributesOperationMap.setSelectedAttributes(newSelectedAttributeList);
-        attributesOperationMap.setDeselectedAttributes(unselectedAttributeList);
 
         restTemplate.put(url, attributesOperationMap);
+
+        List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
+        assertEquals(enrichmentList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
+        enrichmentList = getLeadEnrichmentAttributeList(false);
+        assertTrue(enrichmentList.size() > MAX_SELECT + MAX_PREMIUM_SELECT);
+        checkSelection(enrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT, MAX_SELECT);
+
+        List<LeadEnrichmentAttribute> selectedEnrichmentList = getLeadEnrichmentAttributeList(true);
+        assertEquals(selectedEnrichmentList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
+        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT, MAX_SELECT);
     }
 
-    @SuppressWarnings("unchecked")
-    @Test(groups = "deployment", enabled = true)
-    public void testGetLP3Attributes() {
-        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
-        List<LeadEnrichmentAttribute> combinedAttributeList = restTemplate.getForObject(url, List.class);
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLP3Attributes" })
+    public void testGetLP3Attributes()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+        assertEquals(combinedAttributeList.size(), totalLeadEnrichmentCount);
+
+        List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
+        assertNotNull(selectedAttributeList);
+        assertFalse(selectedAttributeList.isEmpty());
+        assertEquals(selectedAttributeList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3Attributes" })
     public void testGetLP3PremiumAttributesLimitation() {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/premiumattributeslimitation";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3PremiumAttributesLimitation" })
     public void testGetLP3SelectedAttributeCount() {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
+        assertEquals(count.intValue(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3SelectedAttributeCount" })
     public void testGetLP3SelectedAttributePremiumCount() {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
+        assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3SelectedAttributePremiumCount" })
+    public void testSaveLP3AttributesForSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+        LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
+
+        assertEquals(selectCount, MAX_SELECT);
+        assertEquals(premiumSelectCount, MAX_PREMIUM_SELECT);
+        assertEquals(deselectCount, MAX_DESELECT);
+        assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
+        assertEquals(attributesOperationMap.getDeselectedAttributes().size(), MAX_DESELECT);
+
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
+
+        restTemplate.put(url, attributesOperationMap);
+
+        List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
+        assertEquals(enrichmentList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        enrichmentList = getLeadEnrichmentAttributeList(false);
+        assertTrue(enrichmentList.size() > 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        checkSelection(enrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1, MAX_SELECT);
+
+        List<LeadEnrichmentAttribute> selectedEnrichmentList = getLeadEnrichmentAttributeList(true);
+        assertEquals(selectedEnrichmentList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1, MAX_SELECT);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLP3AttributesForSecondSave" })
+    public void testGetLP3AttributesAfterSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+        assertEquals(combinedAttributeList.size(), totalLeadEnrichmentCount);
+
+        List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
+        assertNotNull(selectedAttributeList);
+        assertFalse(selectedAttributeList.isEmpty());
+        assertEquals(selectedAttributeList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLP3AttributesAfterSecondSave" })
+    public void testGetLP3PremiumAttributesLimitationAfterSecondSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/premiumattributeslimitation";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLP3PremiumAttributesLimitationAfterSecondSave" })
+    public void testGetLP3SelectedAttributeCountAfterSecondSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedattributes/count";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+        assertEquals(count.intValue(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLP3SelectedAttributeCountAfterSecondSave" })
+    public void testGetLP3SelectedAttributePremiumCountAfterSecondSave() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3/selectedpremiumattributes/count";
+        Integer count = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(count);
+        assertEquals(count.intValue(), MAX_PREMIUM_SELECT + (MAX_SELECT + MAX_PREMIUM_SELECT - MAX_DESELECT));
+    }
+
+    private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
+
+        LeadEnrichmentAttributesOperationMap attributesOperationMap = new LeadEnrichmentAttributesOperationMap();
+        List<LeadEnrichmentAttribute> newSelectedAttributeList = new ArrayList<>();
+        List<LeadEnrichmentAttribute> deselectedAttributeList = new ArrayList<>();
+        attributesOperationMap.setSelectedAttributes(newSelectedAttributeList);
+        attributesOperationMap.setDeselectedAttributes(deselectedAttributeList);
+
+        selectCount = 0;
+        premiumSelectCount = 0;
+        deselectCount = 0;
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            if (attr.getIsSelected()) {
+                if (deselectCount < MAX_DESELECT) {
+                    deselectCount++;
+                    attr.setIsSelected(false);
+                    deselectedAttributeList.add(attr);
+                }
+            } else {
+                if (selectCount < MAX_SELECT && !attr.getIsPremium()) {
+                    selectCount++;
+                    attr.setIsSelected(true);
+                    newSelectedAttributeList.add(attr);
+                } else if (premiumSelectCount < MAX_PREMIUM_SELECT && attr.getIsPremium()) {
+                    premiumSelectCount++;
+                    attr.setIsSelected(true);
+                    attr.setIsPremium(true);
+                    newSelectedAttributeList.add(attr);
+                }
+            }
+        }
+
+        return attributesOperationMap;
+    }
+
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr)
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
+        if (onlySelectedAttr) {
+            url += "?onlySelectedAttributes=" + onlySelectedAttr;
+        }
+        List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
+        assertNotNull(combinedAttributeObjList);
+
+        List<LeadEnrichmentAttribute> combinedAttributeList = new ArrayList<>();
+        ObjectMapper om = new ObjectMapper();
+
+        for (Object obj : combinedAttributeObjList) {
+            LeadEnrichmentAttribute attr = om.readValue(om.writeValueAsString(obj), LeadEnrichmentAttribute.class);
+            combinedAttributeList.add(attr);
+        }
+
+        return combinedAttributeList;
+    }
+
+    private void checkSelection(List<LeadEnrichmentAttribute> enrichmentList,
+            LeadEnrichmentAttributesOperationMap attributesOperationMap, int premiumSelectCount, int selectCount) {
+        for (LeadEnrichmentAttribute attr : enrichmentList) {
+            for (LeadEnrichmentAttribute selectedAttr : attributesOperationMap.getSelectedAttributes()) {
+                if (attr.getFieldName().equals(selectedAttr.getFieldName())) {
+                    assertTrue(attr != selectedAttr);
+                    assertEquals(attr.getIsSelected(), selectedAttr.getIsSelected());
+                    assertEquals(attr.getIsPremium(), selectedAttr.getIsPremium());
+                    assertTrue(attr.getIsSelected());
+
+                    if (attr.getIsPremium()) {
+                        premiumSelectCount--;
+                        assertTrue(premiumSelectCount >= 0);
+                    } else {
+                        selectCount--;
+                        assertTrue(selectCount >= 0);
+                    }
+                }
+            }
+
+            for (LeadEnrichmentAttribute deselectedAttr : attributesOperationMap.getDeselectedAttributes()) {
+                if (attr.getFieldName().equals(deselectedAttr.getFieldName())) {
+                    assertTrue(attr != deselectedAttr);
+                    assertEquals(attr.getIsSelected(), deselectedAttr.getIsSelected());
+                    assertEquals(attr.getIsPremium(), deselectedAttr.getIsPremium());
+                    assertFalse(attr.getIsSelected());
+                }
+            }
+        }
+    }
+
     // ------------END for LP v3-------------------//
 }

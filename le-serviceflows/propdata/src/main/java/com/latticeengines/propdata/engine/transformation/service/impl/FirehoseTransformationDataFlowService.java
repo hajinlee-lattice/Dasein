@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("firehoseTransformationDataFlowService")
@@ -33,8 +32,6 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     private static final String PART_FILE = "PART-0001";
 
-    private static final String AVSC = ".avsc";
-
     private static final String CSV_GZ = ".csv.gz";
 
     @Autowired
@@ -45,9 +42,6 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
@@ -29,12 +30,16 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
     @Value("${pls.leadenrichment.premium.max:10}")
     private int premiumAttributesLimitation;
 
     @Override
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
             Integer premiumAttributeLimitation) {
+        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
         int additionalPremiumAttrCount = 0;
 
@@ -72,6 +77,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
         SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
+        attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
         return attr;
     }
 
@@ -110,6 +116,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
             attr.setIsPremium(column.isPremium());
             attr.setCategory(column.getCategory());
+            superimposedList.add(attr);
         }
 
         return superimposedList;

@@ -19,50 +19,53 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
 
 @Component("scoreHistoryEntityMgr")
-public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreRecordHistory> implements ScoreHistoryEntityMgr {
+public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreRecordHistory>
+        implements ScoreHistoryEntityMgr {
 
     private static final Log log = LogFactory.getLog(ScoreHistoryEntityMgrImpl.class);
 
     public ScoreHistoryEntityMgrImpl() {
-        super(new BaseFabricEntityMgrImpl.Builder().
-                  recordType("ScoreHistory").
-                  topic("ScoreHistory").
-                  store("REDIS").
-                  repository("RTS"));
+        super(new BaseFabricEntityMgrImpl.Builder().recordType("ScoreHistory").topic("ScoreHistory").store("REDIS")
+                .repository("RTS"));
     }
 
     public void publish(List<Record> requests, List<RecordScoreResponse> responses) {
 
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
 
         Map<String, Record> requestMap = new HashMap<String, Record>();
 
         for (Record request : requests)
-             requestMap.put(request.getRecordId(), request);
+            requestMap.put(request.getRecordId(), request);
 
         for (RecordScoreResponse response : responses) {
             ScoreRecordHistory scoreHistory = buildScoreHistory(requestMap.get(response.getId()), response);
-            log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "+ scoreHistory.getRecordId() +
-                     " latticeId " +scoreHistory.getLatticeId());
+            log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "
+                    + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
             super.publish(scoreHistory);
         }
     }
 
     public void publish(Record request, RecordScoreResponse response) {
 
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
         // Ignore score requests without lattice Id;
-        if (response.getLatticeId() == null) return;
+        if (response.getLatticeId() == null)
+            return;
         ScoreRecordHistory scoreHistory = buildScoreHistory(request, response);
-        log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "+ scoreHistory.getRecordId() +
-                 " latticeId " +scoreHistory.getLatticeId());
+        log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "
+                + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
         super.publish(scoreHistory);
     }
 
     public void publish(ScoreRequest request, ScoreResponse response) {
-        if (isDisabled()) return;
+        if (isDisabled())
+            return;
         // Ignore score requests without lattice Id;
-        if (response.getLatticeId() == null) return;
+        if (response.getLatticeId() == null)
+            return;
 
         Record record = new Record();
         record.setRecordId(response.getId());
@@ -71,7 +74,7 @@ public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreReco
         record.setRootOperationId("");
         record.setRule(request.getRule());
         record.setRequestTimestamp(response.getTimestamp());
-        Map<String, Map<String, Object>>  attrMap = new HashMap<String, Map<String, Object>>();
+        Map<String, Map<String, Object>> attrMap = new HashMap<String, Map<String, Object>>();
         attrMap.put(request.getModelId(), request.getRecord());
         record.setModelAttributeValuesMap(attrMap);
 
@@ -92,13 +95,14 @@ public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreReco
 
         ScoreRecordHistory scoreHistory = buildScoreHistory(record, recordRsp);
 
-        log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "+ scoreHistory.getRecordId() +
-                 " latticeId " +scoreHistory.getLatticeId());
+        log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "
+                + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
         super.publish(scoreHistory);
     }
 
     public List<ScoreRecordHistory> findByLatticeId(String latticeId) {
-        if (isDisabled()) return null;
+        if (isDisabled())
+            return null;
 
         Map<String, String> properties = new HashMap<String, String>();
         properties.put("latticeId", latticeId);
@@ -122,7 +126,6 @@ public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreReco
         history.setResponse(JsonUtils.serialize(response));
         return history;
     }
-
 
     private String constructHistoryId(String recordType, String recordId, String timestamp) {
         return recordType + "_" + recordId + "_" + timestamp;

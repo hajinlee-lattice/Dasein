@@ -230,6 +230,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
             Assert.assertEquals(RECORD_MODEL_CARDINALITY, relatedRecordModelTuple.size());
             for (RecordModelTuple tuple : relatedRecordModelTuple) {
                 Map<String, Object> matchedResult = unorderedMatchedRecordMap.get(tuple);
+                Assert.assertNotNull(matchedResult);
                 String modelId = tuple.getModelId();
 
                 Predefined columnSelection = uniqueScoringArtifactsMap.get(modelId).getModelSummary()
