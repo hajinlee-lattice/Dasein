@@ -1,26 +1,29 @@
 package com.latticeengines.datafabric.service.message.impl;
 
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+
+import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.ZkConnection;
+import org.I0Itec.zkclient.exception.ZkInterruptedException;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode;
 import kafka.utils.ZKStringSerializer$;
 import kafka.utils.ZkUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.Schema;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.ZkConnection;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Component("messageService")
 public class FabricMessageServiceImpl implements FabricMessageService {
@@ -32,6 +35,9 @@ public class FabricMessageServiceImpl implements FabricMessageService {
 
     @Value("${datafabric.message.zkConnect}")
     private String zkConnect;
+
+    @Value("${datafabric.message.environment}")
+    private String environment;
 
     @Value("${datafabric.message.stack}")
     private String stack;
@@ -62,61 +68,71 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         buildKeySchema();
     }
 
-
+    @Override
     public String getBrokers() {
         return brokers;
     }
 
+    @Override
     public String getZkConnect() {
         return zkConnect;
     }
 
+    @Override
     public String getSchemaRegUrl() {
         return schemaRegUrl;
     }
 
-    public String deriveTopic(String origTopic, boolean isGlobal) {
-         String derivedTopic;
+    @Override
+    public String deriveTopic(String origTopic, TopicScope scope) {
+        String topicEnvironment = environment;
+        String topicStack = stack;
 
-         if (isGlobal) {
-             derivedTopic = "Stack_Global_" + origTopic;
-         } else {
-             derivedTopic = "Stack_" + stack + "_" + origTopic;
-         }
+        switch (scope) {
+            case PUBLIC:
+                topicEnvironment = "global";
+                topicStack = "global";
+                break;
+            case STACK_PRIVATE:
+                topicStack = "global";
+                break;
+            case PRIVATE:
+            default:
+                break;
+        }
 
-         return derivedTopic;
+        return String.format("Env_%s_Stack_%s_%s", topicEnvironment, topicStack, origTopic);
     }
 
     public GenericRecord buildKey(String producer, String recordType, String id) {
 
-          GenericRecord key = new GenericData.Record(msgKeySchema);
+        GenericRecord key = new GenericData.Record(msgKeySchema);
 
-          key.put("timeStamp", System.currentTimeMillis());
-          key.put("version", this.version);
-          key.put("producer", producer);
-          key.put("record", recordType);
-          key.put("id", id);
+        key.put("timeStamp", System.currentTimeMillis());
+        key.put("version", this.version);
+        key.put("producer", producer);
+        key.put("record", recordType);
+        key.put("id", id);
 
-          return key;
+        return key;
     }
 
-    public boolean createTopic(String topic, boolean isShared, int numPartitions, int numRepls) {
+    public boolean createTopic(String topic, TopicScope scope, int numPartitions, int numRepls) {
 
         boolean result = false;
         ZkClient zkClient = null;
-        ZkUtils zkUtils = null;
 
-        String derivedTopic = deriveTopic(topic, isShared);
+        String derivedTopic = deriveTopic(topic, scope);
 
         try {
             zkClient = new ZkClient(zkConnect, 10000, 10000, ZKStringSerializer$.MODULE$);
-            zkUtils = new ZkUtils(zkClient, new ZkConnection(zkConnect), false);
-            Properties topicConfiguration = new Properties();
+            ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(zkConnect), false);
 
             if (!AdminUtils.topicExists(zkUtils, derivedTopic)) {
-                AdminUtils.createTopic(zkUtils, derivedTopic, numPartitions, numRepls, new Properties(), RackAwareMode.Enforced$.MODULE$);
-                log.info("Topic created. name: " + topic + "partitions: " + numPartitions +
-                         "replications: " + numRepls);
+                AdminUtils.createTopic(zkUtils, derivedTopic, numPartitions, numRepls, new Properties(),
+                        RackAwareMode.Enforced$.MODULE$);
+                log.info(
+                        "Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
             } else {
                 log.info("Topic exisits. name " + topic);
             }
@@ -124,29 +140,32 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             result = true;
 
         } catch (Exception ex) {
-            log.error("Failed to create topic " + derivedTopic); 
+            log.error("Failed to create topic " + derivedTopic);
             log.error(ex);
         } finally {
             if (zkClient != null) {
-                zkClient.close();
+                try {
+                    zkClient.close();
+                } catch (ZkInterruptedException e) {
+                    log.error("Error when closing zk client.", e);
+                }
             }
         }
 
         return result;
     }
 
-    public boolean deleteTopic(String topic, boolean shared) {
+    @Override
+    public boolean deleteTopic(String topic, TopicScope scope) {
 
         boolean result = false;
 
         ZkClient zkClient = null;
-        ZkUtils zkUtils = null;
-
-        String derivedTopic = deriveTopic(topic, shared);
+        String derivedTopic = deriveTopic(topic, scope);
 
         try {
             zkClient = new ZkClient(zkConnect, 10000, 10000, ZKStringSerializer$.MODULE$);
-            zkUtils = new ZkUtils(zkClient, new ZkConnection(zkConnect), false);
+            ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(zkConnect), false);
 
             if (AdminUtils.topicExists(zkUtils, derivedTopic)) {
                 AdminUtils.deleteTopic(zkUtils, derivedTopic);
@@ -160,7 +179,11 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             log.error(ex);
         } finally {
             if (zkClient != null) {
-                zkClient.close();
+                try {
+                    zkClient.close();
+                } catch (ZkInterruptedException e) {
+                    log.error("Error when closing zk client.", e);
+                }
             }
         }
 
@@ -168,15 +191,13 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     }
 
     private void buildKeySchema() {
-         try {
-             InputStream is = Thread.currentThread().getContextClassLoader()
-                               .getResourceAsStream("avro/MessageKey.avsc");
-             Schema.Parser parser = new Schema.Parser();
-             msgKeySchema = parser.parse(is);
-         } catch (IOException e) {
-             log.error("Message key schema avsc file not found");
-             log.error(e);
-             msgKeySchema = null;
+        try {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("avro/MessageKey.avsc");
+            Schema.Parser parser = new Schema.Parser();
+            msgKeySchema = parser.parse(is);
+        } catch (IOException e) {
+            log.error("Message key schema avsc file not found", e);
+            msgKeySchema = null;
         }
     }
 }

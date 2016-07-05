@@ -1,24 +1,19 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
-import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImpl;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
+import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
 
@@ -52,8 +47,8 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         recordType = "demoRecord";
         group = "demoGroup";
 
-        messageService.createTopic(topic, false, 1, 1);
-        messageService.createTopic(topicToConnect, false, 1, 1);
+        messageService.createTopic(topic, TopicScope.PRIVATE, 1, 1);
+        messageService.createTopic(topicToConnect, TopicScope.PRIVATE, 1, 1);
 
 
         SampleFabricEntityMgr.Builder builder= new SampleFabricEntityMgr.Builder().

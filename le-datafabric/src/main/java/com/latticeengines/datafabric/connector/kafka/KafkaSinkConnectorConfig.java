@@ -1,17 +1,12 @@
 package com.latticeengines.datafabric.connector.kafka;
 
-import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
+import java.util.Map;
+
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigDef.Width;
-import org.apache.kafka.common.config.ConfigException;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public class KafkaSinkConnectorConfig extends AbstractConfig {
 
@@ -46,11 +41,11 @@ public class KafkaSinkConnectorConfig extends AbstractConfig {
     public static final String KAFKA_TOPIC_DEFAULT = "Unknown";
     private static final String KAFKA_TOPIC_DISPLAY = "Kafka topic";
 
-    public static final String KAFKA_SHAREDTOPIC_CONFIG = "kafka.sharedTopic";
-    private static final String KAFKA_SHAREDTOPIC_DOC =
-        "Is the sink topic shared cross stacks";
-    public static final boolean KAFKA_SHAREDTOPIC_DEFAULT = false;
-    private static final String KAFKA_SHAREDTOPIC_DISPLAY = "Kafka shared topic";
+    public static final String KAFKA_SCOPE_CONFIG = "kafka.scope";
+    private static final String KAFKA_SCOPE_DOC =
+        "The privacy scope of the topic: private, stack_private, public";
+    public static final String KAFKA_SCOPE_DEFAULT = "private";
+    private static final String KAFKA_SCOPE_DISPLAY = "Kafka topic scope";
 
     public static final String KAFKA_RECORD_CONFIG = "kafka.record";
     private static final String KAFKA_RECORD_DOC =
@@ -100,7 +95,7 @@ public class KafkaSinkConnectorConfig extends AbstractConfig {
               .define(KAFKA_SCHEMAREG_CONFIG, Type.STRING, KAFKA_SCHEMAREG_DEFAULT, Importance.HIGH, KAFKA_SCHEMAREG_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCHEMAREG_DISPLAY)
               .define(KAFKA_STACK_CONFIG, Type.STRING, KAFKA_STACK_DEFAULT, Importance.HIGH, KAFKA_STACK_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_STACK_DISPLAY)
               .define(KAFKA_TOPIC_CONFIG, Type.STRING, KAFKA_TOPIC_DEFAULT, Importance.HIGH, KAFKA_TOPIC_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_TOPIC_DISPLAY)
-              .define(KAFKA_SHAREDTOPIC_CONFIG, Type.BOOLEAN, KAFKA_SHAREDTOPIC_DEFAULT, Importance.HIGH, KAFKA_SHAREDTOPIC_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SHAREDTOPIC_DISPLAY)
+              .define(KAFKA_SCOPE_CONFIG, Type.STRING, KAFKA_SCOPE_DEFAULT, Importance.HIGH, KAFKA_SCOPE_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCOPE_DISPLAY)
               .define(KAFKA_RECORD_CONFIG, Type.STRING, KAFKA_RECORD_DEFAULT, Importance.HIGH, KAFKA_RECORD_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_RECORD_DISPLAY);
 
         // Define Schema configuration group

@@ -1,4 +1,4 @@
-package com.latticeengines.datafabric.service.message.impl;
+package com.latticeengines.datafabric.service.message;
 
 import org.apache.avro.generic.GenericRecord;
 

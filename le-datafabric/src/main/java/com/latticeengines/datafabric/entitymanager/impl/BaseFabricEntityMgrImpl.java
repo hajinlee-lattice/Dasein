@@ -1,46 +1,44 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
-import java.lang.Class;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-
-
-import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
-import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.FabricMessageProducer;
-import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
-import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
-import com.latticeengines.datafabric.service.message.impl.FabricStreamProc;
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-import com.latticeengines.datafabric.util.RedisUtil;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.Encoder;
+import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.reflect.ReflectDatumWriter;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.Decoder;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.Encoder;
-import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value; 
+import org.springframework.beans.factory.annotation.Value;
+
+import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
+import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
+import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
+import com.latticeengines.datafabric.service.message.FabricMessageProducer;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.datafabric.service.message.FabricStreamProc;
+import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
+import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
+import com.latticeengines.datafabric.util.RedisUtil;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
 
@@ -63,7 +61,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private String topic;
 
-    private boolean sharedTopic;
+    private TopicScope scope;
 
     private FabricMessageProducer producer;
 
@@ -82,7 +80,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.recordType = builder.recordType;
 
         this.topic = builder.topic;
-        this.sharedTopic = builder.sharedTopic;
+        this.scope = builder.scope;
         this.disabled = false;
         if (builder.messageService != null) this.messageService = builder.messageService;
         if (builder.dataService != null) this.dataService = builder.dataService;
@@ -108,7 +106,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder().
                                                          messageService(this.messageService).
                                                          topic(this.topic).
-                                                         shared(sharedTopic));
+                                                         scope(scope));
 
             consumers = new HashMap<String, Object>();
         }
@@ -172,7 +170,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                                                                              messageService(messageService).
                                                                              group(consumerGroup).
                                                                              topic(topic).
-                                                                             shared(sharedTopic).
+                                                                             scope(scope).
                                                                              processor(streamProc).
                                                                              numThreads(numThreads));
         consumers.put(consumerGroup, consumer);
@@ -288,7 +286,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         private String topic;
 
-        private boolean sharedTopic;
+        private TopicScope scope;
 
         public Builder store(String store) {
             this.store = store;
@@ -310,10 +308,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             return this;
         }
 
-        public Builder sharedTopic(boolean sharedTopic) {
-            this.sharedTopic = sharedTopic;
+        public Builder scope(TopicScope scope) {
+            this.scope = scope;
             return this;
         }
+
         public Builder messageService(FabricMessageService messageService) {
             this.messageService = messageService;
             return this;

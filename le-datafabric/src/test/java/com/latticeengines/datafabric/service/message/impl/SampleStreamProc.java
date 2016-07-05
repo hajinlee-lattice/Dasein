@@ -2,7 +2,9 @@ package com.latticeengines.datafabric.service.message.impl;
 
 import org.apache.avro.generic.GenericRecord;
 
-public class SampleStreamProc implements FabricStreamProc  {
+import com.latticeengines.datafabric.service.message.FabricStreamProc;
+
+public class SampleStreamProc implements FabricStreamProc {
 
     public int messageCount = 0;
     public int invalidMessages = 0;

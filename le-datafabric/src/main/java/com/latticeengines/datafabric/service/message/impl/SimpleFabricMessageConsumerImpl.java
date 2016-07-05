@@ -1,18 +1,22 @@
 package com.latticeengines.datafabric.service.message.impl;
 
-import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-
-import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.datafabric.service.message.FabricStreamProc;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 import io.confluent.kafka.serializers.KafkaAvroDecoder;
 import kafka.consumer.Consumer;
@@ -21,14 +25,7 @@ import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
-import kafka.serializer.StringDecoder;
 import kafka.utils.VerifiableProperties;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.specific.SpecificData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
@@ -47,30 +44,30 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
     private String streamProc;
 
-    private boolean shared;
+    private TopicScope scope;
 
     @Autowired
     private FabricMessageService messageService;
 
     private ConsumerConnector consumer;
     private ExecutorService executor;
-    FabricStreamProc processor;
+    private FabricStreamProc processor;
     private Properties props;
     private String derivedTopic;
 
     public SimpleFabricMessageConsumerImpl(Builder builder) {
         this.groupId = builder.group;
         this.topic = builder.topic;
-        this.shared = builder.shared;
+        this.scope = builder.scope;
         this.numThreads = builder.numThreads;
         this.autoStart = builder.autoStart;
         this.autoCommit = builder.autoCommit;
         this.processor = builder.processor;
         if (builder.messageService != null) this.messageService = builder.messageService;
 
-        this.derivedTopic = messageService.deriveTopic(topic, shared);
+        this.derivedTopic = messageService.deriveTopic(topic, scope);
         this.props = createConsumerConfig();
-        if (this.autoStart == true) {
+        if (this.autoStart) {
             start();
         }
     }
@@ -103,13 +100,11 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
             int threadNumber = 0;
             for (final KafkaStream stream : streams) {
                 FabricStreamRunnable runnable = new FabricStreamRunnable(stream, processor);
-
                 executor.submit(runnable);
                 threadNumber++;
             }
         } catch (Exception ex) {
-            log.error("Failed to start stream consumers");
-            log.error(ex);
+            log.error("Failed to start stream consumers", ex);
         }
     }
 
@@ -187,7 +182,7 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
         private boolean autoStart = true;
 
-        private boolean shared = false;;
+        private TopicScope scope = TopicScope.PRIVATE;
 
         private FabricMessageService messageService = null;
 
@@ -224,8 +219,8 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
             return this;
         }
 
-        public Builder shared(boolean shared) {
-            this.shared = shared;
+        public Builder scope(TopicScope scope) {
+            this.scope = scope;
             return this;
         }
 

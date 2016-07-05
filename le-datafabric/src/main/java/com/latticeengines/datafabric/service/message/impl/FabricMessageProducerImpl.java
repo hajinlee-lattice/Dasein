@@ -1,17 +1,19 @@
 package com.latticeengines.datafabric.service.message.impl;
 
-
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.FabricMessageProducer;
-import java.util.concurrent.Future;
 import java.util.Properties;
+import java.util.concurrent.Future;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.latticeengines.datafabric.service.message.FabricMessageProducer;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class FabricMessageProducerImpl implements FabricMessageProducer {
 
@@ -25,8 +27,7 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
 
     private int retries;
 
-    private boolean shared;
-
+    private TopicScope scope;
 
     private KafkaProducer<Object, Object> producer;
     private Properties props;
@@ -39,9 +40,10 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
         this.topic = builder.topic;
         this.ackLevel = builder.ackLevel;
         this.retries = builder.retries;
-        this.shared = builder.shared;
+        this.scope = builder.scope;
         this.producerName = builder.producer;
-        if (builder.messageService != null) this.messageService = builder.messageService;
+        if (builder.messageService != null)
+            this.messageService = builder.messageService;
 
         createProducerInternal();
     }
@@ -55,7 +57,7 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
         props.put("key.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
         props.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
 
-        derivedTopic = messageService.deriveTopic(topic,shared);
+        derivedTopic = messageService.deriveTopic(topic, scope);
         producer = new KafkaProducer<Object, Object>(props);
     }
 
@@ -83,7 +85,7 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
 
         private int retries = 1;
 
-        private boolean shared = false;;
+        private TopicScope scope = TopicScope.PRIVATE;
 
         private FabricMessageService messageService = null;
 
@@ -105,8 +107,8 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
             return this;
         }
 
-        public Builder shared(boolean shared) {
-            this.shared = shared;
+        public Builder scope(TopicScope scope) {
+            this.scope = scope;
             return this;
         }
 
@@ -121,8 +123,3 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
         }
     }
 }
-
-
-
-
-

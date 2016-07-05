@@ -1,21 +1,11 @@
 package com.latticeengines.datafabric.connector.kafka;
 
-import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.FabricMessageProducer;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
-
-import io.confluent.connect.avro.AvroData;
-
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -23,9 +13,16 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.latticeengines.datafabric.service.message.FabricMessageProducer;
+import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
+import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
+
+import io.confluent.connect.avro.AvroData;
 
 public class KafkaSinkTask extends SinkTask {
 
@@ -40,7 +37,7 @@ public class KafkaSinkTask extends SinkTask {
     private String zkConnect;
     private String stack;
     private String topic;
-    private boolean sharedTopic;
+    private TopicScope scope;
 
 
     public KafkaSinkTask() {
@@ -66,7 +63,7 @@ public class KafkaSinkTask extends SinkTask {
             schemaRegUrl  = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCHEMAREG_CONFIG);
             stack = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_STACK_CONFIG);
             topic = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_TOPIC_CONFIG);
-            sharedTopic = connectorConfig.getBoolean(KafkaSinkConnectorConfig.KAFKA_SHAREDTOPIC_CONFIG);
+            scope = TopicScope.fromName(connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCOPE_CONFIG));
             recordType = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_RECORD_CONFIG);
 
             messageService = new FabricMessageServiceImpl(brokers,
@@ -77,10 +74,9 @@ public class KafkaSinkTask extends SinkTask {
 
             log.info("Constructing producer for topic " + topic + "\n");
 
-            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder().
-                                                         messageService(messageService).
-                                                         topic(topic).
-                                                         shared(sharedTopic));
+            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder(). //
+                                                         messageService(messageService). //
+                                                         topic(topic).scope(scope));
 
             // No recovery implemented assuming sinking to another Kafka cluster is idempotent.
         } catch (ConfigException e) {

@@ -6,6 +6,7 @@ import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
 import com.latticeengines.datafabric.util.RedisUtil;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import redis.clients.jedis.Jedis;
 
 import org.apache.avro.generic.GenericData;
@@ -35,43 +36,43 @@ public class FabricMessageServiceImplFunctionalTestNG extends DataFabricFunction
     public void setUp() throws Exception {
         topic = "demoTopic1";
         recordType = "demoRecord";
-//        messageService = new FabricMessageServiceImpl("localhost:9092",
-//                                                      "localhost:2181",
-//                                                      "http://localhost:8081",
-//                                                      "yyangdev");
-//        topic = "test-topic" + getUUID();
+        // messageService = new FabricMessageServiceImpl("localhost:9092",
+        // "localhost:2181",
+        // "http://localhost:8081",
+        // "yyangdev");
+        // topic = "test-topic" + getUUID();
 
-//        if (messageService.topicExists(topic)) {
-//            messageService.deleteTopic(topic, false);
-//        }
-        messageService.createTopic(topic, false, 1, 1);
+        // if (messageService.topicExists(topic)) {
+        // messageService.deleteTopic(topic, false);
+        // }
+        messageService.createTopic(topic, TopicScope.PRIVATE, 1, 1);
 
         buildSchema();
     }
 
     @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
-//       if (messageService.topicExists(topic)) {
-//           messageService.deleteTopic(topic, false);
-//       }
+        // if (messageService.topicExists(topic)) {
+        // messageService.deleteTopic(topic, false);
+        // }
     }
-
 
     @Test(groups = "functional", enabled = false)
     public void testProduceConsume() throws Exception {
-        FabricMessageProducer  producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder().
-                                                                        messageService(messageService).
-                                                                        topic(topic).
-                                                                        shared(false));
+        FabricMessageProducer producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder(). //
+                messageService(messageService). //
+                topic(topic). //
+                scope(TopicScope.PRIVATE));
 
         SampleStreamProc processor = new SampleStreamProc();
-        FabricMessageConsumer consumer = new SimpleFabricMessageConsumerImpl(new SimpleFabricMessageConsumerImpl.Builder().
-                                                                            messageService(messageService).
-                                                                            group("testGroup").
-                                                                            topic(topic).
-                                                                            shared(false).
-                                                                            processor(processor).
-                                                                            numThreads(1));
+        FabricMessageConsumer consumer = new SimpleFabricMessageConsumerImpl(
+                new SimpleFabricMessageConsumerImpl.Builder(). //
+                        messageService(messageService). //
+                        group("testGroup"). //
+                        topic(topic). //
+                        scope(TopicScope.PRIVATE). //
+                        processor(processor). //
+                        numThreads(1));
 
         for (int i = 0; i < 16; i++) {
             GenericRecord record = new GenericData.Record(schema);
@@ -82,8 +83,8 @@ public class FabricMessageServiceImplFunctionalTestNG extends DataFabricFunction
         }
 
         try {
-            Thread.sleep(4000);                 //1000 milliseconds is one second.
-        } catch(InterruptedException ex) {
+            Thread.sleep(4000); // 1000 milliseconds is one second.
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
         consumer.stop(120000);
@@ -93,15 +94,11 @@ public class FabricMessageServiceImplFunctionalTestNG extends DataFabricFunction
     }
 
     private void buildSchema() {
-        String schemaString = "{\"namespace\": \"example.avro\", \"type\": \"record\", " +
-                              "\"name\": \"sample_test\"," +
-                              "\"fields\": [" +
-                              "{\"name\": \"name\", \"type\": \"string\"}," +
-                              "{\"name\": \"company\", \"type\": \"string\"}" +
-                              "]}";
+        String schemaString = "{\"namespace\": \"example.avro\", \"type\": \"record\", " + "\"name\": \"sample_test\","
+                + "\"fields\": [" + "{\"name\": \"name\", \"type\": \"string\"},"
+                + "{\"name\": \"company\", \"type\": \"string\"}" + "]}";
 
         Schema.Parser parser = new Schema.Parser();
         schema = parser.parse(schemaString);
     }
 }
-
