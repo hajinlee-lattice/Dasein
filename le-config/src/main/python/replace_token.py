@@ -6,7 +6,8 @@ PROPERTY_FILE_SUFFIX = "*.properties"
 NEW_SUFFIX=".new"
 
 def main():
-    dir, profile = sys.argv[:2]
+    dir, profile = sys.argv[1:3]
+    print "dir=%s, profile=%s" % (dir, profile)
     replace(dir, profile)
 
 def replace(dir, profile):
