@@ -55,6 +55,7 @@ Page Summary / Sub-Nav Headers
 
   .nav {
     padding: 3px 0 0;
+    margin-left: -1px;
     text-align: left;
     position: relative;
     left: -1px;
@@ -69,10 +70,10 @@ Page Summary / Sub-Nav Headers
     }
     &.review-model {
       .button.angled-button:before, .button.angled-button:after {
-        width: 101px;
+        width: 113px;
       }
       .button.angled-button {
-        width: 190px;
+        width: 219px;
       }
     }
   }
