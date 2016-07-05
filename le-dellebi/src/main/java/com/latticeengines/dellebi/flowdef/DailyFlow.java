@@ -59,6 +59,9 @@ public class DailyFlow {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
+    @Value("${dataplatform.queue.scheme:legacy}")
+    private String yarnQueueScheme;
+
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
 
@@ -109,7 +112,8 @@ public class DailyFlow {
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        properties.put("mapred.job.queue.name", queue);
+        String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, yarnQueueScheme);
+        properties.put("mapred.job.queue.name", translatedQueue);
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
         try {
