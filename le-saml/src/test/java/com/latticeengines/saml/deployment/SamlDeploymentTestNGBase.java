@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
@@ -35,7 +36,6 @@ import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.testframework.SamlTestNGBase;
 import com.latticeengines.saml.util.SAMLUtils;
-import com.latticeengines.security.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {

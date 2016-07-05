@@ -13,6 +13,7 @@
         <component-name>saml</component-name>
         <le.domain.version>2.0.35-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.35-SNAPSHOT</le.db.version>
+        <le.auth.version>2.0.35-SNAPSHOT</le.auth.version>
         <le.security.version>2.0.35-SNAPSHOT</le.security.version>
         <le.testfwk.version>2.0.35-SNAPSHOT</le.testfwk.version>
         <spring.saml.version>1.0.2.RELEASE</spring.saml.version>
@@ -84,6 +85,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-auth</artifactId>
+            <version>${le.auth.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-auth</artifactId>
+            <version>${le.auth.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

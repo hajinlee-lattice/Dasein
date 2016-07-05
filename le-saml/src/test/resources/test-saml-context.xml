@@ -5,5 +5,4 @@
 
     <import resource="classpath:saml-context.xml"/>
     <import resource="classpath:test-testframework-context.xml"/>
-    <import resource="classpath:security-globalauth-persistence-context.xml"/>
 </beans>
