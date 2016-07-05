@@ -71,7 +71,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        modelSummaryEntityMgr.deleteByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
         setupTwoTenants();
         setupHdfs();
         log.info("Wait for 10 seconds to download model summary");
