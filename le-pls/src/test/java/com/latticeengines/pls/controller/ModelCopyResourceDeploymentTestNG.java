@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -55,6 +56,9 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
     private static final String localPathBase = ClassLoader.getSystemResource(
             "com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
 
@@ -67,6 +71,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        modelSummaryEntityMgr.deleteByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
         setupTwoTenants();
         setupHdfs();
         log.info("Wait for 10 seconds to download model summary");
@@ -84,6 +89,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                         .toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+        modelSummaryEntityMgr.deleteByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
     }
 
     private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
