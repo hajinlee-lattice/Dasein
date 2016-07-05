@@ -1,7 +1,6 @@
 package com.latticeengines.pls.end2end;
 
 
-
 import static org.testng.Assert.assertEquals;
 
 import static org.testng.Assert.assertFalse;
@@ -9,7 +8,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
 import static org.testng.Assert.assertTrue;
-
 
 
 import java.io.File;
@@ -29,7 +27,6 @@ import java.util.List;
 import java.util.UUID;
 
 
-
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
@@ -41,9 +38,7 @@ import java.text.*;
 import java.util.concurrent.*;
 
 
-
 import javax.annotation.Nullable;
-
 
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -91,7 +86,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import org.testng.annotations.Test;
-
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -147,7 +141,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 
-
 import org.apache.hadoop.fs.FileSystem;
 
 import org.apache.hadoop.conf.Configuration;
@@ -155,11 +148,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 
-
 import com.latticeengines.monitor.metric.service.impl.SplunkLogMetricWriter;
-
-
-
 
 
 @Component
@@ -167,11 +156,9 @@ import com.latticeengines.monitor.metric.service.impl.SplunkLogMetricWriter;
 public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
 
-
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
 
     private static final Log log = LogFactory.getLog(CXSelfServiceModelingEndToEndDeploymentTestNG.class);
-
 
 
     @Autowired
@@ -186,20 +173,19 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
     private Connection conn;
 
-    private String SqlServer_report="10.41.1.97\\sql2012std";
+    private String SqlServer_report = "10.41.1.97\\sql2012std";
 
-    private String Sql_userName="dataloader_user";
+    private String Sql_userName = "dataloader_user";
 
-    private String Sql_password="password";
+    private String Sql_password = "password";
 
-    private String Sql_DBName="MQTest";
+    private String Sql_DBName = "MQTest";
 
     private String ModelArtifacts;
 
-    private String Webhdfs_nn1="http://10.41.1.185:50070/explorer.html#/";
+    private String Webhdfs_nn1 = "http://10.41.1.185:50070/explorer.html#/";
 
-    private String Webhdfs_nn2="http://10.41.1.104:50070/explorer.html#/";
-
+    private String Webhdfs_nn2 = "http://10.41.1.104:50070/explorer.html#/";
 
 
     @Value("${pls.modelingservice.basedir}")
@@ -207,13 +193,9 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private String modelingServiceHdfsBaseDir;
 
 
-
     @Value("${pls.fs.defaultFS}")
 
     private String plsHdfsPath;
-
-    
-
 
 
     @Autowired
@@ -221,9 +203,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private Configuration yarnConfiguration;
 
 
-
     HashMap<String, Double> model_score_map = new HashMap<String, Double>();
-
 
 
     @BeforeClass(groups = "qa.lp")
@@ -244,19 +224,18 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         log.info("====start to connect DB======");
 
-        conn=dbConnect();
+        conn = dbConnect();
 
     }
 
-    
 
     @AfterClass(groups = "qa.lp")
 
-    public void tearDown() throws Exception{
+    public void tearDown() throws Exception {
 
         log.info("====This is tear down method====");
 
-        if (conn!=null)
+        if (conn != null)
 
         {
 
@@ -268,17 +247,16 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
     }
 
-    
 
-    @Test(groups="qa.lp", enabled=true)
+    @Test(groups = "qa.lp", enabled = true)
 
-    public void testModelQuality() throws InterruptedException, IOException,SQLException,ParseException, ExecutionException
+    public void testModelQuality() throws InterruptedException, IOException, SQLException, ParseException, ExecutionException
 
     {
 
-        String fullPath=System.getenv("WSHOME")+"/le-pls/src/test/resources/"+RESOURCE_BASE+'/'+fileName;
+        String fullPath = System.getenv("WSHOME") + "/le-pls/src/test/resources/" + RESOURCE_BASE + '/' + fileName;
 
-        log.info("Folder Full Path:"+fullPath);
+        log.info("Folder Full Path:" + fullPath);
 
         File folder = new File(fullPath);
 
@@ -292,9 +270,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
                 processOneFile(fileName);
 
-            }
-
-            else
+            } else
 
             {
 
@@ -302,19 +278,17 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
             }
 
-        }
-
-        else if(folder.isDirectory())
+        } else if (folder.isDirectory())
 
         {
 
             File[] listOfFiles = folder.listFiles();
 
-            String FolderName=fileName;
+            String FolderName = fileName;
 
             log.info(String.format("===========Files numbre is %d", listOfFiles.length));
 
-            int taskSize=0;
+            int taskSize = 0;
 
             ArrayList<String> fileNames = new ArrayList<String>();
 
@@ -326,61 +300,55 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
                 {
 
-                    fileNames.add(FolderName+'/'+listOfFiles[i].getName());
+                    fileNames.add(FolderName + '/' + listOfFiles[i].getName());
 
                     taskSize++;
 
-                }
-
-                else
+                } else
 
                 {
 
-                    log.info(String.format("The file %s in folder %s is not CSV file, so skip to model", listOfFiles[i].getName(),folder.getPath()));
+                    log.info(String.format("The file %s in folder %s is not CSV file, so skip to model", listOfFiles[i].getName(), folder.getPath()));
 
                 }
 
-                
-
-                
 
             }
 
-            ExecutorService pool = Executors.newFixedThreadPool(taskSize);   
+            ExecutorService pool = Executors.newFixedThreadPool(taskSize);
 
-            List<Future> list = new ArrayList<Future>();  
+            List<Future> list = new ArrayList<Future>();
 
-            for (int i = 0; i < taskSize; i++) {  
+            for (int i = 0; i < taskSize; i++) {
 
-             Callable<Object> c = new MyCallable(fileNames.get(i));    
+                Callable<Object> c = new MyCallable(fileNames.get(i));
 
-             Future f = pool.submit(c); 
+                Future f = pool.submit(c);
 
-             list.add(f);  
+                list.add(f);
 
-            }   
+            }
 
             pool.shutdown();
 
             pool.awaitTermination(300, TimeUnit.MINUTES);
 
-            for (Future f : list) {  
+            for (Future f : list) {
 
-             log.info(">>>>>>>>> " + f.get().toString());  
+                log.info(">>>>>>>>> " + f.get().toString());
 
-            } 
+            }
 
         }
 
     }
 
 
-
-    public boolean processOneFile(String csvFile) throws InterruptedException, IOException,SQLException,ParseException
+    public boolean processOneFile(String csvFile) throws InterruptedException, IOException, SQLException, ParseException
 
     {
 
-        boolean result =false;
+        boolean result = false;
 
         log.info(String.format("======CSV File Name is: %s=========", csvFile));
 
@@ -388,24 +356,22 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         downloadModels();
 
-        Double rocScore=model_score_map.get(modelId);
+        Double rocScore = model_score_map.get(modelId);
 
-        WriteQualityTestReport(csvFile,rocScore);
+        WriteQualityTestReport(csvFile, rocScore);
 
-        result=true;
+        result = true;
 
         return result;
 
     }
 
-    
 
     public void downloadModels() throws IOException {
 
         String tenantName = tenantToAttach.getId();
 
-        String hdfsPath = String.format("%s/%s/%s", plsHdfsPath , modelingServiceHdfsBaseDir, tenantName);
-
+        String hdfsPath = String.format("%s/%s/%s", plsHdfsPath, modelingServiceHdfsBaseDir, tenantName);
 
 
         // TODO: do we make local path a parameter from Jenkins?
@@ -421,7 +387,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 FileUtils.deleteDirectory(new File(localPath, tenantName));
 
 
-
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, localPath + "/" + tenantName);
 
                 log.info(String.format("File %s copied to local machine at %s", hdfsPath, localPath));
@@ -430,7 +395,8 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
                 log.info(String.format("File %s does not exist on HDFS", hdfsPath));
 
-            };
+            }
+            ;
 
         } catch (IOException ioe) {
 
@@ -439,13 +405,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }
 
 
-
     }
-
-
-
-
-
 
 
     @SuppressWarnings("rawtypes")
@@ -466,11 +426,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        String displayName=csvFileName;
+        String displayName = csvFileName;
 
-        if (csvFileName.indexOf('/')>=0){
+        if (csvFileName.indexOf('/') >= 0) {
 
-            displayName=csvFileName.split("/")[1];
+            displayName = csvFileName.split("/")[1];
 
         }
 
@@ -497,7 +457,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
-
     @SuppressWarnings("rawtypes")
 
     public void resolveMetadata(SourceFile sourceFile) {
@@ -513,7 +472,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
 
                 FieldMappingDocument.class);
-
 
 
         for (FieldMapping mapping : mappings.getFieldMappings()) {
@@ -535,13 +493,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }
 
 
-
         List<String> ignored = new ArrayList<>();
 
         ignored.add("Activity_Count_Interesting_Moment_Webinar");
 
         mappings.setIgnoredFields(ignored);
-
 
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
@@ -555,7 +511,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                         sourceFile.getName()), mappings, Void.class);
 
     }
-
 
 
     //    @Test(groups = "qa.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -572,12 +527,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         String modelName = parameters.getName();
 
-        String modelingWorkflowApplicationId=model(parameters);
+        String modelingWorkflowApplicationId = model(parameters);
 
         return modelName;
 
     }
-
 
 
     @SuppressWarnings("rawtypes")
@@ -595,11 +549,9 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         String modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
 
-
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
         waitForWorkflowStatus(modelingWorkflowApplicationId, true);
-
 
 
         boolean thrown = false;
@@ -619,9 +571,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }
 
 
-
         assertTrue(thrown);
-
 
 
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
@@ -631,7 +581,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         return modelingWorkflowApplicationId;
 
     }
-
 
 
     //    @Test(groups = "qa.lp", dependsOnMethods = "createModel")
@@ -651,7 +600,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(reports.size(), 2);
 
     }
-
 
 
     public ModelSummary retrieveModelSummary(String modelName) throws InterruptedException {
@@ -703,7 +651,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
-
     public void retrieveErrorsFile(SourceFile sourceFile) {
 
         // Relies on error in Account.csv
@@ -729,7 +676,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertTrue(errors.length() > 0);
 
     }
-
 
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {
@@ -769,7 +715,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         assertNotNull(found);
 
 
-
         @SuppressWarnings("unchecked")
 
         List<Object> predictors = restTemplate.getForObject(
@@ -779,7 +724,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 List.class);
 
         assertTrue(Iterables.any(predictors, new Predicate<Object>() {
-
 
 
             @Override
@@ -795,7 +739,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         }));
 
 
-
         // Look up the model summary with details
 
         Object rawSummary = restTemplate.getForObject(
@@ -807,15 +750,12 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
-
     private JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
-
 
 
         int retryOnException = 4;
 
         Job job = null;
-
 
 
         while (true) {
@@ -829,7 +769,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
 
 
-
                 job = null;
 
                 if (--retryOnException == 0)
@@ -839,13 +778,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
             }
 
 
-
             if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
 
                 return job.getJobStatus();
 
             }
-
 
 
             try {
@@ -862,77 +799,72 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
     }
 
-    
 
-    private void WriteQualityTestReport(String csvFileName, Double rocScore) throws SQLException,ParseException{
+    private void WriteQualityTestReport(String csvFileName, Double rocScore) throws SQLException, ParseException {
 
-        String tenantName=tenantToAttach.getId();
+        String tenantName = tenantToAttach.getId();
 
         String hdfsPath_nn1 = String.format("%s%s%s", Webhdfs_nn1, modelingServiceHdfsBaseDir, tenantName);
 
         String hdfsPath_nn2 = String.format("%s%s%s", Webhdfs_nn2, modelingServiceHdfsBaseDir, tenantName);
 
-        String Customer="";
+        String Customer = "";
 
-        String CSVFile=csvFileName;
+        String CSVFile = csvFileName;
 
-        if (csvFileName.indexOf('/')>=0)
+        if (csvFileName.indexOf('/') >= 0)
 
         {
 
-            CSVFile=csvFileName.split("/")[1];
-
-        } 
-
-        if (CSVFile.lastIndexOf(".")>0){
-
-            Customer=CSVFile.substring(0,CSVFile.lastIndexOf("."));
+            CSVFile = csvFileName.split("/")[1];
 
         }
 
-        
+        if (CSVFile.lastIndexOf(".") > 0) {
 
-        if (Customer.indexOf('/')>=0)
-
-        {
-
-            Customer=Customer.split("/")[1];
+            Customer = CSVFile.substring(0, CSVFile.lastIndexOf("."));
 
         }
 
-        if (Customer.indexOf("_LP3_")>0)
+
+        if (Customer.indexOf('/') >= 0)
 
         {
 
-            Customer=Customer.split("_LP3_")[0];
+            Customer = Customer.split("/")[1];
 
         }
 
-        else if(Customer.split("_").length>2)
+        if (Customer.indexOf("_LP3_") > 0)
 
         {
 
-            Customer=Customer.split("_")[0]+'_'+Customer.split("_")[1];
+            Customer = Customer.split("_LP3_")[0];
+
+        } else if (Customer.split("_").length > 2)
+
+        {
+
+            Customer = Customer.split("_")[0] + '_' + Customer.split("_")[1];
 
         }
 
         System.out.println("Connected to server !!!");
 
-        Statement statement=conn.createStatement();
+        Statement statement = conn.createStatement();
 
         log.info("====start to insert DB======");
 
-        int res=statement.executeUpdate("insert INTO [dbo].[ModelQualityReport] ([Customer],[CSVFile],[ModelArtifacts_NN1],[ModelArtifacts_NN2],[ROC],[CreateDate]) VALUES ('"+Customer+"', '"+CSVFile+"','"+hdfsPath_nn1+"','"+hdfsPath_nn2+"',"+rocScore+",'"+ getCurrentTimeStamp()+"')");
+        int res = statement.executeUpdate("insert INTO [dbo].[ModelQualityReport] ([Customer],[CSVFile],[ModelArtifacts_NN1],[ModelArtifacts_NN2],[ROC],[CreateDate]) VALUES ('" + Customer + "', '" + CSVFile + "','" + hdfsPath_nn1 + "','" + hdfsPath_nn2 + "'," + rocScore + ",'" + getCurrentTimeStamp() + "')");
 
-        assertEquals(res,1);
+        assertEquals(res, 1);
 
         log.info("====completed to insert DB======");
 
         statement.close();
 
-        } 
+    }
 
-    
 
     private String getCurrentTimeStamp() throws ParseException {
 
@@ -945,12 +877,10 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         return dateFormat.format(today.getTime());
 
 
-
     }
 
-    
 
-    private Connection dbConnect() throws SQLServerException{
+    private Connection dbConnect() throws SQLServerException {
 
         SQLServerDataSource dataSource = new SQLServerDataSource();
 
@@ -971,12 +901,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
-
     public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName)
 
             throws InterruptedException {
 
-        String csvFileName=fileName;
+        String csvFileName = fileName;
 
         if (!StringUtils.isBlank(fileName)) {
 
@@ -992,7 +921,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         log.info("Uploading File");
 
-        SourceFile sourceFile=uploadFile(csvFileName);
+        SourceFile sourceFile = uploadFile(csvFileName);
 
         log.info(sourceFile.getName());
 
@@ -1002,9 +931,9 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         log.info("Creating Model");
 
-        String modelName=createModel(sourceFile);
+        String modelName = createModel(sourceFile);
 
-        ModelSummary modelSummary=retrieveModelSummary(modelName);
+        ModelSummary modelSummary = retrieveModelSummary(modelName);
 
         String modelId = modelSummary.getId();
 
@@ -1012,14 +941,13 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
         Double rocScore = modelSummary.getRocScore();
 
-        log.info(String.format(">>>>>>>>>>>>>>>> modeling iD is:%s and rocScore is: %f", modelId,rocScore));
+        log.info(String.format(">>>>>>>>>>>>>>>> modeling iD is:%s and rocScore is: %f", modelId, rocScore));
 
-        model_score_map.put(modelId,rocScore);
+        model_score_map.put(modelId, rocScore);
 
         return modelId;
 
     }
-
 
 
     public RestTemplate getRestTemplate() {
@@ -1029,7 +957,6 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
-
     public Tenant getTenant() {
 
         return tenantToAttach;
@@ -1037,51 +964,44 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     }
 
 
+    class MyCallable implements Callable<Object> {
 
-    
+        private String CSVFileName;
 
-    class MyCallable implements Callable<Object> {  
 
-        private String CSVFileName;  
+        MyCallable(String csvfileName) {
 
-          
+            this.CSVFileName = csvfileName;
 
-        MyCallable(String csvfileName) {  
+        }
 
-           this.CSVFileName = csvfileName;  
 
-        }  
+        public Object call() throws Exception {
 
-          
+            String result = "";
 
-        public Object call() throws Exception {  
+            System.out.println(">>>>>>>>" + CSVFileName + " start to process!");
 
-           String result="";
+            boolean result_process = processOneFile(CSVFileName);
 
-           System.out.println(">>>>>>>>" + CSVFileName + " start to process!");
+            if (result_process)
 
-           boolean result_process=processOneFile(CSVFileName); 
+            {
 
-           if (result_process)
+                result = "======" + CSVFileName + "Have been processed successfully!";
 
-           {
+            } else
 
-               result= "======"+CSVFileName + "Have been processed successfully!";  
+            {
 
-           }
+                result = "!!!!!!!!" + CSVFileName + "processed Failed!";
 
-           else
+            }
 
-           {
+            return result;
 
-               result= "!!!!!!!!"+CSVFileName + "processed Failed!";
+        }
 
-           }
-
-           return result;
-
-        }  
-
-        }  
+    }
 
 }
