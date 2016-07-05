@@ -100,7 +100,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
-        String appId = pmmlModelWorkflowSubmitter.submit(modelName, moduleName, pmmlFileName, pivotFileName).toString();
+        String appId = pmmlModelWorkflowSubmitter.submit(modelName, moduleName, pivotFileName, pmmlFileName).toString();
         return ResponseDocument.successResponse(appId);
 
     }
