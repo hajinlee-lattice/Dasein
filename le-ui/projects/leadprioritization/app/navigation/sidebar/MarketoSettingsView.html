@@ -1,4 +1,12 @@
-<div>
+<div ng-controller="SidebarRootController">
+    <button class="open-button open" data-ng-click="handleSidebarToggle($event)">
+        <span class="fa fa-arrow-left"></span>
+    </button>
+    <div class="logo-container">
+        <a href="#/" class="logo" style="float: none;padding: 0;">
+            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+        </a>
+    </div>
     <div class="menu-header">
         <a ui-sref="home.models" class="button icon-button">
             <span class="fa fa-angle-left"></span>
@@ -8,14 +16,14 @@
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
             <a class="pd-sidebar-header" ui-sref="home.marketosettings.apikey">
-                <span class="ico ico-marketo-apikey ico-light-gray"></span>
-                <span class="pd-sidebar-header-label">API Key</span>
+                <span class="ico-container"><span class="ico ico-marketo-apikey ico-light-gray"></span></span>
+                <span class="pd-sidebar-header-label label">API Key</span>
             </a>
         </li>
         <li role="presentation" ui-sref-active="active">
             <a class="pd-sidebar-header" ui-sref="home.marketosettings.models">
-                <span class="ico ico-marketo-models ico-light-gray"></span>
-                <span class="pd-sidebar-header-label">Models</span>
+                <span class="ico-container"><span class="ico ico-marketo-models ico-light-gray"></span></span>
+                <span class="pd-sidebar-header-label label">Models</span>
             </a>
         </li>
     </ul>

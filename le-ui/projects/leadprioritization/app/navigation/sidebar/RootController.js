@@ -4,8 +4,14 @@ angular
         'mainApp.appCommon.utilities.StringUtility',
         'mainApp.core.services.FeatureFlagService'
     ])
-    .controller('SidebarRootController', function($scope, FeatureFlagService, ResourceUtility) {
+    .controller('SidebarRootController', function($scope, $state, FeatureFlagService, ResourceUtility) {
+        $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
+
+        $scope.handleSidebarToggle = function ($event) {
+            $("body").toggleClass("open-nav");
+            $("body").addClass("controlled-nav");  // indicate the user toggled the nav
+        }
         
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();

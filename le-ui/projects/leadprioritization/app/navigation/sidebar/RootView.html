@@ -1,53 +1,60 @@
 <div ng-controller="SidebarRootController">
-    <div>
+    <button class="open-button open" data-ng-click="handleSidebarToggle($event)">
+        <!-- <span class="fa fa-arrow-left"></span> -->
+        <span class="fa fa-compress"></span>
+        <span class="fa fa-expand"></span>
+    </button>
+    <div class="logo-container">
         <a href="#/" class="logo" style="float: none;padding: 0;">
             <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
         </a>
     </div>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.models"><span class="ico ico-model ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}} <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
+            <a ui-sref="home.models"><span class="ico-container"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
+            <!--
             <ul>
-                <li role="presentation" ui-sref-active="active"><a ui-sref="home.models.import">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_CREATE')}}</a></li>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="home.models.import"><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_CREATE')}}</span></a></li>
             </ul>
+            -->
         </li>
         <li data-ng-if="showUserManagement" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.users"><span class="ico ico-user ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</a>
+            <a ui-sref="home.users"><span class="ico-container"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
         </li>
         <li data-ng-if="showModelCreationHistory" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.history"><span class="ico ico-history ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</a>
+            <a ui-sref="home.history"><span class="ico-container"><span class="ico ico-history ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</span></a>
         </li>
         <!--
-        <li role="presentation" ui-sref-active="active">
+            <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.fields"><span class="fa fa-columns"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MANAGE')}}</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
+            </li>
+            <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.setup"><span class="fa fa-database"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SETUP')}}</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
+            </li>
+            <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.activate"><span class="fa fa-rocket"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_ACTIVATE')}}</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
+            </li>
+            <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.enrichment"><span class="fa fa-area-chart"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ENRICHMENT')}}</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
+            </li>
+            <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.dashboard"><span class="fa fa-dashboard"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</a>
-        </li>
+            </li>
         -->
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.jobs.status" ui-sref-opts="{reload: true}"><span class="ico ico-cog ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}</a>
+            <a ui-sref="home.jobs.status" ui-sref-opts="{reload: true}"><span class="ico-container"><span class="ico ico-cog ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}</span></a>
+        </li>   
+        <li role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
+            <a ui-sref="home.marketosettings.apikey"><span class="ico-container"><span class="ico ico-marketo ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}</span></a>
         </li>
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.marketosettings.apikey"><span class="ico ico-marketo ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.eloquasettings.apikey"><span class="ico ico-eloqua ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}</a>
+        <li role="presentation"  ng-class="{active: $state.includes('home.eloquasettings')}">
+            <a ui-sref="home.eloquasettings.apikey"><span class="ico-container"><span class="ico ico-eloqua ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}</span></a>
         </li>
         <li data-ng-if="showModelCreationHistory" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.sfdcsettings"><span class="ico ico-salesforce ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}</a>
+            <a ui-sref="home.sfdcsettings"><span class="ico-container"><span class="ico ico-salesforce ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}</span></a>
         </li>
         <li data-ng-if="showApiConsole" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.apiconsole"><span class="ico ico-api-console ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}</a>
+            <a ui-sref="home.apiconsole"><span class="ico-container"><span class="ico ico-api-console ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}</span></a>
         </li>
     </ul>
 </div>

@@ -39,9 +39,12 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     });
     
     checkBrowserWidth();
+
     $(window).resize(checkBrowserWidth);
+
     $scope.handleSidebarToggle = function ($event) {
         $("body").toggleClass("open-nav");
+        $("body").addClass("controlled-nav");  // indicate the user toggled the nav
     }
 
     $(document.body).click(function() {
@@ -57,10 +60,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     };
 
     function checkBrowserWidth(){
-        if (window.matchMedia("(min-width: 1200px)").matches) {
-            $("body").addClass("open-nav");
-        } else {
-            $("body").removeClass("open-nav");
+      // if the user has closed the nav, leave it closed when increasing size
+      if (window.matchMedia("(min-width: 1200px)").matches && !$("body").hasClass("controlled-nav")) {
+        $("body").addClass("open-nav");
+      } else {
+        if($("body").hasClass("open-nav")) {
+          // if the nav is open when scaling down close it but allow it to re-open by removing our user controlled class indicator
+          $("body").removeClass("controlled-nav");
         }
+        $("body").removeClass("open-nav");
+      }
     }
 });

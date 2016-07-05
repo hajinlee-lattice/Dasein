@@ -1,33 +1,35 @@
 <div ng-controller="SidebarRootController">
-    <div class="menu-header">
-        <a ui-sref="home.models" class="button button-blue icon-button">
-            <span class="fa fa-angle-left"></span>
-        </a>
-        <h3>Back</h3>
-    </div>
+    <button class="open-button open" data-ng-click="handleSidebarToggle($event)">
+        <!-- <span class="fa fa-arrow-left"></span> -->
+        <span class="fa fa-compress"></span>
+        <span class="fa fa-expand"></span>
+    </button>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.attributes"><span class="ico ico-attributes ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</a>
+            <a ui-sref="home.models"><span class="ico-container"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.performance"><span class="ico ico-performance ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</a>
+            <a ui-sref="home.model.attributes"><span class="ico-container">><span class="ico ico-attributes ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</span></a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.leads"><span class="ico ico-leads ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}</a>
+            <a ui-sref="home.model.performance"><span class="ico-container">><span class="ico ico-performance ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</span></a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="home.model.leads"><span class="ico-container">><span class="ico ico-leads ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}</span></a>
         </li>
         <li data-ng-if="showModelSummary" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.summary"><span class="ico ico-datatable ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</a>
+            <a ui-sref="home.model.summary"><span class="ico-container">><span class="ico ico-datatable ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</span></a>
         </li>
         <li data-ng-if="showAlerts" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.alerts"><span class="ico ico-alerts ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</a>
+            <a ui-sref="home.model.alerts"><span class="ico-container">><span class="ico ico-alerts ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</span></a>
         </li>
-        
+
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.jobs"><span class="ico ico-scoring ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</a>
+            <a ui-sref="home.model.jobs"><span class="ico-container">><span class="ico ico-scoring ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</span></a>
         </li>
-        
+
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.refine"><span class="ico ico-refine ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</a>
+            <a ui-sref="home.model.refine"><span class="ico-container">><span class="ico ico-refine ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
         </li>
     </ul>
 </div>

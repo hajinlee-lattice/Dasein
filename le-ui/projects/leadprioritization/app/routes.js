@@ -307,7 +307,9 @@ angular
             },
             views: {
                 "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
+                    // -- ben::bookmark 
+                    // templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
                     template: ''
@@ -326,8 +328,12 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
+                    /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
                     controller: function(urls) {
@@ -347,8 +353,12 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
+                    /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
                     controller: function(urls) { 
@@ -389,7 +399,8 @@ angular
             },
             views: {
                 "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/EloquaSettingsView.html'
+                    //templateUrl: 'app/navigation/sidebar/EloquaSettingsView.html'
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
                     template: ''
@@ -408,8 +419,12 @@ angular
                             return 'SUMMARY_ELOQUA_APIKEY';
                         }
                     },
+                    /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
+                    templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 "main@": {
                     controller: function(urls) {
@@ -429,8 +444,12 @@ angular
                             return 'SUMMARY_ELOQUA_MODELS';
                         }
                     },
+                    /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
+                    templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 "main@": {
                     controller: function(urls) {

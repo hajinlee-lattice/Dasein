@@ -1,11 +1,7 @@
 <header data-ng-controller="MainHeaderController">
     <div class="secondary-nav">
-
-        <button id="toggleNav" class="nav-button" data-ng-click="handleSidebarToggle($event)">
-            <span class="fa fa-bars"></span>
-        </button>
-
-        <img ng-show="!isModelDetailsPage" class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
+        <!-- <img ng-show="!isModelDetailsPage" class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" /> -->
+        <!-- <span class="ico ico-model ico-light-gray"></span> -->
         <span ng-show="isModelDetailsPage" class="model-name">{{ displayName }}</span>
         
         <div class="pull-right">

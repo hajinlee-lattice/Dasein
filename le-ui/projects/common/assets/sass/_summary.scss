@@ -56,6 +56,8 @@ Page Summary / Sub-Nav Headers
   .nav {
     padding: 3px 0 0;
     text-align: left;
+    position: relative;
+    left: -1px;
     p {
       float: right;
       margin-right: 20px;
