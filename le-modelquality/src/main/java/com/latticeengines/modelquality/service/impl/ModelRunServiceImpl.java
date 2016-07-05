@@ -12,9 +12,10 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.modelquality.service.ModelRunService;
 
 @Component("modelRunService")
-public class ModelRunSericeImpl implements ModelRunService {
+public class ModelRunServiceImpl implements ModelRunService {
 
-    private static final Log log = LogFactory.getLog(ModelRunSericeImpl.class);
+    @SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(ModelRunServiceImpl.class);
     
     @Resource(name = "fileModelRunService")
     private ModelRunService fileModelRunService;
@@ -24,7 +25,6 @@ public class ModelRunSericeImpl implements ModelRunService {
     
     @Override
     public void run(ModelRun modelRun) {
-        
         SelectedConfig config = modelRun.getSelectedConfig();
         DataSetType dataSetType = config.getDataSet().getDataSetType();
         if (dataSetType == DataSetType.SOURCETABLE) {
