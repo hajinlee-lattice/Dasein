@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
@@ -32,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.testframework.SamlTestNGBase;

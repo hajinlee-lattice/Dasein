@@ -22,14 +22,12 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.metadata.MetadataMemoryProvider;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.util.SAMLUtils;
 
-@Component
 public class MetadataSynchronizer {
     private static Logger log = Logger.getLogger(MetadataSynchronizer.class);
 

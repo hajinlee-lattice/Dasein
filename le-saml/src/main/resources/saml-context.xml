@@ -8,7 +8,8 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.latticeengines.saml"/>
 
-    <import resource="classpath:saml-core-context.xml"/>
+    <import resource="classpath:saml-common-context.xml"/>
+    <import resource="classpath:saml-server-context.xml"/>
     <import resource="classpath:saml-persistence-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:security-context.xml"/>

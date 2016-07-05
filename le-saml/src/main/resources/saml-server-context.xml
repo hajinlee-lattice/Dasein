@@ -5,6 +5,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
+    <bean class="com.latticeengines.saml.MetadataSynchronizer"/>
+
     <!-- Secured pages with SAML as entry point -->
     <security:http entry-point-ref="samlEntryPoint" use-expressions="false">
         <security:intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
@@ -48,18 +50,6 @@
 
     <!-- Logger for SAML messages and events -->
     <bean id="samlLogger" class="org.springframework.security.saml.log.SAMLDefaultLogger"/>
-
-    <!-- Central storage of cryptographic keys -->
-    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
-        <constructor-arg value="classpath:security/samlKeystore.jks"/>
-        <constructor-arg type="java.lang.String" value="30fd6cd5-ecaa-47af-8850-ab2c8b37f095"/>
-        <constructor-arg>
-            <map>
-                <entry key="testidp" value="testidp"/>
-            </map>
-        </constructor-arg>
-        <constructor-arg type="java.lang.String" value="testidp"/>
-    </bean>
 
     <!-- Entry point to initialize authentication, default values taken from properties file -->
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
@@ -235,23 +225,5 @@
     <bean id="paosBinding" class="org.springframework.security.saml.processor.HTTPPAOS11Binding">
         <constructor-arg ref="parserPool"/>
     </bean>
-
-    <!-- Initialization of OpenSAML library-->
-    <bean class="org.springframework.security.saml.SAMLBootstrap"/>
-
-    <!-- Initialization of the velocity engine -->
-    <bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory"
-          factory-method="getEngine"/>
-
-    <!-- XML parser pool needed for OpenSAML parsing -->
-    <bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize">
-        <property name="builderFeatures">
-            <map>
-                <entry key="http://apache.org/xml/features/dom/defer-node-expansion" value="false"/>
-            </map>
-        </property>
-    </bean>
-
-    <bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder"/>
 
 </beans>
