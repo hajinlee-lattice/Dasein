@@ -88,6 +88,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                         .toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+        setupSecurityContext(tenant1);
         modelSummaryEntityMgr.deleteByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
     }
 
