@@ -447,7 +447,8 @@ public enum LedpCode {
     LEDP_32000("Validations failed: {0}"), //
 
     // le-saml
-    LEDP_33000("An identity provider with ID {0} already exists");
+    LEDP_33000("An identity provider with ID {0} already exists"), //
+    LEDP_33001("Validation failed for Identity Provider with Entity ID {0}: {1}");
 
     private String message;
 

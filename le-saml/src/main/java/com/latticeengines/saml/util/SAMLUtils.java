@@ -1,5 +1,7 @@
 package com.latticeengines.saml.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
@@ -28,6 +30,14 @@ public class SAMLUtils {
             return entityId.replace(LOCAL_ENTITY_ID_BASE, "");
         }
         return null;
+    }
+
+    public static XMLObject deserialize(ParserPool parser, String string) {
+        try (InputStream stream = new ByteArrayInputStream(string.getBytes())) {
+            return deserialize(parser, stream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static XMLObject deserialize(ParserPool parser, InputStream inputStream) {

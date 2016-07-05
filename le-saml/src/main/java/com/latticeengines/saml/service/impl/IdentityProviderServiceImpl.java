@@ -45,6 +45,9 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
     public IdentityProvider find(String entityId) {
         Tenant tenant = getTenant();
         IdentityProvider identityProvider = identityProviderEntityMgr.findByEntityId(entityId);
+        if (identityProvider == null) {
+            return null;
+        }
         if (!identityProvider.getGlobalAuthTenant().getId().equals(tenant.getId())) {
             throw new AccessDeniedException("Unauthorized");
         }

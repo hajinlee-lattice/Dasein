@@ -4,9 +4,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
-
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,36 +26,37 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    private IdentityProvider identityProvider;
+
     @BeforeClass(groups = "functional")
     public void setup() {
-        setupTenant();
+        samlTestBed.setupTenant();
     }
 
     @Test(groups = "functional")
     public void testCreate() {
-        IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setEntityId("entityId");
-        try {
-            identityProvider.setMetadata(IOUtils.toString(getClass().getResourceAsStream(
-                    RESOURCE_BASE + "/idp_metadata.xml")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        identityProvider = samlTestBed.constructIdp();
         identityProviderService.create(identityProvider);
+    }
+
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testFailValidation() {
+        IdentityProvider bad = samlTestBed.constructIdp();
+        bad.setEntityId("bad entity id");
+        identityProviderEntityMgr.create(bad);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testExists() {
-        IdentityProvider identityProvider = identityProviderService.find("entityId");
-        assertNotNull(identityProvider);
+        IdentityProvider retrieved = identityProviderService.find(identityProvider.getEntityId());
+        assertNotNull(retrieved);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testExists")
     public void testDuplicateEntityIdNotAllowed() {
         boolean thrown = false;
         try {
-            testCreate();
+            identityProviderService.create(identityProvider);
         } catch (LedpException e) {
             thrown = true;
         }
@@ -67,7 +65,7 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testDuplicateEntityIdNotAllowed")
     public void testDelete() {
-        identityProviderService.delete("entityId");
+        identityProviderService.delete(identityProvider.getEntityId());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testDelete")
@@ -77,8 +75,8 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testCreateAgain")
     public void testCascadeDelete() {
-        tenantService.discardTenant(globalAuthFunctionalTestBed.getMainTestTenant());
-        IdentityProvider identityProvider = identityProviderEntityMgr.findByEntityId("entityId");
-        assertNull(identityProvider);
+        tenantService.discardTenant(samlTestBed.getGlobalAuthTestBed().getMainTestTenant());
+        IdentityProvider retrieved = identityProviderEntityMgr.findByEntityId(identityProvider.getEntityId());
+        assertNull(retrieved);
     }
 }

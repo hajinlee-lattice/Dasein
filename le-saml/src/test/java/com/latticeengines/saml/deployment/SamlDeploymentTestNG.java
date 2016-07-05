@@ -15,53 +15,58 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
     @Value("${saml.failure.redirect.address}")
     private String errorPage;
 
+    @Value("${saml.success.redirect.address}")
+    private String successPage;
+
     @Test(groups = "deployment")
     public void testIdPInitiatedAuth() throws UnsupportedEncodingException {
-        Response response = getTestSAMLResponse(identityProvider);
-        sendSamlResponse(response);
+        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToSuccessPage(samlTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_IncorrectEntityId() {
-        Response response = getTestSAMLResponse(identityProvider);
+        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
         assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
                 "invalidEntityId");
-        assertRedirectedToErrorPage(sendSamlResponse(response));
+        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_UnknownUser() {
-        Response response = getTestSAMLResponse(identityProvider);
+        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
         assertion.getSubject().getNameID().setValue("unknown@lattice-engines.com");
-        assertRedirectedToErrorPage(sendSamlResponse(response));
+        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_IdpNotAssociatedWithTenant() throws InterruptedException {
-        globalAuthFunctionalTestBed.setMainTestTenant(globalAuthFunctionalTestBed.getTestTenants().get(1));
-        MultiTenantContext.setTenant(globalAuthFunctionalTestBed.getMainTestTenant());
+        GlobalAuthTestBed gatestbed = samlTestBed.getGlobalAuthTestBed();
+        gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(1));
+        MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
 
         // Register IdP
-        IdentityProvider otherIdentityProvider = constructIdp();
+        IdentityProvider otherIdentityProvider = samlTestBed.constructIdp();
         identityProviderService.create(otherIdentityProvider);
         // Sleep to let metadata manager pick up the new IdP
         Thread.sleep(10000);
 
         // Switch back to main tenant
-        globalAuthFunctionalTestBed.setMainTestTenant(globalAuthFunctionalTestBed.getTestTenants().get(0));
-        MultiTenantContext.setTenant(globalAuthFunctionalTestBed.getMainTestTenant());
+        gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(0));
+        MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
 
-        Response response = getTestSAMLResponse(otherIdentityProvider);
+        Response response = samlTestBed.getTestSAMLResponse(otherIdentityProvider);
 
-        assertRedirectedToErrorPage(sendSamlResponse(response));
+        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
     }
 
     private void assertRedirectedToErrorPage(ResponseEntity<Void> httpResponse) {
@@ -70,4 +75,12 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         assertEquals(inner.size(), 1);
         assertTrue(inner.get(0).contains(errorPage));
     }
+
+    private void assertRedirectedToSuccessPage(ResponseEntity<Void> httpResponse) {
+        List<String> inner = httpResponse.getHeaders().get("Location");
+        assertNotNull(inner);
+        assertEquals(inner.size(), 1);
+        assertTrue(inner.get(0).contains(successPage));
+    }
+
 }
