@@ -95,7 +95,7 @@ public class MetadataSynchronizer {
         List<Tenant> tenants = new ArrayList<>();
         for (String tenantId : grouped.keySet()) {
             try {
-                log.info(String.format("Refreshing metadata for tenant %s", tenantId));
+                log.debug(String.format("Refreshing metadata for tenant %s", tenantId));
                 tenants.add(constructTenant(tenantId, grouped.get(tenantId)));
             } catch (Exception e) {
                 log.error(
