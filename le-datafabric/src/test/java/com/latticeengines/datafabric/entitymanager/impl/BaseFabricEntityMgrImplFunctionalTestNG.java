@@ -105,7 +105,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         deleteEntities(entities);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testPublishAndConsume() throws Exception {
 
 

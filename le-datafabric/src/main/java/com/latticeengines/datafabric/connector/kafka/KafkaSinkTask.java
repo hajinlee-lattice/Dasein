@@ -36,9 +36,9 @@ public class KafkaSinkTask extends SinkTask {
     private String schemaRegUrl;
     private String zkConnect;
     private String stack;
+    private String environment;
     private String topic;
     private TopicScope scope;
-
 
     public KafkaSinkTask() {
 
@@ -51,7 +51,7 @@ public class KafkaSinkTask extends SinkTask {
 
     @Override
     public void start(Map<String, String> props) {
-        Set<TopicPartition> assignment = context.assignment();;
+        Set<TopicPartition> assignment = context.assignment();
 
         try {
             KafkaSinkConnectorConfig connectorConfig = new KafkaSinkConnectorConfig(props);
@@ -59,26 +59,28 @@ public class KafkaSinkTask extends SinkTask {
             avroData = new AvroData(schemaCacheSize);
 
             brokers = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_BROKERS_CONFIG);
-            zkConnect  = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_ZKCONNECT_CONFIG);
-            schemaRegUrl  = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCHEMAREG_CONFIG);
+            zkConnect = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_ZKCONNECT_CONFIG);
+            schemaRegUrl = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCHEMAREG_CONFIG);
             stack = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_STACK_CONFIG);
+            environment = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_ENVIRONMENT_CONFIG);
             topic = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_TOPIC_CONFIG);
             scope = TopicScope.fromName(connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCOPE_CONFIG));
             recordType = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_RECORD_CONFIG);
 
-            messageService = new FabricMessageServiceImpl(brokers,
-                                                          zkConnect,
-                                                          schemaRegUrl,
-                                                          stack);
-
+            messageService = new FabricMessageServiceImpl(brokers, //
+                    zkConnect, //
+                    schemaRegUrl, //
+                    stack, //
+                    environment);
 
             log.info("Constructing producer for topic " + topic + "\n");
 
             producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder(). //
-                                                         messageService(messageService). //
-                                                         topic(topic).scope(scope));
+                    messageService(messageService). //
+                    topic(topic).scope(scope));
 
-            // No recovery implemented assuming sinking to another Kafka cluster is idempotent.
+            // No recovery implemented assuming sinking to another Kafka cluster
+            // is idempotent.
         } catch (ConfigException e) {
             throw new ConnectException("Couldn't start KafkaSinkConnector due to configuration error.", e);
         } catch (ConnectException e) {
@@ -93,19 +95,15 @@ public class KafkaSinkTask extends SinkTask {
 
     @Override
     public void put(Collection<SinkRecord> records) throws ConnectException {
-
-        Map<String, GenericRecord> avroRecords;
-
-        avroRecords = new HashMap<String, GenericRecord>();
-
+        Map<String, GenericRecord> avroRecords = new HashMap<>();
         try {
-            for (SinkRecord record: records) {
-                Struct value = (Struct)record.value();
-                Struct key = (Struct)record.key();
-                GenericRecord valueRec = (GenericRecord)avroData.fromConnectData(value.schema(), value);
-                GenericRecord keyRec = (GenericRecord)avroData.fromConnectData(key.schema(), key);
-                String id = keyRec.get("id").toString();;
-                String recordType = keyRec.get("record").toString();;
+            for (SinkRecord record : records) {
+                Struct value = (Struct) record.value();
+                Struct key = (Struct) record.key();
+                GenericRecord valueRec = (GenericRecord) avroData.fromConnectData(value.schema(), value);
+                GenericRecord keyRec = (GenericRecord) avroData.fromConnectData(key.schema(), key);
+                String id = keyRec.get("id").toString();
+                String recordType = keyRec.get("record").toString();
                 if (!recordType.equals(this.recordType))
                     continue;
                 log.debug("Kafka connector sink record " + recordType + " " + this.recordType + " id " + id + "\n");

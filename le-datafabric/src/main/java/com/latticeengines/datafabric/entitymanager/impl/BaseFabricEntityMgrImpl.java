@@ -286,7 +286,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         private String topic;
 
-        private TopicScope scope;
+        private TopicScope scope = TopicScope.PRIVATE;
 
         public Builder store(String store) {
             this.store = store;

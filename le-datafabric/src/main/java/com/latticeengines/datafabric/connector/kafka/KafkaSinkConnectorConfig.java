@@ -32,8 +32,14 @@ public class KafkaSinkConnectorConfig extends AbstractConfig {
     public static final String KAFKA_STACK_CONFIG = "kafka.stack";
     private static final String KAFKA_STACK_DOC =
         "The lattice stack for sink kafka cluster";
-    public static final String KAFKA_STACK_DEFAULT = "http://localhost:8081";
+    public static final String KAFKA_STACK_DEFAULT = "";
     private static final String KAFKA_STACK_DISPLAY = "lattice stack";
+
+    public static final String KAFKA_ENVIRONMENT_CONFIG = "kafka.environment";
+    private static final String KAFKA_ENVIRONMENT_DOC =
+            "The lattice environment for sink kafka cluster";
+    public static final String KAFKA_ENVIRONMENT_DEFAULT = "dev";
+    private static final String KAFKA_ENVIRONMENT_DISPLAY = "lattice environment";
 
     public static final String KAFKA_TOPIC_CONFIG = "kafka.topic";
     private static final String KAFKA_TOPIC_DOC =
@@ -91,11 +97,12 @@ public class KafkaSinkConnectorConfig extends AbstractConfig {
 
         // Define Redis configuration group.
         config.define(KAFKA_BROKERS_CONFIG, Type.STRING, KAFKA_BROKERS_DEFAULT, Importance.HIGH, KAFKA_BROKERS_DOC, KAFKA_GROUP, 2, Width.MEDIUM, KAFKA_BROKERS_DISPLAY)
-              .define(KAFKA_ZKCONNECT_CONFIG, Type.STRING, KAFKA_ZKCONNECT_DEFAULT, Importance.HIGH, KAFKA_ZKCONNECT_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_ZKCONNECT_DISPLAY)
-              .define(KAFKA_SCHEMAREG_CONFIG, Type.STRING, KAFKA_SCHEMAREG_DEFAULT, Importance.HIGH, KAFKA_SCHEMAREG_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCHEMAREG_DISPLAY)
-              .define(KAFKA_STACK_CONFIG, Type.STRING, KAFKA_STACK_DEFAULT, Importance.HIGH, KAFKA_STACK_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_STACK_DISPLAY)
-              .define(KAFKA_TOPIC_CONFIG, Type.STRING, KAFKA_TOPIC_DEFAULT, Importance.HIGH, KAFKA_TOPIC_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_TOPIC_DISPLAY)
-              .define(KAFKA_SCOPE_CONFIG, Type.STRING, KAFKA_SCOPE_DEFAULT, Importance.HIGH, KAFKA_SCOPE_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCOPE_DISPLAY)
+              .define(KAFKA_ZKCONNECT_CONFIG, Type.STRING, KAFKA_ZKCONNECT_DEFAULT, Importance.HIGH, KAFKA_ZKCONNECT_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_ZKCONNECT_DISPLAY) //
+              .define(KAFKA_SCHEMAREG_CONFIG, Type.STRING, KAFKA_SCHEMAREG_DEFAULT, Importance.HIGH, KAFKA_SCHEMAREG_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCHEMAREG_DISPLAY) //
+              .define(KAFKA_STACK_CONFIG, Type.STRING, KAFKA_STACK_DEFAULT, Importance.HIGH, KAFKA_STACK_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_STACK_DISPLAY) //
+              .define(KAFKA_ENVIRONMENT_CONFIG, Type.STRING, KAFKA_ENVIRONMENT_DEFAULT, Importance.HIGH, KAFKA_ENVIRONMENT_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_ENVIRONMENT_DISPLAY) //
+              .define(KAFKA_TOPIC_CONFIG, Type.STRING, KAFKA_TOPIC_DEFAULT, Importance.HIGH, KAFKA_TOPIC_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_TOPIC_DISPLAY) //
+              .define(KAFKA_SCOPE_CONFIG, Type.STRING, KAFKA_SCOPE_DEFAULT, Importance.HIGH, KAFKA_SCOPE_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_SCOPE_DISPLAY) //
               .define(KAFKA_RECORD_CONFIG, Type.STRING, KAFKA_RECORD_DEFAULT, Importance.HIGH, KAFKA_RECORD_DOC, KAFKA_GROUP, 4, Width.SHORT, KAFKA_RECORD_DISPLAY);
 
         // Define Schema configuration group
