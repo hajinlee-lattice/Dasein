@@ -43,7 +43,7 @@ public class KafkaSinkConnectorConfig extends AbstractConfig {
 
     public static final String KAFKA_SCOPE_CONFIG = "kafka.scope";
     private static final String KAFKA_SCOPE_DOC =
-        "The privacy scope of the topic: private, stack_private, public";
+        "The privacy scope of the topic: private, environment_private, public";
     public static final String KAFKA_SCOPE_DEFAULT = "private";
     private static final String KAFKA_SCOPE_DISPLAY = "Kafka topic scope";
 
