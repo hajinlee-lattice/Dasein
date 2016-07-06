@@ -8,13 +8,12 @@
 
     <div class="row">
         <div class="twelve columns list-header">
-            Custom Fields | <a href="#">Lattice Data Cloud</a>
+            All Warnings | <a href="javascript:void(0)">Custom Fields</a> | <a href="javascript:void(0)">Lattice Data Cloud</a>
         </div>
     </div>
 
     <div class="row">
         <div id="" class="twelve columns model-list">
-        	
 
         	<table>
                 <thead>
@@ -28,45 +27,17 @@
                   </tr>
                 </thead>
                 <tbody>
-                    <tr >
+                    <tr data-ng-repeat="columnWarning in vm.columnWarnings">
                         <td>
-                        	<input type="checkbox" name="column-id" value="{{column}}" />
+                            <input type="checkbox" id="" />
                         </td>
-                        <td>20</td>
-                        <td>Anonymous Leads</td>
-                        <td>Description</td>
-                        <td><i class="fa fa-angle-double-down fa-lg"></i></td>
-                    </tr>
-                    <tr >
-                        <td>
-                            <input type="checkbox" name="column-id" value="{{column}}" />
-                        </td>
-                        <td>50</td>
-                        <td>Anonymous Leads</td>
-                        <td>Description</td>
-                        <td><i class="fa fa-angle-double-down fa-lg"></i></td>
-                    </tr>
-                    <tr >
-                        <td>
-                            <input type="checkbox" name="column-id" value="{{column}}" />
-                        </td>
-                        <td>30</td>
-                        <td>Anonymous Leads</td>
-                        <td>Description</td>
-                        <td><i class="fa fa-angle-double-down fa-lg"></i></td>
-                    </tr>
-                    <tr >
-                        <td>
-                            <input type="checkbox" name="column-id" value="{{column}}" />
-                        </td>
-                        <td>10</td>
-                        <td>Anonymous Leads</td>
-                        <td>Description</td>
+                        <td>{{columnWarning.flaggedItemCount}}</td>
+                        <td>{{vm.ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</td>
+                        <td>{{vm.ruleNameToDataRules[columnWarning.dataRuleName].description}}</td>
                         <td><i class="fa fa-angle-double-down fa-lg"></i></td>
                     </tr>
                  </tbody>
             </table>
-
 
         </div>
     </div>

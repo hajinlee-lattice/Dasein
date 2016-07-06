@@ -163,8 +163,8 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     }
 
     @Override
-    public ModelReviewData getReviewData(String modelId) {
-        String url = constructUrl("/ruleresults/reviewdata/{modelId}", modelId);
+    public ModelReviewData getReviewData(String modelId, String eventTableName) {
+        String url = constructUrl("/ruleresults/reviewdata/{modelId}/{eventTableName}", modelId, eventTableName);
         return get("getReviewData", url, ModelReviewData.class);
     }
 

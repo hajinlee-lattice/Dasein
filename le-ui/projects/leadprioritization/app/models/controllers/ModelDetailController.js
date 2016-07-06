@@ -12,7 +12,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.appCommon.services.ThresholdExplorerService',
-    'mainApp.create.csvBulkUpload'
+    'mainApp.create.csvBulkUpload',
+    'mainApp.models.review'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
     NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {

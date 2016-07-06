@@ -411,7 +411,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             $scope.saveInProgress = false;
         } else {
             $scope.showEditFieldsError = true;
-            $scope.editFieldsErrorMessage = "No fields changed. Plesae update fields before cloning";
+            $scope.editFieldsErrorMessage = "No fields changed. Please update fields before cloning";
         }
     };
 

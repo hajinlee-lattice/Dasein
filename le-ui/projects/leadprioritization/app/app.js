@@ -17,6 +17,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.config.services.ConfigService',
     'mainApp.sfdc.sfdcCredentials',
     'lp.create.import',
+    'lp.models.review',
     'pd.navigation',
     'pd.jobs',
     'pd.apiconsole'
