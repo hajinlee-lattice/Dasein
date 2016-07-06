@@ -1,0 +1,7 @@
+{
+	"type": "record",
+	"name": "PublicDomain",
+	"fields": [
+		{"name": "Domain", "type": "string"}
+	]
+}
