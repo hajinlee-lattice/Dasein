@@ -13,6 +13,7 @@ from .profile import KafkaProfile, DEFAULT_PROFILE
 from ..module.autoscaling import AutoScalingGroup, LaunchConfiguration
 from ..module.ec2 import EC2Instance
 from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
+from ..module.efs import EfsFileSystem, EfsMountTarget
 from ..module.elb import ElasticLoadBalancer
 from ..module.parameter import *
 from ..module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
@@ -51,9 +52,9 @@ def create_template():
     # Broker resources
     elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     ecscluster = ECSCluster("BrokerCluster")
-    asgroup, launchconfig = create_bkr_asgroup(ecscluster, [ elb9092 ])
+    asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ])
     bkr, bkr_task = broker_service(ecscluster, asgroup)
-    stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, bkr, bkr_task])
+    stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, efs, efs_mt_1, efs_mt_2, bkr, bkr_task])
 
     sr_rsrcs = sr_resources(bkr, elb9092)
     elb9022, elb9024 = sr_rsrcs[:2]
@@ -145,12 +146,10 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
                 'ParameterKey': 'BrokerMemory',
                 'ParameterValue': profile.broker_mem()
             },
-            {
-                'ParameterKey': 'BrokerHeapSize',
-                'ParameterValue': profile.broker_heap()
-            },
+            PARAM_BROKER_HEAP_SIZE.config(profile.broker_heap()),
             PARAM_ENVIRONMENT.config(environment),
-            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile())
+            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
+            PARAM_EFS_SECURITY_GROUP.config(config.efs_sg()),
         ],
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',
@@ -186,7 +185,7 @@ def teardown(stackname):
 def cleanup_zk(zkhosts, chroot):
     print "clean up %s from %s" % (chroot, zkhosts)
     zk = KazooClient(zkhosts)
-    for _ in xrange(600):
+    for _ in xrange(30):
         try:
             zk = KazooClient(zkhosts)
             zk.start()
@@ -198,53 +197,26 @@ def cleanup_zk(zkhosts, chroot):
             continue
     zk.stop()
 
-def consul_master_service(ecscluster, asgroup):
-    container = ContainerDefinition("consul", "progrium/consul") \
-        .mem_mb(1000).publish_port(8500, 8500) \
-        .command(["-server", "-bootstrap", "-bootstrap-expect", "4", "-ui-dir", "/ui"])
-
-    task = TaskDefinition("ConsulMasterTask")
-    task.add_container(container)
-
-    service = ECSService("ConsulMaster", ecscluster, task, 1).set_min_max_percent(100, 200).depends_on(asgroup)
-    return service, task
-
-def consul_follower_service(ecscluster, elb8500, master):
-    assert isinstance(elb8500, ElasticLoadBalancer)
-
-    container = ContainerDefinition("consul", "progrium/consul") \
-        .mem_mb(1000).publish_port(8500, 8500) \
-        .command(["-server", "-join", { "Fn::GetAtt": [ elb8500.logical_id(), "DNSName" ] } ])
-
-    task = TaskDefinition("ConsulFollowerTask")
-    task.add_container(container)
-
-    service = ECSService("ConsulFollower", ecscluster, task, 1).set_min_max_percent(100, 200)\
-        .depends_on(elb8500).depends_on(master)
-    return service, task
-
 def create_bkr_asgroup(ecscluster, elbs):
-    asgroup = AutoScalingGroup("BrokerScalingGroup")
+    efs = EfsFileSystem("BrokerLogsEfs", "Broker Logs")
+    efs_mt_1 = EfsMountTarget("BrokerLogsMountTarget1", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_1)
+    efs_mt_2 = EfsMountTarget("BrokerLogsMountTarget2", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_2)
+
+    asgroup = AutoScalingGroup("BrokerScalingGroup").depends_on(efs)
     launchconfig = LaunchConfiguration("BrokerContainerPool", instance_type_ref="BrokerInstanceType")
-    launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster))
+    launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster, efs))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
     launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
-    launchconfig.mount("/dev/xvda", 8)
-
-    disks = broker_log_devices(_LOG_SIZE)
-    for disk in disks:
-        launchconfig.mount("/dev/xvd%s" % disk['label'], disk['size'])
 
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
-    return asgroup, launchconfig
+    return asgroup, launchconfig, efs, efs_mt_1, efs_mt_2
 
 def broker_service(ecscluster, asgroup):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
 
-    disks = broker_log_devices(_LOG_SIZE)
-    log_vols = [Volume("log%s" % d['label'], "/mnt/kafka/log/%s" % d['label']) for d in disks]
+    num_log_dirs = 8
 
     container = ContainerDefinition("bkr", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
@@ -252,7 +224,7 @@ def broker_service(ecscluster, asgroup):
         ] ]}) \
         .mem_mb({ "Ref" : "BrokerMemory" }).publish_port(9092, 9092) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
-        .set_env("LOG_DIRS", ",".join("/mnt/kafka/log/%s" % d['label'] for d in disks)) \
+        .set_env("LOG_DIRS", ",".join("/var/log/kafka/%d" % d for d in xrange(num_log_dirs))) \
         .set_env("RACK_ID", { "Ref" : "AWS::Region" }) \
         .set_env("KAFKA_HEAP_OPTS", {"Fn::Join" : [ "", [
             "-Xmx", { "Ref": "BrokerHeapSize" }, " -Xms", { "Ref": "BrokerHeapSize" }
@@ -267,15 +239,14 @@ def broker_service(ecscluster, asgroup):
         .mount("/etc/internaladdr.txt", intaddr) \
         .mount("/etc/externaladdr.txt", extaddr)
 
-    for v, d in zip(log_vols, disks):
-        container.mount("/mnt/kafka/log/%s" % d['label'], v)
-
     task = TaskDefinition("BrokerTask")
     task.add_container(container)\
         .add_volume(intaddr)\
         .add_volume(extaddr)
 
-    for v in log_vols:
+    for d in xrange(num_log_dirs):
+        v = Volume("log%d" % d, "/var/log/kafka/%d" % d)
+        container.mount("/var/log/kafka/%d" % d, v)
         task.add_volume(v)
 
     service = ECSService("Broker", ecscluster, task, { "Ref": "Brokers" }).set_min_max_percent(50, 200)\
@@ -398,9 +369,10 @@ def extra_param():
         return json.loads(text)
 
 
-def bkr_metadata(ec2, ecscluster):
+def bkr_metadata(ec2, ecscluster, efs):
     assert isinstance(ec2, EC2Instance) or isinstance(ec2, LaunchConfiguration)
     assert isinstance(ecscluster, ECSCluster)
+    assert isinstance(efs, Parameter) or isinstance(efs, EfsFileSystem)
     metadata = {
         "AWS::CloudFormation::Init" : {
             "configSets": {
@@ -413,7 +385,8 @@ def bkr_metadata(ec2, ecscluster):
             "prepare" : {
                 "packages" : {
                     "yum" : {
-                        "xfsprogs" : []
+                        "xfsprogs" : [],
+                        "nfs-utils": []
                     }
                 },
                 "files" : {
@@ -436,16 +409,136 @@ def bkr_metadata(ec2, ecscluster):
                         "mode": "000777",
                         "owner": "root",
                         "group": "root"
+                    },
+                    "/tmp/mount_efs.sh": {
+                        "content": {
+                            "Fn::Join": [
+                                "",
+                                [ "#!/usr/bin/env bash \n",
+                                  "mkdir -p /mnt/efs \n",
+                                  "echo \"mount -t nfs4 -o nfsvers=4.1 $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
+                                  efs.ref() ,
+                                  ".efs.us-east-1.amazonaws.com:/ /mnt/efs\" >> /etc/fstab \n",
+                                  ]
+                            ]
+                        },
+                        "mode": "000777",
+                        "owner": "root",
+                        "group": "root"
                     }
                 },
                 "commands" : {
                     "01_mount" : {
                         "command" : { "Fn::Join": [ "\n", [
-                            "bash /mount_volumn.sh",
-                            "mount -a"
+                            "bash /mount_efs.sh",
+                            "mount -a",
                         ] ] }
                     }
                 }
+            },
+            "install" : {
+                "files" : {
+                    "/etc/cfn/cfn-hup.conf" : {
+                        "content" : { "Fn::Join" : ["", [
+                            "[main]\n",
+                            "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                            "region=", { "Ref" : "AWS::Region" }, "\n"
+                        ]]},
+                        "mode"    : "000400",
+                        "owner"   : "root",
+                        "group"   : "root"
+                    },
+                    "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                        "content": { "Fn::Join" : ["", [
+                            "[cfn-auto-reloader-hook]\n",
+                            "triggers=post.update\n",
+                            "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
+                            "action=/opt/aws/bin/cfn-init -v",
+                            "         -c reload",
+                            "         --stack ", { "Ref" : "AWS::StackName" },
+                            "         --resource %s " % ec2.logical_id(),
+                            "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                            "runas=root\n"
+                        ]]}
+                    }
+                },
+                "commands" : {
+                    "01_save_ip" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
+                            "echo $ADDR >> /etc/internaladdr.txt",
+                            "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
+                            "echo $PUBADDR >> /etc/externaladdr.txt"
+                        ] ] }
+                    },
+                    "02_create_log_dirs" : {
+                        "command" : { "Fn::Join": [ "", [
+                            "#!/bin/bash\n",
+                            "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`\n",
+                            "rm -rf /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR\n",
+                            "mkdir -p /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR\n",
+                            "rm -rf /var/log/kafka\n",
+                            "ln -s /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR /var/log/kafka \n",
+                            "for i in $(seq 0 7); do mkdir -p /var/log/kafka/${i}; done\n"
+                        ] ] }
+                    },
+                    "03_add_instance_to_cluster" : {
+                        "command" : { "Fn::Join": [ "", [
+                            "#!/bin/bash\n",
+                            "rm -rf /etc/ecs/ecs.config\n",
+                            "touch /etc/ecs/ecs.config\n",
+                            "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
+                            "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
+                            "echo ECS_RESERVED_PORTS=[22, 5000] >> /etc/ecs/ecs.config\n"
+                        ] ] }
+                    }
+                },
+                "services" : {
+                    "sysvinit" : {
+                        "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
+                    }
+                }
+            }
+        }
+    }
+
+    disks = broker_log_devices(_LOG_SIZE)
+    print ('According to log size of %d GB, going to mount disks [ ' % _LOG_SIZE) + ','.join(str(d['size']) for d in disks) + ' ] GB'
+    for d in disks:
+        metadata["AWS::CloudFormation::Init"]["prepare"]["files"]["/tmp/mount_volume.sh"]["content"]["Fn::Join"][1]\
+            .append("mountebs /dev/xvd%s /mnt/kafka/log/%s" % (d['label'], d['label']))
+
+    return metadata
+
+
+def userdata(ec2, asgroup):
+    assert isinstance(ec2, EC2Instance) or isinstance(ec2, LaunchConfiguration)
+    assert isinstance(asgroup, AutoScalingGroup)
+    return { "Fn::Base64" : { "Fn::Join" : ["", [
+        "#!/bin/bash -xe\n",
+        "yum install -y aws-cfn-bootstrap\n",
+
+        "/opt/aws/bin/cfn-init -v",
+        "         -c bootstrap"
+        "         --stack ", { "Ref" : "AWS::StackName" },
+        "         --resource %s " % ec2.logical_id(),
+        "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+        "/opt/aws/bin/cfn-signal -e $? ",
+        "         --stack ", { "Ref" : "AWS::StackName" },
+        "         --resource %s " % asgroup.logical_id(),
+        "         --region ", { "Ref" : "AWS::Region" }, "\n"
+    ]]}}
+
+def sr_metadata(ec2, ecscluster):
+    assert isinstance(ec2, EC2Instance) or isinstance(ec2, LaunchConfiguration)
+    assert isinstance(ecscluster, ECSCluster)
+    return {
+        "AWS::CloudFormation::Init" : {
+            "configSets": {
+                "bootstrap": [ "install" ],
+                "reload": [ "install" ]
             },
             "install" : {
                 "files" : {
@@ -503,46 +596,6 @@ def bkr_metadata(ec2, ecscluster):
         }
     }
 
-    disks = broker_log_devices(_LOG_SIZE)
-    print ('According to log size of %d GB, going to mount disks [ ' % _LOG_SIZE) + ','.join(str(d['size']) for d in disks) + ' ] GB'
-    for d in disks:
-        metadata["AWS::CloudFormation::Init"]["prepare"]["files"]["/tmp/mount_volume.sh"]["content"]["Fn::Join"][1]\
-            .append("mountebs /dev/xvd%s /mnt/kafka/log/%s" % (d['label'], d['label']))
-
-    return metadata
-
-
-def userdata(ec2, asgroup):
-    assert isinstance(ec2, EC2Instance) or isinstance(ec2, LaunchConfiguration)
-    assert isinstance(asgroup, AutoScalingGroup)
-    return { "Fn::Base64" : { "Fn::Join" : ["", [
-        "#!/bin/bash -xe\n",
-        "yum install -y aws-cfn-bootstrap\n",
-
-        "/opt/aws/bin/cfn-init -v",
-        "         -c bootstrap"
-        "         --stack ", { "Ref" : "AWS::StackName" },
-        "         --resource %s " % ec2.logical_id(),
-        "         --region ", { "Ref" : "AWS::Region" }, "\n",
-
-        "/opt/aws/bin/cfn-signal -e $? ",
-        "         --stack ", { "Ref" : "AWS::StackName" },
-        "         --resource %s " % asgroup.logical_id(),
-        "         --region ", { "Ref" : "AWS::Region" }, "\n"
-    ]]}}
-
-def sr_metadata(ec2, ecscluster):
-    config = bkr_metadata(ec2, ecscluster)["AWS::CloudFormation::Init"]["install"]
-    return {
-        "AWS::CloudFormation::Init" : {
-            "configSets": {
-                "bootstrap": [ "install" ],
-                "reload": [ "install" ]
-            },
-            "install": config
-        }
-    }
-
 def calc_heap_log(peak, avg):
     heap = peak * 1024 * 30
     log_size = avg * 2
@@ -570,6 +623,9 @@ def broker_log_devices(log_size):
         })
     return disks
 
+def delete_efs_dir():
+    client = boto3.client('efs')
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Kafka ECS CloudFormation management')
     commands = parser.add_subparsers(help="commands")
@@ -585,7 +641,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
-    parser1.add_argument('--cleanup-zk', dest='cleanupzk', type=str, action='store_true', help='cleanup kafka root node from zk')
+    parser1.add_argument('--cleanup-zk', dest='cleanupzk',action='store_true', help='cleanup kafka root node from zk')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
     parser1.set_defaults(func=provision_cli)
 

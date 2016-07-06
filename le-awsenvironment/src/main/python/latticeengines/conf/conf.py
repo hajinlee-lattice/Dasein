@@ -41,6 +41,9 @@ class AwsEnvironment:
     def ecs_instance_profile(self):
         return self._props['ecs.instance.profile.arn']
 
+    def efs_sg(self):
+        return self._props['efs.sg']
+
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry()

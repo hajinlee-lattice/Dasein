@@ -10,6 +10,7 @@ PARAM_BROKERS = Parameter("Brokers", "Desired number of Kafka broker tasks", typ
 PARAM_BROKER_MEMORY = Parameter("BrokerMemory", "Desired number of Kafka broker tasks", type="Number", default="4")
 PARAM_BROKER_HEAP_SIZE = Parameter("BrokerHeapSize", "Desired number of Kafka broker tasks", default="3072m")
 PARAM_ECS_INSTANCE_PROFILE = ArnParameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
+PARAM_EFS_SECURITY_GROUP = Parameter("EfsSecurityGroup", "Security Group for EFS", type="AWS::EC2::SecurityGroup::Id")
 
 KAFKA_PARAMS = [
     PARAM_BROKER_INSTANCE_TYPE,
@@ -21,5 +22,6 @@ KAFKA_PARAMS = [
     PARAM_BROKERS,
     PARAM_BROKER_MEMORY,
     PARAM_BROKER_HEAP_SIZE,
-    PARAM_ECS_INSTANCE_PROFILE
+    PARAM_ECS_INSTANCE_PROFILE,
+    PARAM_EFS_SECURITY_GROUP
 ]
