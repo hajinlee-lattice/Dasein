@@ -311,13 +311,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
             fields = new ArrayList<>(sourceSchema.getFields().size());
             for (Field field : sourceSchema.getFields()) {
-                Type avroType = Type.NULL;
-                for (Schema schema : field.schema().getTypes()) {
-                    avroType = schema.getType();
-                    if (!Type.NULL.equals(avroType)) {
-                        break;
-                    }
-                }
+                Type avroType =AvroUtils.getType(field);
                 FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
                 fields.add(fm);
             }

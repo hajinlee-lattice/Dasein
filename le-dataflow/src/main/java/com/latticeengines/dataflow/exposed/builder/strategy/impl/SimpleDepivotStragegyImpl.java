@@ -27,21 +27,21 @@ public class SimpleDepivotStragegyImpl implements DepivotStrategy {
         List<List<Object>> result = new ArrayList<>();
         for (List<String> sourceTuple : sourceFieldTuples) {
             List<Object> valueTuple = new ArrayList<>();
+            boolean hasNotNull = false;
             for (String field : sourceTuple) {
                 Object value = arguments.getObject(field);
-                if (value == null || (value instanceof String && StringUtils.isEmpty((String) value))) {
-                    // no need to handle null depivot field, skip
-                    continue;
+                if (value instanceof String) {
+                    hasNotNull = hasNotNull || StringUtils.isNotEmpty((String) value);
+                } else {
+                    hasNotNull = hasNotNull || (value != null);
                 }
                 valueTuple.add(value);
             }
 
-            if (valueTuple.size() == 0) {
-                // if there is no non-null depivot field then simply skip
-                continue;
+            if (hasNotNull) {
+                // skip all null tuple
+                result.add(valueTuple);
             }
-
-            result.add(valueTuple);
         }
         return result;
     }

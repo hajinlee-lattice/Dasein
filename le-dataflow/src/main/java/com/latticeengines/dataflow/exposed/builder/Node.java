@@ -109,8 +109,10 @@ public class Node {
     }
 
     public Node groupByAndLimit(FieldList groupByFieldList, int count) {
-        return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
-                new FirstNBuffer(count))), builder);
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, new FirstNBuffer(count))),
+                builder);
     }
 
     public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending,
@@ -119,13 +121,14 @@ public class Node {
     }
 
     @SuppressWarnings("rawtypes")
-    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending) {
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
+            boolean descending) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
     }
 
     @SuppressWarnings("rawtypes")
-    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
-            boolean descending, boolean caseInsensitive) {
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending,
+            boolean caseInsensitive) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
                 sortFieldList, buffer, descending, caseInsensitive)), builder);
     }
@@ -138,8 +141,10 @@ public class Node {
 
     @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas) {
-        return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer,
-                fieldMetadatas)), builder);
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer, fieldMetadatas)),
+                builder);
     }
 
     public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
@@ -175,14 +180,16 @@ public class Node {
     }
 
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField)), builder);
+        return new Node(
+                builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply, targetField)),
+                builder);
     }
 
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField,
             FieldList outputFields) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField, outputFields)), builder);
+        return new Node(builder.register(
+                new FunctionOperation(opInput(identifier), expression, fieldsToApply, targetField, outputFields)),
+                builder);
     }
 
     public Node renameBooleanField(String booleanField, BooleanType type) {
@@ -205,19 +212,23 @@ public class Node {
             return this;
         }
 
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, new FieldList(
-                booleanField), fm)), builder);
+        return new Node(
+                builder.register(
+                        new FunctionOperation(opInput(identifier), expression, new FieldList(booleanField), fm)),
+                builder);
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
-                targetField)), builder);
+        return new Node(
+                builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply, targetField)),
+                builder);
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
             FieldList outputFields) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
-                targetFields, outputFields)), builder);
+        return new Node(builder.register(
+                new FunctionOperation(opInput(identifier), function, fieldsToApply, targetFields, outputFields)),
+                builder);
     }
 
     public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
@@ -284,18 +295,22 @@ public class Node {
     }
 
     public Node addTimestamp(String timestampField, int mode) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField, mode))), builder);
+        return new Node(
+                builder.register(
+                        new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, mode))),
+                builder);
     }
 
     public Node addTimestamp(String timestampField) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField))), builder);
+        return new Node(
+                builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField))),
+                builder);
     }
 
     public Node addTimestamp(String timestampField, Date timestamp) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField, timestamp))), builder);
+        return new Node(builder.register(
+                new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, timestamp))),
+                builder);
     }
 
     public Node debug(int printFieldsEvery) {
