@@ -11,6 +11,9 @@ class AwsEnvironment:
                     k, v = line.split('=')
                     self._props[k] = v.replace('\n', '')
 
+    def aws_account_id(self):
+        return self._props['aws.account.id']
+
     def ec2_key(self):
         return self._props['key.name']
 
