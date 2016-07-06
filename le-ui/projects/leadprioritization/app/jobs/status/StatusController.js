@@ -117,9 +117,9 @@ angular
                             day = day.length > 1 ? day : '0' + day,
                             filename = 'score.' + $scope.job.id + '.' + year + month + day + '.csv';
 
+                        saveAs(blob, filename);
                         $scope.showProgress = false;
 
-                        saveAs(blob, filename);
                     }, function(reason) {
                     });
                 };
