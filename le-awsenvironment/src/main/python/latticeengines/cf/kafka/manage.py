@@ -220,8 +220,7 @@ def create_bkr_asgroup(ecscluster, elbs, instance_profile):
 def broker_service(ecscluster, asgroup):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
-
-    num_log_dirs = 8
+    log_vol = Volume("log", "/var/log/kafka")
 
     container = ContainerDefinition("bkr", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
@@ -229,7 +228,7 @@ def broker_service(ecscluster, asgroup):
         ] ]}) \
         .mem_mb({ "Ref" : "BrokerMemory" }).publish_port(9092, 9092) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
-        .set_env("LOG_DIRS", ",".join("/var/log/kafka/%d" % d for d in xrange(num_log_dirs))) \
+        .set_env("LOG_DIRS", "/var/log/kafka") \
         .set_env("RACK_ID", { "Ref" : "AWS::Region" }) \
         .set_env("KAFKA_HEAP_OPTS", {"Fn::Join" : [ "", [
             "-Xmx", { "Ref": "BrokerHeapSize" }, " -Xms", { "Ref": "BrokerHeapSize" }
@@ -242,17 +241,14 @@ def broker_service(ecscluster, asgroup):
             }
         }) \
         .mount("/etc/internaladdr.txt", intaddr) \
-        .mount("/etc/externaladdr.txt", extaddr)
+        .mount("/etc/externaladdr.txt", extaddr) \
+        .mount("/var/log/kafka", log_vol)
 
     task = TaskDefinition("BrokerTask")
     task.add_container(container)\
         .add_volume(intaddr)\
-        .add_volume(extaddr)
-
-    for d in xrange(num_log_dirs):
-        v = Volume("log%d" % d, "/var/log/kafka/%d" % d)
-        container.mount("/var/log/kafka/%d" % d, v)
-        task.add_volume(v)
+        .add_volume(extaddr)\
+        .add_volume(log_vol)
 
     service = ECSService("Broker", ecscluster, task, { "Ref": "Brokers" }).set_min_max_percent(50, 200)\
         .depends_on(asgroup)
@@ -484,8 +480,7 @@ def bkr_metadata(ec2, ecscluster, efs):
                             "rm -rf /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR\n",
                             "mkdir -p /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR\n",
                             "rm -rf /var/log/kafka\n",
-                            "ln -s /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR /var/log/kafka \n",
-                            "for i in $(seq 0 7); do mkdir -p /var/log/kafka/${i}; done\n"
+                            "ln -s /mnt/efs/", { "Ref" : "AWS::StackName" } , "/$ADDR /var/log/kafka \n"
                         ] ] }
                     },
                     "03_add_instance_to_cluster" : {
