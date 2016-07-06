@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -18,6 +19,6 @@ public interface SelectedAttrService {
 
     Integer getSelectedAttributePremiumCount(Tenant tenant);
 
-    Integer getPremiumAttributesLimitation(Tenant tenant);
+    Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant);
 
 }

@@ -1,7 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +45,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
             Integer premiumAttributeLimitation) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+
+        checkAmbiguityInFieldNames(attributes);
+
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
         int additionalPremiumAttrCount = 0;
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, false);
 
         List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
-            for (LeadEnrichmentAttribute selectedAttr : attributes.getSelectedAttributes()) {
+            for (String selectedAttrStr : attributes.getSelectedAttributes()) {
+                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
                 addAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -58,7 +67,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<SelectedAttribute> deleteAttrList = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
-            for (LeadEnrichmentAttribute deselectedAttr : attributes.getDeselectedAttributes()) {
+            for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -76,12 +87,6 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         selectedAttrEntityMgr.delete(deleteAttrList);
     }
 
-    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
-        SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
-        attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
-        return attr;
-    }
-
     @Override
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
             Category category, Boolean onlySelectedAttributes) {
@@ -90,6 +95,23 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
                 onlySelectedAttributes);
+    }
+
+    @Override
+    public Integer getSelectedAttributeCount(Tenant tenant) {
+        return selectedAttrEntityMgr.count(false);
+    }
+
+    @Override
+    public Integer getSelectedAttributePremiumCount(Tenant tenant) {
+        return selectedAttrEntityMgr.count(true);
+    }
+
+    @Override
+    public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
+        Map<String, Integer> limitationMap = new HashMap<>();
+        limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
+        return limitationMap;
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
@@ -143,19 +165,37 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         superimposedList.add(attr);
     }
 
-    @Override
-    public Integer getSelectedAttributeCount(Tenant tenant) {
-        return selectedAttrEntityMgr.count(false);
+    private void checkAmbiguityInFieldNames(LeadEnrichmentAttributesOperationMap attributes) {
+        Set<String> attrSet = new HashSet<>();
+        checkDuplicate(attrSet, attributes.getSelectedAttributes());
+        checkDuplicate(attrSet, attributes.getDeselectedAttributes());
     }
 
-    @Override
-    public Integer getSelectedAttributePremiumCount(Tenant tenant) {
-        return selectedAttrEntityMgr.count(true);
+    private void checkDuplicate(Set<String> attrSet, List<String> attributes) {
+        if (!CollectionUtils.isEmpty(attributes)) {
+            for (String attrStr : attributes) {
+                if (attrSet.contains(attrStr)) {
+                    throw new LedpException(LedpCode.LEDP_18113, new String[] { attrStr });
+                }
+                attrSet.add(attrStr);
+            }
+        }
     }
 
-    @Override
-    public Integer getPremiumAttributesLimitation(Tenant tenant) {
-        return premiumAttributesLimitation;
+    private LeadEnrichmentAttribute findEnrichmentAttributeByName(List<LeadEnrichmentAttribute> allAttributes,
+            String selectedAttrStr) {
+        for (LeadEnrichmentAttribute attr : allAttributes) {
+            if (attr.getFieldName().equals(selectedAttrStr)) {
+                return attr;
+            }
+        }
+
+        throw new LedpException(LedpCode.LEDP_18114, new String[] { selectedAttrStr });
     }
 
+    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
+        SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
+        attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
+        return attr;
+    }
 }

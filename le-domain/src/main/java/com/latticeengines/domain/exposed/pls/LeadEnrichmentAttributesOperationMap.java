@@ -6,23 +6,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties
 public class LeadEnrichmentAttributesOperationMap {
-    private List<LeadEnrichmentAttribute> selectedAttributes;
+    private List<String> selectedAttributes;
 
-    private List<LeadEnrichmentAttribute> deselectedAttributes;
+    private List<String> deselectedAttributes;
 
-    public List<LeadEnrichmentAttribute> getSelectedAttributes() {
+    public List<String> getSelectedAttributes() {
         return selectedAttributes;
     }
 
-    public void setSelectedAttributes(List<LeadEnrichmentAttribute> selectedAttributes) {
+    public void setSelectedAttributes(List<String> selectedAttributes) {
         this.selectedAttributes = selectedAttributes;
     }
 
-    public List<LeadEnrichmentAttribute> getDeselectedAttributes() {
+    public List<String> getDeselectedAttributes() {
         return deselectedAttributes;
     }
 
-    public void setDeselectedAttributes(List<LeadEnrichmentAttribute> deselectedAttributes) {
+    public void setDeselectedAttributes(List<String> deselectedAttributes) {
         this.deselectedAttributes = deselectedAttributes;
     }
 

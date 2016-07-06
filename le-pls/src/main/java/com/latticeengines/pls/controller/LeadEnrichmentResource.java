@@ -124,12 +124,10 @@ public class LeadEnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attributes")
-    public Boolean saveLP3Attributes(HttpServletRequest request, //
+    public void saveLP3Attributes(HttpServletRequest request, //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         selectedAttrService.save(attributes, tenant, getPremiumAttributesLimitation(request));
-
-        return true;
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH, //
@@ -161,7 +159,7 @@ public class LeadEnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Integer getLP3PremiumAttributesLimitation(HttpServletRequest request) {
+    public Map<String, Integer> getLP3PremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
