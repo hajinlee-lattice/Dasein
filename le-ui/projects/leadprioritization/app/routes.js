@@ -257,22 +257,39 @@ angular
         })
         .state('home.model.review', {
             url: '/review',
+            resolve: {
+                ReviewData: function($q, $stateParams, $http, Model, ModelReviewService, ModelReviewStore) {
+                    var deferred = $q.defer(),
+                        modelId = $stateParams.modelId,
+                        eventTableName = Model.EventTableProvenance.EventTableName;
+
+                    ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
+                        if (result.Success === true) {
+                            ModelReviewStore.SetReviewData(modelId, result.Result);
+                            deferred.resolve(result.Result);
+                        }
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/RefineModelSummaryView.html'
                 },
                 "main@": {
+                    controller: 'ModelReviewRowController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/models/views/RefineModelRowsView.html'
-                }   
+                }
             }
         })
         .state('home.model.review.columns', {
             url: '/columns',
             views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/RefineModelSummaryView.html'
-                },
                 "main@": {
+                    controller: 'ModelReviewColumnController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/models/views/RefineModelColumnsView.html'
                 }   
             }
