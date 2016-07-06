@@ -89,16 +89,16 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         String topicStack = stack;
 
         switch (scope) {
-            case PUBLIC:
-                topicEnvironment = "global";
-                topicStack = "global";
-                break;
-            case STACK_PRIVATE:
-                topicStack = "global";
-                break;
-            case PRIVATE:
-            default:
-                break;
+        case PUBLIC:
+            topicEnvironment = "global";
+            topicStack = "global";
+            break;
+        case ENVIRONMENT_PRIVATE:
+            topicStack = "global";
+            break;
+        case PRIVATE:
+        default:
+            break;
         }
 
         return String.format("Env_%s_Stack_%s_%s", topicEnvironment, topicStack, origTopic);
