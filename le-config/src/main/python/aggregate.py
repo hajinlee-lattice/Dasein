@@ -22,8 +22,6 @@ def main():
         aggregated=""
         for dir_name, _, _ in os.walk(WSHOME):
             end_with = PROPERTY_DIR + environment
-            if environment in ('qacluster', 'prodcluster'):
-                end_with += 'a'
             if dir_name[-len(end_with):] == end_with and 'le-config' not in dir_name:
                 aggregated += aggregate_props(dir_name)
 
