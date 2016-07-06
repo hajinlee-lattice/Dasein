@@ -44,6 +44,9 @@ class AwsEnvironment:
     def efs_sg(self):
         return self._props['efs.sg']
 
+    def kafka_create_ecs_role(self):
+        return self._props['kafka.create.role'] == 'True'
+
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry()

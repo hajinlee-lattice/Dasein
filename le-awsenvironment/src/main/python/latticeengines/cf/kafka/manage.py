@@ -15,6 +15,7 @@ from ..module.ec2 import EC2Instance
 from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from ..module.efs import EfsFileSystem, EfsMountTarget
 from ..module.elb import ElasticLoadBalancer
+from ..module.iam import ECSContainerRole, InstanceProfile
 from ..module.parameter import *
 from ..module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from ..module.template import TEMPLATE_DIR
@@ -37,7 +38,7 @@ def template_cli(args):
     calc_heap_log(args.pth, args.ath)
 
 def template(environment, upload):
-    stack = create_template()
+    stack = create_template(environment)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -45,14 +46,22 @@ def template(environment, upload):
         print stack.json()
         stack.validate()
 
-def create_template():
+def create_template(environment):
     stack = Stack("AWS CloudFormation template for Kafka ECS container instances.")
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(KAFKA_PARAMS)
+    config = AwsEnvironment(environment)
 
     # Broker resources
     elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     ecscluster = ECSCluster("BrokerCluster")
-    asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ])
+
+    if config.kafka_create_ecs_role():
+        ec2_role = ECSContainerRole("EcsContainerRole")
+        instance_profile = InstanceProfile("EcsInstanceProfile").add_role(ec2_role)
+        stack.add_resources([ec2_role, instance_profile])
+        asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], instance_profile)
+    else:
+        asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
     bkr, bkr_task = broker_service(ecscluster, asgroup)
     stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, efs, efs_mt_1, efs_mt_2, bkr, bkr_task])
 
@@ -138,14 +147,8 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
                 'ParameterKey': 'ZookeeperHosts',
                 'ParameterValue': zkhosts + "/" + stackname
             },
-            {
-                'ParameterKey': 'Brokers',
-                'ParameterValue': profile.num_brokers()
-            },
-            {
-                'ParameterKey': 'BrokerMemory',
-                'ParameterValue': profile.broker_mem()
-            },
+            PARAM_BROKERS.config(profile.num_brokers()),
+            PARAM_BROKER_MEMORY.config(profile.broker_mem()),
             PARAM_BROKER_HEAP_SIZE.config(profile.broker_heap()),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
@@ -197,7 +200,9 @@ def cleanup_zk(zkhosts, chroot):
             continue
     zk.stop()
 
-def create_bkr_asgroup(ecscluster, elbs):
+def create_bkr_asgroup(ecscluster, elbs, instance_profile):
+    assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
+
     efs = EfsFileSystem("BrokerLogsEfs", "Broker Logs")
     efs_mt_1 = EfsMountTarget("BrokerLogsMountTarget1", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_1)
     efs_mt_2 = EfsMountTarget("BrokerLogsMountTarget2", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_2)
@@ -206,7 +211,7 @@ def create_bkr_asgroup(ecscluster, elbs):
     launchconfig = LaunchConfiguration("BrokerContainerPool", instance_type_ref="BrokerInstanceType")
     launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster, efs))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
-    launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
+    launchconfig.set_instance_profile(instance_profile)
 
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
