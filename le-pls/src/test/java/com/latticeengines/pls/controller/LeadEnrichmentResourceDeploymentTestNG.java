@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -28,6 +29,8 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
+    private static final String SEARCH_DISPLAY_NAME_STR1 = "NuE R";
+    private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP ";
     private static final int MAX_DESELECT = 5;
     private static final int MAX_SELECT = 4;
     private static final int MAX_PREMIUM_SELECT = 2;
@@ -373,6 +376,8 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
 
+        ObjectMapper om = new ObjectMapper();
+        System.out.println("attributesOperationMap = " + om.writeValueAsString(attributesOperationMap));
         restTemplate.put(url, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
@@ -425,6 +430,76 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         assertEquals(count.intValue(), MAX_PREMIUM_SELECT + (MAX_SELECT + MAX_PREMIUM_SELECT - MAX_DESELECT));
     }
 
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLP3SelectedAttributeCountAfterSecondSave" })
+    public void testGetLP3AttributesWithParamsAfterSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
+                SEARCH_DISPLAY_NAME_STR1, Category.FIRMOGRAPHICS);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 1);
+
+        combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR1, Category.FIRMOGRAPHICS);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 1);
+
+        combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2, Category.FIRMOGRAPHICS);
+        assertNotNull(combinedAttributeList);
+        assertTrue(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 0);
+
+        combinedAttributeList = getLeadEnrichmentAttributeList(false, SEARCH_DISPLAY_NAME_STR2,
+                Category.TECHNOLOGY_PROFILE);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 3);
+
+        combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
+                Category.TECHNOLOGY_PROFILE);
+        assertNotNull(combinedAttributeList);
+        assertTrue(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 0);
+
+        combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR1,
+                Category.TECHNOLOGY_PROFILE);
+        assertNotNull(combinedAttributeList);
+        assertTrue(combinedAttributeList.isEmpty());
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
+        }
+
+        assertEquals(combinedAttributeList.size(), 0);
+
+    }
+
     private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
@@ -466,10 +541,33 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        return getLeadEnrichmentAttributeList(onlySelectedAttr, null, null);
+    }
+
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
+            String attributeDisplayNameFilter, Category category)
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/leadenrichment/v3";
-        if (onlySelectedAttr) {
-            url += "?onlySelectedAttributes=" + onlySelectedAttr;
+        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+                || category != null) {
+            url += "?";
         }
+        if (onlySelectedAttr) {
+            url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
+        }
+        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+            url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
+        }
+        if (category != null) {
+            url += "category=" + category.toString() + "&";
+        }
+
+        if (url.endsWith("&")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        System.out.println("Using URL: " + url);
+
         List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
         assertNotNull(combinedAttributeObjList);
 

@@ -3,12 +3,15 @@ package com.latticeengines.proxy.exposed.pls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
@@ -139,6 +142,32 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("getPaginatedModels: Remote call failure: " + e.getMessage(), e);
         }
+    }
+
+    public List<LeadEnrichmentAttribute> getLp3LeadEnrichmentAttributes(CustomerSpace customerSpace, //
+            String attributeDisplayNameFilter, Category category, //
+            Boolean onlySelectedAttributes) {
+        String url = constructUrl("pls/internal/leadenrichment/lp3", customerSpace.toString());
+        url += "?" + "onlySelectedAttributes" + "=" + ((onlySelectedAttributes == true) ? true : false);
+        if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
+            url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
+        }
+        if (category != null) {
+            url += "&" + "category" + "=" + category.toString();
+        }
+
+        log.debug("Get from " + url);
+        List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
+        List<LeadEnrichmentAttribute> attributeList = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(combinedAttributeObjList)) {
+            for (Object obj : combinedAttributeObjList) {
+                String json = JsonUtils.serialize(obj);
+                LeadEnrichmentAttribute attr = JsonUtils.deserialize(json, LeadEnrichmentAttribute.class);
+                attributeList.add(attr);
+            }
+        }
+        return attributeList;
     }
 
 }

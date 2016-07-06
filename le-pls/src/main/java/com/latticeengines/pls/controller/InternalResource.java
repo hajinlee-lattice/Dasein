@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -19,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -42,6 +38,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -53,8 +50,10 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -71,6 +70,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -86,6 +86,9 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.wordnik.swagger.annotations.ApiParam;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "internal", description = "REST resource for internal operations")
 @RestController
@@ -115,6 +118,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private SelectedAttrService selectedAttrService;
 
     @Autowired
     private UserService userService;
@@ -173,7 +179,8 @@ public class InternalResource extends InternalResourceBase {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/default/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create default target market")
     public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -183,7 +190,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.createDefaultTargetMarket();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find target market by name")
     public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -194,7 +202,8 @@ public class InternalResource extends InternalResourceBase {
         return targetMarketService.findTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update target market")
     public void updateTargetMarket(@PathVariable("targetMarketName") String targetMarketName,
@@ -206,7 +215,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -217,7 +227,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -227,7 +238,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteAll();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market report")
     public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
@@ -238,7 +250,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.registerReport(targetMarketName, report);
     }
 
-    @RequestMapping(value = "/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a report")
     public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
@@ -249,7 +262,8 @@ public class InternalResource extends InternalResourceBase {
         reportService.createOrUpdateReport(report);
     }
 
-    @RequestMapping(value = "/reports/{reportName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reports/{reportName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a Report")
     public Report findReportByName(@PathVariable("reportName") String reportName,
@@ -260,7 +274,8 @@ public class InternalResource extends InternalResourceBase {
         return reportService.getReportByName(reportName);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a SourceFile")
     public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
@@ -271,7 +286,8 @@ public class InternalResource extends InternalResourceBase {
         return sourceFileService.findByName(sourceFileName);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a SourceFile")
     public void updateSourceFile(@PathVariable("sourceFileName") String sourceFileName,
@@ -282,7 +298,8 @@ public class InternalResource extends InternalResourceBase {
         sourceFileService.update(sourceFile);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a SourceFile")
     public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
@@ -293,7 +310,8 @@ public class InternalResource extends InternalResourceBase {
         sourceFileService.create(sourceFile);
     }
 
-    @RequestMapping(value = "/modelsummaries/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a ModelSummary")
     public void createModelSummary(@PathVariable("tenantId") String tenantId, @RequestBody ModelSummary modelSummary,
@@ -304,7 +322,8 @@ public class InternalResource extends InternalResourceBase {
         modelSummaryService.createModelSummary(modelSummary, tenantId);
     }
 
-    @RequestMapping(value = "/modelsummaries/{modelId}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{modelId}/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a model summary")
     public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
@@ -316,7 +335,8 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/modelsummaries/active/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/active/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all active model summaries")
     public List<ModelSummary> getActiveModelSummaries(@PathVariable("tenantId") String tenantId,
@@ -341,7 +361,8 @@ public class InternalResource extends InternalResourceBase {
         return summaries;
     }
 
-    @RequestMapping(value = "/modelsummarydetails/count/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummarydetails/count/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all model summaries count")
     public int getModelSummariesCount(
@@ -351,14 +372,15 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringUtils.isEmpty(start)) {
+        if (!StringUtils.objectIsNullOrEmptyString(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
 
     }
 
-    @RequestMapping(value = "/modelsummarydetails/paginate/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummarydetails/paginate/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get paginated model summaries")
     public List<ModelSummary> getPaginatedModelSummaries(
@@ -370,7 +392,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringUtils.isEmpty(start)) {
+        if (!StringUtils.objectIsNullOrEmptyString(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return postProcessModelSummaryList(
@@ -378,7 +400,8 @@ public class InternalResource extends InternalResourceBase {
 
     }
 
-    @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{applicationId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by applicationId")
     public ModelSummary findModelSummaryByAppId(@PathVariable("applicationId") String applicationId,
@@ -388,7 +411,8 @@ public class InternalResource extends InternalResourceBase {
         return modelSummaryEntityMgr.findByApplicationId(applicationId);
     }
 
-    @RequestMapping(value = "/modelsummaries/modelid/{modelId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/modelid/{modelId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by modelId")
     public ModelSummary findModelSummaryByModelId(@PathVariable("modelId") String modelId,
@@ -432,7 +456,32 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
-    @RequestMapping(value = "/emails/createmodel/result/{result}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/leadenrichment" + LeadEnrichmentResource.LP3_ENRICH_PATH + "/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all active model summaries")
+    public List<LeadEnrichmentAttribute> getLp3LeadEnrichmentAttributes(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request, @ApiParam(value = "Get attributes with display name containing specified " //
+                    + "text (case insensitive) for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
+            String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
+            String category, //
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes) {
+        checkHeader(request);
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                onlySelectedAttributes);
+    }
+
+    @RequestMapping(value = "/emails/createmodel/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
@@ -452,7 +501,8 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/emails/score/result/{result}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/emails/score/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
     public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
@@ -513,7 +563,7 @@ public class InternalResource extends InternalResourceBase {
             waitForTenantConsoleInstallation(CustomerSpace.parse(tenant2Id));
 
         } else {
-            if (StringUtils.isEmpty(productPrefix)) {
+            if (StringUtils.objectIsNullOrEmptyString(productPrefix)) {
                 Camille camille = CamilleEnvironment.getCamille();
                 Path productsPath = PathBuilder
                         .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1Id))
@@ -584,8 +634,8 @@ public class InternalResource extends InternalResourceBase {
                     payload = JsonUtils.serialize(tenant);
                     HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers,
                             payload);
-                    String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort()
-                            + "/pls/modelsummaries?selection=all", true, headers);
+                    String response = HttpClientWithOptionalRetryUtils
+                            .sendGetRequest(getHostPort() + "/pls/modelsummaries?selection=all", true, headers);
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jNode = mapper.readTree(response);
                     log.info("Found " + jNode.size() + " models for " + tenant.getId());
@@ -599,11 +649,10 @@ public class InternalResource extends InternalResourceBase {
                         fakeTenant.setPid(-1L);
                         data.setTenant(fakeTenant);
                         data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                        HttpClientWithOptionalRetryUtils.sendPostRequest(
-                                getHostPort() + "/pls/modelsummaries?raw=true", true, headers,
-                                JsonUtils.serialize(data));
-                        response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort()
-                                + "/pls/modelsummaries", true, headers);
+                        HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
+                                true, headers, JsonUtils.serialize(data));
+                        response = HttpClientWithOptionalRetryUtils
+                                .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
                         jNode = mapper.readTree(response);
                         log.info("Uploaded a model to " + tenant.getId() + ". Now there are " + jNode.size()
                                 + " models");
@@ -685,12 +734,12 @@ public class InternalResource extends InternalResourceBase {
             String tenantToken = "${TENANT}";
             String topologyToken = "${TOPOLOGY}";
             String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-            InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                    "com/latticeengines/pls/controller/internal/" + tenantRegJson);
+            InputStream ins = getClass().getClassLoader()
+                    .getResourceAsStream("com/latticeengines/pls/controller/internal/" + tenantRegJson);
             String payload = IOUtils.toString(ins);
             payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-            HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
-                    + dlTenantName, false, adHeaders, payload);
+            HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
         } else {
             throw new RuntimeException(
                     "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
@@ -752,8 +801,8 @@ public class InternalResource extends InternalResourceBase {
     private void assignTestingUsersToTenants(Map<AccessLevel, User> accessLevelToUsers) {
         for (String testTenantId : getTestTenantIds()) {
             for (Map.Entry<AccessLevel, User> accessLevelToUser : accessLevelToUsers.entrySet()) {
-                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId, accessLevelToUser.getValue()
-                        .getUsername());
+                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId,
+                        accessLevelToUser.getValue().getUsername());
             }
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
         }
@@ -778,13 +827,14 @@ public class InternalResource extends InternalResourceBase {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
-    private void manufactureSecurityContextForInternalAccess(String tenantId) {
+    private Tenant manufactureSecurityContextForInternalAccess(String tenantId) {
         log.info("Manufacturing security context for " + tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
         }
         manufactureSecurityContextForInternalAccess(tenant);
+        return tenant;
     }
 
     private void manufactureSecurityContextForInternalAccess(Tenant tenant) {

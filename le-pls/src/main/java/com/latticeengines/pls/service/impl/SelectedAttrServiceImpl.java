@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -87,11 +88,13 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.LeadEnrichment);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
-        return superimpose(allColumns, selectedAttributes, onlySelectedAttributes);
+        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
+                onlySelectedAttributes);
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
-            List<SelectedAttribute> selectedAttributes, Boolean onlySelectedAttributes) {
+            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
+            Boolean onlySelectedAttributes) {
         List<String> selectedAttributeNames = new ArrayList<>();
 
         for (SelectedAttribute selectedAttribute : selectedAttributes) {
@@ -106,20 +109,38 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
                     continue;
                 }
             }
-            LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
-            attr.setDisplayName(column.getDisplayName());
-            attr.setFieldName(column.getColumnId());
-            attr.setFieldNameInTarget(column.getColumnName());
-            attr.setFieldType(column.getDataType());
-            attr.setDataSource(column.getMatchDestination());
-            attr.setDescription(column.getDescription());
-            attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
-            attr.setIsPremium(column.isPremium());
-            attr.setCategory(column.getCategory());
-            superimposedList.add(attr);
+
+            if (category != null) {
+                if (column.getCategory() != category) {
+                    continue;
+                }
+            }
+
+            if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+                if (!column.getDisplayName().toUpperCase().contains(attributeDisplayNameFilter.toUpperCase())) {
+                    continue;
+                }
+            }
+
+            addAttrInFinalList(selectedAttributeNames, superimposedList, column);
         }
 
         return superimposedList;
+    }
+
+    private void addAttrInFinalList(List<String> selectedAttributeNames, List<LeadEnrichmentAttribute> superimposedList,
+            ColumnMetadata column) {
+        LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
+        attr.setDisplayName(column.getDisplayName());
+        attr.setFieldName(column.getColumnId());
+        attr.setFieldNameInTarget(column.getColumnName());
+        attr.setFieldType(column.getDataType());
+        attr.setDataSource(column.getMatchDestination());
+        attr.setDescription(column.getDescription());
+        attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
+        attr.setIsPremium(column.isPremium());
+        attr.setCategory(column.getCategory().toString());
+        superimposedList.add(attr);
     }
 
     @Override

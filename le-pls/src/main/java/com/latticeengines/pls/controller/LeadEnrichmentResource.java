@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -35,8 +36,8 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class LeadEnrichmentResource {
 
-    private static final String LP2_ENRICH_PATH = "";
-    private static final String LP3_ENRICH_PATH = "/v3";
+    public static final String LP2_ENRICH_PATH = "";
+    public static final String LP3_ENRICH_PATH = "/v3";
 
     @Autowired
     private SessionService sessionService;
@@ -113,7 +114,7 @@ public class LeadEnrichmentResource {
     public List<String> getLP3Categories(HttpServletRequest request) {
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
-            categoryStrList.add(category.getName());
+            categoryStrList.add(category.toString());
         }
         return categoryStrList;
     }
@@ -144,13 +145,15 @@ public class LeadEnrichmentResource {
             @ApiParam(value = "Get attributes " //
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
-            Category category, //
+            String category, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, category, onlySelectedAttributes);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                onlySelectedAttributes);
     }
 
     @RequestMapping(value = LP3_ENRICH_PATH + "/premiumattributeslimitation", //
