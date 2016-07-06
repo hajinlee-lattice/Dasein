@@ -56,8 +56,8 @@ def create_template(environment):
     ecscluster = ECSCluster("BrokerCluster")
 
     if config.kafka_create_ecs_role():
-        ec2_role = ECSContainerRole("EcsContainerRole")
-        instance_profile = InstanceProfile("EcsInstanceProfile").add_role(ec2_role)
+        ec2_role = ECSContainerRole("ContainerRole")
+        instance_profile = InstanceProfile("ContainerInstanceProfile").add_role(ec2_role)
         stack.add_resources([ec2_role, instance_profile])
         asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], instance_profile)
     else:
