@@ -108,15 +108,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         map = new LinkedMultiValueMap<>();
         map.add("metadataFile", new ClassPathResource(
-                "com/latticeengines/pls/end2end/selfServiceModeling/pivotmappingfiles/pivotvalues.txt"));
+                "com/latticeengines/pls/end2end/selfServiceModeling/pivotmappingfiles/pivotvalues.txt.gz"));
         headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         requestEntity = new HttpEntity<>(map, headers);
 
         response = restTemplate.postForObject( //
-                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s", getRestAPIHostPort(), "module1",
-                        "pivotmappings", "pivotvalues"), //
+                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s&compressed=%s", getRestAPIHostPort(), "module1",
+                        "pivotmappings", "pivotvalues", "true"), //
                 requestEntity, ResponseDocument.class);
         String pivotFilePath = new ObjectMapper().convertValue(response.getResult(), String.class);
         log.info(pivotFilePath);
