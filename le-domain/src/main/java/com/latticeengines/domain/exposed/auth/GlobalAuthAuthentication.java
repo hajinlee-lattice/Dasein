@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.dataplatform.HasPidTemplated;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -24,14 +25,14 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalAuthentication")
-public class GlobalAuthAuthentication extends BaseGlobalAuthObject implements HasPid {
+public class GlobalAuthAuthentication extends BaseGlobalAuthObject implements HasPidTemplated<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
     @Column(name = "GlobalAuthentication_ID", nullable = false)
-    private Long authenticationId;
+    private Integer authenticationId;
 
     @JsonProperty("ga_user")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -52,12 +53,12 @@ public class GlobalAuthAuthentication extends BaseGlobalAuthObject implements Ha
     private boolean mustChangePassword;
 
     @Override
-    public Long getPid() {
+    public Integer getPid() {
         return authenticationId;
     }
 
     @Override
-    public void setPid(Long pid) {
+    public void setPid(Integer pid) {
         this.authenticationId = pid;
 
     }

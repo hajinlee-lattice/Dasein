@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.dataplatform.HasPidTemplated;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -27,7 +28,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalTenant")
-public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, HasId<String>, HasPid {
+public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, HasId<String>, HasPidTemplated<Integer> {
 
     @JsonProperty("deployment_id")
     @Column(name = "Deployment_ID", nullable = true, unique = true)
@@ -42,19 +43,19 @@ public class GlobalAuthTenant extends BaseGlobalAuthObject implements HasName, H
     @Basic(optional = false)
     @JsonIgnore
     @Column(name = "GlobalTenant_ID", nullable = false, unique = true)
-    private Long pid;
+    private Integer pid;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "globalAuthTenant")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights;
 
     @Override
-    public Long getPid() {
+    public Integer getPid() {
         return pid;
     }
 
     @Override
-    public void setPid(Long pid) {
+    public void setPid(Integer pid) {
         this.pid = pid;
 
     }

@@ -13,17 +13,18 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.dataplatform.HasPidTemplated;
 
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalSession")
-public class GlobalAuthSession extends BaseGlobalAuthObject implements HasPid {
+public class GlobalAuthSession extends BaseGlobalAuthObject implements HasPidTemplated<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
     @Column(name = "GlobalSession_ID", nullable = false)
-    private Long pid;
+    private Integer pid;
 
     @JsonProperty("ticket_id")
     @Column(name = "Ticket_ID", nullable = false)
@@ -38,12 +39,12 @@ public class GlobalAuthSession extends BaseGlobalAuthObject implements HasPid {
     private Long tenantId;
 
     @Override
-    public Long getPid() {
+    public Integer getPid() {
         return pid;
     }
 
     @Override
-    public void setPid(Long pid) {
+    public void setPid(Integer pid) {
         this.pid = pid;
     }
 

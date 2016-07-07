@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.dataplatform.HasPidTemplated;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,14 +28,14 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
 @Table(name = "SECURITY_IDENTITY_PROVIDER")
-public class IdentityProvider implements HasPid, HasAuditingFields {
+public class IdentityProvider implements HasPidTemplated<Integer>, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
     @Column(name = "PID", unique = true, nullable = false)
-    private Long pid;
+    private Integer pid;
 
     @JsonProperty("ga_tenant")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -61,12 +62,12 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     private Date created;
 
     @Override
-    public Long getPid() {
+    public Integer getPid() {
         return pid;
     }
 
     @Override
-    public void setPid(Long pid) {
+    public void setPid(Integer pid) {
         this.pid = pid;
     }
 

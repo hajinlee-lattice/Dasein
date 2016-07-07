@@ -19,19 +19,19 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.dataplatform.HasPidTemplated;
 
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalUserTenantRight")
-public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements HasPid {
+public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements HasPidTemplated<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @JsonIgnore
     @Column(name = "GlobalUserTenantRight_ID", unique = true, nullable = false)
-    private Long userTenantRightId;
+    private Integer userTenantRightId;
 
     @JsonProperty("ga_user")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -50,12 +50,12 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     private String operationName;
 
     @Override
-    public Long getPid() {
+    public Integer getPid() {
         return userTenantRightId;
     }
 
     @Override
-    public void setPid(Long pid) {
+    public void setPid(Integer pid) {
         this.userTenantRightId = pid;
     }
 
