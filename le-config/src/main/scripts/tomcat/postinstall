@@ -12,7 +12,7 @@ python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
 
 echo "copying files from temporary folders"
 mkdir -p /etc/ledp
-cp /tmp/ledp/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp/
+cp -f /tmp/ledp/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp/
 chmod 755 /etc/ledp/latticeengines.properties
 
 echo "cleaning up"
