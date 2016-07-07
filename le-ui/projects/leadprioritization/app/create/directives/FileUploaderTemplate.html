@@ -12,27 +12,25 @@
     &#105;
   </span>
 </label>
-<div class="fileUpEload button form-control">
+<div class="fileUpload button form-control">
     <div class="progress processing" ng-show="vm_uploader.processing || vm_uploader.compressing" ng-style="{width: vm_uploader.process_percent + vm_uploader.compress_percent + '%'}"></div>
     <div class="progress uploading {{vm_uploader.uploaded ? 'finished' : ''}}" ng-show="vm_uploader.uploading || vm_uploader.uploaded" ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}"></div>
     <span>{{vm_uploader.selectedFileDisplayName}}</span>
     <input
-      required
+      ng-required="{{vm_uploader.fileRequired}}"
       type="file"
       accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
       id="uploadBtn"
       name="{{ vm_uploader_container.inputName }}"
       class="upload"
-      ng-disabled="vm_uploader.inputDisabled"
       ng-model="vm_uploader.selectedFileName"
       ng-hide="vm_uploader.uploading"
-      ng-change="vm_uploader.cancel(); vm.clickCancel()"
+      ng-disabled="vm_uploader.inputDisabled"
       file-uploader="vm_uploader.selectedFile" />
     <i class="fa fa-save" ng-if="!vm_uploader.compressing && !vm_uploader.processing && !vm_uploader.uploading && !vm_uploader.uploaded"></i>
     <i class="fa fa-spinner fa-pulse" ng-if="(vm_uploader.compressing || vm_uploader.processing || vm_uploader.uploading) && !vm_uploader.uploaded && vm_uploader.upload_percent == 0"></i>
-    <i class="fa fa-close" ng-click="vm_uploader.cancel(); " ng-if="vm_uploader.uploading && vm_uploader.upload_percent > 0"></i>
-    <i class="fa fa-check" ng-click="vm_uploader.cancel(); vm.clickCancel();" ng-if="vm_uploader.uploaded"></i>
+    <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.uploading && vm_uploader.upload_percent > 0"></i>
+    <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.uploaded"></i>
 </div>
-{{importErrorMsg}}
 <p class="help-block">{{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}</p>
 <p id="csvFileUploadMessage">{{ vm_uploader.message }}&nbsp;<span class="pull-right">{{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}</span> </p>

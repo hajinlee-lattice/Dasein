@@ -17,7 +17,7 @@ angular
             url: '/pmml',
             views: {
                 "summary@": {
-                    templateUrl: 'app/navigation/summary/ModelListView.html'
+                    templateUrl: 'app/navigation/summary/PMMLCreateView.html'
                 },
                 "main@": {
                     templateUrl: 'app/create/views/PMMLImportView.html'
@@ -63,6 +63,18 @@ angular
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
+                },
+                "main@": {
+                    controller: 'ImportJobController',
+                    templateUrl: 'app/create/views/ImportJobView.html'
+                }
+            }
+        })
+        .state('home.models.pmml.job', {
+            url: '/:applicationId/job',
+            views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/PMMLCreateView.html'
                 },
                 "main@": {
                     controller: 'ImportJobController',

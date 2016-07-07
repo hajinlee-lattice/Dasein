@@ -10,13 +10,14 @@ angular
             inputDisabled:'=',
             infoTemplate:'=',
             defaultMessage:'=',
+            fileRequired:'@',
             fileAccept:'@',
             fileSelect:'&',
             fileLoad:'&',
             fileDone:'&',
             fileCancel:'&'
         },
-        templateUrl: 'app/create/directives/CSVUploaderTemplate.html',
+        templateUrl: 'app/create/directives/FileUploaderTemplate.html',
         controllerAs: 'vm_uploader_container',
         controller: function ($scope) {
             angular.extend(this, $scope);
@@ -26,7 +27,7 @@ angular
 .directive('fileUploader', function ($parse) {
     return {
         restrict: 'A',
-        require:'ngModel',
+        require: 'ngModel',
         link: function(scope, element, attrs, ngModel) {
             var model = $parse(attrs.fileUploader);
             var modelSetter = model.assign;
@@ -59,8 +60,10 @@ angular
                 element = this.element = $element[0];
 
             vm.init = function() {
-                console.log('init', vm, this);
                 vm.params.scope = vm;
+                vm.fileRequired = typeof vm.fileRequired == "undefined" 
+                    ? true
+                    : vm.fileRequired;
             }
 
             vm.startUpload = function() {
@@ -284,7 +287,6 @@ angular
                 }
 
                 vm.uploading = false;
-
                 if (result.Success && result.Result) {
                     var fileName = vm.choosenFileName = result.Result.name,
                         metaData = vm.metadata = result.Result;
@@ -363,7 +365,7 @@ angular
                     vm.selectedFileDisplayName = '';
                     vm.choosenFileName = '';
                 }
-
+                
                 if (typeof vm.fileCancel == 'function') {
                     vm.fileCancel();
                 }

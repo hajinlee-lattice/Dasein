@@ -32,7 +32,7 @@ angular
     });
 
     vm.pmmlSelect = function(fileName) {
-        vm.fileName = fileName;
+        vm.fileName = vm.pmmlFileName = fileName;
 
         if (vm.modelDisplayName) {
             return;
@@ -73,17 +73,18 @@ angular
             moduleName = vm.moduleName = artifactName + '_' + timestamp;
 
         vm.pmmlUploaded = false;
-        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
+        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + vm.sanitize(artifactName);
         
         return vm.pmmlParams;
     }
 
     vm.pivotSelect = function(fileName) {
-        var artifactName = vm.artifactName,
+        var artifactName = fileName,
+            pivotFile = vm.pivotFileName = fileName,
             moduleName = vm.moduleName;
 
         vm.pivotUploaded = false;
-        vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + artifactName;
+        vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + vm.sanitize(artifactName);
         
         return vm.pivotParams;
     }
@@ -138,9 +139,31 @@ angular
         vm.showImportError = false;
         vm.importErrorMsg = "";
     }
+
+    vm.sanitize = function(fileName) {
+        fileName = fileName.replace('.csv','');
+        fileName = fileName.replace('.xml','');
+        fileName = fileName.replace('.txt','');
+        return fileName;
+    }
     
     vm.clickNext = function() {
-        alert('WIP');
+        ShowSpinner('Modeling...');
+
+        var options = {
+                modelName: this.modelDisplayName,
+                module: this.moduleName,
+                pmmlfile: (this.pmmlFileName),
+                pivotfile: vm.sanitize(this.pivotFileName)+'.csv'
+            };
+
+        ImportService.StartPMMLModeling(options).then(function(result) {
+            if (result.Result && result.Result != "") {
+                setTimeout(function() {
+                    $state.go('home.models.pmml.job', { applicationId: result.Result });
+                }, 1);
+            }
+        });
     }
     
     vm.keyupTextArea = function(event) {

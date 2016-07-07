@@ -573,9 +573,9 @@ Model List
     filter: hue-rotate(0deg) saturate(100%);
   }
   100% {
-    -webkit-filter: hue-rotate(360deg) saturate(200%);
-    -moz-filter: hue-rotate(360deg) saturate(200%);
-    filter: hue-rotate(360deg) saturate(200%);
+    -webkit-filter: hue-rotate(360deg) saturate(150%);
+    -moz-filter: hue-rotate(360deg) saturate(150%);
+    filter: hue-rotate(360deg) saturate(150%);
   }
 }
 
@@ -600,6 +600,7 @@ Model List
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 150px;
+        background-image: url(/assets/images/bkg-active-model-lp.jpg);
 
         &.SalesforceLead {
             background-image: url(/assets/images/bkg-active-model-lead.png);
@@ -626,9 +627,9 @@ Model List
             animation-duration: 1.2s;
             animation-delay: 0s;
             animation-name: colorShift;
-            -webkit-filter: grayscale(0%) hue-rotate(0deg) saturate(200%);
-            -moz-filter: grayscale(0%) hue-rotate(0deg) saturate(200%);
-            filter: grayscale(0%) hue-rotate(0deg) saturate(200%);
+            -webkit-filter: grayscale(0%) hue-rotate(0deg) saturate(150%);
+            -moz-filter: grayscale(0%) hue-rotate(0deg) saturate(150%);
+            filter: grayscale(0%) hue-rotate(0deg) saturate(150%);
         }
 
         &.inactive .model-image {

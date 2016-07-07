@@ -10,7 +10,7 @@ angular
     var vm = this;
 
     angular.extend(vm, {
-        importErrorMsg: 'hgiu',
+        importErrorMsg: '',
         accountLeadCheck: '',
         modelDisplayName: '',
         modelDescription: '',
@@ -23,6 +23,12 @@ angular
         params: {
             infoTemplate: "<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>",
             compressed: true
+        },
+        pivotParams: {
+            infoTemplate: "<h4>Pivot Mapping File</h4><p>Choose a Pivot Mapping File</p>",
+            defaultMessage: "Example: pivot-mapping.txt",
+            compressed: false,
+            metadataFile: true
         }
     });
 

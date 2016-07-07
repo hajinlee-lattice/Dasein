@@ -18,11 +18,11 @@
             </ul>
             -->
         </li>
-        <li data-ng-if="showUserManagement" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.users"><span class="ico-container"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
-        </li>
         <li data-ng-if="showModelCreationHistory" role="presentation" ui-sref-active="active">
             <a ui-sref="home.history"><span class="ico-container"><span class="ico ico-history ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</span></a>
+        </li>
+        <li data-ng-if="showUserManagement" role="presentation" ui-sref-active="active">
+            <a ui-sref="home.users"><span class="ico-container"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
         </li>
         <!--
             <li role="presentation" ui-sref-active="active">

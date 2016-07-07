@@ -231,6 +231,48 @@ angular
         return deferred.promise;
     };
 
+    this.StartPMMLModeling = function(options) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'POST',
+            url: '/pls/models/pmml/' + options.modelName,
+            params: {
+                'module': options.module,
+                'pmmlfile': options.pmmlfile,
+                'pivotfile': options.pivotfile
+            },
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    Success: false,
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    Result: null
+                };
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: data.Errors,
+                    Result: data.Result
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.StartTestingSet = function(modelId, fileName) {
         var deferred = $q.defer();
 
