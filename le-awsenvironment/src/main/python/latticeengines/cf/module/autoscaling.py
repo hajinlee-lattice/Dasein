@@ -1,19 +1,20 @@
 from .elb import ElasticLoadBalancer
 from .iam import InstanceProfile
-from .parameter import ArnParameter
+from .parameter import Parameter, ArnParameter
 from .resource import Resource
 
 
 class AutoScalingGroup(Resource):
-    def __init__(self, logicalId):
+    def __init__(self, logicalId, capacity, min_size, max_size):
         Resource.__init__(self, logicalId)
         self._template = {
             "Type" : "AWS::AutoScaling::AutoScalingGroup",
             "Properties" : {
                 "VPCZoneIdentifier" : [ { "Ref" : "SubnetId1" }, {"Ref": "SubnetId2"} ],
-                "MinSize" : "1",
-                "MaxSize" : { "Ref" : "MaxSize" },
-                "DesiredCapacity" : { "Ref" : "DesiredCapacity" }
+                "Cooldown": "1200",
+                "MinSize" : min_size.ref() if isinstance(min_size, Parameter) else min_size,
+                "MaxSize" : max_size.ref() if isinstance(max_size, Parameter) else max_size,
+                "DesiredCapacity" : capacity.ref() if isinstance(capacity, Parameter) else capacity
             },
             "CreationPolicy" : {
                 "ResourceSignal" : {
@@ -29,6 +30,7 @@ class AutoScalingGroup(Resource):
                 }
             }
         }
+
 
     def set_capacity(self, capacity):
         self._template["Properties"]["DesiredCapacity"] = capacity
@@ -106,6 +108,27 @@ class LaunchConfiguration(Resource):
         return self
 
 
+class ScalingPolicy(Resource):
+    def __init__(self, logicalId, asgroup):
+        assert isinstance(asgroup, AutoScalingGroup)
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::AutoScaling::ScalingPolicy",
+            "Properties" : {
+                "AutoScalingGroupName" : asgroup.ref()
+            }
+        }
 
+class SimpleScalingPolicy(ScalingPolicy):
+    def __init__(self, logicalId, asgroup, incremental):
+        assert isinstance(incremental, int)
+        ScalingPolicy.__init__(self, logicalId, asgroup)
+        self._template["Properties"]["AdjustmentType"] = "ChangeInCapacity"
+        self._template["Properties"]["ScalingAdjustment"] = str(incremental)
 
-
+class PercentScalingPolicy(ScalingPolicy):
+    def __init__(self, logicalId, asgroup, incremental):
+        assert isinstance(incremental, int)
+        ScalingPolicy.__init__(self, logicalId, asgroup)
+        self._template["Properties"]["AdjustmentType"] = "PercentChangeInCapacity"
+        self._template["Properties"]["ScalingAdjustment"] = str(incremental)

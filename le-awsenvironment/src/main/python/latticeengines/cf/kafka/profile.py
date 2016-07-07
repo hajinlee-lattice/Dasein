@@ -63,7 +63,7 @@ class KafkaProfile:
         return self._sr_instance_type
 
     def max_instances(self):
-        return str(max(2 * self._instances, 3))
+        return str(max(2 * self._instances, 4))
 
     def num_brokers(self):
         return str(self._brokers)

@@ -1,7 +1,7 @@
 {
-  "Instances": 2,
+  "Instances": 4,
   "BrokerInstanceType": "t2.medium",
   "SRInstanceType": "t2.medium",
-  "Brokers": 2,
+  "Brokers": 4,
   "BrokerMemory": 3520
 }

@@ -10,7 +10,8 @@ from kazoo.client import KazooClient
 
 from .params import *
 from .profile import KafkaProfile, DEFAULT_PROFILE
-from ..module.autoscaling import AutoScalingGroup, LaunchConfiguration
+from ..module.autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy
+from ..module.cw import CloudWatchAlarm
 from ..module.ec2 import EC2Instance
 from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from ..module.efs import EfsFileSystem, EfsMountTarget
@@ -38,7 +39,7 @@ def template_cli(args):
     calc_heap_log(args.pth, args.ath)
 
 def template(environment, upload):
-    stack = create_template(environment)
+    stack = create_template()
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -46,22 +47,20 @@ def template(environment, upload):
         print stack.json()
         stack.validate()
 
-def create_template(environment):
+def create_template():
     stack = Stack("AWS CloudFormation template for Kafka ECS container instances.")
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(KAFKA_PARAMS)
-    config = AwsEnvironment(environment)
 
     # Broker resources
     elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     ecscluster = ECSCluster("BrokerCluster")
-
-    asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
+    stack.add_resources([elb9092, ecscluster])
+    asgroup = create_bkr_asgroup(stack, ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
     bkr, bkr_task = broker_service(ecscluster, asgroup)
-    stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, efs, efs_mt_1, efs_mt_2, bkr, bkr_task])
+    stack.add_resources([bkr, bkr_task])
+    broker_cw_alarms(stack, asgroup, ecscluster, bkr)
 
-    sr_rsrcs = sr_resources(bkr, elb9092)
-    elb9022, elb9024 = sr_rsrcs[:2]
-    stack.add_resources(sr_rsrcs)
+    elb9022, elb9024 = sr_resources(stack, bkr, elb9092)
 
     # Outputs
     outputs = {
@@ -137,10 +136,7 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
                 'ParameterKey': 'MaxSize',
                 'ParameterValue': profile.max_instances()
             },
-            {
-                'ParameterKey': 'ZookeeperHosts',
-                'ParameterValue': zkhosts + "/" + stackname
-            },
+            PARAM_ZK_HOSTS.config(zkhosts + "/" + stackname),
             PARAM_BROKERS.config(profile.num_brokers()),
             PARAM_BROKER_MEMORY.config(profile.broker_mem()),
             PARAM_BROKER_HEAP_SIZE.config(profile.broker_heap()),
@@ -194,14 +190,16 @@ def cleanup_zk(zkhosts, chroot):
             continue
     zk.stop()
 
-def create_bkr_asgroup(ecscluster, elbs, instance_profile):
+def create_bkr_asgroup(stack, ecscluster, elbs, instance_profile):
     assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
 
     efs = EfsFileSystem("BrokerLogsEfs", "Broker Logs")
     efs_mt_1 = EfsMountTarget("BrokerLogsMountTarget1", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_1)
     efs_mt_2 = EfsMountTarget("BrokerLogsMountTarget2", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_2)
+    stack.add_resources([efs, efs_mt_1, efs_mt_2])
 
-    asgroup = AutoScalingGroup("BrokerScalingGroup").depends_on(efs_mt_1).depends_on(efs_mt_2)
+    asgroup = AutoScalingGroup("BrokerScalingGroup", PARAM_BROKERS, PARAM_BROKERS, PARAM_BROKER_GROUP_MAX_SIZE)\
+        .depends_on(efs_mt_1).depends_on(efs_mt_2)
     launchconfig = LaunchConfiguration("BrokerContainerPool", instance_type_ref="BrokerInstanceType")
     launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster, efs))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
@@ -209,7 +207,8 @@ def create_bkr_asgroup(ecscluster, elbs, instance_profile):
 
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
-    return asgroup, launchconfig, efs, efs_mt_1, efs_mt_2
+    stack.add_resources([asgroup, launchconfig])
+    return asgroup
 
 def broker_service(ecscluster, asgroup):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
@@ -248,7 +247,23 @@ def broker_service(ecscluster, asgroup):
         .depends_on(asgroup)
     return service, task
 
-def sr_resources(bkr_service, elb9092):
+def broker_cw_alarms(stack, broker_asgroup, broker_cluster, broker_service):
+    scale_up = PercentScalingPolicy("BrokerScaleUp", broker_asgroup, 100)
+    scale_down = PercentScalingPolicy("BrokerScaleDown", broker_asgroup, -50)
+    stack.add_resources([scale_down, scale_up])
+
+    high_mem_alarm = CloudWatchAlarm("BrokerHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(broker_cluster, broker_service) \
+        .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
+        .add_scaling_policy(scale_up)
+    low_mem_alarm = CloudWatchAlarm("BrokerLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(broker_cluster, broker_service) \
+        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
+        .add_scaling_policy(scale_down)
+
+    stack.add_resources([high_mem_alarm, low_mem_alarm])
+
+def sr_resources(stack, bkr_service, elb9092):
     elb9022 = ElasticLoadBalancer("lb9022").listen("9022", "80", protocol="http")
     # elb9023 = ElasticLoadBalancer("lb9023").listen("9023", "80", protocol="http")
     elb9024 = ElasticLoadBalancer("lb9024").listen("9024", "80", protocol="http")
@@ -257,10 +272,13 @@ def sr_resources(bkr_service, elb9092):
     sr, sr_task = schema_registry_service(ecscluster, bkr_service)
     conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9022, sr)
     # kr, kr_task = kafka_rest_service(ecscluster, elb9022, sr)
-    return elb9022, elb9024, ecscluster, asgroup, launchconfig, sr, sr_task, conn, conn_task
+    stack.add_resources([elb9022, elb9024, ecscluster, asgroup, launchconfig, sr, sr_task, conn, conn_task])
+    sr_cw_alarms(stack, asgroup, ecscluster, sr, conn)
+    return elb9022, elb9024
 
 def create_sr_asgroup(ecscluster, elbs):
-    asgroup = AutoScalingGroup("SchemaRegistryScalingGroup").set_capacity(2).set_max_size(4)
+    asgroup = AutoScalingGroup("SchemaRegistryScalingGroup", 2, 2, 8)\
+        .set_capacity(2).set_max_size(4)
     launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instance_type_ref="SRInstanceType")
     launchconfig.set_metadata(sr_metadata(launchconfig, ecscluster))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
@@ -328,7 +346,7 @@ def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
         .set_env("SR_ADDRESS", { "Fn::Join" : [ "", [
             "http://", { "Fn::GetAtt": [ elb9022.logical_id(), "DNSName" ] }] ]}) \
         .set_env("GROUP_ID", { "Fn::Join" : [ "", [ "cf-", { "Ref": "AWS::StackName" } ] ]}) \
-        .set_env("REPLICATION_FACTOR", "2") \
+        .set_env("REPLICATION_FACTOR", "3") \
         .set_logging({
             "LogDriver": "awslogs",
             "Options": {
@@ -342,6 +360,30 @@ def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
 
     service = ECSService("ConnectWorker", ecscluster, task, 2).set_min_max_percent(50, 200).depends_on(sr)
     return service, task
+
+def sr_cw_alarms(stack, sr_asgroup, sr_cluster, sr_service, kc_service):
+    scale_up = PercentScalingPolicy("SRScaleUp", sr_asgroup, 100)
+    scale_down = PercentScalingPolicy("SRScaleDown", sr_asgroup, -50)
+    stack.add_resources([scale_down, scale_up])
+
+    sr_high_mem_alarm = CloudWatchAlarm("SRHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(sr_cluster, sr_service) \
+        .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
+        .add_scaling_policy(scale_up)
+    sr_low_mem_alarm = CloudWatchAlarm("SRLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(sr_cluster, sr_service) \
+        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
+        .add_scaling_policy(scale_down)
+    kc_high_mem_alarm = CloudWatchAlarm("KCHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(sr_cluster, kc_service) \
+        .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
+        .add_scaling_policy(scale_up)
+    kc_low_mem_alarm = CloudWatchAlarm("KCLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
+        .add_ecsservice(sr_cluster, kc_service) \
+        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
+        .add_scaling_policy(scale_down)
+
+    stack.add_resources([sr_high_mem_alarm, sr_low_mem_alarm, kc_high_mem_alarm, kc_low_mem_alarm])
 
 def get_elbs(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
@@ -616,9 +658,6 @@ def broker_log_devices(log_size):
             'type': 'st1'
         })
     return disks
-
-def delete_efs_dir():
-    client = boto3.client('efs')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Kafka ECS CloudFormation management')
