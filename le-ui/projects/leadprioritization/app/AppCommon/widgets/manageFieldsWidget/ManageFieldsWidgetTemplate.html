@@ -18,7 +18,7 @@
         <div class="title">
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
             <div class="button-area">
-                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="button orange-button">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="button orange-button">{{ResourceUtility.getString('BUTTON_APPLY_LABEL')}}</button>
                 <button id="manage-fields-discard" data-ng-click="discardChangesClicked($event)" data-ng-show="batchEdit" class="button gray-button">{{ResourceUtility.getString('BUTTON_DISCARD_CHANGES_LABEL')}}</button>
                 <button id="manage-fields-remodel" data-ng-click="remodelClicked($event)" data-ng-show="!batchEdit" class="button blue-button">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</button>
                 <button id="manage-fields-reset" data-ng-click="resetSettingsClicked($event)" data-ng-show="!batchEdit" class="button gray-button">{{ResourceUtility.getString('BUTTON_RESET_SETTINGS_LABEL')}}</button>
@@ -48,7 +48,7 @@
     </div>
     <script id="displayNameTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'DisplayName')" class='k-dirty'></span>
-        <a href="javascript:void(0)" data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-click="fieldLinkClicked($event, dataItem)" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</a>
+        <a href="javascript:void(0)" data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</a>
         <input type="text" data-ng-if="batchEdit && !isLatticeAttribute(dataItem)" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
     </script>
     <script id="columnNameTemplate" type="text/x-kendo-tmpl">

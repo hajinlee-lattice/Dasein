@@ -5,7 +5,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.services.MetadataService',
     'mainApp.appCommon.services.ManageFieldsService',
-    'mainApp.setup.modals.EditFieldModel',
     'mainApp.setup.controllers.DiscardEditFieldsModel',
     'mainApp.setup.modals.UpdateFieldsModal',
     'mainApp.setup.modals.FieldMappingSettingsModal'
@@ -13,7 +12,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
 .controller('ManageFieldsWidgetController', function (
     $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility,
-    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal) {
+    MetadataService, ManageFieldsService, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -517,14 +516,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.isChanged = function (uid, field) {
         var row = $scope.dirtyRows[uid];
         return row && row[field] && row[field].dirty;
-    };
-
-    $scope.fieldLinkClicked = function($event, field) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-
-        EditFieldModel.show(field, $scope);
     };
 
     var attributesEditable = [ 'DisplayName', 'Description', 'ApprovedUsage', 'DisplayDiscretization', 'FundamentalType', 'StatisticalType' ];
