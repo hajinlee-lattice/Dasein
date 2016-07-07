@@ -1,23 +1,16 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
-import com.latticeengines.domain.exposed.modelreview.DataRule;
-import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
-import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
-import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +25,10 @@ import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
+import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -41,10 +38,10 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.client.RestTemplate;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
