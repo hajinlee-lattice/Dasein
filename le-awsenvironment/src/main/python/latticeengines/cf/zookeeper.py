@@ -89,8 +89,8 @@ def bootstrap(stackname, pem, consul):
     pub_zk, pri_zk = update_zoo_cfg(pem, ips)
     if consul is not None:
         print 'Saving zk connection strings to consul server %s' % consul
-        write_to_consul(consul, "%s_public_zk" % stackname, pub_zk)
-        write_to_consul(consul, "%s_private_zk" % stackname, pri_zk)
+        write_to_consul(consul, "%s/public_zk" % stackname, pub_zk + "/" + stackname)
+        write_to_consul(consul, "%s/private_zk" % stackname, pri_zk + "/" + stackname)
     return pub_zk, pri_zk
 
 def info(args):
@@ -191,8 +191,7 @@ def teardown(stackname, consul=None):
     client = boto3.client('cloudformation')
     teardown_stack(client, stackname)
     if consul is not None:
-        remove_from_consul(consul, "%s_public_zk" % stackname)
-        remove_from_consul(consul, "%s_private_zk" % stackname)
+        remove_from_consul(consul, "%s" % stackname)
 
 def instance_name(idx):
     return "EC2Instance%d" % (idx + 1)
@@ -235,7 +234,7 @@ def write_to_consul(server, key, value):
 
 def remove_from_consul(server, key):
     conn = httplib.HTTPConnection(server)
-    conn.request("DELETE", "/v1/kv/%s" % key)
+    conn.request("DELETE", "/v1/kv/%s?recurse" % key)
     response = conn.getresponse()
     print response.status, response.reason
 

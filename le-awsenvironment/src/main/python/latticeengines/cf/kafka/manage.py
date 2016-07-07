@@ -1,5 +1,6 @@
 import argparse
 import boto3
+import httplib
 import json
 import logging
 import math
@@ -82,9 +83,10 @@ def create_template():
     return stack
 
 def provision_cli(args):
-    return provision(args.environment, args.stackname, args.zkhosts, profile=args.profile, cleanupzk=args.cleanupzk)
+    return provision(args.environment, args.stackname, args.zkhosts, profile=args.profile, cleanupzk=args.cleanupzk,
+                     consul=args.consul)
 
-def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
+def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False, consul=None):
     if profile is None:
         profile = DEFAULT_PROFILE
     else:
@@ -162,18 +164,27 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False):
     )
     print 'Got StackId: %s' % response['StackId']
     wait_for_stack_creation(client, stackname)
-    return get_elbs(stackname)
+    elbs = get_elbs(stackname)
+    if consul is not None:
+        print 'Saving addresses to consul server %s' % consul
+        write_to_consul(consul, "%s/broker" % stackname, elbs["BrokerLoadBalancer"] + ":9092")
+        write_to_consul(consul, "%s/schema_registry" % stackname, "http://" + elbs["SchemaRegistryLoadBalancer"])
+        write_to_consul(consul, "%s/kafka_connect" % stackname, "http://" + elbs["KafkaConnectLoadBalancer"])
+    return elbs
 
 def describe(args):
     stack = boto3.resource('cloudformation').Stack(args.stackname)
     print stack
 
 def teardown_cli(args):
-    teardown(args.stackname)
+    teardown(args.stackname, consul=args.consul)
 
-def teardown(stackname):
+def teardown(stackname, consul=None):
     client = boto3.client('cloudformation')
     teardown_stack(client, stackname)
+    if consul is not None:
+        print 'Removing addresses from consul server %s' % consul
+        remove_from_consul(consul, stackname)
 
 def cleanup_zk(zkhosts, chroot):
     print "clean up %s from %s" % (chroot, zkhosts)
@@ -658,6 +669,18 @@ def broker_log_devices(log_size):
             'type': 'st1'
         })
     return disks
+
+def write_to_consul(server, key, value):
+    conn = httplib.HTTPConnection(server)
+    conn.request("PUT", "/v1/kv/%s" % key, value)
+    response = conn.getresponse()
+    print response.status, response.reason
+
+def remove_from_consul(server, key):
+    conn = httplib.HTTPConnection(server)
+    conn.request("DELETE", "/v1/kv/%s?recurse" % key)
+    response = conn.getresponse()
+    print response.status, response.reason
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Kafka ECS CloudFormation management')

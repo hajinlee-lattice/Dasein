@@ -29,6 +29,9 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     print "schema registry address: http://%s/" % elbs["SchemaRegistryLoadBalancer"]
     print "kafka connect address: http://%s/" % elbs["KafkaConnectLoadBalancer"]
 
+    if consul is not None:
+        print "You can also find these addresses on consul server: http://%s:8500/ui/#/dc1/kv/" % consul
+
 def teardown_cli(args):
     teardown(args.stackname, consul=args.consul)
 
