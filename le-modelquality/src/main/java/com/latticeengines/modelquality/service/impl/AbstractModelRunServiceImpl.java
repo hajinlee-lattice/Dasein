@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 
 public abstract class AbstractModelRunServiceImpl implements ModelRunService {
@@ -34,6 +35,9 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
 
     @Autowired
     private ModelRunEntityMgr modelRunEntityMgr;
+
+    @Autowired
+    protected MetricService metricService;
 
     protected RestTemplate restTemplate;
     protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
@@ -54,6 +58,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
 
         } catch (Exception ex) {
             modelRun.setStatus(ModelRunStatus.FAILED);
+            System.out.println(ex.getMessage());
             modelRun.setErrorMessage(ex.getMessage());
             modelRunEntityMgr.update(modelRun);
             log.error("Failed!", ex);

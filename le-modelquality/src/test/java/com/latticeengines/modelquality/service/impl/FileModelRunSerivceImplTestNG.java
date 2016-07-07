@@ -1,5 +1,6 @@
 package com.latticeengines.modelquality.service.impl;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,6 +31,7 @@ public class FileModelRunSerivceImplTestNG extends ModelQualityDeploymentTestNGB
             System.out.println("Finished modelRun2");
 
         } catch (Exception ex) {
+            System.out.println(ExceptionUtils.getFullStackTrace(ex));
             Assert.fail(ex.getMessage());
         }
     }

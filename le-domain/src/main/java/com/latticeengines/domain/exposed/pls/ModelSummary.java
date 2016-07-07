@@ -31,6 +31,10 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -47,7 +51,8 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 @Table(name = "MODEL_SUMMARY", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
         @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId {
+public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact,
+        Dimension {
 
     private String id;
     private String name;
@@ -130,6 +135,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
     @Index(name = "MODEL_SUMMARY_ID_IDX")
+    @MetricTag(tag = "ModelID")
     public String getId() {
         return id;
     }
@@ -194,6 +200,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("RocScore")
     @Column(name = "ROC_SCORE", nullable = false)
     @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
+    @MetricField(name = "RocScore", fieldType = MetricField.FieldType.DOUBLE)
     public Double getRocScore() {
         return rocScore;
     }
@@ -377,6 +384,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Top10PctLift")
     @Column(name = "TOP_10_PCT_LIFT", nullable = true)
     @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
+    @MetricField(name = "Top10PercentLift", fieldType = MetricField.FieldType.DOUBLE)
     public Double getTop10PercentLift() {
         return top10PercentLift;
     }
@@ -389,6 +397,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Top20PctLift")
     @Column(name = "TOP_20_PCT_LIFT", nullable = true)
     @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
+    @MetricField(name = "Top20PercentLift", fieldType = MetricField.FieldType.DOUBLE)
     public Double getTop20PercentLift() {
         return top20PercentLift;
     }
@@ -401,6 +410,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Top30PctLift")
     @Column(name = "TOP_30_PCT_LIFT", nullable = true)
     @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
+    @MetricField(name = "Top30PercentLift", fieldType = MetricField.FieldType.DOUBLE)
     public Double getTop30PercentLift() {
         return top30PercentLift;
     }

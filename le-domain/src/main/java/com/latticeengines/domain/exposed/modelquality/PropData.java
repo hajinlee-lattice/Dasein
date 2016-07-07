@@ -11,31 +11,34 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "MODELQUALITY_PROPDATA")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class PropData implements HasName, HasPid {
-    
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class PropData implements HasName, HasPid, Fact, Dimension {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @Column(name = "VERSION", nullable = false)
     private String version;
-    
+
     @JsonProperty("metadata_version")
     @Column(name = "METADATA_VERSION", nullable = false)
     private String metadataVersion;
-    
+
     @Override
     public String getName() {
         return name;
@@ -62,6 +65,7 @@ public class PropData implements HasName, HasPid {
         this.version = version;
     }
 
+    @MetricTag(tag = "PropDataMetadataVersion")
     public String getMetadataVersion() {
         return metadataVersion;
     }

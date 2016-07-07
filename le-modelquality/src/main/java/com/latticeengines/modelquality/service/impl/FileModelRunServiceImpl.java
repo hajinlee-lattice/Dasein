@@ -1,10 +1,12 @@
 package com.latticeengines.modelquality.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,10 +24,12 @@ import org.springframework.util.LinkedMultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -34,6 +38,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.modelquality.metrics.ModelQualityMetrics;
+import com.latticeengines.modelquality.metrics.ModelingMesurement;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("fileModelRunService")
@@ -57,11 +63,14 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String modelName = createModel(config, sourceFile);
         ModelSummary modelSummary = retrieveModelSummary(modelName);
 
-        saveMetricsToReportDB(modelSummary);
+        saveMetricsToReportDB(modelSummary, config);
     }
 
-    private void saveMetricsToReportDB(ModelSummary modelSummary) {
+    private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config) {
         log.info("Model Summary=" + modelSummary.toString());
+        ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
+        ModelingMesurement measurement = new ModelingMesurement(metrics);
+        metricService.write(MetricDB.MODEL_QUALITY, measurement);
     }
 
     public SourceFile uploadFile(SelectedConfig config) {

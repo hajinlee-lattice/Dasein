@@ -19,13 +19,15 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Pipeline implements HasName, HasPid {
+public class Pipeline implements HasName, HasPid, Fact, Dimension {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

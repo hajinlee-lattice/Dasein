@@ -20,6 +20,9 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -28,47 +31,49 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "MODELQUALITY_DATASET")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class DataSet implements HasName, HasTenant, HasPid {
-    
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
-    // There is no foreign key to the TENANT table because we want to selectively add customer data sets
+
+    // There is no foreign key to the TENANT table because we want to
+    // selectively add customer data sets
     @JsonProperty("customer_space")
     @Column(name = "CUSTOMER_SPACE", nullable = false)
     private String customerSpace;
-    
+
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @Column(name = "INDUSTRY", nullable = false)
     private String industry;
-    
+
     @Column(name = "TYPE", nullable = false)
     private DataSetType dataSetType;
-    
+
     @Column(name = "SCHEMA_INTERPRETATION", nullable = false)
     private SchemaInterpretation schemaInterpretation;
-    
+
     @JsonProperty("training_hdfs_path")
     @Column(name = "TRAINING_HDFS_PATH")
     private String trainingSetHdfsPath;
-    
+
     @JsonProperty("test_hdfs_path")
     @Column(name = "TEST_HDFS_PATH")
     private String testSetHdfsPath;
-    
+
     @JsonProperty("scoring_data_sets")
-    @OneToMany(cascade = { CascadeType.ALL  }, fetch = FetchType.EAGER, mappedBy = "dataSet")
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "dataSet")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
-    
+
     @Override
+    @MetricTag(tag = "DataSetName")
     public String getName() {
         return name;
     }
@@ -91,6 +96,7 @@ public class DataSet implements HasName, HasTenant, HasPid {
         return new Tenant(customerSpace);
     }
 
+    @MetricTag(tag = "DataSetIndustry")
     public String getIndustry() {
         return industry;
     }
@@ -99,7 +105,6 @@ public class DataSet implements HasName, HasTenant, HasPid {
         this.industry = industry;
     }
 
-    
     public DataSetType getDataSetType() {
         return dataSetType;
     }
@@ -108,13 +113,22 @@ public class DataSet implements HasName, HasTenant, HasPid {
         this.dataSetType = dataSetType;
     }
 
-    
+    @MetricTag(tag = "DataSetType")
+    public String getDataSetTypeStrValue() {
+        return dataSetType.name();
+    }
+
     public SchemaInterpretation getSchemaInterpretation() {
         return schemaInterpretation;
     }
 
     public void setSchemaInterpretation(SchemaInterpretation schemaInterpretation) {
         this.schemaInterpretation = schemaInterpretation;
+    }
+
+    @MetricTag(tag = "DataSetSchemaInterpretation")
+    public String getSchemaInterpretationStrValue() {
+        return schemaInterpretation.name();
     }
 
     public Long getPid() {
@@ -148,7 +162,7 @@ public class DataSet implements HasName, HasTenant, HasPid {
     public void setScoringDataSets(List<ScoringDataSet> scoringDataSets) {
         this.scoringDataSets = scoringDataSets;
     }
-    
+
     public void addScoringDataSet(ScoringDataSet scoringDataSet) {
         scoringDataSet.setDataSet(this);
         scoringDataSets.add(scoringDataSet);
