@@ -8,7 +8,6 @@ def main():
     args = parse_args()
     args.func(args)
 
-
 def provision_cli(args):
     provision(args.environment, args.stackname, args.profile, args.keyfile, consul=args.consul)
 
@@ -24,9 +23,11 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     # provision kafka cloud formation
     elbs = kafka.provision(environment, stackname, pri_zk_hosts + "/" + stackname, profile)
 
-    print pub_zk_hosts + "/" + stackname
-    print pri_zk_hosts + "/" + stackname
-    print elbs
+    print "public zk address: %s/%s" % (pub_zk_hosts, stackname)
+    print "private zk address: %s/%s" % (pri_zk_hosts, stackname)
+    print "broker address: %s:9092" % elbs["BrokerLoadBalancer"]
+    print "schema registry address: http://%s/" % elbs["SchemaRegistryLoadBalancer"]
+    print "kafka connect address: http://%s/" % elbs["KafkaConnectLoadBalancer"]
 
 def teardown_cli(args):
     teardown(args.stackname, consul=args.consul)
