@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Test for required env variables
+printf "%s\n" "${WSHOME:?You must set WSHOME}"
+printf "%s\n" "${HADOOP_HOME:?You must set HADOOP_HOME}"
+printf "%s\n" "${TEZ_CONF_DIR:?You must set TEZ_CONF_DIR}"
+printf "%s\n" "${JETTY_HOME:?You must set JETTY_HOME}"
+
 export API_PROPDIR=$WSHOME/le-api/conf/env/dev
 export DATAPLATFORM_PROPDIR=$WSHOME/le-dataplatform/conf/env/dev
 export DB_PROPDIR=$WSHOME/le-db/conf/env/dev
