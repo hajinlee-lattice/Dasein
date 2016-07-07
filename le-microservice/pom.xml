@@ -14,6 +14,7 @@
         <le.propdata.version>2.0.35-SNAPSHOT</le.propdata.version>
         <le.network.version>2.0.35-SNAPSHOT</le.network.version>
         <le.quartz.version>2.0.35-SNAPSHOT</le.quartz.version>
+	<le.modelquality.version>2.0.35-SNAPSHOT</le.modelquality.version>
     </properties>
 
     <parent>
@@ -206,6 +207,7 @@
         <module>workflowapi</module>
         <module>dellebi</module>
         <module>quartz</module>
+	<module>modelquality</module>
     </modules>
 
 </project>

@@ -73,6 +73,10 @@
                                     <location>dellebi/target/le-dellebi-microservice-${le.rpm.version}.war</location>
                                     <destination>dellebi.war</destination>
                                 </source>
+                                <source>
+                                    <location>modelquality/target/le-modelquality-microservice-${le.rpm.version}.war</location>
+                                    <destination>modelquality.war</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
