@@ -22,70 +22,6 @@
         <le.rpm.version>2.0.35-SNAPSHOT</le.rpm.version>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>devcluster</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>devcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/devcluster</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>qaclustera</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>qaclustera</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/qaclustera</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>qaclusterb</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>qaclusterb</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/qaclusterb</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>prodclustera</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>prodclustera</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/prodclustera</scoring.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>prodclusterb</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>prodclusterb</value>
-                </property>
-            </activation>
-            <properties>
-                <scoring.properties.path>conf/env/prodclusterb</scoring.properties.path>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
             <plugin>
@@ -122,17 +58,6 @@
                             <sources>
                                 <source>
                                     <location>target/le-scoring-${le.rpm.version}-shaded.jar</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/tmp/app/scoring</directory>
-                            <filemode>644</filemode>
-                            <username>${mapping.username}</username>
-                            <groupname>${mapping.groupname}</groupname>
-                            <sources>
-                                <source>
-                                    <location>${scoring.properties.path}/scoring.properties</location>
                                 </source>
                             </sources>
                         </mapping>
