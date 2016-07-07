@@ -34,13 +34,17 @@ class CloudWatchAlarm(Resource):
         return self
 
 
-    def add_ecsservice(self, ecscluster, ecsservice):
+    def add_ecscluster(self, ecscluster):
         assert isinstance(ecscluster, ECSCluster)
-        assert isinstance(ecsservice, ECSService)
         self._template["Properties"]["Dimensions"].append({
             "Name": "ClusterName",
             "Value": ecscluster.ref()
         })
+        return self
+
+    def add_ecsservice(self, ecscluster, ecsservice):
+        assert isinstance(ecsservice, ECSService)
+        self.add_ecscluster(ecscluster)
         self._template["Properties"]["Dimensions"].append({
             "Name": "ServiceName",
             "Value": ecsservice.ref()

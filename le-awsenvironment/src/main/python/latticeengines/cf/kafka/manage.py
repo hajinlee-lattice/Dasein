@@ -59,7 +59,7 @@ def create_template():
     asgroup = create_bkr_asgroup(stack, ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
     bkr, bkr_task = broker_service(ecscluster, asgroup)
     stack.add_resources([bkr, bkr_task])
-    broker_cw_alarms(stack, asgroup, ecscluster, bkr)
+    broker_cw_alarms(stack, asgroup, ecscluster)
 
     elb9022, elb9024 = sr_resources(stack, bkr, elb9092)
 
@@ -258,21 +258,15 @@ def broker_service(ecscluster, asgroup):
         .depends_on(asgroup)
     return service, task
 
-def broker_cw_alarms(stack, broker_asgroup, broker_cluster, broker_service):
+def broker_cw_alarms(stack, broker_asgroup, broker_cluster):
     scale_up = PercentScalingPolicy("BrokerScaleUp", broker_asgroup, 100)
-    scale_down = PercentScalingPolicy("BrokerScaleDown", broker_asgroup, -50)
-    stack.add_resources([scale_down, scale_up])
+    stack.add_resources([scale_up])
 
     high_mem_alarm = CloudWatchAlarm("BrokerHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(broker_cluster, broker_service) \
+        .add_ecscluster(broker_cluster) \
         .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
         .add_scaling_policy(scale_up)
-    low_mem_alarm = CloudWatchAlarm("BrokerLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(broker_cluster, broker_service) \
-        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
-        .add_scaling_policy(scale_down)
-
-    stack.add_resources([high_mem_alarm, low_mem_alarm])
+    stack.add_resources([high_mem_alarm])
 
 def sr_resources(stack, bkr_service, elb9092):
     elb9022 = ElasticLoadBalancer("lb9022").listen("9022", "80", protocol="http")

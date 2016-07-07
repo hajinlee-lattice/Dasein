@@ -20,10 +20,11 @@ def main():
 
     for environment in ENVIRONMENTS:
         aggregated=""
+        keys={}
         for dir_name, _, _ in os.walk(WSHOME):
             end_with = PROPERTY_DIR + environment
             if dir_name[-len(end_with):] == end_with and 'le-config' not in dir_name:
-                aggregated += aggregate_props(dir_name)
+                aggregated += aggregate_props(dir_name, keys)
 
         target_path=os.path.join(confdir(environment), 'latticeengines.properties')
         if os.path.isfile(target_path):
@@ -32,7 +33,7 @@ def main():
             print 'Writing to ' + target_path
             f.write(aggregated)
 
-def aggregate_props(dir):
+def aggregate_props(dir, keys):
     prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
     aggregated = ""
     for prop_file in prop_files:
@@ -41,6 +42,13 @@ def aggregate_props(dir):
                           + prop_file.replace(WSHOME + "/", "") \
                           + "\n# ==================================================\n"
             with open(prop_file, 'r') as f:
+                for line in f:
+                    if len(line.strip()) > 0 and ('#' != line.strip()[0]):
+                        key = line.strip().replace('\n', '').split('=')[0]
+                        if key in keys:
+                            raise ValueError("Found duplicated key %s in %s and %s" % (key, keys[key], prop_file))
+                        else:
+                            keys[key] = prop_file
                 aggregated += f.read()
     return aggregated + "\n"
 
