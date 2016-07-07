@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -171,18 +172,20 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         List<DataRule> defaultRules = getMasterList();
 
         for (DataRule dataRule : defaultRules) {
-            if (dataRule.getName() == "CountUniqueValueRule") {
+            if (dataRule.getName().equals("CountUniqueValueRule")) {
                 dataRule.setEnabled(true);
                 Map<String, String> countUniqueValueRuleProps = new HashMap<>();
                 countUniqueValueRuleProps.put("uniqueCountThreshold", String.valueOf(200));
                 dataRule.setProperties(countUniqueValueRuleProps);
-            } else if (dataRule.getName() == "PopulatedRowCount") {
+            } else if (dataRule.getName().equals("PopulatedRowCount")) {
                 dataRule.setEnabled(true);
-            } else if (dataRule.getName() == "OneRecordPerDomain"
-                    && schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+            } else if (dataRule.getName().equals("OneRecordPerDomain")
+                    && schemaInterpretation.equals(SchemaInterpretation.SalesforceAccount)) {
                 dataRule.setEnabled(true);
             }
         }
+
+        log.info("Default rules submitted: " + JsonUtils.serialize(defaultRules));
 
         return defaultRules;
     }
@@ -224,6 +227,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
         List<DataRule> masterRuleList = new ArrayList<>();
         for (Triple<String, String, Boolean> config : masterColumnConfig) {
+            DataRule rule = generateDataRule(config);
+            masterRuleList.add(rule);
+        }
+
+        for (Triple<String, String, Boolean> config : masterRowConfig) {
             DataRule rule = generateDataRule(config);
             masterRuleList.add(rule);
         }
