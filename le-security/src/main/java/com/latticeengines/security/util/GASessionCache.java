@@ -41,12 +41,16 @@ public class GASessionCache {
                             while (++retries <= MAX_RETRY) {
                                 try {
                                     session = globalSessionMgr.retrieve(ticket);
+                                    if (session != null) {
+                                        break;
+                                    }
                                 } catch (Exception e) {
                                     log.warn("Failed to retrieve session " + token + " from GA - retried " + retries
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
-                                        retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+                                        retryInterval = new Double(retryInterval
+                                                * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
                                         Thread.sleep(retryInterval);
                                     } catch (Exception e) {
                                         // ignore
@@ -58,8 +62,10 @@ public class GASessionCache {
                             }
                             return session;
                         } catch (Exception e) {
-                            log.warn(String.format("Encountered an error when retrieving session %s from GA: "
-                                    + e.getMessage() + " Invalidate the cache.", token), e);
+                            log.warn(
+                                    String.format(
+                                            "Encountered an error when retrieving session %s from GA: "
+                                                    + e.getMessage() + " Invalidate the cache.", token), e);
                             return null;
                         }
                     }

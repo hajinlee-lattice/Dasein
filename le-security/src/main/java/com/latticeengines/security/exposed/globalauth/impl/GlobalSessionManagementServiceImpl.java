@@ -33,7 +33,7 @@ public class GlobalSessionManagementServiceImpl
 
     private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
 
-    private static final int TicketInactivityTimeoutInMinute = 1440;
+    public static final int TicketInactivityTimeoutInMinute = 1440;
 
     @Autowired
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;

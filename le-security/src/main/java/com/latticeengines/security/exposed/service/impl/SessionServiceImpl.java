@@ -17,6 +17,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.globalauth.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.util.GASessionCache;
 
@@ -24,7 +25,7 @@ import com.latticeengines.security.util.GASessionCache;
 public class SessionServiceImpl implements SessionService {
 
     private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
-    private static final int CACHE_TIMEOUT_IN_SEC = 60; // compare to the session timeout in GA, 1 min is negligible
+    private static final int CACHE_TIMEOUT_IN_SEC = (int) ((GlobalSessionManagementServiceImpl.TicketInactivityTimeoutInMinute * 60) * 0.01);
     private static final Integer MAX_RETRY = 3;
     private static final Long RETRY_INTERVAL_MSEC = 200L;
     private static Random random = new Random(System.currentTimeMillis());
@@ -49,7 +50,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session attach(Ticket ticket){
+    public Session attach(Ticket ticket) {
         Long retryInterval = RETRY_INTERVAL_MSEC;
         Integer retries = 0;
         Session session = null;
@@ -83,7 +84,9 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session retrieve(Ticket ticket){ return sessionCache.retrieve(ticket.getData()); }
+    public Session retrieve(Ticket ticket) {
+        return sessionCache.retrieve(ticket.getData());
+    }
 
     @Override
     public void logout(Ticket ticket) {
@@ -99,8 +102,8 @@ public class SessionServiceImpl implements SessionService {
             session.setAccessLevel(level.name());
         } catch (NullPointerException e) {
             if (!GARights.isEmpty()) {
-                AccessLevel level = isInternalEmail(session.getEmailAddress()) ?
-                        AccessLevel.INTERNAL_USER : AccessLevel.EXTERNAL_USER;
+                AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
+                        : AccessLevel.EXTERNAL_USER;
                 session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
                 session.setAccessLevel(level.name());
             }
