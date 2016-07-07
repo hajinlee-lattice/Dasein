@@ -24,8 +24,8 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     # provision kafka cloud formation
     elbs = kafka.provision(environment, stackname, pri_zk_hosts + "/" + stackname, profile)
 
-    print pub_zk_hosts
-    print pri_zk_hosts
+    print pub_zk_hosts + "/" + stackname
+    print pri_zk_hosts + "/" + stackname
     print elbs
 
 def teardown_cli(args):

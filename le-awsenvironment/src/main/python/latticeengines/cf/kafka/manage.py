@@ -15,7 +15,7 @@ from ..module.ec2 import EC2Instance
 from ..module.ecs import ECSCluster, ECSService, TaskDefinition, ContainerDefinition, Volume
 from ..module.efs import EfsFileSystem, EfsMountTarget
 from ..module.elb import ElasticLoadBalancer
-from ..module.iam import ECSContainerRole, InstanceProfile
+from ..module.iam import InstanceProfile
 from ..module.parameter import *
 from ..module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from ..module.template import TEMPLATE_DIR
@@ -55,13 +55,7 @@ def create_template(environment):
     elb9092 = ElasticLoadBalancer("lb9092").listen("9092")
     ecscluster = ECSCluster("BrokerCluster")
 
-    if config.kafka_create_ecs_role():
-        ec2_role = ECSContainerRole("ContainerRole")
-        instance_profile = InstanceProfile("ContainerInstanceProfile").add_role(ec2_role)
-        stack.add_resources([ec2_role, instance_profile])
-        asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], instance_profile)
-    else:
-        asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
+    asgroup, launchconfig, efs, efs_mt_1, efs_mt_2 = create_bkr_asgroup(ecscluster, [ elb9092 ], PARAM_ECS_INSTANCE_PROFILE)
     bkr, bkr_task = broker_service(ecscluster, asgroup)
     stack.add_resources([elb9092, ecscluster, asgroup, launchconfig, efs, efs_mt_1, efs_mt_2, bkr, bkr_task])
 
@@ -207,7 +201,7 @@ def create_bkr_asgroup(ecscluster, elbs, instance_profile):
     efs_mt_1 = EfsMountTarget("BrokerLogsMountTarget1", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_1)
     efs_mt_2 = EfsMountTarget("BrokerLogsMountTarget2", efs, PARAM_EFS_SECURITY_GROUP, PARAM_SUBNET_2)
 
-    asgroup = AutoScalingGroup("BrokerScalingGroup").depends_on(efs)
+    asgroup = AutoScalingGroup("BrokerScalingGroup").depends_on(efs_mt_1).depends_on(efs_mt_2)
     launchconfig = LaunchConfiguration("BrokerContainerPool", instance_type_ref="BrokerInstanceType")
     launchconfig.set_metadata(bkr_metadata(launchconfig, ecscluster, efs))
     launchconfig.set_userdata(userdata(launchconfig, asgroup))
