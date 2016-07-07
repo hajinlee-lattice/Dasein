@@ -126,7 +126,7 @@ public class ModelingParameters {
     public void setPivotFileName(String pivotFileName) {
         this.pivotFileName = pivotFileName;
     }
-    
+
     public Map<String, String> getRunTimeParams() {
         return runTimeParams;
     }
@@ -139,6 +139,5 @@ public class ModelingParameters {
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
 
 }
