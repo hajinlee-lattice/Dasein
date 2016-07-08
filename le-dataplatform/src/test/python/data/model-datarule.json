@@ -1,5 +1,6 @@
 {
   "features": [
+  	"AwardYear",
     "BankruptcyFiled",
     "BusinessAnnualSalesAbs",
     "BusinessECommerceSite",
