@@ -14,7 +14,7 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
     public BaseEntityMgrImpl() {
     }
 
-    public abstract BaseDao<T> getDao(); 
+    public abstract BaseDao<T> getDao();
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
@@ -39,14 +39,14 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
     public void delete(T entity) {
         getDao().delete(entity);
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void deleteAll() {
         getDao().deleteAll();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly=true)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @Override
     public boolean containInSession(T entity) {
         return getDao().containInSession(entity);
@@ -54,15 +54,15 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
 
     /**
      * get object by key. entity.getPid() must NOT be empty.
-     */    
+     */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public T findByKey(T entity) {
         return getDao().findByKey(entity);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<T> findAll() {
         return getDao().findAll();
     }

@@ -49,7 +49,7 @@ def aggregate_props(dir, keys):
                             raise ValueError("Found duplicated key %s in %s and %s" % (key, keys[key], prop_file))
                         else:
                             keys[key] = prop_file
-                aggregated += f.read()
+                    aggregated += line
     return aggregated + "\n"
 
 def confdir(environment):
