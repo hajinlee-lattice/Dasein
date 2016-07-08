@@ -13,7 +13,6 @@ class DataRuleProductionPipelineTest(DataRuleTestBase):
         launcher = Launcher("model-datarule.json")
         launcher.execute(False)
 
-        self.assertRuleOutputCount(2)
+        self.assertRuleOutputCount(8)
         self.assertColumnRuleOutput("./results/datarules/CountUniqueValueRule_ColumnRule.avro", [])
         self.assertColumnRuleOutput("./results/datarules/PopulatedRowCount_ColumnRule.avro", [])
-

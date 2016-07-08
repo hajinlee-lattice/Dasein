@@ -25,6 +25,87 @@
         "columns": "allColumns"
       },
       "ColumnTransformFilePath": "populatedrowcount.py"
+    },
+    "OverlyPredictiveDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "overlypredictiveDS",
+      "MainClassName": "OverlyPredictiveDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "overlypredictiveDS.py"
+    },
+    "LowCoverageDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "lowcoverageDS",
+      "MainClassName": "LowCoverageDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns"
+      },
+      "ColumnTransformFilePath": "lowcoverageDS.py"
+    },
+    "PopulatedRowCountDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "populatedrowcountDS",
+      "MainClassName": "PopulatedRowCountDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns"
+      },
+      "ColumnTransformFilePath": "populatedrowcountDS.py"
+    },
+    "NullIssueDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "nullissueDS",
+      "MainClassName": "NullIssueDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "nullissueDS.py"
+    },
+    "UniqueValueCountDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "uniquevaluecountDS",
+      "MainClassName": "UniqueValueCountDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns"
+      },
+      "ColumnTransformFilePath": "uniquevaluecountDS.py"
+    },
+    "HighlyPredictiveSmallPopulationDS": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "highlypredictivesmallpopulationDS",
+      "MainClassName": "HighlyPredictiveSmallPopulationDS",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columns": "allColumns",
+        "categoricalColumns": "categoricalColumns",
+        "numericalColumns": "numericalColumns",
+        "eventColumn": "targetColumn"
+      },
+      "ColumnTransformFilePath": "highlypredictivesmallpopulationDS.py"
     }
   }
 }
