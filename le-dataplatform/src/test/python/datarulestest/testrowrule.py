@@ -18,10 +18,10 @@ class TestRowRule(RowRule):
 
     @overrides(RowRule)
     def getRowsToRemove(self):
-        return { "11869" : ['ColumnA', 'ColumnX', 'ColumnZ'],
-                 "43441" : ['ColumnB'],
-                 "Row3" : ['ColumnC'],
-                 "Row4" : ['ColumnD']
+        return { "13671" : ['ColumnA', 'ColumnX', 'ColumnZ'],
+                 "28031" : ['ColumnB'],
+                 "43441" : ['ColumnC'],
+                 "44574" : ['ColumnD']
                }
 
     @overrides(RowRule)

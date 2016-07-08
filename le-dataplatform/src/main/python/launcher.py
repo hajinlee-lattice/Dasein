@@ -167,9 +167,9 @@ class Launcher(object):
 
         params["training"] = self.training
         params["test"] = self.test
+        params["idColumn"] = self.selectIdColumn(self.training)
 
         allColumnsPreTransform = self.getColumnNames(self.training, self.test)
-
         (self.training, self.test) = executor.preTransformData(self.training, self.test, params)
         (self.training, self.test, metadata) = executor.transformData(params)
         (self.training, self.test) = executor.postTransformData(self.training, self.test, params)
@@ -244,6 +244,18 @@ class Launcher(object):
             for filename in filter(lambda e: executor.accept(e), filenames):
                 hdfs.copyFromLocal(dataRulesLocalDir + filename, "%s%s" % (dataRulesHdfsDir, filename))
 
+    def selectIdColumn(self, dataFrame):
+        if dataFrame is None or hasattr(dataFrame, 'columns') == False:
+            return None
+
+        if "Id" in dataFrame.columns:
+            return "Id"
+        elif "LeadID" in dataFrame.columns:
+            return "LeadID"
+        elif "ExternalID" in dataFrame.columns:
+            return "ExternalID"
+        else:
+            return None
 
 def traverse(directory):
     (dirpath, directories, filenames) = os.walk(directory).next()

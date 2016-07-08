@@ -66,14 +66,7 @@ class DataRuleExecutor(Executor):
         params["pipeline"] = pipeline
         training = pipeline.apply(params["training"], configMetadata)
         logger.info('Process results')
-        idColumn = None
-        if 'Id' in params["training"].columns:
-            idColumn = 'Id'
-        elif 'LeadID' in params["training"].columns:
-            idColumn = 'LeadID'
-        elif 'ExternalId' in params["training"].columns:
-            idColumn = 'ExternalId'
-        pipeline.processResults(dataRulesLocalDir, params["training"], params["parser"].target, idColumn)
+        pipeline.processResults(dataRulesLocalDir, params["training"], params["parser"].target, params["idColumn"])
         return (training, test, metadata)
 
     @overrides(Executor)

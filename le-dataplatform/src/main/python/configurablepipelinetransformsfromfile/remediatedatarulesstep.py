@@ -42,13 +42,7 @@ class RemediateDataRulesStep(PipelineStep):
 
 
     def transform(self, dataFrame, configMetadata, test):
-        idColumn = None
-        if 'Id' in dataFrame.columns:
-            idColumn = 'Id'
-        elif 'LeadID' in dataFrame.columns:
-            idColumn = 'LeadID'
-        elif 'ExternalId' in dataFrame.columns:
-            idColumn = 'ExternalId'
+        idColumn = self.params["idColumn"]
 
         if not idColumn:
             logger.info('No id column identified; not removing any rows')

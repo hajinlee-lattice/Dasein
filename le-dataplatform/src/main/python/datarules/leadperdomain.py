@@ -1,7 +1,6 @@
 from leframework.codestyle import overrides
 from pipelinefwk import get_logger
 from rulefwk import RowRule
-from dataruleutils import selectIdColumn
 
 logger = get_logger("LeadPerDomainRule")
 
@@ -12,14 +11,12 @@ class LeadPerDomainRule(RowRule):
     domainFields = ["Email", "Domain", "Website"]
     idColumn = "LeadID"
 
-    def __init__(self):
-        pass
+    def __init__(self, params):
+        self.idColumn = params["idColumn"]
 
     @overrides(RowRule)
     def apply(self, dataFrame, configMetadata):
         self.rowsToRemove = {}
-
-        selectIdColumn(dataFrame)
 
         for field in self.domainFields:
             if field in dataFrame.columns:
@@ -34,9 +31,6 @@ class LeadPerDomainRule(RowRule):
     @overrides(RowRule)
     def getRowsToRemove(self):
         return self.rowsToRemove
-
-    def selectIDColumn(self, dataFrame):
-        self.idColumn = selectIdColumn(dataFrame)
 
     @overrides(RowRule)
     def getDescription(self):

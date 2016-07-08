@@ -16,14 +16,6 @@ def calculateConversionRate(dataFrameColumn):
     else:
         return 0.0
 
-def selectIdColumn(dataFrame):
-    if "Id" in dataFrame.columns:
-        return "Id"
-    elif "LeadID" in dataFrame.columns:
-        return "LeadID"
-    elif "ExternalID" in dataFrame.columns:
-        return "ExternalID"
-
 def isCategorical(columnType):
     return columnType == "categorical"
 

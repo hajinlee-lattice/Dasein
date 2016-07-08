@@ -15,8 +15,10 @@ class leadPerDomainRuleTest(DataRuleTestBase):
                                u'P1_Event': np.random.binomial(numberOfRows, 0.2)
                               })
         dictOfArguments = {}
+        params = {}
+        params["idColumn"] = "LeadID"
 
-        leadPerDomainRule = LeadPerDomainRule()
+        leadPerDomainRule = LeadPerDomainRule(params)
         leadPerDomainRule.apply(dataFrame, dictOfArguments)
         rowsToRemove = leadPerDomainRule.getRowsToRemove()
         self.assertEqual(len(rowsToRemove.keys()), 0, "No keys should be filtered when Email and CompanyName are filled in")

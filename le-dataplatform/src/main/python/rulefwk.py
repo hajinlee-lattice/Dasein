@@ -79,6 +79,11 @@ class DataRulePipeline(Pipeline):
                     datum["id"] = index
                     datum["itemid"] = itemId
                     datum["isPositiveEvent"] = False
+                    if idColumn:
+                        row = dataFrame.loc[dataFrame[idColumn] == itemId]
+                        targetValue = row.iloc[0][targetColumn]
+                        if targetValue:
+                            datum["isPositiveEvent"] = True
                     datum["columns"] = ','.join(columns)
                     index = index + 1
                     dataWriter.append(datum)

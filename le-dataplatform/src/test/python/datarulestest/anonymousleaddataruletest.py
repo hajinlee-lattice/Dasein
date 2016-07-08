@@ -13,8 +13,9 @@ class anonymousLeadRuleTest(DataRuleTestBase):
                                u'P1_Event': np.random.binomial(5, 0.2)
                               })
         dictOfArguments = {}
-
-        anonymousLeadRule = AnonymousLeadRule()
+        params = {}
+        params["idColumn"] = "LeadID"
+        anonymousLeadRule = AnonymousLeadRule(params=params)
         anonymousLeadRule.apply(dataFrame, dictOfArguments)
         rowsToRemove = anonymousLeadRule.getRowsToRemove()
         self.assertEqual(len(rowsToRemove.keys()), 0, "No keys should be filtered when Email and CompanyName are filled in")

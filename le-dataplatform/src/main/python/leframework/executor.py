@@ -99,6 +99,7 @@ class Executor(object):
 
         pipelineParams = {}
         pipelineParams["schema"] = params["schema"]
+        pipelineParams["idColumn"] = params["idColumn"]
         # Create the data pipeline
         pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, \
                                                                pipelineLib, \
