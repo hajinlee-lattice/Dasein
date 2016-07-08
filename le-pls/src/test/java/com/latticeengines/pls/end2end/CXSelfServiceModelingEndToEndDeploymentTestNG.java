@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
+import org.python.modules.time.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -86,13 +87,13 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private Connection conn;
-    private String SqlServer_report = "10.41.1.97\\sql2012std";
-    private String Sql_userName = "dataloader_user";
-    private String Sql_password = "password";
-    private String Sql_DBName = "MQTest";
+    private String sqlServerreport = "10.41.1.97\\sql2012std";
+    private String sqlUserName = "dataloader_user";
+    private String sqlPassword = "password";
+    private String sqlDBName = "MQTest";
 
-    private String Webhdfs_nn1 = "http://10.41.1.185:50070/explorer.html#/";
-    private String Webhdfs_nn2 = "http://10.41.1.104:50070/explorer.html#/";
+    private String webhdfsnn1 = "http://10.41.1.185:50070/explorer.html#/";
+    private String webhdfsnn2 = "http://10.41.1.104:50070/explorer.html#/";
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -116,15 +117,15 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
         log.info(String.format("Test environment setup finished. tenant name: %s ", tenantToAttach.getName()));
-        log.info("====start to connect DB======");
+        log.info("start to connect DB...");
         conn = dbConnect();
     }
 
     @AfterClass(groups = "qa.lp")
     public void tearDown() throws Exception {
-        log.info("====This is tear down method====");
+        log.info("This is tear down method...");
         if (conn != null) {
-            log.info("====Close sql connection====");
+            log.info("Close sql connection...");
             conn.close();
         }
     }
@@ -155,15 +156,17 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                 }
             }
             ExecutorService pool = Executors.newFixedThreadPool(taskSize);
-            List<Future> list = new ArrayList<>();
+            List<Future<String>> list = new ArrayList<>();
             for (int i = 0; i < taskSize; i++) {
-                Callable<Object> c = new MyCallable(fileNames.get(i));
-                Future f = pool.submit(c);
+                log.info(">>>>>>>>>>>start one thread");
+                Callable<String> c = new MyCallable(fileNames.get(i));
+                Future<String> f = pool.submit(c);
                 list.add(f);
+                Time.sleep(60);
             }
             pool.shutdown();
             pool.awaitTermination(300, TimeUnit.MINUTES);
-            for (Future f : list) {
+            for (Future<String> f : list) {
                 log.info(">>>>>>>>> " + f.get().toString());
             }
         }
@@ -213,14 +216,31 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
             displayName = csvFileName.split("/")[1];
         }
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        log.info(String.format(">>>>>>>>>>%s/pls/models/uploadfile/unnamed?displayName=%s", getRestAPIHostPort(),
-                displayName));
+        
         ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/pls/models/uploadfile/unnamed?displayName=%s", getRestAPIHostPort(),
                         displayName), //
                 requestEntity, ResponseDocument.class);
         SourceFile sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
+        
+        map = new LinkedMultiValueMap<>();
+        map.add("metadataFile", new ClassPathResource(
+                "com/latticeengines/pls/end2end/selfServiceModeling/pivotmappingfiles/pivotvalues.txt"));
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        requestEntity = new HttpEntity<>(map, headers);
+        
+        String pivotvalues="pivotvalues_"+displayName.substring(0, displayName.lastIndexOf("."));
+
+        response = restTemplate.postForObject( //
+                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s", getRestAPIHostPort(), "module1",
+                        "pivotmappings", pivotvalues), //
+                requestEntity, ResponseDocument.class);
+        String pivotFilePath = new ObjectMapper().convertValue(response.getResult(), String.class);
+        log.info(pivotFilePath);
+        
         return sourceFile;
     }
 
@@ -251,13 +271,24 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
                         sourceFile.getName()), mappings, Void.class);
     }
 
-    public String createModel(SourceFile sourceFile) {
+    public String createModel(SourceFile sourceFile, String csvFileName) {
+        String customer="";
+        String csvFile = csvFileName;
+        if (csvFileName.indexOf('/') >= 0) {
+            csvFile = csvFileName.split("/")[1];
+        }
+        if (csvFile.lastIndexOf(".") > 0) {
+            customer = csvFile.substring(0, csvFile.lastIndexOf("."));
+        }
+
         ModelingParameters parameters = new ModelingParameters();
-        parameters.setName("CXSelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
+        parameters.setName("CXSelfServiceModelingEndToEndDeploymentTestNG_" +customer+"_"+ DateTime.now().getMillis());
         parameters.setDescription("Test");
         parameters.setFilename(sourceFile.getName());
+        parameters.setModuleName("module1");
+        parameters.setPivotFileName("pivotvalues_"+customer+".csv");
         String modelName = parameters.getName();
-        String modelingWorkflowApplicationId = model(parameters);
+        model(parameters);
         return modelName;
     }
 
@@ -393,30 +424,30 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private void WriteQualityTestReport(String csvFileName, Double rocScore) throws SQLException, ParseException {
 
         String tenantName = tenantToAttach.getId();
-        String hdfsPath_nn1 = String.format("%s%s%s", Webhdfs_nn1, modelingServiceHdfsBaseDir, tenantName);
-        String hdfsPath_nn2 = String.format("%s%s%s", Webhdfs_nn2, modelingServiceHdfsBaseDir, tenantName);
-        String Customer = "";
-        String CSVFile = csvFileName;
+        String hdfsPath_nn1 = String.format("%s%s%s", webhdfsnn1, modelingServiceHdfsBaseDir, tenantName);
+        String hdfsPath_nn2 = String.format("%s%s%s", webhdfsnn2, modelingServiceHdfsBaseDir, tenantName);
+        String customer = "";
+        String csvFile = csvFileName;
         if (csvFileName.indexOf('/') >= 0) {
-            CSVFile = csvFileName.split("/")[1];
+            csvFile = csvFileName.split("/")[1];
         }
-        if (CSVFile.lastIndexOf(".") > 0) {
-            Customer = CSVFile.substring(0, CSVFile.lastIndexOf("."));
+        if (csvFile.lastIndexOf(".") > 0) {
+            customer = csvFile.substring(0, csvFile.lastIndexOf("."));
         }
-        if (Customer.indexOf('/') >= 0) {
-            Customer = Customer.split("/")[1];
+        if (customer.indexOf('/') >= 0) {
+            customer = customer.split("/")[1];
         }
-        if (Customer.indexOf("_LP3_") > 0) {
-            Customer = Customer.split("_LP3_")[0];
-        } else if (Customer.split("_").length > 2) {
-            Customer = Customer.split("_")[0] + '_' + Customer.split("_")[1];
+        if (customer.indexOf("_LP3_") > 0) {
+            customer = customer.split("_LP3_")[0];
+        } else if (customer.split("_").length > 2) {
+            customer = customer.split("_")[0] + '_' + customer.split("_")[1];
         }
         System.out.println("Connected to server !!!");
         Statement statement = conn.createStatement();
-        log.info("==== start to insert into ModelQualityReport db ======");
-        int res = statement.executeUpdate("insert INTO [dbo].[ModelQualityReport] ([Customer],[CSVFile],[ModelArtifacts_NN1],[ModelArtifacts_NN2],[ROC],[CreateDate]) VALUES ('" + Customer + "', '" + CSVFile + "','" + hdfsPath_nn1 + "','" + hdfsPath_nn2 + "'," + rocScore + ",'" + getCurrentTimeStamp() + "')");
+        log.info("start to insert into ModelQualityReport db...");
+        int res = statement.executeUpdate("insert INTO [dbo].[ModelQualityReport] ([Customer],[CSVFile],[ModelArtifacts_NN1],[ModelArtifacts_NN2],[ROC],[CreatedDate]) VALUES ('" + customer + "', '" + csvFile + "','" + hdfsPath_nn1 + "','" + hdfsPath_nn2 + "'," + rocScore + ",'" + getCurrentTimeStamp() + "')");
         assertEquals(res, 1);
-        log.info("====completed to insert DB======");
+        log.info("completed to insert DB...");
         statement.close();
     }
 
@@ -429,11 +460,11 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
     private Connection dbConnect() throws SQLServerException {
         SQLServerDataSource dataSource = new SQLServerDataSource();
-        dataSource.setServerName(SqlServer_report);
+        dataSource.setServerName(sqlServerreport);
         dataSource.setPortNumber(1433);
-        dataSource.setDatabaseName(Sql_DBName);
-        dataSource.setUser(Sql_userName);
-        dataSource.setPassword(Sql_password);
+        dataSource.setDatabaseName(sqlDBName);
+        dataSource.setUser(sqlUserName);
+        dataSource.setPassword(sqlPassword);
         Connection conn = dataSource.getConnection();
         return conn;
     }
@@ -453,7 +484,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         log.info("Resolving Metadata");
         resolveMetadata(sourceFile);
         log.info("Creating Model");
-        String modelName = createModel(sourceFile);
+        String modelName = createModel(sourceFile,csvFileName);
         ModelSummary modelSummary = retrieveModelSummary(modelName);
         String modelId = modelSummary.getId();
         log.info("modeling id: " + modelId);
@@ -471,14 +502,14 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
         return tenantToAttach;
     }
 
-    class MyCallable implements Callable<Object> {
+    class MyCallable implements Callable<String> {
         private String CSVFileName;
 
         MyCallable(String csvfileName) {
             this.CSVFileName = csvfileName;
         }
-
-        public Object call() throws Exception {
+        @Override
+        public String call() throws Exception {
             String result = "";
             System.out.println(">>>>>>>>" + CSVFileName + " start to process!");
             boolean result_process = processOneFile(CSVFileName);
