@@ -48,7 +48,7 @@ public class MetadataFileUploadResource {
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam("metadataFile") MultipartFile metadataFile) {
         try {
-            log.info(String.format("Uploading file %s (artifactName=%s, compressed=%s)", artifactName,
+            log.info(String.format("Uploading file (moduleName=%s, artifactName=%s, compressed=%s)", moduleName, artifactName,
                     compressed));
             if (metadataFile.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
