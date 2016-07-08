@@ -21,7 +21,7 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile, consul)
 
     # provision kafka cloud formation
-    elbs = kafka.provision(environment, stackname, pri_zk_hosts + "/" + stackname, profile)
+    elbs = kafka.provision(environment, stackname, pri_zk_hosts, profile)
 
     print "public zk address: %s/%s" % (pub_zk_hosts, stackname)
     print "private zk address: %s/%s" % (pri_zk_hosts, stackname)
