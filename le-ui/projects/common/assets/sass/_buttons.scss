@@ -221,109 +221,64 @@ Use this structure for angled buttons:
 </a>
 ============================================================ */
 .button.angled-button {
-  display: inline-block;
-  position: relative;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;         
-  margin-right: 3px;
-  margin-bottom: 2px;
-  width: 169px;
-  &.long {
-    width: 250px;
-  }
-  padding: 0;
-
-  -webkit-transition: none;
-  -moz-transition: none;
-  -o-transition: none;
-  transition: none;
-
-  &:before, &:after {
-    content: "";
-    position: absolute;
-    display: block;
-    background: #3d6590;
-   
-    width: 90px;
-    height: 100%;
-    top: 0;
-    z-index: 1;
-    
-    -webkit-transform-origin: bottom left;
-    -moz-transform-origin: bottom left;
-    transform-origin: bottom left;
-
-    -webkit-transition: none;
-    -moz-transition: none;
-    -o-transition: none;
-    transition: none;
-
-  }
-  &:before {
-    left: -0.25em;
-    -webkit-transform: skewX(20deg);
-    -moz-transform: skewX(20deg);
-    transform: skewX(20deg);
-    border-right: none;
-  }
-  &:after {  
-    right: -0.25em;
-    -webkit-transform: skewX(20deg);
-    -moz-transform: skewX(20deg);
-    transform: skewX(20deg);
-    border-left: none;
-  }
-  &.long:before, &.long:after {
-      width: 130px;
-  }
-  &:hover {
-    cursor: default;
-  }
-  a {
     display: inline-block;
-    padding: 14px 24px 10px 0;
     position: relative;
-    z-index: 2;
-    -webkit-transition: none;
-    -moz-transition: none;
-    -o-transition: none;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;         
+    margin-bottom: 2px;
+    min-width: 169px;
+    padding: 0 20px;
+    background: #3d6590;
+    border-radius: 0;
+    border: 0;
     transition: none;
-  }
-  span {
-    color: #fff;
-    letter-spacing: 1px;
-    font-weight: normal;
-  }
-  &.active {
-    margin-bottom: -6px;
-    &:before, &:after {
-      background: #fff;
-    }
-    &:before {
-      left: 0;
-      -webkit-transform: none;
-      -moz-transform: none;
-      transform: none;
-      border-right: none;
+    transform: skewX(20deg);
+    &:hover {
+        cursor: default;
     }
     a {
-      background: #fff;
-      padding: 16px 24px 16px 0;
-      min-width: 122px;
+        display: inline-block;
+        padding: 14px 24px 10px 0;
+        position: relative;
+        z-index: 2;
+        transition: none;
+        transform: skewX(-20deg);
+        display: inline-block;
     }
     span {
-      color: #333;
+        color: #fff;
+        letter-spacing: 1px;
+        font-weight: normal;
     }
-  }
-  &.active:nth-child(2):before {
-      width: 39px;
-      margin-left: -16px;
-  }
-  &.active:nth-child(3):before {
-      width: 39px;
-      margin-left: -12px;
-  }
+    &.active {
+        padding-bottom: 7px;
+        margin-bottom: -6px;
+        background: #fff;
+        z-index: 2;
+        span {
+            color: #333;
+        }
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          background: #fff;
+          width: 50px;
+          transform: skewX(-20deg);
+        }
+    }
+    &.active:nth-child(2):before {
+        width: 39px;
+        margin-left: -16px;
+    }
+    &.active:nth-child(3):before {
+        width: 39px;
+        margin-left: -12px;
+    }
 }
 .create-model-summary .button.angled-button:first-of-type {
   padding-left: 50px;
