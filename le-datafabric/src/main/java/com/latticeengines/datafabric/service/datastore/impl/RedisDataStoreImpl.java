@@ -31,6 +31,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.util.Pool;
 
+@SuppressWarnings("deprecation")
 public class RedisDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(RedisDataStoreImpl.class);
@@ -78,6 +79,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
                  " index " + redisIndex);
     }
 
+    
     public void createRecord(String id, GenericRecord record) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();

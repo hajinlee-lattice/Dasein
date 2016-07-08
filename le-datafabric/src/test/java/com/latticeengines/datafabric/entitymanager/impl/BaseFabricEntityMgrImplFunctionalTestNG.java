@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(BaseFabricEntityMgrImplFunctionalTestNG.class);
+
     private final String latticeId = "12345654321";
 
     private SampleFabricEntityMgr entityManager;
@@ -34,9 +36,6 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     int messageCount = 0;
     int invalidMessages = 0;
 
-
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(BaseFabricEntityMgrImplFunctionalTestNG.class);
 
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {

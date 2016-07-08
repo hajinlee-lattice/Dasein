@@ -14,8 +14,6 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 @ContextConfiguration(locations = { "classpath:test-datafabric-context.xml" })
 public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-
-    @SuppressWarnings("unused")
     protected static final Log log = LogFactory.getLog(DataFabricFunctionalTestNGBase.class);
 
     @Autowired
