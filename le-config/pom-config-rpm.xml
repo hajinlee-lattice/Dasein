@@ -270,9 +270,6 @@
                                     <location>../le-admin/conf/env/qacluster/admin.properties</location>
                                 </source>
                                 <source>
-                                    <location>../le-zoltan/conf/env/qacluster/zoltan.properties</location>
-                                </source>
-                                <source>
                                     <location>../le-eai/conf/env/qacluster/eai.properties</location>
                                 </source>
                                 <source>
@@ -357,9 +354,6 @@
                                 </source>
                                 <source>
                                     <location>../le-admin/conf/env/prodcluster/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-zoltan/conf/env/prodcluster/zoltan.properties</location>
                                 </source>
                                 <source>
                                     <location>../le-scheduler/conf/env/prodcluster/nodelabel_commands.txt</location>
