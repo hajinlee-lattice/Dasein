@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -28,6 +29,28 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
+
+    @Test(groups = "deployment", enabled = true)
+    public void getAllLeadEnrichmentAttributes() {
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, false);
+        Assert.assertNotNull(enrichmentAttributeList);
+        Assert.assertTrue(enrichmentAttributeList.size() > 0);
+
+        for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
+            Assert.assertFalse(attr.getIsSelected());
+            Assert.assertNotNull(attr.getFieldName());
+            Assert.assertNotNull(attr.getCategory());
+        }
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void getSelectedLeadEnrichmentAttributes() {
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, true);
+        Assert.assertNotNull(enrichmentAttributeList);
+        Assert.assertEquals(enrichmentAttributeList.size(), 0);
+    }
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {

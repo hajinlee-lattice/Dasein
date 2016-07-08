@@ -43,9 +43,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
-            Integer premiumAttributeLimitation) {
+            Map<String, Integer> limitationMap) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
-
+        Integer premiumAttributeLimitation = getTotalMaxCount(limitationMap);
         checkAmbiguityInFieldNames(attributes);
 
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
@@ -78,6 +78,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             }
         }
 
+        // TODO - add check for per datasource limitation as well
         if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
             // throw exception if effective premium count crosses limitation
             throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
@@ -85,6 +86,14 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         selectedAttrEntityMgr.add(addAttrList);
         selectedAttrEntityMgr.delete(deleteAttrList);
+    }
+
+    private Integer getTotalMaxCount(Map<String, Integer> limitationMap) {
+        Integer totalCount = 0;
+        for (String key : limitationMap.keySet()) {
+            totalCount += limitationMap.get(key);
+        }
+        return totalCount;
     }
 
     @Override

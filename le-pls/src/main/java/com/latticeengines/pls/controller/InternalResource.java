@@ -456,11 +456,11 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
-    @RequestMapping(value = "/leadenrichment" + LeadEnrichmentResource.LP3_ENRICH_PATH + "/"
+    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all active model summaries")
-    public List<LeadEnrichmentAttribute> getLp3LeadEnrichmentAttributes(@PathVariable("tenantId") String tenantId,
+    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(@PathVariable("tenantId") String tenantId,
             HttpServletRequest request, @ApiParam(value = "Get attributes with display name containing specified " //
                     + "text (case insensitive) for attributeDisplayNameFilter", required = false) //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //

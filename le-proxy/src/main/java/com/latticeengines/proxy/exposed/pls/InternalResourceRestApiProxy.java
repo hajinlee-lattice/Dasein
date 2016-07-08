@@ -144,10 +144,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<LeadEnrichmentAttribute> getLp3LeadEnrichmentAttributes(CustomerSpace customerSpace, //
+    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes) {
-        String url = constructUrl("pls/internal/leadenrichment/lp3", customerSpace.toString());
+        String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
         url += "?" + "onlySelectedAttributes" + "=" + ((onlySelectedAttributes == true) ? true : false);
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
             url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;

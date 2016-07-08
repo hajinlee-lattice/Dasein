@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface SelectedAttrService {
 
-    void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Integer premiumAttributeLimitation);
+    void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap);
 
     List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter, Category category,
             Boolean onlySelectedAttributes);

@@ -94,6 +94,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected Tenant tenant;
 
+    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
+
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
         if (shouldInit()) {
@@ -117,6 +119,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
+
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
     }
 
     protected boolean shouldInit() {
