@@ -290,6 +290,8 @@ def create_sr_asgroup(ecscluster, elbs):
     launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
     asgroup.add_pool(launchconfig)
     asgroup.attach_elbs(elbs)
+    for elb in elbs:
+        asgroup.depends_on(elb)
     return asgroup, launchconfig
 
 def schema_registry_service(ecscluster, broker):
