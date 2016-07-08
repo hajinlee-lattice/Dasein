@@ -29,6 +29,7 @@ public class AddTimestampStrategy extends AddFieldStrategyBase {
         this.mode = mode;
     }
 
+    @SuppressWarnings("deprecation")
     public AddTimestampStrategy(String fieldName, Date date) {
         super(fieldName, Long.class);
         this.timestamp = date.getTime();
