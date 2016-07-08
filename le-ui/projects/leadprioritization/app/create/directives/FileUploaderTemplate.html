@@ -13,8 +13,8 @@
   </span>
 </label>
 <div class="fileUpload button form-control">
-    <div class="progress processing" ng-show="vm_uploader.processing || vm_uploader.compressing" ng-style="{width: vm_uploader.process_percent + vm_uploader.compress_percent + '%'}"></div>
-    <div class="progress uploading {{vm_uploader.uploaded ? 'finished' : ''}}" ng-show="vm_uploader.uploading || vm_uploader.uploaded" ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}"></div>
+    <div class="progress processing" ng-show="vm_uploader.processing || vm_uploader.compressing" ng-style="{width: vm_uploader.process_percent + vm_uploader.compress_percent + '%'}"><span><span></span></span></div>
+    <div class="progress uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" ng-show="vm_uploader.uploading || vm_uploader.uploaded" ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}"><span><span></span></span></div>
     <span>{{vm_uploader.selectedFileDisplayName}}</span>
     <input
       ng-required="{{vm_uploader.fileRequired}}"

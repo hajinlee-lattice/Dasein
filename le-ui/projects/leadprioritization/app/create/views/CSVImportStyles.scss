@@ -1,14 +1,12 @@
 section.container.setup-import {
     font-size: 1.4em;
-    margin-top: 2em;
+    margin-top: 5em;
     tooltip {
         position: absolute;
         margin-top: -2px;
     }
-    
     label {
-        color: #000;
-        
+        color: #000;   
         span {
             color: #999;
         }
@@ -16,13 +14,10 @@ section.container.setup-import {
             color: #fff;
         }
     }
-    
     textarea {
         overflow: hidden;
     }
-    
     div.file-upload {
-        
         &.disabled,
         &.disabled * {
             pointer-events: none;
@@ -33,10 +28,8 @@ section.container.setup-import {
                 display: none;
             }
         }
-
         div.fileUpload {
-            position: relative;
-            
+            position: relative;   
             input.upload {
                 font-size: 0;
                 top: 0;
@@ -51,26 +44,17 @@ section.container.setup-import {
     #csvFileUploadMessage {
         font-size: 0.9em;
     }
-
     div.toggle-check {
         vertical-align: top;
         font-size: 1em;
         margin-right: .8em;
         margin-top: 0.2em;
-        
-        div {
-            
-        }
-        label {
-
-        }
         input {
             margin-top: 0.5em;
             margin-right: 0.5em;
             margin-left: 1.5em;
         }
     }
-
     div.progress { 
         position: absolute;
         top: 0;
@@ -79,7 +63,6 @@ section.container.setup-import {
         border-radius: 0;
         box-shadow: 1px 0 1px 0px #aaa;
         transition: all 500ms linear;
-
         &.processing {
             background: #dddddd;
         }
@@ -88,25 +71,65 @@ section.container.setup-import {
             background: #dfdfdf;
         }
         &.uploading {
-            background: #85d7ff;
+            background-color: #a2e264;
+        }
+        &.uploading > span {
+            display: block;
+            -webkit-transition: width 4s;
+            transition: width 4s;
+            height: 100%;
+            margin-top: 0;
+            left: 0;
+            right: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        &.animate > span > span {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background-image:
+               -webkit-gradient(linear, 0 0, 100% 100%,
+                  color-stop(.25, rgba(255, 255, 255, .1)),
+                  color-stop(.25, transparent), color-stop(.5, transparent),
+                  color-stop(.5, rgba(255, 255, 255, .1)),
+                  color-stop(.75, rgba(255, 255, 255, .1)),
+                  color-stop(.75, transparent), to(transparent)
+               );
+            background-image:
+                -moz-linear-gradient(
+                  -45deg,
+                  rgba(255, 255, 255, .1) 25%,
+                  transparent 25%,
+                  transparent 50%,
+                  rgba(255, 255, 255, .1) 50%,
+                  rgba(255, 255, 255, .1) 75%,
+                  transparent 75%,
+                  transparent
+               );
+            z-index: 1;
+            -webkit-background-size: 50px 50px;
+            -moz-background-size: 50px 50px;
+            background-size: 50px 50px;
+            -webkit-animation: move 1s linear infinite;
+            -moz-animation: move 1s linear infinite;
+            overflow: hidden;
         }
         &.uploading.finished {
             background: #a2e264;
             width: 100%;
         }
     }
-
     i {
         position: absolute;
         right: 0;
         top: 0;
         bottom: 0;
         padding: 0.6em;
-
         &.fa-close {
             color: #666;
+            z-index: 3;
         }
-
         &.fa-check {
             color: darkolivegreen;
         }
@@ -115,6 +138,26 @@ section.container.setup-import {
         }
     }
 }
+.animate > span:after {
+    display: none;
+}
+@-webkit-keyframes move {
+    0% {
+       background-position: 0 0;
+    }
+    100% {
+       background-position: 50px 50px;
+    }
+}
+@-moz-keyframes move {
+    0% {
+       background-position: 0 0;
+    }
+    100% {
+       background-position: 50px 50px;
+    }
+}
+
 
 
 /*

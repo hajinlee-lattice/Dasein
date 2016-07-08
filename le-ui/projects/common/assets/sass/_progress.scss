@@ -25,45 +25,23 @@
 
 /* Bar */
 .meter {
-	height: 24px; 
+	height: 36px; 
 	position: relative;
-	background: #555;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	border-radius: 6px;
-	padding: 3px;
+	background: #fefefe;
+	border: #ccc solid 1px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
 	-webkit-box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
 	-moz-box-shadow   : inset 0 -1px 1px rgba(255,255,255,0.3);
 	box-shadow        : inset 0 -1px 1px rgba(255,255,255,0.3);
 }
 .meter > span {
 	display: block;
+	-webkit-transition: width 4s;
+    transition: width 4s;
 	height: 100%;
-	-webkit-border-radius: 4px;
-	   -moz-border-radius: 4px;
-	        border-radius: 4px;
-	background-color: rgb(43,194,83);
-	background-image: -webkit-gradient(
-	  linear,
-	  left bottom,
-	  left top,
-	  color-stop(0, rgb(43,194,83)),
-	  color-stop(1, rgb(84,240,84))
-	 );
-	background-image: -moz-linear-gradient(
-	  center bottom,
-	  rgb(43,194,83) 37%,
-	  rgb(84,240,84) 69%
-	 );
-	-webkit-box-shadow:
-	  inset 0 2px 9px  rgba(255,255,255,0.3),
-	  inset 0 -2px 6px rgba(0,0,0,0.4);
-	-moz-box-shadow:
-	  inset 0 2px 9px  rgba(255,255,255,0.3),
-	  inset 0 -2px 6px rgba(0,0,0,0.4);
-	box-shadow:
-	  inset 0 2px 9px  rgba(255,255,255,0.3),
-	  inset 0 -2px 6px rgba(0,0,0,0.4);
+	background-color: #a2e264;
 	position: relative;
 	overflow: hidden;
 	&.indeterminate {
@@ -76,20 +54,20 @@
 	top: 0; left: 0; bottom: 0; right: 0;
 	background-image:
 	   -webkit-gradient(linear, 0 0, 100% 100%,
-	      color-stop(.25, rgba(255, 255, 255, .2)),
+	      color-stop(.25, rgba(255, 255, 255, .1)),
 	      color-stop(.25, transparent), color-stop(.5, transparent),
-	      color-stop(.5, rgba(255, 255, 255, .2)),
-	      color-stop(.75, rgba(255, 255, 255, .2)),
+	      color-stop(.5, rgba(255, 255, 255, .1)),
+	      color-stop(.75, rgba(255, 255, 255, .1)),
 	      color-stop(.75, transparent), to(transparent)
 	   );
 	background-image:
 		-moz-linear-gradient(
 		  -45deg,
-	      rgba(255, 255, 255, .2) 25%,
+	      rgba(255, 255, 255, .1) 25%,
 	      transparent 25%,
 	      transparent 50%,
-	      rgba(255, 255, 255, .2) 50%,
-	      rgba(255, 255, 255, .2) 75%,
+	      rgba(255, 255, 255, .1) 50%,
+	      rgba(255, 255, 255, .1) 75%,
 	      transparent 75%,
 	      transparent
 	   );

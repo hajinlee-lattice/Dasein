@@ -72,11 +72,12 @@
     <div class="row">
         <div class="six columns offset-three">
 
-            <div class="meter animate" data-ng-if="jobStatus != null || jobStatus != 'Failed' || jobStatus != 'Completed' || !jobStepsCompletedStates.create_global_target_market || stepFailed != 'load_data' || stepFailed != 'generate_insights' || stepFailed != 'create_global_target_market'">
+            <div class="meter animate " data-ng-if="jobStatus != null || jobStatus != 'Failed' || jobStatus != 'Completed' || !jobStepsCompletedStates.create_global_target_market || stepFailed != 'load_data' || stepFailed != 'generate_insights' || stepFailed != 'create_global_target_market'">
               <span style="width: 20%" data-ng-if="jobStatus == 'Pending'"><span></span></span>
               <span style="width: 40%" data-ng-if="jobStepsRunningStates.load_data"><span></span></span>
               <span style="width: 60%" data-ng-if="jobStepsRunningStates.generate_insights"><span></span></span>
               <span style="width: 80%" data-ng-if="jobStepsRunningStates.create_global_target_market"><span></span></span>
+              <span style="width: 100%" data-ng-if="jobStatus == Completed">
             </div>
             <!--
             <div data-ng-if="jobStatus == 'Completed'">
