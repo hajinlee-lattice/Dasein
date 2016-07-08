@@ -1,10 +1,10 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
-import com.latticeengines.domain.exposed.datafabric.RedisIndex;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
+
+import com.latticeengines.domain.exposed.datafabric.RedisIndex;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 @Entity
 public class SampleEntity implements HasId<String> {

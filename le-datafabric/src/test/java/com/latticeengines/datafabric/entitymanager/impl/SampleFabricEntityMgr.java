@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
-
 public class SampleFabricEntityMgr extends BaseFabricEntityMgrImpl<SampleEntity> {
 
     public SampleFabricEntityMgr(Builder builder) {

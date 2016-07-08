@@ -1,19 +1,18 @@
 package com.latticeengines.datafabric.util;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datafabric.RedisIndex;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.apache.avro.Schema;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.commons.lang.StringUtils;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 
 
 public class RedisUtil {

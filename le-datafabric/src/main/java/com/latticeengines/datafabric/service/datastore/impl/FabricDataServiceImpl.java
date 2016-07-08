@@ -1,11 +1,7 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
@@ -13,10 +9,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.util.Pool;
 
 

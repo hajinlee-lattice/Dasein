@@ -1,25 +1,19 @@
 package com.latticeengines.datafabric.service.message.impl;
 
-import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
-import com.latticeengines.datafabric.service.message.FabricMessageProducer;
-import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
-import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
-import com.latticeengines.datafabric.util.RedisUtil;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
-import redis.clients.jedis.Jedis;
-
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.specific.SpecificData;
-import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
+import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
+import com.latticeengines.datafabric.service.message.FabricMessageProducer;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class FabricMessageServiceImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
 

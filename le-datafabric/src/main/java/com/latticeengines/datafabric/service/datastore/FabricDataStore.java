@@ -2,6 +2,7 @@ package com.latticeengines.datafabric.service.datastore;
 
 import java.util.List;
 import java.util.Map;
+
 import org.apache.avro.generic.GenericRecord;
 
 public interface FabricDataStore {

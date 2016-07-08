@@ -1,17 +1,12 @@
 package com.latticeengines.datafabric.connector.redis;
 
-import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
+import java.util.Map;
+
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigDef.Width;
-import org.apache.kafka.common.config.ConfigException;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public class RedisSinkConnectorConfig extends AbstractConfig {
 

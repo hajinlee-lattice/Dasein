@@ -1,21 +1,11 @@
 package com.latticeengines.datafabric.connector.redis;
 
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImpl;
-import com.latticeengines.datafabric.util.RedisUtil;
-
-import io.confluent.connect.avro.AvroData;
-
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -23,9 +13,14 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImpl;
+
+import io.confluent.connect.avro.AvroData;
 
 public class RedisSinkTask extends SinkTask {
 

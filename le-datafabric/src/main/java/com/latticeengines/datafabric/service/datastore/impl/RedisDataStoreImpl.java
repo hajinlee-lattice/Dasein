@@ -1,11 +1,7 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-import com.latticeengines.datafabric.util.RedisUtil;
-
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -14,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.lang.StringBuilder;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
@@ -22,14 +17,15 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.JsonEncoder;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.Decoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.stereotype.Component;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.datafabric.util.RedisUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
