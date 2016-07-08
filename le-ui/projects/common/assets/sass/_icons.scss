@@ -169,6 +169,11 @@ Icons
 		-webkit-mask-image:  url("/assets/images/ico-api-console.svg");
 		mask:  url("/assets/images/ico-api-console.svg");
 	}
+    &.ico-arrow-open {
+		-webkit-mask-image:  url("/assets/images/ico-arrow-open.svg");
+		mask:  url("/assets/images/ico-arrow-open.svg");
+    }
+	&.ico-light-grey,
 	&.ico-light-gray {
 		background-color: #b3b5b8;
 	}
@@ -316,4 +321,8 @@ Icons
 		background-image:  url("/assets/images/ico-api-console.png");
 		background-size: 16px;
 	}
+    .ico-arrow-open {
+		background-image:  url("/assets/images/ico-arrow-open.png");
+		background-size: 16px;
+    }
 }

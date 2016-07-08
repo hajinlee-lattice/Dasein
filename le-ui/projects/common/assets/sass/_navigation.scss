@@ -1,3 +1,6 @@
+$max-height: 500px;
+$slide-transition: 200ms;
+
 @mixin transition($args...) {
     -webkit-transition: $args;
     -moz-transition: $args;
@@ -30,26 +33,36 @@
     min-height: 100vh;
 }
 
-nav.primary-nav {
-    @include flex-item(0 1 auto);
-    position: relative;
-    z-index: 2; // for tabs to hide left edge of first tab since this used to be position fixed
-}
 section.main-content {
     @include flex-item(1 1 auto);
+    @include transition(padding $slide-transition ease);
     position: relative;
     z-index: 1;
+    padding-left: 60px;
+    @media screen and (max-height: $max-height) {
+        padding-left: 70px;
+    }
 }
 
-.primary-nav {
-    @include transition(all 250ms ease);
-    padding-left: 10px;
-    min-height: 100vh; // on page load make sure sidebar is 100% hi
+nav.primary-nav {
+    @include flex-item(0 1 auto);
+    @include transition(width $slide-transition ease);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2; // for tabs to hide left edge of first tab since this used to be position fixed
+    min-height: 100vh; // on page load make sure sidebar is 100% high
     width: 60px;
     min-width: 60px; // protection for IE
     background: #222831;
-    position: relative;
+    padding-left: 10px;
     padding-bottom: 75px;
+    @media screen and (max-height: $max-height) {
+        overflow: auto;
+        width: 70px;
+        overflow-x: hidden;
+    }
     .label {
         font-size: 12px;
         display: none;
@@ -65,8 +78,8 @@ section.main-content {
     }
     .ico-container {
         display: inline-block;
-        height: 38px;
-        width: 38px;
+        height: 35px;
+        width: 35px;
         padding: 4px;
         overflow: hidden;
         border-radius: 50%;
@@ -78,21 +91,27 @@ section.main-content {
             top: 50%;
             left: 50%;
             transform: translateY(-50%) translateX(-50%);
-            height: 18px;
-            width: 18px;
+            height: 20px;
+            width: 20px;
             &.ico-marketo {
-                height: 12px;
+                height: 13px;
             }
             &.ico-history {
-                height: 16px;
+                height: 18px;
             }
             &.ico-salesforce {
+                height: 32px;
+                width: 32px;
+            }
+            &.ico-eloqua {
                 height: 30px;
                 width: 30px;
             }
-            &.ico-eloqua {
-                height: 28px;
-                width: 28px;
+            &.ico-user {
+                width: 19px;
+            }
+            &.ico-api-console {
+                height: 19px;
             }
         }
     }
@@ -101,7 +120,6 @@ section.main-content {
     }
     padding-top: 40px;
     .open-button {
-        color: white;
         background: transparent;
         border: 0;
         width: 38px;
@@ -109,31 +127,20 @@ section.main-content {
         font-size: 20px;
         padding: 10px 0;
         position: absolute;
-        top: 0;
+        top: 8px;
         left: 10px;
+        overflow: hidden;
+        width: 50px;
+        height: 25px;
         opacity: .5;
-        &:hover {
-          opacity: 1;
-        }
-        .fa {
-          color: rgba(255,255,255,.7);
-        }
-        .fa-arrow-left {
+        .ico-arrow-open {
+            position: absolute;
+            left: -9px;
+            height: 50px;
+            width: 50px;
+            color: white;
+            top: -15px;
             transform: rotate(180deg);
-        }
-        .fa-compress {
-            @include transition(all 250ms ease);
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            opacity: 0;
-        }
-        .fa-expand {
-            @include transition(all 250ms ease);
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            opacity: 1;
         }
     }
     .logo-container {
@@ -143,6 +150,9 @@ section.main-content {
         right: 0;
         bottom: 0;
         text-align: center;
+        @media screen and (max-height: $max-height) {
+            position: static;
+        }
     }
     .menu {
         text-align: left;
@@ -234,9 +244,9 @@ section.main-content {
             font-size: 27px;
             text-align: center;
             .fa {
-              vertical-align: top;
-              position: relative;
-              left: -2px;
+                vertical-align: top;
+                position: relative;
+                left: -2px;
             }
         }
         h3 {
@@ -259,12 +269,8 @@ html:not(.no-cssmask) {
     }
 }
 
-#inner-wrap {
-    @include transition(all 250ms ease);
-}
-
 .open-nav {
-    .primary-nav {
+    nav.primary-nav {
         width: 250px;
         .menu-header h3 {
             display: block;
@@ -272,20 +278,18 @@ html:not(.no-cssmask) {
         .label {
             display: inline-block;
         }
-    }
-    .open-button {
-        .fa-arrow-left {
-            transform: rotate(0deg);
+        .open-button {
+            .ico-arrow-open {
+                top: -9px;
+                transform: rotate(0deg);
+            }
         }
-        .fa-compress {
-            opacity: 1;
-        }
-        .fa-expand {
-            opacity: 0;
+        .logo-container {
+            display: block;
         }
     }
-    .logo-container {
-        display: block; 
+    section.main-content {
+        padding-left: 250px;
     }
     .menu-header {
         h3 {
@@ -345,7 +349,7 @@ html:not(.no-cssmask) {
         background-repeat: no-repeat; 
         background-position: 12px 50%;
         &:hover {
-          cursor: default;
+            cursor: default;
         }
     }
     .profile-nav {

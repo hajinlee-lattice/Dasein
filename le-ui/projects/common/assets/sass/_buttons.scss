@@ -229,6 +229,9 @@ Use this structure for angled buttons:
   margin-right: 3px;
   margin-bottom: 2px;
   width: 169px;
+  &.long {
+    width: 250px;
+  }
   padding: 0;
 
   -webkit-transition: none;
@@ -271,6 +274,9 @@ Use this structure for angled buttons:
     transform: skewX(20deg);
     border-left: none;
   }
+  &.long:before, &.long:after {
+      width: 130px;
+  }
   &:hover {
     cursor: default;
   }
@@ -304,6 +310,7 @@ Use this structure for angled buttons:
     a {
       background: #fff;
       padding: 16px 24px 16px 0;
+      min-width: 122px;
     }
     span {
       color: #333;
