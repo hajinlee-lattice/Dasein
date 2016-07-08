@@ -237,6 +237,19 @@ Use this structure for angled buttons:
     &:hover {
         cursor: default;
     }
+    &:first-child {
+        &:before {
+        display: block;
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background: inherit;
+        width: 50px;
+        transform: skewX(-20deg);
+      }
+    }
     a {
         display: inline-block;
         padding: 14px 24px 10px 0;
@@ -266,7 +279,7 @@ Use this structure for angled buttons:
           top: 0;
           left: 0;
           bottom: 0;
-          background: #fff;
+          background: inherit;
           width: 50px;
           transform: skewX(-20deg);
         }
