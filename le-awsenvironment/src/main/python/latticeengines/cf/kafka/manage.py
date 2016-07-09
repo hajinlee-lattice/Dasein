@@ -102,42 +102,15 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False, co
         StackName=stackname,
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json'),
         Parameters=[
-            {
-                'ParameterKey': 'VpcId',
-                'ParameterValue': config.vpc()
-            },
-            {
-                'ParameterKey': 'SubnetId1',
-                'ParameterValue': config.public_subnet_1()
-            },
-            {
-                'ParameterKey': 'SubnetId2',
-                'ParameterValue': config.public_subnet_2()
-            },
-            {
-                'ParameterKey': 'KeyName',
-                'ParameterValue': config.ec2_key()
-            },
-            {
-                'ParameterKey': 'SecurityGroupId',
-                'ParameterValue': config.kafka_sg()
-            },
-            {
-                'ParameterKey': 'BrokerInstanceType',
-                'ParameterValue': profile.instance_type()
-            },
-            {
-                'ParameterKey': 'SRInstanceType',
-                'ParameterValue': profile.sr_instance_type()
-            },
-            {
-                'ParameterKey': 'DesiredCapacity',
-                'ParameterValue': profile.num_instances()
-            },
-            {
-                'ParameterKey': 'MaxSize',
-                'ParameterValue': profile.max_instances()
-            },
+            PARAM_VPC_ID.config(config.vpc()),
+            PARAM_SUBNET_1.config(config.public_subnet_1()),
+            PARAM_SUBNET_2.config(config.public_subnet_2()),
+            PARAM_KEY_NAME.config(config.ec2_key()),
+            PARAM_SECURITY_GROUP.config(config.kafka_sg()),
+            PARAM_BROKER_INSTANCE_TYPE.config(profile.instance_type()),
+            PARAM_SR_INSTANCE_TYPE.config(profile.sr_instance_type()),
+            PARAM_BROKER_GROUP_CAPACITY.config(profile.num_instances()),
+            PARAM_BROKER_GROUP_MAX_SIZE.config(profile.max_instances()),
             PARAM_ZK_HOSTS.config(zkhosts + "/" + stackname),
             PARAM_BROKERS.config(profile.num_brokers()),
             PARAM_BROKER_MEMORY.config(profile.broker_mem()),

@@ -21,7 +21,7 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile, consul)
 
     # provision kafka cloud formation
-    elbs = kafka.provision(environment, stackname, pri_zk_hosts, profile)
+    elbs = kafka.provision(environment, stackname, pri_zk_hosts, profile, consul=consul)
 
     print "public zk address: %s/%s" % (pub_zk_hosts, stackname)
     print "private zk address: %s/%s" % (pri_zk_hosts, stackname)
@@ -30,7 +30,7 @@ def provision(environment, stackname, profile, keyfile, consul=None):
     print "kafka connect address: http://%s/" % elbs["KafkaConnectLoadBalancer"]
 
     if consul is not None:
-        print "You can also find these addresses on consul server: http://%s:8500/ui/#/dc1/kv/" % consul
+        print "You can also find these addresses on consul server: http://%s/ui/#/dc1/kv/" % consul
 
 def teardown_cli(args):
     teardown(args.stackname, consul=args.consul)
