@@ -135,7 +135,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
                 log.info(
                         "Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
             } else {
-                log.info("Topic exisits. name " + topic);
+                log.info("Topic exists. name " + topic);
             }
 
             result = true;

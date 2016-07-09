@@ -1,11 +1,11 @@
 package com.latticeengines.datafabric.connector.kafka;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -13,8 +13,6 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
@@ -26,7 +24,7 @@ import io.confluent.connect.avro.AvroData;
 
 public class KafkaSinkTask extends SinkTask {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaSinkTask.class);
+    private static final Log log = LogFactory.getLog(KafkaSinkTask.class);
     private AvroData avroData;
     private FabricMessageService messageService;
     private FabricMessageProducer producer;
@@ -46,26 +44,23 @@ public class KafkaSinkTask extends SinkTask {
 
     @Override
     public String version() {
-        return Version.getVersion();
+        return "1.0.0";
     }
 
     @Override
     public void start(Map<String, String> props) {
-        Set<TopicPartition> assignment = context.assignment();
-
         try {
-            KafkaSinkConnectorConfig connectorConfig = new KafkaSinkConnectorConfig(props);
-            int schemaCacheSize = connectorConfig.getInt(KafkaSinkConnectorConfig.SCHEMA_CACHE_SIZE_CONFIG);
-            avroData = new AvroData(schemaCacheSize);
+            KafkaSinkConfig connectorConfig = new KafkaSinkConfig(props);
+            avroData = connectorConfig.constructAvroData();
 
-            brokers = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_BROKERS_CONFIG);
-            zkConnect = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_ZKCONNECT_CONFIG);
-            schemaRegUrl = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCHEMAREG_CONFIG);
-            stack = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_STACK_CONFIG);
-            environment = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_ENVIRONMENT_CONFIG);
-            topic = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_TOPIC_CONFIG);
-            scope = TopicScope.fromName(connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_SCOPE_CONFIG));
-            recordType = connectorConfig.getString(KafkaSinkConnectorConfig.KAFKA_RECORD_CONFIG);
+            brokers = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_BROKERS, String.class);
+            zkConnect = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_ZKCONNECT, String.class);
+            schemaRegUrl = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_SCHEMAREG, String.class);
+            stack = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_STACK, String.class);
+            environment = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_ENVIRONMENT, String.class);
+            topic = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_LOGICAL_TOPIC, String.class);
+            scope = TopicScope.fromName(connectorConfig.getProperty(KafkaSinkConfig.KAFKA_TOPIC_SCOPE, String.class));
+            recordType = connectorConfig.getProperty(KafkaSinkConfig.KAFKA_RECORD, String.class);
 
             messageService = new FabricMessageServiceImpl(brokers, //
                     zkConnect, //
@@ -85,7 +80,7 @@ public class KafkaSinkTask extends SinkTask {
             throw new ConnectException("Couldn't start KafkaSinkConnector due to configuration error.", e);
         } catch (ConnectException e) {
             log.error("Couldn't start KafkaSinkConnector:", e);
-            log.error("Shutting down ReidsSinkConnector.");
+            log.error("Shutting down KafkaSinkConnector.");
         }
     }
 
@@ -95,7 +90,6 @@ public class KafkaSinkTask extends SinkTask {
 
     @Override
     public void put(Collection<SinkRecord> records) throws ConnectException {
-        Map<String, GenericRecord> avroRecords = new HashMap<>();
         try {
             for (SinkRecord record : records) {
                 Struct value = (Struct) record.value();

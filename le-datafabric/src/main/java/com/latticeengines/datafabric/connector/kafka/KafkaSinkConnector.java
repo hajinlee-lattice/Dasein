@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * KafkaSinkConnector is a Kafka Connect Connector implementation that ingest data from one Kafka cluster
@@ -19,20 +19,21 @@ import org.slf4j.LoggerFactory;
  */
 public class KafkaSinkConnector extends Connector {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaSinkConnector.class);
+    private static final Log log = LogFactory.getLog(KafkaSinkConnector.class);
     private Map<String, String> configProperties;
-    private KafkaSinkConnectorConfig config;
+    private KafkaSinkConfig config;
 
     @Override
     public String version() {
-        return Version.getVersion();
+        return "1.0.0";
     }
 
     @Override
     public void start(Map<String, String> props) throws ConnectException {
+        log.info("Start " + this.getClass().getSimpleName());
         try {
             configProperties = props;
-            config = new KafkaSinkConnectorConfig(props);
+            config = new KafkaSinkConfig(props);
         } catch (ConfigException e) {
             throw new ConnectException("Couldn't start KafkaSinkConnector due to configuration error", e);
         }
@@ -56,12 +57,12 @@ public class KafkaSinkConnector extends Connector {
 
     @Override
     public void stop() throws ConnectException {
-
+        log.info("Stop " + this.getClass().getSimpleName());
     }
 
     @Override
     public ConfigDef config() {
-        return KafkaSinkConnectorConfig.getConfig();
+        return KafkaSinkConfig.getConfig();
     }
 
 }

@@ -491,6 +491,16 @@ public class AvroUtils {
         }
     }
 
+    public static void appendToLocalFile(List<GenericRecord> data, String path) throws IOException {
+        File avroFile = new File(path);
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
+            writer.appendTo(avroFile);
+            for (GenericRecord datum : data) {
+                writer.append(datum);
+            }
+        }
+    }
+
     public static List<GenericRecord> readFromLocalFile(String path) throws IOException {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),
