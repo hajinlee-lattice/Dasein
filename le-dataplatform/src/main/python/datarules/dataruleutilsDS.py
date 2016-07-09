@@ -28,9 +28,6 @@ def discretizeNumericVar(inputCol, numBucket = 20, emptyValList=[None,"Null","Em
 
     idxNonEmpty = [i for i,x in enumerate(inputCol) if x not in emptyValList and not math.isnan(x)]
 
-    if len(idxNonEmpty) == 0:
-        return [range(len(inputCol))]
-
     idxEmpty = [i for i,x in enumerate(inputCol) if x in emptyValList or math.isnan(x)]
 
     inputColNonEmpty=[inputCol[i] for i in idxNonEmpty]
@@ -66,6 +63,14 @@ def getColVal(colVal, colType, numBucket):
         return colVal
     elif colType == 'num':
         return numricVarToCategVar(colVal, numBucket)
+
+def ismissing(val, type):
+    if type == 'cat' and (val == '' or pd.isnull(val)):
+        return True
+    elif type == 'num' and val == 0:
+        return True
+    else:
+        return False
 
 # get the conversion rate for each feature value
 def getGroupedRate(colVal, eventCol, cntRate_overall = None):
@@ -107,11 +112,3 @@ def convertCleanDataFrame(colNames, df, catColumnNamesSet, numColumnNamesSet, re
     numRows=len(allCols[0])
     allRows=[[allCols[j][i] for j in range(len(allCols))] for i in range(numRows)]
     return allRows
-
-def selectIdColumn(dataFrame):
-    if "Id" in dataFrame.columns:
-        return "Id"
-    elif "LeadID" in dataFrame.columns:
-        return "LeadID"
-    elif "ExternalID" in dataFrame.columns:
-        return "ExternalID"
