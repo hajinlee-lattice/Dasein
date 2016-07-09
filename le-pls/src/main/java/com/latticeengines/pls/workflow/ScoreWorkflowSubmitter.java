@@ -40,11 +40,13 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String tableToScore, String sourceDisplayName, TransformationGroup transformationGroup) {
+    public ApplicationId submit(String modelId, String tableToScore, String sourceDisplayName,
+            TransformationGroup transformationGroup) {
         log.info(String.format(
                 "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
                 tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName, transformationGroup);
+        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName,
+                transformationGroup);
 
         if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
@@ -88,7 +90,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/Export_" + DateTime.now().getMillis()) //
+                .outputFilename("/" + sourceDisplayName.replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .build();

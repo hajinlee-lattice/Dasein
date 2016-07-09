@@ -25,22 +25,21 @@ import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-
 @Component("metadataFileUploadService")
 public class MetadataFileUploadServiceImpl implements MetadataFileUploadService {
-    
+
     private static final Log log = LogFactory.getLog(MetadataFileUploadServiceImpl.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private MetadataProxy metadataProxy;
 
     @Override
     public String uploadFile(String urlToken, String moduleName, String artifactName, InputStream inputStream) {
         ArtifactType artifactType = ArtifactType.getArtifactTypeByUrlToken(urlToken);
-        
+
         if (artifactType == null) {
             throw new LedpException(LedpCode.LEDP_18090, new String[] { urlToken });
         }
@@ -50,7 +49,8 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
         String hdfsPath = String.format("%s/%s.%s", path.toString(), artifactName, artifactType.getFileType());
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
-                throw new LedpException(LedpCode.LEDP_18091, new String[] { artifactType.getCode(), artifactName, moduleName });
+                throw new LedpException(LedpCode.LEDP_18091, new String[] { artifactType.getCode(), artifactName,
+                        moduleName });
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, hdfsPath);
             Artifact artifact = new Artifact();
@@ -63,7 +63,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
 
         return hdfsPath;
     }
-    
+
     @Override
     public List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
@@ -71,7 +71,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
         Path path = PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(), customerSpace);
         try {
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path.toString());
-            
+
             for (String filePath : files) {
                 Module module = new Module();
                 module.setName(new org.apache.hadoop.fs.Path(filePath).getName());
@@ -83,7 +83,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
         }
         return modules;
     }
-    
+
     @Override
     public List<Artifact> getArtifacts(String moduleName, ArtifactType artifactType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -94,7 +94,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
         List<Artifact> artifacts = new ArrayList<>();
         try {
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
-            
+
             for (String filePath : files) {
                 Artifact artifact = new Artifact();
                 org.apache.hadoop.fs.Path hadoopPath = new org.apache.hadoop.fs.Path(filePath);
@@ -107,14 +107,14 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
             log.warn(e);
             return new ArrayList<>();
         }
-        
+
         return artifacts;
     }
-    
+
     @Override
     public List<Artifact> getArtifacts(String moduleName, String urlToken) {
         ArtifactType artifactType = ArtifactType.getArtifactTypeByUrlToken(urlToken);
-        
+
         if (artifactType == null) {
             throw new LedpException(LedpCode.LEDP_18090, new String[] { urlToken });
         }

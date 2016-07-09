@@ -113,7 +113,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/Export_" + DateTime.now().getMillis()) //
+                .outputFilename("/" + sourceFile.getDisplayName().replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //
