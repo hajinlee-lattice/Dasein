@@ -1,0 +1,38 @@
+<div class="enrichment-container" data-ng-controller="EnrichmentController as vm">
+    <section id="main-content" class="container">
+        <ul class="subheader">
+            <li class="attributes">
+                <select>
+                    <option ng-repeat="attribute in attributes" value="{{attribute.name}}">
+                        {{attribute.name}}
+                    </option>
+                </select>
+            </li>
+            <li class="totals">
+                <ul>
+                    <li>
+                        Total Selected* <em class="badge">{{total.selected}}</em>
+                    </li>
+                    <li>
+                        Total Premium** <em class="badge">{{total.premium}}</em>
+                    </li>
+                </ul>
+            </li>
+            <li class="menu">
+                <span class="fa fa-bars"></span>
+            </li>
+            <li class="save">
+                <button class="button icon-button orange-button">{{button_save}}</button>
+            </li>
+        </ul>
+
+        <div class="enrichments">
+            <div class="box" ng-repeat="enrichment in enrichments">
+                <div data-corner-ribbon="premium" ng-if="enrichment.premium"><strong>premium</strong></div>
+                <div class="ico-container"><span class="ico ico-light-gray ico-locations"></span></div>
+                <h2>{{enrichment.title}}</h2>
+                <p>{{enrichment.description}}</div>
+            </div>
+        </div>
+    </section>
+</diV>

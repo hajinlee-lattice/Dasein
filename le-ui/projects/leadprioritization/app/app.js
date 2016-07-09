@@ -20,7 +20,8 @@ var mainApp = angular.module('mainApp', [
     'lp.models.review',
     'pd.navigation',
     'pd.jobs',
-    'pd.apiconsole'
+    'pd.apiconsole',
+    'lp.enrichment.leadenrichment'
 ])
 
 // adds Authorization token to $http requests to access API

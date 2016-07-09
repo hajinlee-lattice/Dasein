@@ -78,8 +78,8 @@ nav.primary-nav {
     }
     .ico-container {
         display: inline-block;
-        height: 35px;
-        width: 35px;
+        height: 36px;
+        width: 36px;
         padding: 4px;
         overflow: hidden;
         border-radius: 50%;
@@ -113,6 +113,9 @@ nav.primary-nav {
             &.ico-api-console {
                 height: 19px;
             }
+            &.ico-alerts {
+              height: 19px;
+            }
         }
     }
     .active > a > .ico-container {
@@ -139,8 +142,8 @@ nav.primary-nav {
             height: 50px;
             width: 50px;
             color: white;
-            top: -15px;
-            transform: rotate(180deg);
+            top: -9px;
+            transform: rotate(0deg);
         }
     }
     .logo-container {
@@ -280,8 +283,8 @@ html:not(.no-cssmask) {
         }
         .open-button {
             .ico-arrow-open {
-                top: -9px;
-                transform: rotate(0deg);
+                top: -15px;
+                transform: rotate(180deg);
             }
         }
         .logo-container {

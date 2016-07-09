@@ -705,12 +705,10 @@ angular
                             return 'LEAD_ENRICHMENT_SETUP_TITLE';
                         }
                     },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {
-                    controller: 'LeadEnrichmentController',
-                    templateUrl: 'app/setup/views/LeadEnrichmentView.html'
+                    templateUrl: 'app/enrichment/views/EnrichmentView.html'
                 }   
             }
         });

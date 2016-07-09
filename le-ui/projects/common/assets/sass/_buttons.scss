@@ -239,16 +239,17 @@ Use this structure for angled buttons:
     }
     &:first-child {
         &:before {
-        display: block;
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        background: inherit;
-        width: 50px;
-        transform: skewX(-20deg);
-      }
+            display: block;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: inherit;
+            width: 50px;
+            transform: skewX(-20deg);
+            transition: none;
+        }
     }
     a {
         display: inline-block;
@@ -273,15 +274,16 @@ Use this structure for angled buttons:
             color: #333;
         }
         &:before {
-          display: block;
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          background: inherit;
-          width: 50px;
-          transform: skewX(-20deg);
+            display: block;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: inherit;
+            width: 50px;
+            transform: skewX(-20deg);
+            transition: none;
         }
     }
     &.active:nth-child(2):before {
