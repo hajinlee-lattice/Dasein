@@ -100,13 +100,36 @@ angular.module('pd.jobs', [
             'addStandardAttributesViaJavaFunction': 'create_global_target_market',
             'sample': 'create_global_target_market',
             'exportData': 'create_global_target_market',
-            'profileAndModel': 'create_global_target_market',
-            'activateModel': 'create_global_target_market'
+            'setMatchSelection': 'create_global_target_market',
+            'writeMetadataFiles': 'create_global_target_market',
+            'profile': 'create_global_target_market',
+            'reviewModel': 'create_global_target_market',
+            'remediateDataRules': 'create_global_target_market',
+            'cleanInitialReview': 'create_global_target_market',
+            'sample': 'create_global_target_market',
+            'exportData': 'create_global_target_market',
+            'setMatchSelection': 'create_global_target_market',
+            'writeMetadataFiles': 'create_global_target_market',
+            'profile': 'create_global_target_market',
+            'reviewModel': 'create_global_target_market',
+            'createModel': 'create_global_target_market',
+            'downloadAndProcessModelSummaries': 'create_global_target_market'
         },
         'modelAndEmailWorkflow': {
+            'dedupEventTable': 'create_global_target_market',
+            'matchDataCloud': 'create_global_target_market',
+            'processMatchResult': 'create_global_target_market',
+            'addStandardAttributesViaJavaFunction': 'create_global_target_market',
+            'remediateDataRules': 'create_global_target_market',
+            'resolveMetadataFromUserRefinedAttributes': 'create_global_target_market',
             'sample': 'create_global_target_market',
-            'profileAndModel': 'create_global_target_market',
-            'activateModel': 'create_global_target_market'
+            'exportData': 'create_global_target_market',
+            'setMatchSelection': 'create_global_target_market',
+            'writeMetadataFiles': 'create_global_target_market',
+            'profile': 'create_global_target_market',
+            'reviewModel': 'create_global_target_market',
+            'createModel': 'create_global_target_market',
+            'downloadAndProcessModelSummaries': 'create_global_target_market'
         }
     };
 
