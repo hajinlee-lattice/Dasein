@@ -3,6 +3,9 @@ from avro import schema, datafile, io
 import codecs
 from pipelinefwk import Pipeline
 from pipelinefwk import PipelineStep
+import logging
+
+logger = logging.getLogger(name='rulefwk')
 
 class DataRulePipeline(Pipeline):
 
@@ -36,7 +39,11 @@ class DataRulePipeline(Pipeline):
 
     def apply(self, dataFrame, configMetadata):
         for step in self.pipelineSteps:
-            step.apply(dataFrame, configMetadata)
+            try:
+                step.apply(dataFrame, configMetadata)
+            except Exception as e:
+                logger.error("Caught Exception while applying datarule. Stack trace below")
+                logger.error(e)
         return dataFrame
 
     def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
