@@ -38,6 +38,10 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Autowired
+    private TenantConfigServiceImpl tenantConfigService;
+
+    // TODO : remove this and corresponding configuration
     @Value("${pls.leadenrichment.premium.max:10}")
     private int premiumAttributesLimitation;
 
@@ -55,7 +59,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
             for (String selectedAttrStr : attributes.getSelectedAttributes()) {
-                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
+                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        selectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
                 addAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -68,8 +73,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
-                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
-                        deselectedAttrStr);
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(
+                        allAttributes, deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -79,27 +84,22 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
 
         // TODO - add check for per datasource limitation as well
-        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
+        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount
+                + additionalPremiumAttrCount) {
             // throw exception if effective premium count crosses limitation
-            throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
+            throw new LedpException(LedpCode.LEDP_18112,
+                    new String[] { premiumAttributeLimitation.toString() });
         }
 
         selectedAttrEntityMgr.add(addAttrList);
         selectedAttrEntityMgr.delete(deleteAttrList);
     }
 
-    private Integer getTotalMaxCount(Map<String, Integer> limitationMap) {
-        Integer totalCount = 0;
-        for (String key : limitationMap.keySet()) {
-            totalCount += limitationMap.get(key);
-        }
-        return totalCount;
-    }
-
     @Override
-    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
-            Category category, Boolean onlySelectedAttributes) {
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.LeadEnrichment);
+    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant,
+            String attributeDisplayNameFilter, Category category, Boolean onlySelectedAttributes) {
+        List<ColumnMetadata> allColumns = columnMetadataProxy
+                .columnSelection(Predefined.Enrichment);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
@@ -119,13 +119,15 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
         Map<String, Integer> limitationMap = new HashMap<>();
+        int premiumAttributesLimitation = tenantConfigService
+                .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
-            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes) {
+            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter,
+            Category category, Boolean onlySelectedAttributes) {
         List<String> selectedAttributeNames = new ArrayList<>();
 
         for (SelectedAttribute selectedAttribute : selectedAttributes) {
@@ -148,7 +150,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             }
 
             if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
-                if (!column.getDisplayName().toUpperCase().contains(attributeDisplayNameFilter.toUpperCase())) {
+                if (!column.getDisplayName().toUpperCase()
+                        .contains(attributeDisplayNameFilter.toUpperCase())) {
                     continue;
                 }
             }
@@ -159,8 +162,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         return superimposedList;
     }
 
-    private void addAttrInFinalList(List<String> selectedAttributeNames, List<LeadEnrichmentAttribute> superimposedList,
-            ColumnMetadata column) {
+    private void addAttrInFinalList(List<String> selectedAttributeNames,
+            List<LeadEnrichmentAttribute> superimposedList, ColumnMetadata column) {
         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
         attr.setDisplayName(column.getDisplayName());
         attr.setFieldName(column.getColumnId());
@@ -191,8 +194,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
     }
 
-    private LeadEnrichmentAttribute findEnrichmentAttributeByName(List<LeadEnrichmentAttribute> allAttributes,
-            String selectedAttrStr) {
+    private LeadEnrichmentAttribute findEnrichmentAttributeByName(
+            List<LeadEnrichmentAttribute> allAttributes, String selectedAttrStr) {
         for (LeadEnrichmentAttribute attr : allAttributes) {
             if (attr.getFieldName().equals(selectedAttrStr)) {
                 return attr;
@@ -202,9 +205,18 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         throw new LedpException(LedpCode.LEDP_18114, new String[] { selectedAttrStr });
     }
 
-    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
+    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr,
+            Tenant tenant) {
         SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
         attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
         return attr;
+    }
+
+    private Integer getTotalMaxCount(Map<String, Integer> limitationMap) {
+        Integer totalCount = 0;
+        for (String key : limitationMap.keySet()) {
+            totalCount += limitationMap.get(key);
+        }
+        return totalCount;
     }
 }
