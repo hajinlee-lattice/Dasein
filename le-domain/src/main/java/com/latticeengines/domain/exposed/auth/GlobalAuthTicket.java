@@ -12,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Index;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -30,6 +32,7 @@ public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
 
     @JsonProperty("ticket")
     @Column(name = "Ticket", nullable = false)
+    @Index(name = "IX_Ticket")
     private String ticket;
 
     @JsonProperty("user_id")
