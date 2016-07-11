@@ -40,7 +40,7 @@ public class SamplingPropertyDef implements HasName, HasPid {
     private Long pid;
 
     @Column(name = "NAME", nullable = false)
-    public String name;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "FK_SAMPLING_ID", nullable = false)
@@ -52,8 +52,7 @@ public class SamplingPropertyDef implements HasName, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<SamplingPropertyValue> samplingPropertyValues = new ArrayList<>();
-    
-    
+
     public SamplingPropertyDef() {
     }
 
@@ -88,7 +87,7 @@ public class SamplingPropertyDef implements HasName, HasPid {
     public void setPid(Long pid) {
         this.pid = pid;
     }
-    
+
     public List<SamplingPropertyValue> getSamplingPropertyValues() {
         return samplingPropertyValues;
     }
@@ -96,7 +95,7 @@ public class SamplingPropertyDef implements HasName, HasPid {
     public void setSamplingPropertyValues(List<SamplingPropertyValue> samplingPropertyValues) {
         this.samplingPropertyValues = samplingPropertyValues;
     }
-    
+
     public void addSamplingPropertyValue(SamplingPropertyValue samplingPropertyValue) {
         samplingPropertyValues.add(samplingPropertyValue);
         samplingPropertyValue.setSamplingPropertyDef(this);

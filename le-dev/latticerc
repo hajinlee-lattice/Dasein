@@ -27,6 +27,7 @@ export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
 export SAML_PROPDIR=$WSHOME/le-saml/conf/env/dev
 export MODELQUALITY_PROPDIR=$WSHOME/le-modelquality/conf/env/dev
 export AUTH_PROPDIR=$WSHOME/le-auth/conf/env/dev
+export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 
 export LE_ENVIRONMENT=dev
 export LE_PROPDIR=$WSHOME/le-config/conf/env/dev

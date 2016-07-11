@@ -114,6 +114,7 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     }
 
     @MetricTag(tag = "DataSetType")
+    @JsonIgnore
     public String getDataSetTypeStrValue() {
         return dataSetType.name();
     }
@@ -127,6 +128,7 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     }
 
     @MetricTag(tag = "DataSetSchemaInterpretation")
+    @JsonIgnore
     public String getSchemaInterpretationStrValue() {
         return schemaInterpretation.name();
     }

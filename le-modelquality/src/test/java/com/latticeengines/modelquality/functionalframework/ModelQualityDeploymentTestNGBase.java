@@ -11,7 +11,9 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
@@ -124,8 +126,18 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         sampling.setName("sampling1");
 
         SamplingPropertyDef def = new SamplingPropertyDef();
-        def.setName("name1");
-        SamplingPropertyValue value = new SamplingPropertyValue("value1");
+        def.setName(SamplingFactory.MODEL_SAMPLING_RATE_KEY);
+        SamplingPropertyValue value = new SamplingPropertyValue("100");
+        def.addSamplingPropertyValue(value);
+        sampling.addSamplingPropertyDef(def);
+
+        def.setName(SamplingFactory.MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY);
+        value = new SamplingPropertyValue("80");
+        def.addSamplingPropertyValue(value);
+        sampling.addSamplingPropertyDef(def);
+
+        def.setName(SamplingFactory.MODEL_SAMPLING_TEST_PERCENTAGE_KEY);
+        value = new SamplingPropertyValue("20");
         def.addSamplingPropertyValue(value);
         sampling.addSamplingPropertyDef(def);
 
@@ -137,6 +149,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         dataFlow.setName("dataFlow1");
         dataFlow.setMatch(true);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
+        dataFlow.setDedupType(DedupType.ONELEADPERDOMAIN);
         return dataFlow;
     }
 
@@ -144,16 +157,19 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
 
         Pipeline pipeline = new Pipeline();
         pipeline.setName("Pipeline" + i);
+        pipeline.setPipelineScript("/app/dataplatform/scripts/pipeline/pipeline.py");
+        pipeline.setPipelineLibScript("/app/dataplatform/scripts/lepipeline.tar.gz");
+        pipeline.setPipelineDriver("/app/dataplatform/scripts/pipeline/pipeline.json");
 
         PipelineStep step = new PipelineStep();
-        step.setName("StepName" + i);
-        step.setScript("StepScrip" + i);
+        step.setName("pivotstep");
+        step.setScript("pivotstep.py");
         List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
         PipelinePropertyDef pipelinePropertyDef = new PipelinePropertyDef();
-        pipelinePropertyDef.setName("StepDef" + i);
+        pipelinePropertyDef.setName("minCategoricalCount");
 
         PipelinePropertyValue pipeLinePropertyValue = new PipelinePropertyValue();
-        pipeLinePropertyValue.setValue("PropertyValue" + i);
+        pipeLinePropertyValue.setValue("4");
         pipeLinePropertyValue.setPipelinePropertyDef(pipelinePropertyDef);
         pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
 

@@ -39,6 +39,18 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @JsonProperty("pipeline_script")
+    @Column(name = "PIPELINE_SCRIPT", nullable = true)
+    private String pipelineScript;
+
+    @JsonProperty("pipeline_lib_script")
+    @Column(name = "PIPELINE_LIB_SCRIPT", nullable = true)
+    private String pipelineLibScript;
+
+    @JsonProperty("pipeline_driver")
+    @Column(name = "PIPELINE_DRIVER", nullable = true)
+    private String pipelineDriver;
+
     @JsonProperty("pipeline_steps")
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     @JoinTable(name = "MODELQUALITY_PIPELINE_PIPELINE_STEP", //
@@ -64,6 +76,30 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public String getPipelineScript() {
+        return pipelineScript;
+    }
+
+    public void setPipelineScript(String pipelineScript) {
+        this.pipelineScript = pipelineScript;
+    }
+
+    public String getPipelineLibScript() {
+        return pipelineLibScript;
+    }
+
+    public void setPipelineLibScript(String pipelineLibScript) {
+        this.pipelineLibScript = pipelineLibScript;
+    }
+
+    public String getPipelineDriver() {
+        return pipelineDriver;
+    }
+
+    public void setPipelineDriver(String pipelineDriver) {
+        this.pipelineDriver = pipelineDriver;
     }
 
     public List<PipelineStep> getPipelineSteps() {

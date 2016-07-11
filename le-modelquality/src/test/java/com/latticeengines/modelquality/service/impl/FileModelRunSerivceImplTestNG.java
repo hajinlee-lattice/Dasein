@@ -21,7 +21,7 @@ public class FileModelRunSerivceImplTestNG extends ModelQualityDeploymentTestNGB
         modelRun2 = createModelRun(AlgorithmFactory.ALGORITHM_NAME_LR);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "manual")
     public void run() {
         try {
             modelRunService.run(modelRun1);

@@ -38,6 +38,8 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
+import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
@@ -138,6 +140,8 @@ public class ModelingServiceExecutor {
         samplingConfig.setCustomer(builder.getCustomer());
         samplingConfig.setTable(builder.getTable());
         samplingConfig.setHdfsDirPath(builder.getHdfsDirToSample());
+        SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
+
         AppSubmission submission = modelProxy.createSamples(samplingConfig);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for sampling: %s", appId));
@@ -200,8 +204,7 @@ public class ModelingServiceExecutor {
 
         String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
         if (StringUtils.isNotEmpty(enabledRulesProp)) {
-            algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " "
-                    + enabledRulesProp);
+            algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " " + enabledRulesProp);
         }
 
         ModelDefinition modelDef = new ModelDefinition();
@@ -270,6 +273,7 @@ public class ModelingServiceExecutor {
     private Algorithm getAlgorithm() {
         Algorithm algo = AlgorithmFactory.createAlgorithm(builder.runTimeParams);
         if (algo != null) {
+            PipelineFactory.configPipeline(algo, builder.runTimeParams);
             return algo;
         }
 
@@ -595,7 +599,7 @@ public class ModelingServiceExecutor {
         }
 
         public Builder runTimeParams(Map<String, String> runTimeParams) {
-            this.runTimeParams = runTimeParams ;
+            this.runTimeParams = runTimeParams;
             return this;
         }
 
@@ -921,6 +925,7 @@ public class ModelingServiceExecutor {
         public Map<ArtifactType, String> getMetadataArtifacts() {
             return metadataArtifacts;
         }
+
         public List<DataRule> getDataRules() {
             return dataRules;
         }

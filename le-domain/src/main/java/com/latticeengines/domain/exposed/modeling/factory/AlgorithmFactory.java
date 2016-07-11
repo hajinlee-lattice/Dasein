@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
@@ -18,11 +17,9 @@ import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
-public class AlgorithmFactory {
+public class AlgorithmFactory extends ModelFactory {
 
     private static final Log log = LogFactory.getLog(AlgorithmFactory.class);
-
-    public static final String MODEL_CONFIG = "modelConfig";
 
     public static final String ALGORITHM_NAME_RF = "RF";
     public static final String ALGORITHM_NAME_LR = "LR";
@@ -58,20 +55,11 @@ public class AlgorithmFactory {
     private static com.latticeengines.domain.exposed.modelquality.Algorithm getModelAlgorithm(
             Map<String, String> runTimeParams) {
 
-        if (runTimeParams == null || !runTimeParams.containsKey(MODEL_CONFIG)) {
-            log.info("There's no model config!");
+        SelectedConfig selectedConfig = getModelConfig(runTimeParams);
+        if (selectedConfig == null) {
             return null;
         }
-        try {
-            log.info("Model Config=" + runTimeParams.get(MODEL_CONFIG));
-            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG),
-                    com.latticeengines.domain.exposed.modelquality.SelectedConfig.class);
-            return selectedConfig.getAlgorithm();
-
-        } catch (Exception ex) {
-            log.warn("Failed to create Algorithm!", ex);
-        }
-        return null;
+        return selectedConfig.getAlgorithm();
     }
 
     private static Algorithm createDT(com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
@@ -94,12 +82,11 @@ public class AlgorithmFactory {
 
     private static void configAlgorithm(AlgorithmBase algo,
             com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
-
-        algo.setName(modelAlgo.getName());
-        algo.setSampleName(SAMPLE_NAME);
         if (StringUtils.isNotEmpty(modelAlgo.getScript())) {
             algo.setScript(modelAlgo.getScript());
         }
+        algo.setName(modelAlgo.getName());
+        algo.setSampleName(SAMPLE_NAME);
         List<AlgorithmPropertyDef> defs = modelAlgo.getAlgorithmPropertyDefs();
         if (CollectionUtils.isNotEmpty(defs)) {
             StringBuilder builder = new StringBuilder();
@@ -116,7 +103,7 @@ public class AlgorithmFactory {
                 }
             }
             if (builder.length() > 0) {
-                builder.trimToSize();
+                builder.setLength(builder.length() - 1);
                 algo.setAlgorithmProperties(builder.toString());
             }
         }

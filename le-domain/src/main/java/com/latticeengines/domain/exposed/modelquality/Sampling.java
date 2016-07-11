@@ -39,10 +39,10 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
     private Long pid;
 
     @Column(name = "NAME", nullable = false)
-    public String name;
+    private String name;
 
     @Column(name = "PARALLEL_ENABLED", nullable = false)
-    public boolean parallelEnabled = false;
+    private boolean parallelEnabled = false;
 
     @JsonProperty("sampling_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sampling")
@@ -75,6 +75,14 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    public void setParallelEnabled(boolean parallelEnabled) {
+        this.parallelEnabled = parallelEnabled;
     }
 
     public List<SamplingPropertyDef> getSamplingPropertyDefs() {

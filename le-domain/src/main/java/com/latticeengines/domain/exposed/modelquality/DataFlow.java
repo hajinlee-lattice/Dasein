@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -36,9 +37,21 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @Column(name = "MATCH", nullable = false)
     private Boolean match;
 
+    @JsonProperty("exclude_propdata_columns")
+    @Column(name = "EXCLUDE_PROPDATA_COLUMNS", nullable = true)
+    private boolean excludePropDataColumns = false;
+
     @JsonProperty("transform_group")
-    @Column(name = "TRANSFORM_GROUP", nullable = false)
+    @Column(name = "TRANSFORM_GROUP", nullable = true)
     private TransformationGroup transformationGroup;
+
+    @JsonProperty("transform_dedup_type")
+    @Column(name = "TRANSFORM_DEDUP_TYPE", nullable = true)
+    private DedupType dedupType;
+
+    @JsonProperty("predefined_selection_name")
+    @Column(name = "PREDEFINED_SELECTION_NAME", nullable = true)
+    private String predefinedSelectionName;
 
     public Boolean getMatch() {
         return match;
@@ -52,13 +65,46 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
         return transformationGroup;
     }
 
+    public DedupType getDedupType() {
+        return dedupType;
+    }
+
+    public void setDedupType(DedupType dedupType) {
+        this.dedupType = dedupType;
+    }
+
     public void setTransformationGroup(TransformationGroup transformationGroup) {
         this.transformationGroup = transformationGroup;
     }
 
+    @MetricTag(tag = "ExcludePropDataColumns")
+    public boolean isExcludePropDataColumns() {
+        return excludePropDataColumns;
+    }
+
+    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
+        this.excludePropDataColumns = excludePropDataColumns;
+    }
+
     @MetricTag(tag = "TransformationGroupName")
+    @JsonIgnore
     public String getTransformationGroupStrValue() {
         return transformationGroup.getName();
+    }
+
+    @MetricTag(tag = "DedupType")
+    @JsonIgnore
+    public String getDedupTypeStrValue() {
+        return dedupType.name();
+    }
+
+    @MetricTag(tag = "PredefinedSelectionName")
+    public String getPredefinedSelectionName() {
+        return predefinedSelectionName;
+    }
+
+    public void setPredefinedSelectionName(String predefinedSelectionName) {
+        this.predefinedSelectionName = predefinedSelectionName;
     }
 
     @Override

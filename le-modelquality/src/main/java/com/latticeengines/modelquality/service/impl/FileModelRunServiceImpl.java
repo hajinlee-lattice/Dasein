@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -129,17 +130,23 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     private String createModel(SelectedConfig config, SourceFile sourceFile) {
         ModelingParameters parameters = new ModelingParameters();
+        parameters.setName("SelfServiceModelingByModelQuality" + DateTime.now().getMillis());
+        parameters.setDescription("SelfServiceModelingByModelQuality");
+        parameters.setFilename(sourceFile.getName());
+        String modelName = parameters.getName();
+
+        configModelingParams(config, parameters);
+        model(parameters);
+        return modelName;
+    }
+
+    private void configModelingParams(SelectedConfig config, ModelingParameters parameters) {
         String configJson = JsonUtils.serialize(config);
         Map<String, String> runTimeParams = new HashMap<>();
         runTimeParams.put(AlgorithmFactory.MODEL_CONFIG, configJson);
         parameters.setRunTimeParams(runTimeParams);
 
-        parameters.setName("SelfServiceModelingByModelQuality" + DateTime.now().getMillis());
-        parameters.setDescription("SelfServiceModelingByModelQuality");
-        parameters.setFilename(sourceFile.getName());
-        String modelName = parameters.getName();
-        model(parameters);
-        return modelName;
+        DataFlowFactory.configDataFlow(config, parameters);
     }
 
     @SuppressWarnings("rawtypes")
@@ -154,6 +161,9 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         log.info("Job Status=" + completedStatus.toString());
+        if (completedStatus != JobStatus.COMPLETED) {
+            throw new RuntimeException("Job was not completed! application id=" + modelingWorkflowApplicationId);
+        }
     }
 
     public ModelSummary retrieveModelSummary(String modelName) {
