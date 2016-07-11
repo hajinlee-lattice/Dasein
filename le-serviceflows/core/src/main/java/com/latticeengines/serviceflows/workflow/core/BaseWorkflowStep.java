@@ -145,14 +145,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             ModelStepConfiguration modelStepConfiguration, Table eventTable) {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
-        if (StringUtils.isNotEmpty(modelStepConfiguration.getPivotArtifactPath())) {
-            try {
-                PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration,
-                        modelStepConfiguration.getPivotArtifactPath());
-                metadataContents = ModelingUtils.addPivotValuesToMetadataContent(eventTable.getModelingMetadata(), pivotValues);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_00002, e);
-            }
+        try {
+            PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration,
+                    modelStepConfiguration.getPivotArtifactPath());
+            metadataContents = ModelingUtils.addPivotValuesToMetadataContent(eventTable.getModelingMetadata(),
+                    pivotValues);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
         }
 
         String dataCompositionContents = getDataCompositionContents(eventTable);

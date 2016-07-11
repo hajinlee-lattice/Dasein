@@ -112,7 +112,7 @@ public class ModelResource {
     @ApiOperation(value = "Generate a PMML model from the supplied module. Returns the job id.")
     public ResponseDocument<String> modelForPmml(@PathVariable String modelName, //
             @RequestParam(value = "module") String moduleName, //
-            @RequestParam(value = "pivotfile") String pivotFileName, //
+            @RequestParam(value = "pivotfile", required = false) String pivotFileName, //
             @RequestParam(value = "pmmlfile") String pmmlFileName) {
         if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);

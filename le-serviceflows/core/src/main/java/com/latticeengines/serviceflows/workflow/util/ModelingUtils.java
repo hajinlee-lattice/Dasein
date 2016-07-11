@@ -12,6 +12,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.base.Predicate;
@@ -32,42 +33,44 @@ public class ModelingUtils {
         Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = new HashMap<>();
         Map<String, UserDefinedType> sourceColumnTypes = new HashMap<>();
 
-        try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
-                pivotArtifactPath)), "UTF-8")) {
-            try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
-                for (CSVRecord record : parser) {
-                    String targetColumn = record.get("TargetColumn");
-                    String sourceColumn = record.get("SourceColumn");
-                    String value = record.get("Value");
-                    String sourceColumnType = record.get("SourceColumnType");
+        if (StringUtils.isNotEmpty(pivotArtifactPath)) {
+            try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
+                    pivotArtifactPath)), "UTF-8")) {
+                try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
+                    for (CSVRecord record : parser) {
+                        String targetColumn = record.get("TargetColumn");
+                        String sourceColumn = record.get("SourceColumn");
+                        String value = record.get("Value");
+                        String sourceColumnType = record.get("SourceColumnType");
 
-                    UserDefinedType userType = UserDefinedType.valueOf(sourceColumnType);
+                        UserDefinedType userType = UserDefinedType.valueOf(sourceColumnType);
 
-                    if (userType == null) {
-                        throw new RuntimeException(String.format("User type %s is not an accepted type.",
-                                sourceColumnType));
+                        if (userType == null) {
+                            throw new RuntimeException(String.format("User type %s is not an accepted type.",
+                                    sourceColumnType));
+                        }
+                        sourceColumnTypes.put(sourceColumn, userType);
+
+                        Map.Entry<String, List<String>> p = pivotValuesByTargetColumn.get(targetColumn);
+                        List<AbstractMap.Entry<String, String>> s = pivotValuesBySourceColumn.get(sourceColumn);
+                        if (p == null) {
+                            List<String> l = new ArrayList<>();
+                            l.add(value);
+                            p = new AbstractMap.SimpleEntry<String, List<String>>(sourceColumn, l);
+                            pivotValuesByTargetColumn.put(targetColumn, p);
+                        } else {
+                            p.getValue().add(value);
+                        }
+
+                        if (s == null) {
+                            s = new ArrayList<>();
+                            pivotValuesBySourceColumn.put(sourceColumn, s);
+                        }
+                        s.add(new AbstractMap.SimpleEntry<String, String>(targetColumn, value));
                     }
-                    sourceColumnTypes.put(sourceColumn, userType);
-
-                    Map.Entry<String, List<String>> p = pivotValuesByTargetColumn.get(targetColumn);
-                    List<AbstractMap.Entry<String, String>> s = pivotValuesBySourceColumn.get(sourceColumn);
-                    if (p == null) {
-                        List<String> l = new ArrayList<>();
-                        l.add(value);
-                        p = new AbstractMap.SimpleEntry<String, List<String>>(sourceColumn, l);
-                        pivotValuesByTargetColumn.put(targetColumn, p);
-                    } else {
-                        p.getValue().add(value);
-                    }
-
-                    if (s == null) {
-                        s = new ArrayList<>();
-                        pivotValuesBySourceColumn.put(sourceColumn, s);
-                    }
-                    s.add(new AbstractMap.SimpleEntry<String, String>(targetColumn, value));
                 }
-            }
 
+            }
         }
         return new PivotValuesLookup(pivotValuesByTargetColumn, pivotValuesBySourceColumn, sourceColumnTypes);
     }

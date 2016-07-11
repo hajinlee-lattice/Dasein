@@ -7,7 +7,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.transform.sax.SAXSource;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.DataDictionary;
@@ -75,6 +78,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             executor.writeDataFiles();
             executor.model();
         } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_28019, new String[] { configuration.getPmmlArtifactPath() });
         }
     }
@@ -299,17 +303,17 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
     // new version of JPMML
     private FieldType getFieldType(DataType pmmlDataType) {
         switch (pmmlDataType.toString()) {
-            case "BOOLEAN":
-                return FieldType.BOOLEAN;
-            case "STRING":
-                return FieldType.STRING;
-            case "INTEGER":
-                return FieldType.INTEGER;
-            case "DOUBLE":
-            case "FLOAT":
-                return FieldType.FLOAT;
-            default:
-                return FieldType.STRING;
+        case "BOOLEAN":
+            return FieldType.BOOLEAN;
+        case "STRING":
+            return FieldType.STRING;
+        case "INTEGER":
+            return FieldType.INTEGER;
+        case "DOUBLE":
+        case "FLOAT":
+            return FieldType.FLOAT;
+        default:
+            return FieldType.STRING;
         }
     }
 
