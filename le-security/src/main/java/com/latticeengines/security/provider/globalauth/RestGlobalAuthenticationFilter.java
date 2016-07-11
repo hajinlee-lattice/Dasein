@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
@@ -24,12 +25,17 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        if (ticket == null) {
-            throw new BadCredentialsException("Unauthorized.");
+
+        String methodName = String.format("RestGlobalAuthenticationFilter.attemptAuthentication [%s]",
+                request.getRequestURL());
+        try (PerformanceTimer timer = new PerformanceTimer(methodName)) {
+            String ticket = request.getHeader(Constants.AUTHORIZATION);
+            if (ticket == null) {
+                throw new BadCredentialsException("Unauthorized.");
+            }
+            TicketAuthenticationToken authRequest = new TicketAuthenticationToken(null, ticket);
+            return this.getAuthenticationManager().authenticate(authRequest);
         }
-        TicketAuthenticationToken authRequest = new TicketAuthenticationToken(null, ticket);
-        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
     @SuppressWarnings("deprecation")
@@ -37,7 +43,6 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
         boolean retVal = false;
         String ticket = request.getHeader(Constants.AUTHORIZATION);
-
         if (ticket != null) {
             Authentication authResult = null;
             try {

@@ -23,7 +23,8 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
         String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
 
         String user = MultiTenantContext.getEmailAddress();
-        return metrics + String.format(" User=%s", user);
+        String tenant = MultiTenantContext.isContextSet() ? MultiTenantContext.getTenant().getId() : "<not set>";
+        return metrics + String.format(" User=%s Tenant=%s", user, tenant);
     }
 
     @Override
