@@ -17,6 +17,8 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.latticeengines.db.exposed.schemagen.postprocess.PostProcessor;
+import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcessor;
 
 public class SchemaGenerator {
 
@@ -25,6 +27,7 @@ public class SchemaGenerator {
     private Configuration cfg;
     private String schemaName = "";
     private DBDialect dialect;
+    private PostProcessor postProcessor;
 
     /**
      * an new instance is only good for one dialect. It seems that Hibernate
@@ -35,9 +38,11 @@ public class SchemaGenerator {
      *            - specific packages, not sub-package
      * @throws Exception
      */
-    public SchemaGenerator(String name, DBDialect dialect, String... packages) throws Exception {
+    public SchemaGenerator(String name, DBDialect dialect, PostProcessor postProcessor, String... packages)
+            throws Exception {
         cfg = new Configuration();
         this.dialect = dialect;
+        this.postProcessor = postProcessor;
         init(name, packages);
         log.info("SchemaGenerator " + name + " for " + dialect + " dialect");
     }
@@ -93,12 +98,16 @@ public class SchemaGenerator {
     public File generateToScript() throws IOException {
         String exportFileName = "ddl_" + schemaName.toLowerCase() + "_" + dialect.name().toLowerCase() + ".sql";
         generate(exportFileName, true, false);
+        postProcess(exportFileName);
 
         return new File(exportFileName);
     }
 
-    public void generateToDatabase() {
-        generate(null, false, true);
+    private void postProcess(String exportFileName) {
+        File file = new File(exportFileName);
+        if (postProcessor != null) {
+            postProcessor.process(file);
+        }
     }
 
     public void appendStaticSql(File exportFile, DBDialect dbDialect) throws IOException {
@@ -113,8 +122,8 @@ public class SchemaGenerator {
         default:
             break;
         }
-        Iterable<File> iterable = Files.fileTreeTraverser()
-                .children(new File("src/main/resources/staticsql/" + leafFolder));
+        Iterable<File> iterable = Files.fileTreeTraverser().children(
+                new File("src/main/resources/staticsql/" + leafFolder));
         for (File f : iterable) {
             if (f.getName().equals(".svn") || f.isDirectory()) {
                 continue;
@@ -156,13 +165,14 @@ public class SchemaGenerator {
             packages[j++] = args[i];
         }
 
-        SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL, packages);
+        SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL, null, packages);
         File mysqlExportFile = mysqlGenerator.generateToScript();
 
-        SchemaGenerator mysql5Generator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
+        SchemaGenerator mysql5Generator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, null, packages);
         File mysql5ExportFile = mysql5Generator.generateToScript();
 
-        SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
+        SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER,
+                new SQLServerPostProcessor(), packages);
         File sqlServerExportFile = sqlServerGenerator.generateToScript();
 
         if (withStaticSql) {
@@ -228,8 +238,8 @@ public class SchemaGenerator {
                             // only process specific package, not sub-package
                             if (!jarEntry.isDirectory() && jarPackage.equalsIgnoreCase(packageName.replace('.', '/'))) {
                                 // remove .class extension
-                                String fullyClassname = jarEntry.getName().substring(0,
-                                        jarEntry.getName().length() - 6);
+                                String fullyClassname = jarEntry.getName()
+                                        .substring(0, jarEntry.getName().length() - 6);
                                 classes.add(Class.forName(fullyClassname.replace('/', '.')));
                                 if (log.isDebugEnabled()) {
                                     log.debug("adding class: " + fullyClassname);
@@ -243,8 +253,7 @@ public class SchemaGenerator {
                 }
             }
         } catch (NullPointerException x) {
-            throw new ClassNotFoundException(
-                    packageName + " (" + directory + ") does not appear to be a valid package");
+            throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
         }
 
         return classes;
