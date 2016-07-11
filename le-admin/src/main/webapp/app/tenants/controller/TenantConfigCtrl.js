@@ -386,8 +386,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
              return false;
          } else if ($scope.LPA3isSelected) {
              var atLeastOneSourceFeatureFlagIsChecked = true;
-             if ($scope.featureFlags["UseSalesforceSettings"] == false && $scope.featureFlags["UseMarketoSettings"] == false && 
-                     $scope.featureFlags["UseEloquaSettings"] == false ) {
+             if ($scope.featureFlags.UseSalesforceSettings === false && $scope.featureFlags.UseMarketoSettings === false && 
+                     $scope.featureFlags.UseEloquaSettings === false ) {
                  atLeastOneSourceFeatureFlagIsChecked = false;
              }
              if (!atLeastOneSourceFeatureFlagIsChecked) {
@@ -518,8 +518,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
     
     function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings"
-            || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings") {
+        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings" || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings") {
             return true;
         }
         if (!featureFlag.Configurable) {
