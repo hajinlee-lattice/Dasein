@@ -58,11 +58,13 @@ public class EnrichmentResource {
             method = RequestMethod.PUT, //
             headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Save attributes")
+    @ApiOperation(value = "Save lead enrichment selection")
     public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
+            @ApiParam(value = "Update lead enrichment selection", required = true) //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request));
+        selectedAttrService.save(attributes, tenant,
+                getLeadEnrichmentPremiumAttributesLimitation(request));
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //
@@ -84,7 +86,8 @@ public class EnrichmentResource {
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
                 onlySelectedAttributes);
     }
@@ -94,7 +97,8 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(
+            HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }

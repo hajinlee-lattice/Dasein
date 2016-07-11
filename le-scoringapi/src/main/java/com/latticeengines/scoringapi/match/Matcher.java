@@ -19,6 +19,7 @@ public interface Matcher {
     Map<RecordModelTuple, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList);
+            List<ModelSummary> originalOrderModelSummaryList, //
+            boolean forEnrichment);
 
 }

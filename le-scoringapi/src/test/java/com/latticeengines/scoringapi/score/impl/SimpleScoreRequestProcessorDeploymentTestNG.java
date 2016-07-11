@@ -26,7 +26,8 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
-public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
+public class SimpleScoreRequestProcessorDeploymentTestNG
+        extends ScoringResourceDeploymentTestNGBase {
     private static final int MAX_RECORD_COUNT = 19; // prime number for better
                                                     // distribution of models
     private ScoreRequestProcessor scoreRequestProcessor;
@@ -43,9 +44,11 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     private List<ModelSummary> originalOrderModelSummaryList;
     private Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap;
     private Map<String, Map<String, Predefined>> recordModelIdSelectionMap;
+    private Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap;
 
     public void init() throws IOException {
-        scoreRequestProcessor = applicationContext.getBean("customScoreRequestProcessor", ScoreRequestProcessor.class);
+        scoreRequestProcessor = applicationContext.getBean("customScoreRequestProcessor",
+                ScoreRequestProcessor.class);
         scoreRequestProcessorImpl = (ScoreRequestProcessorImpl) scoreRequestProcessor;
         modelList = createModelList();
     }
@@ -70,13 +73,13 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
             Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
 
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                modelIdSelectionMap.put(modelId,
-                        uniqueScoringArtifactsMap.get(modelId).getModelSummary().getPredefinedSelection());
+                modelIdSelectionMap.put(modelId, uniqueScoringArtifactsMap.get(modelId)
+                        .getModelSummary().getPredefinedSelection());
             }
 
             recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
         }
-
+        unorderedLeadEnrichmentMap = new HashMap<>();
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -85,7 +88,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
         CustomerSpace space = ScoringApiControllerDeploymentTestNGBase.customerSpace;
-        scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
+        scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap,
+                uniqueFieldSchemasMap);
         Assert.assertEquals(MAX_RECORD_COUNT, records.size());
         Assert.assertEquals(modelList.size(), uniqueScoringArtifactsMap.size());
         Assert.assertEquals(modelList.size(), uniqueFieldSchemasMap.size());
@@ -94,16 +98,18 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
     public void testCheckForMissingFields() throws IOException {
-        originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
-                uniqueFieldSchemasMap, request);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderParsedTupleList.size());
+        originalOrderParsedTupleList = scoreRequestProcessorImpl
+                .checkForMissingFields(uniqueScoringArtifactsMap, uniqueFieldSchemasMap, request);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                originalOrderParsedTupleList.size());
 
         int idx = 0;
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
             Record record = request.getRecords().get(idx / RECORD_MODEL_CARDINALITY);
             Assert.assertEquals(record, tuple.getRecord());
 
-            Assert.assertEquals(RECORD_MODEL_CARDINALITY, record.getModelAttributeValuesMap().size());
+            Assert.assertEquals(RECORD_MODEL_CARDINALITY,
+                    record.getModelAttributeValuesMap().size());
 
             boolean foundModelIdMatch = false;
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
@@ -121,24 +127,27 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     public void testExtractParsedList() {
         partiallyOrderedParsedTupleList = new ArrayList<>();
         partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
-        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
-                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList);
+        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList,
+                uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList,
+                partiallyOrderedPmmlParsedRecordList);
 
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractParsedList" })
     public void testExtractModelSummaries() {
-        originalOrderModelSummaryList = scoreRequestProcessorImpl.extractModelSummaries(originalOrderParsedTupleList,
-                uniqueScoringArtifactsMap);
+        originalOrderModelSummaryList = scoreRequestProcessorImpl
+                .extractModelSummaries(originalOrderParsedTupleList, uniqueScoringArtifactsMap);
         Assert.assertNotNull(originalOrderModelSummaryList);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderModelSummaryList.size());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                originalOrderModelSummaryList.size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
     public void testBulkMatchAndJoin() {
         unorderedMatchedRecordMap = simulateBulkMatchAndJoin();
         Assert.assertNotNull(unorderedMatchedRecordMap);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedMatchedRecordMap.size());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                unorderedMatchedRecordMap.size());
 
         checkMatchedResults();
     }
@@ -159,7 +168,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         unorderedCombinedRecordMap = new HashMap<>();
         unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
         Assert.assertNotNull(unorderedCombinedRecordMap);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedCombinedRecordMap.size());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                unorderedCombinedRecordMap.size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testAddMissingFields" })
@@ -168,13 +178,15 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
                 unorderedCombinedRecordMap, originalOrderParsedTupleList);
 
         Assert.assertNotNull(unorderedTransformedRecords);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedTransformedRecords.size());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                unorderedTransformedRecords.size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testTransform" })
     public void testGenerateDebugScoreResponse() {
-        List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl.generateDebugScoreResponse(
-                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
+        List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl
+                .generateDebugScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
+                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
 
         Assert.assertNotNull(recordScoreResponseDebugList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
@@ -183,10 +195,12 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGenerateDebugScoreResponse" })
     public void testGenerateScoreResponse() {
-        List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl.generateScoreResponse(
-                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList);
+        List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl
+                .generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
+                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
 
         Assert.assertNotNull(recordScoreResponseList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
@@ -194,7 +208,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         checkScoreResultList(recordScoreResponseList, false);
     }
 
-    private void checkScoreResultList(List<RecordScoreResponse> recordScoreResponseList, boolean isDebug) {
+    private void checkScoreResultList(List<RecordScoreResponse> recordScoreResponseList,
+            boolean isDebug) {
         for (RecordScoreResponse recordScoreResponse : recordScoreResponseList) {
             if (isDebug) {
                 DebugRecordScoreResponse debugResponse = (DebugRecordScoreResponse) recordScoreResponse;
@@ -233,8 +248,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
                 Assert.assertNotNull(matchedResult);
                 String modelId = tuple.getModelId();
 
-                Predefined columnSelection = uniqueScoringArtifactsMap.get(modelId).getModelSummary()
-                        .getPredefinedSelection();
+                Predefined columnSelection = uniqueScoringArtifactsMap.get(modelId)
+                        .getModelSummary().getPredefinedSelection();
 
                 Assert.assertEquals(modelIdSelectionMap.get(modelId), columnSelection);
             }

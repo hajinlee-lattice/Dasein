@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
@@ -170,4 +171,9 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return attributeList;
     }
 
+    public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+           LeadEnrichmentAttributesOperationMap attributes) {
+        String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
+        restTemplate.put(url, attributes);
+    }
 }

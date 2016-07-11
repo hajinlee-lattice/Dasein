@@ -26,6 +26,7 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
             throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
         InternalResourceRestApiProxy plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
+        saveAttributeSelection(customerSpace);
         runScoringTest(url, plsRest, modelName, customerSpace, pmmlTenant, true, true);
     }
 
