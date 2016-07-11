@@ -63,7 +63,7 @@
     </property>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>0.0.0.0</value>
+        <value>localhost</value>
     </property>
     <property>
         <name>yarn.resourcemanager.admin.address</name>
@@ -84,10 +84,6 @@
     <property>
         <name>yarn.resourcemanager.webapp.address</name>
         <value>${yarn.resourcemanager.hostname}:8088</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.hostname</name>
-        <value>0.0.0.0</value>
     </property>
     <property>
         <name>yarn.nodemanager.address</name>
