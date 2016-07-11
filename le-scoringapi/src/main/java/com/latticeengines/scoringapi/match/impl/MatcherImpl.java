@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
@@ -71,8 +72,15 @@ public class MatcherImpl implements Matcher {
     private MatchInput buildMatchInput(CustomerSpace space, //
             InterpretedFields interpreted, //
             Map<String, Object> record, //
-            ModelSummary modelSummary) {
-        return buildMatchInput(space, interpreted, record, modelSummary, null);
+            ModelSummary modelSummary, //
+            boolean forEnrichment) {
+        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
+        if (forEnrichment) {
+            selectedLeadEnrichmentAttributes = internalResourceRestApiProxy
+                    .getLeadEnrichmentAttributes(space, null, null, true);
+        }
+        return buildMatchInput(space, interpreted, record, modelSummary,
+                selectedLeadEnrichmentAttributes);
     }
 
     private MatchInput buildMatchInput(CustomerSpace space, //
@@ -145,8 +153,10 @@ public class MatcherImpl implements Matcher {
             InterpretedFields interpreted, //
             Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record, //
-            ModelSummary modelSummary) {
-        MatchInput matchInput = buildMatchInput(space, interpreted, record, modelSummary);
+            ModelSummary modelSummary, //
+            boolean forEnrichment) {
+        MatchInput matchInput = buildMatchInput(space, interpreted, record, modelSummary,
+                forEnrichment);
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
@@ -156,6 +166,21 @@ public class MatcherImpl implements Matcher {
         }
 
         getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput);
+
+        if (forEnrichment) {
+            Map<String, Object> enrichmentData = new HashMap<>();
+            if (matchInput.getCustomSelection() != null
+                    && matchInput.getCustomSelection().getColumnNames() != null) {
+                for (Column attr : matchInput.getCustomSelection().getColumns()) {
+                    if (record.containsKey(attr.getExternalColumnId())) {
+                        enrichmentData.put(attr.getExternalColumnId(),
+                                record.get(attr.getExternalColumnId()));
+                    }
+                }
+            }
+            record = enrichmentData;
+        }
+
         return record;
     }
 
@@ -278,7 +303,8 @@ public class MatcherImpl implements Matcher {
             } else {
                 matchInputList
                         .add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
-                                recordModelTuple.getParsedData().getKey(), modelSummary));
+                                recordModelTuple.getParsedData().getKey(), modelSummary,
+                                selectedLeadEnrichmentAttributes));
             }
         }
         return bulkInput;

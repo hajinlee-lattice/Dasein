@@ -122,18 +122,32 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         split("parseRecord");
 
         Map<String, Object> readyToTransformRecord = null;
+        Map<String, Object> enrichmentAttributes = null;
 
         if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
             Map<String, Object> matchedRecord = matcher.matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
-                    parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary());
+                    parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
+                    false);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
+
+            if (request.isPerformEnrichment()) {
+                enrichmentAttributes = matcher.matchAndJoin(space,
+                        parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
+                        parsedRecordAndInterpretedFields.getKey(),
+                        scoringArtifacts.getModelSummary(), true);
+            }
         } else {
             Map<String, Object> formattedPmmlRecord = parsedRecordAndInterpretedFields.getKey();
             addMissingFields(fieldSchemas, formattedPmmlRecord);
             readyToTransformRecord = formattedPmmlRecord;
         }
+
+        if (enrichmentAttributes == null) {
+            enrichmentAttributes = new HashMap<>();
+        }
+
         split("matchRecord");
 
         Map<String, Object> transformedRecord = transform(scoringArtifacts, readyToTransformRecord);
@@ -147,6 +161,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts,
                     transformedRecord);
         }
+        scoreResponse.setEnrichmentAttributeValues(enrichmentAttributes);
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
         scoreHistoryEntityMgr.publish(request, scoreResponse);

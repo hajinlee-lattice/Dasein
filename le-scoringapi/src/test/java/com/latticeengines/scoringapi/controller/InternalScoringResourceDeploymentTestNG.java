@@ -91,6 +91,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
                 customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
+        Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -102,6 +104,40 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
         Assert.assertTrue(difference < 0.1);
+        Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
+        Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void scoreRecordWithEnrichment() throws IOException {
+        ScoreRequest scoreRequest = getScoreRequest();
+        scoreRequest.setModelId(MODEL_ID);
+        scoreRequest.setPerformEnrichment(true);
+        ObjectMapper om = new ObjectMapper();
+        System.out.println(om.writeValueAsString(scoreRequest));
+        ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
+                customerSpace.toString());
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
+        System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
+                + scoreResponse.getEnrichmentAttributeValues().size());
+        Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void scoreDebugRecordWithEnrichment() throws IOException {
+        ScoreRequest scoreRequest = getScoreRequest();
+        scoreRequest.setModelId(MODEL_ID);
+        scoreRequest.setPerformEnrichment(true);
+        DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
+        Assert.assertTrue(difference < 0.1);
+        Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
+        System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
+                + scoreResponse.getEnrichmentAttributeValues().size());
+        Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
     }
 
     @Test(groups = "deployment", enabled = true)

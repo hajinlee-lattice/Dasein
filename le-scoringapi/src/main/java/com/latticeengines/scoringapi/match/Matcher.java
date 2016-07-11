@@ -14,7 +14,8 @@ public interface Matcher {
     Map<String, Object> matchAndJoin(CustomerSpace space, //
             InterpretedFields interpreted, //
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
-            ModelSummary modelSummary);
+            ModelSummary modelSummary, //
+            boolean forEnrichment);
 
     Map<RecordModelTuple, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
