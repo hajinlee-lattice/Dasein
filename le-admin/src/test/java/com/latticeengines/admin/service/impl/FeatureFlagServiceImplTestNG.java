@@ -45,35 +45,80 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 + PlsFeatureFlag.values().length, "Should have at most LatticeFeatureFlags and PlsFeatureFlags");
         FeatureFlagDefinition danteFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.DANTE.getName());
         Assert.assertNotNull(danteFeatureFlag);
+
         FeatureFlagDefinition quotaFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.QUOTA.getName());
         Assert.assertNotNull(quotaFeatureFlag);
+
         FeatureFlagDefinition targetMarketFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.TARGET_MARKET
                 .getName());
         Assert.assertNotNull(targetMarketFeatureFlag);
+
         FeatureFlagDefinition createDefaultFeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         Assert.assertNotNull(createDefaultFeatureFlag);
+
         FeatureFlagDefinition enablePocTransformFeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName());
         Assert.assertNotNull(enablePocTransformFeatureFlag);
+
+        FeatureFlagDefinition useSalesforceSettingsFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.USE_SALESFORCE_SETTINGS.getName());
+        Assert.assertNotNull(useSalesforceSettingsFeatureFlag);
+
+        FeatureFlagDefinition useMarketoSettingsFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.USE_MARKETO_SETTINGS.getName());
+        Assert.assertNotNull(useMarketoSettingsFeatureFlag);
+
+        FeatureFlagDefinition useEloquaSettingsFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName());
+        Assert.assertNotNull(useEloquaSettingsFeatureFlag);
+
+        FeatureFlagDefinition allowPivotFileProdSetFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName());
+        Assert.assertNotNull(allowPivotFileProdSetFeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
+
         Assert.assertTrue(!quotaFeatureFlag.getConfigurable()
                 && quotaFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
                 && quotaFeatureFlag.getDisplayName() != null && quotaFeatureFlag.getDocumentation() != null);
+
         Assert.assertTrue(!targetMarketFeatureFlag.getConfigurable()
                 && targetMarketFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
                 && targetMarketFeatureFlag.getDisplayName() != null
                 && targetMarketFeatureFlag.getDocumentation() != null);
+
         Assert.assertTrue(!createDefaultFeatureFlag.getConfigurable()
                 && createDefaultFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
                 && createDefaultFeatureFlag.getDisplayName() != null
                 && createDefaultFeatureFlag.getDocumentation() != null);
+
         Assert.assertTrue(enablePocTransformFeatureFlag.getConfigurable()
                 && enablePocTransformFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enablePocTransformFeatureFlag.getDisplayName() != null
                 && enablePocTransformFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(useSalesforceSettingsFeatureFlag.getConfigurable()
+                && useSalesforceSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && useSalesforceSettingsFeatureFlag.getDisplayName() != null
+                && useSalesforceSettingsFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(useMarketoSettingsFeatureFlag.getConfigurable()
+                && useMarketoSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && useMarketoSettingsFeatureFlag.getDisplayName() != null
+                && useMarketoSettingsFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(useEloquaSettingsFeatureFlag.getConfigurable()
+                && useEloquaSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && useEloquaSettingsFeatureFlag.getDisplayName() != null
+                && useEloquaSettingsFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(allowPivotFileProdSetFeatureFlag.getConfigurable()
+                && allowPivotFileProdSetFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && allowPivotFileProdSetFeatureFlag.getDisplayName() != null
+                && allowPivotFileProdSetFeatureFlag.getDocumentation() != null);
 
     }
 
@@ -146,7 +191,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                     + "only has something to do with the UI in tenant console");
         }
         flags = featureFlagService.getFlags(TestTenantId);
-        Assert.assertTrue(flags.containsKey(FLAG_ID), "TestFlag should have been set.");
+        Assert.assertTrue(flags.containsKey(FLAG_ID), "TestFlag should be defined.");
+        Assert.assertTrue(flags.get(FLAG_ID), "TestFlag should have been set.");
     }
 
 }

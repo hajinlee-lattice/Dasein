@@ -101,7 +101,7 @@
             </form>
             <br>
             <h4>Feature Flags</h4>
-            <div ng-repeat="featureFlag in selectedFeatureFlags">
+            <div ng-repeat="featureFlag in selectedFeatureFlags | orderBy:'-DisplayName'">
                 <feature-flag show={{!featureFlag.Configurable}} flag="featureFlag.Value" name={{featureFlag.DisplayName}} readonly="readonly"></feature-flag>
             </div>
 

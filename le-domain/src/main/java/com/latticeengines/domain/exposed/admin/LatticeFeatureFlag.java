@@ -11,7 +11,11 @@ public enum LatticeFeatureFlag {
     QUOTA("Quota", "Quota"), //
     TARGET_MARKET("TargetMarket", "Target Market"), //
     USE_EAI_VALIDATE_CREDENTIAL("ValidateCredsUsingEai", "Use Eai to valiate source credentials"), //
-    ENABLE_POC_TRANSFORM("EnablePocTransform", "enable POC in data transform");
+    ENABLE_POC_TRANSFORM("EnablePocTransform", "Enable POC in data transform"), //
+    USE_SALESFORCE_SETTINGS("UseSalesforceSettings", "Use Salesforce settings"), //
+    USE_MARKETO_SETTINGS("UseMarketoSettings", "Use Marketo settings"), //
+    USE_ELOQUA_SETTINGS("UseEloquaSettings", "Use Eloqua settings"), //
+    ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file");
 
     private String name;
     private String documentation;

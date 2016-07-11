@@ -106,6 +106,15 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         verifySourceCredentialProdSet.add(LatticeProduct.PD);
         Set<LatticeProduct> enablePocTransformProdSet = new HashSet<LatticeProduct>();
         enablePocTransformProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> useSalesforceSettingsProdSet = new HashSet<LatticeProduct>();
+        useSalesforceSettingsProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> useMarketoSettingsProdSet = new HashSet<LatticeProduct>();
+        useMarketoSettingsProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> useEloquaSettingsProdSet = new HashSet<LatticeProduct>();
+        useEloquaSettingsProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> allowPivotFileProdSet = new HashSet<LatticeProduct>();
+        allowPivotFileProdSet.add(LatticeProduct.LPA3);
+
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
         FeatureFlagDefinition quotaFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA.getName(),
@@ -119,6 +128,19 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition enablePocTransformFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName(),
                 LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getDocumentation(), enablePocTransformProdSet, true);
+        FeatureFlagDefinition useSalesforceSettingsFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.USE_SALESFORCE_SETTINGS.getName(),
+                LatticeFeatureFlag.USE_SALESFORCE_SETTINGS.getDocumentation(), useMarketoSettingsProdSet, true);
+        FeatureFlagDefinition useMarketoSettingsFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.USE_MARKETO_SETTINGS.getName(),
+                LatticeFeatureFlag.USE_MARKETO_SETTINGS.getDocumentation(), useMarketoSettingsProdSet, true);
+        FeatureFlagDefinition useEloquaSettingsFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName(),
+                LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getDocumentation(), useEloquaSettingsProdSet, true);
+        FeatureFlagDefinition allowPivotFileProdSetFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), LatticeFeatureFlag.ALLOW_PIVOT_FILE.getDocumentation(),
+                allowPivotFileProdSet, true);
+
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.TARGET_MARKET.getName(), targetMarketFeatureFlag);
@@ -126,6 +148,13 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 verifySourceCredentialFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName(),
                 enablePocTransformFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_SALESFORCE_SETTINGS.getName(),
+                useSalesforceSettingsFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_MARKETO_SETTINGS.getName(),
+                useMarketoSettingsFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName(), useEloquaSettingsFeatureFlag);
+        FeatureFlagClient
+                .setDefinition(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), allowPivotFileProdSetFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,

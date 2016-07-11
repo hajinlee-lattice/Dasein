@@ -47,6 +47,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.selectedFeatureFlags = [];
     $scope.selectedComponents = [];
     $scope.twoLPsAreSelected = false;
+    $scope.LPA3isSelected = false;
     updateAvailableProducts();
     updateSpaceConfigurationOptions();
     getAvailableFeatureFlags();
@@ -144,6 +145,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             if (selectedProducts[i].name === ( "Lead Prioritization")) {
                 LPASelected = true;
                 selectedLPAnum += 1;
+            } else if (selectedProducts[i].name === ( "Lead Prioritization 3.0")) {
+                selectedLPAnum += 1;
+                $scope.LPA3isSelected = true;
             }
         }
         if (selectedLPAnum == 2) {
@@ -380,6 +384,16 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
          if ($scope.twoLPsAreSelected) {
              alert("Cannot choose two LPA products at the same time!");
              return false;
+         } else if ($scope.LPA3isSelected) {
+             var atLeastOneSourceFeatureFlagIsChecked = true;
+             if ($scope.featureFlags["UseSalesforceSettings"] == false && $scope.featureFlags["UseMarketoSettings"] == false && 
+                     $scope.featureFlags["UseEloquaSettings"] == false ) {
+                 atLeastOneSourceFeatureFlagIsChecked = false;
+             }
+             if (!atLeastOneSourceFeatureFlagIsChecked) {
+                 alert("At least one source feature flag for LP3.0 should be checked.");
+                 return false;
+             }
          }
          return true;
     }
@@ -504,7 +518,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
     
     function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante") {
+        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings"
+            || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings") {
             return true;
         }
         if (!featureFlag.Configurable) {
