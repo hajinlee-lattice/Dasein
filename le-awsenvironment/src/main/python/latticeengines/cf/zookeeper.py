@@ -8,7 +8,7 @@ import sys
 import time
 
 from .module.ec2 import EC2Instance
-from .module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP, PARAM_VPC_ID, PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_KEY_NAME, PARAM_ENVIRONMENT
+from .module.parameter import PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP, PARAM_VPC_ID, PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3, PARAM_KEY_NAME, PARAM_ENVIRONMENT
 from .module.stack import Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
 from ..conf import AwsEnvironment
@@ -27,7 +27,7 @@ def template(environment, nodes, upload=False):
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP])
     for n in xrange(nodes):
         name = "EC2Instance%d" % (n + 1)
-        subnet = "SubnetId%d" % ( (n % 2) + 1 )
+        subnet = "SubnetId%d" % ( (n % 3) + 1 )
         ec2 = EC2Instance(name, subnet_ref=subnet) \
             .set_metadata(ec2_metadata(n)) \
             .mount("/dev/xvdb", 10) \
@@ -55,6 +55,7 @@ def provision(environment, stackname):
             PARAM_VPC_ID.config(config.vpc()),
             PARAM_SUBNET_1.config(config.public_subnet_1()),
             PARAM_SUBNET_2.config(config.public_subnet_2()),
+            PARAM_SUBNET_3.config(config.public_subnet_3()),
             PARAM_SECURITY_GROUP.config(config.zk_sg()),
             PARAM_INSTANCE_TYPE.config("t2.medium"),
             PARAM_KEY_NAME.config(config.ec2_key()),

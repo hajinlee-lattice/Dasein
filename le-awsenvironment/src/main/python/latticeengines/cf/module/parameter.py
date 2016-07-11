@@ -64,6 +64,7 @@ class InstanceTypeParameter(Parameter):
 PARAM_VPC_ID = Parameter("VpcId", "The VPC in which the stack will reside", type="AWS::EC2::VPC::Id")
 PARAM_SUBNET_1 = Parameter("SubnetId1", "The first subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_SUBNET_2 = Parameter("SubnetId2", "The second subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
+PARAM_SUBNET_3 = Parameter("SubnetId3", "The third subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_KEY_NAME = Parameter("KeyName", "Name of an existing EC2 KeyPair to enable SSH access to the instance", type="AWS::EC2::KeyPair::KeyName")
 PARAM_ENVIRONMENT = Parameter("Environment", "Environment tag. For example, qa and production")
 
@@ -74,6 +75,7 @@ COMMON_PARAMETERS = {
     PARAM_VPC_ID,
     PARAM_SUBNET_1,
     PARAM_SUBNET_2,
+    PARAM_SUBNET_3,
     PARAM_KEY_NAME,
     PARAM_ENVIRONMENT
 }

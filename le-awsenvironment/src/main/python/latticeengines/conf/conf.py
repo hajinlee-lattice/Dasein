@@ -26,6 +26,9 @@ class AwsEnvironment:
     def public_subnet_2(self):
         return self._props['public.subnet.id.2']
 
+    def public_subnet_3(self):
+        return self._props['public.subnet.id.3']
+
     def private_subnet(self):
         return self._props['private.subnet.id']
 

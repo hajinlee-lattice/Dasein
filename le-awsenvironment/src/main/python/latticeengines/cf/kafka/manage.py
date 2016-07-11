@@ -105,6 +105,7 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False, co
             PARAM_VPC_ID.config(config.vpc()),
             PARAM_SUBNET_1.config(config.public_subnet_1()),
             PARAM_SUBNET_2.config(config.public_subnet_2()),
+            PARAM_SUBNET_3.config(config.public_subnet_3()),
             PARAM_KEY_NAME.config(config.ec2_key()),
             PARAM_SECURITY_GROUP.config(config.kafka_sg()),
             PARAM_BROKER_INSTANCE_TYPE.config(profile.instance_type()),
@@ -243,29 +244,28 @@ def broker_cw_alarms(stack, broker_asgroup, broker_cluster):
 
 def sr_resources(stack, bkr_service, elb9092):
     elb9022 = ElasticLoadBalancer("lb9022").listen("9022", "80", protocol="http")
-    # elb9023 = ElasticLoadBalancer("lb9023").listen("9023", "80", protocol="http")
     elb9024 = ElasticLoadBalancer("lb9024").listen("9024", "80", protocol="http")
     ecscluster = ECSCluster("SchemaRegistryCluster")
-    asgroup, launchconfig = create_sr_asgroup(ecscluster, [elb9022, elb9024])
+    ec2_instances = create_sr_ec2cluster(ecscluster, [elb9022, elb9024])
     sr, sr_task = schema_registry_service(ecscluster, bkr_service)
     conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9022, sr)
-    # kr, kr_task = kafka_rest_service(ecscluster, elb9022, sr)
-    stack.add_resources([elb9022, elb9024, ecscluster, asgroup, launchconfig, sr, sr_task, conn, conn_task])
-    sr_cw_alarms(stack, asgroup, ecscluster, sr, conn)
+    stack.add_resources([elb9022, elb9024, ecscluster, sr, sr_task, conn, conn_task])
+    stack.add_resources(ec2_instances)
     return elb9022, elb9024
 
-def create_sr_asgroup(ecscluster, elbs):
-    asgroup = AutoScalingGroup("SchemaRegistryScalingGroup", 2, 2, 8)\
-        .set_capacity(2).set_max_size(4)
-    launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instance_type_ref="SRInstanceType")
-    launchconfig.set_metadata(sr_metadata(launchconfig, ecscluster))
-    launchconfig.set_userdata(userdata(launchconfig, asgroup))
-    launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
-    asgroup.add_pool(launchconfig)
-    asgroup.attach_elbs(elbs)
-    for elb in elbs:
-        asgroup.depends_on(elb)
-    return asgroup, launchconfig
+def create_sr_ec2cluster(ecscluster, elbs):
+    ec2_instances = []
+    for n in xrange(3):
+        name = "SRInstance%d" % (n + 1)
+        subnet = "SubnetId%d" % ( (n % 3) + 1 )
+        ec2 = EC2Instance(name, subnet_ref=subnet) \
+            .mount("/dev/xvdb", 10) \
+            .add_tag("lattice-engines.cluster.type", "Zookeeper")
+        ec2.set_metadata(sr_metadata(ec2, ecscluster))
+        ec2_instances.append(ec2)
+        for elb in elbs:
+            elb.add_instance(ec2)
+    return ec2_instances
 
 def schema_registry_service(ecscluster, broker):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
@@ -293,25 +293,6 @@ def schema_registry_service(ecscluster, broker):
 
     service = ECSService("SchemaRegistry", ecscluster, task, 2).set_min_max_percent(50, 200)\
         .depends_on(broker)
-    return service, task
-
-def kafka_rest_service(ecscluster, elb9022, sr):
-    container = ContainerDefinition("kr", { "Fn::Join" : [ "", [
-            { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-            "/kafka-rest"
-        ] ]}) \
-        .mem_mb(600).publish_port(9023, 9023) \
-        .set_env("KAFKAREST_HEAP_OPTS", "-Xms512m -Xms512m") \
-        .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
-        .set_env("SR_ADDRESS",
-                 {"Fn::Join" : [ "", [
-                     "http://", {"Fn::GetAtt": [ elb9022.logical_id(), "DNSName" ] }
-                 ]]})
-
-    task = TaskDefinition("KafkaRESTTask")
-    task.add_container(container)
-
-    service = ECSService("KafkaREST", ecscluster, task, 2).set_min_max_percent(50, 200).depends_on(sr)
     return service, task
 
 def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
