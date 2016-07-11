@@ -6,7 +6,10 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore) {
+.controller('ModelListController', function (
+    $scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, 
+    WidgetService, ModelService, ModelStore, ImportModelModal
+) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 
@@ -25,6 +28,10 @@ angular.module('mainApp.models.controllers.ModelListController', [
     }
 
     $scope.showNoModels = false;
+
+    $scope.importJSON = function() {
+        ImportModelModal.show();
+    }
 
     function getModels(use_cache) {
         ModelStore.getModels(use_cache).then(function(result) {

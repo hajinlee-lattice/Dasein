@@ -1,6 +1,6 @@
 <div class="container" data-ng-controller="ModelListController">
 
-    <section id="main-content" class="container">
+    <section id="main-content" class="container lp-model-list">
 
         <div class="row twelve columns">        
             <div data-ng-show="loading">
@@ -20,12 +20,29 @@
                     <span class="badge blue-badge">Total: {{totalLength}}</span>,&nbsp;
                     <span class="badge grey-badge">Active: {{activeLength}} / {{totalLength - activeLength}}</span>
                 </div>
-
-                <div class="pull-right" style="width: 20em;">
-                    <label for="">Create Model:&nbsp;&nbsp;</label>
-                    <button ui-sref="home.models.import" type="button" class="button icon-button orange-button create-model">CSV</button>/
-                    <button ui-sref="home.models.pmml" type="button" class="button icon-button orange-button create-model">PMML</button>
-                </div>
+                <div class="create-model-menu">
+                    <button 
+                            type="button"
+                            class="button icon-button orange-button create-model"
+                            ng-click="showCustomMenu = !showCustomMenu" 
+                            ng-class="{ 'open': showCustomMenu }">
+                        Create<span class="fa fa-chevron-down"></span>
+                    </button>
+                    <ul class="model-menu" ng-show="showCustomMenu">
+                        <li>
+                            <a ui-sref="home.models.import">Import CSV File</a>
+                            <i class="fa fa-file-excel-o"></i>
+                        </li>
+                        <li>
+                            <a ui-sref="home.models.pmml">Import PMML File</a>
+                            <i class="fa fa-file-code-o"></i>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" ng-click="importJSON()">Import JSON File</a>
+                            <i class="fa fa-file-text-o"></i>
+                        </li>
+                    </ul>
+                </div> 
             </div>
         </div>
 

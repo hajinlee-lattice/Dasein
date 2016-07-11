@@ -245,7 +245,7 @@ Content
     min-height: 100%;
 }
 #main-content {
-    overflow:auto;
+    overflow: initial;
     padding-bottom: 28px;
 }
 
@@ -600,7 +600,7 @@ Model List
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 150px;
-        background-image: url(/assets/images/bkg-active-model-lp.jpg);
+        background-image: url(/assets/images/bkg-active-model-pmml.png);
 
         &.SalesforceLead {
             background-image: url(/assets/images/bkg-active-model-lead.png);

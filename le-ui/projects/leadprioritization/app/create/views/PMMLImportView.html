@@ -15,7 +15,10 @@
           file-done="vm.pmmlDone(result)"
           file-cancel="vm.pmmlCancel()"
           class="form-group file-upload" 
-          ng-class="{ 'has-error' : uploadForm.pmmlFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.pmmlFileName.$pristine }">
+          ng-class="{ 
+            'has-error' : uploadForm.pmmlFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 
+            'is-pristine' : uploadForm.pmmlFileName.$pristine 
+          }">
       </div>
 
       <div 
@@ -24,14 +27,15 @@
           params="vm.pivotParams"
           input-name="pivotFileName"
           default-message="vm.pivotParams.defaultMessage"
+          file-required="false"
           file-accept=".csv,.txt"
           file-select="vm.pivotSelect(fileName)"
           file-done="vm.pivotDone()"
           file-cancel="vm.pivotCancel()"
           class="form-group file-upload" 
           ng-class="{ 
-            'disabled' : !vm.moduleName,
-            'has-error' : uploadForm.pivotFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.pivotFileName.$pristine 
+            'disabled': !vm.moduleName,
+            'has-error': uploadForm.pivotFileName.$invalid && !uploadForm.modelDisplayName.$pristine
           }">
       </div>
       
@@ -93,7 +97,7 @@
             <button 
                 type="button" 
                 class="button orange-button block-button"
-                ng-disabled="uploadForm.$invalid || (!vm.pmmlUploaded || !vm.pivotUploaded)"
+                ng-disabled="uploadForm.$invalid || !vm.pmmlUploaded"
                 ng-click="vm.clickNext(vm_uploader.choosenFileName)">
               {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
             </button>

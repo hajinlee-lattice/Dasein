@@ -130,6 +130,9 @@ angular.module('pd.jobs', [
             'reviewModel': 'create_global_target_market',
             'createModel': 'create_global_target_market',
             'downloadAndProcessModelSummaries': 'create_global_target_market'
+        },
+        'pmmlModelWorkflow': {
+            'createPMMLModel': 'create_global_target_market'
         }
     };
 

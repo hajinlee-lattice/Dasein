@@ -5,7 +5,7 @@ angular
 
     angular.extend(vm, {
         importErrorMsg: '',
-        accountLeadCheck: '',
+        accountLeadCheck: 'SalesforceLead',
         modelDisplayName: '',
         modelDescription: '',
         moduleName: '',
@@ -20,7 +20,7 @@ angular
         pmmlParams: {
             infoTemplate: "<h4>PMML File</h4><p>Choose a PMML File</p>",
             defaultMessage: "Example: enterprise-pmml-model.xml",
-            compressed: false,
+            compressed: true,
             metadataFile: true
         },
         pivotParams: {
@@ -69,11 +69,11 @@ angular
             .removeClass('is-pristine');
 
         var timestamp = new Date().getTime();
-            artifactName = vm.artifactName = fileName.replace('.csv','').replace('.xml',''),
+            artifactName = vm.artifactName = vm.stripExt(fileName),
             moduleName = vm.moduleName = artifactName + '_' + timestamp;
 
         vm.pmmlUploaded = false;
-        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + vm.sanitize(artifactName);
+        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
         
         return vm.pmmlParams;
     }
@@ -84,7 +84,7 @@ angular
             moduleName = vm.moduleName;
 
         vm.pivotUploaded = false;
-        vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + vm.sanitize(artifactName);
+        vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + vm.stripExt(artifactName);
         
         return vm.pivotParams;
     }
@@ -108,7 +108,7 @@ angular
 
         if (vm.showTypeDefault) {
             vm.showTypeDefault = false;
-            vm.accountLeadCheck = '';
+            vm.accountLeadCheck = 'SalesforceLead';
         }
 
         if (vm.showNameDefault) {
@@ -140,11 +140,14 @@ angular
         vm.importErrorMsg = "";
     }
 
-    vm.sanitize = function(fileName) {
-        fileName = fileName.replace('.csv','');
-        fileName = fileName.replace('.xml','');
-        fileName = fileName.replace('.txt','');
-        return fileName;
+    vm.stripExt = function(fileName) {
+        var fnSplit = (fileName || '').split('.');
+
+        if (fnSplit.length > 1) {
+            fnSplit.pop();
+        }
+
+        return fnSplit.join('.');
     }
     
     vm.clickNext = function() {
@@ -153,9 +156,12 @@ angular
         var options = {
                 modelName: this.modelDisplayName,
                 module: this.moduleName,
-                pmmlfile: (this.pmmlFileName),
-                pivotfile: vm.sanitize(this.pivotFileName)+'.csv'
+                pmmlfile: this.pmmlFileName
             };
+
+        if (this.pivotFileName) {
+            options.pivotfile = vm.stripExt(this.pivotFileName) + '.csv';
+        }
 
         ImportService.StartPMMLModeling(options).then(function(result) {
             if (result.Result && result.Result != "") {

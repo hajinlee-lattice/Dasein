@@ -14,51 +14,49 @@
                     ng-class="{ 'open': showCustomMenu }">
                 <span class="fa fa-ellipsis-v"></span>
             </button>
-            <div class="model-menu" ng-show="showCustomMenu">
-                <ul>
-                    <li 
-                            data-ng-if="!isActive" 
-                            data-ng-click="updateAsActiveClick($event); Activating = true;">
-                        <a href="javascript:void(0)">Activate</a>
-                        <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
-                    </li>
+            <ul class="model-menu" ng-show="showCustomMenu">
+                <li 
+                        data-ng-if="!isActive" 
+                        data-ng-click="updateAsActiveClick($event); Activating = true;">
+                    <a href="javascript:void(0)">Activate</a>
+                    <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
+                </li>
 
-                    <li 
-                            data-ng-if="mayChangeModelNames"
-                            data-ng-click="modelNameEditClick($event)">
-                        <a href="javascript:void(0)" data-title="Enter Model Name">Rename</a>
-                        <i class="fa fa-edit"></i>
-                    </li>
+                <li 
+                        data-ng-if="mayChangeModelNames"
+                        data-ng-click="modelNameEditClick($event)">
+                    <a href="javascript:void(0)" data-title="Enter Model Name">Rename</a>
+                    <i class="fa fa-edit"></i>
+                </li>
 
-                    <li 
-                            ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" 
-                            data-ng-click="refineAndCloneClick($event)">
-                        <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
-                        <i class="fa fa-copy"></i>
-                    </li>
+                <li 
+                        ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" 
+                        data-ng-click="refineAndCloneClick($event)">
+                    <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
+                    <i class="fa fa-copy"></i>
+                </li>
 
-                    <li 
-                            ui-sref="home.model.review({ modelId: '{{ data.Id | escape }}' })" 
-                            data-ng-click="reviewClick($event)">
-                        <a href="javascript:void(0)">Review Model</a>
-                        <i class="fa fa-eye"></i>
-                    </li>
+                <li 
+                        ui-sref="home.model.review({ modelId: '{{ data.Id | escape }}' })" 
+                        data-ng-click="reviewClick($event)">
+                    <a href="javascript:void(0)">Review Model</a>
+                    <i class="fa fa-eye"></i>
+                </li>
 
-                    <li 
-                            data-ng-if="isActive" 
-                            data-ng-click="updateAsInactiveClick($event); Deactivating = true;">
-                        <a href="javascript:void(0)">Deactivate</a>
-                        <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
-                    </li>
+                <li 
+                        data-ng-if="isActive" 
+                        data-ng-click="updateAsInactiveClick($event); Deactivating = true;">
+                    <a href="javascript:void(0)">Deactivate</a>
+                    <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
+                </li>
 
-                    <li 
-                            data-ng-if="mayDeleteModels && !isActive" 
-                            data-ng-click="deleteModelClick($event)">
-                        <a href="javascript:void(0)">Delete</a>
-                        <i class="fa fa-trash"></i>
-                    </li>
-                </ul>
-            </div>
+                <li 
+                        data-ng-if="mayDeleteModels && !isActive" 
+                        data-ng-click="deleteModelClick($event)">
+                    <a href="javascript:void(0)">Delete</a>
+                    <i class="fa fa-trash"></i>
+                </li>
+            </ul>
         </h2>
     </div>        
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">

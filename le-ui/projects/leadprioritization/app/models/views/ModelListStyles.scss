@@ -1,0 +1,35 @@
+.lp-model-list {
+	.create-model-menu {
+		position: relative;
+		margin-right: 0.75em;
+		float: right;
+		z-index: 10;
+		border-bottom-color: transparent;
+		border-bottom-width: 2px;
+		border-style: solid;
+						
+		button {
+			vertical-align: top;
+			
+			&.open {
+				background-color: #222;
+				border-bottom-color: #aaa;
+				border-bottom-right-radius: 0;
+				border-bottom-left-radius: 0;
+			}
+
+			span {
+				margin-left: 0.75em;
+			}
+		}
+
+		ul {
+			border-radius: 6px;
+			border-top-right-radius: 0;
+			
+			li {
+				
+			}
+		}
+	}
+}

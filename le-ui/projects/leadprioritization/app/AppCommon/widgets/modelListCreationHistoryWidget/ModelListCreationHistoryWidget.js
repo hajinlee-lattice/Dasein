@@ -4,11 +4,11 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.models.modals.ImportModelModal'
-]);
-
-app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, $state, ModelService, ResourceUtility,
-                                                                     FeatureFlagService, NavUtility, ImportModelModal) {
-
+])
+.controller('ModelListCreationHistoryWidgetController', function (
+    $scope, $rootScope, $state, ModelService, ResourceUtility,
+    FeatureFlagService, NavUtility, ImportModelModal
+) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.models = $scope.data;
     var flags = FeatureFlagService.Flags();
@@ -21,10 +21,10 @@ app.controller('ModelListCreationHistoryWidgetController', function ($scope, $ro
 
         ModelService.undoDeletedModel(modelId).then(function(result){
             if (result.success) {
-                $state.go('home.history', {}, { reload: true } );
+                $state.go('home.models.history', {}, { reload: true } );
             } else {
                 //TODO:song handle errors
-                $state.go('home.history', {}, { reload: true } );
+                $state.go('home.models.history', {}, { reload: true } );
             }
         });
     };
@@ -33,8 +33,8 @@ app.controller('ModelListCreationHistoryWidgetController', function ($scope, $ro
         ImportModelModal.show();
     };
 })
-    .directive('modelListCreationHistoryWidget', function () {
-        return {
-            templateUrl: 'app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidgetTemplate.html'
-        };
-    });
+.directive('modelListCreationHistoryWidget', function () {
+    return {
+        templateUrl: 'app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidgetTemplate.html'
+    };
+});

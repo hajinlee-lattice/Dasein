@@ -4,6 +4,7 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
+    //'ngAnimate',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.modules.ServiceErrorModule',
@@ -69,7 +70,7 @@ var mainApp = angular.module('mainApp', [
     Please remove the idle timeout code and make that it's own module
     placed in the /common area for all apps to utilize without dupe code
 */
-.controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
+.controller('MainController', function ($scope, $state, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
     TimestampIntervalUtility, ResourceStringsService, HelpService, LoginService, ConfigService) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
@@ -152,6 +153,13 @@ var mainApp = angular.module('mainApp', [
     }
 
     function checkIfSessionIsInactiveEveryInterval() {
+        var ignoreStates = ['home.models.import','home.models.pmml','home.model.scoring'];
+        //console.log('checkInterval',$state.current.name);
+        if (ignoreStates.indexOf($state.current.name) >= 0) {
+            //console.log('ignored', $state.current.name, (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING), Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp(), TIME_INTERVAL_INACTIVITY_BEFORE_WARNING);
+            return;
+        }
+
         if (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING) {
             if (!warningModalInstance) {
                 cancelCheckingIfSessionIsInactiveAndSetIdToNull();

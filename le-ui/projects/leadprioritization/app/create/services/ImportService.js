@@ -189,17 +189,23 @@ angular
     };
 
     this.StartModeling = function(MetaData) {
-        var deferred = $q.defer();
+        var deferred = $q.defer(),
+            data = {
+                description: MetaData.description,
+                filename: MetaData.name,
+                name: MetaData.modelName,
+                displayName: MetaData.displayName
+            };
+
+        if (MetaData.moduleName && MetaData.pivotFileName) {
+            data.moduleName = MetaData.moduleName;
+            data.pivotFileName = MetaData.pivotFileName;
+        }
 
         $http({
             method: 'POST',
             url: '/pls/models/' + MetaData.modelName,
-            data: {
-                'description': MetaData.description,
-                'filename': MetaData.name,
-                'name': MetaData.modelName,
-                'displayName': MetaData.displayName
-            },
+            data: data,
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {

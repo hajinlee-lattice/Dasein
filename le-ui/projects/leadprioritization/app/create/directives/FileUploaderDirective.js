@@ -46,12 +46,10 @@ angular
         controller: function ($scope, $state, $q, $element, $timeout, ResourceUtility, StringUtility, ImportService, ImportStore, ServiceErrorUtility) {
             var vm = this,
                 options = {
-                    process_percent: 0,
                     compress_percent: 0,
                     upload_percent: 0,
                     uploading: false,
                     uploaded: false,
-                    processing: false,
                     compressing: false,
                     compressed: true,
                     selectedFileDisplayName: '',
@@ -67,6 +65,7 @@ angular
             }
 
             vm.startUpload = function() {
+                console.log('startUpload');
                 if (!vm.selectedFile) {
                     return false;
                 }
@@ -75,7 +74,6 @@ angular
 
                 vm.startTime = new Date();
                 vm.upload_percent = 0;
-                vm.processing = true;
 
                 vm.changeFile();
                 vm.readHeaders(vm.selectedFile).then(function(headers) {
@@ -83,18 +81,30 @@ angular
                         vm.params = vm.fileLoad({headers:headers}) || vm.params;
                     }
 
-                    vm.readFile(vm.selectedFile)
-                        .then(vm.gzipFile)
-                        .then(vm.uploadFile);
+                    var fnFallBack = function() {
+                        vm.compress_percent = 100;
+                        vm.uploadFile(vm.selectedFile);
+                    }
+
+                    if (vm.isCompressed()) {
+                        try {
+                            vm.processFile(vm.selectedFile)
+                                .then(vm.uploadFile);
+                        } catch(e) {
+                            fnFallBack();
+                        }
+                    } else {
+                        fnFallBack();
+                    }
                 });
             }
 
-            // grab filename from file path
             vm.getFileName = function(s) { 
-              return (typeof s==='string' && (s=s.match(/[^\\\/]+$/)) && s[0]) || '';
+                return (typeof s==='string' && (s=s.match(/[^\\\/]+$/)) && s[0]) || '';
             } 
 
             vm.changeFile = function(scope) {
+                console.log('changeFile');
                 var input = element,
                     fileName = vm.getFileName(input.value);
 
@@ -106,22 +116,9 @@ angular
             }
 
             vm.readHeaders = function(file) {
-                vm.message = 'Processing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
-                vm.process_percent = 0;
+                console.log('readHeaders');
+                vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 vm.compress_percent = 0;
-
-                setTimeout(function() {
-                    vm.process_percent = 10;
-                }, 1);
-
-                vm.process_timer = setInterval(function() {
-                    var currentTime = new Date(),
-                        seconds = Math.floor((currentTime - vm.startTime) / 1000);
-
-                    vm.process_percent = 100 - (100 / seconds);
-                    vm.message = 'Processing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
-                    $scope.$digest();
-                }, 500);
 
                 var deferred = $q.defer(),
                     FR = new FileReader(),
@@ -137,32 +134,107 @@ angular
                 return deferred.promise;
             }
 
-            vm.readFile = function(file) {
+            vm.processFile = function(file) {
+                console.log('processFile');
+                var deferred = $q.defer();
+                
+                try {
+                    // make 16k chunks, compress chunks, reconstitute
+                    vm.processInChunks(file).then(function(result) {
+                        deferred.resolve(result);
+                    });
+                } catch(err) {
+                    // read whole file, compress whole file
+                    vm.processWhole(file).then(function(result) {
+                        deferred.resolve(result);
+                    });
+                }
+
+                return deferred.promise;
+            }
+
+            vm.processWhole = function(file) {
+                console.log('processWhole');
+                var deferred = $q.defer();
+
+                vm.readFile(file)
+                    .then(vm.compressFileInWorker)
+                    .then(function(result) {
+                        deferred.resolve(result);
+                    });
+                
+                return deferred.promise;
+            }
+
+            vm.processInChunks = function(file) {
+                console.log('processInChunks');
+                vm.compressing = true;
+                
                 var deferred = $q.defer(),
-                    FR = new FileReader();
+                    blob = new Blob([
+                        "onmessage = function(e) {"+
+                        "   importScripts(e.data.url + '/lib/js/pako_deflate.min.js');"+
+                        ""+ 
+                        "   var file = e.data.file,"+
+                        "       FR = new FileReaderSync(),"+
+                        "       totalSize = file.size, curSize = 0,"+
+                        "       chunkSize = 16384, chunks = [], chunk;"+
+                        ""+
+                        "   while (curSize < totalSize) { "+ 
+                        "       if (chunks.length % 100 == 0) {"+
+                        "           var percentage = ((curSize / totalSize) * 100).toFixed(2);"+
+                        "           postMessage({ file: null, progress: percentage });"+
+                        "       }"+
+                        ""+
+                        "       chunk = file.slice(curSize, curSize + chunkSize);"+
+                        "       chunks.push(pako.gzip(FR.readAsArrayBuffer(chunk)));"+
+                        "       curSize += chunkSize;"+
+                        "   }"+
+                        ""+ 
+                        "   postMessage({ file: chunks, progress: 100 });"+
+                        "}"
+                    ]),
+                    blobURL = window.URL.createObjectURL(blob),
+                    worker = new Worker(blobURL);
 
-                FR.onprogress = function(e) {
-                    vm.message = 'Processing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+                worker.onmessage = function(result) {
+                    if (result.data.progress) {
+                        vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+                        vm.compress_percent = result.data.progress;
+                        vm.percentage = Math.ceil(result.data.progress);
+                        $scope.$digest();
+                    }
 
-                    var percent = Math.round(((e.loaded / e.total) * 100) / 3);
-
-                    if (percent != vm.process_percent && percent > vm.process_percent) {
-                        vm.process_percent = percent;
+                    if (result.data.file) {
+                        var blob = new Blob(result.data.file);
+                        deferred.resolve(blob);
                     }
                 };
 
+                worker.postMessage({ 
+                    url: document.location.origin, 
+                    file: file
+                });
+
+                return deferred.promise;
+            }
+
+            vm.readFile = function(file) {
+                console.log('readFile');
+                var deferred = $q.defer(),
+                    FR = new FileReader();
+
                 FR.onload = function(e) {
-                    vm.process_percent = 33;
                     deferred.resolve(FR.result);
                 };
 
-                clearInterval(vm.process_timer);
                 FR.readAsArrayBuffer(file);
 
                 return deferred.promise;
             }
 
-            vm.gzipFile = function(file) {
+            vm.compressFileInWorker = function(file) {
+                console.log('compressFileInWorker');
                 vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 vm.compressing = true;
 
@@ -173,27 +245,18 @@ angular
                         deferred.resolve(file);
                     };
 
-                if (!vm.isCompressed()) {
-                    fnComplete(vm.selectedFile);
-                    return deferred.promise;
-                }
-
-                setTimeout(function() {
-                    vm.compress_percent = 25;
-                }, 1);
-
                 vm.compress_timer = setInterval(function() {
                     var currentTime = new Date(),
                         seconds = Math.floor((currentTime - vm.startTime) / 1000);
 
-                    vm.compress_percent = (100 - (100 / seconds)) / 1.5;
+                    vm.compress_percent = 100 - (100 / seconds);
                     vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                     $scope.$digest();
                 }, 1000);
 
                 try {
                     var convertedData = new Uint8Array(file),
-                        // Workers must exist in external files.  vm fakes that
+                        // Workers must exist in external files. this fakes that
                         blob = new Blob([
                             "onmessage = function(e) {" +
                             "   importScripts(e.data.url + '/lib/js/pako_deflate.min.js');" +
@@ -217,35 +280,54 @@ angular
                         { url: document.location.origin, file: convertedData }, 
                         [ convertedData.buffer ]
                     );
-                } catch(e) {
-                    // fallback for IE and other browsers that dont support webworker method
-                    vm.message = 'Compressing the file.  This might take awhile...';
-
-                    setTimeout(function() {
-                        try {
-                            var convertedData = new Uint8Array(file),
-                                zipped = pako.gzip(convertedData, { to : 'Uint8Array' }),
-                                array = new Array(zipped),
-                                blob = new Blob(array);
-
-                            fnComplete(blob);
-                        } catch(err) {
-                            // compression error, turn it off & send uncompressed
-                            if (vm.params) {
-                                vm.params.compressed = false;
-                            } else {
-                                vm.compressed = false;
-                            }
-
-                            fnComplete(vm.selectedFile);
-                        }
-                    }, 1);
+                } catch(err) {
+                    // Web Workers not working, try synchronous
+                    vm.compressFile(file).then(function(result) {
+                        deferred.resolve(result);
+                    });
                 }
 
                 return deferred.promise;
             }
 
+            vm.compressFile = function(file) {
+                console.log('compressFile');
+                vm.compressing = true;
+                vm.message = 'Compressing the file.  This might take awhile...';
+                
+                var deferred = $q.defer(),
+                    fnComplete = function(file) {
+                        vm.compress_percent = 100;
+                        clearInterval(vm.compress_timer);
+                        deferred.resolve(file);
+                    };
+
+                // fallback for IE and other browsers that dont support webworker method
+                setTimeout(function() {
+                    try {
+                        var convertedData = new Uint8Array(file),
+                            zipped = pako.gzip(convertedData, { to : 'Uint8Array' }),
+                            array = new Array(zipped),
+                            blob = new Blob(array);
+
+                        fnComplete(blob);
+                    } catch(err) {
+                        // compression error, turn it off & send uncompressed
+                        if (vm.params) {
+                            vm.params.compressed = false;
+                        } else {
+                            vm.compressed = false;
+                        }
+
+                        fnComplete(vm.selectedFile);
+                    }
+                }, 1);
+
+                return deferred.promise;
+            }
+
             vm.uploadFile = function(file) {
+                console.log('uploadFile');
                 vm.uploading = true;
                 vm.upload_percent = 0;
 
@@ -282,6 +364,7 @@ angular
             }
 
             vm.uploadResponse = function(result) {
+                console.log('uploadResponse');
                 if (typeof vm.fileDone == 'function') {
                     vm.fileDone({ result: result });
                 }
@@ -308,8 +391,8 @@ angular
             }
 
             vm.uploadProgress = function(e) {
-                if (e.total / 1024 > 486000) {
-                    vm.message = 'ERROR: Over 486MB file size limit.';
+                if (e.total / 1024 > 4096000) {
+                    vm.message = 'ERROR: Over ~4GB file size limit.';
 
                     var xhr = ImportStore.Get('cancelXHR', true);
 
@@ -323,7 +406,7 @@ angular
 
                     if (vm.uploading) {
                         vm.message = 'Sending: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
-                        vm.percentage = Math.round(percent);
+                        vm.percentage = percent ? Math.ceil(percent) : 1;
                         $scope.$digest();
                     }
                 }
@@ -332,7 +415,7 @@ angular
             vm.getElapsedTime = function(startTime) {
                 var format = function(num, type) {
                         if (num > 0) {
-                            return num + ' ' + (num == 1 ? type : type+'s') + ' ';
+                            return num + ' ' + (num == 1 ? type : type + 's') + ' ';
                         } else {
                             return '';
                         }
@@ -350,12 +433,10 @@ angular
             }
 
             vm.cancel = function(IGNORE_FILENAME) {
-                vm.processing = false;
                 vm.compressing = false;
                 vm.uploading = false;
                 vm.uploaded = false;
                 vm.percentage = '';
-                vm.process_percent = 0;
                 vm.compress_percent = 0;
                 vm.upload_percent = 0;
                 vm.message = '';
@@ -365,7 +446,7 @@ angular
                     vm.selectedFileDisplayName = '';
                     vm.choosenFileName = '';
                 }
-                
+
                 if (typeof vm.fileCancel == 'function') {
                     vm.fileCancel();
                 }

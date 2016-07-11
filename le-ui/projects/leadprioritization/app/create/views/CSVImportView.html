@@ -67,7 +67,7 @@
 
       <div 
           file-uploader-container
-          label="Pivot Mapping File (optional)"
+          label="Pivot Mapping File"
           params="vm.pivotParams"
           input-name="pivotFileName"
           default-message="vm.pivotParams.defaultMessage"
@@ -79,7 +79,7 @@
           class="form-group file-upload"
           ng-class="{ 
             'disabled' : !vm.moduleName,
-            'has-error' : uploadForm.pivotFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.pivotFileName.$pristine 
+            'has-error' : uploadForm.pivotFileName.$invalid && !uploadForm.modelDisplayName.$pristine
           }">
       </div>
 

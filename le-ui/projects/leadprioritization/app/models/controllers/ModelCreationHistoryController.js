@@ -5,11 +5,14 @@ angular.module('mainApp.models.controllers.ModelCreationHistoryController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
-    'mainApp.models.services.ModelService'
+    'mainApp.models.services.ModelService',
+    'mainApp.models.modals.ImportModelModal'
 ])
 
-.controller('ModelCreationHistoryController', function ($scope, BrowserStorageUtility, ResourceUtility, RightsUtility, WidgetService, WidgetConfigUtility, 
-		WidgetFrameworkService, ModelService) {
+.controller('ModelCreationHistoryController', function (
+    $scope, BrowserStorageUtility, ResourceUtility, RightsUtility, WidgetService, 
+    WidgetConfigUtility, WidgetFrameworkService, ModelService
+) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 

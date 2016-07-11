@@ -65,7 +65,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     });
 
     function modelCreationHistoryView() {
-        $state.go('home.history', {}, { reload: true } );
+        $state.go('home.models.history', {}, { reload: true } );
     }
 
     /*

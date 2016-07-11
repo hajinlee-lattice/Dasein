@@ -83,6 +83,17 @@ angular
                 }
             }
         })
+        .state('home.models.history', {
+            url: '/history',
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "main@": {
+                    templateUrl: 'app/models/views/ModelCreationHistoryView.html'
+                }   
+            }
+        })
         .state('home.model', {
             url: '/model/:modelId',
             resolve: {
@@ -629,26 +640,6 @@ angular
                 },
                 "main@": {
                     templateUrl: 'app/config/views/ManageCredentialsView.html'
-                }   
-            }
-        })
-        .state('home.history', {
-            url: '/history',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'MODEL_LIST_CREATION_HISTORY';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/models/views/ModelCreationHistoryView.html'
                 }   
             }
         })

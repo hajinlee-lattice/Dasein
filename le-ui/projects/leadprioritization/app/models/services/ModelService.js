@@ -36,7 +36,6 @@ angular.module('mainApp.models.services.ModelService', [
         var deferred = $q.defer();
 
         if (use_cache) {
-            console.log(use_cache, ModelStore.models ? ModelStore.models.length : '_undefined', ModelStore.models);
             if (ModelStore.models && ModelStore.models.length > 0) {
                 deferred.resolve(ModelStore.models);
             } else {

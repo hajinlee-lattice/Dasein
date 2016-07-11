@@ -56,46 +56,58 @@ angular
     }
     
     vm.fileSelect = function(fileName) {
-        vm.uploaded = false;
-
-        if (vm.modelDisplayName) {
-            return;
-        }
-
-        var date = new Date(),
-            day = date.getDate(),
-            year = date.getFullYear(),
-            month = (date.getMonth() + 1),
-            seconds = date.getSeconds(),
-            minutes = date.getMinutes(),
-            hours = date.getHours(),
-            month = (month < 10 ? '0' + month : month),
-            day = (day < 10 ? '0' + day : day),
-            minutes = (minutes < 10 ? '0' + minutes : minutes),
-            hours = (hours < 10 ? '0' + hours : hours),
-            timestamp = year +''+ month +''+ day +'-'+ hours +''+ minutes,
-            displayName = fileName.replace('.csv',''),
-            displayName = displayName.substr(0, 50 - (timestamp.length + 1));
-
-        if ((vm.modelDisplayName || '').indexOf(displayName) < 0) {
-            vm.modelDisplayName = displayName + '_' + timestamp;
-            vm.showNameDefault = true;
-        }
-
-        $('#modelDisplayName').focus();
-        
         setTimeout(function() {
-            $('#modelDisplayName').select();
-        }, 1);
+            vm.uploaded = false;
 
-        $('#modelDisplayName')
-            .parent('div.form-group')
-            .removeClass('is-pristine');
+            if (vm.modelDisplayName) {
+                return;
+            }
+
+            var date = new Date(),
+                day = date.getDate(),
+                year = date.getFullYear(),
+                month = (date.getMonth() + 1),
+                seconds = date.getSeconds(),
+                minutes = date.getMinutes(),
+                hours = date.getHours(),
+                month = (month < 10 ? '0' + month : month),
+                day = (day < 10 ? '0' + day : day),
+                minutes = (minutes < 10 ? '0' + minutes : minutes),
+                hours = (hours < 10 ? '0' + hours : hours),
+                schema = !vm.accountLeadCheck 
+                    ? '' : (vm.accountLeadCheck == "SalesforceLead") 
+                        ? 'lead_' : 'account_',
+                timestamp = schema +''+ year +''+ month +''+ day +'-'+ hours +''+ minutes,
+                displayName = fileName.replace('.csv',''),
+                displayName = displayName.substr(0, 50 - (timestamp.length + 1));
+
+            if ((vm.modelDisplayName || '').indexOf(displayName) < 0) {
+                vm.modelDisplayName = displayName + '_' + timestamp;
+                vm.showNameDefault = true;
+            }
+
+            $('#modelDisplayName').focus();
+            
+            setTimeout(function() {
+                $('#modelDisplayName').select();
+            }, 1);
+
+            $('#modelDisplayName')
+                .parent('div.form-group')
+                .removeClass('is-pristine');
+
+            var timestamp = new Date().getTime();
+                artifactName = vm.artifactName = vm.stripExt(fileName),
+                moduleName = vm.moduleName = artifactName + '_' + timestamp;
+        }, 25);
     }
 
     vm.fileDone = function(result) {
         vm.uploaded = true;
-        vm.fileName = result.Result.name;
+        
+        if (result.Result) {
+            vm.fileName = result.Result.name;
+        }
     }
     
     vm.fileCancel = function() {
@@ -114,6 +126,34 @@ angular
         if (xhr) {
             xhr.abort();
         }
+    }
+
+    vm.pivotSelect = function(fileName) {
+        var artifactName = vm.artifactName = vm.stripExt(fileName),
+            pivotFile = vm.pivotFileName = fileName,
+            endpoint = '/pls/metadatauploads/modules/',
+            moduleName = vm.moduleName;
+
+        vm.pivotUploaded = false;
+        vm.pivotParams.url = endpoint + moduleName + '/pivotmappings?artifactName=' + artifactName;
+        
+        return vm.pivotParams;
+    }
+
+    vm.pivotDone = function() {
+        vm.pivotUploaded = true;
+    }
+
+    vm.pivotCancel = function() { }
+
+    vm.stripExt = function(fileName) {
+        var fnSplit = (fileName || '').split('.');
+
+        if (fnSplit.length > 1) {
+            fnSplit.pop();
+        }
+
+        return fnSplit.join('.');
     }
 
     vm.changeType = function() {
@@ -141,6 +181,12 @@ angular
         metaData.displayName = displayName;
         metaData.description = vm.modelDescription;
         metaData.schemaInterpretation = schemaInterpretation;
+
+        if (vm.pivotUploaded) {
+            metaData.moduleName = vm.moduleName;
+            metaData.pivotFileName = vm.stripExt(vm.pivotFileName) + '.csv';
+        }
+
         ImportStore.Set(fileName, metaData);
 
         setTimeout(function() {

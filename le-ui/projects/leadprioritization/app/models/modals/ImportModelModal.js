@@ -77,7 +77,6 @@ angular.module('mainApp.models.modals.ImportModelModal', [
             // Remove the created HTML from the DOM
             modalElement.on('hidden.bs.modal', function (evt) {
                 modalElement.empty();
-                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             });
         });
     };
