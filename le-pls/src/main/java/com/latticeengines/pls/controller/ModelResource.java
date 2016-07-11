@@ -233,8 +233,19 @@ public class ModelResource {
             columnResult.setDataRuleName(rule.getName());
             if (rule.getName().equals("UniqueValueCount")) {
                 List<String> flaggedColumns = new ArrayList<>();
-                flaggedColumns.add("SomeColumnA");
-                flaggedColumns.add("AnotherColumnB");
+                flaggedColumns.add("Activity_Count_Click_Email");
+                columnResult.setFlaggedColumnNames(flaggedColumns);
+            } else if (rule.getName().equals("LowCoverage")) {
+                List<String> flaggedColumns = new ArrayList<>();
+                flaggedColumns.add("GooglePlus_Url");
+                columnResult.setFlaggedColumnNames(flaggedColumns);
+            } else if (rule.getName().equals("OverlyPredictiveColumns")) {
+                List<String> flaggedColumns = new ArrayList<>();
+                flaggedColumns.add("FeatureTermOrderHistory");
+                columnResult.setFlaggedColumnNames(flaggedColumns);
+            } else if (rule.getName().equals("PositivelyPredictiveNulls")) {
+                List<String> flaggedColumns = new ArrayList<>();
+                flaggedColumns.add("Country");
                 columnResult.setFlaggedColumnNames(flaggedColumns);
             } else {
                 columnResult.setFlaggedColumnNames(Collections.EMPTY_LIST);
@@ -249,9 +260,9 @@ public class ModelResource {
             masterRuleList.add(rule);
             RowRuleResult rowResult = new RowRuleResult();
             rowResult.setDataRuleName(rule.getName());
-            rowResult.setFlaggedItemCount(0);
+            rowResult.setFlaggedItemCount(100);
             rowResult.setFlaggedRowIdAndColumnNames(Collections.EMPTY_MAP);
-            rowResult.setNumPositiveEvents(0);
+            rowResult.setNumPositiveEvents(50);
             rowResults.put(rule.getName(), rowResult);
         }
 
@@ -270,6 +281,8 @@ public class ModelResource {
             Map<String, String> props = new HashMap<>();
             props.put("domains", "company.com, anothersite.com, abc.com");
             rule.setProperties(props);
+        } else if (rule.getName().equals("UniqueValueCount")) {
+            rule.setEnabled(true);
         } else {
             rule.setProperties(Collections.EMPTY_MAP);
         }

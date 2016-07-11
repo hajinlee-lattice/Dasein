@@ -1,0 +1,196 @@
+angular.module('mainApp.models.review', [
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.models.services.ModelService',
+    'mainApp.setup.services.MetadataService',
+    'lp.models.review'
+])
+.controller('ModelReviewRowController', function($scope, _, $rootScope, ResourceUtility, ModelService, ModelReviewStore,
+    ReviewData, Model) {
+    var vm = this,
+        ruleNameToDataRules = {};
+
+    for (var i in ReviewData.dataRules) {
+        ruleNameToDataRules[ReviewData.dataRules[i].name] = ReviewData.dataRules[i];
+    }
+
+    angular.extend(vm, {
+        ruleNameToDataRules: ruleNameToDataRules,
+        rowWarnings : _.values(ReviewData.ruleNameToRowRuleResults),
+        totalRecords: Model.ModelDetails.TotalLeads,
+        rowsExcluded: 0
+    });
+
+    var storedDataRules = ModelReviewStore.GetDataRules();
+    if (storedDataRules != null) {
+        storedDataRules.forEach(function(storeDataRule) {
+            vm.ruleNameToDataRules[storeDataRule.name] = storeDataRule;
+        })
+    }
+
+    vm.warningExcludeToggled = function($event, warning) {
+        if ($event == null) {
+            $event.preventDefault();
+        }
+
+        var beforeState = vm.ruleNameToDataRules[warning.dataRuleName].enabled;
+        vm.ruleNameToDataRules[warning.dataRuleName].enabled = !beforeState;
+        ModelReviewStore.SetReviewData(vm.modelId, ReviewData);
+        ModelReviewStore.AddDataRule(vm.ruleNameToDataRules[warning.dataRuleName]);
+        if (beforeState == true) {
+            vm.rowsExcluded -= warning.flaggedItemCount;
+        } else {
+            vm.rowsExcluded += warning.flaggedItemCount;
+        }
+
+        $rootScope.$broadcast('RowWarningToggled', warning, vm.ruleNameToDataRules[warning.dataRuleName]);
+    };
+
+    vm.rowWarnings.forEach(function(rowWarning) {
+        if (vm.ruleNameToDataRules[rowWarning.dataRuleName].enabled) {
+            vm.rowsExcluded += rowWarning.flaggedItemCount;
+        }
+    });
+})
+.controller('ModelReviewColumnController', function($scope, _, $stateParams, ResourceUtility, ModelService, MetadataService,
+    ModelReviewStore, ReviewData, ModelMetadata, Model) {
+    var vm = this,
+        ruleNameToDataRules = {},
+        modelId = $stateParams.modelId;
+
+    for (var i in ReviewData.dataRules) {
+        ruleNameToDataRules[ReviewData.dataRules[i].name] = ReviewData.dataRules[i];
+    }
+
+    angular.extend(vm, {
+        ruleNameToDataRules: ruleNameToDataRules,
+        allColumnWarnings : _.values(ReviewData.ruleNameToColumnRuleResults),
+        showAll: false,
+        showLatticeAttr: false,
+        showCustomAttr: true,
+        totalWarnedColumnCount: 0,
+        latticeWarnedColumnCount: 0,
+        customWarnedColumnCount: 0,
+        columnWarningsToDisplay: []
+    });
+    var storedDataRules = ModelReviewStore.GetDataRules();
+    if (storedDataRules != null) {
+        storedDataRules.forEach(function(storeDataRule) {
+            vm.ruleNameToDataRules[storeDataRule.name] = storeDataRule;
+        })
+    }
+
+    vm.warningExcludeToggled = function($event, warning) {
+        if ($event == null) {
+            $event.preventDefault();
+        }
+
+        var beforeState = ruleNameToDataRules[warning.dataRuleName].enabled;
+        ruleNameToDataRules[warning.dataRuleName].enabled = !beforeState;
+        ModelReviewStore.SetReviewData(vm.modelId, ReviewData);
+        ModelReviewStore.AddDataRule(ruleNameToDataRules[warning.dataRuleName]);
+        if (beforeState == true) {
+            vm.totalWarnedColumnCount -= warning.flaggedItemCount;
+            if (isLatticeColumnWarning(warning)) {
+                vm.latticeWarnedColumnCount -= warning.flaggedItemCount;
+            } else {
+                vm.customWarnedColumnCount -= warning.flaggedItemCount;
+            }
+        } else {
+            vm.totalWarnedColumnCount += warning.flaggedItemCount;
+            if (isLatticeColumnWarning(warning)) {
+                vm.latticeWarnedColumnCount += warning.flaggedItemCount;
+            } else {
+                vm.customWarnedColumnCount += warning.flaggedItemCount;
+            }
+        }
+        if (vm.showAll) {
+            vm.customWarnedColumnCount = vm.totalWarnedColumnCount;
+        }
+    };
+
+    vm.allColumnWarnings.forEach(function(columnWarning) {
+        if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
+            vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
+        }
+    });
+
+    vm.displayLatticeWarningsClicked = function() {
+        vm.columnWarningsToDisplay = [],
+        vm.showAll = false,
+        vm.showCustomAttr = false,
+        vm.showLatticeAttr = true;
+        vm.latticeWarnedColumnCount = 0;
+
+        vm.allColumnWarnings.forEach(function(columnWarning) {
+            if (isLatticeColumnWarning(columnWarning)) {
+                vm.columnWarningsToDisplay.push(columnWarning);
+                if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
+                    vm.latticeWarnedColumnCount += columnWarning.flaggedItemCount;
+                }
+            }
+        });
+    };
+
+    vm.displayNonLatticeWarningsClicked = function() {
+        vm.columnWarningsToDisplay = [],
+        vm.showAll = false,
+        vm.showLatticeAttr = false,
+        vm.showCustomAttr = true;
+        vm.customWarnedColumnCount = 0;
+
+        vm.allColumnWarnings.forEach(function(columnWarning) {
+            if (isNonLatticeColumnWarning(columnWarning)) {
+                vm.columnWarningsToDisplay.push(columnWarning);
+                if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
+                    vm.customWarnedColumnCount += columnWarning.flaggedItemCount;
+                }
+            }
+        });
+    };
+
+    vm.displayAllWarningsClicked = function() {
+        vm.showAll = true,
+        vm.showLatticeAttr = false,
+        vm.showCustomAttr = false;
+
+        vm.columnWarningsToDisplay = vm.allColumnWarnings.slice(0);
+        vm.customWarnedColumnCount = vm.totalWarnedColumnCount;
+    };
+    this.displayNonLatticeWarningsClicked();
+
+    function isLatticeColumnWarning(columnWarning) {
+        if (columnWarning.flaggedColumnNames != null) {
+            for (var i in columnWarning.flaggedColumnNames) {
+                var flaggedColumn = findMetadataItemByColumnName(columnWarning.flaggedColumnNames[i]);
+                if (flaggedColumn != null && isLatticeAttribute(flaggedColumn)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function isNonLatticeColumnWarning(columnWarning) {
+        if (columnWarning.flaggedColumnNames != null) {
+            for (var i in columnWarning.flaggedColumnNames) {
+                var flaggedColumn = findMetadataItemByColumnName(columnWarning.flaggedColumnNames[i]);
+                if (flaggedColumn != null && !isLatticeAttribute(flaggedColumn)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function isLatticeAttribute(column) {
+        return MetadataService.IsLatticeAttribute(column);
+    }
+
+    function findMetadataItemByColumnName(columnName) {
+        for (var i in ModelMetadata) {
+            if (ModelMetadata[i]['ColumnName'].toLowerCase() == columnName.toLowerCase()) {
+                return ModelMetadata[i];
+            }
+        }
+    }
+});

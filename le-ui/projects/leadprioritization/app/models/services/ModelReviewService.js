@@ -5,14 +5,40 @@ angular
 .service('ModelReviewStore', function($q) {
     var ModelReviewStore = this;
     this.reviewData = {};
+    this.dataRules = [];
+
+    this.AddDataRule = function(dataRule) {
+        for (var i in this.dataRules) {
+            if (dataRule.name == this.dataRules[i].name) {
+                this.dataRules.splice(i, 1);
+            }
+        }
+        this.dataRules.push(dataRule);
+    };
+
+    this.GetDataRules = function() {
+        return this.dataRules;
+    };
+
+    this.RemoveDataRule = function(name) {
+        for (var i in this.dataRules) {
+            if (this.dataRules[i].name == name) {
+                this.dataRules.splice(i, 1);
+            }
+        }
+    };
 
     this.GetReviewData = function(modelId) {
         return this.reviewData[modelId];
-    }
+    };
 
     this.SetReviewData = function(modelId, reviewData) {
         this.reviewData[modelId] = reviewData;
-    }
+    };
+
+    this.ResetReviewData = function() {
+        this.reviewData = {};
+    };
 })
 .service('ModelReviewService', function($q, $http, ResourceUtility, ModelReviewStore, ServiceErrorUtility) {
     this.GetModelReviewData = function(modelId, eventTableName) {

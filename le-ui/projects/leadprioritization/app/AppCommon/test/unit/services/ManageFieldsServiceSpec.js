@@ -3,20 +3,20 @@
 describe('ManageFieldsServiceSpec Tests', function () {
     var stringUtility,
         resourceUtility,
-        manageFieldsService,
+        metadataService,
         fields;
 
     beforeEach(function () {
         module('mainApp.appCommon.utilities.StringUtility');
         module('mainApp.appCommon.utilities.ResourceUtility');
-        module('mainApp.appCommon.services.ManageFieldsService');
+        module('mainApp.setup.services.MetadataService');
         module('test.testData.ManageFieldsTestDataService');
 
-        inject(['StringUtility', 'ResourceUtility', 'ManageFieldsService', 'ManageFieldsTestDataService',
-            function (StringUtility, ResourceUtility, ManageFieldsService, ManageFieldsTestDataService) {
+        inject(['StringUtility', 'ResourceUtility', 'MetadataService', 'ManageFieldsTestDataService',
+            function (StringUtility, ResourceUtility, MetadataService, ManageFieldsTestDataService) {
                 stringUtility = StringUtility;
                 resourceUtility = ResourceUtility;
-                manageFieldsService = ManageFieldsService;
+                metadataService = MetadataService;
                 fields = ManageFieldsTestDataService.GetSampleFields();
             }
         ]);
@@ -27,7 +27,7 @@ describe('ManageFieldsServiceSpec Tests', function () {
     //==================================================
     describe('manage-fields get all selects options tests', function () {
         it('should return a object contains sources/objects/categories/allOptions', function () {
-            var warnings = manageFieldsService.GetOptionsForSelects(fields);
+            var warnings = metadataService.GetOptionsForSelects(fields);
             var expectedObj = {
                 sourcesToSelect: ["Lattice Data Cloud", "Marketo", "Salesforce"],
                 categoriesToSelect: ["Lead Information", "Marketing Activity"],
@@ -63,12 +63,12 @@ describe('ManageFieldsServiceSpec Tests', function () {
     describe('manage-fields category editable tests', function () {
         it('should return true means category editable', function () {
             var dataItem = { Tags: "Internal" };
-            expect(manageFieldsService.CategoryEditable(dataItem)).toBe(true);
+            expect(metadataService.CategoryEditable(dataItem)).toBe(true);
         });
 
         it('should return false means category not editable', function () {
             var dataItem = { Tags: "External" };
-            expect(manageFieldsService.CategoryEditable(dataItem)).toBe(false);
+            expect(metadataService.CategoryEditable(dataItem)).toBe(false);
         });
     });
 

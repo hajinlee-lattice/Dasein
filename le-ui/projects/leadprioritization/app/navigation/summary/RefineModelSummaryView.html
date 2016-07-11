@@ -6,11 +6,11 @@
 	            <h3 class="summary-title">Total Records</h3>
 	            <dl>
 	                <dt>Before</dt>
-	                <dd id="detail-status">25,000</dd>
+	                <dd id="detail-status">{{vm.totalRecords}}</dd>
 	            </dl>
 	            <dl>
 	                <dt>After</dt>
-	                <dd id="detail-created">20,000</dd>
+	                <dd id="detail-created">{{vm.totalRecordsAfterDisplay}}</dd>
 	            </dl>
 	        </div>
 	    </div><!-- End .type-overview -->
@@ -20,11 +20,11 @@
 	            <h3 class="summary-title">Success Events</h3>
 	            <dl>
 	                <dt>Before</dt>
-	                <dd id="detail-status">25,000</dd>
+	                <dd id="detail-status">{{vm.successEvents}}</dd>
 	            </dl>
 	            <dl>
 	                <dt>After</dt>
-	                <dd id="detail-created">20,000</dd>
+	                <dd id="detail-created">{{vm.successEventsAfterDisplay}}</dd>
 	            </dl>
 	        </div>
 	    </div><!-- End .type-leads -->
@@ -34,11 +34,11 @@
 	            <h3 class="summary-title">Conversion Rate</h3>
 	            <dl>
 	                <dt>Before</dt>
-	                <dd id="detail-status">25,000</dd>
+	                <dd id="detail-status">{{vm.conversionRate}}%</dd>
 	            </dl>
 	            <dl>
 	                <dt>After</dt>
-	                <dd id="detail-created">20,000</dd>
+	                <dd id="detail-created">{{vm.conversionRateAfter}}%</dd>
 	            </dl>
 	        </div>
 	    </div><!-- End .type-conversions -->
@@ -53,7 +53,7 @@
 	        <a ui-sref="home.model.review.columns"><span>Column Exclusions</span></a>
 	    </div>
 	    <div class="pull-right">
-	    	<button type="button" class="button orange-button nav-primary-button">Create New Model</button>
+	    	<button type="button" data-ng-click="vm.createModelClicked()" class="button orange-button nav-primary-button">Create New Model</button>
 	    </div>
 	</div><!-- End .nav -->
 

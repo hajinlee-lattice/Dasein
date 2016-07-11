@@ -4,22 +4,21 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.services.MetadataService',
-    'mainApp.appCommon.services.ManageFieldsService',
     'mainApp.setup.controllers.DiscardEditFieldsModel',
     'mainApp.setup.modals.UpdateFieldsModal',
     'mainApp.setup.modals.FieldMappingSettingsModal'
 ])
 
 .controller('ManageFieldsWidgetController', function (
-    $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility,
-    MetadataService, ManageFieldsService, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal) {
+    $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility, MetadataService,
+    MetadataStore, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
     $scope.fieldAttributes = [];
     $scope.eventTableName = $scope.data.EventTableProvenance.EventTableName;
-    $scope.modelSummaryId = $scope.data.ModelId;
+    $scope.modelId = $scope.data.ModelId;
     $scope.dirtyRows = {};
     $scope.indexToOldFieldsForSingleFieldPage = {};
     $scope.indexToOldFieldsForListFieldsPage = {};
@@ -60,7 +59,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                 dataItem.ApprovedUsage = "None";
             }
 
-            if (dataItem.ApprovedUsage != "None" || ! ManageFieldsService.IsLatticeAttribute(dataItem)) {
+            if (dataItem.ApprovedUsage != "None" || ! MetadataService.IsLatticeAttribute(dataItem)) {
                 fields.push(dataItem);
             } else {
                 $scope.fieldsNotDisplayed.push(dataItem);
@@ -71,29 +70,23 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     function loadFields() {
         $scope.loading = true;
-        MetadataService.GetFieldsForModelSummaryId($scope.modelSummaryId).then(function(result) {
-            if (result.Success) {
-                $scope.fields = getFieldsToDisplay(result.ResultObj);
-                renderSelects($scope.fields);
-                renderGrid($scope.fields);
+        MetadataStore.GetMetadataForModel($scope.modelId).then(function(result) {
+            $scope.fields = getFieldsToDisplay(result);
+            renderSelects($scope.fields);
+            renderGrid($scope.fields);
 
-                if ($scope.fields != null && $scope.fields.length > 0) {
-                    $scope.fieldAttributes = [];
-                    for (var attr in $scope.fields[0]) {
-                        $scope.fieldAttributes.push(attr);
-                    }
+            if ($scope.fields != null && $scope.fields.length > 0) {
+                $scope.fieldAttributes = [];
+                for (var attr in $scope.fields[0]) {
+                    $scope.fieldAttributes.push(attr);
                 }
-                $scope.loading = false;
-            } else {
-                $scope.showLoadingError = true;
-                $scope.loadingError = result.ResultErrors;
-                $scope.loading = false;
             }
+            $scope.loading = false;
         });
     }
 
     function renderSelects(fields) {
-        var obj = ManageFieldsService.GetOptionsForSelects(fields);
+        var obj = MetadataService.GetOptionsForSelects(fields);
         $scope.categoriesToSelect = obj.categoriesToSelect;
         $scope.allOptions = obj.allOptions;
     }
@@ -181,11 +174,11 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     }
 
     $scope.categoryEditable = function(dataItem) {
-        return ManageFieldsService.CategoryEditable(dataItem);
+        return MetadataService.CategoryEditable(dataItem);
     };
 
     $scope.isLatticeAttribute = function(dataItem) {
-        return ManageFieldsService.IsLatticeAttribute(dataItem);
+        return MetadataService.IsLatticeAttribute(dataItem);
     };
 
     $scope.categoryWarning = function(dataItem) {
@@ -405,7 +398,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var editedData = getAllEditedData();
         if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelSummaryId, $scope.fields.concat($scope.fieldsNotDisplayed));
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelId, $scope.fields.concat($scope.fieldsNotDisplayed));
 
             $scope.saveInProgress = false;
         } else {

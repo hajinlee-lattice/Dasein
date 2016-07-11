@@ -2,7 +2,7 @@
 
     <div class="row">
         <div class="twelve columns list-header">
-            <div class="pull-left number-of-items">5,000 of 25,000 rows excluded</div>
+            <div class="pull-left number-of-items">{{vm.rowsExcluded}} of {{vm.totalRecords}} rows excluded</div>
         </div>
     </div>
 
@@ -24,11 +24,17 @@
                 <tbody>
                     <tr data-ng-repeat="rowWarning in vm.rowWarnings">
                         <td>
-                            <input type="checkbox" id="" />
+                            <input type="checkbox" id="" data-ng-click="vm.warningExcludeToggled($event, rowWarning)"
+                                   data-ng-checked="vm.ruleNameToDataRules[rowWarning.dataRuleName].enabled"/>
                         </td>
                         <td>{{rowWarning.flaggedItemCount}}</td>
-                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].displayName}}</td>
-                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].description}}</td>
+                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].displayName}}
+                            <textarea id="" data-ng-if="vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains != null">
+                                {{vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains}}
+                            </textarea>
+                        </td>
+                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].description}}
+                        </td>
                     </tr>
                  </tbody>
             </table>
