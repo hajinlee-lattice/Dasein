@@ -178,20 +178,22 @@ angular
                         "   var file = e.data.file,"+
                         "       FR = new FileReaderSync(),"+
                         "       totalSize = file.size, curSize = 0,"+
-                        "       chunkSize = 16384, chunks = [], chunk;"+
+                        "       chunkSize = 16384, chunks = 0, chunk,"+
+                        "       deflator = new pako.Deflate({gzip:true});"+
                         ""+
                         "   while (curSize < totalSize) { "+ 
-                        "       if (chunks.length % 100 == 0) {"+
+                        "       if (chunks++ % 100 == 0) {"+
                         "           var percentage = ((curSize / totalSize) * 100).toFixed(2);"+
                         "           postMessage({ file: null, progress: percentage });"+
                         "       }"+
                         ""+
                         "       chunk = file.slice(curSize, curSize + chunkSize);"+
-                        "       chunks.push(pako.gzip(FR.readAsArrayBuffer(chunk)));"+
                         "       curSize += chunkSize;"+
+                        "       lastChunk = (curSize >= totalSize);"+
+                        "       deflator.push(FR.readAsArrayBuffer(chunk), lastChunk);"+
                         "   }"+
                         ""+ 
-                        "   postMessage({ file: chunks, progress: 100 });"+
+                        "   postMessage({ file: deflator.result, progress: 100 });"+
                         "}"
                     ]),
                     blobURL = window.URL.createObjectURL(blob),
@@ -206,7 +208,7 @@ angular
                     }
 
                     if (result.data.file) {
-                        var blob = new Blob(result.data.file);
+                        var blob = new Blob([ new Uint8Array(result.data.file) ]);
                         deferred.resolve(blob);
                     }
                 };
