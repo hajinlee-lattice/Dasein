@@ -246,12 +246,32 @@ def sr_resources(stack, bkr_service, elb9092):
     elb9022 = ElasticLoadBalancer("lb9022").listen("9022", "80", protocol="http")
     elb9024 = ElasticLoadBalancer("lb9024").listen("9024", "80", protocol="http")
     ecscluster = ECSCluster("SchemaRegistryCluster")
-    ec2_instances = create_sr_ec2cluster(ecscluster, [elb9022, elb9024])
-    sr, sr_task = schema_registry_service(ecscluster, bkr_service)
+
+    # ec2_instances = create_sr_ec2cluster(ecscluster, [elb9022, elb9024])
+    # stack.add_resources(ec2_instances)
+    # sr, sr_task = schema_registry_service(ecscluster, bkr_service, ec2_instances)
+
+    asgroup, launchconfig = create_sr_asgroup(ecscluster, [elb9022, elb9024])
+    stack.add_resources([asgroup, launchconfig])
+    sr, sr_task = schema_registry_service(ecscluster, bkr_service, [asgroup])
+
     conn, conn_task = kafka_connect_service(ecscluster, elb9092, elb9022, sr)
     stack.add_resources([elb9022, elb9024, ecscluster, sr, sr_task, conn, conn_task])
-    stack.add_resources(ec2_instances)
+
     return elb9022, elb9024
+
+def create_sr_asgroup(ecscluster, elbs):
+    asgroup = AutoScalingGroup("SchemaRegistryScalingGroup", 2, 2, 8) \
+        .set_capacity(2).set_max_size(4)
+    launchconfig = LaunchConfiguration("SchemaRegistryContainerPool", instance_type_ref="SRInstanceType")
+    launchconfig.set_metadata(sr_metadata(launchconfig, ecscluster))
+    launchconfig.set_userdata(userdata(launchconfig, asgroup))
+    launchconfig.set_instance_profile(PARAM_ECS_INSTANCE_PROFILE)
+    asgroup.add_pool(launchconfig)
+    asgroup.attach_elbs(elbs)
+    for elb in elbs:
+        asgroup.depends_on(elb)
+    return asgroup, launchconfig
 
 def create_sr_ec2cluster(ecscluster, elbs):
     ec2_instances = []
@@ -267,7 +287,7 @@ def create_sr_ec2cluster(ecscluster, elbs):
             elb.add_instance(ec2)
     return ec2_instances
 
-def schema_registry_service(ecscluster, broker):
+def schema_registry_service(ecscluster, broker, ec2s):
     intaddr = Volume("internaladdr", "/etc/internaladdr.txt")
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
     container = ContainerDefinition("sr", { "Fn::Join" : [ "", [
@@ -293,6 +313,9 @@ def schema_registry_service(ecscluster, broker):
 
     service = ECSService("SchemaRegistry", ecscluster, task, 2).set_min_max_percent(50, 200)\
         .depends_on(broker)
+    for ec2 in ec2s:
+        service.depends_on(ec2)
+
     return service, task
 
 def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
@@ -321,30 +344,6 @@ def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
 
     service = ECSService("ConnectWorker", ecscluster, task, 2).set_min_max_percent(50, 200).depends_on(sr)
     return service, task
-
-def sr_cw_alarms(stack, sr_asgroup, sr_cluster, sr_service, kc_service):
-    scale_up = PercentScalingPolicy("SRScaleUp", sr_asgroup, 100)
-    scale_down = PercentScalingPolicy("SRScaleDown", sr_asgroup, -50)
-    stack.add_resources([scale_down, scale_up])
-
-    sr_high_mem_alarm = CloudWatchAlarm("SRHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(sr_cluster, sr_service) \
-        .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
-        .add_scaling_policy(scale_up)
-    sr_low_mem_alarm = CloudWatchAlarm("SRLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(sr_cluster, sr_service) \
-        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
-        .add_scaling_policy(scale_down)
-    kc_high_mem_alarm = CloudWatchAlarm("KCHighMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(sr_cluster, kc_service) \
-        .evaluate("GreaterThanThreshold", 85, period_minute=1, eval_periods=5, stat="Average") \
-        .add_scaling_policy(scale_up)
-    kc_low_mem_alarm = CloudWatchAlarm("KCLowMemAlarm", "AWS/ECS", "MemoryUtilization") \
-        .add_ecsservice(sr_cluster, kc_service) \
-        .evaluate("LessThanThreshold", 35, period_minute=1, eval_periods=10, stat="Average") \
-        .add_scaling_policy(scale_down)
-
-    stack.add_resources([sr_high_mem_alarm, sr_low_mem_alarm, kc_high_mem_alarm, kc_low_mem_alarm])
 
 def get_elbs(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
