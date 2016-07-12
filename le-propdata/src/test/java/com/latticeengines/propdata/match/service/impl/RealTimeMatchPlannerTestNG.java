@@ -67,6 +67,23 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
         }
     }
 
+    @Test(groups = "functional")
+    public void testUnionSelection() {
+        MatchInput input = prepareMatchInput();
+        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        ColumnSelection columnSelection = new ColumnSelection();
+        List<ColumnSelection.Column> columns = Arrays.asList(
+                new ColumnSelection.Column("TechIndicator_Dropbox"),
+                new ColumnSelection.Column("TechIndicator_Box"),
+                new ColumnSelection.Column("TechIndicator_Splunk")
+        );
+        columnSelection.setColumns(columns);
+        input.setUnionSelections(Arrays.asList(ColumnSelection.Predefined.RTS, columnSelection));
+        MatchContext context = matchPlanner.plan(input);
+        Integer expectedColumns = columnSelectionService.parsePredefined(ColumnSelection.Predefined.RTS).getColumns().size() + 3;
+        Assert.assertEquals((Integer) context.getColumnSelection().getColumns().size(), expectedColumns);
+    }
+
     private MatchInput prepareMatchInput() {
         MatchInput input = new MatchInput();
         input.setUuid(UUID.randomUUID());

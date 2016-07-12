@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.propdata.manage.AbstractSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
@@ -62,12 +64,26 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    protected ColumnSelection parseColumnSelection(MatchInput input) {
-        if (input.getPredefinedSelection() != null) {
+    ColumnSelection parseColumnSelection(MatchInput input) {
+        if (input.getUnionSelections() != null && !input.getUnionSelections().isEmpty()) {
+            return combineSelections(input.getUnionSelections());
+        } else if (input.getPredefinedSelection() != null) {
             return columnSelectionService.parsePredefined(input.getPredefinedSelection());
         } else {
             return input.getCustomSelection();
         }
+    }
+
+    private ColumnSelection combineSelections(Collection<AbstractSelection> selectionCollection) {
+        List<ColumnSelection> selections = new ArrayList<>();
+        for (AbstractSelection abstractSelection: selectionCollection) {
+            if (abstractSelection instanceof ColumnSelection) {
+                selections.add((ColumnSelection) abstractSelection);
+            } else if (abstractSelection instanceof ColumnSelection.Predefined) {
+                selections.add(columnSelectionService.parsePredefined((ColumnSelection.Predefined) abstractSelection));
+            }
+        }
+        return ColumnSelection.combine(selections);
     }
 
     @MatchStep

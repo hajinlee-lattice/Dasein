@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.propdata.manage.AbstractSelection;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,12 +116,29 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Must specify predefined or custom column selection.");
         }
 
-        if (input.getCustomSelection() == null
+        if (input.getUnionSelections() != null && !input.getUnionSelections().isEmpty()) {
+            for (AbstractSelection selection : input.getUnionSelections()) {
+                validateSingleSelection(selection);
+            }
+        } else if (input.getCustomSelection() == null
                 && !ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
             throw new UnsupportedOperationException("Only Predefined selection "
                     + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
         }
 
+    }
+
+    private static void validateSingleSelection(AbstractSelection selection) {
+        if (selection instanceof ColumnSelection.Predefined) {
+            ColumnSelection.Predefined predefined = (ColumnSelection.Predefined) selection;
+            if (!ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
+                throw new UnsupportedOperationException("Only Predefined selection "
+                        + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
+            }
+        } else if (!(selection instanceof ColumnSelection)) {
+            throw new UnsupportedOperationException(
+                    "Must be either an explicit ColumnSelection or the name of a predefined selection.");
+        }
     }
 
     private static void validateKeys(Set<MatchKey> keySet) {

@@ -1,10 +1,16 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,7 +19,7 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ColumnSelection {
+public class ColumnSelection implements AbstractSelection {
 
     private List<Column> columns;
     private String name;
@@ -27,6 +33,7 @@ public class ColumnSelection {
         for (ExternalColumn externalColumn: externalColumns) {
             ColumnSelection.Column column = new ColumnSelection.Column();
             column.setExternalColumnId(externalColumn.getExternalColumnID());
+            column.setColumnName(externalColumn.getDefaultColumnName());
             columns.add(column);
         }
         setColumns(columns);
@@ -71,11 +78,32 @@ public class ColumnSelection {
         return list;
     }
 
+    public static ColumnSelection combine(Collection<ColumnSelection> selectionCollection) {
+        Set<Column> columns = new HashSet<>();
+        for (ColumnSelection selection: selectionCollection) {
+            columns.addAll(selection.getColumns());
+        }
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(new ArrayList<Column>(columns));
+        return columnSelection;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Column {
 
         private String externalColumnId;
         private String columnName;
+
+        public Column() {}
+
+        public Column(String externalColumnId) {
+            setExternalColumnId(externalColumnId);
+        }
+
+        public Column(String externalColumnId, String columnName) {
+            setExternalColumnId(externalColumnId);
+            setColumnName(columnName);
+        }
 
         @JsonProperty("ExternalColumnID")
         public String getExternalColumnId() {
@@ -96,9 +124,30 @@ public class ColumnSelection {
         public void setColumnName(String columnName) {
             this.columnName = columnName;
         }
+
+        @Override
+        public boolean equals(Object that) {
+            if (!(that instanceof Column)) {
+                return false;
+            } else if (that == this) {
+                return true;
+            }
+
+            Column rhs = (Column) that;
+            return new EqualsBuilder() //
+                    .append(externalColumnId, rhs.getExternalColumnId()) //
+                    .append(columnName, rhs.getColumnName()) //
+                    .isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(3, 11).append(externalColumnId).append(columnName).toHashCode();
+        }
+
     }
 
-    public enum Predefined implements Dimension {
+    public enum Predefined implements Dimension, AbstractSelection {
         LeadEnrichment("LeadEnrichment"), //
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
