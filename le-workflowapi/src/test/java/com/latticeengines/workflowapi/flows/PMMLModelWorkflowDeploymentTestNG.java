@@ -67,9 +67,6 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testWorkflow" })
     public void scoreRecords() throws IOException, InterruptedException {
-        // wait for 15 seconds to make sure that model entry is created in model
-        // summary
-        Thread.sleep(15 * 1000);
 
         Model model = testPMMLScoring.getModel(modelName, PMML_CUSTOMERSPACE, pmmlTenant);
         System.out.println(modelName + ", " + model.getModelId());

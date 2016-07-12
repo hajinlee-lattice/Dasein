@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -12,6 +13,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty("workflowName")
     private String workflowName;
+
+    @JsonProperty("internalResourceHostPort")
+    private String internalResourceHostPort;
 
     @JsonProperty
     private boolean restart;
@@ -80,4 +84,11 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.inputProperties = inputProperties;
     }
 
+    public String getInternalResourceHostPort() {
+        return internalResourceHostPort;
+    }
+
+    public void setInternalResourceHostPort(String internalResourceHostPort) {
+        this.internalResourceHostPort = internalResourceHostPort;
+    }
 }

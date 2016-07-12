@@ -40,7 +40,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
-    private static final Log log = LogFactory.getLog(BaseWorkflowStep.class);
+    protected static final Log log = LogFactory.getLog(BaseWorkflowStep.class);
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String EVENT_TABLE = "EVENT_TABLE";

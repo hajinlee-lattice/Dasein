@@ -72,11 +72,14 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         log.info("Inside CreatePMMLModel execute()");
 
         try {
-            PMMLModelingServiceExecutor executor = new PMMLModelingServiceExecutor(
-                    createModelingServiceExecutorBuilder(configuration));
+            PMMLModelingServiceExecutor.Builder builder = createModelingServiceExecutorBuilder(configuration);
+            PMMLModelingServiceExecutor executor = new PMMLModelingServiceExecutor(builder);
             executor.writeMetadataFiles();
             executor.writeDataFiles();
-            executor.model();
+            String appId = executor.model();
+            Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
+            modelApplicationIdToEventColumn.put(appId, builder.getTargets()[0]);
+            executionContext.put(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_28019, new String[] { configuration.getPmmlArtifactPath() });

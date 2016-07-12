@@ -66,6 +66,7 @@ public class PMMLModelWorkflowConfiguration extends WorkflowConfiguration {
         
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             model.setInternalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -10,6 +11,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotEmptyString

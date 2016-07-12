@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobParameters;
@@ -38,8 +39,22 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         if (stepStringConfig != null) {
             setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
             return true;
-        } else
-            return false;
+        }
+        for (String key : jobParameters.getParameters().keySet()) {
+            try {
+                if (key.startsWith("com.") && configurationClass.isAssignableFrom(Class.forName(key))) {
+                    stepStringConfig = jobParameters.getString(key);
+                    if (stepStringConfig != null) {
+                        setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
+                        return true;
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                log.error(ExceptionUtils.getFullStackTrace((e)));
+                return false;
+            }
+        }
+        return false;
     }
 
     public void setConfiguration(T configuration) {

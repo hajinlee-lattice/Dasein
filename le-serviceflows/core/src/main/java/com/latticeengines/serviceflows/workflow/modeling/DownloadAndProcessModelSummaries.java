@@ -64,7 +64,10 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
                 .get(COLUMN_RULE_RESULTS);
         Map<String, List<RowRuleResult>> eventToRowResults = (Map<String, List<RowRuleResult>>) executionContext
                 .get(ROW_RULE_RESULTS);
-
+        if (eventToColumnResults == null || eventToRowResults == null) {
+            log.warn("COLUMN_RULE_RESULTS or ROW_RULE_RESULTS is null");
+            return;
+        }
         Tenant tenant = tenantEntityMgr.findByTenantId(configuration.getCustomerSpace().toString());
         for (String event : eventToModelId.keySet()) {
             String modelId = eventToModelId.get(event);

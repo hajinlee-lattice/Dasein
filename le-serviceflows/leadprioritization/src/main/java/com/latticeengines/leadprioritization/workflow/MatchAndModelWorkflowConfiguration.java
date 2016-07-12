@@ -54,6 +54,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             export.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             resolveAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

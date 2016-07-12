@@ -53,6 +53,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
     private static final String CUSTOMER_SPACE = "CustomerSpace";
+    private static final String INTERNAL_RESOURCE_HOST_PORT = "Internal_Resource_Host_Port";
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
     @Autowired
@@ -95,6 +96,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         if (workflowConfiguration != null) {
             if (workflowConfiguration.getCustomerSpace() != null) {
                 parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
+            }
+            if (workflowConfiguration.getInternalResourceHostPort() != null) {
+                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT, workflowConfiguration.getInternalResourceHostPort()
+                        .toString());
             }
             for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
                 parmsBuilder.addString(configurationClassName,
@@ -196,8 +201,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(
-            List<WorkflowExecutionId> workflowIds) {
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
         try {

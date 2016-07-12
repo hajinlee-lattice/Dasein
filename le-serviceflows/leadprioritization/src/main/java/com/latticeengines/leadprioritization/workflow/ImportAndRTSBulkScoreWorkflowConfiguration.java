@@ -53,6 +53,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             importDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
             rtsBulkScoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
