@@ -6,7 +6,7 @@
         ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
     <div class="model-image {{ data.ModelType }}"></div>
     <div class="model-title" data-ng-hide="nameStatus.editing">
-        <h2 class="editable editable-click" data-type="text" data-placement="right">{{::displayName}}</h2>
+        <h2 data-type="text" data-placement="right" ng-class="editable editable-click" title="{{::displayName}}">{{::displayName | limitTo: 36 }}{{::displayName.length > 36 ? '&hellip;' : ''}}</h2>
         <h2 class="edit">
             <button 
                     type="button"
