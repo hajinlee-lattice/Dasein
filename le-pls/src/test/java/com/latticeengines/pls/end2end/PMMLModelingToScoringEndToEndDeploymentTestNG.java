@@ -35,7 +35,6 @@ import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-//@ComponentScan(value={"com.latticeengines.pls.*", "com.latticeengines.scoringapi.*"})
 public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/pmml";
