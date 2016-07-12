@@ -2,7 +2,7 @@
 
 source /etc/profile
 echo "getting environment information"
-echo $ENV_TYPE
+echo $LE_ENVIRONMENT
 rm -rf /usr/share/tomcat/webapps/ms/*.war
 mkdir -p /usr/share/tomcat/webapps/ms
 rm -rf /usr/share/tomcat/work/MicrosereviceEngine
@@ -21,10 +21,10 @@ do
     popd
     rm -rf $fn.war
 
-    if [ -f "/tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/${fn}_log4j.properties" ]
+    if [ -f "/tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties" ]
     then
         echo "replacing log4j.properties for ${fn}.war"
-        cp -f /tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/${fn}_log4j.properties ${fn}/WEB-INF/classes/log4j.properties
+        cp -f /tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties ${fn}/WEB-INF/classes/log4j.properties
     fi
 
     jar cvf $fn.war -C $fn/ .

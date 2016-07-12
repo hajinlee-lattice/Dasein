@@ -2,7 +2,7 @@
 
 source /etc/profile
 echo "getting environment information"
-echo $ENV_TYPE
+echo $LE_ENVIRONMENT
 
 echo "repackaging wars"
 cd /tmp/le-admin-tc-rpm/war
@@ -13,10 +13,10 @@ jar xvf ../ROOT.war
 popd
 rm -rf ROOT.war
 
-if [ -f "/tmp/le-admin-tc-rpm/env/${ENV_TYPE}/log4j.properties" ]
+if [ -f "/tmp/le-admin-tc-rpm/env/${LE_ENVIRONMENT}/log4j.properties" ]
 then
     echo "replacing log4j.properties for ROOT.war"
-    cp -f /tmp/le-admin-tc-rpm/env/${ENV_TYPE}/log4j.properties ROOT/WEB-INF/classes/log4j.properties
+    cp -f /tmp/le-admin-tc-rpm/env/${LE_ENVIRONMENT}/log4j.properties ROOT/WEB-INF/classes/log4j.properties
 fi
 
 jar cvf ROOT.war -C ROOT/ .
