@@ -23,7 +23,7 @@ source $WSHOME/le-dev/aliases
 echo "Changing dir into workspace"
 cd $WSHOME
 echo "Top-level compile"
-mvn -T8 -Pgenerate -DskipTests clean install 2> /tmp/errors.txt
+mvn -T8 -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
 echo "Top-level playmaker compile"
