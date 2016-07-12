@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
+    private static ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "deployment", enabled = true)
     public void getAllLeadEnrichmentAttributes() {
@@ -113,14 +114,14 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
         scoreRequest.setPerformEnrichment(true);
-        ObjectMapper om = new ObjectMapper();
         System.out.println(om.writeValueAsString(scoreRequest));
         ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
                 customerSpace.toString());
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
-                + scoreResponse.getEnrichmentAttributeValues().size());
+                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n"
+                + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
     }
 
@@ -136,7 +137,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertTrue(difference < 0.1);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
-                + scoreResponse.getEnrichmentAttributeValues().size());
+                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n"
+                + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
     }
 
