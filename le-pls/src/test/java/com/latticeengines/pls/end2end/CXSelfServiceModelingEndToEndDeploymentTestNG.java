@@ -87,7 +87,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private Connection conn;
-    private String sqlServerreport = "10.41.1.97\\sql2012std";
+    private String sqlServerReport = "10.41.1.97\\sql2012std";
     private String sqlUserName = "dataloader_user";
     private String sqlPassword = "password";
     private String sqlDBName = "MQTest";
@@ -460,7 +460,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
 
     private Connection dbConnect() throws SQLServerException {
         SQLServerDataSource dataSource = new SQLServerDataSource();
-        dataSource.setServerName(sqlServerreport);
+        dataSource.setServerName(sqlServerReport);
         dataSource.setPortNumber(1433);
         dataSource.setDatabaseName(sqlDBName);
         dataSource.setUser(sqlUserName);
