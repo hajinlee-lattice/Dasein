@@ -5,10 +5,10 @@ import pandas as pd
         
 # given the length and conversion rate of sub-population and the length and conversion rate of overall-population, calculate the significance 
 def sigCalculation(sub, overall):
-    sub_cnt, sub_rate = sub
-    oa_cnt, oa_rate = overall
-    r = (sub_cnt*sub_rate + oa_cnt*oa_rate)/(sub_cnt+oa_cnt)
-    return (sub_rate-oa_rate)/(math.sqrt(r*(1.0-r)*(1.0/sub_cnt + 1.0/oa_cnt)))
+    subCnt, subRate = sub
+    oaCnt, oaRate = overall
+    r = (subCnt*subRate + oaCnt*oaRate)/(subCnt+oaCnt)
+    return (subRate-oaRate)/(math.sqrt(r*(1.0-r)*(1.0/subCnt + 1.0/oaCnt)))
 
 # given an array of events, calculate the conversion rate 
 def getRate(eventCol):
@@ -37,11 +37,11 @@ def discretizeNumericVar(inputCol, numBucket = 20, emptyValList=[None,"Null","Em
     
     sortedInd = [y[0] for y in sorted(enumerate(inputColNonEmpty), key = lambda x: x[1])]
     
-    idxNonEmpty_sorted = [idxNonEmpty[i] for i in sortedInd]   
+    idxNonEmptySorted = [idxNonEmpty[i] for i in sortedInd]   
 
     idxCut = bucketing(len(idxNonEmpty), numBucket)
         
-    return [idxEmpty] + [[idxNonEmpty_sorted[i] for i in range(idxCut[bucketIdx], idxCut[bucketIdx+1])] for bucketIdx in range(len(idxCut)-1)] 
+    return [idxEmpty] + [[idxNonEmptySorted[i] for i in range(idxCut[bucketIdx], idxCut[bucketIdx+1])] for bucketIdx in range(len(idxCut)-1)] 
         
     
 # given a column of numerical data, discretize the data into categorical column. The null value are all in bucket 0, the non-null values are put in buckets ranging from 1 to numBucket
@@ -70,17 +70,17 @@ def getColVal(colVal, colType, numBucket):
 # get the conversion rate for each feature value  
 def getGroupedRate(colVal, eventCol, cntRate_overall = None):
 
-    data_grouped = groupby(sorted(zip(colVal, eventCol), key = lambda y: y[0]), lambda z: z[0])
+    dataGrouped = groupby(sorted(zip(colVal, eventCol), key = lambda y: y[0]), lambda z: z[0])
 
-    data_grouped = {key : [x for x in group] for key, group in data_grouped}
+    dataGrouped = {key : [x for x in group] for key, group in dataGrouped}
             
-    cntRate_grouped = {key : (len(group), getRate([x[1] for x in group])) for (key, group) in data_grouped.items()}
+    cntRateGrouped = {key : (len(group), getRate([x[1] for x in group])) for (key, group) in dataGrouped.items()}
     
     if cntRate_overall is None:
-        cntRate_grouped = {key : (x[0], x[1]) for (key, x) in cntRate_grouped.items()}
+        cntRateGrouped = {key : (x[0], x[1]) for (key, x) in cntRateGrouped.items()}
     else:
-        cntRate_grouped = {key : (x[0], x[1], sigCalculation(x, cntRate_overall)) for (key, x) in cntRate_grouped.items()}
-    return cntRate_grouped
+        cntRateGrouped = {key : (x[0], x[1], sigCalculation(x, cntRate_overall)) for (key, x) in cntRateGrouped.items()}
+    return cntRateGrouped
 
 def strValueFix(x):
     nullWordsPart = set(['missing','available', 'empty', 'bogus'])        

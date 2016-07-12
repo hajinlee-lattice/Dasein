@@ -3,14 +3,13 @@ from leframework.codestyle import overrides
 import pandas as pd
 from dataruleutilsds import convertCleanDataFrame
 
-
 class LowCoverageDS(ColumnRule):
 
-    def __init__(self, columns, categoricalColumns, numericalColumns, lowcoverage_threshold = 0.95):
+    def __init__(self, columns, categoricalColumns, numericalColumns, lowcoverageThreshold = 0.95):
         self.columns = columns.keys()
         self.catColumn = set(categoricalColumns.keys())
         self.numColumn = set(numericalColumns.keys())
-        self.lowcoverage_threshold = lowcoverage_threshold
+        self.lowcoverageThreshold = lowcoverageThreshold
         self.columnsInfo = {}
 
     def createInternalData(self, dataFrame):
@@ -22,28 +21,23 @@ class LowCoverageDS(ColumnRule):
 
         for columnName in self.columns:
             try:
-                testResult = self.get_lowcoverage(columnName)
+                testResult = self.getLowcoverage(columnName)
                 self.columnsInfo[columnName] = testResult
             except KeyError:
                 # What is default value
                 self.columnsInfo[columnName] = None
 
     @overrides
-    def explain(self):
+    def getDescription(self):
         return "Check if column has too many missing values"
 
-    #input:
-        # colVal: list of feature
-    #output:
-        # dict = {colName: (True/False, populateRate)}
-
-    def get_lowcoverage(self, columnName):
+    def getLowcoverage(self, columnName):
         colVal = self.data[self.columns.index(columnName)]
-        null_rate = len([x for x in colVal if x == '' or pd.isnull(x)])*1.0/len(colVal)
-        if null_rate >= self.lowcoverage_threshold:
-            return (True, null_rate)
+        nullRate = len([x for x in colVal if x == '' or pd.isnull(x)])*1.0/len(colVal)
+        if nullRate >= self.lowcoverageThreshold:
+            return (True, nullRate)
         else:
-            return (False, null_rate)
+            return (False, nullRate)
 
     def getColumnsInfo(self):
         return self.columnsInfo
