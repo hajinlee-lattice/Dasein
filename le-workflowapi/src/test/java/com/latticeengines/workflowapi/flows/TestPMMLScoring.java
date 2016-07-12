@@ -30,7 +30,7 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
         runScoringTest(url, plsRest, modelName, customerSpace, pmmlTenant, true, true);
     }
 
-    public Model getMeodel(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
+    public Model getModel(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
             throws IOException, InterruptedException {
         Thread.sleep(10000);
         for (int i = 0; i < MAX_COUNTER; i++) {

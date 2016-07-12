@@ -71,7 +71,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         // summary
         Thread.sleep(15 * 1000);
 
-        Model model = testPMMLScoring.getMeodel(modelName, PMML_CUSTOMERSPACE, pmmlTenant);
+        Model model = testPMMLScoring.getModel(modelName, PMML_CUSTOMERSPACE, pmmlTenant);
         System.out.println(modelName + ", " + model.getModelId());
         Assert.assertNotNull(model.getModelId());
         testPMMLScoring.scoreRecords(model.getModelId(), PMML_CUSTOMERSPACE, pmmlTenant);

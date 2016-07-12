@@ -166,12 +166,12 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected void saveAttributeSelection(CustomerSpace customerSpace) {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
-        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection();
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace,
                 selectedAttributeMap);
     }
 
-    private LeadEnrichmentAttributesOperationMap checkSelection() {
+    private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
         List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
