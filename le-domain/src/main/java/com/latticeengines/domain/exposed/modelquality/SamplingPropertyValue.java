@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "MODELQUALITY_SAMPLING_PROPERTY_VALUE")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class SamplingPropertyValue implements HasPid {
 
     @Id
@@ -28,18 +28,19 @@ public class SamplingPropertyValue implements HasPid {
 
     @Column(name = "VALUE")
     private String value;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_SAMPLING_PROPDEF_ID", nullable = false)
     @JsonIgnore
     private SamplingPropertyDef samplingPropertyDef;
-    
-    public SamplingPropertyValue() {}
-    
+
+    public SamplingPropertyValue() {
+    }
+
     public SamplingPropertyValue(String value) {
         setValue(value);
     }
-    
+
     public SamplingPropertyDef getSamplingPropertyDef() {
         return samplingPropertyDef;
     }
@@ -64,6 +65,10 @@ public class SamplingPropertyValue implements HasPid {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String toString() {
+        return value;
     }
 
 }

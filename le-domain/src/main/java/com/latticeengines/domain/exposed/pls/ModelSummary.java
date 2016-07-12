@@ -34,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
-import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -135,7 +134,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
     @Index(name = "MODEL_SUMMARY_ID_IDX")
-    @MetricTag(tag = "ModelID")
+    @MetricField(name = "ModelID")
     public String getId() {
         return id;
     }

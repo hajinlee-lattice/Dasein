@@ -61,7 +61,7 @@ public class ModelRun implements HasPid, HasName, HasAuditingFields {
     @Column(name = "DESCRIPTION", length = 4000)
     private String description;
     
-    @Column(name = "ERROR_MESSAGE")
+    @Column(name = "ERROR_MESSAGE", length = 4000)
     private String errorMessage;
     
     @Transient

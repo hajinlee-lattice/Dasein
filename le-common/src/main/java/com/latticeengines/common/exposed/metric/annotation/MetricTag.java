@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface MetricTag {
 
-    String tag();
+    String tag() default "";
 
+    String tagReferencingField() default "";
 }

@@ -24,6 +24,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -99,6 +100,11 @@ public class SamplingPropertyDef implements HasName, HasPid {
     public void addSamplingPropertyValue(SamplingPropertyValue samplingPropertyValue) {
         samplingPropertyValues.add(samplingPropertyValue);
         samplingPropertyValue.setSamplingPropertyDef(this);
+    }
+
+    @MetricTag(tagReferencingField = "name")
+    public String getSamplingPropertyStrValues() {
+        return samplingPropertyValues.toString();
     }
 
 }

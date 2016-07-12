@@ -2,7 +2,9 @@ package com.latticeengines.common.exposed.util;
 
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,11 +41,22 @@ public class MetricUtilsUnitTestNG {
         entry = MetricUtils.parseTag(instance, method);
         Assert.assertEquals("tenant1", entry.getValue());
 
+        method = clz.getDeclaredMethod("getTagField");
+        Assert.assertNotNull(method);
+        Assert.assertTrue(method.isAnnotationPresent(MetricTag.class));
+
+        metricTag = method.getAnnotation(MetricTag.class);
+        Assert.assertEquals(metricTag.tag(), "");
+
+        instance.setTagField("Tag3");
+        entry = MetricUtils.parseTag(instance, method);
+        Assert.assertEquals(new AbstractMap.SimpleEntry<>("tenant1", "Tag3"), entry);
+
         Map<String, String> tagSet = MetricUtils.parseTags(instance);
-        Assert.assertEquals(tagSet.size(), 2);
+        Assert.assertEquals(tagSet.size(), 3);
 
         Set<String> tags = MetricUtils.scanTags(SimpleTestClass.class);
-        Assert.assertEquals(tags.size(), 2);
+        Assert.assertEquals(tags.size(), 3);
     }
 
     @Test(groups = "unit")
@@ -59,11 +72,23 @@ public class MetricUtilsUnitTestNG {
         tagGroup.setSourceName("source1");
         instance.setTagGroup(tagGroup);
 
+        TestDimension tagGroup2 = new TestDimension();
+        tagGroup2.setDimensionTag("dimension");
+        instance.addDimension(tagGroup2);
+
         Map<String, String> tagSet = MetricUtils.parseTagGroup(instance, method);
+        Assert.assertEquals(tagSet.size(), 2);
+
+        method = clz.getDeclaredMethod("getDimensions");
+        Assert.assertNotNull(method);
+        Assert.assertTrue(method.isAnnotationPresent(MetricTagGroup.class));
+
+        tagSet = MetricUtils.parseTagGroup(instance, method);
         Assert.assertEquals(tagSet.size(), 1);
 
         tagSet = MetricUtils.parseTags(instance);
-        Assert.assertEquals(tagSet.size(), 1);
+        Assert.assertEquals(tagSet.size(), 3);
+
     }
 
     @Test(groups = "unit")
@@ -127,6 +152,7 @@ public class MetricUtilsUnitTestNG {
     private class SimpleTestClass implements Dimension, Fact {
         private String tenantId;
         private String sourceName;
+        private String tagField;
         private Integer field;
         private Boolean booleanField;
         private String stringField;
@@ -148,6 +174,15 @@ public class MetricUtilsUnitTestNG {
 
         public void setSourceName(String sourceName) {
             this.sourceName = sourceName;
+        }
+
+        @MetricTag(tagReferencingField = "tenantId")
+        public String getTagField() {
+            return tagField;
+        }
+
+        public void setTagField(String tagField) {
+            this.tagField = tagField;
         }
 
         @MetricField(name = "field", fieldType = MetricField.FieldType.INTEGER)
@@ -190,6 +225,8 @@ public class MetricUtilsUnitTestNG {
     private class ComplexTestClass implements Dimension, Fact {
         private SimpleTestClass tagGroup;
 
+        private List<Dimension> dimensions;
+
         @MetricTagGroup(excludes = { "Tag2" })
         @MetricFieldGroup(includes = { "field", "doubleField", "booleanField" }, excludes = { "doubleField" })
         public SimpleTestClass getTagGroup() {
@@ -198,6 +235,36 @@ public class MetricUtilsUnitTestNG {
 
         public void setTagGroup(SimpleTestClass tagGroup) {
             this.tagGroup = tagGroup;
+        }
+
+        @MetricTagGroup
+        public List<Dimension> getDimensions() {
+            return dimensions;
+        }
+
+        @SuppressWarnings("unused")
+        public void setDimensions(List<Dimension> dimensions) {
+            this.dimensions = dimensions;
+        }
+
+        public void addDimension(Dimension dimension) {
+            if (dimensions == null) {
+                dimensions = new ArrayList<>();
+            }
+            dimensions.add(dimension);
+        }
+    }
+
+    private class TestDimension implements Dimension {
+        private String dimensionTag;
+
+        @MetricTag(tag = "Tag4")
+        public String getDimensionTag() {
+            return dimensionTag;
+        }
+
+        public void setDimensionTag(String dimensionTag) {
+            this.dimensionTag = dimensionTag;
         }
     }
 
@@ -209,6 +276,10 @@ public class MetricUtilsUnitTestNG {
             tagGroup.setTenantId("tenant1");
             tagGroup.setSourceName("source1");
             instance.setTagGroup(tagGroup);
+
+            TestDimension tagGroup2 = new TestDimension();
+            tagGroup2.setDimensionTag("dimension");
+            instance.addDimension(tagGroup2);
             return instance;
         }
 

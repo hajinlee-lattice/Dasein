@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -85,6 +86,12 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
         this.parallelEnabled = parallelEnabled;
     }
 
+    @MetricTag(tag = "IsParallelSamplingEnabled")
+    public String getParallelEnabled() {
+        return String.valueOf(parallelEnabled);
+    }
+
+    @MetricTagGroup
     public List<SamplingPropertyDef> getSamplingPropertyDefs() {
         return samplingPropertyDefs;
     }
