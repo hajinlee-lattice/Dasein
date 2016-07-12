@@ -95,7 +95,7 @@
     },
     "HighlyPredictiveSmallPopulationDS": {
       "KeyWhenSortingByAscending": "4",
-      "Name": "highlypredictivesmallpopulationDS",
+      "Name": "highlypredictivesmallpopulationds",
       "MainClassName": "HighlyPredictiveSmallPopulationDS",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
@@ -105,7 +105,7 @@
         "numericalColumns": "numericalColumns",
         "eventColumn": "targetColumn"
       },
-      "ColumnTransformFilePath": "highlypredictivesmallpopulationDS.py"
+      "ColumnTransformFilePath": "highlypredictivesmallpopulationds.py"
     }
   }
 }

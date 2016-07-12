@@ -47,12 +47,12 @@ class NullIssueDS(ColumnRule):
     @overrides
     def getDescription(self):
         return "Check if column is overly positive predictive from missing values"
-        
+
     def isMissingAfterBucketing(self, val, type):
         if type == 'cat' and (val == '' or pd.isnull(val)):
             return True
         elif type == 'num' and val == 0:
-            return True    
+            return True
         else:
             return False
 
@@ -62,10 +62,10 @@ class NullIssueDS(ColumnRule):
 
         # get the over-all rate
         cntRateOverall = (len(eventCol), getRate(eventCol))
-        
+
         # get the column of values
         colVal = getColVal(colVal, colType, self.numBucket)
-        
+
         # get the rate with respect to each bucket
         cntRateGrouped = getGroupedRate(colVal, eventCol)
 
@@ -75,13 +75,18 @@ class NullIssueDS(ColumnRule):
         cntRateNull = [[x, y[0], y[1]]  for x, y in cntRateGrouped.items() if self.isMissingAfterBucketing(x, colType)]
 
         if len(cntRateNull) == 0:
-            return (False, 0, 0)
+            return (False, 0, 0, 1.0, 1.0)
         else:
             cntRateNull = cntRateNull[0]
-        
+
+        popRateNull = cntRateNull[1]*1.0/cntRateOverall[0]
+        liftRateNull = cntRateNull[2]/cntRateOverall[1]
+        popRateNonNull = 1.0 - popRateNull
+        liftRateNonNull = (1.0 - popRateNull*liftRateNull)/popRateNonNull
+
         if cntRateNull[2] <= cntRateOverall[1] * self.nullIssueLiftThreshold:
-            return (False, cntRateNull[1]*1.0/cntRateOverall[0], cntRateNull[2]/cntRateOverall[1])
-        
+            return (False, popRateNull, liftRateNull, popRateNonNull, liftRateNonNull)
+
         # get the rate with respect to non-missing values
         cntRateNonNull = [[x, y[0], y[1]] for x, y in cntRateGrouped.items() if not self.isMissingAfterBucketing(x, colType)]
 
@@ -97,11 +102,14 @@ class NullIssueDS(ColumnRule):
                 event += cntRate[1]*cntRate[2]
             else:
                 break
-        # if (r_nm/r_0 - 1) < (r_m/r_0 - 1)*threshold where r_nm is the rte from non-mising values, r_m is from missing values, r_0 is overall rate, the feature has null issues
+
+
+        # if (r_nm/r_0 - 1) < (r_m/r_0 - 1)*threshold where r_nm is the rte from non-mising values, r_m is from missing values, r_0 is overall rate, the feature has null issues.
+        # return population rate of null values, lift from null values, population rate of non-null values and the lift from non-null values
         if (event/pop - cntRateOverall[1]) < self.nullIssuePredictiveThreshold*(cntRateNull[2] - cntRateOverall[1]):
-            return (True, cntRateNull[1]*1.0/cntRateOverall[0], cntRateNull[2]/cntRateOverall[1])
+            return (True, popRateNull, liftRateNull, popRateNonNull, liftRateNonNull)
         else:
-            return (False, cntRateNull[1]*1.0/cntRateOverall[0], cntRateNull[2]/cntRateOverall[1])
+            return (False, popRateNull, liftRateNull, popRateNonNull, liftRateNonNull)
 
     def getColumnsInfo(self):
         return {key: val for key, val in self.columnsInfo.items()}
