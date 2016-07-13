@@ -33,7 +33,7 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private S3Service s3Service;
 
-    @Value("${eai.test.s3.bucket}")
+    @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
     @BeforeClass(groups = "aws")

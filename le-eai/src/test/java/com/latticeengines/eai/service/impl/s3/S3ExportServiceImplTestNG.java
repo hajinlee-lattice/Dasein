@@ -54,7 +54,7 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private URL csvUrl;
 
-    @Value("${eai.s3.datafile.bucket}")
+    @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
     @BeforeClass(groups = "aws")
