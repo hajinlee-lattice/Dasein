@@ -68,7 +68,7 @@ angular
             .parent('div.form-group')
             .removeClass('is-pristine');
 
-        var timestamp = new Date().getTime();
+        var timestamp = new Date().getTime(),
             artifactName = vm.artifactName = vm.stripExt(fileName),
             moduleName = vm.moduleName = artifactName + '_' + timestamp;
 

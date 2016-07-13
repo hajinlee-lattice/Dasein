@@ -266,8 +266,8 @@ Use this structure for angled buttons:
         font-weight: normal;
     }
     &.active {
-        padding-bottom: 7px;
-        margin-bottom: -6px;
+        padding-bottom: 2px;
+        margin-bottom: 0px;
         background: #fff;
         z-index: 2;
         span {

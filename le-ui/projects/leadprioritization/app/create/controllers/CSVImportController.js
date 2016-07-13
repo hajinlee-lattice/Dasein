@@ -6,8 +6,17 @@ angular
     'lp.create.import.report',
     '720kb.tooltips'
 ])
-.controller('csvImportController', function($scope, $state, $q, ResourceUtility, StringUtility, ImportService, ImportStore) {
+.controller('csvImportController', function(
+    $scope, $state, $q, ResourceUtility, StringUtility, ImportService, 
+    ImportStore, FeatureFlagService
+) {
     var vm = this;
+
+    FeatureFlagService.GetAllFlags().then(function(result) {
+        var flags = FeatureFlagService.Flags();
+        
+        vm.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+    });
 
     angular.extend(vm, {
         importErrorMsg: '',
@@ -104,7 +113,7 @@ angular
 
     vm.fileDone = function(result) {
         vm.uploaded = true;
-        
+
         if (result.Result) {
             vm.fileName = result.Result.name;
         }

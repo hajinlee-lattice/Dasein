@@ -65,7 +65,6 @@ angular
             }
 
             vm.startUpload = function() {
-                console.log('startUpload');
                 if (!vm.selectedFile) {
                     return false;
                 }
@@ -104,7 +103,6 @@ angular
             } 
 
             vm.changeFile = function(scope) {
-                console.log('changeFile');
                 var input = element,
                     fileName = vm.getFileName(input.value);
 
@@ -116,7 +114,6 @@ angular
             }
 
             vm.readHeaders = function(file) {
-                console.log('readHeaders');
                 vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 vm.compress_percent = 0;
 
@@ -135,7 +132,6 @@ angular
             }
 
             vm.processFile = function(file) {
-                console.log('processFile');
                 var deferred = $q.defer();
                 
                 try {
@@ -154,7 +150,6 @@ angular
             }
 
             vm.processWhole = function(file) {
-                console.log('processWhole');
                 var deferred = $q.defer();
 
                 vm.readFile(file)
@@ -167,7 +162,6 @@ angular
             }
 
             vm.processInChunks = function(file) {
-                console.log('processInChunks');
                 vm.compressing = true;
                 
                 var deferred = $q.defer(),
@@ -222,7 +216,6 @@ angular
             }
 
             vm.readFile = function(file) {
-                console.log('readFile');
                 var deferred = $q.defer(),
                     FR = new FileReader();
 
@@ -236,7 +229,6 @@ angular
             }
 
             vm.compressFileInWorker = function(file) {
-                console.log('compressFileInWorker');
                 vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 vm.compressing = true;
 
@@ -293,7 +285,6 @@ angular
             }
 
             vm.compressFile = function(file) {
-                console.log('compressFile');
                 vm.compressing = true;
                 vm.message = 'Compressing the file.  This might take awhile...';
                 
@@ -329,7 +320,6 @@ angular
             }
 
             vm.uploadFile = function(file) {
-                console.log('uploadFile');
                 vm.uploading = true;
                 vm.upload_percent = 0;
 
@@ -366,7 +356,6 @@ angular
             }
 
             vm.uploadResponse = function(result) {
-                console.log('uploadResponse');
                 if (typeof vm.fileDone == 'function') {
                     vm.fileDone({ result: result });
                 }
@@ -393,7 +382,7 @@ angular
             }
 
             vm.uploadProgress = function(e) {
-                if (e.total / 1024 > 4096000) {
+                if (e.total / 1024 > 4194304) {
                     vm.message = 'ERROR: Over ~4GB file size limit.';
 
                     var xhr = ImportStore.Get('cancelXHR', true);
@@ -407,7 +396,11 @@ angular
                         percent = vm.upload_percent = ((done / total) * 100);
 
                     if (vm.uploading) {
-                        vm.message = 'Sending: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+                        if (percent < 100) {
+                            vm.message = 'Sending: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+                        } else {
+                            vm.message = 'Processing...';
+                         }
                         vm.percentage = percent ? Math.ceil(percent) : 1;
                         $scope.$digest();
                     }

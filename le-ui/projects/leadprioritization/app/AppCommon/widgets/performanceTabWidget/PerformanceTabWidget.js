@@ -35,7 +35,7 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
             $scope.liftChartData = $scope.data.ThresholdLiftData;
 
             $scope.liftData = [[ ResourceUtility.getString("LIFT_GRID_LIFT") ]];
-            $scope.data.ThresholdLiftData.forEach(function(d){
+            ($scope.data.ThresholdLiftData || []).forEach(function(d){
                 $scope.liftData[0].push($filter("number")(d, 1) + "x");
             });
             $scope.liftColumns = [

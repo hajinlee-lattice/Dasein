@@ -153,10 +153,12 @@ var mainApp = angular.module('mainApp', [
     }
 
     function checkIfSessionIsInactiveEveryInterval() {
-        var ignoreStates = ['home.models.import','home.models.pmml','home.model.scoring'];
-        //console.log('checkInterval',$state.current.name);
+        var ignoreStates = [
+            'home.models.import','home.models.pmml','home.model.scoring',
+            'home.models.import.job','home.models.pmml.job'
+        ];
+
         if (ignoreStates.indexOf($state.current.name) >= 0) {
-            //console.log('ignored', $state.current.name, (Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >= TIME_INTERVAL_INACTIVITY_BEFORE_WARNING), Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp(), TIME_INTERVAL_INACTIVITY_BEFORE_WARNING);
             return;
         }
 
@@ -165,6 +167,7 @@ var mainApp = angular.module('mainApp', [
                 cancelCheckingIfSessionIsInactiveAndSetIdToNull();
                 openWarningModal();
             }
+
             $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
         }
     }

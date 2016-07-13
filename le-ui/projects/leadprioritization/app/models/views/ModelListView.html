@@ -17,8 +17,8 @@
             <div class="twelve columns list-header">
                 <div class="pull-left number-of-items" ng-if="totalLength">
                     <!--{{::ResourceUtility.getString('MODEL_LIST_TOTAL_MODELS', [totalLength, activeLength])}}-->
-                    <span class="badge blue-badge">Total: {{totalLength}}</span>,&nbsp;
-                    <span class="badge grey-badge">Active: {{activeLength}} / {{totalLength - activeLength}}</span>
+                    <span class="badge blue-badge">Total: {{totalLength}}</span>&nbsp;
+                    <span class="badge grey-badge">Active: {{activeLength}}</span>
                 </div>
                 <div class="create-model-menu">
                     <button 
@@ -26,19 +26,20 @@
                             class="button icon-button orange-button create-model"
                             ng-click="showCustomMenu = !showCustomMenu" 
                             ng-class="{ 'open': showCustomMenu }">
-                        Create<span class="fa fa-chevron-down"></span>
+                        Create Model
+                        <span class="fa fa-chevron-down" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
                     </button>
                     <ul class="model-menu" ng-show="showCustomMenu">
                         <li>
-                            <a ui-sref="home.models.import">Import CSV File</a>
+                            <a ui-sref="home.models.import">From Training Set</a>
                             <i class="fa fa-file-excel-o"></i>
                         </li>
                         <li>
-                            <a ui-sref="home.models.pmml">Import PMML File</a>
+                            <a ui-sref="home.models.pmml">From PMML File</a>
                             <i class="fa fa-file-code-o"></i>
                         </li>
-                        <li>
-                            <a href="javascript:void(0)" ng-click="importJSON()">Import JSON File</a>
+                        <li ng-if="showUploadSummaryJson">
+                            <a href="javascript:void(0)" ng-click="importJSON()">Import a JSON File</a>
                             <i class="fa fa-file-text-o"></i>
                         </li>
                     </ul>

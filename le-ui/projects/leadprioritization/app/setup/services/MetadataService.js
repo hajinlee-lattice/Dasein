@@ -23,7 +23,7 @@ angular.module('mainApp.setup.services.MetadataService', [
                     MetadataStore.SetMetadataForModel(modelId, result.ResultObj);
                     deferred.resolve(result.ResultObj);
                 } else {
-                    deferred.reject(result.ResultErrors);
+                    deferred.resolve(result);
                 }
             });
         }

@@ -64,7 +64,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     };
 
     this.SelectSuppressedCategories = function (modelSummary, categories) {
-        var sortedCategories = this.SortCategoriesByPowerSumDescending(modelSummary, categories);
+        var sortedCategories = this.SortCategoriesByPowerSumDescending(modelSummary, categories) || [];
         var suppressedCategories = null;
         //Select Categories Except for The Top 8
         if (sortedCategories.length > 8) {

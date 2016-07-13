@@ -86,6 +86,7 @@ nav.primary-nav {
         background: rgba(255,255,255,.08);
         text-align: center;
         position: relative;
+
         .ico {
             position: absolute;
             top: 50%;
@@ -117,9 +118,6 @@ nav.primary-nav {
               height: 19px;
             }
         }
-    }
-    .active > a > .ico-container {
-        background: rgba(239, 106, 48, 1);
     }
     padding-top: 40px;
     .open-button {
@@ -169,11 +167,33 @@ nav.primary-nav {
         & > li {
             white-space: nowrap;
         }
-        a, li > div {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            &:hover {
-                color: rgba(255, 255, 255, 0.8);
+        a {
+            display: inline-block;
+            width: 100%;
+        }
+        & > li {
+            &> a {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.7);
+            }
+            &:hover > a {
+                color: rgba(255, 255, 255, 0.85);
+                transition: none;
+            }
+            &:hover > a span:first-of-type {
+                background: #464646;
+                transition: none;
+                span {
+                    background-color: white;
+                }
+            }
+            &.active > a span:first-of-type,
+            &.active:hover > a span:first-of-type {
+                background: rgba(239, 106, 48, 1);
+                transition: all 250ms ease 1ms;
+                span {
+                    background-color: white;
+                }
             }
         }
         & > li > a span:first-of-type {
@@ -280,6 +300,10 @@ html:not(.no-cssmask) {
         }
         .label {
             display: inline-block;
+            -webkit-transition: none;
+            -moz-transition: none;
+            -ms-transition: none;
+            transition: none;
         }
         .open-button {
             .ico-arrow-open {

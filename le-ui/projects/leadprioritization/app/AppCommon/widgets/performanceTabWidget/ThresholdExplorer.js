@@ -180,13 +180,15 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             for (var i = 1; i < 10; i++) {
                 var xLoc = x(i * 10);
-                svg.append("line")
-                    .attr("x1", xLoc)
-                    .attr("y1", "0")
-                    .attr("x2", xLoc)
-                    .attr("y2", height)
-                    .attr("stroke-width", "1")
-                    .style("stroke", "white");
+                if (xLoc) {
+                    svg.append("line")
+                        .attr("x1", xLoc)
+                        .attr("y1", "0")
+                        .attr("x2", xLoc)
+                        .attr("y2", height)
+                        .attr("stroke-width", "1")
+                        .style("stroke", "white");
+                }
             }
 
             //==================================================
@@ -364,6 +366,9 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             function updateInfoElements(d)
             {
+                if (!d) {
+                    return;
+                }
                 infoElements.select("circle.y")
                     .attr("transform", "translate(" +
                     x(d.leads) + "," +

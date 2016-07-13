@@ -19,18 +19,16 @@
     transition: all 0ms linear;
 }
 .ng-enter {
-    opacity: 0;
+
 }
 .ng-enter-active {
-    opacity: 1;
+
 }
 .ng-leave {
-    position: absolute;
-    opacity: 1;
-    top: 3em;
+
 }
 .ng-leave-active {
-    opacity: 0;
+
 }
 
 .login-body {

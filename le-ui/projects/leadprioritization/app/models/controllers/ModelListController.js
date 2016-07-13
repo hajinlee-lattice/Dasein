@@ -3,15 +3,21 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.models.services.ModelService'
 ])
 .controller('ModelListController', function (
     $scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, 
-    WidgetService, ModelService, ModelStore, ImportModelModal
+    WidgetService, ModelService, ModelStore, ImportModelModal, FeatureFlagService
 ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
+
+    FeatureFlagService.GetAllFlags().then(function(result) {
+        var flags = FeatureFlagService.Flags();
+        $scope.showUploadSummaryJson = FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
+    });
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {

@@ -62,16 +62,16 @@ section.container.setup-import {
         left: 0;
         border-radius: 0;
         box-shadow: 1px 0 1px 0px #aaa;
-        transition: all 500ms linear;
+        transition: all 333ms linear;
         &.processing {
             background: #dddddd;
         }
         &.compressing {
-            transition: all 1000ms linear;
+            transition: all 333ms linear;
             background: #dfdfdf;
         }
         &.uploading {
-            background-color: #a2e264;
+            background-color: #b2f274;
         }
         &.uploading > span {
             display: block;
@@ -111,12 +111,12 @@ section.container.setup-import {
             -webkit-background-size: 50px 50px;
             -moz-background-size: 50px 50px;
             background-size: 50px 50px;
-            -webkit-animation: move 1s linear infinite;
-            -moz-animation: move 1s linear infinite;
+            -webkit-animation: move 2.5s linear infinite;
+            -moz-animation: move 2.5s linear infinite;
             overflow: hidden;
         }
         &.uploading.finished {
-            background: #a2e264;
+            background: #b2f274;
             width: 100%;
         }
     }

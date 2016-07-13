@@ -31,29 +31,32 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
     var chartData = data.ChartData;
-
-    // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
-    for (var i = 0; i < chartData.children.length; i++) {
-        if (chartData.children[i].children.length == 0) {
-            chartData.children.splice(i, 1);
+    if (chartData) {
+        // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
+        for (var i = 0; i < chartData.children.length; i++) {
+            if (chartData.children[i].children.length == 0) {
+                chartData.children.splice(i, 1);
+            }
         }
+
+        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     }
 
     $scope.backToSummaryView = false;
-    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     
     // Get Internal category list
     var internalCategoryObj = data.InternalAttributes;
-    $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
-    $scope.internalCategories = internalCategoryObj.categories;
-    $scope.showInternalCategories = internalCategoryObj.total > 0;
-    
-    // Get External category list
-    var externalCategoryObj = data.ExternalAttributes;
-    $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
-    $scope.externalCategories = externalCategoryObj.categories;
-    $scope.showExternalCategories = externalCategoryObj.total > 0;
-    
+    if (internalCategoryObj) {
+        $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
+        $scope.internalCategories = internalCategoryObj.categories;
+        $scope.showInternalCategories = internalCategoryObj.total > 0;
+        
+        // Get External category list
+        var externalCategoryObj = data.ExternalAttributes;
+        $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
+        $scope.externalCategories = externalCategoryObj.categories;
+        $scope.showExternalCategories = externalCategoryObj.total > 0;
+    }    
     // Calculate total
     var totalPredictors = data.TotalPredictors;
     $scope.topPredictorTitle = totalPredictors + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
@@ -136,48 +139,50 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 }
             });
 
-        var path = svg.datum(chartData).selectAll("path")
-            .data(fakePartition.nodes)
-        .enter().append("path")
-            .attr("display", function(d) { 
-                return d.depth ? null : "none"; 
-            }) // hide inner ring
-            .attr("d", arc)
-            .attr('stroke-width', function(d) { return d.depth === 1 ? 2.5 : 1; })
-            .style("stroke", "#fff")
-            .style("cursor", "pointer")
-            .attr('opacity', function(d) {
-                if  (d.depth === 1) {
-                    return 1;
-                } else if (d.depth === 2) {
-                    return hoverOpacity;
-                }
-            })
-            .style("fill", function(d) {
-                return d.color;
-            })
-            .on("click", attributeClicked)
-            .on("mouseover", function (d) {
-                var path = svg.selectAll("path")
-                    .filter(function(node) {
-                        return node.depth == 2 && node.name == d.name;
-                    });
+        if (chartData) {
+            var path = svg.datum(chartData).selectAll("path")
+                .data(fakePartition.nodes)
+            .enter().append("path")
+                .attr("display", function(d) { 
+                    return d.depth ? null : "none"; 
+                }) // hide inner ring
+                .attr("d", arc)
+                .attr('stroke-width', function(d) { return d.depth === 1 ? 2.5 : 1; })
+                .style("stroke", "#fff")
+                .style("cursor", "pointer")
+                .attr('opacity', function(d) {
+                    if  (d.depth === 1) {
+                        return 1;
+                    } else if (d.depth === 2) {
+                        return hoverOpacity;
+                    }
+                })
+                .style("fill", function(d) {
+                    return d.color;
+                })
+                .on("click", attributeClicked)
+                .on("mouseover", function (d) {
+                    var path = svg.selectAll("path")
+                        .filter(function(node) {
+                            return node.depth == 2 && node.name == d.name;
+                        });
 
-                path.style("opacity", 1);
+                    path.style("opacity", 1);
 
-                if (d.depth == 2) {
-                    showAttributeHover(d.name, d.color, d3.mouse(this)[0], d3.mouse(this)[1], path);
-                }
-            })
-            .on("mouseout", function (d) {
-                svg.selectAll("path")
-                    .filter(function(node) {
-                        return node.depth == 2;
-                    })
-                    .style("opacity", hoverOpacity);
-                hideAttributeHover();
-            })
-            .each(stash);
+                    if (d.depth == 2) {
+                        showAttributeHover(d.name, d.color, d3.mouse(this)[0], d3.mouse(this)[1], path);
+                    }
+                })
+                .on("mouseout", function (d) {
+                    svg.selectAll("path")
+                        .filter(function(node) {
+                            return node.depth == 2;
+                        })
+                        .style("opacity", hoverOpacity);
+                    hideAttributeHover();
+                })
+                .each(stash);
+        }
 
         function attributeClicked (d) {
             var category = null;
@@ -204,7 +209,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 return arc(b);
             };
         }
-        path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
+
+        if (path) {
+            path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
+        }
     };
 
     $scope.drawSummaryChart();

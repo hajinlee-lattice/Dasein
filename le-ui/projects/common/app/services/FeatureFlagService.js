@@ -40,7 +40,12 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         JOBS_PAGE: 'JobsPage',
         MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
-        API_CONSOLE_PAGE: 'APIConsolePage'
+        API_CONSOLE_PAGE: 'APIConsolePage',
+
+        ALLOW_PIVOT_FILE:'AllowPivotFile',
+        USE_ELOQUA_SETTINGS: 'UseEloquaSettings',
+        USE_MARKETO_SETTINGS: 'UseMarketoSettings',
+        USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings'
     };
     this.Flags = function(){ return flags; };
 

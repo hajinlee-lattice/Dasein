@@ -39,16 +39,17 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     var model = Model;
     model.ModelId = modelId;
     model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
-    model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
-    model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
-
+    if (model.ChartData) {
+        model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
+        model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
+        combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
+        model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
+    }
     // UI BAND-AID for DP-2854 here
-    combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
 
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
     var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
     model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
-    model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
 
     thresholdData = ThresholdExplorerService.PrepareData(model);
     model.ThresholdChartData = thresholdData.ChartData;
