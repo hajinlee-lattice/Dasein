@@ -49,6 +49,7 @@ class EnhancedFilesTest(TrainingTestBase):
         self.assertEqual(details["TrainingConversions"], 190)
         self.assertIsNotNone(details["RocScore"])
         self.assertIsNotNone(details["ConstructionTime"])
+        self.assertEqual(details["ModelType"], "PythonScriptModel")
 
         # Check Segmentations
         segments = summary["Segmentations"][0]["Segments"]

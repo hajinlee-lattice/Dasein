@@ -16,12 +16,16 @@ class PmmlModelSkeletonGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
+        mediator = self.mediator
         model = OrderedDict()
         model["__type"] = "PmmlModel:#LatticeEngines.DataBroker.ServiceInterface"
         model["AdjustmentFactor"] = 1
         model["ColumnMetadata"] = None
         model["InitialTransforms"] = None
         model["Target"] = 1
+
+        mediator.modelType = model["__type"]
+
         version = self.__getLatticeVersion()
         if version is not None:
             model["LatticeVersion"] = version

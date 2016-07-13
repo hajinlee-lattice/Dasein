@@ -29,6 +29,9 @@ class ModelGenerator(State, JsonGenBase):
         model["ColumnMetadata"] = None
         model["InitialTransforms"] = None
         model["Target"] = 1
+
+        mediator.modelType = model["__type"]
+
         version = self.__getLatticeVersion()
         if version is not None:
             model["LatticeVersion"] = version

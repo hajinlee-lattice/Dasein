@@ -34,7 +34,7 @@ class ModelDetailGenerator(State):
         result["TotalConversions"] = int(mediator.allDataPreTransform[schema["target"]].sum())
         result["TestingConversions"] = int(mediator.data[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
-
+        result["ModelType"] = mediator.modelType.split(":")[0]
         try:
             if self.mediator.rocscore is not None:
                 result["RocScore"] = self.mediator.rocscore

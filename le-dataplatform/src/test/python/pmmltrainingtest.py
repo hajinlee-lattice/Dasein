@@ -1,6 +1,8 @@
 from trainingtestbase import TrainingTestBase
  
 import sys
+import json
+import glob
  
 class PmmlTrainingTest(TrainingTestBase):
  
@@ -12,3 +14,6 @@ class PmmlTrainingTest(TrainingTestBase):
  
         traininglauncher = Launcher("modeldriver-pmml.json")
         traininglauncher.execute(False)
+
+        jsonDict = json.loads(open(glob.glob("./results/enhancements/modelsummary.json")[0]).read())
+        self.assertEquals(jsonDict["ModelDetails"]["ModelType"], "PmmlModel")
