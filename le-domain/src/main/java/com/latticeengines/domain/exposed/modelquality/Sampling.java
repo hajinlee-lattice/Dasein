@@ -87,6 +87,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
     }
 
     @MetricTag(tag = "IsParallelSamplingEnabled")
+    @JsonIgnore
     public String getParallelEnabled() {
         return String.valueOf(parallelEnabled);
     }
