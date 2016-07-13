@@ -9,7 +9,6 @@
     <div class="row">
         <div id="" class="twelve columns model-list">
         	
-
         	<table>
                 <thead>
                   <tr>
@@ -28,12 +27,12 @@
                                    data-ng-checked="vm.ruleNameToDataRules[rowWarning.dataRuleName].enabled"/>
                         </td>
                         <td>{{rowWarning.flaggedItemCount}}</td>
-                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].displayName}}
-                            <textarea id="" data-ng-if="vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains != null">
-                                {{vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains}}
-                            </textarea>
+                        <td>
+                            {{vm.ruleNameToDataRules[rowWarning.dataRuleName].displayName}}
                         </td>
-                        <td>{{vm.ruleNameToDataRules[rowWarning.dataRuleName].description}}
+                        <td>
+                            {{vm.ruleNameToDataRules[rowWarning.dataRuleName].description}}<br/>
+                            <textarea id="" class="form-control" data-ng-if="vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains != null">{{vm.ruleNameToDataRules[rowWarning.dataRuleName].properties.domains}}</textarea>
                         </td>
                     </tr>
                  </tbody>

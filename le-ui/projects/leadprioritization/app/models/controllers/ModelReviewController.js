@@ -2,10 +2,11 @@ angular.module('mainApp.models.review', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.models.services.ModelService',
     'mainApp.setup.services.MetadataService',
+    'mainApp.models.modals.RefineModelThresholdModal',
     'lp.models.review'
 ])
 .controller('ModelReviewRowController', function($scope, _, $rootScope, ResourceUtility, ModelService, ModelReviewStore,
-    ReviewData, Model) {
+    ReviewData, RefineModelThresholdModal, Model) {
     var vm = this,
         ruleNameToDataRules = {};
 
@@ -42,6 +43,8 @@ angular.module('mainApp.models.review', [
             vm.rowsExcluded += warning.flaggedItemCount;
         }
 
+        RefineModelThresholdModal.show();
+
         $rootScope.$broadcast('RowWarningToggled', warning, vm.ruleNameToDataRules[warning.dataRuleName]);
     };
 
@@ -52,7 +55,7 @@ angular.module('mainApp.models.review', [
     });
 })
 .controller('ModelReviewColumnController', function($scope, _, $stateParams, ResourceUtility, ModelService, MetadataService,
-    ModelReviewStore, ReviewData, ModelMetadata, Model) {
+    ModelReviewStore, ReviewData, ModelMetadata, RefineModelThresholdModal, Model) {
     var vm = this,
         ruleNameToDataRules = {},
         modelId = $stateParams.modelId;
@@ -106,6 +109,9 @@ angular.module('mainApp.models.review', [
         if (vm.showAll) {
             vm.customWarnedColumnCount = vm.totalWarnedColumnCount;
         }
+
+        RefineModelThresholdModal.show();
+
     };
 
     vm.allColumnWarnings.forEach(function(columnWarning) {
