@@ -31,7 +31,8 @@ class S3Writer {
         String accessKeyId = config.getProperty(S3SinkConfig.AWS_ACCESS_KEY_ID, String.class);
         String secretKey = config.getProperty(S3SinkConfig.AWS_SECRET_KEY, String.class);
         AmazonS3 s3Client;
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(accessKeyId) && org.apache.commons.lang.StringUtils.isNotEmpty(secretKey)) {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(accessKeyId)
+                && org.apache.commons.lang.StringUtils.isNotEmpty(secretKey)) {
             AWSCredentials credentials = new BasicAWSCredentials(accessKeyId, secretKey);
             s3Client = new AmazonS3Client(credentials);
         } else {
@@ -50,7 +51,7 @@ class S3Writer {
     void initialize() {
         log.info("Initializing prefix " + prefix + " in bucket " + bucket);
         List<S3ObjectSummary> objects = client.listObjects(bucket, prefix).getObjectSummaries();
-        for (S3ObjectSummary summary: objects) {
+        for (S3ObjectSummary summary : objects) {
             String key = summary.getKey();
             try {
                 log.info("Removing an existing object " + key);
@@ -78,7 +79,7 @@ class S3Writer {
     long getLastCommittedOffset(TopicPartition tp) {
         Long offset = -1L;
         List<S3ObjectSummary> objects = client.listObjects(bucket, prefix).getObjectSummaries();
-        for (S3ObjectSummary summary: objects) {
+        for (S3ObjectSummary summary : objects) {
             String key = summary.getKey();
             String filename = StringUtils.substringAfterLast(key, "/");
             if (!filename.startsWith(tp.topic()) || !filename.endsWith(".avro")) {

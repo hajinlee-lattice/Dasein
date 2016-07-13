@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -80,9 +81,17 @@ public class S3ServiceImpl implements S3Service {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
+            setAclRecursive(bucket, prefix);
         }
 
         return upload;
+    }
+
+    private void setAclRecursive(String bucket, String prefix) {
+        for (S3ObjectSummary summary: listObjects(bucket, prefix)) {
+            s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), CannedAccessControlList.AuthenticatedRead);
+        }
     }
 
     private String stackSafePrefix(String prefix) {
