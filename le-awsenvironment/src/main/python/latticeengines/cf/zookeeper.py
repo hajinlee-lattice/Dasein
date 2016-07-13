@@ -27,11 +27,10 @@ def template(environment, nodes, upload=False):
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP])
     for n in xrange(nodes):
         name = "EC2Instance%d" % (n + 1)
-        subnet = "SubnetId%d" % ( (n % 3) + 1 )
-        ec2 = EC2Instance(name, subnet_ref=subnet) \
+        subnet_ref = "SubnetId%d" % ( (n % 3) + 1 )
+        ec2 = EC2Instance(name, subnet_ref, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME) \
             .set_metadata(ec2_metadata(n)) \
             .mount("/dev/xvdb", 10) \
-            .add_tag("lattice-engines.cluster.type", "Zookeeper") \
             .add_sg(PARAM_SECURITY_GROUP)
         stack.add_resource(ec2)
     if upload:
@@ -122,7 +121,7 @@ def get_ips(stackname):
                 ips[node_id]['PublicIp'] = output['OutputValue']
     return ips
 
-def update_zoo_cfg(pem, ips, use_public_ip=False):
+def update_zoo_cfg(pem, ips):
     private_ips = [None] * len(ips)
     for node_id, node_ips in ips.items():
         private_ips[int(node_id) - 1] = node_ips['PrivateIp']

@@ -20,17 +20,19 @@ def _ec2_params():
 
 
 class EC2Instance(Resource):
-    def __init__(self, name, subnet_ref=None, instance_type=None, os="AmazonLinux"):
+    def __init__(self, name, subnet_ref, instance_type, ec2_key, os="AmazonLinux"):
+        assert isinstance(instance_type, Parameter)
+        assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
         self._template = {
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "ImageId": EC2Instance.__image_id(os),
-                "InstanceType": { "Ref": "InstanceType" },
+                "InstanceType": instance_type.ref(),
                 "SecurityGroupIds": [ ],
                 "SubnetId": { "Ref": subnet_ref },
                 "Monitoring": "true",
-                "KeyName": { "Ref" : "KeyName" },
+                "KeyName": ec2_key.ref(),
                 "UserData": EC2Instance.__userdata(name),
                 "Tags": []
             },
