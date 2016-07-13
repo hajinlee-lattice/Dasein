@@ -77,13 +77,17 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
         this.transformationGroup = transformationGroup;
     }
 
-    @MetricTag(tag = "ExcludePropDataColumns")
     public boolean isExcludePropDataColumns() {
         return excludePropDataColumns;
     }
 
     public void setExcludePropDataColumns(boolean excludePropDataColumns) {
         this.excludePropDataColumns = excludePropDataColumns;
+    }
+
+    @MetricTag(tag = "ExcludePropDataColumns")
+    public String getExcludePropDataColumns() {
+        return String.valueOf(excludePropDataColumns);
     }
 
     @MetricTag(tag = "TransformationGroupName")
