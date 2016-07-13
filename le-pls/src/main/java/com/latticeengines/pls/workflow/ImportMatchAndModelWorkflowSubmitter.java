@@ -210,29 +210,13 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 "Low coverage (empty exceeds x%)");
         masterColumnConfig.add(lowCoverage);
 
-        Triple<String, String, String> highPredictiveLowPopulation = Triple.of("HighlyPredictiveSmallPopulationDS",
-                "High Predictive Low Population", "High predictive, low population");
-        masterRowConfig.add(highPredictiveLowPopulation);
-
         Triple<String, String, String> positivelyPredictiveNulls = Triple.of("NullIssueDS",
                 "Positively Predictive Nulls", "Positively predictive nulls");
         masterColumnConfig.add(positivelyPredictiveNulls);
 
-        Triple<String, String, String> publicDomains = Triple.of("PublicDomains", "Public Domains",
-                "Exclude Records with Public Domains");
-        masterRowConfig.add(publicDomains);
-
-        Triple<String, String, String> customDomains = Triple.of("CustomDomains", "Custom Domains",
-                "Exclude specific domain(s)");
-        masterRowConfig.add(customDomains);
-
-        Triple<String, String, String> oneRecordPerDomain = Triple.of("OneRecordPerDomain", "One Record Per Domain",
-                "One Record Per Domain");
-        masterRowConfig.add(oneRecordPerDomain);
-
-        Triple<String, String, String> oneLeadPerAccount = Triple.of("OneLeadPerAccount", "One Lead Per Account",
-                "One Lead Per Account");
-        masterRowConfig.add(oneLeadPerAccount);
+        Triple<String, String, String> highPredictiveLowPopulation = Triple.of("HighlyPredictiveSmallPopulationDS",
+                "High Predictive Low Population", "High predictive, low population");
+        masterRowConfig.add(highPredictiveLowPopulation);
 
         List<DataRule> masterRuleList = new ArrayList<>();
         for (Triple<String, String, String> config : masterColumnConfig) {
