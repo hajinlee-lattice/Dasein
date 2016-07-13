@@ -29,8 +29,14 @@ class AwsEnvironment:
     def public_subnet_3(self):
         return self._props['public.subnet.id.3']
 
-    def private_subnet(self):
-        return self._props['private.subnet.id']
+    def private_subnet_1(self):
+        return self._props['private.subnet.id.1']
+
+    def private_subnet_2(self):
+        return self._props['private.subnet.id.2']
+
+    def private_subnet_3(self):
+        return self._props['private.subnet.id.3']
 
     def zk_sg(self):
         return self._props['zookeeper.sg']
@@ -39,7 +45,7 @@ class AwsEnvironment:
         return self._props['kafka.sg']
 
     def ecr_registry(self):
-        return self._props['ecr.registry']
+        return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
 
     def cf_bucket(self):
         return self._props['cf.s3.bucket']

@@ -31,7 +31,8 @@ def template(environment, nodes, upload=False):
         ec2 = EC2Instance(name, subnet_ref=subnet) \
             .set_metadata(ec2_metadata(n)) \
             .mount("/dev/xvdb", 10) \
-            .add_tag("lattice-engines.cluster.type", "Zookeeper")
+            .add_tag("lattice-engines.cluster.type", "Zookeeper") \
+            .add_sg(PARAM_SECURITY_GROUP)
         stack.add_resource(ec2)
     if upload:
         stack.validate()
@@ -53,9 +54,9 @@ def provision(environment, stackname):
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(bucket, _S3_CF_PATH, 'template.json'),
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
-            PARAM_SUBNET_1.config(config.public_subnet_1()),
-            PARAM_SUBNET_2.config(config.public_subnet_2()),
-            PARAM_SUBNET_3.config(config.public_subnet_3()),
+            PARAM_SUBNET_1.config(config.private_subnet_1()),
+            PARAM_SUBNET_2.config(config.private_subnet_2()),
+            PARAM_SUBNET_3.config(config.private_subnet_3()),
             PARAM_SECURITY_GROUP.config(config.zk_sg()),
             PARAM_INSTANCE_TYPE.config("t2.medium"),
             PARAM_KEY_NAME.config(config.ec2_key()),
@@ -107,18 +108,21 @@ def get_ips(stackname):
             node_id = key.replace('EC2Instance', '') \
                 .replace('PrivateIp', '') \
                 .replace('PublicIp', '') \
-                .replace('URL', '')
+                .replace('PrivateUrl', '') \
+                .replace('PublicUrl', '')
             if node_id not in ips:
                 ips[node_id] = {}
             if 'PrivateIp' in key:
                 ips[node_id]['PrivateIp'] = output['OutputValue']
-            elif 'URL' in key:
-                ips[node_id]['URL'] = output['OutputValue']
+            elif 'PrivateUrl' in key:
+                ips[node_id]['PrivateUrl'] = output['OutputValue']
+            elif 'PublicUrl' in key:
+                ips[node_id]['PublicUrl'] = output['OutputValue']
             elif 'PublicIp' in key:
                 ips[node_id]['PublicIp'] = output['OutputValue']
     return ips
 
-def update_zoo_cfg(pem, ips):
+def update_zoo_cfg(pem, ips, use_public_ip=False):
     private_ips = [None] * len(ips)
     for node_id, node_ips in ips.items():
         private_ips[int(node_id) - 1] = node_ips['PrivateIp']
@@ -134,7 +138,10 @@ def update_zoo_cfg(pem, ips):
     public_zk_hosts=[]
     private_zk_hosts=[]
     for node_id, node_ips in ips.items():
-        url = 'ec2-user@%s' % node_ips['URL']
+        if use_public_ip:
+            url = 'ec2-user@%s' % node_ips['PublicUrl']
+        else:
+            url = 'ec2-user@%s' % node_ips['PrivateIp']
         remote_path = '/opt/zookeeper/conf/zoo.cfg'
 
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
@@ -259,6 +266,7 @@ def parse_args():
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
+    parser1.add_argument('--public-ip', dest='publicip', tpye=bool, action='store_true', help='ssh through public ip')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")

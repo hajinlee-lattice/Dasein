@@ -34,9 +34,13 @@ class Stack(Template):
 
         # output info
         outputs = {
-            name + "URL": {
-                "Description" : "URL for EC2 instance " + name,
+            name + "PublicUrl": {
+                "Description" : "Public URL for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ name, "PublicDnsName" ]}
+            },
+            name + "PrivateUrl": {
+                "Description" : "Private URL for EC2 instance " + name,
+                "Value" : { "Fn::GetAtt" : [ name, "PrivateDnsName" ]}
             },
             name + "PublicIp": {
                 "Description" : "Public IP for EC2 instance " + name,

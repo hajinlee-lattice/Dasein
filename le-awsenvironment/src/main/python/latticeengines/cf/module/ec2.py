@@ -2,6 +2,7 @@ import json
 import os
 
 from .iam import InstanceProfile
+from .parameter import Parameter
 from .resource import Resource
 from .template import TEMPLATE_DIR
 
@@ -26,7 +27,7 @@ class EC2Instance(Resource):
             "Properties": {
                 "ImageId": EC2Instance.__image_id(os),
                 "InstanceType": { "Ref": "InstanceType" },
-                "SecurityGroupIds": [{ "Ref": "SecurityGroupId" }],
+                "SecurityGroupIds": [ ],
                 "SubnetId": { "Ref": subnet_ref },
                 "Monitoring": "true",
                 "KeyName": { "Ref" : "KeyName" },
@@ -50,6 +51,11 @@ class EC2Instance(Resource):
 
     def set_metadata(self, metadata):
         self._template["Metadata"] = metadata
+        return self
+
+    def add_sg(self, sg):
+        assert isinstance(sg, Parameter)
+        self._template["Properties"]["SecurityGroupIds"].append(sg.ref())
         return self
 
     def userdata(self, userdata):
