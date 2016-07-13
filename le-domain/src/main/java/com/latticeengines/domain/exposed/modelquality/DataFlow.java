@@ -86,6 +86,7 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     }
 
     @MetricTag(tag = "ExcludePropDataColumns")
+    @JsonIgnore
     public String getExcludePropDataColumns() {
         return String.valueOf(excludePropDataColumns);
     }
