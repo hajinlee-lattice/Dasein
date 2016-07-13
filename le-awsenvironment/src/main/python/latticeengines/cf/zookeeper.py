@@ -138,10 +138,7 @@ def update_zoo_cfg(pem, ips, use_public_ip=False):
     public_zk_hosts=[]
     private_zk_hosts=[]
     for node_id, node_ips in ips.items():
-        if use_public_ip:
-            url = 'ec2-user@%s' % node_ips['PublicUrl']
-        else:
-            url = 'ec2-user@%s' % node_ips['PrivateIp']
+        url = 'ec2-user@%s' % node_ips['PrivateUrl']
         remote_path = '/opt/zookeeper/conf/zoo.cfg'
 
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
@@ -266,7 +263,6 @@ def parse_args():
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
-    parser1.add_argument('--public-ip', dest='publicip', tpye=bool, action='store_true', help='ssh through public ip')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")
