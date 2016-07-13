@@ -106,7 +106,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     @Value("${eai.test.metadata.port}")
     protected int mockPort;
 
-    @BeforeClass(groups = { "functional", "deployment" })
+    @BeforeClass(groups = { "functional", "deployment", "aws", "aws-deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);

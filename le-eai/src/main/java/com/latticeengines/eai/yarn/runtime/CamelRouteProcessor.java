@@ -2,6 +2,8 @@ package com.latticeengines.eai.yarn.runtime;
 
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
+import com.latticeengines.eai.service.impl.camel.HdfsToS3RouteService;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -29,9 +31,13 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
+    @Autowired
+    private HdfsToS3RouteService amazonS3ExportService;
+
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
-        if (!ImportConfiguration.ImportType.CamelRoute.equals(importConfig.getImportType())) {
+        if (!ImportConfiguration.ImportType.CamelRoute.equals(importConfig.getImportType())
+                && !ImportConfiguration.ImportType.AmazonS3.equals(importConfig.getImportType())) {
             throw new IllegalArgumentException("An import of type " + importConfig.getImportType() + " was directed to "
                     + this.getClass().getSimpleName());
         }
@@ -39,23 +45,33 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
         System.out.println(JsonUtils.serialize(importConfig.getCamelRouteConfiguration()));
 
         CamelRouteConfiguration camelRouteConfiguration = importConfig.getCamelRouteConfiguration();
-        CamelContext camelContext = new DefaultCamelContext();
-        CamelRouteService<?> camelRouteService;
 
-        if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
-            camelRouteService = sftpToHdfsRouteService;
+        if (ImportConfiguration.ImportType.AmazonS3.equals(importConfig.getImportType())) {
+            invokdeS3Upload((HdfsToS3RouteConfiguration) camelRouteConfiguration);
         } else {
-            throw new UnsupportedOperationException(
-                    camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
+            CamelContext camelContext = new DefaultCamelContext();
+            CamelRouteService<?> camelRouteService;
+
+            if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
+                camelRouteService = sftpToHdfsRouteService;
+            } else {
+                throw new UnsupportedOperationException(
+                        camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
+            }
+
+            RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
+            camelContext.addRoutes(route);
+            camelContext.start();
+            waitForRouteToFinish(camelRouteService, camelRouteConfiguration);
+            camelContext.stop();
         }
 
-        RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
-        camelContext.addRoutes(route);
-        camelContext.start();
-        waitForRouteToFinish(camelRouteService, camelRouteConfiguration);
-        camelContext.stop();
-
         return null;
+    }
+
+    private void invokdeS3Upload(HdfsToS3RouteConfiguration configuration) {
+        amazonS3ExportService.downloadToLocal(configuration);
+        amazonS3ExportService.upload(configuration);
     }
 
     private void waitForRouteToFinish(CamelRouteService<?> camelRouteService,

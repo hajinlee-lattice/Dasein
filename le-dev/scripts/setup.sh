@@ -12,6 +12,7 @@ function processErrors
 
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
+printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
 
 # Expand aliases
 echo "Expanding aliases."

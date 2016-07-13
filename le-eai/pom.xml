@@ -19,6 +19,7 @@
         <le.baton.version>2.0.35-SNAPSHOT</le.baton.version>
         <le.network.version>2.0.35-SNAPSHOT</le.network.version>
         <le.testfwk.version>2.0.35-SNAPSHOT</le.testfwk.version>
+        <le.aws.version>2.0.35-SNAPSHOT</le.aws.version>
         <le.proxy.version>2.0.35-SNAPSHOT</le.proxy.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
@@ -248,6 +249,11 @@
             <version>${camel.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-aws</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-api</artifactId>
             <version>${hadoop.version}</version>
@@ -342,6 +348,11 @@
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${le.aws.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
@@ -550,6 +561,11 @@
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>${jcraft.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws.version}</version>
         </dependency>
     </dependencies>
 </project>

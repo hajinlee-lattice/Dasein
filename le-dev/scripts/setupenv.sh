@@ -2,6 +2,7 @@
 
 printf "%s\n" "${HADOOP_CONF_DIR:?You must set HADOOP_CONF_DIR}"
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
+printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
 
 cp $WSHOME/le-dev/hadoop/dev/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/mapred-site.xml $HADOOP_CONF_DIR
@@ -11,7 +12,6 @@ cp $WSHOME/le-dev/hadoop/dev/yarn-site.xml $HADOOP_CONF_DIR
 if [ ! -z "CATALINA_HOME" ]; then
     cp $WSHOME/le-dev/tomcat/dev/server.xml $CATALINA_HOME/conf/server.xml
 fi
-
 
 mkdir -p $WSHOME/le-dev/hadoop/artifacts/
 export TEZ_TARBALL=$WSHOME/le-dev/hadoop/artifacts/tez-0.8.2.tar.gz

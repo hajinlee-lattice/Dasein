@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "class_name")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration")
+        @JsonSubTypes.Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration"),
+        @JsonSubTypes.Type(value = HdfsToS3RouteConfiguration.class, name = "HdfsToS3RouteConfiguration")
 })
 public class CamelRouteConfiguration {
 

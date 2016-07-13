@@ -31,6 +31,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
         switch (importType) {
             case CamelRoute:
+            case AmazonS3:
                 log.info("Directing import job to " + camelRouteProcessor.getClass().getSimpleName());
                 return camelRouteProcessor.process(importConfig);
             case ImportTable:

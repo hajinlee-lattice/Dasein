@@ -25,7 +25,7 @@ def propDirsOpts():
 
 def commonOpts():
     args = [
-        # '-Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks',
+        '-Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks',
         '-Djava.util.logging.config.file=../le-dev/test-logging.properties',
         '-Dsqoop.throwOnError=true'
     ]

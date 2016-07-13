@@ -88,8 +88,16 @@ public class ImportConfiguration extends BasePayloadConfiguration {
         return importConfiguration;
     }
 
+    public static ImportConfiguration createForAmazonS3Configuration(
+            CamelRouteConfiguration camelRouteConfiguration) {
+        ImportConfiguration importConfiguration = new ImportConfiguration();
+        importConfiguration.setImportType(ImportType.AmazonS3);
+        importConfiguration.setCamelRouteConfiguration(camelRouteConfiguration);
+        return importConfiguration;
+    }
+
     public enum ImportType {
-        ImportTable, CamelRoute
+        ImportTable, CamelRoute, AmazonS3
     }
 
 }
