@@ -23,12 +23,12 @@ public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private EaiProxy eaiProxy;
 
-    @BeforeClass(groups = "aws-deployment")
+    @BeforeClass(groups = "aws")
     public void setup() throws Exception {
         exportServiceTestNG.setup();
     }
 
-    @Test(groups = "aws-deployment")
+    @Test(groups = "aws")
     public void testDownloadSftpByRestCall() throws Exception {
         HdfsToS3RouteConfiguration camelRouteConfiguration =  exportServiceTestNG.getRouteConfiguration();
         ImportConfiguration importConfig =
