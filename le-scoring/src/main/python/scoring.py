@@ -27,7 +27,7 @@ EXPORT_DF_SCRIPT_NAME="exportdfstep.py"
 ASSIGNCONVERSIONRATE_SCRIPT_NAME="assignconversionratetocategoricalcolumns.py"
 REMEDIATEDATARULESSTEP_SCRIPT_NAME="remediatedatarulesstep.py"
 WEBHDFS_SCRIPT_NAME="webhdfs.py"
-
+CUSTOMPROXY_SCRIPT_NAME="customproxystep.py"
 
 def main(argv):
     scoringFiles = [SCORING_SCRIPT_NAME,
@@ -50,7 +50,8 @@ def main(argv):
                     EXPORT_DF_SCRIPT_NAME,
                     ASSIGNCONVERSIONRATE_SCRIPT_NAME,
                     REMEDIATEDATARULESSTEP_SCRIPT_NAME,
-                    WEBHDFS_SCRIPT_NAME]
+                    WEBHDFS_SCRIPT_NAME,
+                    CUSTOMPROXY_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
