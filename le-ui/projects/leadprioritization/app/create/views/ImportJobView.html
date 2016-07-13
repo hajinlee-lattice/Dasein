@@ -1,11 +1,17 @@
 <section class="import-job-status ng-scope">
     <div class="row">
+        <div class="six columns offset-three">
+            <h2>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE')}}</h2>
+            <h3>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_SUPPORTING_TITLE')}}</h3>
+        </div>
+    </div>
+    <div class="row">
         <div class="six columns offset-three">    
 
-            <dl data-ng-if="jobStatus != null">
+            <dl>
                 <dt>Job Started</dt>
                 <dd>
-                    <div class="progress-icon">
+                    <div class="progress-icon"  data-ng-if="jobStatus != null">
                         <span data-ng-if="jobStatus == 'Pending'">
                             <span class="loading-small"></span>
                         </span>
@@ -13,11 +19,12 @@
                             <i class="fa fa-check"></i>
                         </span>
                     </div>
-                    <div>{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
+                    <div data-ng-if="startTimestamp">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
                 </dd>
             </dl>
-            <dl data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">
-                <dt>Loading Data</dt>
+            <dl>
+                <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
+                <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>
                 <dd>
                     <div class="progress-icon">
                         <span data-ng-if="jobStepsRunningStates.load_data">
@@ -30,11 +37,12 @@
                             <i class="fa fa-warning"></i>
                         </span>
                     </div>
-                    <div>{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
+                    <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
                 </dd>
             </dl>
-            <dl data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">
-                <dt>Matching to Data Cloud</dt>
+            <dl>
+                <dt data-ng-if="jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
+                <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
                 <dd>
                     <div class="progress-icon">
                         <span data-ng-if="jobStepsRunningStates.generate_insights">
@@ -47,11 +55,12 @@
                             <i class="fa fa-warning"></i>
                         </span>
                     </div>
-                    <div>{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
+                    <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
                 </dd>
             </dl>
-            <dl data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">
-                <dt>Building Model</dt>
+            <dl>
+                <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
+                <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
                 <dd>
                     <div class="progress-icon">
                         <span data-ng-if="jobStepsRunningStates.create_global_target_market">
@@ -64,7 +73,7 @@
                             <i class="fa fa-warning"></i>
                         </span>
                     </div>
-                    <div>{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
+                    <div data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
                 </dd>
             </dl>
         </div>
@@ -92,14 +101,13 @@
         <div class="six columns offset-three field-mapping-actions">
             <div class="pull-left">
                 <button ui-sref="home.models.import" class="button white-button" type="button">
-                    {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
+                    {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_CREATE_ANOTHER')}}
                 </button>
             </div>
             <div class="pull-right">
                 <button ui-sref="home.models" class="button orange-button" type="button">
                     {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST')}}
                 </button>
-                <p>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST_HELPER_TEXT')}}</p>
             </div>
         </div>
     </div>

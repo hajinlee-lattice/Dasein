@@ -388,11 +388,29 @@ Create Model: Validate Import View
 Create Model: Import Job Status
 ================================================================== */
 .import-job-status {
+    h2 {
+        margin-bottom: 10px;
+        margin-top: 40px;
+        font-weight: bold;
+    }
+    h3 {
+        font-weight: normal;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        text-transform: none;
+    }
     dt {
       width: 35%;
+      font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+      &.not-started {
+        color: #bbb;
+        font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
+      }
     }
     dd {
       margin: 0 0 0 35%;
+      font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
       .fa-warning {
         color: #D22027;
       }
