@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
@@ -25,8 +26,8 @@ public class ScoreHistoryEntityMgrImpl extends BaseFabricEntityMgrImpl<ScoreReco
     private static final Log log = LogFactory.getLog(ScoreHistoryEntityMgrImpl.class);
 
     public ScoreHistoryEntityMgrImpl() {
-        super(new BaseFabricEntityMgrImpl.Builder().recordType("ScoreHistory").topic("ScoreHistory").store("REDIS")
-                .repository("RTS"));
+        super(new BaseFabricEntityMgrImpl.Builder().recordType("ScoreHistory").topic("ScoreHistory")
+              .scope(TopicScope.ENVIRONMENT_PRIVATE).store("REDIS").repository("RTS"));
     }
 
     public void publish(List<Record> requests, List<RecordScoreResponse> responses) {

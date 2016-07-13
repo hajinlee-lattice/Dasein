@@ -167,7 +167,6 @@ public class RedisDataStoreImpl implements FabricDataStore {
     }
 
     private String avroToJson(GenericRecord record) {
-        boolean pretty = false;
         GenericDatumReader<GenericRecord> reader = null;
         JsonEncoder encoder = null;
         ByteArrayOutputStream output = null;
@@ -175,7 +174,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
             output = new ByteArrayOutputStream();
             reader = new GenericDatumReader<GenericRecord>();
             DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
-            encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
+            encoder = EncoderFactory.get().jsonEncoder(schema, output);
             writer.write(record, encoder);
             encoder.flush();
             output.flush();
