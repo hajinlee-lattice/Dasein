@@ -5,7 +5,10 @@ Description:
 '''
 import os
 import shutil
+import pwd
 import imp
+from leframework.webhdfs import WebHDFS
+from urlparse import urlparse
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
 
@@ -34,7 +37,7 @@ class CustomProxyStep(PipelineStep):
                         return
                     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
                     hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
-                    files = hdfs.listdir(localTargetFilePath)
+                    files = hdfs.listdir(self.targetFilePath)
                     if size.size <= 0:
                         logger.info("custom target file %s does not exist." % (self.targetFilePath))
                         return
