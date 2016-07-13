@@ -191,47 +191,56 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     }
 
     private List<DataRule> getMasterList() {
-        List<Triple<String, String, Boolean>> masterColumnConfig = new ArrayList<>();
-        List<Triple<String, String, Boolean>> masterRowConfig = new ArrayList<>();
+        List<Triple<String, String, String>> masterColumnConfig = new ArrayList<>();
+        List<Triple<String, String, String>> masterRowConfig = new ArrayList<>();
 
-        Triple<String, String, Boolean> overlyPredictiveColumns = Triple.of("Overly Predictive Columns",
-                "overly predictive single category / value range", false);
-        masterColumnConfig.add(overlyPredictiveColumns);
-        Triple<String, String, Boolean> lowCoverage = Triple.of("Low Coverage", "Low coverage (empty exceeds x%)",
-                false);
-        masterColumnConfig.add(lowCoverage);
-        Triple<String, String, Boolean> populatedRowCount = Triple.of("Populated Row Count",
-                "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ", false);
-        masterColumnConfig.add(populatedRowCount);
-        Triple<String, String, Boolean> positivelyPredictiveNulls = Triple.of("Positively Predictive Nulls",
-                "Positively predictive nulls", false);
-        masterColumnConfig.add(positivelyPredictiveNulls);
-        Triple<String, String, Boolean> uniqueValueCount = Triple.of("Count Unique Value Rule",
-                "Unique value count in column - Integrated from Profiling", false);
+        Triple<String, String, String> uniqueValueCount = Triple.of("UniqueValueCountDS", "Count Unique Value Rule",
+                "Unique value count in column - Integrated from Profiling");
         masterColumnConfig.add(uniqueValueCount);
-        Triple<String, String, Boolean> publicDomains = Triple.of("Public Domains",
-                "Exclude Records with Public Domains ", false);
-        masterRowConfig.add(publicDomains);
-        Triple<String, String, Boolean> customDomains = Triple
-                .of("Custom Domains", "Exclude specific domain(s)", false);
-        masterRowConfig.add(customDomains);
-        Triple<String, String, Boolean> oneRecordPerDomain = Triple.of("One Record Per Domain",
-                "One Record Per Domain", false);
-        masterRowConfig.add(oneRecordPerDomain);
-        Triple<String, String, Boolean> oneLeadPerAccount = Triple.of("One Lead Per Account", "One Lead Per Account",
-                false);
-        masterRowConfig.add(oneLeadPerAccount);
-        Triple<String, String, Boolean> highPredictiveLowPopulation = Triple.of("High Predictive Low Population",
-                "High predictive, low population", false);
+
+        Triple<String, String, String> populatedRowCount = Triple.of("PopulatedRowCountDS", "Populated Row Count",
+                "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ");
+        masterColumnConfig.add(populatedRowCount);
+
+        Triple<String, String, String> overlyPredictiveColumns = Triple.of("OverlyPredictiveDS",
+                "Overly Predictive Columns", "overly predictive single category / value range");
+        masterColumnConfig.add(overlyPredictiveColumns);
+
+        Triple<String, String, String> lowCoverage = Triple.of("LowCoverageDS", "Low Coverage",
+                "Low coverage (empty exceeds x%)");
+        masterColumnConfig.add(lowCoverage);
+
+        Triple<String, String, String> highPredictiveLowPopulation = Triple.of("HighlyPredictiveSmallPopulationDS",
+                "High Predictive Low Population", "High predictive, low population");
         masterRowConfig.add(highPredictiveLowPopulation);
 
+        Triple<String, String, String> positivelyPredictiveNulls = Triple.of("NullIssueDS",
+                "Positively Predictive Nulls", "Positively predictive nulls");
+        masterColumnConfig.add(positivelyPredictiveNulls);
+
+        Triple<String, String, String> publicDomains = Triple.of("PublicDomains", "Public Domains",
+                "Exclude Records with Public Domains");
+        masterRowConfig.add(publicDomains);
+
+        Triple<String, String, String> customDomains = Triple.of("CustomDomains", "Custom Domains",
+                "Exclude specific domain(s)");
+        masterRowConfig.add(customDomains);
+
+        Triple<String, String, String> oneRecordPerDomain = Triple.of("OneRecordPerDomain", "One Record Per Domain",
+                "One Record Per Domain");
+        masterRowConfig.add(oneRecordPerDomain);
+
+        Triple<String, String, String> oneLeadPerAccount = Triple.of("OneLeadPerAccount", "One Lead Per Account",
+                "One Lead Per Account");
+        masterRowConfig.add(oneLeadPerAccount);
+
         List<DataRule> masterRuleList = new ArrayList<>();
-        for (Triple<String, String, Boolean> config : masterColumnConfig) {
+        for (Triple<String, String, String> config : masterColumnConfig) {
             DataRule rule = generateDataRule(config);
             masterRuleList.add(rule);
         }
 
-        for (Triple<String, String, Boolean> config : masterRowConfig) {
+        for (Triple<String, String, String> config : masterRowConfig) {
             DataRule rule = generateDataRule(config);
             masterRuleList.add(rule);
         }
@@ -239,12 +248,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         return masterRuleList;
     }
 
-    private DataRule generateDataRule(Triple<String, String, Boolean> config) {
+    private DataRule generateDataRule(Triple<String, String, String> config) {
         DataRule rule = new DataRule();
-        rule.setName(org.springframework.util.StringUtils.trimAllWhitespace(config.getLeft()));
-        rule.setDisplayName(config.getLeft());
-        rule.setDescription(config.getMiddle());
-        rule.setFrozenEnablement(config.getRight());
+        rule.setName(config.getLeft());
+        rule.setDisplayName(config.getMiddle());
+        rule.setDescription(config.getRight());
+        rule.setFrozenEnablement(false);
         rule.setColumnsToRemediate(new ArrayList<String>());
         rule.setEnabled(false);
         rule.setProperties(new HashMap<String, String>());

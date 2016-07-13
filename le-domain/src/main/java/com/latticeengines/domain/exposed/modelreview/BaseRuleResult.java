@@ -13,6 +13,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -42,13 +43,14 @@ public abstract class BaseRuleResult implements HasPid, HasTenant {
     protected String dataRuleName;
 
     @JsonProperty
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
     @JsonProperty
     @Column(name = "MODEL_ID", nullable = false)
+    @Index(name = "IX_MODEL_ID")
     private String modelId;
 
     @Override

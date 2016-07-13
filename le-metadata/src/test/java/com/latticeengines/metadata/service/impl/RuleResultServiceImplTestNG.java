@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -47,6 +48,7 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         assertEquals(retrievedResults.size(), results.size());
         assertEquals(retrievedResults, results);
+        JsonUtils.serialize(retrievedResults); // Confirm this works without exception
     }
 
     private ColumnRuleResult generateColumnResult(String modelId, Tenant tenant) {
@@ -76,6 +78,7 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         assertEquals(retrievedResults.size(), results.size());
         assertEquals(retrievedResults, results);
+        JsonUtils.serialize(retrievedResults); // Confirm this works without exception
     }
 
     private RowRuleResult generateRowResult(String modelId, Tenant tenant) {

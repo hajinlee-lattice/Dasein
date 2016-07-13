@@ -40,14 +40,15 @@ class DataRulePipeline(Pipeline):
     def apply(self, dataFrame, configMetadata):
         for step in self.pipelineSteps:
             try:
+                logger.info("Applying DataRule " + step.__class__.__name__)
                 step.apply(dataFrame, configMetadata)
             except Exception as e:
-                logger.error("Caught Exception while applying datarule. Stack trace below")
-                logger.error(e)
+                logger.exception("Caught Exception while applying datarule. Stack trace below" + str(e))
         return dataFrame
 
     def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
         for step in self.pipelineSteps:
+            logger.info("Processing results for DataRule " + step.__class__.__name__)
             fileSuffix = ""
             if isinstance(step, ColumnRule):
                 avroSchema = getColumnSchema()
@@ -62,14 +63,18 @@ class DataRulePipeline(Pipeline):
                 fileSuffix = "TableRule"
                 results = step.getRowsToRemove()
 
+
             recordWriter = io.DatumWriter(avroSchema)
             outputFileName = step.__class__.__name__ + '_' + fileSuffix + '.avro'
             dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
                                                  recordWriter, writers_schema=avroSchema, codec='deflate')
 
             if not results:
-                dataWriter.close()
+                logger.info("No DataRule results for " + step.__class__.__name__)
+                dataWriter.close() # write out avro file with no rows
                 continue
+            else:
+                logger.info("DataRule results: " + str(results))
 
             index = 1
             if isinstance(step, ColumnRule):

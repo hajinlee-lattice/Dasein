@@ -361,21 +361,26 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         attributeStats["HighNullValueRate"].append(colName)
         filtered = True
 
+    notPopulated = False;
     if diagnostics["PopulationRate"] == 0.0:
-        return (index, diagnostics)
+        logger.warn("PopulationRate in data profile would remove this column: %s" % colName)
+        notPopulated = True
 
     logger.info("Processing column %s." % colName)
     if colName in stringcols:
         # Categorical column
-        columnData = columnData.apply(lambda col: None if isnull(col) else str(col))
         diagnostics["Type"] = "Categorical"
+        columnData = columnData.apply(lambda col: None if isnull(col) else str(col))
         uniqueValues = len(columnData.unique())
-        mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
-            return (index, diagnostics)
+
+        if notPopulated:
+            mode = None
+        else:
+            mode = columnData.value_counts().idxmax()
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
         # Band column
@@ -389,7 +394,6 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
 
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
-            return (index, diagnostics)
         if bucketingParams is not None:
             # Apply bucketing with specified type and parameters
             bands = bucketDispatcher.bucketColumn(columnData, eventVector, bucketingParams[0], bucketingParams[1])
