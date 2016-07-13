@@ -88,6 +88,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String predefinedSelectionVersion;
     private ColumnSelection customizedColumnSelection;
     private String pivotArtifactPath;
+    private String modelType;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -481,6 +482,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("PivotArtifactPath")
     public void setPivotArtifactPath(String pivotArtifactPath) {
         this.pivotArtifactPath = pivotArtifactPath;
+    }
+
+    @JsonProperty("ModelType")
+    @Column(name = "MODEL_TYPE", nullable = false)
+    public String getModelType() {
+        return modelType;
+    }
+
+    @JsonProperty("ModelType")
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 
     @Transient
