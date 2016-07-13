@@ -26,7 +26,7 @@ public class DateTimeCleanupFunction extends CleanupFunction implements Function
     protected Tuple cleanupArguments(TupleEntry arguments) {
         try {
             Long dateTime = arguments.getLong(dateTimeField);
-            if (DateTimeUtils.isInValidRange(dateTime)) {
+            if (dateTime != 0 && DateTimeUtils.isInValidRange(dateTime)) {
                 return new Tuple(dateTime);
             } else {
                 return null;
