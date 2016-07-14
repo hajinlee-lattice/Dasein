@@ -1,4 +1,4 @@
-package com.latticeengines.snowflakedb.util;
+package com.latticeengines.snowflakedb.exposed.util;
 
 import java.util.Arrays;
 import java.util.List;

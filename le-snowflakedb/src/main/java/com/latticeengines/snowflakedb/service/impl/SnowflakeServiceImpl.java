@@ -2,6 +2,7 @@ package com.latticeengines.snowflakedb.service.impl;
 
 import java.util.List;
 
+import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -13,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;
-import com.latticeengines.snowflakedb.util.SnowflakeUtils;
 
 @Component("snowflakeService")
 public class SnowflakeServiceImpl implements SnowflakeService {

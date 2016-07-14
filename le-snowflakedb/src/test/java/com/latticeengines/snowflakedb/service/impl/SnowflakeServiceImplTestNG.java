@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;
-import com.latticeengines.snowflakedb.util.SnowflakeUtils;
+import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
