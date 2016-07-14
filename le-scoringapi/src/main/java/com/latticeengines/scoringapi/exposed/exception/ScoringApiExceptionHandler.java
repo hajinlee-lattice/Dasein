@@ -119,12 +119,13 @@ public class ScoringApiExceptionHandler {
         return generateExceptionResponse(code, ex, false);
     }
 
-    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert) {
+    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex,
+            boolean fireAlert) {
         return generateExceptionResponse(code, ex, fireAlert, false, true);
     }
 
-    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert,
-            boolean includeErrors, boolean includeTrace) {
+    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex,
+            boolean fireAlert, boolean includeErrors, boolean includeTrace) {
         ExceptionHandlerErrors exceptionHandlerErrors = new ExceptionHandlerErrors();
         List<String> errorMessages = new ArrayList<String>();
         Throwable cause = ex;
@@ -153,8 +154,8 @@ public class ScoringApiExceptionHandler {
         if (fireAlert) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes();
-            String identifier = String.valueOf(attributes.getRequest().getAttribute(
-                    RequestLogInterceptor.IDENTIFIER_KEY));
+            String identifier = String.valueOf(
+                    attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
             alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
@@ -162,8 +163,8 @@ public class ScoringApiExceptionHandler {
             alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
 
             String logUrl = SPLUNK_URL + identifier + "%22";
-            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-" + code + "-"
-                    + ex.getClass().getName();
+            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-"
+                    + code + "-" + ex.getClass().getName();
             alertService.triggerCriticalEvent(errorMessage, logUrl, dedupKey, alertDetails);
         }
 
@@ -173,7 +174,7 @@ public class ScoringApiExceptionHandler {
         if (warnings.hasWarnings()) {
             requestInfo.put("Warnings", JsonUtils.serialize(warnings.getWarnings()));
         }
-        requestInfo.logSummary();
+        requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
         return exceptionHandlerErrors;
     }

@@ -2,7 +2,9 @@ package com.latticeengines.scoringinternalapi.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -13,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
@@ -28,9 +31,12 @@ import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
+import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
@@ -40,6 +46,48 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public abstract class BaseScoring {
+
+    private static final String REQUEST_DURATION_MS = "requestDurationMS";
+
+    private static final String SOURCE = "Source";
+
+    private static final String TOTAL_RECORDS = "TotalRecords";
+
+    private static final String IS_BULK_REQUEST = "IsBulkRequest";
+
+    private static final String IS_ENRICHMENT_REQUESTED = "IsEnrichmentRequested";
+
+    private static final String ID_TYPE = "IdType";
+
+    private static final String RULE = "Rule";
+
+    private static final String MODEL_ID = "ModelId";
+
+    private static final String LATTICE_ID = "LatticeId";
+
+    private static final String RECORD_ID = "RecordId";
+
+    private static final String SCORE = "Score";
+
+    private static final String ERROR_KEY = "Error";
+
+    private static final String ERRORS = "errors";
+
+    private static final String ERROR_DESCRIPTION = "error_description";
+
+    private static final String ERROR = "error";
+
+    private static final String HAS_WARNING = "HasWarning";
+
+    private static final String HAS_ERROR = "HasError";
+
+    private static final String WARNINGS = "Warnings";
+
+    private static final String RECORD_CARDINALITY = "RecordCardinality";
+
+    private static final String GET_TENANT_FROM_OAUTH = "getTenantFromOAuth";
+
+    private static final String AVERAGE_TOTAL_DURATION_PER_RECORD = "requestDurationAveragePerRecordMS";
 
     protected static final int MAX_ALLOWED_RECORDS = 200;
 
@@ -75,7 +123,8 @@ public abstract class BaseScoring {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
+    protected List<Model> getActiveModels(HttpServletRequest request, ModelType type,
+            CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(type);
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
@@ -94,10 +143,12 @@ public abstract class BaseScoring {
         }
     }
 
-    protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
-            boolean considerAllStatus, CustomerSpace customerSpace) throws ParseException {
+    protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start,
+            int offset, int maximum, boolean considerAllStatus, CustomerSpace customerSpace)
+            throws ParseException {
         start = validateStartValue(start);
-        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus, customerSpace);
+        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus,
+                customerSpace);
     }
 
     protected int getModelCount(HttpServletRequest request, String start, boolean considerAllStatus,
@@ -106,8 +157,8 @@ public abstract class BaseScoring {
         return fetchModelCount(request, start, considerAllStatus, customerSpace);
     }
 
-    protected ScoreResponse scorePercentileRecord(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace) {
+    protected ScoreResponse scorePercentileRecord(HttpServletRequest request,
+            ScoreRequest scoreRequest, CustomerSpace customerSpace) {
         return scoreRecord(request, scoreRequest, false, customerSpace);
     }
 
@@ -121,33 +172,40 @@ public abstract class BaseScoring {
         return scoreRecords(request, scoreRequest, true, customerSpace);
     }
 
-    protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace) {
+    protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request,
+            ScoreRequest scoreRequest, CustomerSpace customerSpace) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace);
     }
 
-    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
-            CustomerSpace customerSpace) {
+    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest,
+            boolean isDebug, CustomerSpace customerSpace) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            httpStopWatch.split("getTenantFromOAuth");
+            httpStopWatch.split(GET_TENANT_FROM_OAUTH);
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequest));
             }
-            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest,
+                    isDebug);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
-                requestInfo.put("Warnings", JsonUtils.serialize(warnings.getWarnings()));
+                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
             }
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
             }
 
-            requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));
-            requestInfo.put("HasError", Boolean.toString(false));
-            requestInfo.put("Score", String.valueOf(response.getScore()));
+            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings()));
+            requestInfo.put(HAS_ERROR, Boolean.toString(false));
+            requestInfo.put(SCORE, String.valueOf(response.getScore()));
+            requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
+            requestInfo.put(IS_ENRICHMENT_REQUESTED,
+                    String.valueOf(scoreRequest.isPerformEnrichment()));
+            requestInfo.put(RECORD_ID, response.getId());
+            requestInfo.put(LATTICE_ID, response.getLatticeId());
+            requestInfo.put(ID_TYPE, scoreRequest.getIdType());
 
-            requestInfo.logSummary();
+            requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
             RequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace);
             SingleRecordMeasurement measurement = new SingleRecordMeasurement(metrics);
@@ -171,9 +229,10 @@ public abstract class BaseScoring {
         metrics.setGetTenantFromOAuthDurationMS(getSplit(splits, "getTenantFromOAuthDurationMS"));
         metrics.setMatchRecordDurationMS(getSplit(splits, "matchRecordDurationMS"));
         metrics.setParseRecordDurationMS(getSplit(splits, "parseRecordDurationMS"));
-        metrics.setRequestDurationMS(getSplit(splits, "requestDurationMS"));
+        metrics.setRequestDurationMS(getSplit(splits, REQUEST_DURATION_MS));
         metrics.setRequestPreparationDurationMS(getSplit(splits, "requestPreparationDurationMS"));
-        metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
+        metrics.setRetrieveModelArtifactsDurationMS(
+                getSplit(splits, "retrieveModelArtifactsDurationMS"));
         metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
         metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
 
@@ -184,10 +243,11 @@ public abstract class BaseScoring {
         return Integer.valueOf(splits.get(key));
     }
 
-    private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
-            boolean considerAllStatus, CustomerSpace customerSpace) {
+    private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start,
+            int offset, int maximum, boolean considerAllStatus, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus);
+            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum,
+                    considerAllStatus);
         }
     }
 
@@ -198,8 +258,8 @@ public abstract class BaseScoring {
         }
     }
 
-    private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
-            boolean isDebug, CustomerSpace customerSpace) {
+    private List<RecordScoreResponse> scoreRecords(HttpServletRequest request,
+            BulkRecordScoreRequest scoreRequests, boolean isDebug, CustomerSpace customerSpace) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
@@ -208,13 +268,14 @@ public abstract class BaseScoring {
         }
 
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
+        List<RecordScoreResponse> response = null;
 
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            httpStopWatch.split("getTenantFromOAuth");
+            httpStopWatch.split(GET_TENANT_FROM_OAUTH);
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequests));
             }
-            List<RecordScoreResponse> response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug);
+            response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug);
 
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
@@ -222,7 +283,84 @@ public abstract class BaseScoring {
 
             return response;
         } finally {
-            requestInfo.logSummary();
+            logBulkScoreSummary(scoreRequests, response);
+        }
+    }
+
+    private void logBulkScoreSummary(BulkRecordScoreRequest scoreRequests,
+            List<RecordScoreResponse> responseList) {
+        requestInfo.put(IS_BULK_REQUEST, Boolean.TRUE.toString());
+        requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
+        requestInfo.put(SOURCE, scoreRequests.getSource());
+        Map<String, String> stopWatchSplits = requestInfo.getStopWatchSplits();
+
+        if (CollectionUtils.isEmpty(responseList)) {
+            requestInfo.logSummary(stopWatchSplits);
+        } else {
+            int idx = 0;
+            if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
+                try {
+                    int avgTime = new Float(
+                            (Integer.parseInt(stopWatchSplits.get(REQUEST_DURATION_MS)) * 1.0
+                                    / responseList.size())).intValue();
+                    requestInfo.put(AVERAGE_TOTAL_DURATION_PER_RECORD, String.valueOf(avgTime));
+                } catch (Exception ex) {
+                    // ignore any exception as it should not fail overall score
+                    // request
+                }
+            }
+            for (RecordScoreResponse resp : responseList) {
+                Record record = scoreRequests.getRecords().get(idx++);
+                for (ScoreModelTuple scoreTuple : resp.getScores()) {
+                    Map<String, String> logMap = new HashMap<>();
+                    String modelId = scoreTuple.getModelId();
+                    Double score = scoreTuple.getScore();
+                    String error = scoreTuple.getError();
+                    String errorDesc = scoreTuple.getErrorDescription();
+                    List<Warning> warningList = new ArrayList<>();
+                    requestInfo.put(WARNINGS, null);
+                    if (!CollectionUtils.isEmpty(resp.getWarnings())) {
+                        for (Warning warning : warnings.getWarnings()) {
+                            if (warning.getDescription().contains(modelId)) {
+                                warningList.add(warning);
+                            }
+                        }
+
+                        if (!warningList.isEmpty()) {
+                            requestInfo.put(WARNINGS, JsonUtils.serialize(warningList));
+                        }
+                    }
+
+                    requestInfo.put(HAS_WARNING, String.valueOf(!warningList.isEmpty()));
+                    boolean hasError = !com.latticeengines.common.exposed.util.StringUtils
+                            .objectIsNullOrEmptyString(error);
+                    requestInfo.put(HAS_ERROR, Boolean.toString(hasError));
+
+                    if (hasError) {
+                        Map<String, String> errorMap = new HashMap<>();
+                        errorMap.put(ERROR, error);
+                        errorMap.put(ERROR_DESCRIPTION, errorDesc);
+                        errorMap.put(ERRORS, JsonUtils.serialize(new ArrayList<String>()));
+
+                        requestInfo.put(ERROR_KEY, JsonUtils.serialize(errorMap));
+                    } else {
+                        requestInfo.put(ERROR_KEY, null);
+                    }
+                    requestInfo.put(SCORE, String.valueOf(score));
+                    requestInfo.put(RECORD_ID, resp.getId());
+                    requestInfo.put(RECORD_CARDINALITY,
+                            String.valueOf(record.getModelAttributeValuesMap().size()));
+                    requestInfo.put(LATTICE_ID, resp.getLatticeId());
+                    requestInfo.put(MODEL_ID, scoreTuple.getModelId());
+                    requestInfo.put(RULE, record.getRule());
+                    requestInfo.put(ID_TYPE, record.getIdType());
+                    requestInfo.put(IS_ENRICHMENT_REQUESTED,
+                            String.valueOf(record.isPerformEnrichment()));
+
+                    requestInfo.putAll(logMap);
+                    requestInfo.logSummary(stopWatchSplits);
+                }
+            }
         }
     }
 

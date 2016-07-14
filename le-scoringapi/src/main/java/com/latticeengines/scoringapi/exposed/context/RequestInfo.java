@@ -12,5 +12,7 @@ public interface RequestInfo {
 
     void putAll(Map<String, String> map);
 
-    void logSummary();
+    void logSummary(Map<String, String> stopWatchSplits);
+
+    Map<String, String> getStopWatchSplits();
 }
