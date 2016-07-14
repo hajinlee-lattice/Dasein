@@ -21,11 +21,12 @@
         <li data-ng-if="showAlerts" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.alerts"><span class="ico-container"><span class="ico ico-alerts ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</span></a>
         </li>
-
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.jobs"><span class="ico-container"><span class="ico ico-scoring ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</span></a>
         </li>
-
+        <li>
+            <a ui-sref="home.model.review"><span class="ico-container"><span class="ico ico-light-gray" title="{{ResourceUtility.get('NAVIGATION_SIDEBAR_LP_REVIEW')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}</span></a>
+        </li>
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.refine"><span class="ico-container"><span class="ico ico-refine ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
         </li>

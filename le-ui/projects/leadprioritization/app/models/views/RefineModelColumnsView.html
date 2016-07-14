@@ -13,33 +13,22 @@
     </div>
 
     <div class="row">
-        <div id="" class="twelve columns model-list">
-
-        	<table>
-                <thead>
-                  <tr>
-                    <th>Exclude</th>
-                    <th>Columns</th>
-                    <th>Warning Type</th>
-                    <th>Description</th>
-                    <th>&nbsp;</th>
-                    <!-- <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th> -->
-                  </tr>
-                </thead>
-                <tbody>
-                    <tr data-ng-repeat="columnWarning in vm.columnWarningsToDisplay">
-                        <td>
-                            <input type="checkbox" id="" data-ng-click="vm.warningExcludeToggled($event, columnWarning)"
-                                   data-ng-checked="vm.ruleNameToDataRules[columnWarning.dataRuleName].enabled"/>
-                        </td>
-                        <td>{{columnWarning.flaggedItemCount}}</td>
-                        <td>{{vm.ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</td>
-                        <td>{{vm.ruleNameToDataRules[columnWarning.dataRuleName].description}}</td>
-                        <td><i class="fa fa-angle-double-down fa-lg"></i></td>
-                    </tr>
-                 </tbody>
-            </table>
-
+        <div id="" class="ten columns model-list">
+            <div class="row panel-heading custom-heading">
+                <span class="columns one">Exclude</span>
+                <span class="columns two">Columns</span>
+                <span class="columns two">Warning Type</span>
+                <span class="columns four">Description</span>
+                <span class="columns two">&nbsp;</span>
+            </div>
+            <div>
+                <div
+                    data-model-review-column-warning
+                    data-ng-repeat="columnWarning in vm.columnWarningsToDisplay"
+                    column="columnWarning"
+                    rules="vm.ruleNameToDataRules">
+                </div>
+            </div>
         </div>
     </div>
 

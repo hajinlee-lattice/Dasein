@@ -107,16 +107,6 @@ angular
 
                     return deferred.promise;
                 },
-                ModelMetadata: function($q, $stateParams, MetadataStore) {
-                    var deferred = $q.defer(),
-                        id = $stateParams.modelId;
-
-                    MetadataStore.GetMetadataForModel(id).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                },
                 loadAlaSQL: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
                 }
@@ -286,7 +276,11 @@ angular
 
                     ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
                         if (result.Success === true) {
-                            ModelReviewStore.SetReviewData(modelId, result.Result);
+                            var modelReviewData = result.Result;
+                            ModelReviewStore.SetReviewData(modelId, modelReviewData);
+                            for (var i in modelReviewData.dataRules) {
+                                ModelReviewStore.AddDataRule(modelReviewData.dataRules[i]);
+                            }
                             deferred.resolve(result.Result);
                         }
                     });
