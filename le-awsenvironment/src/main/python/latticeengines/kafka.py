@@ -18,13 +18,12 @@ def provision(environment, stackname, profile, keyfile, consul=None):
 
     # provision and bootstrap zookeeper
     zookeeper.provision(environment, stackname + "-zk")
-    pub_zk_hosts, pri_zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile, consul)
+    zk_hosts = zookeeper.bootstrap(stackname + "-zk", keyfile, consul)
 
     # provision kafka cloud formation
-    elbs = kafka.provision(environment, stackname, pri_zk_hosts, profile, consul=consul)
+    elbs = kafka.provision(environment, stackname, zk_hosts, profile, consul=consul)
 
-    print "public zk address: %s/%s" % (pub_zk_hosts, stackname)
-    print "private zk address: %s/%s" % (pri_zk_hosts, stackname)
+    print "zk address: %s/%s" % (zk_hosts, stackname)
     print "broker address: %s:9092" % elbs["BrokerLoadBalancer"]
     print "schema registry address: http://%s/" % elbs["SchemaRegistryLoadBalancer"]
     print "kafka connect address: http://%s/" % elbs["KafkaConnectLoadBalancer"]

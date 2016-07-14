@@ -87,12 +87,11 @@ def bootstrap_cli(args):
 def bootstrap(stackname, pem, consul):
     ips = get_ips(stackname)
     print 'Found ips in output:\n', ips
-    pub_zk, pri_zk = update_zoo_cfg(pem, ips)
+    zk = update_zoo_cfg(pem, ips)
     if consul is not None:
         print 'Saving zk connection strings to consul server %s' % consul
-        write_to_consul(consul, "%s/public_zk" % stackname, pub_zk + "/" + stackname)
-        write_to_consul(consul, "%s/private_zk" % stackname, pri_zk + "/" + stackname)
-    return pub_zk, pri_zk
+        write_to_consul(consul, "%s/zk" % stackname, zk + "/" + stackname)
+    return zk
 
 def info(args):
     ips = get_ips(args.stackname)
@@ -105,26 +104,20 @@ def get_ips(stackname):
         key = output['OutputKey']
         if 'EC2Instance' in key:
             node_id = key.replace('EC2Instance', '') \
-                .replace('PrivateIp', '') \
-                .replace('PublicIp', '') \
-                .replace('PrivateUrl', '') \
-                .replace('PublicUrl', '')
+                .replace('Ip', '') \
+                .replace('Url', '')
             if node_id not in ips:
                 ips[node_id] = {}
-            if 'PrivateIp' in key:
-                ips[node_id]['PrivateIp'] = output['OutputValue']
-            elif 'PrivateUrl' in key:
-                ips[node_id]['PrivateUrl'] = output['OutputValue']
-            elif 'PublicUrl' in key:
-                ips[node_id]['PublicUrl'] = output['OutputValue']
-            elif 'PublicIp' in key:
-                ips[node_id]['PublicIp'] = output['OutputValue']
+            if 'Ip' in key:
+                ips[node_id]['Ip'] = output['OutputValue']
+            elif 'Url' in key:
+                ips[node_id]['Url'] = output['OutputValue']
     return ips
 
 def update_zoo_cfg(pem, ips):
     private_ips = [None] * len(ips)
     for node_id, node_ips in ips.items():
-        private_ips[int(node_id) - 1] = node_ips['PrivateIp']
+        private_ips[int(node_id) - 1] = node_ips['Ip']
 
     zoo_cfg = zk_properties(len(ips), private_ips)
     temp_file = '/tmp/zoo.cfg'
@@ -134,10 +127,9 @@ def update_zoo_cfg(pem, ips):
     with open(temp_file, 'r') as tf:
         print '\nzoo.cfg content is:\n\n', tf.read()
 
-    public_zk_hosts=[]
-    private_zk_hosts=[]
+    zk_hosts=[]
     for node_id, node_ips in ips.items():
-        url = 'ec2-user@%s' % node_ips['PrivateIp']
+        url = 'ec2-user@%s' % node_ips['Ip']
         remote_path = '/opt/zookeeper/conf/zoo.cfg'
 
         print 'Bootstrapping node %s [%s] ...' %(node_id, url)
@@ -166,27 +158,22 @@ def update_zoo_cfg(pem, ips):
             print result
         print 'Done. %.2f seconds.' % (time.time() -t1)
 
-        public_zk_hosts.append(node_ips['PublicIp'] + ":2181")
-        private_zk_hosts.append(node_ips['PrivateIp'] + ":2181")
+        zk_hosts.append(node_ips['Ip'] + ":2181")
         sys.stdout.flush()
 
     print '\n================================================================================'
-    print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)
-    print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
+    print 'ZK Connection String: %s' % ','.join(zk_hosts)
     print '================================================================================\n'
-    return ','.join(public_zk_hosts), ','.join(private_zk_hosts)
+    return ','.join(zk_hosts)
 
 def print_zk_hosts(ips):
-    public_zk_hosts=[]
-    private_zk_hosts=[]
+    zk_hosts=[]
     for node_id, node_ips in ips.items():
-        public_zk_hosts.append(node_ips['PublicIp'] + ":2181")
-        private_zk_hosts.append(node_ips['PrivateIp'] + ":2181")
+        zk_hosts.append(node_ips['Ip'] + ":2181")
     print '\n================================================================================'
-    print 'Public ZK Connection String: %s' % ','.join(public_zk_hosts)
-    print 'Private ZK Connection String: %s' % ','.join(private_zk_hosts)
+    print 'ZK Connection String: %s' % ','.join(zk_hosts)
     print '================================================================================\n'
-    return  ','.join(public_zk_hosts), ','.join(private_zk_hosts)
+    return  ','.join(zk_hosts)
 
 def teardown_cli(args):
     teardown(args.stackname, consul=args.consul)

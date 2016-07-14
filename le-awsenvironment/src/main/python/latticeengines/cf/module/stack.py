@@ -34,20 +34,20 @@ class Stack(Template):
 
         # output info
         outputs = {
-            name + "PublicUrl": {
-                "Description" : "Public URL for EC2 instance " + name,
-                "Value" : { "Fn::GetAtt" : [ name, "PublicDnsName" ]}
-            },
-            name + "PrivateUrl": {
-                "Description" : "Private URL for EC2 instance " + name,
+            # name + "PublicUrl": {
+            #     "Description" : "Public URL for EC2 instance " + name,
+            #     "Value" : { "Fn::GetAtt" : [ name, "PublicDnsName" ]}
+            # },
+            # name + "PublicIp": {
+            #     "Description" : "Public IP for EC2 instance " + name,
+            #     "Value" : { "Fn::GetAtt" : [ name, "PublicIp" ]}
+            # },
+            name + "Url": {
+                "Description" : "URL for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ name, "PrivateDnsName" ]}
             },
-            name + "PublicIp": {
-                "Description" : "Public IP for EC2 instance " + name,
-                "Value" : { "Fn::GetAtt" : [ name, "PublicIp" ]}
-            },
-            name + "PrivateIp": {
-                "Description" : "Private IP for EC2 instance " + name,
+            name + "Ip": {
+                "Description" : "IP for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ name, "PrivateIp" ]}
             }
         }
