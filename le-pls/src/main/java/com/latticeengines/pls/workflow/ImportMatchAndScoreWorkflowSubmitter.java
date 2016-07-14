@@ -98,6 +98,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             }
         }
 
+        String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
+
         return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -113,7 +115,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/" + sourceFile.getDisplayName().replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
+                .outputFilename("/" + sourceFileDisplayName.replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //
