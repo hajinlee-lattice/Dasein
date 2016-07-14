@@ -102,14 +102,13 @@ def convertCleanDataFrame(colNames, df, catColumnNamesSet, numColumnNamesSet, re
             col = [strValueFix(x) for x in col]
         if colType == 'num':
             try:
-                col = [float(str(x)) for x in col]
-		col1 = [float(x) for x in col] # exception will be thrown in SelfServeModeling that will be caught
+                col = [x if pd.isnull(x) else float(x) for x in col]
             except Exception as e:
-		print "Exception while converting to float: %s" % e
-                print c, "columnName that caused an exception"
-                print "column values and types"
+                print "Exception while converting to float: %s" % e
+                print c, "is columnName that caused an exception"
+                print "Column values and types"
                 for x in col:
-                    print col, type(col)
+                    print x, type(x)
         allCols.append(col)
     if returnListofCols: return allCols
     numRows = len(allCols[0])
