@@ -31,6 +31,7 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
@@ -545,6 +546,26 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
         this.setPredefinedSelectionName(predefinedSelection.getName());
+    }
+
+    @Transient
+    @JsonIgnore
+    @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
+    public Double getCrossValidatedMean() {
+        String rawModelSummary = getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode mean = modelSummaryJson.get("CrossValidatedMeanOfModelAccuracy");
+        return mean != null ? mean.asDouble() : 0D;
+    }
+
+    @Transient
+    @JsonIgnore
+    @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
+    public Double getCrossValidatedStd() {
+        String rawModelSummary = getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode std = modelSummaryJson.get("CrossValidatedStdOfModelAccuracy");
+        return std != null ? std.asDouble() : 0D;
     }
 
     // this annotation is not being called, for now I'll set lastUpdateTime

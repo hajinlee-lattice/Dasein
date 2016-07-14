@@ -25,7 +25,6 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
         propData = new PropData();
         propData.setName("PropData1");
-        propData.setVersion("version1");
         propData.setMetadataVersion("MetadataVersion1");
     }
 

@@ -39,6 +39,9 @@ public class ModelingParameters {
     private String predefinedSelectionName;
 
     @JsonProperty
+    private String selectedVersion;
+    
+    @JsonProperty
     private String moduleName;
 
     @JsonProperty
@@ -109,6 +112,14 @@ public class ModelingParameters {
 
     public void setPredefinedSelectionName(String predefinedSelectionName) {
         this.predefinedSelectionName = predefinedSelectionName;
+    }
+    
+    public String getSelectedVersion() {
+        return selectedVersion;
+    }
+
+    public void setSelectedVersion(String selectedVersion) {
+        this.selectedVersion = selectedVersion;
     }
 
     public String getModuleName() {

@@ -37,10 +37,6 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @Column(name = "MATCH", nullable = false)
     private Boolean match;
 
-    @JsonProperty("exclude_propdata_columns")
-    @Column(name = "EXCLUDE_PROPDATA_COLUMNS", nullable = true)
-    private boolean excludePropDataColumns = false;
-
     @JsonProperty("transform_group")
     @Column(name = "TRANSFORM_GROUP", nullable = true)
     private TransformationGroup transformationGroup;
@@ -48,10 +44,6 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @JsonProperty("transform_dedup_type")
     @Column(name = "TRANSFORM_DEDUP_TYPE", nullable = true)
     private DedupType dedupType;
-
-    @JsonProperty("predefined_selection_name")
-    @Column(name = "PREDEFINED_SELECTION_NAME", nullable = true)
-    private String predefinedSelectionName;
 
     public Boolean getMatch() {
         return match;
@@ -77,20 +69,6 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
         this.transformationGroup = transformationGroup;
     }
 
-    public boolean isExcludePropDataColumns() {
-        return excludePropDataColumns;
-    }
-
-    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
-        this.excludePropDataColumns = excludePropDataColumns;
-    }
-
-    @MetricTag(tag = "ExcludePropDataColumns")
-    @JsonIgnore
-    public String getExcludePropDataColumns() {
-        return String.valueOf(excludePropDataColumns);
-    }
-
     @MetricTag(tag = "TransformationGroupName")
     @JsonIgnore
     public String getTransformationGroupStrValue() {
@@ -101,15 +79,6 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @JsonIgnore
     public String getDedupTypeStrValue() {
         return dedupType.name();
-    }
-
-    @MetricTag(tag = "PredefinedSelectionName")
-    public String getPredefinedSelectionName() {
-        return predefinedSelectionName;
-    }
-
-    public void setPredefinedSelectionName(String predefinedSelectionName) {
-        this.predefinedSelectionName = predefinedSelectionName;
     }
 
     @Override

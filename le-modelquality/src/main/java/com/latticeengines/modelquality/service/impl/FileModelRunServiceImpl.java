@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
+import com.latticeengines.domain.exposed.modeling.factory.PropDataFactory;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -61,6 +62,8 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String modelName = createModel(config, sourceFile);
         ModelSummary modelSummary = retrieveModelSummary(modelName);
 
+        String modelId = modelSummary.getId();
+        
         saveMetricsToReportDB(modelSummary, config);
     }
 
@@ -147,6 +150,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         parameters.setRunTimeParams(runTimeParams);
 
         DataFlowFactory.configDataFlow(config, parameters);
+        PropDataFactory.configPropData(config, parameters);
     }
 
     @SuppressWarnings("rawtypes")

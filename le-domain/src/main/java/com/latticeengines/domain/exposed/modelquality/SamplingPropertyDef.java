@@ -103,6 +103,7 @@ public class SamplingPropertyDef implements HasName, HasPid {
     }
 
     @MetricTag(tagReferencingField = "name")
+    @JsonIgnore
     public String getSamplingPropertyStrValues() {
         return samplingPropertyValues.toString();
     }

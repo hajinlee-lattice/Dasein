@@ -169,7 +169,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         pipelinePropertyDef.setName("minCategoricalCount");
 
         PipelinePropertyValue pipeLinePropertyValue = new PipelinePropertyValue();
-        pipeLinePropertyValue.setValue("4");
+        pipeLinePropertyValue.setValue("5");
         pipeLinePropertyValue.setPipelinePropertyDef(pipelinePropertyDef);
         pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
 
@@ -183,7 +183,6 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected PropData createPropData() {
         PropData propData = new PropData();
         propData.setName("propData1");
-        propData.setVersion("version1");
         propData.setMetadataVersion("metadataVersion1");
         return propData;
     }
@@ -191,7 +190,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected DataSet createDataSet() {
 
         DataSet dataSet = new DataSet();
-        dataSet.setName("DataSet1");
+        dataSet.setName("DataSet1"); 
         dataSet.setIndustry("Industry1");
         dataSet.setTenant(new Tenant("Model_Quality_Test.Model_Quality_Test.Production"));
         dataSet.setDataSetType(DataSetType.SOURCETABLE);
@@ -270,6 +269,12 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         def.addAlgorithmPropertyValue(value);
         algorithm.addAlgorithmPropertyDef(def);
 
+        def = new AlgorithmPropertyDef("cross_validation");
+        value = new AlgorithmPropertyValue("5");
+        def.addAlgorithmPropertyValue(value);
+        algorithm.addAlgorithmPropertyDef(def);
+
+        
         return algorithm;
 
     }

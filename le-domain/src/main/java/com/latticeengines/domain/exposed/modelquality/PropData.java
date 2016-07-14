@@ -32,6 +32,14 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @JsonProperty("exclude_propdata_columns")
+    @Column(name = "EXCLUDE_PROPDATA_COLUMNS", nullable = true)
+    private boolean excludePropDataColumns = false;
+    
+    @JsonProperty("predefined_selection_name")
+    @Column(name = "PREDEFINED_SELECTION_NAME", nullable = true)
+    private String predefinedSelectionName;
+
     @Column(name = "VERSION", nullable = false)
     private String version;
 
@@ -74,4 +82,22 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
         this.metadataVersion = metadataVersion;
     }
 
+    @MetricTag(tag = "ExcludePropDataColumns")
+    @JsonIgnore
+    public boolean isExcludePropDataColumns() {
+        return excludePropDataColumns;
+    }
+
+    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
+        this.excludePropDataColumns = excludePropDataColumns;
+    }
+    
+    @MetricTag(tag = "PredefinedSelectionName")
+    public String getPredefinedSelectionName() {
+        return predefinedSelectionName;
+    }
+
+    public void setPredefinedSelectionName(String predefinedSelectionName) {
+        this.predefinedSelectionName = predefinedSelectionName;
+    }
 }

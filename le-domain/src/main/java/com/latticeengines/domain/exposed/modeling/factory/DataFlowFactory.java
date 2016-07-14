@@ -26,10 +26,6 @@ public class DataFlowFactory {
         if (dataFlow.getDedupType() != null) {
             parameters.setDeduplicationType(dataFlow.getDedupType());
         }
-        if (dataFlow.getPredefinedSelectionName() != null) {
-            parameters.setPredefinedSelectionName(dataFlow.getPredefinedSelectionName());
-        }
-        parameters.setExcludePropDataColumns(dataFlow.isExcludePropDataColumns());
 
         log.info("Successfully configured the DataFlow");
     }
