@@ -33,6 +33,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean retainMatchTables;
 
+    private boolean excludePublicDomains;
+
     @NotNull
     private MatchCommandType matchCommandType;
 
@@ -137,6 +139,16 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("retain_match_tables")
     public void setRetainMatchTables(boolean retainMatchTables) {
         this.retainMatchTables = retainMatchTables;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public boolean isExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public void setExcludePublicDomains(boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
     }
 
     @JsonProperty("match_queue")

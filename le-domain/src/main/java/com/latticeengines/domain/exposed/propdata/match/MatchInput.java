@@ -30,6 +30,7 @@ public class MatchInput implements Fact, Dimension {
     private int numRows;
 
     private Boolean returnUnmatched = true;
+    private Boolean excludePublicDomains = false;
 
     private InputBuffer inputBuffer;
     private IOBufferType outputBufferType;
@@ -61,6 +62,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("ReturnUnmatched")
     public void setReturnUnmatched(Boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    @JsonProperty("ExcludePublicDomains")
+    public Boolean getExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    @JsonProperty("ExcludePublicDomains")
+    public void setExcludePublicDomains(Boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
     }
 
     @JsonProperty("KeyMap")
