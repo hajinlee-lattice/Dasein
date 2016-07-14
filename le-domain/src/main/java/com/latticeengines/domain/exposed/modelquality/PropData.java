@@ -82,12 +82,17 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
         this.metadataVersion = metadataVersion;
     }
 
-    @MetricTag(tag = "ExcludePropDataColumns")
     @JsonIgnore
     public boolean isExcludePropDataColumns() {
         return excludePropDataColumns;
     }
 
+    @MetricTag(tag = "ExcludePropDataColumns")
+    @JsonIgnore
+    public String isExcludePropDataColumnsStrValue() {
+        return "" + excludePropDataColumns;
+    }
+    
     public void setExcludePropDataColumns(boolean excludePropDataColumns) {
         this.excludePropDataColumns = excludePropDataColumns;
     }

@@ -552,19 +552,23 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedMean() {
-        String rawModelSummary = getDetails().getPayload();
-        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode mean = modelSummaryJson.get("CrossValidatedMeanOfModelAccuracy");
-        return mean != null ? mean.asDouble() : 0D;
+        return getSummaryFieldValue("CrossValidatedMeanOfModelAccuracy");
     }
 
     @Transient
     @JsonIgnore
     @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedStd() {
+        return getSummaryFieldValue("CrossValidatedStdOfModelAccuracy");
+    }
+
+    private Double getSummaryFieldValue(String field) {
+        if (getDetails() == null || getDetails().getPayload() == null) {
+            return null;
+        }
         String rawModelSummary = getDetails().getPayload();
         JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode std = modelSummaryJson.get("CrossValidatedStdOfModelAccuracy");
+        JsonNode std = modelSummaryJson.get(field);
         return std != null ? std.asDouble() : 0D;
     }
 
