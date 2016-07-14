@@ -43,9 +43,6 @@ class EC2Instance(Resource):
             }
         }
 
-        if instance_type is not None:
-            self._template["Properties"]["InstanceType"] = instance_type
-
     def set_instanceprofile(self, instanceprofile):
         assert isinstance(instanceprofile, InstanceProfile)
         self._template["Properties"]["IamInstanceProfile"] = instanceprofile.ref()
@@ -118,69 +115,5 @@ class VolumeAttachement(Resource):
                 "Device" : device,
                 "InstanceId" : instance.ref(),
                 "VolumeId" : volume.ref()
-            }
-        }
-
-
-class SchemaRegistryEc2Instance(EC2Instance):
-    def __init__(self, name, ecscluster, subnet_ref=None, instance_type=None):
-        EC2Instance.__init__(name, subnet_ref, instance_type, os="AmazonECSLinux")
-        self.set_metadata(self.__metadata(ecscluster))
-
-    def __metadata(self, ecscluster):
-        return {
-            "AWS::CloudFormation::Init" : {
-                "install" : {
-                    "files" : {
-                        "/etc/cfn/cfn-hup.conf" : {
-                            "content" : { "Fn::Join" : ["", [
-                                "[main]\n",
-                                "stack=", { "Ref" : "AWS::StackId" }, "\n",
-                                "region=", { "Ref" : "AWS::Region" }, "\n"
-                            ]]},
-                            "mode"    : "000400",
-                            "owner"   : "root",
-                            "group"   : "root"
-                        },
-                        "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
-                            "content": { "Fn::Join" : ["", [
-                                "[cfn-auto-reloader-hook]\n",
-                                "triggers=post.update\n",
-                                "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
-                                "action=/opt/aws/bin/cfn-init -v",
-                                "         -c reload",
-                                "         --stack ", { "Ref" : "AWS::StackName" },
-                                "         --resource %s " % self.logical_id(),
-                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
-                                "runas=root\n"
-                            ]]}
-                        }
-                    },
-                    "commands" : {
-                        "01_save_ip" : {
-                            "command" : { "Fn::Join": [ "\n", [
-                                "#!/bin/bash",
-                                "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
-                                "echo $ADDR >> /etc/internaladdr.txt",
-                                "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
-                                "echo $PUBADDR >> /etc/externaladdr.txt"
-                            ] ] }
-                        },
-                        "02_add_instance_to_cluster" : {
-                            "command" : { "Fn::Join": [ "", [
-                                "#!/bin/bash\n",
-                                "rm -rf /etc/ecs/ecs.config\n",
-                                "touch /etc/ecs/ecs.config\n",
-                                "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
-                                "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
-                            ] ] }
-                        }
-                    },
-                    "services" : {
-                        "sysvinit" : {
-                            "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
-                        }
-                    }
-                }
             }
         }
