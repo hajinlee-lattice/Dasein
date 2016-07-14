@@ -89,7 +89,7 @@ public class CustomYarnClient extends CommandYarnClient {
         } catch (Exception e) {
             if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false))
             {
-                log.info("Retry list applications.");
+                log.info("Retry kill application.");
                 performFailover();
                 super.killApplication(applicationId);
             }
@@ -109,7 +109,7 @@ public class CustomYarnClient extends CommandYarnClient {
         } catch (Exception e) {
             if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false))
             {
-                log.info("Retry list applications.");
+                log.info("Retry get application report.");
                 performFailover();
                 return super.getApplicationReport(applicationId);
             }
