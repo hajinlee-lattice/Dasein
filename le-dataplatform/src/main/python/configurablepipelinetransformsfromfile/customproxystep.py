@@ -38,7 +38,7 @@ class CustomProxyStep(PipelineStep):
                     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
                     hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
                     files = hdfs.listdir(self.targetFilePath)
-                    if size.size <= 0:
+                    if len(files) <= 0:
                         logger.info("custom target file %s does not exist." % (self.targetFilePath))
                         return
                     logger.info("Copying custom target file %s to local %s." % (self.targetFilePath, localTargetFilePath))
