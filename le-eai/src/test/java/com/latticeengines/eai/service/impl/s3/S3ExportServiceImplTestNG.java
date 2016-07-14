@@ -54,6 +54,9 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private URL csvUrl;
 
+    @Value("${common.le.stack}")
+    private String leStack;
+
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
@@ -61,7 +64,7 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void setup() throws Exception {
         InputStream avroStream = ClassLoader.getSystemResourceAsStream("com/latticeengines/eai/service/impl/file/file.avro");
         sourceFilePath = "/tmp/S3ExportServieImplTestNG/sourceFiles";
-        targetS3Path = "S3ExportServieImplTestNG";
+        targetS3Path = "S3ExportServieImplTestNG/" + leStack ;
         HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
         HdfsUtils.mkdir(yarnConfiguration, sourceFilePath);
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, avroStream, sourceFilePath + "/file.avro");

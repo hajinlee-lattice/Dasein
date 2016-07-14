@@ -34,11 +34,17 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private S3Service s3Service;
 
+    @Value("${common.le.stack}")
+    private String leStack;
+
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
+    private String s3Prefix;
+
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
+        s3Prefix = S3_PREFIX + "/" + leStack;
         cleanup();
         InputStream avroStream = ClassLoader
                 .getSystemResourceAsStream("com/latticeengines/eai/service/impl/camel/camel.avro");
@@ -56,19 +62,19 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
         HdfsToS3RouteConfiguration configuration = getRouteConfiguration();
         routeService.downloadToLocal(configuration);
         routeService.upload(configuration);
-        Assert.assertTrue(s3Service.listObjects(s3Bucket, S3_PREFIX).size() > 0);
+        Assert.assertTrue(s3Service.listObjects(s3Bucket, s3Prefix).size() > 0);
     }
 
     private void cleanup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, HDFS_DIR);
-        s3Service.cleanupPrefix(s3Bucket, S3_PREFIX);
+        s3Service.cleanupPrefix(s3Bucket, s3Prefix);
         FileUtils.deleteQuietly(new File("tmp"));
     }
 
     HdfsToS3RouteConfiguration getRouteConfiguration() {
         HdfsToS3RouteConfiguration configuration = new HdfsToS3RouteConfiguration();
         configuration.setS3Bucket(s3Bucket);
-        configuration.setS3Prefix(S3_PREFIX);
+        configuration.setS3Prefix(s3Prefix);
         configuration.setHdfsPath(HDFS_DIR + "/*.avro");
         configuration.setTargetFilename(FILENAME);
         configuration.setSplitSize(10L * 1024 * 1024);

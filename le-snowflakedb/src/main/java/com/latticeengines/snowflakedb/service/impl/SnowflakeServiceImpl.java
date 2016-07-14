@@ -2,9 +2,7 @@ package com.latticeengines.snowflakedb.service.impl;
 
 import java.util.List;
 
-import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +12,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;
+import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 
 @Component("snowflakeService")
 public class SnowflakeServiceImpl implements SnowflakeService {
 
     private static final Log log = LogFactory.getLog(SnowflakeServiceImpl.class);
-
-    private static final String AVRO_STAGE = "avro_stage";
 
     @Autowired
     @Qualifier(value = "snowflakeJdbcTemplate")
@@ -34,9 +31,6 @@ public class SnowflakeServiceImpl implements SnowflakeService {
 
     @Value("${aws.region}")
     private String awsRegion;
-
-    @Value("${common.le.stack}")
-    private String leStack;
 
     @Override
     public void createDatabase(String db, String s3Bucket) {
@@ -81,21 +75,16 @@ public class SnowflakeServiceImpl implements SnowflakeService {
                 "pattern = '.*.avro'\n" +
                 "on_error = 'continue'",
                 SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)),
-                SnowflakeUtils.toQualified(db, AVRO_STAGE),
+                SnowflakeUtils.toQualified(db, SnowflakeUtils.AVRO_STAGE),
                 s3Folder);
         snowflakeJdbcTemplate.execute(sql);
     }
 
-    @Override
-    public String s3PrefixForAvroStage() {
-        return AVRO_STAGE;
-    }
-
     private void addAvroStage(String db, String s3Bucket) {
         log.info("Adding S3 avro stage to database [" + db + "]");
-        String stageName = SnowflakeUtils.toQualified(db, AVRO_STAGE);
+        String stageName = SnowflakeUtils.toQualified(db, SnowflakeUtils.AVRO_STAGE);
         String region = awsRegion.replace("-", "_").toUpperCase();
-        String url = String.format("s3://%s/%s/", s3Bucket, absoluteS3PrefixForAvroStage());
+        String url = String.format("s3://%s/%s/", s3Bucket, SnowflakeUtils.AVRO_STAGE);
 
         String sql = String.format("CREATE OR REPLACE STAGE %s\n" +
                 "  URL = '%s'\n" +
@@ -104,14 +93,6 @@ public class SnowflakeServiceImpl implements SnowflakeService {
                 "  FILE_FORMAT = ( TYPE='AVRO') \n", stageName, url, awsAccessKey, awsSecretKey, region);
 
         snowflakeJdbcTemplate.execute(sql);
-    }
-
-    private String absoluteS3PrefixForAvroStage() {
-        if (StringUtils.isEmpty(leStack)) {
-            return AVRO_STAGE;
-        } else {
-            return leStack + "/" + AVRO_STAGE;
-        }
     }
 
 }

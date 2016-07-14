@@ -18,6 +18,7 @@ public final class SnowflakeUtils {
     public static final String AVRO_COLUMN = "RECORD";
     public static final String AVRO_RAW_SUFFIX = "_RAW";
     public static final String DEFAULT_SCHEMA = "PUBLIC";
+    public static final String AVRO_STAGE = "avro_stage";
 
     public static String toQualified(String db, String obj) {
         return String.format("%s.%s.%s", db, SnowflakeUtils.DEFAULT_SCHEMA, obj);

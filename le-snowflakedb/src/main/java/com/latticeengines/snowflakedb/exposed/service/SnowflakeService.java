@@ -15,6 +15,4 @@ public interface SnowflakeService {
     void createAvroTable(String db, String table, Schema schema, List<String> columnsToExpose);
 
     void loadAvroTableFromS3(String db, String table, String s3Folder);
-
-    String s3PrefixForAvroStage();
 }

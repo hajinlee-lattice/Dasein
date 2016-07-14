@@ -17,6 +17,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,7 +31,7 @@ import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 @ContextConfiguration(locations = { "classpath:test-snowflake-context.xml" })
 public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final String DB_NAME = "SnowflakeServiceImplTestNG";
+    private static final String DB_NAME = "SnowflakeServiceImplTest";
 
     @Autowired
     private SnowflakeService snowflakeService;
@@ -45,28 +46,38 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
-    @BeforeMethod(groups = "functional")
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    private String dbName;
+
+    @BeforeClass(groups = "functional")
     public void setup() {
-        snowflakeService.dropDatabaseIfExists(DB_NAME);
+        dbName = leStack + "_" + DB_NAME;
+    }
+
+    @BeforeMethod(groups = "functional")
+    public void setupMethod() {
+        snowflakeService.dropDatabaseIfExists(dbName);
     }
 
     @AfterMethod(groups = "functional")
-    public void teardown() {
-        snowflakeService.dropDatabaseIfExists(DB_NAME);
+    public void teardownMethod() {
+        snowflakeService.dropDatabaseIfExists(dbName);
     }
 
     @Test(groups = "functional")
     public void testCreateAndDeleteDatabase() {
-        Assert.assertFalse(verityDatabaseExists(DB_NAME), DB_NAME + "should be deleted");
-        snowflakeService.createDatabase(DB_NAME, s3Bucket);
-        Assert.assertTrue(verityDatabaseExists(DB_NAME), DB_NAME + "should be created");
-        snowflakeService.dropDatabaseIfExists(DB_NAME);
-        Assert.assertFalse(verityDatabaseExists(DB_NAME), DB_NAME + "should be deleted");
+        Assert.assertFalse(verityDatabaseExists(dbName), dbName + "should be deleted");
+        snowflakeService.createDatabase(dbName, s3Bucket);
+        Assert.assertTrue(verityDatabaseExists(dbName), dbName + "should be created");
+        snowflakeService.dropDatabaseIfExists(dbName);
+        Assert.assertFalse(verityDatabaseExists(dbName), dbName + "should be deleted");
     }
 
     @Test(groups = "functional")
     public void testCreateAndDeleteAvroTable() {
-        snowflakeService.createDatabase(DB_NAME, s3Bucket);
+        snowflakeService.createDatabase(dbName, s3Bucket);
         String table = "AvroTable";
 
         Schema schema = new Schema.Parser()
@@ -76,15 +87,15 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
                         + "{\"name\":\"Field3\",\"type\":[\"string\",\"null\"]}," //
                         + "{\"name\":\"Field4\",\"type\":[\"int\",\"null\"]}]}");
 
-        snowflakeService.createAvroTable(DB_NAME, table, schema, Arrays.asList("field1", "field2", "field3"));
+        snowflakeService.createAvroTable(dbName, table, schema, Arrays.asList("field1", "field2", "field3"));
 
         snowflakeJdbcTemplate.execute(String.format(
                 "INSERT INTO %s SELECT "
                         + "OBJECT_CONSTRUCT('Field1', 1, 'Field2', 'hello', 'Field3', PARSE_JSON('NULL'), 'Field4', 4)",
-                SnowflakeUtils.toQualified(DB_NAME, SnowflakeUtils.toAvroRawTable(table))));
+                SnowflakeUtils.toQualified(dbName, SnowflakeUtils.toAvroRawTable(table))));
 
         Map<String, Object> row = snowflakeJdbcTemplate
-                .queryForMap(String.format("SELECT * FROM %s limit 1;", SnowflakeUtils.toQualified(DB_NAME, table)));
+                .queryForMap(String.format("SELECT * FROM %s limit 1;", SnowflakeUtils.toQualified(dbName, table)));
 
         Assert.assertEquals(Integer.valueOf(row.get("FIELD1").toString()), new Integer(1));
         Assert.assertEquals(row.get("FIELD2"), "hello");
@@ -94,18 +105,20 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
 
     @Test(groups = "functional")
     public void testLoadAvroTableFromStage() throws IOException {
-        snowflakeService.createDatabase(DB_NAME, s3Bucket);
+        snowflakeService.createDatabase(dbName, s3Bucket);
         String table = "AvroTable2";
-        InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/feature.avro");
+        InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/hgdata.avro");
         Schema schema = AvroUtils.readSchemaFromInputStream(avroStream);
-        snowflakeService.createAvroTable(DB_NAME, table, schema, Arrays.asList("Domain", "Creation_Date"));
+        snowflakeService.createAvroTable(dbName, table, schema, Arrays.asList("Domain", "Creation_Date"));
         uploadAvroToS3();
-        snowflakeService.loadAvroTableFromS3(DB_NAME, table, "feature");
+        snowflakeService.loadAvroTableFromS3(dbName, table, leStack + "/hgdata");
 
         Map<String, Object> row = snowflakeJdbcTemplate
-                .queryForMap(String.format("SELECT * FROM %s limit 1;", SnowflakeUtils.toQualified(DB_NAME, table)));
+                .queryForMap(String.format("SELECT * FROM %s limit 1;", SnowflakeUtils.toQualified(dbName, table)));
         Assert.assertTrue(row.containsKey("Domain"));
         Assert.assertFalse(row.containsKey("Supplier_Name"));
+
+        cleanupS3();
     }
 
     private boolean verityDatabaseExists(String databaseName) {
@@ -120,8 +133,13 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
     }
 
     private void uploadAvroToS3() {
-        InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/feature.avro");
-        String key = snowflakeService.s3PrefixForAvroStage() + "/feature/part-1.avro";
+        InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/hgdata.avro");
+        String key = SnowflakeUtils.AVRO_STAGE + "/" + leStack + "/hgdata/part-1.avro";
         s3Service.uploadInputStream(s3Bucket, key, avroStream, true);
+    }
+
+    private void cleanupS3() {
+        String prefix = SnowflakeUtils.AVRO_STAGE + "/" + leStack + "/hgdata";
+        s3Service.cleanupPrefix(s3Bucket, prefix);
     }
 }

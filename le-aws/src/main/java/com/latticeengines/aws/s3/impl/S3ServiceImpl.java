@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -30,32 +29,26 @@ public class S3ServiceImpl implements S3Service {
     @Autowired
     private AmazonS3 s3Client;
 
-    @Value("${common.le.stack}")
-    private String leStack;
-
     @Override
     public void cleanupPrefix(String bucket, String prefix) {
-        String stackSafePrefix = stackSafePrefix(prefix);
-        List<S3ObjectSummary> objects = s3Client.listObjects(bucket, stackSafePrefix).getObjectSummaries();
+        List<S3ObjectSummary> objects = s3Client.listObjects(bucket, prefix).getObjectSummaries();
         for (S3ObjectSummary summary : objects) {
             log.info("Deleting s3 object " + summary.getKey() + " from " + bucket);
             s3Client.deleteObject(bucket, summary.getKey());
         }
-        log.info("Deleting s3 object " + stackSafePrefix + " from " + bucket);
-        s3Client.deleteObject(bucket, stackSafePrefix);
+        log.info("Deleting s3 object " + prefix + " from " + bucket);
+        s3Client.deleteObject(bucket, prefix);
     }
 
     @Override
     public List<S3ObjectSummary> listObjects(String bucket, String prefix) {
-        String stackSafePrefix = stackSafePrefix(prefix);
-        return s3Client.listObjects(bucket, stackSafePrefix).getObjectSummaries();
+        return s3Client.listObjects(bucket, prefix).getObjectSummaries();
     }
 
     @Override
     public MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync) {
-        String stackSafePrefix = stackSafePrefix(prefix);
         TransferManager tm = new TransferManager(s3Client, Executors.newFixedThreadPool(8));
-        final MultipleFileUpload upload = tm.uploadDirectory(bucket, stackSafePrefix, new File(localDir), true);
+        final MultipleFileUpload upload = tm.uploadDirectory(bucket, prefix, new File(localDir), true);
         final AtomicInteger uploadedObjects = new AtomicInteger(0);
 
         ExecutorService waiters = Executors.newFixedThreadPool(8);
@@ -91,9 +84,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync) {
-        String stackSafeKey = stackSafePrefix(key);
         TransferManager tm = new TransferManager(s3Client);
-        Upload upload = tm.upload(bucket, stackSafeKey, inputStream, null);
+        Upload upload = tm.upload(bucket, key, inputStream, null);
 
         log.info(upload.getDescription());
         if (sync) {
@@ -111,9 +103,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public Upload uploadLocalFile(String bucket, String key, File file, Boolean sync) {
-        String stackSafeKey = stackSafePrefix(key);
         TransferManager tm = new TransferManager(s3Client);
-        Upload upload = tm.upload(bucket, stackSafeKey, file);
+        Upload upload = tm.upload(bucket, key, file);
 
         log.info(upload.getDescription());
         if (sync) {
@@ -132,14 +123,6 @@ public class S3ServiceImpl implements S3Service {
     private void setAclRecursive(String bucket, String prefix) {
         for (S3ObjectSummary summary: listObjects(bucket, prefix)) {
             s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), CannedAccessControlList.AuthenticatedRead);
-        }
-    }
-
-    private String stackSafePrefix(String prefix) {
-        if (prefix.startsWith("/")) {
-            return leStack + prefix;
-        } else {
-            return leStack + "/" + prefix;
         }
     }
 
