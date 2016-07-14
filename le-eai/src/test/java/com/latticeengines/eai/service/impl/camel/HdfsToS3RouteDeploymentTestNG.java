@@ -6,10 +6,12 @@ import static org.testng.Assert.assertNotNull;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
@@ -17,15 +19,23 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 
 public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
 
+    public static final String TEST_CUSTOMER = "EaiTester";
+
     @Autowired
     private HdfsToS3RouteTestNG hdfsToS3RouteTestNG;
 
     @Autowired
     private EaiProxy eaiProxy;
 
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    private CustomerSpace customerSpace;
+
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
         hdfsToS3RouteTestNG.setup();
+        customerSpace = CustomerSpace.parse(leStack + "_" + TEST_CUSTOMER);
     }
 
     @Test(groups = "aws", enabled = false)
@@ -33,6 +43,7 @@ public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
         HdfsToS3RouteConfiguration camelRouteConfiguration =  hdfsToS3RouteTestNG.getRouteConfiguration();
         ImportConfiguration importConfig =
                 ImportConfiguration.createForAmazonS3Configuration(camelRouteConfiguration);
+        importConfig.setCustomerSpace(customerSpace);
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         assertNotEquals(submission.getApplicationIds().size(), 0);
         String appId = submission.getApplicationIds().get(0);
