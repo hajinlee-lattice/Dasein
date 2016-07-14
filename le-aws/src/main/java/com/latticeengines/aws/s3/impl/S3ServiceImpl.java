@@ -1,6 +1,7 @@
 package com.latticeengines.aws.s3.impl;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,8 +30,8 @@ public class S3ServiceImpl implements S3Service {
     @Autowired
     private AmazonS3 s3Client;
 
-    @Value("${aws.le.stack}")
-    private String awsStackName;
+    @Value("${common.le.stack}")
+    private String leStack;
 
     @Override
     public void cleanupPrefix(String bucket, String prefix) {
@@ -88,6 +89,46 @@ public class S3ServiceImpl implements S3Service {
         return upload;
     }
 
+    @Override
+    public Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync) {
+        String stackSafeKey = stackSafePrefix(key);
+        TransferManager tm = new TransferManager(s3Client);
+        Upload upload = tm.upload(bucket, stackSafeKey, inputStream, null);
+
+        log.info(upload.getDescription());
+        if (sync) {
+            try {
+                upload.waitForCompletion();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            setAclRecursive(bucket, key);
+        }
+
+        return upload;
+    }
+
+    @Override
+    public Upload uploadLocalFile(String bucket, String key, File file, Boolean sync) {
+        String stackSafeKey = stackSafePrefix(key);
+        TransferManager tm = new TransferManager(s3Client);
+        Upload upload = tm.upload(bucket, stackSafeKey, file);
+
+        log.info(upload.getDescription());
+        if (sync) {
+            try {
+                upload.waitForCompletion();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            setAclRecursive(bucket, key);
+        }
+
+        return upload;
+    }
+
     private void setAclRecursive(String bucket, String prefix) {
         for (S3ObjectSummary summary: listObjects(bucket, prefix)) {
             s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), CannedAccessControlList.AuthenticatedRead);
@@ -96,9 +137,9 @@ public class S3ServiceImpl implements S3Service {
 
     private String stackSafePrefix(String prefix) {
         if (prefix.startsWith("/")) {
-            return awsStackName + prefix;
+            return leStack + prefix;
         } else {
-            return awsStackName + "/" + prefix;
+            return leStack + "/" + prefix;
         }
     }
 

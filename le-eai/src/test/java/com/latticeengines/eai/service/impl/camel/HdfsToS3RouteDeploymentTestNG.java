@@ -18,21 +18,21 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
-    private HdfsToS3RouteTestNG exportServiceTestNG;
+    private HdfsToS3RouteTestNG hdfsToS3RouteTestNG;
 
     @Autowired
     private EaiProxy eaiProxy;
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
-        exportServiceTestNG.setup();
+        hdfsToS3RouteTestNG.setup();
     }
 
-    @Test(groups = "aws")
+    @Test(groups = "aws", enabled = false)
     public void testDownloadSftpByRestCall() throws Exception {
-        HdfsToS3RouteConfiguration camelRouteConfiguration =  exportServiceTestNG.getRouteConfiguration();
+        HdfsToS3RouteConfiguration camelRouteConfiguration =  hdfsToS3RouteTestNG.getRouteConfiguration();
         ImportConfiguration importConfig =
-                ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfiguration);
+                ImportConfiguration.createForAmazonS3Configuration(camelRouteConfiguration);
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         assertNotEquals(submission.getApplicationIds().size(), 0);
         String appId = submission.getApplicationIds().get(0);

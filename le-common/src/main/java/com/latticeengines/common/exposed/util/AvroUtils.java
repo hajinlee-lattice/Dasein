@@ -21,6 +21,7 @@ import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileStream;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
@@ -65,12 +66,12 @@ public class AvroUtils {
         ArrayNode shuffledFields = (ArrayNode) shuffledJson.get("fields");
         ArrayNode orderedFields = (ArrayNode) orderedJson.get("fields");
         Map<String, JsonNode> fieldMap = new HashMap<>();
-        for (JsonNode field: shuffledFields) {
+        for (JsonNode field : shuffledFields) {
             fieldMap.put(field.get("name").asText(), field);
         }
         ArrayNode newFields = new ObjectMapper().createArrayNode();
         List<String> errorMsgs = new ArrayList<>();
-        for (JsonNode field: orderedFields) {
+        for (JsonNode field : orderedFields) {
             String fieldName = field.get("name").asText();
             if (fieldMap.containsKey(fieldName)) {
                 newFields.add(field);
@@ -80,13 +81,13 @@ public class AvroUtils {
             }
         }
 
-        for (String fieldName: fieldMap.keySet()) {
+        for (String fieldName : fieldMap.keySet()) {
             errorMsgs.add("Found field " + fieldName + " in shuffled schema, but not ordered one.");
         }
 
         if (!errorMsgs.isEmpty()) {
-            throw new IllegalArgumentException("Shuffled and ordered schemas do not match, cannot align.\n" +
-                    org.apache.commons.lang.StringUtils.join(errorMsgs, "\n"));
+            throw new IllegalArgumentException("Shuffled and ordered schemas do not match, cannot align.\n"
+                    + org.apache.commons.lang.StringUtils.join(errorMsgs, "\n"));
         }
 
         shuffledJson.set("fields", newFields);
@@ -518,6 +519,15 @@ public class AvroUtils {
         try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),
                 new GenericDatumReader<GenericRecord>())) {
             schema = reader.getSchema();
+        }
+        return schema;
+    }
+
+    public static Schema readSchemaFromInputStream(InputStream inputStream) throws IOException {
+        Schema schema;
+        try (DataFileStream stream = new DataFileStream<GenericRecord>(inputStream,
+                new GenericDatumReader<GenericRecord>())) {
+            schema = stream.getSchema();
         }
         return schema;
     }

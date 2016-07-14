@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-aws</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>le-snowflakedb</artifactId>
     <name>le-${component-name}</name>
-
-    <properties>
-        <component-name>aws</component-name>
-    </properties>
+    <description>LE DB</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
@@ -18,6 +13,10 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
+    <properties>
+        <component-name>snowflakedb</component-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -25,9 +24,14 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${aws.version}</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>${snowflake.jdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,7 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
-@Component("amazonS3ExportServiceTestNG")
+@Component("hdfsToS3RouteTestNG")
 public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(HdfsToS3RouteTestNG.class);
@@ -51,10 +52,11 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
     }
 
     @Test(groups = "aws")
-    public void testDownloadFromSftp() throws Exception {
+    public void testUploadToS3() throws Exception {
         HdfsToS3RouteConfiguration configuration = getRouteConfiguration();
         routeService.downloadToLocal(configuration);
         routeService.upload(configuration);
+        Assert.assertTrue(s3Service.listObjects(s3Bucket, S3_PREFIX).size() > 0);
     }
 
     private void cleanup() throws Exception {
