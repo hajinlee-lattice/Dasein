@@ -7,8 +7,6 @@ import org.apache.avro.Schema;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.snowflakedb.util.SnowflakeUtils;
-
 public class SnowflakeUtilsUnitTestNG {
 
     @Test(groups = "unit")
