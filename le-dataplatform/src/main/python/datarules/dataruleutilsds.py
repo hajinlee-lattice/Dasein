@@ -104,7 +104,7 @@ def convertCleanDataFrame(colNames, df, catColumnNamesSet, numColumnNamesSet, re
             try:
                 col = [float(str(x)) for x in col]
 		col1 = [float(x) for x in col] # exception will be thrown in SelfServeModeling that will be caught
-            except Exceptin as e:
+            except Exception as e:
 		print "Exception while converting to float: %s" % e
                 print c, "columnName that caused an exception"
                 print "column values and types"
