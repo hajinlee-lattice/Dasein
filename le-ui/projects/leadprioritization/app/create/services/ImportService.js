@@ -279,14 +279,16 @@ angular
         return deferred.promise;
     };
 
-    this.StartTestingSet = function(modelId, fileName) {
+    this.StartTestingSet = function(modelId, fileName, performEnrichment) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/scores/' + modelId,
             params: {
-                fileName: fileName
+                fileName: fileName,
+                performEnrichment: performEnrichment,
+                useRtsApi: performEnrichment
             },
             headers: { 'Content-Type': 'application/json' }
         })

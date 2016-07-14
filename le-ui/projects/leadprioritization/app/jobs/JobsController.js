@@ -4,6 +4,7 @@ angular.module('pd.jobs', [
     'pd.jobs.import.ready',
     'pd.jobs.status',
     'pd.navigation.pagination',
+    'mainApp.models.leadenrichment',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .service('JobsStore', function($q, JobsService) {
@@ -363,7 +364,7 @@ angular.module('pd.jobs', [
         return deferred.promise;
     };
 
-    this.rescoreTrainingData = function() {
+    this.rescoreTrainingData = function(performEnrichment) {
         var deferred = $q.defer();
         var result = {
             success: true
@@ -373,6 +374,10 @@ angular.module('pd.jobs', [
         $http({
             method: 'POST',
             url: '/pls/scores/' + modelId + '/training',
+            params: {
+                'performEnrichment': performEnrichment,
+                'useRtsApi': performEnrichment
+            },
             headers: { 
                 'ErrorDisplayMethod': 'modal'
             }
@@ -496,7 +501,7 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsStore, JobsService, BrowserStorageUtility) {
+.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
@@ -547,6 +552,10 @@ angular.module('pd.jobs', [
         $timeout.cancel($scope.timeoutTask);
     });
 
+    $scope.$on("SCORING_JOB_SUCCESS", function(event, data) {
+        $scope.handleJobCreationSuccess(data);
+    });
+
     $scope.handleJobCreationSuccess = function(data) {
         if (data) {
             $scope.jobCreationSuccess = JSON.parse(data);
@@ -570,10 +579,8 @@ angular.module('pd.jobs', [
     }
 
     $scope.handleRescoreClick = function($event) {
-        JobsService.rescoreTrainingData().then(function(jobResponse) {
-            $scope.handleJobCreationSuccess(jobResponse.success);
-        });
         $event.target.disabled = true;
+        ScoreLeadEnrichmentModal.showRescoreModal();
     };
     
     $scope.closeJobSuccessMessage = function() {

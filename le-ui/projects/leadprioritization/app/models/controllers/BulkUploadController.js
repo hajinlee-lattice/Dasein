@@ -1,9 +1,10 @@
 angular.module('mainApp.create.csvBulkUpload', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.models.leadenrichment',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('csvBulkUploadController', function($state, $stateParams, ResourceUtility, ImportService, ImportStore, RequiredFields, Model) {
+.controller('csvBulkUploadController', function($state, $stateParams, ResourceUtility, ImportService, ImportStore, ScoreLeadEnrichmentModal, RequiredFields, Model) {
     var vm = this;
 
     vm.importErrorMsg = "";
@@ -45,10 +46,6 @@ angular.module('mainApp.create.csvBulkUpload', [
     }
 
     vm.clickNext = function() {
-        ShowSpinner('Executing Scoring Job...');
-
-        ImportService.StartTestingSet(vm.params.modelId, vm.fileName).then(function(result) {
-            $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
-        });
+        ScoreLeadEnrichmentModal.showFileScoreModal(vm.params.modelId, vm.fileName);
     }
 });
