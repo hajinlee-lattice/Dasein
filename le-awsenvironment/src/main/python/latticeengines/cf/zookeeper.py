@@ -53,9 +53,9 @@ def provision(environment, stackname):
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(bucket, _S3_CF_PATH, 'template.json'),
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
-            PARAM_SUBNET_1.config(config.private_subnet_1()),
-            PARAM_SUBNET_2.config(config.private_subnet_2()),
-            PARAM_SUBNET_3.config(config.private_subnet_3()),
+            PARAM_SUBNET_1.config(config.public_subnet_1()),
+            PARAM_SUBNET_2.config(config.public_subnet_2()),
+            PARAM_SUBNET_3.config(config.public_subnet_3()),
             PARAM_SECURITY_GROUP.config(config.zk_sg()),
             PARAM_INSTANCE_TYPE.config("t2.medium"),
             PARAM_KEY_NAME.config(config.ec2_key()),

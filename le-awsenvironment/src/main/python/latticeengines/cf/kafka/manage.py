@@ -103,9 +103,9 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False, co
         TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json'),
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
-            PARAM_SUBNET_1.config(config.private_subnet_1()),
-            PARAM_SUBNET_2.config(config.private_subnet_2()),
-            PARAM_SUBNET_3.config(config.private_subnet_3()),
+            PARAM_SUBNET_1.config(config.public_subnet_1()),
+            PARAM_SUBNET_2.config(config.public_subnet_2()),
+            PARAM_SUBNET_3.config(config.public_subnet_3()),
             PARAM_KEY_NAME.config(config.ec2_key()),
             PARAM_SECURITY_GROUP.config(config.kafka_sg()),
             PARAM_BROKER_INSTANCE_TYPE.config(profile.instance_type()),
