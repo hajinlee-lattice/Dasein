@@ -34,7 +34,7 @@ public class S3ExportServiceImpl extends ExportService {
     @Autowired
     private EaiService eaiService;
 
-    @Value("${eai.s3.datafile.bucket}")
+    @Value("${aws.s3.bucket}")
     private String bucket;
 
     protected S3ExportServiceImpl() {
