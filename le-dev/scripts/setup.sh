@@ -39,33 +39,41 @@ echo "Top-level shaded yarn compile"
 mvn -T6 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
 processErrors
 
+echo "" > /tmp/errors.txt
+
 for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'propdata|pddplnobld' 'dellebi|dedplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
     echo "Deploying ${service} to local Hadoop using ${cmd}" &&
     pushd $WSHOME/le-$service &&
-    eval $cmd 2> /tmp/errors.txt &&
-    popd &&
-    processErrors &
+    eval $cmd 2>> /tmp/errors.txt &&
+    popd &
 done
 wait
 
-for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld' 'config|cfgdpl'
+for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
     echo "Deploying ${service} to local Hadoop using ${cmd}" &&
     pushd $WSHOME/le-$service &&
-    eval $cmd 2> /tmp/errors.txt &&
-    popd &&
-    processErrors &
+    eval $cmd 2>> /tmp/errors.txt &&
+    popd &
 done
 wait
 
-echo "Update propdata DB"
-pushd $WSHOME/le-propdata; mvn -DskipTests clean install; popd;
-bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+sed -i "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+
+if [ ! -z "$(cat /tmp/errors.txt)" ]
+then
+    echo "Error!"
+    cat /tmp/errors.txt
+    exit -1
+fi
+
+echo "deploy properties file"
+cfgdpl 2> /tmp/errors.txt
 processErrors
 
 echo "Rebuild admin war"
