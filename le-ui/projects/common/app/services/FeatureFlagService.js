@@ -84,6 +84,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         .error(function() {
             // if cannot get feature flags from backend
             SetFlag(flags.ADMIN_ALERTS_TAB, false);
+            SetFlag(flags.ALLOW_PIVOT_FILE, false);
             SetFlag(flags.SETUP_PAGE, false);
             SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
             SetFlag(flags.SYSTEM_SETUP_PAGE, false);

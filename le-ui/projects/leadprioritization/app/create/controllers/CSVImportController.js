@@ -14,8 +14,7 @@ angular
 
     FeatureFlagService.GetAllFlags().then(function(result) {
         var flags = FeatureFlagService.Flags();
-        
-        vm.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+        vm.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.ALLOW_PIVOT_FILE);
     });
 
     angular.extend(vm, {

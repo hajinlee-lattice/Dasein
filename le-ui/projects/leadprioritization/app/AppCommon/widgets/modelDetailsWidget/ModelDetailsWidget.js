@@ -21,6 +21,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var modelDetails = data.ModelDetails;
 
     $scope.displayName = modelDetails[widgetConfig.NameProperty];
+    $scope.IsPmml = data.IsPmml;
+
     var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
     
     if (isActive) {

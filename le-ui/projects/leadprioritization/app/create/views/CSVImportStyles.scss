@@ -69,9 +69,9 @@ section.container.setup-import {
         &.compressing {
             transition: all 333ms linear;
             background: #dfdfdf;
-        }
+        } 
         &.uploading {
-            background-color: #b2f274;
+            background-color: #aaea6c;
         }
         &.uploading > span {
             display: block;

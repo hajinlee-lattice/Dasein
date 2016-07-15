@@ -14,22 +14,27 @@
 
     <div class="row">
         <div id="" class="twelve columns model-list">
-            <div class="row panel-heading custom-heading">
-                <span class="columns one">Exclude</span>
-                <span class="columns two">Columns</span>
-                <span class="columns three">Warning Type</span>
-                <span class="columns four">Description</span>
-                <span class="columns two">&nbsp;</span>
-            </div>
-            <div>
-                <div
-                    data-model-review-column-warning
-                    data-ng-repeat="columnWarning in vm.columnWarningsToDisplay"
-                    column="columnWarning"
-                    rules="vm.ruleNameToDataRules"
-                    data="vm.ReviewData">
-                </div>
-            </div>
+            <table>
+                <thead>
+                  <tr>
+                    <th>Exclude</th>
+                    <th>Columns</th>
+                    <th>Warning Type</th>
+                    <th>Description</th>
+                    <th>&nbsp;</th>
+                    <!-- <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th> -->
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        data-model-review-column-warning
+                        data-ng-repeat="columnWarning in vm.columnWarningsToDisplay"
+                        column="columnWarning"
+                        rules="vm.ruleNameToDataRules"
+                        data="vm.ReviewData">
+                    </tr>
+                 </tbody>
+            </table>
         </div>
     </div>
 

@@ -17,7 +17,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'lp.navigation.review'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {
+    NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $stateParams.modelId;
@@ -37,6 +37,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     }
 
     var model = Model;
+    model.IsPmml = IsPmml;
     model.ModelId = modelId;
     model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
     if (model.ChartData) {
@@ -45,6 +46,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
         model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
     }
+    
     // UI BAND-AID for DP-2854 here
 
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);

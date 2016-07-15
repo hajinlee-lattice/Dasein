@@ -33,6 +33,9 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
+                    controller: function($scope, IsPmml) {
+                        $scope.IsPmml = IsPmml || false;
+                    },
                     templateUrl: 'app/jobs/status/StatusView.html'
                 }
             }

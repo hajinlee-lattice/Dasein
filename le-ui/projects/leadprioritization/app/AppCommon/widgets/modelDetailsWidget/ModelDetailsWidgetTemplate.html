@@ -21,7 +21,7 @@
                     </dl>
                 </div>
             </div><!-- End .type-overview -->
-            <div class="type-leads">
+            <div class="type-leads" ng-if="!IsPmml">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{::modelTypeLabel}}</h3>
                     <dl>
@@ -38,7 +38,7 @@
                     </dl>
                 </div>
             </div><!-- End .type-leads -->
-            <div class="type-conversions">
+            <div class="type-conversions" ng-if="!IsPmml">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{::ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
                     <dl>
@@ -51,7 +51,7 @@
                     </dl>
                 </div>
             </div><!-- End .type-conversions -->
-            <div class="type-attribute">
+            <div class="type-attribute" ng-if="!IsPmml">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{::ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
                     <dl>

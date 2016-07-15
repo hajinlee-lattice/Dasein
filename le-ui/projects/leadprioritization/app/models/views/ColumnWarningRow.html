@@ -1,22 +1,31 @@
-<div class="expanded-{{columnWarningExpanded}}" style="position: relative">
+<td>
     <div>
-        <span class="columns one">
-            <input type="checkbox" id="" data-ng-click="warningExcludeToggled($event, columnWarning)"
-                   data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled" />
-        </span>
-        <span class="columns two">{{columnWarning.flaggedItemCount}}</span>
-        <span class="columns three">{{ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</span>
-        <span class="columns four">{{ruleNameToDataRules[columnWarning.dataRuleName].description}}</span>
-        <span data-ng-if="columnWarning.flaggedItemCount > 0 && ! columnWarningExpanded" data-ng-click="expandColumnWarningClicked()" class="columns one"><i class="fa fa-angle-double-down fa-lg"></i></span>
-        <span data-ng-if="columnWarning.flaggedItemCount > 0 && columnWarningExpanded" data-ng-click="expandColumnWarningClicked()" class="columns one"><i class="fa fa-angle-double-up fa-lg"></i></span>
+        <input 
+                type="checkbox" 
+                data-ng-click="warningExcludeToggled($event, columnWarning)"
+                data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled" />
     </div>
-    <div class="row" data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
-        <div class="columns two">
-            <input type="checkbox" id="" data-ng-click="columnExcludeToggled($event, columnName)"
-                   data-ng-checked="columnRemediated(columnName) || (dataRule.enabled && dataRule.columnsToRemediate.length == 0)" />
-        </div>
-        <div class="columns two">
-            {{columnName}}
-        </div>
+    <div data-ng-repeat="columnName in columnWarning.flaggedColumnNames" ng-if="columnWarningExpanded">
+        <input 
+                type="checkbox" 
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-checked="columnRemediated(columnName) || (dataRule.enabled && dataRule.columnsToRemediate.length == 0)" />
     </div>
-</div>
+</td>
+
+<td>
+    <div>
+        {{columnWarning.flaggedItemCount}}
+    </div>
+    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
+        {{columnName}}
+    </div>
+</td>
+
+<td>{{ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</td>
+
+<td>{{ruleNameToDataRules[columnWarning.dataRuleName].description}}</td>
+
+<td data-ng-click="expandColumnWarningClicked()">
+    <i ng-if="columnWarning.flaggedItemCount > 0" class="fa fa-angle-double-{{columnWarningExpanded ? 'up' : 'down'}} fa-lg"></i>
+</td>

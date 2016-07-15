@@ -11,8 +11,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.models.modals.StaleModelModal',
     'mainApp.models.modals.DeactivateModelModal'
 ])
-.controller('ModelListTileWidgetController', function ($http, $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
-    TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService) {
+.controller('ModelListTileWidgetController', function (
+    $http, $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility, 
+    DateTimeFormatUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, 
+    DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService
+) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -123,11 +126,10 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if ($event != null && $scope.nameStatus.editing) {
             $event.preventDefault();
         }
-
         if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
-        } else if (!$scope.nameStatus.editing && incomplete) {
-        	StaleModelModal.show($scope.data.Id);
+        } else if (!$scope.nameStatus.editing && incomplete && $scope.data.ModelType) {
+            StaleModelModal.show($scope.data.Id);
         }
     };
     

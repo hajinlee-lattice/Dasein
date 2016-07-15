@@ -107,19 +107,25 @@ angular
 
                     return deferred.promise;
                 },
+                IsPmml: function(Model) {
+                    return typeof Model.ModelDetails.SourceSchemaInterpretation != 'string';
+                },
                 loadAlaSQL: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
                 }
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $rootScope, Model, FeatureFlagService) {
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                    controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService) {
+                        $scope.IsPmml = IsPmml;
+
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
                             $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
                         });
+                        
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
                     },
                     templateUrl: 'app/navigation/sidebar/ModelView.html'
                 },
@@ -172,8 +178,9 @@ angular
             url: '/summary',
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function($scope, $compile, ModelStore, IsPmml) {
                         $scope.data = ModelStore.data;
+                        $scope.IsPmml = IsPmml;
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
@@ -277,6 +284,7 @@ angular
                     ModelReviewStore.GetReviewData(modelId, eventTableName).then(function(result) {
                         deferred.resolve(result);
                     });
+                    
                     return deferred.promise;
                 }
             },
@@ -342,7 +350,7 @@ angular
                 },
                 "main@": {
                     template: ''
-                }   
+                }
             }
         })
         .state('home.marketosettings.apikey', {

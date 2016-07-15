@@ -3,10 +3,10 @@
         ng-controller="ModelListTileWidgetController" 
         ng-click="tileClick($event)" 
         ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
-        ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
+        ui-sref="{{data.ModelType?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">
     <div class="model-image {{ data.ModelType }}"></div>
     <div class="model-title" data-ng-hide="nameStatus.editing">
-        <h2 data-type="text" data-placement="right" ng-class="editable editable-click" title="{{::displayName}}">{{::displayName | limitTo: 36 }}{{::displayName.length > 36 ? '&hellip;' : ''}}</h2>
+        <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::displayName}}">{{::displayName | limitTo: 36 }}{{::displayName.length > 36 ? '&hellip;' : ''}}</h2>
         <h2 class="edit">
             <button 
                     type="button"
@@ -31,6 +31,7 @@
 
                 <li 
                         ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" 
+                        data-ng-if="data.ModelType"
                         data-ng-click="refineAndCloneClick($event)">
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
                     <i class="fa fa-copy"></i>
@@ -38,6 +39,7 @@
 
                 <li 
                         ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })" 
+                        data-ng-if="data.ModelType"
                         data-ng-click="reviewClick($event)">
                     <a href="javascript:void(0)">Review Model</a>
                     <i class="fa fa-eye"></i>

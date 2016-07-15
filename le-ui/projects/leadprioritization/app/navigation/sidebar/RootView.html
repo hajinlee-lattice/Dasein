@@ -15,13 +15,13 @@
         <li ng-if="showJobsPage" role="presentation" ui-sref-active="active">
             <a ui-sref="home.jobs.status" ui-sref-opts="{reload: true}"><span class="ico-container"><span class="ico ico-cog ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}</span></a>
         </li>   
-        <li ng-if="showMarketoSettingsPage" role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
+        <li ng-if="showMarketoSettings" role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
             <a ui-sref="home.marketosettings.apikey"><span class="ico-container"><span class="ico ico-marketo ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}</span></a>
         </li>
-        <li role="presentation" ng-class="{active: $state.includes('home.eloquasettings')}">
+        <li ng-if="showEloquaSettings" role="presentation" ng-class="{active: $state.includes('home.eloquasettings')}">
             <a ui-sref="home.eloquasettings.apikey"><span class="ico-container"><span class="ico ico-eloqua ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}</span></a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li ng-if="showSalesforceSettings" role="presentation" ui-sref-active="active">
             <a ui-sref="home.sfdcsettings"><span class="ico-container"><span class="ico ico-salesforce ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}</span></a>
         </li>
         <li ng-if="showApiConsole" role="presentation" ui-sref-active="active">

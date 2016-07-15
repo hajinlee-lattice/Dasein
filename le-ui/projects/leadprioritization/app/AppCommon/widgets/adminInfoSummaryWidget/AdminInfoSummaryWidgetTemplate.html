@@ -21,20 +21,20 @@
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
                     <td>
-                        {{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/modeljson?modelId={{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
-                        <br/>
-                        {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/predictorcsv?modelId={{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader>
-                        <br/>
-                        {{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/diagnosticsjson?modelId={{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader>
-                        <br/>
-                        {{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/metadataavsc?modelId={{ModelId}}" filename="metadata.avsc" filetype="application/json"></data-file-downloader>
+                        <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/modeljson?modelId={{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader><br/></span>
+                        
+                        <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/predictorcsv?modelId={{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader><br/></span>
+                        
+                        <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/diagnosticsjson?modelId={{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader><br/></span>
+                        
+                        <span>{{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/metadataavsc?modelId={{ModelId}}" filename="metadata.avsc" filetype="application/json"></data-file-downloader></span>
                     </td>
                 </tr>
-                <tr>
+                <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
@@ -44,7 +44,7 @@
                         <data-file-downloader url="/pls/datafiles/scorecsv?modelId={{ModelId}}" filename="scores.csv" filetype="text/csv"></data-file-downloader>
                     </td>
                 </tr>
-                <tr>
+                <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_CSV_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
@@ -54,7 +54,7 @@
                         <data-file-downloader url="/pls/datafiles/rfmodelcsv?modelId={{ModelId}}" filename="rfmodel.csv" filetype="text/csv"></data-file-downloader>
                     </td>
                 </tr>
-                <tr>
+                <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_POST_MATCH_EVENT_TABLE_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_TRAINING_CSV')}}:&nbsp;&nbsp;&nbsp;&nbsp;
