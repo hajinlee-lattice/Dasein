@@ -105,7 +105,6 @@ tooltip {
     height: auto;
     opacity: 0;
     word-wrap: break-word;
-    z-index: 100;
     padding: $padding-top-bottom-tooltip $padding-rigth-left-tooltip;
     position: absolute;
     will-change: top, left, bottom, right;

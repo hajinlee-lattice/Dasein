@@ -135,10 +135,8 @@ span.chevron-content.chevron-content-text {
     color: black;
     font-size: 15px;
     
-    span {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
+    tooltip tip {
+        font-size: 14px;
     }
     
     span.button {

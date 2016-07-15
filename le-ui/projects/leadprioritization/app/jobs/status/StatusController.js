@@ -41,9 +41,13 @@ angular
                 var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
                 $scope.cancelJob = function(jobId) {
+                    
+                    console.log("cancel job");
+
                     $scope.cancelClicked = true;
                     $scope.cancelling[job.id] = true;
                     JobsService.cancelJob(jobId);
+
                 };
 
                 if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {

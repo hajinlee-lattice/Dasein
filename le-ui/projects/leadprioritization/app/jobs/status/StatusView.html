@@ -1,15 +1,20 @@
 <div data-ng-controller="JobsCtrl" class="container">
-    <div data-ng-if="succeeded" class="job-success-message">
-        <div>{{successMsg}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
-        <span>Analytics are now available.</span>
-    </div>
-    <div data-ng-if="!hideCreationMessage && jobCreationSuccess" class="job-success-message">
-        <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
-        <span>It will start running shortly, which will allow you to track the progress</span>
-    </div>
-    <div data-ng-if="!hideCreationMessage && !jobCreationSuccess" class="job-creation-failed">
-        <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
-        <span>Please retry or wait for a fix</span>
+
+    <div class="row">
+        <div class="twelve columns">
+            <div data-ng-if="succeeded" class="job-success-message">
+                <div>{{successMsg}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
+                <span>Analytics are now available.</span>
+            </div>
+            <div data-ng-if="!hideCreationMessage && jobCreationSuccess" class="job-success-message">
+                <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+                <span>It will start running shortly, which will allow you to track the progress</span>
+            </div>
+            <div data-ng-if="!hideCreationMessage && !jobCreationSuccess" class="job-creation-failed">
+                <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+                <span>Please retry or wait for a fix</span>
+            </div>
+        </div>
     </div>
 
     <div class="table-header">

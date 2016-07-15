@@ -2,7 +2,14 @@
     <div class="clearfix">
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns two" ng-if="state == 'model'">{{job.source}}</span>
+        <span class="columns two tooltip-container" ng-if="state == 'model'">
+            <span
+                tooltips 
+                tooltip-template="{{job.source}}" 
+                tooltip-side="right" 
+                tooltip-size="large" 
+                tooltip-close-button="false">{{job.source | limitTo: 16 }}{{job.source.length > 16 ? '&hellip;' : ''}}</span>
+        </span>
         <span class="columns two" ng-if="state != 'model'">{{job.displayName}}</span>
         <span class="columns two {{job.status}}">{{job.status}}</span>
         <span class="columns three">
