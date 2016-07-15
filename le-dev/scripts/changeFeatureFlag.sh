@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+###############################################
+# Usage: python changeFeatureFlag.sh -f tenants.txt -env Default -featureFlags UseMarketoSettings:true,UseSalesforceSettings:true,UseEloquaSettings:true,AllowPivotFile:true -all 
+###############################################
+
 import os
 import sys
 import argparse
@@ -51,8 +55,8 @@ def updateFeatureFlag(contract, env, newfeatureFlags, zk):
 
 
 def combineFeatureFlags(existingFeatureFlags, newFeatureFlags):
-    print "existing feature flags are ", existingFeatureFlags
-    print "new feature flags are ", newFeatureFlags
+    #print "existing feature flags are ", existingFeatureFlags
+    #print "new feature flags are ", newFeatureFlags
     existingContents = findBetween(existingFeatureFlags, '{', '}')
     newFfList = newFeatureFlags.split(',')
     for ff in newFfList:
@@ -60,9 +64,9 @@ def combineFeatureFlags(existingFeatureFlags, newFeatureFlags):
         featureFlagValue = ff.split(':')[1]
         #Create new feature flag value
         if featureFlag not in existingFeatureFlags:
-            print "existingContents is " + existingContents
+            #print "existingContents is " + existingContents
             newFeatureFlag = '"'+featureFlag+'":'+featureFlagValue
-            print "newFeatureFlag is ", newFeatureFlag
+            #print "newFeatureFlag is ", newFeatureFlag
             if not existingContents.strip() or existingFeatureFlags == '{}':
                 existingContents = newFeatureFlag 
             else:
