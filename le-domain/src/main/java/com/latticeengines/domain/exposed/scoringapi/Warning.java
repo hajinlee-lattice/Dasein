@@ -44,7 +44,13 @@ public class Warning {
         String description = code.getDescription();
 
         for (int i = 0; i < params.length; i++) {
-            description = description.replaceAll("\\{" + i + "\\}", params[i]);
+            String param = params[i];
+            if (param != null) {
+                // we need to escape $ from param otherwise it interfere with
+                // replace logic
+                param = param.replace("$", "\\$");
+            }
+            description = description.replaceAll("\\{" + i + "\\}", param);
         }
         return description;
     }
