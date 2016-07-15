@@ -1,6 +1,5 @@
 package com.latticeengines.saml.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -13,6 +12,4 @@ import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListe
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-saml-context.xml" })
 public abstract class SamlTestNGBase extends AbstractTestNGSpringContextTests {
-    @Autowired
-    protected SamlTestBed samlTestBed;
 }

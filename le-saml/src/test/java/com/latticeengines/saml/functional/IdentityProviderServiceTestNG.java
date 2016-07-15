@@ -4,6 +4,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import com.latticeengines.saml.testframework.SamlTestBed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,22 +27,25 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private SamlTestBed samlFunctionalTestBed;
+
     private IdentityProvider identityProvider;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        samlTestBed.setupTenant();
+        samlFunctionalTestBed.setupTenant();
     }
 
     @Test(groups = "functional")
     public void testCreate() {
-        identityProvider = samlTestBed.constructIdp();
+        identityProvider = samlFunctionalTestBed.constructIdp();
         identityProviderService.create(identityProvider);
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
     public void testFailValidation() {
-        IdentityProvider bad = samlTestBed.constructIdp();
+        IdentityProvider bad = samlFunctionalTestBed.constructIdp();
         bad.setEntityId("bad entity id");
         identityProviderEntityMgr.create(bad);
     }
@@ -75,7 +79,7 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testCreateAgain")
     public void testCascadeDelete() {
-        tenantService.discardTenant(samlTestBed.getGlobalAuthTestBed().getMainTestTenant());
+        tenantService.discardTenant(samlFunctionalTestBed.getGlobalAuthTestBed().getMainTestTenant());
         IdentityProvider retrieved = identityProviderEntityMgr.findByEntityId(identityProvider.getEntityId());
         assertNull(retrieved);
     }

@@ -25,4 +25,17 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+
+    <servlet>
+        <servlet-name>saml</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>saml</servlet-name>
+        <url-pattern>/saml/management/*</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>

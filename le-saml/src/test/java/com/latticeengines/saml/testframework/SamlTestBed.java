@@ -26,7 +26,6 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.saml.key.KeyManager;
-import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -36,12 +35,8 @@ import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
-@Component
-public class SamlTestBed {
+public abstract class SamlTestBed {
     public static final String RESOURCE_BASE = "/com/latticeengines/saml/";
-
-    @Autowired
-    private GlobalAuthTestBed globalAuthFunctionalTestBed;
 
     @Autowired
     private ParserPool parserPool;
@@ -50,19 +45,19 @@ public class SamlTestBed {
     private KeyManager keyManager;
 
     @Value("${saml.base.address}")
-    private String baseUrl;
+    protected String baseUrl;
 
-    public GlobalAuthTestBed getGlobalAuthTestBed() {
-        return globalAuthFunctionalTestBed;
-    }
+    public abstract GlobalAuthTestBed getGlobalAuthTestBed();
+
+    public abstract void registerIdentityProvider(IdentityProvider identityProvider);
 
     public void setupTenant() {
         // Create test tenant
-        globalAuthFunctionalTestBed.bootstrap(2);
-        MultiTenantContext.setTenant(globalAuthFunctionalTestBed.getMainTestTenant());
+        getGlobalAuthTestBed().bootstrap(2);
+        MultiTenantContext.setTenant(getGlobalAuthTestBed().getMainTestTenant());
 
         // Create test user
-        globalAuthFunctionalTestBed.switchToInternalAdmin();
+        getGlobalAuthTestBed().switchToInternalAdmin();
     }
 
     public Response getTestSAMLResponse(IdentityProvider idp) {
@@ -73,6 +68,7 @@ public class SamlTestBed {
             Assertion assertion = response.getAssertions().get(0);
             assertion.setIssueInstant(DateTime.now());
             assertion.getConditions().setNotOnOrAfter(DateTime.now().plus(60000));
+            assertion.getConditions().setNotBefore(DateTime.now());
             SubjectConfirmation sc = assertion.getSubject().getSubjectConfirmations().get(0);
             SubjectConfirmationData scd = sc.getSubjectConfirmationData();
             scd.setNotOnOrAfter(DateTime.now().plus(60000));
@@ -80,9 +76,9 @@ public class SamlTestBed {
             assertion.getAuthnStatements().get(0).setAuthnInstant(DateTime.now());
 
             assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
-                    SAMLUtils.getEntityIdFromTenantId(globalAuthFunctionalTestBed.getMainTestTenant().getId()));
+                    SAMLUtils.getEntityIdFromTenantId(getGlobalAuthTestBed().getMainTestTenant().getId()));
             assertion.getSubject().getNameID()
-                    .setValue(globalAuthFunctionalTestBed.getCurrentUser().getResult().getUser().getEmailAddress());
+                    .setValue(getGlobalAuthTestBed().getCurrentUser().getResult().getUser().getEmailAddress());
             setResponseIssuedBy(response, idp);
             return response;
         } catch (Exception e) {
@@ -122,7 +118,7 @@ public class SamlTestBed {
     }
 
     public String getSSOEndpointUrl() {
-        return baseUrl + "/SSO/alias/" + globalAuthFunctionalTestBed.getMainTestTenant().getId();
+        return baseUrl + "/SSO/alias/" + getGlobalAuthTestBed().getMainTestTenant().getId();
     }
 
     public RestTemplate getSamlRestTemplate() {

@@ -27,52 +27,60 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testIdPInitiatedAuth() throws UnsupportedEncodingException {
-        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
-        assertRedirectedToSuccessPage(samlTestBed.sendSamlResponse(response));
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToSuccessPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
     public void testIdPInitiatedAuth_ResponseNotSigned() throws UnsupportedEncodingException {
-        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
-        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response, false));
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response, false));
     }
 
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_IncorrectEntityId() {
-        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
         assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
                 "invalidEntityId");
-        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
+        assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_UnknownUser() {
-        Response response = samlTestBed.getTestSAMLResponse(identityProvider);
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
         Assertion assertion = response.getAssertions().get(0);
         assertion.getSubject().getNameID().setValue("unknown@lattice-engines.com");
-        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
+        assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
+    /**
+     * This tests the scenario where we create an identity provider associated
+     * with tenant A, but attempt to login with it using tenant B.
+     */
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_IdpNotAssociatedWithTenant() throws InterruptedException {
-        GlobalAuthTestBed gatestbed = samlTestBed.getGlobalAuthTestBed();
+        GlobalAuthTestBed gatestbed = samlDeploymentTestBed.getGlobalAuthTestBed();
+
+        // Switch to secondary tenant
         gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(1));
+        gatestbed.switchToSuperAdmin(gatestbed.getMainTestTenant());
         MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
 
         // Register IdP
-        IdentityProvider otherIdentityProvider = samlTestBed.constructIdp();
-        identityProviderService.create(otherIdentityProvider);
+        IdentityProvider otherIdentityProvider = samlDeploymentTestBed.constructIdp();
+        samlDeploymentTestBed.registerIdentityProvider(otherIdentityProvider);
         // Sleep to let metadata manager pick up the new IdP
         Thread.sleep(10000);
 
         // Switch back to main tenant
         gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(0));
+        gatestbed.switchToSuperAdmin(gatestbed.getMainTestTenant());
         MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
 
-        Response response = samlTestBed.getTestSAMLResponse(otherIdentityProvider);
-
-        assertRedirectedToErrorPage(samlTestBed.sendSamlResponse(response));
+        // Try to login
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(otherIdentityProvider);
+        assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
     private void assertRedirectedToErrorPage(ResponseEntity<Void> httpResponse) {
@@ -88,5 +96,4 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         assertEquals(inner.size(), 1);
         assertTrue(inner.get(0).contains(successPage));
     }
-
 }
