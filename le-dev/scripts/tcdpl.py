@@ -25,7 +25,7 @@ if HADOOP_COMMON_JAR is None or HADOOP_COMMON_JAR == '':
 else:
     print 'HADOOP_COMMON_JAR=%s' % HADOOP_COMMON_JAR
 
-LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi']
+LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality', 'securityapi']
 
 def cleanupWars():
@@ -51,6 +51,7 @@ def cleanupWars():
     print ''
 
 def deployApp(app, modules):
+    print 'deploying ' + app
     if app == 'microservice':
         deployMs(modules)
         return
@@ -93,7 +94,7 @@ def deployMsModule(module):
             break
 
     if moduleWar is None:
-        raise Error("Cannot find war file for module " + module)
+        raise IOError("Cannot find war file for module " + module)
 
     webappWar = 'ROOT.war' if (module == 'core') else module + '.war'
     webappDir = os.path.join(CATALINA_HOME, 'webapps', 'ms', webappWar)
@@ -115,9 +116,9 @@ def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
     parser.add_argument('-a', dest='apps', type=str, default='microservice',
-                        help='comma separated list of apps to be deployed. default is microservice. Avaiable choices are admin, pls, microservice, playmaker, oauth2, scoringapi')
+                        help='comma separated list of apps to be deployed. default is microservice. Avaiable choices are ' + ', '.join(LE_APPS))
     parser.add_argument('-m', dest='modules', type=str, default=','.join(MS_MODULES),
-                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is all modules. Avaiable choices are dataflowapi, eai, metadata, modeling, propdata, scoring, workflowapi')
+                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is all modules. Avaiable choices are ' + ', '.join(MS_MODULES))
     args = parser.parse_args()
 
     return args

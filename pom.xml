@@ -60,5 +60,6 @@
         <module>le-quartzclient</module>
         <module>le-admin</module>
         <module>le-modelquality</module>
+        <module>le-saml</module>
     </modules>
 </project>

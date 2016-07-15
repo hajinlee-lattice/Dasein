@@ -119,6 +119,22 @@
         </Engine>
     </Service>
 
+    <Service name="SAML">
+        <Connector port="8086" protocol="HTTP/1.1" connectionTimeout="20000"/>
+
+        <Engine name="SAMLEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+
+            <Host name="localhost" appBase="webapps/saml" unpackWARs="false" autoDeploy="true"
+                  undeployOldVersions="true">
+                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
+            </Host>
+        </Engine>
+    </Service>
+
     <Service name="API">
         <Connector port="8074" protocol="HTTP/1.1" connectionTimeout="20000"/>
 
