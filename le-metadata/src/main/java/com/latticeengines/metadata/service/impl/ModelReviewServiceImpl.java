@@ -1,16 +1,13 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -30,9 +27,10 @@ public class ModelReviewServiceImpl implements ModelReviewService {
     private RuleResultService ruleResultService;
 
     @Override
-    public ModelReviewData getReviewData(String modelId, String eventTableName) {
-        Table eventTable = metadataService.getTable(null, eventTableName);
+    public ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName) {
+        Table eventTable = metadataService.getTable(CustomerSpace.parse(customerSpace), eventTableName);
         List<DataRule> rules = eventTable.getDataRules();
+        populateDataRuleDisplayNameAndDescriptions(rules);
 
         List<ColumnRuleResult> columnResults = ruleResultService.findColumnResults(modelId);
         List<RowRuleResult> rowResults = ruleResultService.findRowResults(modelId);
@@ -55,103 +53,38 @@ public class ModelReviewServiceImpl implements ModelReviewService {
         return reviewData;
     }
 
-    @SuppressWarnings("unused")
-    private ModelReviewData generateStubData() {
-        Triple<List<DataRule>, Map<String, ColumnRuleResult>, Map<String, RowRuleResult>> masterList = getMasterList();
+    private void populateDataRuleDisplayNameAndDescriptions(List<DataRule> dataRules) {
+        for (DataRule rule : dataRules) {
+            switch (rule.getName()) {
+            case "UniqueValueCountDS":
+                rule.setDescription("Unique value count in column - Integrated from Profiling");
+                rule.setDisplayName("Unique Value Count");
+                break;
+            case "PopulatedRowCountDS":
+                rule.setDescription("Populated Row Count - Integrated from Profiling (certain value exceeds x%)");
+                rule.setDisplayName("Populated Row Count");
+                break;
+            case "OverlyPredictiveDS":
+                rule.setDescription("Overly predictive single category / value range");
+                rule.setDisplayName("Overly Predictive Columns");
+                break;
+            case "LowCoverageDS":
+                rule.setDescription("Low coverage (empty exceeds x%)");
+                rule.setDisplayName("Low Coverage");
+                break;
+            case "NullIssueDS":
+                rule.setDescription("Positively predictive nulls");
+                rule.setDisplayName("Positively Predictive Nulls");
+                break;
+            case "HighlyPredictiveSmallPopulationDS":
+                rule.setDescription("High predictive, low population");
+                rule.setDisplayName("High Predictive Low Population");
+                break;
 
-        ModelReviewData reviewData = new ModelReviewData();
-        reviewData.setDataRules(masterList.getLeft());
-        reviewData.setRuleNameToColumnRuleResults(masterList.getMiddle());
-        reviewData.setRuleNameToRowRuleResults(masterList.getRight());
-
-        return reviewData;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Triple<List<DataRule>, Map<String, ColumnRuleResult>, Map<String, RowRuleResult>> getMasterList() {
-        List<Triple<String, String, Boolean>> masterColumnConfig = new ArrayList<>();
-        List<Triple<String, String, Boolean>> masterRowConfig = new ArrayList<>();
-
-        Triple<String, String, Boolean> overlyPredictiveColumns = Triple.of("Overly Predictive Columns",
-                "overly predictive single category / value range", false);
-        masterColumnConfig.add(overlyPredictiveColumns);
-        Triple<String, String, Boolean> lowCoverage = Triple
-                .of("Low Coverage", "Low coverage (empty exceeds x%)", false);
-        masterColumnConfig.add(lowCoverage);
-        Triple<String, String, Boolean> populatedRowCount = Triple.of("Populated Row Count",
-                "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ", false);
-        masterColumnConfig.add(populatedRowCount);
-        Triple<String, String, Boolean> positivelyPredictiveNulls = Triple.of("Positively Predictive Nulls",
-                "Positively predictive nulls", false);
-        masterColumnConfig.add(positivelyPredictiveNulls);
-        Triple<String, String, Boolean> uniqueValueCount = Triple.of("Unique Value Count",
-                "Unique value count in column - Integrated from Profiling", false);
-        masterColumnConfig.add(uniqueValueCount);
-        Triple<String, String, Boolean> publicDomains = Triple.of("Public Domains",
-                "Exclude Records with Public Domains ", false);
-        masterRowConfig.add(publicDomains);
-        Triple<String, String, Boolean> customDomains = Triple.of("Custom Domains", "Exclude specific domain(s)", false);
-        masterRowConfig.add(customDomains);
-        Triple<String, String, Boolean> oneRecordPerDomain = Triple.of("One Record Per Domain", "One Record Per Domain",
-                false);
-        masterRowConfig.add(oneRecordPerDomain);
-        Triple<String, String, Boolean> oneLeadPerAccount = Triple.of("One Lead Per Account", "One Lead Per Account",
-                false);
-        masterRowConfig.add(oneLeadPerAccount);
-        Triple<String, String, Boolean> highPredictiveLowPopulation = Triple.of("High Predictive Low Population",
-                "High predictive, low population", false);
-        masterRowConfig.add(highPredictiveLowPopulation);
-
-        List<DataRule> masterRuleList = new ArrayList<>();
-        Map<String, ColumnRuleResult> columnResults = new HashMap<>();
-        for (Triple<String, String, Boolean> config : masterColumnConfig) {
-            DataRule rule = generateDataRule(config);
-            masterRuleList.add(rule);
-            ColumnRuleResult columnResult = new ColumnRuleResult();
-            columnResult.setDataRuleName(rule.getName());
-            if (rule.getName().equals("UniqueValueCount")) {
-                List<String> flaggedColumns = new ArrayList<>();
-                flaggedColumns.add("SomeColumnA");
-                flaggedColumns.add("AnotherColumnB");
-                columnResult.setFlaggedColumnNames(flaggedColumns);
-            } else {
-                columnResult.setFlaggedColumnNames(Collections.EMPTY_LIST);
+            default:
+                break;
             }
-            columnResult.setFlaggedItemCount(columnResult.getFlaggedColumnNames().size());
-            columnResults.put(rule.getName(), columnResult);
         }
-
-        Map<String, RowRuleResult> rowResults = new HashMap<>();
-        for (Triple<String, String, Boolean> config : masterRowConfig) {
-            DataRule rule = generateDataRule(config);
-            masterRuleList.add(rule);
-            RowRuleResult rowResult = new RowRuleResult();
-            rowResult.setDataRuleName(rule.getName());
-            rowResult.setFlaggedItemCount(0);
-            rowResult.setFlaggedRowIdAndColumnNames(Collections.EMPTY_MAP);
-            rowResult.setNumPositiveEvents(0);
-            rowResults.put(rule.getName(), rowResult);
-        }
-
-        return Triple.of(masterRuleList, columnResults, rowResults);
-    }
-
-    @SuppressWarnings("unchecked")
-    private DataRule generateDataRule(Triple<String, String, Boolean> config) {
-        DataRule rule = new DataRule();
-        rule.setName(StringUtils.trimAllWhitespace(config.getLeft()));
-        rule.setDisplayName(config.getLeft());
-        rule.setDescription(config.getMiddle());
-        rule.setFrozenEnablement(config.getRight());
-        rule.setColumnsToRemediate(Collections.EMPTY_LIST);
-        if (rule.getName().equals("CustomDomains")) {
-            Map<String, String> props = new HashMap<>();
-            props.put("domains", "company.com, anothersite.com, abc.com");
-            rule.setProperties(props);
-        } else {
-            rule.setProperties(Collections.EMPTY_MAP);
-        }
-        return rule;
     }
 
 }

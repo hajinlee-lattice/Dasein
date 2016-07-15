@@ -16,5 +16,5 @@ public interface RuleResultInterface {
 
     List<RowRuleResult> getRowResults(String modelId);
 
-    ModelReviewData getReviewData(String modelId, String eventTableName);
+    ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName);
 }

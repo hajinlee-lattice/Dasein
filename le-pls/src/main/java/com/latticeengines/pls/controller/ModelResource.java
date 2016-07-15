@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +35,7 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -39,9 +43,7 @@ import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
@@ -135,17 +137,18 @@ public class ModelResource {
 
     @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get the model review data rules for the model")
-    public ResponseDocument<ModelReviewData> getModelReviewData(@PathVariable String modelName, @PathVariable String eventTableName)
-            throws IOException{
-        return ResponseDocument.successResponse(metadataProxy.getReviewData(modelName, eventTableName));
+    @ApiOperation(value = "Get the model review data rules and rule output for the model")
+    public ResponseDocument<ModelReviewData> getModelReviewData(@PathVariable String modelName,
+            @PathVariable String eventTableName) throws IOException {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ResponseDocument.successResponse(metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
     }
 
     @RequestMapping(value = "/reviewmodel/mocked/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the model review data rules for the model")
-    public ResponseDocument<ModelReviewData> getMockedModelReviewData(@PathVariable String modelName, @PathVariable String eventTableName)
-            throws IOException{
+    public ResponseDocument<ModelReviewData> getMockedModelReviewData(@PathVariable String modelName,
+            @PathVariable String eventTableName) throws IOException {
         return ResponseDocument.successResponse(generateStubData());
     }
 
@@ -197,8 +200,8 @@ public class ModelResource {
         Triple<String, String, Boolean> overlyPredictiveColumns = Triple.of("Overly Predictive Columns",
                 "overly predictive single category / value range", false);
         masterColumnConfig.add(overlyPredictiveColumns);
-        Triple<String, String, Boolean> lowCoverage = Triple
-                .of("Low Coverage", "Low coverage (empty exceeds x%)", false);
+        Triple<String, String, Boolean> lowCoverage = Triple.of("Low Coverage", "Low coverage (empty exceeds x%)",
+                false);
         masterColumnConfig.add(lowCoverage);
         Triple<String, String, Boolean> populatedRowCount = Triple.of("Populated Row Count",
                 "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ", false);
@@ -212,10 +215,11 @@ public class ModelResource {
         Triple<String, String, Boolean> publicDomains = Triple.of("Public Domains",
                 "Exclude Records with Public Domains ", false);
         masterRowConfig.add(publicDomains);
-        Triple<String, String, Boolean> customDomains = Triple.of("Custom Domains", "Exclude specific domain(s)", false);
+        Triple<String, String, Boolean> customDomains = Triple
+                .of("Custom Domains", "Exclude specific domain(s)", false);
         masterRowConfig.add(customDomains);
-        Triple<String, String, Boolean> oneRecordPerDomain = Triple.of("One Record Per Domain", "One Record Per Domain",
-                false);
+        Triple<String, String, Boolean> oneRecordPerDomain = Triple.of("One Record Per Domain",
+                "One Record Per Domain", false);
         masterRowConfig.add(oneRecordPerDomain);
         Triple<String, String, Boolean> oneLeadPerAccount = Triple.of("One Lead Per Account", "One Lead Per Account",
                 false);

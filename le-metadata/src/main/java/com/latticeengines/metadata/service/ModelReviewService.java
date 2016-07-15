@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 
 public interface ModelReviewService {
 
-    ModelReviewData getReviewData(String modelId, String eventTableName);
+    ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName);
 
 }

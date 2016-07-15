@@ -74,10 +74,10 @@ public class RuleResultResource {
         return ruleResultService.findRowResults(modelId);
     }
 
-    @RequestMapping(value = "/reviewdata/{modelId}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reviewdata/{customerSpace}/{modelId}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get model review data for a model")
-    public ModelReviewData getReviewData(@PathVariable String modelId, @PathVariable String eventTableName) {
-        return modelReviewService.getReviewData(modelId, eventTableName);
+    public ModelReviewData getReviewData(@PathVariable String customerSpace, @PathVariable String modelId, @PathVariable String eventTableName) {
+        return modelReviewService.getReviewData(customerSpace, modelId, eventTableName);
     }
 }
