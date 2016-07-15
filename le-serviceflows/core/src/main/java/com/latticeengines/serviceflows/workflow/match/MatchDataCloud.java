@@ -141,9 +141,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         matchInput.setInputBuffer(inputBuffer);
 
-        if (getConfiguration().isExcludePublicDomains()) {
-            matchInput.setExcludePublicDomains(true);
-        }
+        matchInput.setExcludePublicDomains(getConfiguration().isExcludePublicDomains());
 
         return matchInput;
     }

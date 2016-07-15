@@ -81,6 +81,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain")) //
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
+                .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null

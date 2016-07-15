@@ -150,6 +150,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder excludePublicDomains(boolean excludePublicDomains) {
+            match.setExcludePublicDomains(excludePublicDomains);
+            return this;
+        }
+
         public Builder matchType(MatchCommandType matchCommandType) {
             match.setMatchCommandType(matchCommandType);
             return this;

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -115,6 +116,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder deduplicationType(DedupType dedupType) {
+            dedupEventTable.setDeduplicationType(dedupType);
+            return this;
+        }
+
         public Builder dedupDataFlowBeanName(String beanName) {
             dedupEventTable.setBeanName(beanName);
             return this;
@@ -140,6 +146,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             match.setDbUser(matchClientDocument.getUsername());
             match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
             match.setMatchClient(matchClientDocument.getMatchClient().name());
+            return this;
+        }
+
+        public Builder excludePublicDomains(boolean excludePublicDomains) {
+            match.setExcludePublicDomains(excludePublicDomains);
             return this;
         }
 
@@ -215,7 +226,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             model.setExcludePropDataColumns(excludePropDataColumns);
             return this;
         }
-        
+
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             model.setRunTimeParams(runTimeParams);
             return this;

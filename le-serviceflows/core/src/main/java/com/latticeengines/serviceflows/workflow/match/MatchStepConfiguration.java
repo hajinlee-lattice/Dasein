@@ -33,7 +33,7 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean retainMatchTables;
 
-    private boolean excludePublicDomains;
+    private boolean excludePublicDomains = false;
 
     @NotNull
     private MatchCommandType matchCommandType;

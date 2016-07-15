@@ -33,6 +33,9 @@ public class ModelingParameters {
     private boolean excludePropDataColumns = false;
 
     @JsonProperty
+    private boolean excludePublicDomains = false;
+
+    @JsonProperty
     private TransformationGroup transformationGroup;
 
     @JsonProperty
@@ -40,7 +43,7 @@ public class ModelingParameters {
 
     @JsonProperty
     private String selectedVersion;
-    
+
     @JsonProperty
     private String moduleName;
 
@@ -98,6 +101,14 @@ public class ModelingParameters {
         this.excludePropDataColumns = excludePropDataColumns;
     }
 
+    public boolean isExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    public void setExcludePublicDomains(boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
+    }
+
     public TransformationGroup getTransformationGroup() {
         return transformationGroup;
     }
@@ -113,7 +124,7 @@ public class ModelingParameters {
     public void setPredefinedSelectionName(String predefinedSelectionName) {
         this.predefinedSelectionName = predefinedSelectionName;
     }
-    
+
     public String getSelectedVersion() {
         return selectedVersion;
     }

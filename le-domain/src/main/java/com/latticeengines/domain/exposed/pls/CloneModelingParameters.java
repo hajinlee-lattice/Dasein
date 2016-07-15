@@ -29,6 +29,9 @@ public class CloneModelingParameters {
     @JsonProperty
     private List<DataRule> dataRules;
 
+    @JsonProperty
+    private boolean excludePublicDomains = false;
+
     public String getName() {
         return name;
     }
@@ -83,6 +86,14 @@ public class CloneModelingParameters {
 
     public void setDataRules(List<DataRule> dataRules) {
         this.dataRules = dataRules;
+    }
+
+    public boolean isExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    public void setExcludePublicDomains(boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
     }
 
     @Override

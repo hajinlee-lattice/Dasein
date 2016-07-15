@@ -121,6 +121,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .internalResourceHostPort(internalResourceHostPort) //
                 .importReportNamePrefix(sourceFile.getName() + "_Report") //
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
+                .deduplicationType(parameters.getDeduplicationType()) //
                 .dedupDataFlowBeanName("dedupEventTable")
                 //
                 .dedupDataFlowParams(
@@ -130,6 +131,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchClientDocument) //
+                .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null means
