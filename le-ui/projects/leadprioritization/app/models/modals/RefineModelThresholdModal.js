@@ -7,8 +7,8 @@ angular.module('mainApp.models.modals.RefineModelThresholdModal', [
     var self = this;
     this.show = function () {
         $http.get('app/models/views/RefineModelThresholdModal.html', { cache: $templateCache }).success(function (html) {
-
             var scope = $rootScope.$new();
+            scope.ResourceUtility = ResourceUtility;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
