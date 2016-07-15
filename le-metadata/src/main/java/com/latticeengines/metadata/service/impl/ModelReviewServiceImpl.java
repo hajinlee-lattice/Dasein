@@ -39,22 +39,11 @@ public class ModelReviewServiceImpl implements ModelReviewService {
 
         Map<String, ColumnRuleResult> ruleNameToColumnRuleResults = new HashMap<>();
         for (ColumnRuleResult columnRuleResult : columnResults) {
-            columnRuleResult.setFlaggedItemCount(columnRuleResult.getFlaggedColumnNames().size());
             ruleNameToColumnRuleResults.put(columnRuleResult.getDataRuleName(), columnRuleResult);
         }
 
         Map<String, RowRuleResult> ruleNameToRowRuleResults = new HashMap<>();
         for (RowRuleResult rowRuleResult : rowResults) {
-            rowRuleResult.setFlaggedItemCount(rowRuleResult.getFlaggedRowIdAndColumnNames().size());
-
-            int positiveEventCount = 0;
-            for (Boolean val : rowRuleResult.getFlaggedRowIdAndPositiveEvent().values()) {
-                if (val) {
-                    positiveEventCount++;
-                }
-            }
-            rowRuleResult.setNumPositiveEvents(positiveEventCount);
-
             ruleNameToRowRuleResults.put(rowRuleResult.getDataRuleName(), rowRuleResult);
         }
 

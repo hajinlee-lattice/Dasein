@@ -54,12 +54,28 @@ public class RuleResultServiceImpl implements RuleResultService {
 
     @Override
     public List<ColumnRuleResult> findColumnResults(String modelId) {
-        return columnRuleResultEntityMgr.findByModelId(modelId);
+        List<ColumnRuleResult> columnResults = columnRuleResultEntityMgr.findByModelId(modelId);
+        for (ColumnRuleResult columnRuleResult : columnResults) {
+            columnRuleResult.setFlaggedItemCount(columnRuleResult.getFlaggedColumnNames().size());
+        }
+        return columnResults;
     }
 
     @Override
     public List<RowRuleResult> findRowResults(String modelId) {
-        return rowRuleResultEntityMgr.findByModelId(modelId);
+        List<RowRuleResult> rowResults = rowRuleResultEntityMgr.findByModelId(modelId);
+        for (RowRuleResult rowRuleResult : rowResults) {
+            rowRuleResult.setFlaggedItemCount(rowRuleResult.getFlaggedRowIdAndColumnNames().size());
+
+            int positiveEventCount = 0;
+            for (Boolean val : rowRuleResult.getFlaggedRowIdAndPositiveEvent().values()) {
+                if (val) {
+                    positiveEventCount++;
+                }
+            }
+            rowRuleResult.setNumPositiveEvents(positiveEventCount);
+        }
+        return rowResults;
     }
 
 }
