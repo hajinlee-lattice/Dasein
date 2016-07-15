@@ -31,7 +31,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String blockOperationUid;
     private String appName;
     private Boolean returnUnmatched;
-    private Boolean excludePublicDomains;
+    private Boolean excludePublicDomains = Boolean.FALSE;
     private String yarnQueue;
     private Schema inputAvroSchema;
 
