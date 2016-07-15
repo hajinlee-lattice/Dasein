@@ -188,7 +188,7 @@ var mainApp = angular.module('mainApp', [
     function openWarningModal() {
         warningModalInstance = $modal.open({
             animation: true,
-            backdrop: false,
+            backdrop: true,
             scope: $scope,
             templateUrl: 'app/core/views/WarningModal.html'
         });
