@@ -180,7 +180,6 @@ public class ModelResource {
         return ResponseDocument.successResponse(metadataProxy.getRowResults(modelId));
     }
 
-    @SuppressWarnings("unused")
     private ModelReviewData generateStubData() {
         Triple<List<DataRule>, Map<String, ColumnRuleResult>, Map<String, RowRuleResult>> masterList = getMasterList();
 
