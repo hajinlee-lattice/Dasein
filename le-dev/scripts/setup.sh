@@ -63,7 +63,16 @@ do
 done
 wait
 
-sed -i "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+UNAME=`uname`
+if [[ "${UNAME}" == 'Darwin' ]]; then
+    echo "You are on Mac"
+    sed -i '' "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+    sed -i '' "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
+else
+    echo "You are on ${UNAME}"
+    sed -i "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+    sed -i "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
+fi
 
 if [ ! -z "$(cat /tmp/errors.txt)" ]
 then
@@ -81,6 +90,3 @@ pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
 processErrors
 
 echo "Success!!!"
-
-
-
