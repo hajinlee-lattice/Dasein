@@ -2,20 +2,20 @@
     <div>
         <span class="columns one">
             <input type="checkbox" id="" data-ng-click="warningExcludeToggled($event, columnWarning)"
-                   data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled"/>
+                   data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled" />
         </span>
         <span class="columns two">{{columnWarning.flaggedItemCount}}</span>
-        <span class="columns two">{{ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</span>
-        <span class="columns three">{{ruleNameToDataRules[columnWarning.dataRuleName].description}}</span>
+        <span class="columns three">{{ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</span>
+        <span class="columns four">{{ruleNameToDataRules[columnWarning.dataRuleName].description}}</span>
         <span data-ng-if="columnWarning.flaggedItemCount > 0 && ! columnWarningExpanded" data-ng-click="expandColumnWarningClicked()" class="columns one"><i class="fa fa-angle-double-down fa-lg"></i></span>
         <span data-ng-if="columnWarning.flaggedItemCount > 0 && columnWarningExpanded" data-ng-click="expandColumnWarningClicked()" class="columns one"><i class="fa fa-angle-double-up fa-lg"></i></span>
     </div>
-    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
-        <div>
-            <input type="checkbox" id="" data-ng-click="warningExcludeToggled($event, columnWarning)"
-                   data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled"/>
+    <div class="row" data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
+        <div class="columns two">
+            <input type="checkbox" id="" data-ng-click="columnExcludeToggled($event, columnName)"
+                   data-ng-checked="columnRemediated(columnName) || (dataRule.enabled && dataRule.columnsToRemediate.length == 0)" />
         </div>
-        <div>
+        <div class="columns two">
             {{columnName}}
         </div>
     </div>

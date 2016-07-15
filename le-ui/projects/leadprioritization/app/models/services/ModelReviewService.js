@@ -2,45 +2,66 @@ angular
 .module('lp.models.review', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.service('ModelReviewStore', function($q) {
+.service('ModelReviewStore', function($q, ModelReviewService) {
     var ModelReviewStore = this;
-    this.reviewData = {};
-    this.dataRules = [];
+    this.reviewDataMap = {};
 
-    this.AddDataRule = function(dataRule) {
-        for (var i in this.dataRules) {
-            if (dataRule.name == this.dataRules[i].name) {
-                this.dataRules.splice(i, 1);
+    this.AddDataRule = function(modelId, dataRule) {
+        var reviewData = this.reviewDataMap[modelId];
+        for (var i in reviewData.dataRules) {
+            if (dataRule.name == reviewData.dataRules[i].name) {
+                reviewData.dataRules.splice(i, 1);
             }
         }
-        this.dataRules.push(dataRule);
+        reviewData.dataRules.push(dataRule);
+        this.reviewDataMap[modelId] = reviewData;
     };
 
-    this.GetDataRules = function() {
-        return this.dataRules;
+    this.GetDataRules = function(modelId) {
+        return this.reviewDataMap[modelId].dataRules;
     };
 
-    this.RemoveDataRule = function(name) {
-        for (var i in this.dataRules) {
-            if (this.dataRules[i].name == name) {
-                this.dataRules.splice(i, 1);
+    this.RemoveDataRule = function(modelId, name) {
+        var reviewData = this.reviewDataMap[modelId];
+        for (var i in reviewData.dataRules) {
+            if (reviewData.dataRules[i].name == name) {
+                reviewData.dataRules.splice(i, 1);
             }
         }
-    };
-
-    this.GetReviewData = function(modelId) {
-        return this.reviewData[modelId];
+        this.reviewDataMap[modelId] = reviewData;
     };
 
     this.SetReviewData = function(modelId, reviewData) {
-        this.reviewData[modelId] = reviewData;
+        this.reviewDataMap[modelId] = reviewData;
+    };
+
+    this.GetReviewData = function(modelId, eventTableName) {
+        var deferred = $q.defer(),
+            reviewData = this.reviewDataMap[modelId];
+
+        if (typeof reviewData == 'object') {
+            deferred.resolve(reviewData);
+        } else {
+             ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
+                 if (result.Success === true) {
+                     var modelReviewData = result.Result;
+                     ModelReviewStore.SetReviewData(modelId, modelReviewData);
+                     for (var i in modelReviewData.dataRules) {
+                        ModelReviewStore.AddDataRule(modelId, modelReviewData.dataRules[i]);
+                     }
+                     deferred.resolve(result.Result);
+                 }
+             });
+
+            return deferred.promise;
+        }
     };
 
     this.ResetReviewData = function() {
-        this.reviewData = {};
+        this.reviewDataMap = {};
     };
 })
-.service('ModelReviewService', function($q, $http, ResourceUtility, ModelReviewStore, ServiceErrorUtility) {
+.service('ModelReviewService', function($q, $http, ResourceUtility, ServiceErrorUtility) {
     this.GetModelReviewData = function(modelId, eventTableName) {
         var deferred = $q.defer();
 

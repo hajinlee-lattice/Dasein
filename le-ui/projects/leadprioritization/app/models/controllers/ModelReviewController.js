@@ -5,10 +5,11 @@ angular.module('mainApp.models.review', [
     'mainApp.models.modals.RefineModelThresholdModal',
     'lp.models.review'
 ])
-.controller('ModelReviewRowController', function($scope, _, $rootScope, ResourceUtility, ModelService, ModelReviewStore,
+.controller('ModelReviewRowController', function($scope, $stateParams, _, $rootScope, ResourceUtility, ModelService, ModelReviewStore,
     ReviewData, RefineModelThresholdModal, Model) {
     var vm = this,
-        ruleNameToDataRules = {};
+        ruleNameToDataRules = {},
+        modelId = $stateParams.modelId;
 
     for (var i in ReviewData.dataRules) {
         ruleNameToDataRules[ReviewData.dataRules[i].name] = ReviewData.dataRules[i];
@@ -21,7 +22,7 @@ angular.module('mainApp.models.review', [
         rowsExcluded: 0
     });
 
-    var storedDataRules = ModelReviewStore.GetDataRules();
+    var storedDataRules = ModelReviewStore.GetDataRules(modelId);
     if (storedDataRules != null) {
         storedDataRules.forEach(function(storeDataRule) {
             vm.ruleNameToDataRules[storeDataRule.name] = storeDataRule;
@@ -35,8 +36,8 @@ angular.module('mainApp.models.review', [
 
         var beforeState = vm.ruleNameToDataRules[warning.dataRuleName].enabled;
         vm.ruleNameToDataRules[warning.dataRuleName].enabled = !beforeState;
-        ModelReviewStore.SetReviewData(vm.modelId, ReviewData);
-        ModelReviewStore.AddDataRule(vm.ruleNameToDataRules[warning.dataRuleName]);
+        ModelReviewStore.SetReviewData(modelId, ReviewData);
+        ModelReviewStore.AddDataRule(modelId, vm.ruleNameToDataRules[warning.dataRuleName]);
         if (beforeState == true) {
             vm.rowsExcluded -= warning.flaggedItemCount;
         } else {
@@ -75,48 +76,21 @@ angular.module('mainApp.models.review', [
             customWarnedColumnCount: 0,
             columnWarningsToDisplay: []
         });
-        var storedDataRules = ModelReviewStore.GetDataRules();
+        var storedDataRules = ModelReviewStore.GetDataRules(modelId);
         if (storedDataRules != null) {
             storedDataRules.forEach(function(storeDataRule) {
                 vm.ruleNameToDataRules[storeDataRule.name] = storeDataRule;
-            })
+            });
         }
 
-        vm.warningExcludeToggled = function($event, warning) {
-            if ($event == null) {
-                $event.preventDefault();
-            }
-
-            var beforeState = ruleNameToDataRules[warning.dataRuleName].enabled;
-            ruleNameToDataRules[warning.dataRuleName].enabled = !beforeState;
-            ModelReviewStore.SetReviewData(vm.modelId, ReviewData);
-            ModelReviewStore.AddDataRule(ruleNameToDataRules[warning.dataRuleName]);
-            if (beforeState == true) {
-                vm.totalWarnedColumnCount -= warning.flaggedItemCount;
-                if (isLatticeColumnWarning(warning)) {
-                    vm.latticeWarnedColumnCount -= warning.flaggedItemCount;
-                } else {
-                    vm.customWarnedColumnCount -= warning.flaggedItemCount;
-                }
-            } else {
-                vm.totalWarnedColumnCount += warning.flaggedItemCount;
-                if (isLatticeColumnWarning(warning)) {
-                    vm.latticeWarnedColumnCount += warning.flaggedItemCount;
-                } else {
-                    vm.customWarnedColumnCount += warning.flaggedItemCount;
-                }
-            }
-            if (vm.showAll) {
-                vm.customWarnedColumnCount = vm.totalWarnedColumnCount;
-            }
-
-            RefineModelThresholdModal.show();
-
-        };
-
         vm.allColumnWarnings.forEach(function(columnWarning) {
+            vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
             if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
-                vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
+                if (isLatticeColumnWarning(columnWarning)) {
+                    vm.latticeWarnedColumnCount += columnWarning.flaggedItemCount;
+                } else if (isNonLatticeColumnWarning(columnWarning)) {
+                    vm.customWarnedColumnCount += columnWarning.flaggedItemCount;
+                }
             }
         });
 
@@ -130,9 +104,6 @@ angular.module('mainApp.models.review', [
             vm.allColumnWarnings.forEach(function(columnWarning) {
                 if (isLatticeColumnWarning(columnWarning)) {
                     vm.columnWarningsToDisplay.push(columnWarning);
-                    if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
-                        vm.latticeWarnedColumnCount += columnWarning.flaggedItemCount;
-                    }
                 }
             });
         };
@@ -147,9 +118,6 @@ angular.module('mainApp.models.review', [
             vm.allColumnWarnings.forEach(function(columnWarning) {
                 if (isNonLatticeColumnWarning(columnWarning)) {
                     vm.columnWarningsToDisplay.push(columnWarning);
-                    if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
-                        vm.customWarnedColumnCount += columnWarning.flaggedItemCount;
-                    }
                 }
             });
         };
@@ -209,45 +177,81 @@ angular.module('mainApp.models.review', [
         templateUrl: 'app/models/views/ColumnWarningRow.html',
         scope: {
             column: '=',
-            rules: '='
+            rules: '=',
+            data: '='
         },
-        controller: ['$scope', '$stateParams', 'ModelService', 'MetadataService', 'ModelReviewStore', 'MetadataStore',
+        controller: ['$scope', '$stateParams', 'ModelService', 'ModelReviewStore', 'MetadataStore',
             'RefineModelThresholdModal', function($scope, $stateParams, ModelService, ModelReviewStore, MetadataStore, RefineModelThresholdModal) {
 
             $scope.modelId = $stateParams.modelId;
             $scope.columnWarning = $scope.column;
             $scope.ruleNameToDataRules = $scope.rules;
             $scope.columnWarningExpanded = false;
+            $scope.dataRule = $scope.ruleNameToDataRules[$scope.columnWarning.dataRuleName];
+            $scope.columnsToRemediate = $scope.dataRule.columnsToRemediate;
+            $scope.ReviewData = $scope.data;
 
             $scope.warningExcludeToggled = function($event, warning) {
                 if ($event == null) {
                     $event.preventDefault();
                 }
 
-                var beforeState = ruleNameToDataRules[warning.dataRuleName].enabled;
-                ruleNameToDataRules[warning.dataRuleName].enabled = !beforeState;
-                ModelReviewStore.SetReviewData($scope.modelId, ReviewData);
-                ModelReviewStore.AddDataRule(ruleNameToDataRules[warning.dataRuleName]);
-                if (beforeState == true) {
-                    vm.totalWarnedColumnCount -= warning.flaggedItemCount;
-                    if (isLatticeColumnWarning(warning)) {
-                        vm.latticeWarnedColumnCount -= warning.flaggedItemCount;
-                    } else {
-                        vm.customWarnedColumnCount -= warning.flaggedItemCount;
-                    }
+                var ruleEnabledBefore = $scope.dataRule.enabled;
+
+                if (ruleEnabledBefore && $scope.columnsToRemediate.length > 0 &&
+                    $scope.columnsToRemediate.length < $scope.columnWarning.flaggedItemCount) {
+                    $scope.columnsToRemediate = [];
+                    $scope.dataRule.columnsToRemediate = [];
                 } else {
-                    vm.totalWarnedColumnCount += warning.flaggedItemCount;
-                    if (isLatticeColumnWarning(warning)) {
-                        vm.latticeWarnedColumnCount += warning.flaggedItemCount;
-                    } else {
-                        vm.customWarnedColumnCount += warning.flaggedItemCount;
-                    }
+                    $scope.columnsToRemediate = [];
+                    $scope.dataRule.columnsToRemediate = [];
+                    $scope.dataRule.enabled = !ruleEnabledBefore;
                 }
-                if (vm.showAll) {
-                    vm.customWarnedColumnCount = vm.totalWarnedColumnCount;
-                }
+                ModelReviewStore.AddDataRule($scope.modelId, $scope.dataRule);
 
                 RefineModelThresholdModal.show();
+            };
+
+            $scope.columnExcludeToggled = function($event, columnName) {
+                var ruleStateEnabled = $scope.dataRule.enabled;
+
+                if (ruleStateEnabled && columnName in $scope.columnsToRemediate) {
+                    $scope.columnsToRemediate.splice($scope.columnsToRemediate.indexOf(columnName), 1);
+                    if ($scope.columnsToRemediate.length == 0) {
+                        $scope.dataRule.enabled = false;
+                        $scope.dataRule.columnsToRemediate = [];
+                    }
+                } else if (ruleStateEnabled) {
+                    if ($scope.columnsToRemediate.length == 0) {
+                        $scope.columnWarning.flaggedColumnNames.forEach(function(flaggedColumnName) {
+                            if (flaggedColumnName != columnName) {
+                                $scope.columnsToRemediate.push(flaggedColumnName);
+                            }
+                        });
+                        if ($scope.columnsToRemediate.length == 0) {
+                            $scope.dataRule.enabled = false;
+                        }
+                    } else {
+                        $scope.columnsToRemediate.push(columnName);
+                        if ($scope.columnsToRemediate.length == $scope.columnWarning.flaggedItemCount) {
+                            $scope.columnsToRemediate = [];
+                        }
+                    }
+                    $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate;
+                } else if (!ruleStateEnabled) {
+                    $scope.dataRule.enabled = true;
+                    $scope.columnsToRemediate.push(columnName);
+                    if ($scope.columnsToRemediate.length == $scope.columnWarning.flaggedItemCount) {
+                        $scope.columnsToRemediate = [];
+                    }
+                    $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate;
+                }
+
+                ModelReviewStore.AddDataRule($scope.modelId, $scope.dataRule);
+            };
+
+            $scope.columnRemediated = function(columnName) {
+                return columnName in $scope.columnsToRemediate;
             };
 
             $scope.expandColumnWarningClicked = function() {

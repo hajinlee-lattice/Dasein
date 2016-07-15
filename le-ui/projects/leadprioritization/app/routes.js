@@ -269,22 +269,14 @@ angular
         .state('home.model.review', {
             url: '/review',
             resolve: {
-                ReviewData: function($q, $stateParams, $http, Model, ModelReviewService, ModelReviewStore) {
+                ReviewData: function($q, $stateParams, $http, Model, ModelReviewStore) {
                     var deferred = $q.defer(),
                         modelId = $stateParams.modelId,
                         eventTableName = Model.EventTableProvenance.EventTableName;
 
-                    ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
-                        if (result.Success === true) {
-                            var modelReviewData = result.Result;
-                            ModelReviewStore.SetReviewData(modelId, modelReviewData);
-                            for (var i in modelReviewData.dataRules) {
-                                ModelReviewStore.AddDataRule(modelReviewData.dataRules[i]);
-                            }
-                            deferred.resolve(result.Result);
-                        }
+                    ModelReviewStore.GetReviewData(modelId, eventTableName).then(function(result) {
+                        deferred.resolve(result);
                     });
-
                     return deferred.promise;
                 }
             },

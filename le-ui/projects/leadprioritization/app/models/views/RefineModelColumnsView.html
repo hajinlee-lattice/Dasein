@@ -13,11 +13,11 @@
     </div>
 
     <div class="row">
-        <div id="" class="ten columns model-list">
+        <div id="" class="twelve columns model-list">
             <div class="row panel-heading custom-heading">
                 <span class="columns one">Exclude</span>
                 <span class="columns two">Columns</span>
-                <span class="columns two">Warning Type</span>
+                <span class="columns three">Warning Type</span>
                 <span class="columns four">Description</span>
                 <span class="columns two">&nbsp;</span>
             </div>
@@ -26,7 +26,8 @@
                     data-model-review-column-warning
                     data-ng-repeat="columnWarning in vm.columnWarningsToDisplay"
                     column="columnWarning"
-                    rules="vm.ruleNameToDataRules">
+                    rules="vm.ruleNameToDataRules"
+                    data="vm.ReviewData">
                 </div>
             </div>
         </div>

@@ -19,12 +19,12 @@ angular.module('lp.navigation.review', [
     });
 
     vm.createModelClicked = function() {
-       UpdateFieldsModal.show(false, vm.modelId, null, ModelReviewStore.GetDataRules());
+       UpdateFieldsModal.show(false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
     };
 
     var rowRulesChanged = [];
     ReviewData.dataRules.forEach(function(dataRule) {
-        var storedDataRules = ModelReviewStore.GetDataRules();
+        var storedDataRules = ModelReviewStore.GetDataRules(vm.modelId);
         storedDataRules.forEach(function(storedDataRule) {
             if (storedDataRule.name == dataRule.name && dataRule.name in ReviewData.ruleNameToRowRuleResults
                 && dataRule.enabled != storedDataRule.enabled) {
