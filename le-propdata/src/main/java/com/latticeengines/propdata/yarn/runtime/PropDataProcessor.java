@@ -113,6 +113,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private MatchInput matchInput;
     private String podId;
     private Boolean returnUnmatched;
+    private Boolean excludePublicDomains;
 
     @Override
     public String process(PropDataJobConfiguration jobConfiguration) throws Exception {
@@ -124,6 +125,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
             podId = jobConfiguration.getHdfsPodId();
             returnUnmatched = jobConfiguration.getReturnUnmatched();
+            excludePublicDomains = jobConfiguration.getExcludePublicDomains();
             HdfsPodContext.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
 
@@ -221,6 +223,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         matchInput.setFields(divider.getFields());
         matchInput.setKeyMap(keyMap);
         matchInput.setData(data);
+        matchInput.setExcludePublicDomains(excludePublicDomains);
         return matchInput;
     }
 
@@ -300,7 +303,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
-            if (!blockSize.equals(count.intValue())) {
+            if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
                 throw new RuntimeException(String
                         .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }

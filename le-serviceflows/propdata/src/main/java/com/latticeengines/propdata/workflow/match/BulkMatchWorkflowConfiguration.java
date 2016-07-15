@@ -63,6 +63,11 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder excludePublicDomains(Boolean exlude) {
+            prepareConfig.setExcludePublicDomains(exlude);
+            return this;
+        }
+
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;

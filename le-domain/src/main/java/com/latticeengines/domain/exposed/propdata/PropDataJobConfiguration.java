@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +15,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
-import org.apache.commons.lang.StringUtils;
 
 public class PropDataJobConfiguration extends BasePayloadConfiguration {
 
@@ -31,6 +31,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String blockOperationUid;
     private String appName;
     private Boolean returnUnmatched;
+    private Boolean excludePublicDomains;
     private String yarnQueue;
     private Schema inputAvroSchema;
 
@@ -195,6 +196,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("return_unmatched")
     public void setReturnUnmatched(Boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public Boolean getExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public void setExcludePublicDomains(Boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
     }
 
     @JsonProperty("yarn_queue")

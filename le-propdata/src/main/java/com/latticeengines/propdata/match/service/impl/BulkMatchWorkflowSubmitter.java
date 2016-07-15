@@ -3,6 +3,7 @@ package com.latticeengines.propdata.match.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.propdata.workflow.match.BulkMatchWorkflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
@@ -49,6 +50,11 @@ public class BulkMatchWorkflowSubmitter {
 
     public BulkMatchWorkflowSubmitter returnUnmatched(Boolean returnUnmatched) {
         builder = builder.returnUnmatched(returnUnmatched);
+        return this;
+    }
+
+    public BulkMatchWorkflowSubmitter excludePublicDomains(Boolean exclude) {
+        builder = builder.excludePublicDomains(exclude);
         return this;
     }
 

@@ -83,6 +83,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
+                .excludePublicDomains(input.getExcludePublicDomains()) //
                 .submit();
         return matchCommandService.start(input, appId, uuid);
     }

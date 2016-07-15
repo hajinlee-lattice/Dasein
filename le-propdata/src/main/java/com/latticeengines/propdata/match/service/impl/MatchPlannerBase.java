@@ -96,9 +96,11 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
-                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet);
-            record.setColumnMatched(new ArrayList<Boolean>());
-            records.add(record);
+                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomains());
+            if (record != null) {
+                record.setColumnMatched(new ArrayList<Boolean>());
+                records.add(record);
+            }
         }
 
         context.setInternalResults(records);
@@ -148,7 +150,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
             int numInputFields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
-            Set<NameLocation> nameLocationSet) {
+            Set<NameLocation> nameLocationSet, boolean excludePublicDomains) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -175,6 +177,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.setParsedDomain(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
+                    if (excludePublicDomains) {
+                        log.warn("A record with publid domain is excluded from input.");
+                        return null;
+                    }
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
                     // update domain set
                     domainSet.add(cleanDomain);

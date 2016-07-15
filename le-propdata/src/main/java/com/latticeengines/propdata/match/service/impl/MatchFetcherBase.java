@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +59,12 @@ public abstract class MatchFetcherBase {
     }
 
     MatchContext fetchSync(MatchContext context) {
+        if (context.getDomains().isEmpty() && context.getNameLocations().isEmpty()) {
+            log.info("Noting to fetch.");
+            context.setResultSet(new ArrayList<Map<String, Object>>());
+            return context;
+        }
+
         Map<String, Set<String>> partitionColumnsMap = context.getPartitionColumnsMap();
 
         Set<String> involvedPartitions = new HashSet<>(partitionColumnsMap.keySet());

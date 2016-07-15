@@ -109,8 +109,11 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
 
+        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(100));
+
         // use avro file and without schema
         input = createAvroBulkMatchInput(false, null);
+        input.setExcludePublicDomains(true);
         command = matchProxy.matchBulk(input, podId);
         appId = ConverterUtils.toApplicationId(command.getApplicationId());
         status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -118,7 +121,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
         matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
         Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-
+        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
     }
 
     @Test(groups = "deployment")
@@ -129,6 +132,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         uploadTestAVro(avroDir, fileName);
 
         MatchInput input = createAvroBulkMatchInput(true, null);
+        // input.setExcludePublicDomains(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
 

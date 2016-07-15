@@ -46,6 +46,9 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @NotNull
     private Boolean returnUnmatched;
 
+    @NotNull
+    private Boolean excludePublicDomains;
+
     private ColumnSelection.Predefined predefinedSelection;
 
     private String predefinedSelectionVersion;
@@ -175,6 +178,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @JsonProperty("return_unmatched")
     public void setReturnUnmatched(Boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public Boolean getExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    @JsonProperty("exclude_public_domains")
+    public void setExcludePublicDomains(Boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
     }
 
     @JsonProperty("average_block_size")
