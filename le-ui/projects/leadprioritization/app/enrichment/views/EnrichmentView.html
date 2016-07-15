@@ -1,20 +1,28 @@
-<div class="enrichment-container" data-ng-controller="EnrichmentController as vm">
+<div class="enrichment-container">
     <section id="main-content" class="container">
         <ul class="subheader">
             <li class="attributes">
-                <select>
-                    <option ng-repeat="attribute in attributes" value="{{attribute.name}}">
-                        {{attribute.name}}
-                    </option>
+                <select ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory()">
+                    <option ng-show="vm.category" value="">{{vm.category ? 'See all Categories' : 'Select a Category'}}</option>
                 </select>
+            </li>
+            <li class="show-selected-attributes">
+                <input 
+                        type="checkbox" 
+                        name="selected-attributes-toggle" 
+                        id="selected-attributes-toggle" 
+                        ng-model="vm.selectedToggle" 
+                        ng-disabled="vm.selectDisabled"
+                        ng-change="vm.current = 1;"> 
+                <label for="selected-attributes-toggle">Selected Attributes</label>
             </li>
             <li class="totals">
                 <ul>
                     <li>
-                        Total Selected* <em class="badge">{{total.selected}}</em>
+                        Total Selected* <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}}</em>
                     </li>
                     <li>
-                        Total Premium** <em class="badge">{{total.premium}}</em>
+                        Total Premium** <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsPremium': true}).length}}</em>
                     </li>
                 </ul>
             </li>
@@ -22,17 +30,33 @@
                 <span class="fa fa-bars"></span>
             </li>
             <li class="save">
-                <button class="button icon-button orange-button">{{button_save}}</button>
+                <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.button_save}}</button>
             </li>
         </ul>
-
-        <div class="enrichments">
-            <div class="box" ng-repeat="enrichment in enrichments">
-                <div data-corner-ribbon="premium" ng-if="enrichment.premium"><strong>premium</strong></div>
+        
+        <ul class="enrichments">
+            <li 
+                    class="box" 
+                    ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                        | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.selectedToggle ? '' : true) })) 
+                        | startFrom: (vm.current - 1) * vm.pagesize 
+                        | limitTo: vm.pagesize" 
+                    ng-class="{'active': enrichment.IsSelected}" 
+                    ng-click="vm.showData(enrichment)">
+                <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
                 <div class="ico-container"><span class="ico ico-light-gray ico-locations"></span></div>
-                <h2>{{enrichment.title}}</h2>
-                <p>{{enrichment.description}}</div>
+                <h2>{{enrichment.DisplayName}}</h2>
+                <p>{{enrichment.Description}}</p>
+                <button class="button" ng-click="enrichment.isDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+                {{!enrichment.IsSelected ? vm.button_select : vm.button_deselect}}
+                </button>
+            </li>
+        </ul>
+        <div class="row required-fields-pagination" ng-init="vm.pagesize = 10; vm.current = 1" ng-show="vm.max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls current="vm.current" max="vm.max = filteredList.length / vm.pagesize">
+                </pd-pagination-controls>
             </div>
         </div>
     </section>
-</diV>
+</div>

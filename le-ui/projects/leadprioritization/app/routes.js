@@ -705,6 +705,19 @@ angular
                     templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {
+                    resolve: {
+                        EnrichmentData: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getEnrichments().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'EnrichmentController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/enrichment/views/EnrichmentView.html'
                 }   
             }
