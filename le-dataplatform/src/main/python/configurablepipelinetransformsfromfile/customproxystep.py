@@ -7,7 +7,7 @@ import os
 import shutil
 import pwd
 import imp
-from leframework.webhdfs import WebHDFS
+from webhdfs import WebHDFS
 from urlparse import urlparse
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
