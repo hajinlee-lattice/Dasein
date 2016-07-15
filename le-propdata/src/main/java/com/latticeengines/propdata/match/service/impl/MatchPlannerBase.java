@@ -64,6 +64,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
+    @MatchStep
     ColumnSelection parseColumnSelection(MatchInput input) {
         if (input.getUnionSelections() != null && !input.getUnionSelections().isEmpty()) {
             return combineSelections(input.getUnionSelections());
@@ -262,6 +263,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return posMap;
     }
 
+    @MatchStep
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
         matchOutput.setMetadata(metadata);

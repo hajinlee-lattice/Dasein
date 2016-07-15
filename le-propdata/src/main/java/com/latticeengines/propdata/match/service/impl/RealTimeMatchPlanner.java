@@ -3,7 +3,6 @@ package com.latticeengines.propdata.match.service.impl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
@@ -21,7 +20,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
-        context.setColumnSelection(parseSelection(input));
+        context.setColumnSelection(parseColumnSelection(input));
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
@@ -30,11 +29,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
         return context;
-    }
-
-    @MatchStep
-    private ColumnSelection parseSelection(MatchInput input) {
-        return parseColumnSelection(input);
     }
 
     @MatchStep
