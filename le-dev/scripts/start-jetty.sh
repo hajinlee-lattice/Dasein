@@ -33,7 +33,7 @@ export MODELQUALITY_PROPDIR=$WSHOME/le-modelquality/conf/env/dev
 export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 export AUTH_PROPDIR=$WSHOME/le-auth/conf/env/dev
 
-export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n -XX:MaxPermSize=560m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop"
+export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n -XX:MaxPermSize=560m -Dsqoop.throwOnError=true -Djavax.net.ssl.trustStore=$WSHOME/le-securityapi/certificates/laca-ldap.dev.lattice.local.jks -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop"
 export CLASSPATH=$CLASSPATH:$HADOOP_HOME/etc/hadoop
 
 pushd $JETTY_HOME

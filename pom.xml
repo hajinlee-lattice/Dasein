@@ -46,6 +46,7 @@
         <module>le-propdata</module>
         <module>le-auth</module>
         <module>le-security</module>
+        <module>le-securityapi</module>
         <module>le-oauth2db</module>
         <module>le-scoringapi</module>
         <module>le-pls</module>
