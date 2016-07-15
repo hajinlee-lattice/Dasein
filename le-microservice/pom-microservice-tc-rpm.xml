@@ -66,8 +66,7 @@
                                     <destination>workflowapi.war</destination>
                                 </source>
                                 <source>
-                                    <location>securityapi/target/le-securityapi-microservice-${le.rpm.version}
-                                        .war</location>
+                                    <location>securityapi/target/le-securityapi-microservice-${le.rpm.version}.war</location>
                                     <destination>securityapi.war</destination>
                                 </source>
                                 <source>

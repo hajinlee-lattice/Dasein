@@ -207,7 +207,7 @@
         <module>workflowapi</module>
         <module>dellebi</module>
         <module>quartz</module>
-	    <module>modelquality</module>
+        <module>modelquality</module>
         <module>securityapi</module>
     </modules>
 
