@@ -8,7 +8,12 @@
 
     <div class="row">
         <div class="twelve columns list-header">
-            <a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All Warnings</a> | <a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Custom Fields</a> | <a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Data Cloud</a>
+            <ul class="link-tabs">
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All Warnings</a>
+                </li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Custom Fields</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Data Cloud</a></li>
+            </ul>
         </div>
     </div>
 

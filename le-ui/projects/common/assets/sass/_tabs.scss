@@ -113,3 +113,31 @@ input.toggle-switch:checked ~ label:after
 {
     margin-left: 32px;
 }
+
+
+
+/* 
+Link Tabs
+==================================================== */
+.link-tabs {
+  margin: 0;
+  padding: 0;
+  li {
+    display: inline;
+    &:after {
+      content: " | ";
+      color: #bbb;
+    }
+    &:last-of-type:after {
+      content: "";
+    }
+    a {
+      padding: 4px;
+      font-size: 16px;
+      &.selected {
+        color: #333;
+        font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
+      }
+    }
+  }
+}
