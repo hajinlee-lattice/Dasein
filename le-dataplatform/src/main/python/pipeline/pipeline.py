@@ -38,7 +38,7 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
     allColumns.update(continuousColumns)
 
     colTransform = columntransform.ColumnTransform(pathToPipelineFiles=[pipelineDriver])
-    (names, steps) = colTransform.buildPipelineFromFile(pipelinePath="./" + pipelineLib, \
+    (names, steps, defaultDisabledSteps) = colTransform.buildPipelineFromFile(pipelinePath="./" + pipelineLib, \
                                                stringColumns=stringColumns, \
                                                categoricalColumns=categoricalColumns, \
                                                continuousColumns=continuousColumns, \
@@ -50,6 +50,7 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
 
     # If properties are empty, don't try and set values
     disabledSteps = []
+    enabledSteps = []
     if pipelineProps:
         try:
             props = dict((u.split("=")[0], u.split("=")[1]) for u in pipelineProps.split(" "))
@@ -63,6 +64,8 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                             if tokens[1] == 'enabled' and value.lower() == 'false':
                                 disabledSteps.append(step)
                                 continue
+                            if tokens[1] == 'enabled' and value.lower() == 'true':
+                                enabledSteps.append(step)
                             currentValue = getattr(step, tokens[1])
                             setattr(step, tokens[1], (type(currentValue))(value))
                 except Exception as propError:
@@ -73,6 +76,11 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
         for disabledStep in reversed(disabledSteps):
             logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
             steps.remove(disabledStep)
+            
+        for disabledStep in reversed(defaultDisabledSteps):
+            if disabledStep in steps and disabledStep not in enabledSteps:
+                logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
+                steps.remove(disabledStep)
 
     return steps
 

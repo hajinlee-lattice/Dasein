@@ -34,7 +34,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 7, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 8, "Pipeline should have 8 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
@@ -75,7 +75,8 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def checkThatTransformsDontThrowExceptions(self):
         keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
-                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn", "remediatedatarulesstep", "customproxystep"]
+                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn", "remediatedatarulesstep", "assignconversionratetoallcategoricalvalues",
+                "customproxystep"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
 
@@ -99,8 +100,9 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 args = []
                 namedParameterList = value["NamedParameterListToInit"]
                 kwargs = colTransform.buildKwArgs(namedParameterList = namedParameterList, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
+                if kwargs.has_key("enabled"):
+                    del kwargs["enabled"]
                 self.aTestBuildKwArgs(namedParameterList)
-
                 try:
                     getattr(columnTransformObject["LoadedModule"], mainClassName)(*args, **kwargs)
                 except Exception as e:

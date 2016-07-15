@@ -102,7 +102,8 @@ class ColumnTransform(object):
         # Return Array that holds functions loaded from file
         pipelineAsArrayOfTransformClasses = []
         pipelineName = []
-
+        defaultDisabledSteps = []
+        
         try:
             jsonToProcess = self.pipelineFileAsJson;
             if jsonToProcess is None:
@@ -138,10 +139,9 @@ class ColumnTransform(object):
                                           profile=profile, \
                                           allColumns=allColumns, \
                                           params=params)
-                if kwargs.has_key("enabled") and (kwargs["enabled"].lower() == "false"):
-                    logger.info("Skip disabled step " + uniqueColumnTransformName)
-                    continue
-
+                argsCopy = dict(kwargs);
+                if kwargs.has_key("enabled"):
+                    del kwargs["enabled"]
                 loadedObject = getattr(columnTransformObject[self.loadedModuleKey], mainClassName)(**kwargs)
                 columnTransformObject[self.loadedObjectKey] = loadedObject
 
@@ -150,10 +150,13 @@ class ColumnTransform(object):
 
                 pipelineName.append(uniqueColumnTransformName)
                 pipelineAsArrayOfTransformClasses.append(loadedObject)
+                if argsCopy.has_key("enabled") and (argsCopy["enabled"].lower() == "false"):
+                    logger.info("By default skip disabled step " + uniqueColumnTransformName)
+                    defaultDisabledSteps.append(loadedObject)
 
             logger.info("Finished Loading Configurable Pipeline")
 
-            return (pipelineName, pipelineAsArrayOfTransformClasses)
+            return (pipelineName, pipelineAsArrayOfTransformClasses, defaultDisabledSteps)
         except Exception as e:
             logger.exception("Caught Exception while building Configurable Pipeline %s" % str(e))
             return None

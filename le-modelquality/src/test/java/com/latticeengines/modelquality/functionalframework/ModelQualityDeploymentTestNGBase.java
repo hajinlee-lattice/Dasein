@@ -167,12 +167,21 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
         PipelinePropertyDef pipelinePropertyDef = new PipelinePropertyDef();
         pipelinePropertyDef.setName("minCategoricalCount");
-
         PipelinePropertyValue pipeLinePropertyValue = new PipelinePropertyValue();
         pipeLinePropertyValue.setValue("5");
-        pipeLinePropertyValue.setPipelinePropertyDef(pipelinePropertyDef);
         pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
-
+        pipelinePropertyDefs.add(pipelinePropertyDef);
+        step.addPipelinePropertyDef(pipelinePropertyDef);
+        
+        step = new PipelineStep();
+        step.setName("assignconversionratetoallcategoricalvalues");
+        step.setScript("assignconversionratetoallcategoricalvalues.py");
+        pipelinePropertyDefs = new ArrayList<>();
+        pipelinePropertyDef = new PipelinePropertyDef();
+        pipelinePropertyDef.setName("enabled");
+        pipeLinePropertyValue = new PipelinePropertyValue();
+        pipeLinePropertyValue.setValue("true");
+        pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
         pipelinePropertyDefs.add(pipelinePropertyDef);
         step.addPipelinePropertyDef(pipelinePropertyDef);
 
