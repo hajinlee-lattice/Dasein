@@ -382,7 +382,7 @@ html:not(.no-cssmask) {
     .profile-nav {
         float: right;
         & > a {
-            padding: 20px 20px 20px 52px;
+            padding: 12px 20px 12px 52px;
             display: block;
             color: $dark-gray;
             background-image: url("/assets/images/ico-user-profile.svg");
@@ -396,6 +396,18 @@ html:not(.no-cssmask) {
             &.active {
                 background-color: #222;
                 color: rgba(255, 255, 255, 0.8);
+            }
+            .pd-header-username {
+                font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+                font-size: 14px;
+                margin-bottom: 0;
+                .tenant-name {
+                    font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
+                    font-size: 12px;
+                }
+            }
+            .pd-header-downarrow {
+                margin-left: 10px;
             }
         }
         ul {

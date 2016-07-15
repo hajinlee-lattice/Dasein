@@ -1,5 +1,5 @@
 <div id="add-user-modal">
-    <div class="modal-dialog modal-sm" data-ng-controller="AddUserController">
+    <div class="modal-dialog" data-ng-controller="AddUserController">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -53,13 +53,25 @@
                     </div>
                 </div>
                 <div class="modal-footer" data-ng-hide="saveInProgress || showExistingUser">
-                    <button id="add-user-btn-cancel" class="button gray-button" type="button" data-ng-click="cancelClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
-                    <button id="add-user-btn-save" class="button orange-button" data-ng-click="addUserClick($event)" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
-                    <button id="add-user-btn-ok" class="button orange-button" data-ng-click="refreshClick()" data-ng-show="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+                    <div class="row">
+                        <div class="six columns">
+                            <button id="add-user-btn-cancel" class="button gray-button block-button" type="button" data-ng-click="cancelClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                        </div>
+                        <div class="six columns">
+                            <button id="add-user-btn-save" class="button orange-button block-button" data-ng-click="addUserClick($event)" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                            <button id="add-user-btn-ok" class="button orange-button block-button" data-ng-click="refreshClick()" data-ng-show="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer" data-ng-show="showExistingUser">
-                    <button id="add-user-btn-no" class="button blue-button" type="button" data-ng-click="noClick()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
-                    <button id="add-user-btn-ok-2" class="button orange-button" data-ng-click="yesClick($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</button>
+                    <div class="row">
+                        <div class="six columns">
+                            <button id="add-user-btn-no" class="button gray-button block-button" type="button" data-ng-click="noClick()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
+                        </div>
+                        <div class="six columns">
+                            <button id="add-user-btn-ok-2" class="button gray-button block-button" data-ng-click="yesClick($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

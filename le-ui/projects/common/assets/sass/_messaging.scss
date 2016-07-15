@@ -36,6 +36,13 @@
 	}
 }
 
+.service-error-banner {
+	.messaging {
+		margin-bottom: 0;
+		margin-top: 20px;
+	}
+}
+
 .page-error {
 	text-align: center;
 	background: url(/assets/images/ico-error.png) center top no-repeat;

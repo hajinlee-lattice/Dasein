@@ -22,6 +22,7 @@
       accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
       id="uploadBtn"
       name="{{ vm_uploader_container.inputName }}"
+      placeholder="{{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}"
       class="upload"
       ng-model="vm_uploader.selectedFileName"
       ng-hide="vm_uploader.uploading"
@@ -32,5 +33,4 @@
     <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.uploading && vm_uploader.upload_percent > 0"></i>
     <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.uploaded"></i>
 </div>
-<p class="help-block">{{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}</p>
 <p id="csvFileUploadMessage">{{ vm_uploader.message }}&nbsp;<span class="pull-right">{{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}</span> </p>

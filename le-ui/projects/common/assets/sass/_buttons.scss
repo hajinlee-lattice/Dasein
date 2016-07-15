@@ -90,15 +90,28 @@ button.button, a.button, .button {
 		}
 	}
   &.gray-button {
-		color: $silver;
-		background-color: $black-titanium;
+		color: $black;
+		background-color: $white-gold;
+    border-color: $silver;
+    border-size: 1px;
+    border-style: solid;
 		&:hover {
-			background-color: $onyx;
+			background-color: $palladium;
 		}
 		&:active {
-			background-color: $jet;
+			background-color: $palladium;
 		}
 	}
+  &.light-gray-button {
+    color: $silver;
+    background-color: $black-titanium;
+    &:hover {
+      background-color: $onyx;
+    }
+    &:active {
+      background-color: $jet;
+    }
+  }
   &.block-button {
     display: block;
     width: 100%;

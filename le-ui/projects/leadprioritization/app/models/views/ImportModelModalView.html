@@ -20,8 +20,12 @@
                 <h2 class="text-center">{{ResourceUtility.getString('MODEL_IMPORT_SUCCESS')}}</h2>
             </div>
             <div class="modal-footer">
-                <button data-ng-hide="showImportSuccess" class="btn btn-primary" data-ng-click="uploadFile()" data-ng-class="{disabled: importing}">{{ResourceUtility.getString('MODEL_IMPORT_UPLOAD')}}</button>
-                <button data-ng-show="showImportSuccess" class="btn btn-primary" data-ng-click="okClicked()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+                <div class="row">
+                    <div class="six columns offset-six">
+                        <button data-ng-hide="showImportSuccess" class="button orange-button block-button" data-ng-click="uploadFile()" data-ng-class="{disabled: importing}">{{ResourceUtility.getString('MODEL_IMPORT_UPLOAD')}}</button>
+                        <button data-ng-show="showImportSuccess" class="button gray-button block-button" data-ng-click="okClicked()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

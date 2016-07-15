@@ -6,13 +6,17 @@
         </div>
         <div class="modal-body">
           <div class="row">
-            <div class="col-sm-12 text-center">
+            <div class="twelve columns">
               <p>{{ResourceUtility.getString('MODEL_STALE_SERVICE_ERROR')}}</p>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-ng-click="confirmClick()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+          <div class="row">
+            <div class="six columns offset-six">
+              <button class="button orange-button block-button" type="button" data-ng-click="confirmClick()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+            </div>
+          </div>
         </div>
     </div>
 </div>

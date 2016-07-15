@@ -9,10 +9,10 @@
                 <div class="modal-body">
                     <div data-ng-show="saveInProgress">
                         <div class="loader"> </div>
-                        <h2 class="text-center">{{ResourceUtility.getString('ACTIVATE_MODEL_ADD_SEGMENT_WAIT')}}</h2>
+                        <h2>{{ResourceUtility.getString('ACTIVATE_MODEL_ADD_SEGMENT_WAIT')}}</h2>
                     </div>
                     <div class="row" data-ng-hide="saveInProgress">
-                        <div class="col-sm-12">
+                        <div class="twelve columns">
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('ACTIVATE_MODEL_SEGMENT_NAME')}}</label>
                                 <input type="text" class="form-control" data-ng-model="newSegment.Name" data-ng-enter="addSegmentClick()" required>
@@ -34,8 +34,14 @@
                     </div>
                 </div>
                 <div class="modal-footer" data-ng-hide="saveInProgress">
-                    <button class="btn btn-secondary" type="button" data-ng-click="cancelClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
-                    <button class="btn btn-primary" data-ng-click="addSegmentClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                    <div class="row">
+                        <div class="six columns">
+                            <button class="button gray-button block-button" type="button" data-ng-click="cancelClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                        </div>
+                        <div class="six columns">
+                            <button class="button orange-button block-button" data-ng-click="addSegmentClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

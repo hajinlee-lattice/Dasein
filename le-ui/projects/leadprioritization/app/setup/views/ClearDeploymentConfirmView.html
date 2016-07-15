@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-sm" data-ng-controller="ClearDeploymentController">
+<div class="modal-dialog" data-ng-controller="ClearDeploymentController">
     <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -20,8 +20,14 @@
           </div>
         </div>
         <div class="modal-footer" data-ng-hide="clearInProgress">
-            <button id="clear-deployment-no" class="btn btn-secondary" type="button" data-ng-click="noClicked()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
-            <a id="clear-deployment-yes" class="btn btn-primary" href="#" data-ng-click="yesClicked($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</a>
+          <div class="row">
+            <div class="six columns">
+              <button id="clear-deployment-no" class="button gray-button block-button" type="button" data-ng-click="noClicked()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
+            </div>
+            <div class="six columns">
+              <a id="clear-deployment-yes" class="button orange-button block-button" href="#" data-ng-click="yesClicked($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</a>
+            </div>
+          </div>
         </div>
     </div>
 </div>

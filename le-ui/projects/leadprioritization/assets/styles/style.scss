@@ -1226,54 +1226,54 @@ Manage Users
 /*
 Modals
 ================================================================== */
-.modal-dialog {
-    -webkit-box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
-       -moz-box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
-            box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
-    margin-top: 100px;
-}
-.modal-backdrop.in {
-    opacity: .2;
-    filter: alpha(opacity=20);
-}
-.modal-content {
-     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;    
-    border-radius: 3px;
-}
-.modal-header {
-    color:#fff;
-    font-weight:700;
-      -webkit-border-radius: 2px 2px 0 0;
-    -moz-border-radius: 2px 2px 0 0;
-    border-radius: 2px 2px 0 0;
-}
-.modal-header .close {
-    float: right;
-    opacity:.8;
-    font-size: 24px;
-    border: none;
-    background: transparent;
-}
-.modal-header .close:hover {
-    opacity:1;
-}
-.modal-body {
-    padding: 40px;
-    word-wrap: break-word;
-}
-.modal-footer {
-    text-align: center;
-    padding: 0 14px 35px;
-    margin-top: 0;
-    border-top: none;
-}
-.modal-sm {
-    width:500px;
-}
-.processing {
-    opacity:.4;
-}
+// .modal-dialog {
+//     -webkit-box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
+//        -moz-box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
+//             box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
+//     margin-top: 100px;
+// }
+// .modal-backdrop.in {
+//     opacity: .2;
+//     filter: alpha(opacity=20);
+// }
+// .modal-content {
+//      -webkit-border-radius: 3px;
+//     -moz-border-radius: 3px;    
+//     border-radius: 3px;
+// }
+// .modal-header {
+//     color:#fff;
+//     font-weight:700;
+//       -webkit-border-radius: 2px 2px 0 0;
+//     -moz-border-radius: 2px 2px 0 0;
+//     border-radius: 2px 2px 0 0;
+// }
+// .modal-header .close {
+//     float: right;
+//     opacity:.8;
+//     font-size: 24px;
+//     border: none;
+//     background: transparent;
+// }
+// .modal-header .close:hover {
+//     opacity:1;
+// }
+// .modal-body {
+//     padding: 40px;
+//     word-wrap: break-word;
+// }
+// .modal-footer {
+//     text-align: center;
+//     padding: 0 14px 35px;
+//     margin-top: 0;
+//     border-top: none;
+// }
+// .modal-sm {
+//     width:500px;
+// }
+// .processing {
+//     opacity:.4;
+// }
 
 /* end */
 

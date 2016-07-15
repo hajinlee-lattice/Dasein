@@ -66,23 +66,42 @@
   opacity: 0.5;
   filter: alpha(opacity=50);
 }
+
+
+.modal-header, .modal-body, .modal-footer {
+  padding: 30px;
+}
+.modal-header, .modal-footer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
 .modal-header {
-  padding: 15px;
+  background: #fff !important;
   border-bottom: 1px solid #e5e5e5;
 }
 .modal-header .close {
   margin-top: -2px;
+  float: right;
+  opacity:.8;
+  font-size: 24px;
+  border: none;
+  background: transparent;
+}
+.modal-header .close:hover {
+    opacity:1;
 }
 .modal-title {
   margin: 0;
   line-height: 1.42857143;
 }
+
+
 .modal-body {
   position: relative;
-  padding: 15px;
 }
+
+
 .modal-footer {
-  padding: 15px;
   text-align: right;
   border-top: 1px solid #e5e5e5;
 }
