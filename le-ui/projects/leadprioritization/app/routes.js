@@ -702,6 +702,12 @@ angular
                             return 'LEAD_ENRICHMENT_SETUP_TITLE';
                         }
                     },
+                    controller: function($scope, EnrichmentStore) {
+                        $scope.metadata = EnrichmentStore.metadata;
+                        $scope.selectToggle = function(bool) {
+                            EnrichmentStore.setMetadata('selectedToggle', bool);
+                        }
+                    },
                     templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {

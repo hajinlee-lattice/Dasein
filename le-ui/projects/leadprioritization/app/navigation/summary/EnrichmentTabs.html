@@ -1,7 +1,10 @@
 <div class="summary blue-fire">
 	<div class="nav">
-		<div class="button angled-button" ui-sref-active-eq="active">
-	        <a ui-sref="home.enrichment"><span>Lead Enrichments</span></a>
-	    </div>
+        <div class="button angled-button {{metadata.selectedToggle ? '' : 'active'}}" ng-click="selectToggle(false)">
+            <a href="javascript:void(0)"><span>Avaliable Attributes</span></a>
+        </div>
+        <div class="button angled-button {{metadata.selectedToggle ? 'active' : ''}}" ng-click="selectToggle(true)">
+            <a href="javascript:void(0)"><span>Selected Attributes</span></a>
+        </div>
 	</div>
 </div>

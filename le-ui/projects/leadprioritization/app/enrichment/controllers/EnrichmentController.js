@@ -1,18 +1,28 @@
+// lock sub-header
+// limit number selectable to (10 for now)
+// sort by name in place of =
+// green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($filter, EnrichmentStore, EnrichmentData, EnrichmentService){
+.controller('EnrichmentController', function($filter, $timeout, EnrichmentStore, EnrichmentData, EnrichmentService){
     var vm = this;
 
     angular.extend(vm, {
         button_save: 'save',
         button_select: 'select for enrichments',
+        button_selected: 'selected for enrichment',
         button_deselect: 'deselect',
+        deselected_messsage: 'this may affect your existing model',
+        categories_see_all: 'See All Categories',
+        categories_select_all: 'Select All Categories',
         categoryOption: null,
-        selectedToggle: null,
+        metadata: EnrichmentStore.metadata,
         category: null,
         userSelectedCount: 0,
         selectDisabled: 1,
         saveDisabled: 1,
-        selectedCount: 0
+        selectedCount: 0,
+        premiumSelectLimit: 10,
+        premiumSelectError: 'maximum number of premium selects'
     });
 
     vm.changeCategory = function(){
@@ -22,12 +32,34 @@ angular.module('lp.enrichment.leadenrichment', [])
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
-
+        if(enrichment.IsPremium) {
+            var premiums = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
+            console.log(premiums);
+            if(premiums > vm.premiumSelectLimit) {
+                enrichment.IsSelected = false;
+                enrichment.IsDirty = false;
+                enrichment.button_select = vm.premiumSelectError;
+                enrichment.button_error = true;
+                $timeout(function(){
+                    enrichment.button_select = vm.button_select;
+                    enrichment.button_error = false;
+                }, 3000);
+                return false;
+            }
+        }
         if (enrichment.IsSelected){
             vm.userSelectedCount++;
         } else {
             vm.userSelectedCount--;
-            // this may affect your existing model <- msg, not alert, banner
+            if(!enrichment.WasDirty) {
+                enrichment.button_select = vm.deselected_messsage;
+                enrichment.WasDirty = true;
+                enrichment.button_msg = true;
+                $timeout(function(){
+                    enrichment.button_select = vm.button_select;
+                    enrichment.button_msg = false;
+                }, 3000);
+            }
         }
         if(vm.userSelectedCount < 1) {
             vm.selectDisabled = 1;
@@ -35,8 +67,8 @@ angular.module('lp.enrichment.leadenrichment', [])
     }
 
     vm.saveSelected = function(){
-        var selectedObj = $filter('filter')(vm.enrichments, {'isDirty': true, 'IsSelected': true}),
-            deselectedObj = $filter('filter')(vm.enrichments, {'isDirty': true, 'IsSelected': false}),
+        var selectedObj = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': true}),
+            deselectedObj = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': false}),
             selected = [],
             deselected = [];
 
@@ -56,6 +88,12 @@ angular.module('lp.enrichment.leadenrichment', [])
         }
         EnrichmentService.setEnrichments(data).then(function(result){
             vm.saveDisabled = true;
+            if(selectedObj.length > 0) {
+                var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
+                for(i in dirtyObj){
+                    dirtyObj[i].IsDirty = false;
+                }
+            }
         });
     }
 

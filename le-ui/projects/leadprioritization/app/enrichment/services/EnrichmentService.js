@@ -4,6 +4,17 @@ angular.module('lp.enrichment.leadenrichment')
     this.enrichments = null;
     this.categories = null;
     this.selectedCount = null;
+    this.metadata = {
+        selectedToggle: false
+    };
+
+    this.getMetadata = function(name) {
+        return this.metadata[name];
+    }
+
+    this.setMetadata = function(name, value) {
+        return this.metadata[name] = value;
+    }
 
     this.getCategories = function(){
         var deferred = $q.defer();
