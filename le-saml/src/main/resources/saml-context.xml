@@ -13,5 +13,5 @@
     <import resource="classpath:saml-persistence-context.xml"/>
     <import resource="classpath:saml-management-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
-    <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:security-no-controller-context.xml"/>
 </beans>

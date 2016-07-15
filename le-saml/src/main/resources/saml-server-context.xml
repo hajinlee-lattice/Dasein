@@ -79,7 +79,9 @@
     <!-- The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there -->
     <bean id="metadataDisplayFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter"/>
 
-    <!-- Configure HTTP Client to accept certificates from the keystore for HTTPS verification -->
+    <!-- Configure HTTP Client to accept certificates from the keystore for HTTPS verification.
+         Needs to also be enabled in metadata with sslHostnameVerification.
+         This doesn't apply for IdP-initiated flows. -->
     <!--
     <bean class="org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer">
         <property name="sslHostnameVerification" value="default"/>
@@ -92,8 +94,6 @@
         <property name="sslSecurityProfile" value="pkix"/>
         <property name="sslHostnameVerification" value="default"/>
         <property name="signMetadata" value="true"/>
-        <property name="signingKey" value="apollo"/>
-        <property name="encryptionKey" value="apollo"/>
         <property name="requireArtifactResolveSigned" value="false"/>
         <property name="requireLogoutRequestSigned" value="false"/>
         <property name="requireLogoutResponseSigned" value="false"/>
