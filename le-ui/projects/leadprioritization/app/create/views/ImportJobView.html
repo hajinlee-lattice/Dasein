@@ -41,7 +41,7 @@
                 </dd>
             </dl>
             <dl>
-                <dt data-ng-if="jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
+                <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
                 <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
                 <dd>
                     <div class="progress-icon">
@@ -59,7 +59,7 @@
                 </dd>
             </dl>
             <dl>
-                <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
+                <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
                 <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
                 <dd>
                     <div class="progress-icon">
@@ -81,7 +81,7 @@
     <div class="row">
         <div class="six columns offset-three">
 
-            <div class="meter animate" data-ng-if="jobStatus == 'Running'">
+            <div class="meter animate" data-ng-if="jobStatus == 'Pending' || jobStatus == 'Running'">
               <span style="width: 10%" data-ng-if="jobStatus == 'Pending'"><span></span></span>
               <span style="width: 20%" data-ng-if="jobStepsRunningStates.load_data"><span></span></span>
               <span style="width: 60%" data-ng-if="jobStepsRunningStates.generate_insights"><span></span></span>
