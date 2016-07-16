@@ -1,4 +1,5 @@
 import logging
+
 from pandas import DataFrame
 from pandas import Series
 
@@ -11,9 +12,10 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.pmmlcolumnmetadatagenerator import PmmlColumnMetadataGenerator
+from leframework.model.states.pmmlcopyfile import PmmlCopyFile
 from leframework.model.states.pmmlfinalize import PmmlFinalize
 from leframework.model.states.pmmlmodelskeletongenerator import PmmlModelSkeletonGenerator
-from leframework.model.states.pmmlcopyfile import PmmlCopyFile
+from leframework.model.states.provenancegenerator import ProvenanceGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -39,9 +41,10 @@ class PmmlModelExecutor(Executor):
         stateMachine.addState(PmmlCopyFile(), 4)
         stateMachine.addState(ModelDetailGenerator(), 5)
         stateMachine.addState(NameGenerator(), 6)
-        stateMachine.addState(DataCompositionGenerator(), 7)
-        stateMachine.addState(EnhancedSummaryGenerator(), 8)
-        stateMachine.addState(PmmlFinalize(), 9)
+        stateMachine.addState(ProvenanceGenerator(), 7)
+        stateMachine.addState(DataCompositionGenerator(), 8)
+        stateMachine.addState(EnhancedSummaryGenerator(), 9)
+        stateMachine.addState(PmmlFinalize(), 10)
         return stateMachine
 
 
