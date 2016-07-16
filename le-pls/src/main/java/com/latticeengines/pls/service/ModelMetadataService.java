@@ -4,16 +4,13 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.RequiredColumnsExtractor;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 
-public interface ModelMetadataService {
+public interface ModelMetadataService extends RequiredColumnsExtractor {
     List<VdbMetadataField> getMetadata(String modelId);
 
     Table cloneTrainingTable(String modelSummaryId);
-
-    List<String> getRequiredColumnDisplayNames(String modelId);
-
-    List<Attribute> getRequiredColumns(String modelId);
 
     Table getTrainingTableFromModelId(String modelId);
 

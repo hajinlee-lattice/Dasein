@@ -1,7 +1,6 @@
-package com.latticeengines.pls.service.impl.fileprocessor;
+package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -9,27 +8,24 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.RequiredColumnsExtractor;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
+import com.latticeengines.pls.service.impl.metadata.GetRequiredColumns;
+import com.latticeengines.pls.util.MetadataUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelMetadataServiceImpl.class);
 
     @Autowired
@@ -37,6 +33,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    
+    private RequiredColumnsExtractor getRequiredColumnsExtractor(String modelId) {
+        return GetRequiredColumns.getRequiredColumnsExtractor(modelId, modelSummaryEntityMgr);
+    }
 
     @Override
     public List<VdbMetadataField> getMetadata(String modelId) {
@@ -61,41 +61,12 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public List<String> getRequiredColumnDisplayNames(String modelId) {
-        List<String> requiredColumnDisplayNames = new ArrayList<String>();
-        List<Attribute> requiredColumns = getRequiredColumns(modelId);
-        for (Attribute column : requiredColumns) {
-            requiredColumnDisplayNames.add(column.getDisplayName());
-        }
-        return requiredColumnDisplayNames;
+        return getRequiredColumnsExtractor(modelId).getRequiredColumnDisplayNames(modelId);
     }
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        List<Attribute> requiredColumns = new ArrayList<>();
-        Table eventTable = getEventTableFromModelId(modelId);
-        List<Attribute> attributes = eventTable.getAttributes();
-        if (attributes == null) {
-            log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
-            throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
-        }
-        ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
-        Table schema = SchemaRepository.instance().getSchema(
-                SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
-        for (Attribute attribute : attributes) {
-            List<String> tags = attribute.getTags();
-            if (schema.getAttribute(attribute.getName()) != null //
-                    || (tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString()) //
-                    && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
-                            .getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString())))) {
-                LogicalDataType logicalDataType = attribute.getLogicalDataType();
-                if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
-                        && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
-                    requiredColumns.add(attribute);
-                }
-            }
-        }
-        log.info("The required columns are : " + Arrays.toString(requiredColumns.toArray()));
-        return requiredColumns;
+        return getRequiredColumnsExtractor(modelId).getRequiredColumns(modelId);
     }
 
     @Override
@@ -189,21 +160,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public Table getEventTableFromModelId(String modelId) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (modelSummary == null) {
-            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
-        }
-        String tableName = modelSummary.getEventTableName();
-        if (tableName == null) {
-            throw new RuntimeException(String.format("Model %s does not have an event tableName", modelId));
-        }
-
-        Table table = metadataProxy.getTable(customerSpace, tableName);
-        if (table == null) {
-            throw new RuntimeException(String.format("No such table with name %s for model %s", tableName, modelId));
-        }
-        return table;
+        return MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
     }
 
     @Override
@@ -225,5 +182,5 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         }
         return table;
     }
-
+    
 }
