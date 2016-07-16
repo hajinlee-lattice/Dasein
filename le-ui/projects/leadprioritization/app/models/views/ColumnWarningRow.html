@@ -1,21 +1,34 @@
 <td>
     <div>
         <input 
-                type="checkbox" 
+                type="checkbox"
+                ng-attr-id="{{columnWarning.dataRuleName}}"
                 data-ng-click="warningExcludeToggled($event, columnWarning)"
                 data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled" />
     </div>
-    <div data-ng-repeat="columnName in columnWarning.flaggedColumnNames" ng-if="columnWarningExpanded">
+    <!-- <div data-ng-if="vm.showLatticeAttr" data-ng-repeat="columnName in latticeColumnNames" ng-if="columnWarningExpanded">
         <input 
                 type="checkbox" 
                 data-ng-click="columnExcludeToggled($event, columnName)"
-                data-ng-checked="columnRemediated(columnName) || (dataRule.enabled && dataRule.columnsToRemediate.length == 0)" />
+                data-ng-checked="columnRemediated(columnName)" />
+    </div>
+    <div data-ng-if="vm.showCustomAttr" data-ng-repeat="columnName in customColumnNames" ng-if="columnWarningExpanded">
+        <input
+                type="checkbox"
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-checked="columnRemediated(columnName)" />
+    </div> -->
+    <div data-ng-repeat="columnName in columnWarning.flaggedColumnNames" ng-if="columnWarningExpanded">
+        <input
+                type="checkbox"
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-checked="columnRemediated(columnName)" />
     </div>
 </td>
 
 <td>
     <div>
-        {{columnWarning.flaggedItemCount}}
+        {{columnWarning.flaggedColumnNames.length}}
     </div>
     <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
         {{columnName}}
