@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -119,6 +120,13 @@ public class HdfsUtils {
             throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
+        }
+    }
+    
+    public static final void copyFromLocalDirToHdfs(Configuration configuration, String localPath, String hdfsPath)
+            throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileUtil.copy(new File(localPath), fs, new Path(hdfsPath), false, configuration);
         }
     }
 
