@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,7 +87,8 @@ public class PerfLoadTestNGBase {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(new File(propertyPath));
-            prop.load(inputStream);
+            String props= IOUtils.toString(inputStream).replace("${API_TOMCAT}", System.getenv("API_TOMCAT"));
+            prop.load(IOUtils.toInputStream(props));
         } catch (FileNotFoundException e) {
             log.error("property file '" + propertyPath + "' not found in the classpath");
             log.error(ExceptionUtils.getFullStackTrace(e));
