@@ -17,8 +17,9 @@
         <div data-ng-hide="saveInProgress">
             <div class="modal-body">
                 <div class="row">
-                    <label id="oneLeadPerDomainCheckbox"><input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain" checked> Use One Lead Per Domain (recommended) </label>
-                    <label id="useLatticeAttributesCheckbox"><input type="checkbox" id="cbox2" data-ng-model="useLatticeAttributes" checked> Use Lattice Data Cloud Attributes (recommended) </label>
+                    <label id="oneLeadPerDomainCheckbox"><input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain"> Use One Lead Per Domain (not recommended) </label>
+                    <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="includePersonalEmailDomains" data-ng-checked="includePersonalEmailDomains"> Include Personal Email Domains (recommended) </label>
+                    <label id="useLatticeAttributesCheckbox"><input type="checkbox" id="cbox3" data-ng-model="useLatticeAttributes" data-ng-checked="useLatticeAttributes"> Use Lattice Data Cloud Attributes (recommended) </label>
                 </div>
             </div>
         </div>
