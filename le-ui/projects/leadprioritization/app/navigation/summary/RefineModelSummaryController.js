@@ -3,7 +3,7 @@ angular.module('lp.navigation.review', [
     'lp.models.review',
     'mainApp.setup.modals.UpdateFieldsModal'
 ])
-.controller('RefineModelSummaryController', function($scope, $stateParams, StringUtility, Model, ReviewData, ModelReviewStore, UpdateFieldsModal) {
+.controller('RefineModelSummaryController', function($scope, $stateParams, StringUtility, Model, ReviewData, ModelReviewService, ModelReviewStore, UpdateFieldsModal) {
     var vm = this;
 
     angular.extend(vm, {
@@ -15,26 +15,25 @@ angular.module('lp.navigation.review', [
         successEventsAfter: Model.ModelDetails.TotalConversions,
         successEventsAfterDisplay: StringUtility.AddCommas(Model.ModelDetails.TotalConversions),
         conversionRate: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
-        conversionRateAfter: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads)
+        conversionRateAfter: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
+        eventTableName: Model.EventTableProvenance.EventTableName
     });
 
     vm.createModelClicked = function() {
        UpdateFieldsModal.show(false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
     };
 
-    var rowRulesChanged = [];
-    ReviewData.dataRules.forEach(function(dataRule) {
-        var storedDataRules = ModelReviewStore.GetDataRules(vm.modelId);
-        storedDataRules.forEach(function(storedDataRule) {
-            if (storedDataRule.name == dataRule.name && dataRule.name in ReviewData.ruleNameToRowRuleResults
-                && dataRule.enabled != storedDataRule.enabled) {
-                rowRulesChanged.push(storedDataRule);
-            }
+    ModelReviewService.GetModelReviewData(vm.modelId, vm.eventTableName).then(function(result) {
+        var oldReviewData = result.Result;
+        oldReviewData.dataRules.forEach(function(dataRule) {
+            var storedDataRules = ModelReviewStore.GetDataRules(vm.modelId);
+            storedDataRules.forEach(function(storedDataRule) {
+                if (storedDataRule.name == dataRule.name && dataRule.name in ReviewData.ruleNameToRowRuleResults
+                    && dataRule.enabled != storedDataRule.enabled) {
+                    updateDisplay(ReviewData.ruleNameToRowRuleResults[storedDataRule.name], storedDataRule);
+                }
+            });
         });
-    })
-
-    rowRulesChanged.forEach(function(rowRuleChanged) {
-        updateDisplay(ReviewData.ruleNameToRowRuleResults[rowRuleChanged.name], rowRuleChanged);
     });
 
     $scope.$on('RowWarningToggled', function(event, warning, dataRule) {
