@@ -4,7 +4,20 @@ angular
     var ImportStore = this;
     this.files = {};
     this.FieldDocuments = {};
+    this.advancedSettings = {
+        oneLeadPerDomain: false,
+        includePersonalEmailDomains: true,
+        useLatticeAttributes: true
+    };
     this.CurrentFieldMapping = null;
+
+    this.SetAdvancedSettings = function(key, value) {
+        this.advancedSettings[key] = value;
+    };
+
+    this.GetAdvancedSetting = function(key) {
+        return this.advancedSettings[key];
+    };
 
     this.Get = function(name, root) {
         return root ? this[name] : this.files[name];
@@ -194,6 +207,9 @@ angular
                 description: MetaData.description,
                 filename: MetaData.name,
                 name: MetaData.modelName,
+                deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
+                excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
+                excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true,
                 displayName: MetaData.displayName
             };
 

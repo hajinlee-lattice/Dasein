@@ -4,10 +4,11 @@ angular
     'mainApp.appCommon.utilities.StringUtility',
     'lp.create.import.job',
     'lp.create.import.report',
+    'mainApp.setup.modals.FieldMappingSettingsModal',
     '720kb.tooltips'
 ])
 .controller('csvImportController', function(
-    $scope, $state, $q, ResourceUtility, StringUtility, ImportService, 
+    $scope, $state, $q, ResourceUtility, StringUtility, ImportService, FieldMappingSettingsModal,
     ImportStore, FeatureFlagService
 ) {
     var vm = this;
@@ -27,6 +28,9 @@ angular
         showNameDefault: false,
         showImportError: false,
         showImportSuccess: false,
+        oneLeadPerDomain: ImportStore.GetAdvancedSetting('oneLeadPerDomain'),
+        includePersonalEmailDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains'),
+        useLatticeAttributes: ImportStore.GetAdvancedSetting('useLatticeAttributes'),
         ResourceUtility: ResourceUtility,
         params: {
             infoTemplate: "<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>",
@@ -39,6 +43,11 @@ angular
             metadataFile: true
         }
     });
+
+    vm.advancedSettingsClicked = function() {
+        FieldMappingSettingsModal.showForModelCreation(ImportStore.GetAdvancedSetting('oneLeadPerDomain'),
+            ImportStore.GetAdvancedSetting('includePersonalEmailDomains'), ImportStore.GetAdvancedSetting('useLatticeAttributes'));
+    };
 
     vm.fileLoad = function(headers) {
         var columns = headers.split(','),

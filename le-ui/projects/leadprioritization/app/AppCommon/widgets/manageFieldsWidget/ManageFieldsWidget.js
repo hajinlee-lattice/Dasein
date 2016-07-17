@@ -22,7 +22,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.dirtyRows = {};
     $scope.indexToOldFieldsForSingleFieldPage = {};
     $scope.indexToOldFieldsForListFieldsPage = {};
-    $scope.oneLeadPerDomain = true;
+    $scope.oneLeadPerDomain = false;
+    $scope.includePersonalEmailDomains = true;
     $scope.useLatticeAttributes = true;
 
     getOptionsAndFields();
@@ -344,7 +345,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.saveInProgress) { return; }
 
         var editedData = getAllEditedData();
-        if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
+        if ((editedData != null && editedData.length > 0) || $scope.oneLeadPerDomain) {
             DiscardEditFieldsModel.show($scope);
         } else {
             $scope.showEditFieldsError = true;
@@ -353,11 +354,12 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     };
 
     $scope.advancedSettingsClicked = function() {
-        FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.useLatticeAttributes);
+        FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes);
     };
 
-    $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, useLatticeAttributes) {
+    $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
         $scope.oneLeadPerDomain = oneLeadPerDomain;
+        $scope.includePersonalEmailDomains = includePersonalEmailDomains;
 
         if ($scope.useLatticeAttributes != useLatticeAttributes) {
             if (!useLatticeAttributes) {
@@ -397,8 +399,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $scope.showEditFieldsError = false;
 
         var editedData = getAllEditedData();
-        if ((editedData != null && editedData.length > 0) || !$scope.oneLeadPerDomain) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.modelId, $scope.fields.concat($scope.fieldsNotDisplayed));
+        if ((editedData != null && editedData.length > 0) || $scope.oneLeadPerDomain || !$scope.includePersonalEmailDomains) {
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.modelId, $scope.fields.concat($scope.fieldsNotDisplayed));
 
             $scope.saveInProgress = false;
         } else {
@@ -411,7 +413,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
-        $scope.oneLeadPerDomain = true;
+        $scope.oneLeadPerDomain = false;
+        $scope.includePersonalEmailDomains = true;
         $scope.useLatticeAttributes = true;
         $scope.dirtyRows = {};
 

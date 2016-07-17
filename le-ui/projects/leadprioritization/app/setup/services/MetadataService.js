@@ -13,8 +13,7 @@ angular.module('mainApp.setup.services.MetadataService', [
 
     this.GetMetadataForModel = function(modelId) {
         var deferred = $q.defer(),
-            metadata = this.metadataMap[modelId];
-
+        metadata = this.metadataMap[modelId];
         if (typeof metadata == 'object') {
             deferred.resolve(metadata);
         } else {
@@ -149,7 +148,7 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.UpdateAndCloneFields = function (dedupType, modelName, modelDisplayName, originalModelSummaryId, fields, dataRules) {
+    this.UpdateAndCloneFields = function (dedupType, includePersonalEmailDomains, modelName, modelDisplayName, originalModelSummaryId, fields, dataRules) {
         var deferred = $q.defer();
 
         var cloneParams = {
@@ -159,6 +158,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             attributes: fields,
             sourceModelSummaryId: originalModelSummaryId,
             deduplicationType: dedupType,
+            excludePublicDomains: includePersonalEmailDomains ? false : true,
             dataRules: dataRules
         };
 
