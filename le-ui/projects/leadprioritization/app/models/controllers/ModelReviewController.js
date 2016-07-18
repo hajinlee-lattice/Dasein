@@ -258,7 +258,7 @@ angular.module('mainApp.models.review', [
                     warning.flaggedColumnNames.forEach(function(columnName) {
                         if (!$scope.columnRemediated(columnName) && $scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
                             $scope.interface.latticeWarnedColumnCount++;
-                        } else if (!$scope.columnsToRemediate(columnName)) {
+                        } else if (!$scope.columnRemediated(columnName)) {
                             $scope.interface.customWarnedColumnCount++;
                         }
                     });
