@@ -208,7 +208,6 @@
         <module>dellebi</module>
         <module>quartz</module>
         <module>modelquality</module>
-        <module>securityapi</module>
     </modules>
 
 </project>

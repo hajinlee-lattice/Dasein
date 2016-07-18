@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xmlns:context="http://www.springframework.org/schema/context"
   xmlns:mvc="http://www.springframework.org/schema/mvc"
   xsi:schemaLocation="
@@ -10,7 +10,7 @@
 
     <import resource="classpath:network-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
-
+  
     <context:component-scan base-package="com.latticeengines.microservice.exposed"/>
 
     <mvc:annotation-driven />
@@ -22,5 +22,5 @@
 
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
-
+    
 </beans>

@@ -64,9 +64,6 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     @Value("${admin.test.deployment.api:http://localhost:8085}")
     private String adminApiHostPort;
 
-    @Value("${pls.test.security.api}")
-    private String securityApiHostPort;
-
     private Camille camille;
     private String podId;
     private RestTemplate magicRestTemplate = new RestTemplate();
@@ -215,7 +212,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         Credentials credentials = new Credentials();
         credentials.setUsername(TestFrameworkUtils.AD_USERNAME);
         credentials.setPassword(TestFrameworkUtils.AD_PASSWORD);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(securityApiHostPort + "/securityapi/adlogin", false,
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/adlogin", false,
                 headers, JsonUtils.serialize(credentials));
 
         ObjectMapper mapper = new ObjectMapper();
