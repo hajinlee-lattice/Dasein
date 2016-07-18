@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +41,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -115,8 +115,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         requestEntity = new HttpEntity<>(map, headers);
 
         response = restTemplate.postForObject( //
-                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s&compressed=%s", getRestAPIHostPort(), "module1",
-                        "pivotmappings", "pivotvalues", "true"), //
+                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s&compressed=%s",
+                        getRestAPIHostPort(), "module1", "pivotmappings", "pivotvalues", "true"), //
                 requestEntity, ResponseDocument.class);
         String pivotFilePath = new ObjectMapper().convertValue(response.getResult(), String.class);
         log.info(pivotFilePath);

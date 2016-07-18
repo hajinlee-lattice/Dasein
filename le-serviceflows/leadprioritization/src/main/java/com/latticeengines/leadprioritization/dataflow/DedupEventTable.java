@@ -13,6 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
@@ -26,6 +27,10 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
     @Override
     public Node construct(DedupEventTableParameters parameters) {
         Node eventTable = addSource(parameters.eventTable);
+        if (parameters.deduplicationType == DedupType.MULTIPLELEADSPERDOMAIN) {
+            return eventTable;
+        }
+
         List<String> outputColumns = eventTable.getFieldNames();
 
         Node last = DataFlowUtils.extractDomain(eventTable, DOMAIN);
