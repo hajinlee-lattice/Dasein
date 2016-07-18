@@ -106,7 +106,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 public boolean apply(Artifact artifact) {
                     return artifact.getName().equals(pivotFileName);
                 }
-            });
+            }, null);
             if (pivotFileName != null && pivotArtifact == null) {
                 throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
             }
@@ -134,8 +134,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null means
-                                                                 // latest
+                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null
+                                                                                            // means
+                                                                                            // latest
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
