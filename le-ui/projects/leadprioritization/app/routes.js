@@ -504,7 +504,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
                     controller: 'sfdcCredentialsController',
@@ -530,7 +530,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
                     controller: function(LoginService) {
@@ -547,13 +547,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_PASSWORD_UPDATE';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    template: ''
                 },
                 "main@": {
                     templateUrl: 'app/login/views/UpdatePasswordView.html'
@@ -622,7 +616,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
                     templateUrl: 'app/userManagement/views/UserManagementView.html'

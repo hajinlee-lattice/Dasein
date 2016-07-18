@@ -50,7 +50,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
                     templateUrl: 'app/jobs/status/StatusView.html'

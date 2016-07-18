@@ -4,9 +4,12 @@ angular
         'mainApp.appCommon.utilities.StringUtility',
         'mainApp.core.services.FeatureFlagService'
     ])
-    .controller('SidebarRootController', function($scope, $state, FeatureFlagService, ResourceUtility) {
+    .controller('SidebarRootController', function(
+        $scope, $state, FeatureFlagService, ResourceUtility, JobsStore
+    ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
+        $scope.jobs = JobsStore.data.jobs;
 
         $scope.handleSidebarToggle = function ($event) {
             $("body").toggleClass("open-nav");

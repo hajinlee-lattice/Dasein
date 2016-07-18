@@ -3,8 +3,8 @@
     <div class="row">
         <div class="ten columns offset-one table-header">
             <div class="pull-left number-of-items" ng-if="users.length > 0">
-                <span class="badge blue-badge">Users: {{ users.length }}</span>&nbsp;
-                <span class="badge gray-badge">Active: {{( users | filter: { Active: true }).length }}</span>
+                Users: <span class="badge blue-badge">{{ users.length }}</span>&nbsp;
+                Active: <span class="badge gray-badge">{{( users | filter: { Active: true }).length }}</span>
             </div>
             <button class="pull-right button orange-button" id="usermgmt-btn-add-user" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)">
                 {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}

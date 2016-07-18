@@ -3,7 +3,10 @@ angular.module('lp.create.import.job', [
     'lp.create.import',
     'pd.jobs'
 ])
-.controller('ImportJobController', function($scope, $state, $stateParams, ResourceUtility, JobsService, ImportStore) {
+.controller('ImportJobController', function(
+    $scope, $state, $stateParams, ResourceUtility, JobsService, 
+    JobsStore, ImportStore
+) {
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
     var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;
@@ -61,12 +64,19 @@ angular.module('lp.create.import.job', [
     function getJobStatusFromAppId() {
         JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
             if (response.success) {
+                if ($scope.jobStatus == response.resultObj.jobStatus) {
+                    return;
+                }
+
                 $scope.jobStatus = response.resultObj.jobStatus;
+                
                 if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
                     cancelPeriodJobStatusQuery();
                 }
 
                 updateStatesBasedOnJobStatus(response.resultObj);
+
+                JobsStore.getJobs();
             } else {
 
             }

@@ -7,15 +7,25 @@ angular.module('pd.jobs', [
     'mainApp.models.leadenrichment',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
+.run(function($interval, JobsStore) {
+    JobsStore.getJobs();
+
+    $interval(function() {
+        JobsStore.getJobs();
+    }, 20 * 1000);
+})
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;
-    this.jobs = [];
-    this.models = {};
-    this.jobsMap = {};
+
+    this.data = {
+        jobs: [],
+        models: {},
+        jobsMap: {}
+    };
 
     this.getJob = function(jobId) {
         var deferred = $q.defer(),
-            job = this.jobsMap[jobId];
+            job = this.data.jobsMap[jobId];
         
         if (typeof job == 'object') {
             deferred.resolve(job);
@@ -29,29 +39,41 @@ angular.module('pd.jobs', [
     };
 
     this.getJobs = function(use_cache, modelId) {
-        var deferred = $q.defer();
-        var jobs = modelId ? this.models[modelId] : this.jobs;
+        var deferred = $q.defer(),
+            jobs = modelId 
+                ? this.data.models[modelId] 
+                : this.data.jobs;
+
         if (use_cache) {
             if (jobs && jobs.length > 0) {
                 deferred.resolve(jobs);
             } else {
-                this.models[modelId] = [];
+                this.data.models[modelId] = [];
                 deferred.resolve([]);
             }
         } else {
             JobsService.getAllJobs().then(function(response) {
                 var response = response.resultObj;
 
-                modelId 
-                    ? JobsStore.models[modelId] = jobs = response 
-                    : JobsStore.jobs = jobs = response;
+                if (modelId) {
+                    JobsStore.data.models[modelId].length = 0;
+                } else {
+                    JobsStore.data.jobs.length = 0;
+                }
+                
+                for (var i=0; i<response.length; i++) {
+                    var job = response[i];
 
-                for (var i=0; i<jobs.length; i++) {
-                    var job = jobs[i];
                     JobsStore.addJob(job.id, job);
+
+                    if (modelId) {
+                        JobsStore.data.models[modelId].push(job);
+                    } else {
+                        JobsStore.data.jobs.push(job);
+                    }
                 }
 
-                deferred.resolve(jobs);
+                deferred.resolve(JobsStore.data.jobs);
             });
         }
 
@@ -59,11 +81,11 @@ angular.module('pd.jobs', [
     };
 
     this.addJob = function(jobId, job) {
-        this.jobsMap[jobId] = job;
+        this.data.jobsMap[jobId] = job;
     };
 
     this.removeJob = function(jobId) {
-        delete this.jobsMap[jobId];
+        delete this.data.jobsMap[jobId];
     };
 })
 .service('JobsService', function($http, $q, _, $stateParams) {
@@ -501,40 +523,41 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal) {
-    $scope.jobs;
+.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval, JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal) {
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.cancelling = {};
     $scope.showEmptyJobsMessage = false;
-    $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
-    //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
     $scope.hideCreationMessage = true;
+    $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
+    
     var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 
+    if (modelId) {
+        if (!JobsStore.data.models[modelId]) {
+            JobsStore.data.models[modelId] = [];
+        }
+
+        $scope.jobs = JobsStore.data.models[modelId];
+    } else { 
+        $scope.jobs = JobsStore.data.jobs;
+    }
 
     function getAllJobs(use_cache) {
         JobsStore.getJobs(use_cache, modelId).then(function(result) {
-            $scope.jobs = result;
-
-            if (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache) {
-                $scope.showEmptyJobsMessage = true;
-            } else {
-                $scope.showEmptyJobsMessage = false;
-            }
+            console.log(JobsStore,result);
+            $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
         });
     }
     
-    var TIME_BETWEEN_JOB_LIST_REFRESH = 20 * 1000;
-    var REFRESH_JOBS_LIST_ID;
+    var BULK_SCORING_INTERVAL = 20 * 1000,
+        BULK_SCORING_ID;
 
-    // use cache if available
-    getAllJobs(true);
-
-    // but still do a xhr because cache may be old
-    getAllJobs();
-
-    REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
+    // this stuff happens only on Model Bulk Scoring page
+    if (modelId) {
+        getAllJobs();
+        BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
+    }
 
     $scope.$on("JobCompleted", function() {
         $scope.succeeded = true;
@@ -546,7 +569,7 @@ angular.module('pd.jobs', [
     });
 
     $scope.$on("$destroy", function() {
-        clearInterval(REFRESH_JOBS_LIST_ID);
+        $interval.cancel(BULK_SCORING_ID);
         $scope.expanded = {};
         $scope.statuses = {};
         $timeout.cancel($scope.timeoutTask);

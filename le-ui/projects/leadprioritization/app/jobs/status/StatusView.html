@@ -31,8 +31,8 @@
                     Loading... <i class="fa fa-spinner fa-pulse fa-fw"></i>
                 </div>
                 <div class="pull-left number-of-items" ng-if="jobs.length > 0">
-                    <span class="badge blue-badge">Total: {{jobs.length}}</span>&nbsp;
-                    <span class="badge gray-badge">Completed: {{(jobs | filter: { jobStatus: 'Completed' }).length}}</span>
+                    Total: <span class="badge blue-badge">{{jobs.length}}</span>&nbsp;
+                    Completed: <span class="badge gray-badge">{{(jobs | filter: { jobStatus: 'Completed' }).length}}</span>
                 </div>
             </div>
             <div class="eight columns text-right">
@@ -89,7 +89,7 @@
                     cancelling="cancelling"
                     class="job-td-row">
                 </div>
-                <div data-ng-show="showEmptyJobsMessage">
+                <div data-ng-show="jobs.length == 0">
                     There are no jobs to show at the moment
                 </div>
             </div>
