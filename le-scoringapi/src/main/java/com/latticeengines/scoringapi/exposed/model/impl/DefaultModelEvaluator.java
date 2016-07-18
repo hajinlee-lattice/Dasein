@@ -135,14 +135,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
         Map<FieldName, ?> results = null;
         try {
-            if (log.isInfoEnabled()) {
-                log.info("Invoke evaluate via jpmml api");
-            }
-
             results = evaluator.evaluate(arguments);
-            if (log.isInfoEnabled()) {
-                log.info("Invoke evaluate complete via jpmml api");
-            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
         }

@@ -172,14 +172,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord) {
-        if (log.isInfoEnabled()) {
-            log.info("Call scoring evaluate");
-        }
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
-        if (log.isInfoEnabled()) {
-            log.info("Call complete scoring evaluate");
-        }
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 
