@@ -1,0 +1,3 @@
+TargetColumn,SourceColumn,SourceColumnType,Value
+x2a,aa,TEXT,a
+x2b,b,TEXT,b

@@ -6,3 +6,7 @@ x2d,SourceColumn,TEXT,d
 x2e,SourceColumn,TEXT,e
 x2f,SourceColumn,TEXT,f
 x2g,SourceColumn,TEXT,g
+x3a,Industry,TEXT,Education
+x3b,Industry,TEXT,Other
+x3c,Industry,TEXT,Government
+x3d,Industry,TEXT,Technology

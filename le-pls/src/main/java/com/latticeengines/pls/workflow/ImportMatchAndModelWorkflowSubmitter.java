@@ -1,5 +1,7 @@
 package com.latticeengines.pls.workflow;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -22,6 +26,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -34,7 +40,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.PivotMappingFileUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -46,6 +54,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
@@ -111,6 +122,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
             }
         }
+        if (pivotArtifact != null) {
+            updateTrainingTable(pivotArtifact.getPath(), trainingTableName);
+        }
 
         log.info("Modeling parameters: " + parameters.toString());
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
@@ -169,6 +183,21 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
         return applicationId;
+    }
+
+    private void updateTrainingTable(String pivotArtifactPath, String trainingTableName) {
+        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                trainingTableName);
+        List<Attribute> trainingAttrs = trainingTable.getAttributes();
+        InputStream stream = null;
+        try {
+            stream = HdfsUtils.getInputStream(yarnConfiguration, pivotArtifactPath);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(stream, trainingAttrs);
+        trainingTable.setAttributes(attrs);
+        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);
     }
 
     private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {

@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +42,6 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -216,13 +216,18 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         JsonNode predictors = modelSummaryJson.get("Predictors");
         for (int i = 0; i < predictors.size(); ++i) {
             JsonNode predictor = predictors.get(i);
-            if (predictor.get("Name") != null && predictor.get("Name").asText() != null
-                    && predictor.get("Name").asText().equals("Some_Column")) {
-                JsonNode tags = predictor.get("Tags");
-                assertEquals(tags.size(), 1);
-                assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-                assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
+            if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
+                if (predictor.get("Name").asText().equals("Some_Column")) {
+                    JsonNode tags = predictor.get("Tags");
+                    assertEquals(tags.size(), 1);
+                    assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
+                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                    assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
+                } else if (predictor.get("Name").asText().equals("Industry")) {
+                    JsonNode approvedUsages = predictor.get("ApprovedUsage");
+                    assertEquals(approvedUsages.size(), 1);
+                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
+                }
             }
         }
     }
