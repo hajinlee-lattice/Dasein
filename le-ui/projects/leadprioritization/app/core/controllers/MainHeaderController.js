@@ -62,7 +62,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     function checkBrowserWidth(){
       // if the user has closed the nav, leave it closed when increasing size
       if (window.matchMedia("(min-width: 1200px)").matches && !$("body").hasClass("controlled-nav")) {
-        $("body").addClass("open-nav");
+        if (typeof(sessionStorage) !== 'undefined') {
+            if(sessionStorage.getItem('open-nav') === 'true') {
+                $("body").addClass('open-nav');
+            } else {
+                $("body").removeClass('open-nav');
+            }
+        }
       } else {
         if($("body").hasClass("open-nav")) {
           // if the nav is open when scaling down close it but allow it to re-open by removing our user controlled class indicator
