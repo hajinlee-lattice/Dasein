@@ -208,6 +208,7 @@ public enum LedpCode {
     LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes can be selected."), //
     LEDP_18113("Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
     LEDP_18114("Saving of lead enrichment selection failed, field name {0} is invalid."), //
+    LEDP_18115("Pivot File Validation Failed due to: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
