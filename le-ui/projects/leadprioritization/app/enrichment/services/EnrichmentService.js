@@ -5,7 +5,8 @@ angular.module('lp.enrichment.leadenrichment')
     this.categories = null;
     this.selectedCount = null;
     this.metadata = {
-        selectedToggle: false
+        selectedToggle: false,
+        page: null,
     };
 
     this.getMetadata = function(name) {

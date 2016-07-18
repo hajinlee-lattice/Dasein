@@ -12,8 +12,13 @@ angular
         $scope.jobs = JobsStore.data.jobs;
 
         $scope.handleSidebarToggle = function ($event) {
-            $("body").toggleClass("open-nav");
-            $("body").addClass("controlled-nav");  // indicate the user toggled the nav
+            $('body').toggleClass('open-nav');
+            $('body').addClass('controlled-nav');  // indicate the user toggled the nav
+
+            if (typeof(sessionStorage) !== 'undefined'){
+                sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
+                console.log('setItem', $('body').hasClass('open-nav'));
+            }
         }
         
         FeatureFlagService.GetAllFlags().then(function(result) {
@@ -31,4 +36,22 @@ angular
         $scope.statusFilter = function (item) { 
             return item.jobStatus === 'Running' || item.jobStatus === 'Pending'; 
         };
+
+        angular.extend($scope, {
+            init: function(){
+                if (typeof(sessionStorage) !== 'undefined') {
+                    console.log('getItem', sessionStorage.getItem('open-nav'));
+                    if(sessionStorage.getItem('open-nav') === 'true') {
+                        $("body").addClass('open-nav');
+                        console.log('open');
+                    } else {
+                        $("body").removeClass('open-nav');
+                        console.log('close');
+                    }
+                }
+            }
+        })
+
+        $scope.init();
+        
     });

@@ -1,6 +1,5 @@
 // lock sub-header
 // limit number selectable to (10 for now)
-// sort by name in place of =
 // green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
 .controller('EnrichmentController', function($filter, $timeout, EnrichmentStore, EnrichmentData, EnrichmentService){
@@ -8,12 +7,12 @@ angular.module('lp.enrichment.leadenrichment', [])
 
     angular.extend(vm, {
         button_save: 'save',
-        button_select: 'select for enrichments',
-        button_selected: 'selected for enrichment',
-        button_deselect: 'deselect',
-        deselected_messsage: 'this may affect your existing model',
+        button_select: 'Turn On',
+        button_selected: 'On',
+        button_deselect: 'Turn Off',
+        deselected_messsage: 'Attribute will be turned off for enrichment',
         categories_see_all: 'See All Categories',
-        categories_select_all: 'Select All Categories',
+        categories_select_all: 'All Categories',
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         category: null,
@@ -22,7 +21,8 @@ angular.module('lp.enrichment.leadenrichment', [])
         saveDisabled: 1,
         selectedCount: 0,
         premiumSelectLimit: 10,
-        premiumSelectError: 'maximum number of premium selects'
+        premiumSelectError: 'Premium attribute limit reached',
+        pagesize: 5
     });
 
     vm.changeCategory = function(){
