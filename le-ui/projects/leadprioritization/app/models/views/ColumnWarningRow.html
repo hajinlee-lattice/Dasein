@@ -22,15 +22,16 @@
         <input
                 type="checkbox"
                 data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-if="shouldDisplayColumn(columnName)"
                 data-ng-checked="columnRemediated(columnName)" />
     </div>
 </td>
 
 <td>
     <div>
-        {{columnWarning.flaggedColumnNames.length}}
+        {{interface.show == 'all' ? columnTotal : interface.show == 'lattice' ? latticeWarningTotal : customWarningTotal}}
     </div>
-    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames">
+    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames" data-ng-if="shouldDisplayColumn(columnName)">
         {{columnName}}
     </div>
 </td>

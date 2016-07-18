@@ -2,19 +2,17 @@
 
     <div class="row">
         <div class="twelve columns list-header">
-            <div class="pull-left number-of-items">{{vm.interface.totalExcludedColumnCount}} of {{vm.totalWarnedColumnCount}} columns excluded</div>
+            <div class="pull-left number-of-items">{{vm.showAll ? vm.interface.totalExcludedColumnCount : vm.showLatticeAttr ? vm.interface.latticeWarnedColumnCount : vm.interface.customWarnedColumnCount}} of {{vm.totalWarnedColumnCount}} columns excluded</div>
         </div>
     </div>
 
     <div class="row">
         <div class="twelve columns list-header">
             <ul class="link-tabs">
-                <li><a href="javascript:void(0)" class="selected">All Warnings</a>
-                </li>
-                <!-- <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All Warnings</a>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All Warnings</a>
                 </li>
                 <li><a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Custom Fields</a></li>
-                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Data Cloud</a></li> -->
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Data Cloud</a></li>
             </ul>
         </div>
     </div>

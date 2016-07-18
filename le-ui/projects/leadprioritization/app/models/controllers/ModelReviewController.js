@@ -68,18 +68,21 @@ angular.module('mainApp.models.review', [
         angular.extend(vm, {
             ruleNameToDataRules: ruleNameToDataRules,
             allColumnWarnings : _.values(ReviewData.ruleNameToColumnRuleResults),
-            // showAll: false,
-            // showLatticeAttr: false,
-            // showCustomAttr: true,
+            showAll: false,
+            showLatticeAttr: false,
+            showCustomAttr: true,
             totalWarnedColumnCount: 0,
-            // latticeWarnedColumnCount: 0,
-            // customWarnedColumnCount: 0,
             interface: {
-                totalExcludedColumnCount: 0
+                totalExcludedColumnCount: 0,
+                latticeWarnedColumnCount: 0,
+                customWarnedColumnCount : 0,
+                show: 'custom'
             },
-            columnWarningsToDisplay: []
+            columnWarningsToDisplay: [],
+            columnNameToIsLatticeAttr: {}
         });
 
+        /*
         vm.columnWarningsToDisplay = vm.allColumnWarnings;
         vm.allColumnWarnings.forEach(function(columnWarning) {
             vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
@@ -89,39 +92,55 @@ angular.module('mainApp.models.review', [
                 }
             });
         });
+        */
 
-        /*
         MetadataStore.GetMetadataForModel(modelId).then(function(modelMetadata) {
             vm.modelMetadata = modelMetadata;
             vm.allColumnWarnings.forEach(function(columnWarning) {
                 vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
                 ReviewData.dataRules.forEach(function(dataRule) {
-                    if (dataRule.enabled) {
-                        vm.interface += dataRule.flaggedItemCount;
+                    if (dataRule.name == columnWarning.dataRuleName) {
+                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
+                            vm.columnNameToIsLatticeAttr[columnName] = vm.isLatticeAttribute(vm.findMetadataItemByColumnName(columnName));
+                        });
+                        if (dataRule.enabled) {
+                            vm.interface.totalExcludedColumnCount += dataRule.flaggedItemCount;
+                        }
                     }
-                };
-                    if (dataRule.enabled && isLatticeColumnWarning(columnWarning) && columnWarning.dataRuleName == dataRule.name) {
+                    /* if (dataRule.enabled && isLatticeColumnWarning(columnWarning) && columnWarning.dataRuleName == dataRule.name) {
                         vm.latticeWarnedColumnCount += dataRule.columnsToRemediate.length;
                     } else if (dataRule.enabled && isNonLatticeColumnWarning(columnWarning) && columnWarning.dataRuleName == dataRule.name) {
                         vm.customWarnedColumnCount += dataRule.columnsToRemediate.length;
-                    }
+                    } */
                 });
-                vm.displayNonLatticeWarningsClicked();
             });
+            vm.displayNonLatticeWarningsClicked();
         });
-        */
 
         vm.displayLatticeWarningsClicked = function() {
             vm.showAll = false
             vm.showCustomAttr = false,
             vm.showLatticeAttr = true;
             vm.columnWarningsToDisplay = [];
+            vm.interface.latticeWarnedColumnCount = 0;
 
-            vm.allColumnWarnings.forEach(function(columnWarning) {
-                if (isLatticeColumnWarning(columnWarning)) {
-                    vm.columnWarningsToDisplay.push(columnWarning);
+            ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
+                for (var i in reviewData.dataRules) {
+                    ruleNameToDataRules[ReviewData.dataRules[i].name] = reviewData.dataRules[i];
                 }
+                vm.allColumnWarnings.forEach(function(columnWarning) {
+                    if (isLatticeColumnWarning(columnWarning)) {
+                        vm.columnWarningsToDisplay.push(columnWarning);
+                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
+                            if (vm.ruleNameToDataRules[columnWarning.dataRuleName].enabled && vm.columnNameToIsLatticeAttr[columnName]
+                                && vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
+                                vm.interface.latticeWarnedColumnCount++;
+                            }
+                        });
+                    }
+                });
             });
+            vm.interface.show = 'lattice';
         };
 
         vm.displayNonLatticeWarningsClicked = function() {
@@ -129,12 +148,25 @@ angular.module('mainApp.models.review', [
             vm.showLatticeAttr = false,
             vm.showCustomAttr = true;
             vm.columnWarningsToDisplay = [];
+            vm.interface.customWarnedColumnCount = 0;
 
-            vm.allColumnWarnings.forEach(function(columnWarning) {
-                if (isNonLatticeColumnWarning(columnWarning)) {
-                    vm.columnWarningsToDisplay.push(columnWarning);
+            ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
+                for (var i in reviewData.dataRules) {
+                    ruleNameToDataRules[ReviewData.dataRules[i].name] = reviewData.dataRules[i];
                 }
+                vm.allColumnWarnings.forEach(function(columnWarning) {
+                    if (isNonLatticeColumnWarning(columnWarning)) {
+                        vm.columnWarningsToDisplay.push(columnWarning);
+                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
+                            if (vm.ruleNameToDataRules[columnWarning.dataRuleName].enabled && !vm.columnNameToIsLatticeAttr[columnName]
+                                && vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
+                                vm.interface.customWarnedColumnCount++;
+                            }
+                        });
+                    }
+                });
             });
+            vm.interface.show = 'custom';
         };
 
         vm.displayAllWarningsClicked = function() {
@@ -143,9 +175,11 @@ angular.module('mainApp.models.review', [
             vm.showCustomAttr = false;
 
             vm.columnWarningsToDisplay = vm.allColumnWarnings.slice(0);
+            vm.interface.show = 'all';
         };
 
         vm.isLatticeAttribute = function(column) {
+            if (column == null) { return false; }
             return MetadataService.IsLatticeAttribute(column);
         };
 
@@ -199,21 +233,19 @@ angular.module('mainApp.models.review', [
             $scope.ruleNameToDataRules = $scope.rules;
             $scope.columnWarningExpanded = false;
             $scope.dataRule = $scope.ruleNameToDataRules[$scope.columnWarning.dataRuleName];
-            $scope.columnsToRemediate = $scope.dataRule.columnsToRemediate.slice(0);
+            $scope.columnsToRemediate = $scope.dataRule.columnsToRemediate;
             $scope.ReviewData = $scope.data;
-            // $scope.latticeColumnNames = [];
-            // $scope.customColumnNames = [];
+            $scope.columnTotal = $scope.columnWarning.flaggedItemCount;
+            $scope.latticeWarningTotal = 0;
+            $scope.customWarningTotal = 0;
 
-            /**
             $scope.columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                var metadataItem = $scope.$parent.vm.findMetadataItemByColumnName(columnName);
-                if ($scope.$parent.vm.isLatticeAttribute(metadataItem)) {
-                    $scope.latticeColumnNames.push(columnName);
-                } else {
-                    $scope.customColumnNames.push(columnName);
+                if ($scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
+                    $scope.latticeWarningTotal++;
+                } else if (!$scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
+                    $scope.customWarningTotal++;
                 }
             });
-            */
 
             $scope.warningExcludeToggled = function($event, warning) {
                 if ($event == null) {
@@ -223,18 +255,31 @@ angular.module('mainApp.models.review', [
                 var ruleEnabledBefore = $scope.dataRule.enabled;
                 if (ruleEnabledBefore && $scope.columnsToRemediate.length < $scope.columnWarning.flaggedItemCount) { // warning was partially enabled
                     $scope.interface.totalExcludedColumnCount -= $scope.columnsToRemediate.length;
+                    warning.flaggedColumnNames.forEach(function(columnName) {
+                        if (!$scope.columnRemediated(columnName) && $scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
+                            $scope.interface.latticeWarnedColumnCount++;
+                        } else if (!$scope.columnsToRemediate(columnName)) {
+                            $scope.interface.customWarnedColumnCount++;
+                        }
+                    });
                     $scope.columnsToRemediate = $scope.columnWarning.flaggedColumnNames.slice(0);
                     $('#' + warning.dataRuleName).trigger('click');
                 } else if (ruleEnabledBefore) { // warning was all enabled
                     $scope.interface.totalExcludedColumnCount -= $scope.columnsToRemediate.length;
+                    warning.flaggedColumnNames.forEach(function(columnName) {
+                        $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount-- : $scope.interface.customWarnedColumnCount--;
+                    });
                     $scope.columnsToRemediate = [];
                     $scope.dataRule.enabled = false;
                 } else {
                     $scope.columnsToRemediate = $scope.columnWarning.flaggedColumnNames.slice(0);
+                    warning.flaggedColumnNames.forEach(function(columnName) {
+                        $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount++ : $scope.interface.customWarnedColumnCount++;
+                    });
                     $scope.dataRule.enabled = true;
                 }
                 $scope.interface.totalExcludedColumnCount += $scope.columnsToRemediate.length;
-                $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate.slice(0);
+                $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate;
                 ModelReviewStore.AddDataRule($scope.modelId, $scope.dataRule);
             };
 
@@ -242,17 +287,19 @@ angular.module('mainApp.models.review', [
                 if ($scope.columnRemediated(columnName)) {
                     $scope.interface.totalExcludedColumnCount--;
                     $scope.columnsToRemediate.splice($scope.columnsToRemediate.indexOf(columnName), 1);
+                    $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount-- : $scope.interface.customWarnedColumnCount--;
                     if ($scope.columnsToRemediate.length == 0) {
                         $scope.dataRule.enabled = false;
                     }
                 } else {
                     $scope.interface.totalExcludedColumnCount++;
                     $scope.columnsToRemediate.push(columnName);
+                    $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount++ : $scope.interface.customWarnedColumnCount++;
                     if ($scope.columnsToRemediate.length == 1) {
                         $scope.dataRule.enabled = true;
                     }
                 }
-                $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate.slice(0);
+                $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate;
                 ModelReviewStore.AddDataRule($scope.modelId, $scope.dataRule);
             };
 
@@ -262,6 +309,12 @@ angular.module('mainApp.models.review', [
 
             $scope.expandColumnWarningClicked = function() {
                 $scope.columnWarningExpanded = !$scope.columnWarningExpanded;
+            };
+
+            $scope.shouldDisplayColumn = function(columnName) {
+                return ($scope.$parent.vm.showCustomAttr && !$scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) ||
+                    ($scope.$parent.vm.showLatticeAttr && $scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) ||
+                    $scope.$parent.vm.showAll;
             };
         }]
     };
