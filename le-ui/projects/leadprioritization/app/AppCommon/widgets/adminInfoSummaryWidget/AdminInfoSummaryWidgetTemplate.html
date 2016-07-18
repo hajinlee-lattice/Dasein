@@ -2,7 +2,7 @@
     <div class="panel-body model-admin-info">
         <table class="table">
             <tbody>
-                <tr>
+                <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_HEALTH_SCORE_LABEL')}}</th>
                     <td><health-score score="ModelHealthScore"></health-score></td>
                 </tr>
