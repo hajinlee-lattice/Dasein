@@ -10,8 +10,8 @@ public class DataRuleUtils {
         for (DataRule rule : dataRules) {
             switch (rule.getName()) {
             case "UniqueValueCountDS":
-                rule.setDescription("Unique value count in column - Integrated from Profiling");
-                rule.setDisplayName("Unique Value Count");
+                rule.setDescription("Remove categorical attributes that have more than 200 distinct values");
+                rule.setDisplayName("Detected Too Many Distinct Values");
                 break;
             case "PopulatedRowCountDS":
                 rule.setDescription("Remove predictors when the predictive power comes from noise");
