@@ -82,7 +82,7 @@ angular.module('mainApp.models.leadenrichment', [
             });
         } else {
             $scope.saveInProgress = true;
-            ImportService.StartTestingSet(vm.params.modelId, vm.fileName, vm.enableLeadEnrichment).then(function(result) {
+            ImportService.StartTestingSet($scope.modelId, $scope.fileName, vm.enableLeadEnrichment).then(function(result) {
                 $scope.saveInProgress = false;
                 if (result.Success) {
                     $("#modalContainer").modal('hide');

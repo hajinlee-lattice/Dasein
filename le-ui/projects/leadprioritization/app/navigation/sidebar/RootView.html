@@ -14,7 +14,7 @@
         </li>
         <li ng-if="showJobsPage" role="presentation" ui-sref-active="active">
             <a ui-sref="home.jobs.status" ui-sref-opts="{reload: true}">
-                <span class="ico-container" ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: {'jobStatus': 'Running'})).length > 0}">
+                <span class="ico-container" ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}">
                     <span class="ico ico-cog ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}"></span>
                 </span>
                 <span class="label">

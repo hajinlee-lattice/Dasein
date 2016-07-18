@@ -27,4 +27,8 @@ angular
             $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
             $scope.showLeadEnrichmentPage = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
         });
+
+        $scope.statusFilter = function (status) { 
+            return status === 'Running' || status === 'Pending'; 
+        };
     });

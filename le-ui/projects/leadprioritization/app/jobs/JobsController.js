@@ -545,7 +545,6 @@ angular.module('pd.jobs', [
 
     function getAllJobs(use_cache) {
         JobsStore.getJobs(use_cache, modelId).then(function(result) {
-            console.log(JobsStore,result);
             $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
         });
     }
