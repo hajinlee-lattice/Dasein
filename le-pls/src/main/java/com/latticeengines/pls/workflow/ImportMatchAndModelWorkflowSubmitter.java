@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
@@ -36,6 +35,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.util.DataRuleUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
@@ -204,15 +204,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         List<DataRule> defaultRules = getMasterList();
 
         for (DataRule dataRule : defaultRules) {
-            if (dataRule.getName().equals("CountUniqueValueRule")) {
+            if (dataRule.getName().equals("UniqueValueCountDS")) {
                 dataRule.setEnabled(true);
                 Map<String, String> countUniqueValueRuleProps = new HashMap<>();
-                countUniqueValueRuleProps.put("uniqueCountThreshold", String.valueOf(200));
+                countUniqueValueRuleProps.put("uniquevaluecountThreshold", String.valueOf(200));
                 dataRule.setProperties(countUniqueValueRuleProps);
-            } else if (dataRule.getName().equals("PopulatedRowCount")) {
-                dataRule.setEnabled(true);
-            } else if (dataRule.getName().equals("OneRecordPerDomain")
-                    && schemaInterpretation.equals(SchemaInterpretation.SalesforceAccount)) {
+            } else if (dataRule.getName().equals("PopulatedRowCountDS")) {
                 dataRule.setEnabled(true);
             }
         }
@@ -223,52 +220,36 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     }
 
     private List<DataRule> getMasterList() {
-        List<Triple<String, String, String>> masterColumnConfig = new ArrayList<>();
-        List<Triple<String, String, String>> masterRowConfig = new ArrayList<>();
+        List<String> columnRuleNames = new ArrayList<>();
+        List<String> rowRuleNames = new ArrayList<>();
 
-        Triple<String, String, String> uniqueValueCount = Triple.of("UniqueValueCountDS", "Count Unique Value Rule",
-                "Unique value count in column - Integrated from Profiling");
-        masterColumnConfig.add(uniqueValueCount);
+        columnRuleNames.add("UniqueValueCountDS");
+        columnRuleNames.add("PopulatedRowCountDS");
+        columnRuleNames.add("OverlyPredictiveDS");
+        columnRuleNames.add("LowCoverageDS");
+        columnRuleNames.add("NullIssueDS");
 
-        Triple<String, String, String> populatedRowCount = Triple.of("PopulatedRowCountDS", "Populated Row Count",
-                "Populated Row Count - Integrated from Profiling (certain value exceeds x%) ");
-        masterColumnConfig.add(populatedRowCount);
-
-        Triple<String, String, String> overlyPredictiveColumns = Triple.of("OverlyPredictiveDS",
-                "Overly Predictive Columns", "overly predictive single category / value range");
-        masterColumnConfig.add(overlyPredictiveColumns);
-
-        Triple<String, String, String> lowCoverage = Triple.of("LowCoverageDS", "Low Coverage",
-                "Low coverage (empty exceeds x%)");
-        masterColumnConfig.add(lowCoverage);
-
-        Triple<String, String, String> positivelyPredictiveNulls = Triple.of("NullIssueDS",
-                "Positively Predictive Nulls", "Positively predictive nulls");
-        masterColumnConfig.add(positivelyPredictiveNulls);
-
-        Triple<String, String, String> highPredictiveLowPopulation = Triple.of("HighlyPredictiveSmallPopulationDS",
-                "High Predictive Low Population", "High predictive, low population");
-        masterRowConfig.add(highPredictiveLowPopulation);
+        rowRuleNames.add("HighlyPredictiveSmallPopulationDS");
 
         List<DataRule> masterRuleList = new ArrayList<>();
-        for (Triple<String, String, String> config : masterColumnConfig) {
-            DataRule rule = generateDataRule(config);
+        for (String name : columnRuleNames) {
+            DataRule rule = generateDataRule(name);
             masterRuleList.add(rule);
         }
 
-        for (Triple<String, String, String> config : masterRowConfig) {
-            DataRule rule = generateDataRule(config);
+        for (String name : rowRuleNames) {
+            DataRule rule = generateDataRule(name);
             masterRuleList.add(rule);
         }
+
+        DataRuleUtils.populateDataRuleDisplayNameAndDescriptions(masterRuleList);
 
         return masterRuleList;
     }
 
-    private DataRule generateDataRule(Triple<String, String, String> config) {
+    private DataRule generateDataRule(String name) {
         DataRule rule = new DataRule();
-        rule.setName(config.getLeft());
-        rule.setDisplayName(config.getMiddle());
-        rule.setDescription(config.getRight());
+        rule.setName(name);
         rule.setFrozenEnablement(false);
         rule.setColumnsToRemediate(new ArrayList<String>());
         rule.setEnabled(false);
