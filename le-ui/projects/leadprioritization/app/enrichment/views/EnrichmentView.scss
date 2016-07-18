@@ -83,51 +83,40 @@
         }
     }
     .box {
-        @include flex-container;
         padding: 10px;
         margin: 5px 0;
         border: 1px solid rgba(0,0,0,.2);
         border-radius: 10px;
         position: relative;
         min-height: 77px;
-        padding-left: 22px;
+        padding-left: 90px;
+        padding-right: 170px;
         & > .ico-container {
-            @include flex-item(0 0 auto);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 10px;
             .ico {
               height: 65px;
               width: 70px;
             }
         }
         & > h2 {
-            @include flex-item(0 0 auto);
-            margin: 0 20px;
-            width: 150px;
+            margin: 0;
+            margin-bottom: 10px;
             font-size: 20px;
-            @include flex-container;
-            justify-content: center;
-            flex-direction: column;
-        }
-        & > p {
-            @include flex-item(1);
-            span {
-              display: block;
-              max-width: 100%;
-              flex-shrink: 1;
-            }
-            @include flex-container;
-            justify-content: center;
-            flex-direction: column;
         }
         & > button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 10px;
             font-weight: normal;
             font-size: 10px;
             height: 50px;
             width: 150px;
             white-space: normal;
             background-color: #467dba;
-            position: relative;
-            top: 50%;
-            transform: translateY(25%);
             padding: 0;
             transition: none;
             & > span {

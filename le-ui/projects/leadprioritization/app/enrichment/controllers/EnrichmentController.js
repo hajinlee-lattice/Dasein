@@ -6,13 +6,15 @@ angular.module('lp.enrichment.leadenrichment', [])
     var vm = this;
 
     angular.extend(vm, {
-        button_save: 'save',
+        button_save: 'Save',
         button_select: 'Turn On',
         button_selected: 'On',
         button_deselect: 'Turn Off',
         deselected_messsage: 'Attribute will be turned off for enrichment',
         categories_see_all: 'See All Categories',
         categories_select_all: 'All Categories',
+        premiumSelectError: 'Premium attribute limit reached',
+        no_results: 'No enrichments were found',
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         category: null,
@@ -21,8 +23,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         saveDisabled: 1,
         selectedCount: 0,
         premiumSelectLimit: 10,
-        premiumSelectError: 'Premium attribute limit reached',
-        pagesize: 5
+        pagesize: 25
     });
 
     vm.changeCategory = function(){

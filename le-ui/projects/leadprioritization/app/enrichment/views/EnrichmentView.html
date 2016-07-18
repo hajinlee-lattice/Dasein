@@ -4,7 +4,7 @@
             <ul class="subheader">
                 <li class="categories">
                     <select class="form-control" ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory(); vm.current = 1;">
-                        <option ng-show="vm.category" value="">{{vm.category ? vm.categories_see_all : vm.categories_select_all}}</option>
+                        <option value="">{{vm.category ? vm.categories_see_all : vm.categories_select_all}}</option>
                     </select>
                 </li>
                 <li class="query">
@@ -60,7 +60,7 @@
                 </button>
             </li>
             <li ng-show="!filteredList.length">
-              <h2>Nothing to show</h2>
+              <h2>{{vm.no_results}}</h2>
             </li>
         </ul>
         <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
