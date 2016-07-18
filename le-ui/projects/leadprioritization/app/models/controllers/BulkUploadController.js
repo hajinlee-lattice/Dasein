@@ -20,6 +20,7 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.params = {
         url: '/pls/scores/fileuploads',
         label: (vm.schema == 'SalesforceLead' ? 'Lead' : 'Account') + ' List',
+        infoTemplate: (vm.schema == 'SalesforceLead' ? 'Upload a file of leads to score. The list of expected column headers are listed below.' : 'Upload a file of accounts to score. The list of expected column headers are listed below.'),
         defaultMessage: "Example: us-enterprise-testing-set.csv",
         modelId: $stateParams.modelId,
         compressed: true, 

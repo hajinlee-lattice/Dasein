@@ -12,7 +12,7 @@
                 <dt>Job Started</dt>
                 <dd>
                     <div class="progress-icon"  data-ng-if="jobStatus != null">
-                        <span data-ng-if="jobStatus == 'Pending'">
+                        <span data-ng-if="jobStatus != null || jobStatus == 'Pending'">
                             <span class="loading-small"></span>
                         </span>
                         <span data-ng-if="startTimestamp">
@@ -22,42 +22,45 @@
                     <div data-ng-if="startTimestamp">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
                 </dd>
             </dl>
-            <dl>
-                <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
-                <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>
-                <dd>
-                    <div class="progress-icon">
-                        <span data-ng-if="jobStepsRunningStates.load_data">
-                            <span class="loading-small"></span>
-                        </span>
-                        <span data-ng-if="jobStepsCompletedStates.load_data">
-                            <i class="fa fa-check"></i>
-                        </span>
-                        <span data-ng-if="stepFailed == 'load_data'">
-                            <i class="fa fa-warning"></i>
-                        </span>
-                    </div>
-                    <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
-                </dd>
-            </dl>
-            <dl>
-                <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
-                <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
-                <dd>
-                    <div class="progress-icon">
-                        <span data-ng-if="jobStepsRunningStates.generate_insights">
-                            <span class="loading-small"></span>
-                        </span>
-                        <span data-ng-if="jobStepsCompletedStates.generate_insights">
-                            <i class="fa fa-check"></i>
-                        </span>
-                        <span data-ng-if="stepFailed == 'generate_insights'">
-                            <i class="fa fa-warning"></i>
-                        </span>
-                    </div>
-                    <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
-                </dd>
-            </dl>
+
+            <div>
+                <dl>
+                    <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
+                    <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>
+                    <dd>
+                        <div class="progress-icon">
+                            <span data-ng-if="jobStepsRunningStates.load_data">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.load_data">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span data-ng-if="stepFailed == 'load_data'">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                        </div>
+                        <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
+                    <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
+                    <dd>
+                        <div class="progress-icon">
+                            <span data-ng-if="jobStepsRunningStates.generate_insights">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.generate_insights">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span data-ng-if="stepFailed == 'generate_insights'">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                        </div>
+                        <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
+                    </dd>
+                </dl>
+            </div>
             <dl>
                 <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
                 <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
@@ -92,7 +95,7 @@
                 <a ui-sref="home.jobs.status.csv({jobId: job.id})">View Report</a>
             </div>
             -->
-            <div data-ng-if="jobStatus == 'Completed'">
+            <div>
                 {{jobStatus}}
             </div>
         </div>

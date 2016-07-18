@@ -383,13 +383,17 @@ html:not(.no-cssmask) {
     .profile-nav {
         float: right;
         & > a {
-            padding: 12px 20px 12px 52px;
+            padding: 16px 20px 16px 52px;
             display: block;
             color: $dark-gray;
             background-image: url("/assets/images/ico-user-profile.svg");
             background-size: 30px 30px;
             background-repeat: no-repeat; 
             background-position: 12px 50%;
+            -webkit-transition: none;
+            -moz-transition: none;
+            -o-transition: none;
+            transition: none;
             &:hover {
                 background-color: #efefef;
                 text-decoration: none;
@@ -401,11 +405,11 @@ html:not(.no-cssmask) {
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
                 font-size: 14px;
-                margin-bottom: 0;
-                .tenant-name {
-                    font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
-                    font-size: 12px;
-                }
+            }            
+            .tenant-name {
+                font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
+                font-size: 12px;
+                margin-top: -4px;
             }
             .pd-header-downarrow {
                 margin-left: 10px;

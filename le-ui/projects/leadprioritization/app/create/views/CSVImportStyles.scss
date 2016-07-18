@@ -5,6 +5,11 @@ section.container.setup-import {
         position: absolute;
         margin-top: -2px;
     }
+    .placeholder {
+        color: #888;
+        text-transform: none;
+        font-size: 17px;
+    }
     label {
         color: #000;   
         span {
@@ -40,9 +45,6 @@ section.container.setup-import {
                 font-size: 10000px;
             }
         }
-    }
-    #csvFileUploadMessage {
-        font-size: 0.9em;
     }
     div.toggle-check {
         vertical-align: top;
@@ -402,7 +404,7 @@ Create Model: Import Job Status
         text-transform: none;
     }
     dt {
-      width: 35%;
+      width: 42%;
       font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
       &.not-started {
         color: #bbb;

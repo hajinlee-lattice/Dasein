@@ -1,9 +1,17 @@
 <div class="service-error-banner" data-ng-controller="ServiceErrorController" ng-init="ShowErrorBanner = true">
-    <div class="messaging error-messaging" ng-show="ShowErrorBanner">
-        <ico class="fa fa-warning"></ico>
-        <span class="">
-            {{errorCode}}: {{errorMsg}}
-        </span>
-        <button id="close-button" type="button" class="close" ng-click="ShowErrorBanner = !ShowErrorBanner">×</button>
-    </div>
+	<div class="container">
+		<div class="row">
+			<div class="twelve columns">
+    
+			    <div class="messaging error-messaging" ng-show="ShowErrorBanner">
+			        <ico class="fa fa-warning"></ico>
+			        <span class="">
+			            {{errorCode}}: {{errorMsg}}
+			        </span>
+			        <button id="close-button" type="button" class="close" ng-click="ShowErrorBanner = !ShowErrorBanner">×</button>
+			    </div>
+
+			</div>
+		</div>
+	</div>
 </div>

@@ -414,12 +414,6 @@ Sign In, Forgot Password, and Update Password Forms
                 .form-update-password .form > div:last-of-type {
                     margin: 2em 0 0;
                 }
-                .form-update-password .form > div:last-of-type a, .form-update-password .form > div:last-of-type button {
-                    width: 47%;
-                }
-                .form-update-password .form > div:last-of-type a {
-                    margin-right: 5%;
-                }
          .form-update-password .form-title {
             width: 40%;
          }
@@ -664,9 +658,9 @@ Model List
         margin-right: 0;
     }
 }
-@media (min-width: 1024px) {
+@media (min-width: 1000px) {
     .model{
-        width: 24%;
+        width: 23.7%;
         margin-right: 1%;
     }
     .model-list > div > div > div > div > div > div > div:nth-child(2n) .model {
