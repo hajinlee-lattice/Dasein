@@ -700,6 +700,7 @@ angular
                         $scope.metadata = EnrichmentStore.metadata;
                         $scope.selectToggle = function(bool) {
                             EnrichmentStore.setMetadata('selectedToggle', bool);
+                            EnrichmentStore.setMetadata('current', 1);
                         }
                     },
                     templateUrl: 'app/navigation/summary/EnrichmentTabs.html'

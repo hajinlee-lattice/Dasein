@@ -89,7 +89,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         }
         EnrichmentService.setEnrichments(data).then(function(result){
             vm.saveDisabled = true;
-            if(selectedObj.length > 0) {
+            if(selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
                 for(i in dirtyObj){
                     dirtyObj[i].IsDirty = false;
