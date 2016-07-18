@@ -89,7 +89,8 @@
       "NamedParameterListToInit": {
         "columns": "allColumns",
         "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns"
+        "numericalColumns": "numericalColumns",
+        "uniquevaluecountThreshold":200
       },
       "ColumnTransformFilePath": "uniquevaluecountds.py"
     },
