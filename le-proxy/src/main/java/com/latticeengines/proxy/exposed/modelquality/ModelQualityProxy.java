@@ -2,7 +2,9 @@ package com.latticeengines.proxy.exposed.modelquality;
 
 import java.util.List;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
@@ -124,6 +126,13 @@ public class ModelQualityProxy extends BaseRestApiProxy implements ModelQualityI
     public ResponseDocument<String> upsertModelConfigs(List<ModelConfig> modelConfigs) {
         String url = constructUrl("/modelconfigs");
         return post("upsertModelConfig", url, modelConfigs, ResponseDocument.class);
+    }
+
+    @Override
+    public ResponseDocument<String> uploadPipelineStepFile(String fileName,
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
+        String url = constructUrl("/pipelinestepfile?fileName={fileName}", fileName);
+        return post("uploadPipelineStepFile", url, requestEntity, ResponseDocument.class);
     }
 
 }

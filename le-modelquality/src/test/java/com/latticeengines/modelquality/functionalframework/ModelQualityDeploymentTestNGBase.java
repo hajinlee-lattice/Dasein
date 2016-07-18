@@ -172,6 +172,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
         pipelinePropertyDefs.add(pipelinePropertyDef);
         step.addPipelinePropertyDef(pipelinePropertyDef);
+        pipeline.addPipelineStep(step);
         
         step = new PipelineStep();
         step.setName("assignconversionratetoallcategoricalvalues");
@@ -184,8 +185,8 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         pipelinePropertyDef.addPipelinePropertyValue(pipeLinePropertyValue);
         pipelinePropertyDefs.add(pipelinePropertyDef);
         step.addPipelinePropertyDef(pipelinePropertyDef);
-
         pipeline.addPipelineStep(step);
+
         return pipeline;
     }
 

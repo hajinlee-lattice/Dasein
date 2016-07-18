@@ -2,6 +2,9 @@ package com.latticeengines.network.exposed.modelquality;
 
 import java.util.List;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.util.LinkedMultiValueMap;
+
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
@@ -48,4 +51,6 @@ public interface ModelQualityInterface {
 
     ResponseDocument<List<ModelConfig>> getModelConfigs();
 
+    ResponseDocument<String> uploadPipelineStepFile(String fileName,
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity);
 }
