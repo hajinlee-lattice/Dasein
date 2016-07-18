@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.propdata.manage.AbstractSelection;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.propdata.match.UnionSelection;
 import com.latticeengines.propdata.match.util.MatchUtils;
 
 class MatchInputValidator {
@@ -112,32 +112,32 @@ class MatchInputValidator {
     }
 
     private static void validateColumnSelection(MatchInput input) {
-        if (input.getPredefinedSelection() == null && input.getCustomSelection() == null) {
-            throw new IllegalArgumentException("Must specify predefined or custom column selection.");
+        if (input.getPredefinedSelection() == null && input.getCustomSelection() == null
+                && input.getUnionSelection() == null) {
+            throw new IllegalArgumentException("Must specify predefined, custom, or union column selection.");
+        } else if (input.getUnionSelection() != null) {
+            validateUnionSelection(input.getUnionSelection());
+        } else if (input.getCustomSelection() == null) {
+            validatePredefinedSelection(input.getPredefinedSelection());
         }
-
-        if (input.getUnionSelections() != null && !input.getUnionSelections().isEmpty()) {
-            for (AbstractSelection selection : input.getUnionSelections()) {
-                validateSingleSelection(selection);
-            }
-        } else if (input.getCustomSelection() == null
-                && !ColumnSelection.Predefined.supportedSelections.contains(input.getPredefinedSelection())) {
-            throw new UnsupportedOperationException("Only Predefined selection "
-                    + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
-        }
-
     }
 
-    private static void validateSingleSelection(AbstractSelection selection) {
-        if (selection instanceof ColumnSelection.Predefined) {
-            ColumnSelection.Predefined predefined = (ColumnSelection.Predefined) selection;
-            if (!ColumnSelection.Predefined.supportedSelections.contains(predefined)) {
-                throw new UnsupportedOperationException("Only Predefined selection "
-                        + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
+    private static void validateUnionSelection(UnionSelection unionSelection) {
+        if (unionSelection.getPredefinedSelections().isEmpty()
+                && (unionSelection.getCustomSelection() == null || !unionSelection.getCustomSelection().isEmpty())) {
+            throw new IllegalArgumentException(
+                    "Must provide predefined or custom column selections in a union selection.");
+        } else {
+            for (ColumnSelection.Predefined predefined : unionSelection.getPredefinedSelections().keySet()) {
+                validatePredefinedSelection(predefined);
             }
-        } else if (!(selection instanceof ColumnSelection)) {
-            throw new UnsupportedOperationException(
-                    "Must be either an explicit ColumnSelection or the name of a predefined selection.");
+        }
+    }
+
+    private static void validatePredefinedSelection(ColumnSelection.Predefined selection) {
+        if (!ColumnSelection.Predefined.supportedSelections.contains(selection)) {
+            throw new UnsupportedOperationException("Only Predefined selection "
+                    + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
         }
     }
 

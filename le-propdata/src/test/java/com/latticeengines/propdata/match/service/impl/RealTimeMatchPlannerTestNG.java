@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
+import com.latticeengines.domain.exposed.propdata.match.UnionSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
@@ -78,7 +79,12 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
                 new ColumnSelection.Column("TechIndicator_Splunk")
         );
         columnSelection.setColumns(columns);
-        input.setUnionSelections(Arrays.asList(ColumnSelection.Predefined.RTS, columnSelection));
+        UnionSelection unionSelection = new UnionSelection();
+        Map<ColumnSelection.Predefined, String> map = new HashMap<>();
+        map.put(ColumnSelection.Predefined.RTS, "1.0");
+        unionSelection.setPredefinedSelections(map);
+        unionSelection.setCustomSelection(columnSelection);
+        input.setUnionSelection(unionSelection);
         MatchContext context = matchPlanner.plan(input);
         Integer expectedColumns = columnSelectionService.parsePredefined(ColumnSelection.Predefined.RTS).getColumns().size() + 3;
         Assert.assertEquals((Integer) context.getColumnSelection().getColumns().size(), expectedColumns);

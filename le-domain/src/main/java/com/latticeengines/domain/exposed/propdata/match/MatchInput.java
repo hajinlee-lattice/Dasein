@@ -15,7 +15,6 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.AbstractSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -41,7 +40,7 @@ public class MatchInput implements Fact, Dimension {
     // only one of these is needed, custom selection has higher priority
     private ColumnSelection.Predefined predefinedSelection;
     private ColumnSelection customSelection;
-    private List<AbstractSelection> unionSelections;
+    private UnionSelection unionSelection;
 
     // if not provided, pick latest
     private String predefinedVersion;
@@ -185,13 +184,13 @@ public class MatchInput implements Fact, Dimension {
     }
 
     @JsonProperty("UnionSelections")
-    public List<AbstractSelection> getUnionSelections() {
-        return unionSelections;
+    public UnionSelection getUnionSelection() {
+        return unionSelection;
     }
 
     @JsonProperty("UnionSelections")
-    public void setUnionSelections(List<AbstractSelection> unionSelections) {
-        this.unionSelections = unionSelections;
+    public void setUnionSelection(UnionSelection unionSelection) {
+        this.unionSelection = unionSelection;
     }
 
     @MetricTag(tag = "MatchEngine")

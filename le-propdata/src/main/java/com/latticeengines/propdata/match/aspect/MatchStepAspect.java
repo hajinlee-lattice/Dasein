@@ -57,9 +57,7 @@ public class MatchStepAspect {
 
     private Object[] combineArgsAndReturn(Object[] args, Object retVal) {
         Object[] allObjs = new Object[args.length + 1];
-        for (int i = 0; i < args.length; i++) {
-            allObjs[i] = args[i];
-        }
+        System.arraycopy(args, 0, allObjs, 0, args.length);
         allObjs[args.length] = retVal;
         return allObjs;
     }

@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ColumnSelection implements AbstractSelection {
+public class ColumnSelection {
 
     private List<Column> columns;
     private String name;
@@ -147,7 +147,12 @@ public class ColumnSelection implements AbstractSelection {
 
     }
 
-    public enum Predefined implements Dimension, AbstractSelection {
+    @JsonIgnore
+    public Boolean isEmpty() {
+        return getColumns().isEmpty();
+    }
+
+    public enum Predefined implements Dimension {
         LeadEnrichment("LeadEnrichment"), //
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //

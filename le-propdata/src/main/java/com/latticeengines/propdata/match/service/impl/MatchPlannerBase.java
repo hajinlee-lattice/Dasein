@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,13 +18,13 @@ import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.propdata.manage.AbstractSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
+import com.latticeengines.domain.exposed.propdata.match.UnionSelection;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.metric.MatchRequest;
@@ -52,22 +51,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            if (StringUtils.isEmpty(input.getPredefinedVersion())) {
-                String version = columnSelectionService.getCurrentVersion(input.getPredefinedSelection());
-                log.debug("Assign version " + version + " to column selection " + input.getPredefinedSelection());
-                input.setPredefinedVersion(version);
-            }
-            if (!columnSelectionService.isValidVersion(input.getPredefinedSelection(), input.getPredefinedVersion())) {
-                throw new IllegalArgumentException("The specified version " + input.getPredefinedVersion()
-                        + " is invalid for the selection " + input.getPredefinedSelection());
-            }
+            input.setPredefinedVersion(
+                    validateOrAssignPredefinedVersion(input.getPredefinedSelection(), input.getPredefinedVersion()));
         }
     }
 
     @MatchStep
     ColumnSelection parseColumnSelection(MatchInput input) {
-        if (input.getUnionSelections() != null && !input.getUnionSelections().isEmpty()) {
-            return combineSelections(input.getUnionSelections());
+        if (input.getUnionSelection() != null) {
+            return combineSelections(input.getUnionSelection());
         } else if (input.getPredefinedSelection() != null) {
             return columnSelectionService.parsePredefined(input.getPredefinedSelection());
         } else {
@@ -75,16 +67,30 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    private ColumnSelection combineSelections(Collection<AbstractSelection> selectionCollection) {
+    private ColumnSelection combineSelections(UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
-        for (AbstractSelection abstractSelection: selectionCollection) {
-            if (abstractSelection instanceof ColumnSelection) {
-                selections.add((ColumnSelection) abstractSelection);
-            } else if (abstractSelection instanceof ColumnSelection.Predefined) {
-                selections.add(columnSelectionService.parsePredefined((ColumnSelection.Predefined) abstractSelection));
-            }
+        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections()
+                .entrySet()) {
+            ColumnSelection.Predefined predefined = entry.getKey();
+            validateOrAssignPredefinedVersion(predefined, entry.getValue());
+            selections.add(columnSelectionService.parsePredefined(predefined));
+        }
+        if (unionSelection.getCustomSelection() != null && !unionSelection.getCustomSelection().isEmpty()) {
+            selections.add(unionSelection.getCustomSelection());
         }
         return ColumnSelection.combine(selections);
+    }
+
+    private String validateOrAssignPredefinedVersion(ColumnSelection.Predefined predefined, String version) {
+        if (StringUtils.isEmpty(version)) {
+            version = columnSelectionService.getCurrentVersion(predefined);
+            log.debug("Assign version " + version + " to column selection " + predefined);
+        }
+        if (!columnSelectionService.isValidVersion(predefined, version)) {
+            throw new IllegalArgumentException(
+                    "The specified version " + version + " is invalid for the selection " + predefined);
+        }
+        return version;
     }
 
     @MatchStep
@@ -97,7 +103,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
-                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomains());
+                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
+                    input.getExcludePublicDomains());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<Boolean>());
                 records.add(record);
@@ -273,7 +280,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     private MatchOutput parseOutputFields(MatchOutput matchOutput) {
         List<ColumnMetadata> metadata = matchOutput.getMetadata();
         List<String> fields = new ArrayList<>();
-        for (ColumnMetadata column: metadata) {
+        for (ColumnMetadata column : metadata) {
             fields.add(column.getColumnName());
         }
         matchOutput.setOutputFields(fields);
