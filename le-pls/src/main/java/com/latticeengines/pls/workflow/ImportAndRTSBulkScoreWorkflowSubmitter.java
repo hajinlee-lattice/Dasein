@@ -36,7 +36,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String fileName) {
+    public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
         if (sourceFile == null) {
@@ -55,7 +55,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
-        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName());
+        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
+                enableLeadEnrichment);
 
         log.info(String
                 .format("Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
@@ -66,7 +67,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
-            String sourceDisplayName) {
+            String sourceDisplayName, boolean enableLeadEnrichment) {
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
@@ -85,6 +86,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
+                .enableLeadEnrichment(enableLeadEnrichment) //
                 .internalResourcePort(internalResourceHostPort) //
                 .build();
     }

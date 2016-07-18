@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -52,17 +53,16 @@ public class AvroUtilsUnitTestNG {
         System.out.println(hiveTableDDL);
     }
 
-
     @Test(groups = "unit")
     public void testAlignFields() throws Exception {
-        Schema schema1 = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\","
-                + "\"fields\":[" //
-                + "{\"name\":\"Field2\",\"type\":\"int\"}," //
-                + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}]}");
-        Schema schema2 = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Ordered\",\"doc\":\"Testing data\","
-                + "\"fields\":[" //
-                + "{\"name\":\"Field1\",\"type\":\"int\"}," //
-                + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema1 = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\"," + "\"fields\":[" //
+                        + "{\"name\":\"Field2\",\"type\":\"int\"}," //
+                        + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema2 = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"Ordered\",\"doc\":\"Testing data\"," + "\"fields\":[" //
+                        + "{\"name\":\"Field1\",\"type\":\"int\"}," //
+                        + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
         Schema schema = AvroUtils.alignFields(schema1, schema2);
         List<Schema.Field> fieldList = schema.getFields();
         Assert.assertEquals(schema.getName(), "Shuffled");
@@ -76,10 +76,17 @@ public class AvroUtilsUnitTestNG {
         Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
                 + "\"fields\":[" + "{\"name\":\"Field1\",\"type\":\"int\"},"
                 + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
-        for (Schema.Field field: schema.getFields()) {
+        for (Schema.Field field : schema.getFields()) {
             Assert.assertEquals(AvroUtils.getType(field), Schema.Type.INT);
         }
 
+    }
+
+    @Test(groups = "unit")
+    public void testConvertSqlServerTypeToAvro() throws IllegalArgumentException, IllegalAccessException {
+        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("NVARCHAR(255)"), Type.STRING);
+        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("date"), Type.LONG);
+        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("BINARY"), Type.BYTES);
     }
 
     @DataProvider(name = "avscFileProvider")

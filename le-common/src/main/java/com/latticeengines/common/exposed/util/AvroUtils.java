@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -376,6 +377,57 @@ public class AvroUtils {
             throw new RuntimeException("Unknown hive type for avro type " + avroType);
         }
 
+    }
+
+    public static Type convertSqlServerTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
+        // the argument 'type' looks like NVARCHAR(MAX), or NVARCHAR(255), etc.
+        String typeStr = org.apache.commons.lang.StringUtils.substringBefore(type.toLowerCase(), "(");
+        Map<String, Integer> sqlTypeMap = new HashMap<String, Integer>();
+        for (java.lang.reflect.Field field : java.sql.Types.class.getFields()) {
+            sqlTypeMap.put(field.getName().toLowerCase(), (Integer) field.get(null));
+        }
+        if (sqlTypeMap.containsKey(typeStr)) {
+            int sqlTypeInt = sqlTypeMap.get(typeStr);
+            switch (sqlTypeInt) {
+            case Types.TINYINT:
+            case Types.SMALLINT:
+            case Types.INTEGER:
+                return Type.INT;
+            case Types.BIGINT:
+                return Type.LONG;
+            case Types.BIT:
+            case Types.BOOLEAN:
+                return Type.BOOLEAN;
+            case Types.REAL:
+                return Type.FLOAT;
+            case Types.FLOAT:
+            case Types.DOUBLE:
+                return Type.DOUBLE;
+            case Types.NUMERIC:
+            case Types.DECIMAL:
+                return Type.STRING;
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.LONGNVARCHAR:
+            case Types.NVARCHAR:
+            case Types.NCHAR:
+                return Type.STRING;
+            case Types.DATE:
+            case Types.TIME:
+            case Types.TIMESTAMP:
+                return Type.LONG;
+            case Types.BLOB:
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return Type.BYTES;
+            default:
+                throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
+        }
     }
 
     public static Type getAvroType(Class<?> javaType) {

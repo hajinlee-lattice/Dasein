@@ -95,7 +95,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private void score(String modelId, String tableToScore) throws Exception {
         RTSBulkScoreWorkflowConfiguration rtsBulkScoreWorkflowConfig = rtsBulkScoreWorkflowSubmitter
-                .generateConfiguration(modelId, tableToScore, tableToScore);
+                .generateConfiguration(modelId, tableToScore, tableToScore, true);
         WorkflowExecutionId workflowId = workflowService.start(rtsBulkScoreWorkflow.name(), rtsBulkScoreWorkflowConfig);
         waitForCompletion(workflowId);
     }
@@ -120,6 +120,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
+        modelSummary.setModelType(ModelSummary.PYTHON_SCRIPT_MODEL);
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
         Table metadataTable = new Table();

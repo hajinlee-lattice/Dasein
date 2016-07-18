@@ -14,6 +14,10 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private String targetResultDir;
 
+    private boolean enableLeadEnrichment;
+
+    private String internalResourceHostPort;
+
     private List<String> modelGuids = new ArrayList<>();
 
     @JsonProperty("model_guids")
@@ -36,6 +40,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.metadataTable = metadataTable;
     }
 
+    @JsonProperty("enable_lead_enrichment")
+    public boolean getEnableLeadEnrichment() {
+        return this.enableLeadEnrichment;
+    }
+
+    @JsonProperty("enable_lead_enrichment")
+    public void setEnableLeadEnrichment(boolean enableLeadEnrichment) {
+        this.enableLeadEnrichment = enableLeadEnrichment;
+    }
+
     @JsonProperty("target_result_dir")
     public String getTargetResultDir() {
         return targetResultDir;
@@ -44,6 +58,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     @JsonProperty("target_result_dir")
     public void setTargetResultDir(String targetResultDir) {
         this.targetResultDir = targetResultDir;
+    }
+
+    @JsonProperty("internal_resource_host_port")
+    public void setInternalResourceHostPort(String internalResourceHostPort) {
+        this.internalResourceHostPort = internalResourceHostPort;
+    }
+
+    @JsonProperty("internal_resource_host_port")
+    public String getInternalResourceHostPort() {
+        return this.internalResourceHostPort;
     }
 
     @Override

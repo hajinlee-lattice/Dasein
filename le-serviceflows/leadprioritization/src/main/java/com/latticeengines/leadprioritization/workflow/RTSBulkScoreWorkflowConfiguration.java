@@ -80,6 +80,11 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
+            score.setEnableLeadEnrichment(enableLeadEnrichment);
+            return this;
+        }
+
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;

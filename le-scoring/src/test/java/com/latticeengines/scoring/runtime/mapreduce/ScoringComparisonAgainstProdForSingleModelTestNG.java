@@ -44,14 +44,13 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
-import com.latticeengines.scoring.orchestration.service.impl.ScoringStepYarnProcessorImplTestNG;
 
 public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFunctionalTestNGBase {
 
     private static final double EPS = 1e-6;
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
-    private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImplTestNG.class);
+    private static final Log log = LogFactory.getLog(ScoringComparisonAgainstProdForSingleModelTestNG.class);
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
@@ -101,7 +100,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
             metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);

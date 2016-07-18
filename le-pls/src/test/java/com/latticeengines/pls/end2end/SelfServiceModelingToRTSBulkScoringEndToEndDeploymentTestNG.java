@@ -73,7 +73,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp")
     public void testScoreTrainingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE", getRestAPIHostPort(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s/training?useRtsApi=TRUE", getRestAPIHostPort(), modelId), //
                 null, String.class);
@@ -182,8 +183,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
-                sourceFile.getName()));
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
                         sourceFile.getName()), //

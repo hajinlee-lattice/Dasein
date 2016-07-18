@@ -263,6 +263,10 @@ public enum LedpCode {
     LEDP_20035("This score does not have score row Id."), //
     LEDP_20036("This score does not have model Id."), //
     LEDP_20037("This score does not have valid score."), //
+    LEDP_20038("Lead enrichment columns cannot be null."), //
+    LEDP_20039("Lead enrichment columns {0} does not have corresponding type in the lead enrichment attribute map."), //
+    LEDP_20040("Convert the sql type to avro type encounters illegal argument exception."), //
+    LEDP_20041("Convert the sql type to avro type encounters illegal access exception."), //
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //
@@ -439,12 +443,11 @@ public enum LedpCode {
     LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
     LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31107("unsupported_model_type", "Unsupported model type {0}"), //
-    LEDP_31199("missing_domain",
-            "Domain field(s) are missing {0}. In case of lead type model, " //
-                    + "make sure to specify 'Email' field and for non-lead type model " //
-                    + "specify either 'Website' or 'Domain' fields. If these fields " //
-                    + "are not specified then specify both 'CompanyName' " //
-                    + "and 'State' fields."), //
+    LEDP_31199("missing_domain", "Domain field(s) are missing {0}. In case of lead type model, " //
+            + "make sure to specify 'Email' field and for non-lead type model " //
+            + "specify either 'Website' or 'Domain' fields. If these fields " //
+            + "are not specified then specify both 'CompanyName' " //
+            + "and 'State' fields."), //
 
     // le-serviceflows
     LEDP_32000("Validations failed: {0}"), //

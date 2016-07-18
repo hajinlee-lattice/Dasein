@@ -10,6 +10,8 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private String inputTableName;
 
+    private boolean enableLeadEnrichment;
+
     public String getModelId() {
         return modelId;
     }
@@ -24,6 +26,14 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
+    }
+
+    public boolean getEnableLeadEnrichment() {
+        return this.enableLeadEnrichment;
+    }
+
+    public void setEnableLeadEnrichment(boolean enableLeadEnrichment) {
+        this.enableLeadEnrichment = enableLeadEnrichment;
     }
 
     public Boolean isRegisterScoredTable() {

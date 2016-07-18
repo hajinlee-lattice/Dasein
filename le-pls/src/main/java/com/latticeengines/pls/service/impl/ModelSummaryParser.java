@@ -116,7 +116,8 @@ public class ModelSummaryParser {
         summary.setTestConversionCount(JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
         summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
-        summary.setModelType(JsonUtils.getOrDefault(details.get("ModelType"), String.class, "PythonScriptModel"));
+        summary.setModelType(JsonUtils.getOrDefault(details.get("ModelType"), String.class,
+                ModelSummary.PYTHON_SCRIPT_MODEL));
         if (summary.getConstructionTime() == null) {
             summary.setConstructionTime(System.currentTimeMillis());
         }

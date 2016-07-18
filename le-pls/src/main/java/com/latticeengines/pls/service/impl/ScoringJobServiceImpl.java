@@ -111,27 +111,31 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String scoreTestingData(String modelId, String fileName, Boolean useRts) {
+    public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment) {
 
         boolean useRtsApi = useRtsApiDefaultValue;
         if (useRts != null) {
             useRtsApi = useRts.booleanValue();
         }
         if (useRtsApi) {
-            return scoreTestingDataUsingRtsApi(modelId, fileName);
+            boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+            return scoreTestingDataUsingRtsApi(modelId, fileName, enableLeadEnrichment);
+
         }
         return scoreTestingData(modelId, fileName);
     }
 
     @Override
-    public String scoreTrainingData(String modelId, Boolean useRts) {
+    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment) {
 
         boolean useRtsApi = useRtsApiDefaultValue;
         if (useRts != null) {
             useRtsApi = useRts.booleanValue();
         }
         if (useRtsApi) {
-            return scoreTrainingDataUsingRtsApi(modelId);
+            boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+            return scoreTrainingDataUsingRtsApi(modelId, enableLeadEnrichment);
+
         }
         return scoreTrainingData(modelId);
     }
@@ -170,7 +174,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                 TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
-    private String scoreTrainingDataUsingRtsApi(String modelId) {
+    private String scoreTrainingDataUsingRtsApi(String modelId, boolean enableLeadEnrichment) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
@@ -180,16 +184,15 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
         }
 
-        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data")
-                .toString();
+        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), enableLeadEnrichment,
+                "Training Data").toString();
     }
 
-    private String scoreTestingDataUsingRtsApi(String modelId, String fileName) {
+    private String scoreTestingDataUsingRtsApi(String modelId, String fileName, boolean enableLeadEnrichment) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName).toString();
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName, enableLeadEnrichment).toString();
     }
-
 }

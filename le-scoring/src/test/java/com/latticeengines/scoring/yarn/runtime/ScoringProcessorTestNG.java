@@ -2,8 +2,12 @@ package com.latticeengines.scoring.yarn.runtime;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -17,6 +21,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -58,6 +64,11 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), filePath);
     }
 
+    @AfterMethod(groups = "functional")
+    public void AfterMethod() throws Exception {
+        HdfsUtils.rmdir(yarnConfiguration, dir);
+    }
+
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void testConvertAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
@@ -83,7 +94,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvro() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
-        bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score");
+        bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score", null);
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 1);
@@ -94,6 +105,65 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         for (GenericRecord ele : list) {
             System.out.println(ele.toString());
         }
+    }
+
+    @Test(groups = "functional")
+    public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
+        List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = generateCorrectEnrichmentAttributeMap();
+        bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score",
+                leadEnrichmentAttributeMap);
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
+        Assert.assertNotNull(files);
+        Assert.assertEquals(files.size(), 1);
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
+        Assert.assertNotNull(contents);
+        List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(files.get(0)));
+        Assert.assertEquals(list.size(), 3);
+        for (GenericRecord ele : list) {
+            Assert.assertNotNull(ele.get("attr1"));
+            Assert.assertNotNull(ele.get("attr2"));
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap() throws IllegalArgumentException,
+            Exception {
+        List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = generateIncorrectEnrichmentAttributeMap();
+        try {
+            bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score",
+                    leadEnrichmentAttributeMap);
+            Assert.fail("Should have thrown exception");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20039);
+        }
+    }
+
+    private Map<String, Type> generateCorrectEnrichmentAttributeMap() {
+        Map<String, Schema.Type> attributeMap = new HashMap<String, Schema.Type>();
+        attributeMap.put("attr1", Schema.Type.STRING);
+        attributeMap.put("attr2", Schema.Type.BOOLEAN);
+        return attributeMap;
+    }
+
+    private Map<String, Type> generateIncorrectEnrichmentAttributeMap() {
+        Map<String, Schema.Type> attributeMap = generateCorrectEnrichmentAttributeMap();
+        attributeMap.remove("attr1");
+        return attributeMap;
+    }
+
+    private List<RecordScoreResponse> generateRecordScoreResponseWithEnrichmentAttributeMap() {
+        List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
+        Map<String, Object> enrichmentAttributes1 = new HashMap<String, Object>();
+        enrichmentAttributes1.put("attr1", "str1");
+        enrichmentAttributes1.put("attr2", Boolean.TRUE);
+        Map<String, Object> enrichmentAttributes2 = new HashMap<String, Object>();
+        enrichmentAttributes2.put("attr1", "str2");
+        enrichmentAttributes2.put("attr2", Boolean.FALSE);
+        recordScoreResponseList.get(0).setEnrichmentAttributeValues(enrichmentAttributes1);
+        recordScoreResponseList.get(1).setEnrichmentAttributeValues(enrichmentAttributes2);
+        return recordScoreResponseList;
     }
 
     private List<RecordScoreResponse> generateRecordScoreResponse() {

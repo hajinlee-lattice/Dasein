@@ -39,7 +39,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     @Autowired
     private ScoringServiceImpl scoringService;
 
-    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/ScoringServiceImplTestNG/Tenants/ScoringServiceImplTestNG/Spaces/Production/Data/Tables/";
+    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/ScoringServiceImplDeploymentTestNG/Tenants/ScoringServiceImplDeploymentTestNG/Spaces/Production/Data/Tables/";
 
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
 
@@ -49,7 +49,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
-    protected static final String TENANT_ID = "ScoringServiceImplTestNG.ScoringServiceImplTestNG.Production";
+    protected static final String TENANT_ID = "ScoringServiceImplDeploymentTestNG.ScoringServiceImplDeploymentTestNG.Production";
 
     protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
 
@@ -99,6 +99,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
                 System.currentTimeMillis());
         String targeDir = TEST_INPUT_DATA_DIR + tableName;
         rtsBulkScoringConfig.setTargetResultDir(targeDir);
+        rtsBulkScoringConfig.setEnableLeadEnrichment(true);
+        rtsBulkScoringConfig.setInternalResourceHostPort(plsApiHostPort);
         ApplicationId appId = scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
         assertNotNull(appId);
         System.out.println(appId);
@@ -128,6 +130,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
+        modelSummary.setModelType(ModelSummary.PYTHON_SCRIPT_MODEL);
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
         ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),
@@ -150,13 +153,13 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
-        URL dataCompositionUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
-        URL rfpmmlUrl = ClassLoader
-                .getSystemResource(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
-        URL scoreDerivationUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+        URL rfpmmlUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.PMML_FILENAME);
+        URL scoreDerivationUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
         URL inputAvroFile = ClassLoader.getSystemResource(LOCAL_DATA_DIR + AVRO_FILE);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
@@ -168,16 +171,16 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.mkdir(yarnConfiguration, inputDataDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
-                artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), artifactTableDir
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
-                artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
-                enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
-                enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir
+                + ModelJsonTypeHandler.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
+                + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), enhancementsDir
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputAvroFile.getFile(), inputDataDir);
     }
 

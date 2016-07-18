@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -29,11 +31,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -41,6 +45,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
@@ -62,6 +67,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Autowired
     private InternalScoringApiProxy internalScoringApiProxy;
 
+    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -74,8 +81,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Override
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
         log.info("In side the rts bulk scoring processor.");
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(
+                rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
         String customerSpace = rtsBulkScoringConfig.getCustomerSpace().toString();
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
+        if (rtsBulkScoringConfig.getEnableLeadEnrichment()) {
+            leadEnrichmentAttributeMap = getLeadEnrichmentAttributes(rtsBulkScoringConfig.getCustomerSpace());
+        }
         long startTime = System.currentTimeMillis();
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
         long endTime = System.currentTimeMillis();
@@ -99,7 +112,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         long scoringApiRequestTotalTime = scoringEndTime - scoringStartTime;
         log.info("The sending scoring requests takes " + (scoringApiRequestTotalTime * 1.66667e-5) + " mins");
         startTime = System.currentTimeMillis();
-        convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir());
+        convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir(),
+                leadEnrichmentAttributeMap);
         endTime = System.currentTimeMillis();
         transformationTotalTime = endTime - startTime;
         log.info("The transformation from bulks score response to avro takes " + (transformationTotalTime * 1.66667e-5)
@@ -114,6 +128,26 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
         String path = ExtractUtils.getSingleExtractPath(yarnConfiguration, metadataTable);
         return path;
+    }
+
+    private Map<String, Schema.Type> getLeadEnrichmentAttributes(CustomerSpace customerSpace) {
+        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE);
+        Map<String, Schema.Type> attributeMap = new HashMap<String, Schema.Type>();
+        for (LeadEnrichmentAttribute attribute : leadEnrichmentAttributeList) {
+            String fieldType = attribute.getFieldType();
+            Schema.Type avroType = null;
+            try {
+                avroType = AvroUtils.convertSqlServerTypeToAvro(fieldType);
+            } catch (IllegalArgumentException e) {
+                throw new LedpException(LedpCode.LEDP_20040, e);
+            } catch (IllegalAccessException e) {
+                throw new LedpException(LedpCode.LEDP_20041, e);
+            }
+            attributeMap.put(attribute.getFieldName(), avroType);
+        }
+        log.info("The attributeMap is: " + attributeMap);
+        return attributeMap;
     }
 
     @VisibleForTesting
@@ -144,7 +178,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         for (GenericRecord avroRecord : avroRecords) {
             i++;
             Record record = new Record();
-            record.setPerformEnrichment(DEFAULT_ENRICHMENT);
+            record.setPerformEnrichment(rtsBulkScoringConfig.getEnableLeadEnrichment());
             record.setIdType(DEFAULT_ID_TYPE);
 
             Object recordIdObj = avroRecord.get(InterfaceName.Id.toString());
@@ -183,12 +217,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             requestList.add(scoreRequest);
         }
 
+        for (BulkRecordScoreRequest request : requestList) {
+            log.info("score request is: " + request);
+        }
         return requestList;
     }
 
     @VisibleForTesting
-    void convertBulkScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList, String targetPath)
-            throws IOException {
+    void convertBulkScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList, String targetPath,
+            Map<String, Schema.Type> leadEnrichmentAttributeMap) throws IOException {
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         String scorePath = String.format(targetPath + "/%s", fileName);
         log.info("The output score path is " + scorePath);
@@ -213,15 +250,30 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
+
+        if (leadEnrichmentAttributeMap != null) {
+            Iterator<Entry<String, Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Schema.Type> pair = (Entry<String, Type>) it.next();
+                String leadEnrichmentAttrName = pair.getKey();
+                Type avroType = pair.getValue();
+                Attribute attr = new Attribute();
+                attr.setName(leadEnrichmentAttrName);
+                attr.setDisplayName(leadEnrichmentAttrName);
+                attr.setSourceLogicalDataType("");
+                attr.setPhysicalDataType(avroType.name());
+                outputTable.addAttribute(attr);
+            }
+        }
         Schema schema = TableUtils.createSchema(outputTable.getName(), outputTable);
 
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
 
             dataFileWriter.create(schema, new File(fileName));
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
+                log.info("the score response is: " + scoreResponse);
                 List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
                 String id = scoreResponse.getId();
                 if (StringUtils.isBlank(id)) {
@@ -239,6 +291,22 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     }
                     builder.set("modelId", modelId);
                     builder.set("score", score);
+
+                    Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
+                    if (leadEnrichmentAttributeMap != null) {
+                        if (enrichmentAttributeValues == null) {
+                            throw new LedpException(LedpCode.LEDP_20038);
+                        }
+                        Iterator<Entry<String, Object>> it = enrichmentAttributeValues.entrySet().iterator();
+                        while (it.hasNext()) {
+                            Entry<String, Object> entry = it.next();
+                            if (!leadEnrichmentAttributeMap.containsKey(entry.getKey())) {
+                                throw new LedpException(LedpCode.LEDP_20039, new String[] { entry.getKey() });
+                            }
+                            builder.set(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     dataFileWriter.append(builder.build());
                 }
             }

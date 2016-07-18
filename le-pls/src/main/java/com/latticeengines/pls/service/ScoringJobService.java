@@ -11,8 +11,8 @@ public interface ScoringJobService {
 
     InputStream getResults(String workflowJobId);
 
-    String scoreTestingData(String modelId, String fileName, Boolean useRtsApi);
+    String scoreTestingData(String modelId, String fileName, Boolean useRtsApi, Boolean performEnrichment);
 
-    String scoreTrainingData(String modelId, Boolean useRtsApi);
+    String scoreTrainingData(String modelId, Boolean useRtsApi, Boolean performEnrichmen);
 
 }

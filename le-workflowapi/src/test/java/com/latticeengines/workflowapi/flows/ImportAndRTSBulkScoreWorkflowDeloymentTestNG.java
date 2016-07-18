@@ -41,7 +41,7 @@ public class ImportAndRTSBulkScoreWorkflowDeloymentTestNG extends ScoreWorkflowD
 
     private void score(String modelId, String tableToScore) throws Exception {
         ImportAndRTSBulkScoreWorkflowConfiguration configuration = importAndRTABulkScoreWorkflowSubmitter
-                .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data");
+                .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data", false);
         WorkflowExecutionId workflowId = workflowService.start(importAndRTSBulkScoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

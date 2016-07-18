@@ -92,6 +92,11 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
+        public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
+            rtsBulkScoreWorkflowConfigurationBuilder.enableLeadEnrichment(enableLeadEnrichment);
+            return this;
+        }
+
         public ImportAndRTSBulkScoreWorkflowConfiguration build() {
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);

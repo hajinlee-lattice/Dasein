@@ -49,6 +49,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
     private Map.Entry<RTSBulkScoringConfiguration, String> buildScoringConfig() {
         RTSBulkScoringConfiguration scoringConfig = new RTSBulkScoringConfiguration();
         String modelId = getModelId();
+        scoringConfig.setEnableLeadEnrichment(configuration.getEnableLeadEnrichment());
         scoringConfig.setModelGuids(Arrays.asList(new String[] { modelId }));
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
                 configuration.getCustomerSpace());
@@ -59,6 +60,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         Table metadataTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
         scoringConfig.setMetadataTable(metadataTable);
         scoringConfig.setCustomerSpace(configuration.getCustomerSpace());
+        scoringConfig.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
         return new AbstractMap.SimpleEntry<RTSBulkScoringConfiguration, String>(scoringConfig, tableName);
     }
 
