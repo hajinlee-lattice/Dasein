@@ -18,15 +18,15 @@ public class DataRuleUtils {
                 rule.setDisplayName("Detected Sampling Noise");
                 break;
             case "OverlyPredictiveDS":
-                rule.setDescription("Remove predictors when excessive lift is detected for some data values");
+                rule.setDescription("Remove attributes when excessive lift is detected for some data values");
                 rule.setDisplayName("Detected Predictors Too Good to be True");
                 break;
             case "LowCoverageDS":
-                rule.setDescription("Remove predictors that have very low coverage");
+                rule.setDescription("Remove attributes that have very low coverage");
                 rule.setDisplayName("Detected Low Coverage in Predictors");
                 break;
             case "NullIssueDS":
-                rule.setDescription("Remove predictors when lift from NULL values is too strong compared to other values");
+                rule.setDescription("Remove attributes when lift from NULL values is too strong compared to other values");
                 rule.setDisplayName("Detected Predictors Over Using NULL Values");
                 break;
             case "HighlyPredictiveSmallPopulationDS":
