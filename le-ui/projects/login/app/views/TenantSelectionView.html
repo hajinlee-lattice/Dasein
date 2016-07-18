@@ -46,14 +46,14 @@
         margin-top: -0.2em;
     }
 </style>
-<div id="tenantSelectionFormContainer" class="modal-dialog modal-sm" data-ng-controller="TenantSelectionController">
+<div id="tenantSelectionFormContainer" class="modal-dialog" data-ng-controller="TenantSelectionController">
     <div class="modal-content">
         <div class="modal-header">
             <h4 class="modal-title">{{ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
         </div>
         <div class="modal-body" ng-init="SortDirection = ''">
             <div class="modal-tenant-select-controls">
-                <span>LP Version:</span>&nbsp;
+                <span>LP Version:</span><br/>
                 <label for="tenantSelection2">
                 <input id="tenantSelection2" type="radio" ng-model="version" value="2.0">
                 2.0</label>&nbsp;

@@ -12,7 +12,7 @@
                 <dt>Job Started</dt>
                 <dd>
                     <div class="progress-icon"  data-ng-if="jobStatus != null">
-                        <span data-ng-if="jobStatus != null || jobStatus == 'Pending'">
+                        <span data-ng-if="!startTimestamp">
                             <span class="loading-small"></span>
                         </span>
                         <span data-ng-if="startTimestamp">
@@ -23,7 +23,7 @@
                 </dd>
             </dl>
 
-            <div>
+            <div data-ng-hide="$state.includes('home.models.pmml.job')">
                 <dl>
                     <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
                     <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>

@@ -383,17 +383,18 @@ html:not(.no-cssmask) {
     .profile-nav {
         float: right;
         & > a {
-            padding: 16px 20px 16px 52px;
+            padding: 16px 20px 16px 20px;
             display: block;
             color: $dark-gray;
-            background-image: url("/assets/images/ico-user-profile.svg");
-            background-size: 30px 30px;
-            background-repeat: no-repeat; 
-            background-position: 12px 50%;
             -webkit-transition: none;
             -moz-transition: none;
             -o-transition: none;
             transition: none;
+            &:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
             &:hover {
                 background-color: #efefef;
                 text-decoration: none;
@@ -401,6 +402,17 @@ html:not(.no-cssmask) {
             &.active {
                 background-color: #222;
                 color: rgba(255, 255, 255, 0.8);
+            }
+            img, & > div, span {
+                float: left;
+            }
+            img {
+                width: 30px;
+                height: 30px;
+                margin: 4px 10px 0 0;
+            }
+            span {
+                margin: 15px 0 0 19px;
             }
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;

@@ -20,6 +20,9 @@ angular.module('lp.create.import.job', [
         load_data: false, generate_insights: false, create_global_target_market: false
     };
 
+    $scope.$state = $state;
+
+
     function updateStatesBasedOnJobStatus(jobStatus) {
         $scope.startTimestamp = jobStatus.startTimestamp;
         for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {

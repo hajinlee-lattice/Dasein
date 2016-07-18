@@ -1,21 +1,22 @@
 <div data-ng-controller="MainViewController">
     <div id="mainHeaderView"></div>
     <div id="mainContentView">
-
-        <div class="summary blue-fire" style="margin-top: 100px">
+        <div class="summary blue-fire">
             <div class="headers text-centered">
                 <div class="container">
                     <div class="row">
-                        <div class="twelve columns">
+                        <div class="six columns offset-three">
                             <h1 style="margin-bottom: 30px;"><span>You are already logged in</span></h1>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="twelve columns">
-                            <button ng-click="logoutClicked()" class="button icon-button white-button">
+                        <div class="three columns offset-three">
+                            <button ng-click="logoutClicked()" class="button white-button block-button">
                                 Sign Out
                             </button>
-                            <button ng-click="modelListClicked()" class="button icon-button orange-button">
+                        </div>
+                        <div class="three columns">
+                            <button ng-click="modelListClicked()" class="button orange-button block-button">
                                 Go to the model list
                             </button>
                         </div>
