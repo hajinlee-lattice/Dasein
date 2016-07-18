@@ -289,78 +289,84 @@ public abstract class BaseScoring {
 
     private void logBulkScoreSummary(BulkRecordScoreRequest scoreRequests,
             List<RecordScoreResponse> responseList) {
-        requestInfo.put(IS_BULK_REQUEST, Boolean.TRUE.toString());
-        requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
-        requestInfo.put(SOURCE, scoreRequests.getSource());
-        Map<String, String> stopWatchSplits = requestInfo.getStopWatchSplits();
+        try {
+            requestInfo.put(IS_BULK_REQUEST, Boolean.TRUE.toString());
+            requestInfo.put(SOURCE, scoreRequests.getSource());
+            Map<String, String> stopWatchSplits = requestInfo.getStopWatchSplits();
 
-        if (CollectionUtils.isEmpty(responseList)) {
-            requestInfo.logSummary(stopWatchSplits);
-        } else {
-            int idx = 0;
-            if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
-                try {
-                    int avgTime = new Float(
-                            (Integer.parseInt(stopWatchSplits.get(REQUEST_DURATION_MS)) * 1.0
-                                    / responseList.size())).intValue();
-                    requestInfo.put(AVERAGE_TOTAL_DURATION_PER_RECORD, String.valueOf(avgTime));
-                } catch (Exception ex) {
-                    // ignore any exception as it should not fail overall score
-                    // request
+            if (CollectionUtils.isEmpty(responseList)) {
+                requestInfo.logSummary(stopWatchSplits);
+            } else {
+                int idx = 0;
+                requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
+                if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
+                    try {
+                        int avgTime = new Float(
+                                (Integer.parseInt(stopWatchSplits.get(REQUEST_DURATION_MS)) * 1.0
+                                        / responseList.size())).intValue();
+                        requestInfo.put(AVERAGE_TOTAL_DURATION_PER_RECORD, String.valueOf(avgTime));
+                    } catch (Exception ex) {
+                        // ignore any exception as it should not fail overall
+                        // score
+                        // request
+                    }
                 }
-            }
-            for (RecordScoreResponse resp : responseList) {
-                Record record = scoreRequests.getRecords().get(idx++);
-                for (ScoreModelTuple scoreTuple : resp.getScores()) {
-                    Map<String, String> logMap = new HashMap<>();
-                    String modelId = scoreTuple.getModelId();
-                    Double score = scoreTuple.getScore();
-                    String error = scoreTuple.getError();
-                    String errorDesc = scoreTuple.getErrorDescription();
-                    List<Warning> warningList = new ArrayList<>();
-                    requestInfo.put(WARNINGS, null);
-                    if (!CollectionUtils.isEmpty(resp.getWarnings())) {
-                        for (Warning warning : warnings.getWarnings()) {
-                            if (warning.getDescription().contains(modelId)) {
-                                warningList.add(warning);
+                for (RecordScoreResponse resp : responseList) {
+                    Record record = scoreRequests.getRecords().get(idx++);
+                    for (ScoreModelTuple scoreTuple : resp.getScores()) {
+                        Map<String, String> logMap = new HashMap<>();
+                        String modelId = scoreTuple.getModelId();
+                        Double score = scoreTuple.getScore();
+                        String error = scoreTuple.getError();
+                        String errorDesc = scoreTuple.getErrorDescription();
+                        List<Warning> warningList = new ArrayList<>();
+                        requestInfo.put(WARNINGS, null);
+                        if (!CollectionUtils.isEmpty(resp.getWarnings())) {
+                            for (Warning warning : warnings.getWarnings()) {
+                                if (warning.getDescription().contains(modelId)) {
+                                    warningList.add(warning);
+                                }
+                            }
+
+                            if (!warningList.isEmpty()) {
+                                requestInfo.put(WARNINGS, JsonUtils.serialize(warningList));
                             }
                         }
 
-                        if (!warningList.isEmpty()) {
-                            requestInfo.put(WARNINGS, JsonUtils.serialize(warningList));
+                        requestInfo.put(HAS_WARNING, String.valueOf(!warningList.isEmpty()));
+                        boolean hasError = !com.latticeengines.common.exposed.util.StringUtils
+                                .objectIsNullOrEmptyString(error);
+                        requestInfo.put(HAS_ERROR, Boolean.toString(hasError));
+
+                        if (hasError) {
+                            Map<String, String> errorMap = new HashMap<>();
+                            errorMap.put(ERROR, error);
+                            errorMap.put(ERROR_DESCRIPTION, errorDesc);
+                            errorMap.put(ERRORS, JsonUtils.serialize(new ArrayList<String>()));
+
+                            requestInfo.put(ERROR_KEY, JsonUtils.serialize(errorMap));
+                        } else {
+                            requestInfo.put(ERROR_KEY, null);
                         }
+                        requestInfo.put(SCORE, String.valueOf(score));
+                        requestInfo.put(RECORD_ID, resp.getId());
+                        requestInfo.put(RECORD_CARDINALITY,
+                                String.valueOf(record.getModelAttributeValuesMap().size()));
+                        requestInfo.put(LATTICE_ID, resp.getLatticeId());
+                        requestInfo.put(MODEL_ID, scoreTuple.getModelId());
+                        requestInfo.put(RULE, record.getRule());
+                        requestInfo.put(ID_TYPE, record.getIdType());
+                        requestInfo.put(IS_ENRICHMENT_REQUESTED,
+                                String.valueOf(record.isPerformEnrichment()));
+
+                        requestInfo.putAll(logMap);
+                        requestInfo.logSummary(stopWatchSplits);
                     }
-
-                    requestInfo.put(HAS_WARNING, String.valueOf(!warningList.isEmpty()));
-                    boolean hasError = !com.latticeengines.common.exposed.util.StringUtils
-                            .objectIsNullOrEmptyString(error);
-                    requestInfo.put(HAS_ERROR, Boolean.toString(hasError));
-
-                    if (hasError) {
-                        Map<String, String> errorMap = new HashMap<>();
-                        errorMap.put(ERROR, error);
-                        errorMap.put(ERROR_DESCRIPTION, errorDesc);
-                        errorMap.put(ERRORS, JsonUtils.serialize(new ArrayList<String>()));
-
-                        requestInfo.put(ERROR_KEY, JsonUtils.serialize(errorMap));
-                    } else {
-                        requestInfo.put(ERROR_KEY, null);
-                    }
-                    requestInfo.put(SCORE, String.valueOf(score));
-                    requestInfo.put(RECORD_ID, resp.getId());
-                    requestInfo.put(RECORD_CARDINALITY,
-                            String.valueOf(record.getModelAttributeValuesMap().size()));
-                    requestInfo.put(LATTICE_ID, resp.getLatticeId());
-                    requestInfo.put(MODEL_ID, scoreTuple.getModelId());
-                    requestInfo.put(RULE, record.getRule());
-                    requestInfo.put(ID_TYPE, record.getIdType());
-                    requestInfo.put(IS_ENRICHMENT_REQUESTED,
-                            String.valueOf(record.isPerformEnrichment()));
-
-                    requestInfo.putAll(logMap);
-                    requestInfo.logSummary(stopWatchSplits);
                 }
             }
+        } catch (Exception ex) {
+            log.debug("Any exception in logging block should not fail rest of the scoring: "
+                    + ex.getMessage(), ex);
         }
     }
 

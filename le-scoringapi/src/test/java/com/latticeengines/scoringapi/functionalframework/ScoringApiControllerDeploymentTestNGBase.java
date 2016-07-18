@@ -223,6 +223,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         modelSummary.setLookupId(String.format("%s|%s|%s", TENANT_ID, EVENT_TABLE, MODEL_VERSION));
         modelSummary.setSourceSchemaInterpretation(SOURCE_INTERPRETATION);
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
+        modelSummary.setModelType("DUMMY_MODEL_TYPE");
         testModelSummaryParser.setPredictors(modelSummary, MODELSUMMARYJSON_LOCALPATH);
 
         String modelId = modelSummary.getId();

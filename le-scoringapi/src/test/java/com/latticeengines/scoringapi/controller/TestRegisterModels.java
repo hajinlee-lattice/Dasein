@@ -67,6 +67,7 @@ public class TestRegisterModels {
         if (retrievedSummary != null) {
             plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
         }
+        modelSummary.setModelType("DUMMY_MODEL_TYPE");
         plsRest.createModelSummary(modelSummary, customerSpace);
         return modelSummary;
     }
