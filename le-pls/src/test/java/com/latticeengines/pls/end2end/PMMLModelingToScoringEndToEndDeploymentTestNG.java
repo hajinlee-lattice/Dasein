@@ -2,12 +2,14 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -42,6 +45,9 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     private Tenant tenantToAttach;
     private String modelName = "pmmlmodel";
     private String modelId;
+    private String fileName;
+
+    private SourceFile sourceFile;
 
     @Autowired
     protected InternalScoringApiInterface internalScoringApiProxy;
@@ -49,12 +55,16 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     @Autowired
     private WorkflowProxy workflowProxy;
 
+    @Autowired
+    private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
         log.info("Test environment setup finished.");
+        fileName = "Lattice_Relaunch_Small.csv";
     }
 
     @SuppressWarnings("rawtypes")
@@ -172,6 +182,39 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         request.setRecord(record);
         DebugScoreResponse response = internalScoringApiProxy.scoreProbabilityRecord(request, tenantToAttach.getName());
         return response;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment.lp", dependsOnMethods = "scoreRecords")
+    public void uploadTestingDataFile() {
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+        ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
+                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
+                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
+        assertTrue(response.isSuccess());
+        sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+        log.info(sourceFile.getName());
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
+    public void testScoreTestingData() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), modelId, sourceFile.getName()));
+        String applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
+                        sourceFile.getName()), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        waitForWorkflowStatus(applicationId, true);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
 }
