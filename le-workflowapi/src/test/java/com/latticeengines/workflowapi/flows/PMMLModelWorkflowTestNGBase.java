@@ -65,7 +65,7 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
                 .pivotArtifactPath(pivotValuesHdfsPath) //
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.toString()) //
+                .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name()) //
                 .build();
 
         return workflowConfig;
