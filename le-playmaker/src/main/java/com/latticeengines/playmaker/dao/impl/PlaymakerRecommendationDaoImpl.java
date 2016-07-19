@@ -258,8 +258,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "A.External_ID AS LEAccountExternalID, " + extensionColumns + " "
-                + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
-                + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date], [Item_ID]) RowNum "
+                + "DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
+                + ") AS LastModificationDate, " + "ROW_NUMBER() OVER ( ORDER BY "
+                + getAccountExtensionLastModificationDate() + ", [Item_ID]) RowNum "
                 + getAccountExtensionFromWhereClause(accountIds, filterBy)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
@@ -280,7 +281,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getAccountExtensionColumns(String columns) {
-       
+
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
         Set<String> columnsInDb = new HashSet<>();
@@ -288,12 +289,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             builder.append("E.").append(field.get("Field")).append(", ");
             columnsInDb.add(field.get("Field").toString());
         }
-        
+
         String selectedColumns = getSelectedColumns(columns, columnsInDb);
         if (StringUtils.isNotEmpty(selectedColumns)) {
             return selectedColumns;
         }
-        
+
         return builder.toString();
     }
 
@@ -330,8 +331,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (StringUtils.isNotEmpty(filterBy)) {
             return getAccountExtensionFromWhereClauseWithFilterBy(filterBy);
         }
-        String whereClause = getAccountExtensionFromClause() + "%s "
-                + "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
+        String whereClause = getAccountExtensionFromClause() + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', "
+                + getAccountExtensionLastModificationDate() + ") >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(accountIds)) {
@@ -354,9 +355,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
             whereClause = String.format(whereClause, oper);
         } else { // ALL or other
-            whereClause = "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
+            whereClause = "WHERE DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
+                    + ">= :start ";
         }
         return getAccountExtensionFromClause() + whereClause;
+    }
+
+    protected String getAccountExtensionLastModificationDate() {
+        return "A.[Last_Modification_Date] ";
     }
 
     @Override

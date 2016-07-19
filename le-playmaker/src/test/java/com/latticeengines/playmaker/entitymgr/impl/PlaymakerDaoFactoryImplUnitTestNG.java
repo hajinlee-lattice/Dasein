@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImpl;
+import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV710;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
 
@@ -13,10 +14,11 @@ public class PlaymakerDaoFactoryImplUnitTestNG {
     @Test(groups = "unit")
     public void normalizedVer() {
         PlaymakerDaoFactoryImpl daoFactory = new PlaymakerDaoFactoryImpl();
-        Assert.assertEquals(daoFactory.normalizedVer("7.4.0"), "007004000");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.1"), "007003001");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.2"), "007003002");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.0"), "007003000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.4.0"),  "007004000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.1"),  "007003001");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.2"),  "007003002");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.0"),  "007003000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.10.0"), "007010000");
 
     }
 
@@ -46,6 +48,9 @@ public class PlaymakerDaoFactoryImplUnitTestNG {
 
         dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.1.6"), defaultDao);
         Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImpl.class);
+
+        dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.10.0"), defaultDao);
+        Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV710.class);
 
     }
 }

@@ -396,10 +396,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(accountextensions.size() > 0);
         extension = accountextensions.get(0);
-        Assert.assertTrue(extension.containsKey(""
-                + ""
-                + ""
-                + ""));
+
         Assert.assertTrue(extension.containsKey("DnBSites"));
         
         Assert.assertFalse(extension.containsKey("RevenueGrowth"));

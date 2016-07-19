@@ -17,9 +17,9 @@ import com.latticeengines.playmaker.dao.PlaymakerDBVersionDao;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.dao.impl.PlaymakerDBVersionDaoImpl;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImpl;
+import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV710;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
-import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV780;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 
 @Component("daoFactory")
@@ -37,8 +37,7 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
         versionDaoMap = new TreeMap<>(Collections.reverseOrder());
         versionDaoMap.put(normalizedVer("7.4.0"), PlaymakerRecommendationDaoImplV740.class);
         versionDaoMap.put(normalizedVer("7.5.0"), PlaymakerRecommendationDaoImplV750.class);
-        versionDaoMap.put(normalizedVer("7.6.0"), PlaymakerRecommendationDaoImplV750.class);
-        versionDaoMap.put(normalizedVer("7.8.0"), PlaymakerRecommendationDaoImplV780.class);
+        versionDaoMap.put(normalizedVer("7.10.0"), PlaymakerRecommendationDaoImplV710.class);
     }
 
     @Override
