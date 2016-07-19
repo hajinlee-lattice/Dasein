@@ -20,7 +20,7 @@ angular.module('lp.navigation.review', [
     });
 
     vm.createModelClicked = function() {
-       UpdateFieldsModal.show(false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
+       UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
     };
 
     ModelReviewService.GetModelReviewData(vm.modelId, vm.eventTableName).then(function(result) {

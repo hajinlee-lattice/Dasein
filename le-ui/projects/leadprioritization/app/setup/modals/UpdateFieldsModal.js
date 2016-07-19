@@ -56,7 +56,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 
         $scope.saveInProgress = true;
 
-        MetadataService.UpdateAndCloneFields($scope.dedupType, modelName, $scope.modelDisplayName, $scope.modelSummaryId,
+        MetadataService.UpdateAndCloneFields($scope.dedupType, $scope.includePersonalEmailDomains, modelName, $scope.modelDisplayName, $scope.modelSummaryId,
             $scope.allMetadataFields, $scope.dataRules).then(function(result){
 
             if (result.Success) {
