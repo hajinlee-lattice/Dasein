@@ -39,7 +39,7 @@ angular
         angular.extend($scope, {
             init: function(){
                 if (typeof(sessionStorage) !== 'undefined') {
-                    if(sessionStorage.getItem('open-nav') === 'true') {
+                    if(sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
                         $("body").addClass('open-nav');
                     } else {
                         $("body").removeClass('open-nav');

@@ -182,7 +182,7 @@ nav.primary-nav {
                 transition: none;
             }
             &:hover > a span:first-of-type {
-                background: #464646;
+                background-color: #464646;
                 transition: none;
                 span {
                     background-color: white;
@@ -190,7 +190,7 @@ nav.primary-nav {
             }
             &.active > a span:first-of-type,
             &.active:hover > a span:first-of-type {
-                background: rgba(239, 106, 48, 1);
+                background-color: rgba(239, 106, 48, 1);
                 transition: all 250ms ease 1ms;
                 span {
                     background-color: white;
@@ -288,8 +288,28 @@ nav.primary-nav {
 }
 
 html:not(.no-cssmask) {
-    .primary-nav .ico {
-        background-color: #fff;
+    nav.primary-nav {
+        .ico {
+            background-color: #fff;
+        }
+    }
+}
+
+html.no-cssmask {
+    .menu {
+        & > li {
+            &:hover > a span:first-of-type {
+                span {
+                    background-color: tranparent;
+                }
+            }
+            &.active > a span:first-of-type,
+            &.active:hover > a span:first-of-type {
+                span {
+                    background-color: transparent;
+                }
+            }
+        }
     }
 }
 
