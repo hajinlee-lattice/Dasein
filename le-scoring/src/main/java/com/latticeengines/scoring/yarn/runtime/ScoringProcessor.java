@@ -190,7 +190,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             Map<String, Object> attributeValues = new HashMap<>();
             for (Schema.Field field : fields) {
                 String fieldName = field.name();
-                Object fieldValue = avroRecord.get(fieldName);
+                Object fieldValue = avroRecord.get(fieldName) == null ? null : avroRecord.get(fieldName).toString();
                 attributeValues.put(fieldName, fieldValue);
             }
 
@@ -218,9 +218,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             requestList.add(scoreRequest);
         }
 
-        for (BulkRecordScoreRequest request : requestList) {
-            log.info("score request is: " + request);
-        }
         return requestList;
     }
 
