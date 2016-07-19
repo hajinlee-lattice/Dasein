@@ -7,7 +7,12 @@ import logging
 import pandas as pd
 
 from dataruleeventtable import DataRuleEventTable
-from datarules.nullissue import NullIssue
+from datarules.populatedrowcountds import PopulatedRowCountDS
+from datarules.lowcoverageds import LowCoverageDS
+from datarules.nullissueds import NullIssueDS
+from datarules.highlypredictivesmallpopulationds import HighlyPredictiveSmallPopulationDS
+from datarules.uniquevaluecountds import UniqueValueCountDS
+from datarules.overlypredictiveds import OverlyPredictiveDS
 from testbase import TestBase
 
 
@@ -37,10 +42,92 @@ class AllDataRuleTests(TestBase):
 
     def columnRuleTestAlgorithm(self, colrule, dataframe, dictOfArguments, reportset='failed'):
         for p, v in colrule.getConfParameters().iteritems():
-            self.logger.info('* Parameter {0:20s} = {1}'.format(p,v))
+            self.logger.info('* Parameter {0:29s} = {1}'.format(p,v))
         colrule.apply(dataframe, dictOfArguments)
+        n_cols = 0
+        n_failed = 0
         for c, r in colrule.getResults().iteritems():
+            n_cols += 1
+            if not r.isPassed():
+                n_failed += 1
             if not r.isPassed() and reportset in ['all', 'failed']:
                 self.logger.info('! Failed Column {0}: {1}'.format(c,r.getMessage()))
             elif reportset in ['all', 'passed']:
                 self.logger.info('o Passed Column {0}: {1}'.format(c,r.getMessage()))
+        self.logger.info('* Summary: {0} columns failed ({1:.2%})'.format(n_failed, float(n_failed)/float(n_cols)))
+
+    def rowRuleTestAlgorithm(self, rowrule, dataframe, dictOfArguments, reportset='failed'):
+        for p, v in rowrule.getConfParameters().iteritems():
+            self.logger.info('* Parameter {0:20s} = {1}'.format(p,v))
+        rowrule.apply(dataframe, dictOfArguments)
+        n_rows = len(dataframe.index)
+        n_failed = 0
+        for c, r in rowrule.getResults().iteritems():
+            if not r.isPassed():
+                n_failed += 1
+            if not r.isPassed() and reportset in ['all', 'failed']:
+                self.logger.info('! Failed Row {0}: {1}'.format(c,r.getMessage()))
+            elif reportset in ['all', 'passed']:
+                self.logger.info('o Passed Row {0}: {1}'.format(c,r.getMessage()))
+        self.logger.info('* Summary: {0} rows failed ({1:.2%})'.format(n_failed, float(n_failed)/float(n_rows)))
+
+    def testPopulatedRowCountDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'PopulatedRowCountDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = PopulatedRowCountDS(columns, et.getCategoricalCols(), et.getNumericalCols(), 0.98, 0.98)
+            dictOfArguments = {}
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+
+    def testLowCoverageDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'LowCoverageDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = LowCoverageDS(columns, et.getCategoricalCols(), et.getNumericalCols(), lowcoverageThreshold=0.95)
+            dictOfArguments = {}
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+
+    def testNullIssueDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'NullIssueDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = NullIssueDS(columns, et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol(),\
+                    numBucket=20, nullIssueLiftThreshold=1.1, nullIssueToppopPercThreshold=0.1, nullIssuePredictiveThreshold=1.5)
+            dictOfArguments = {}
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+
+    def testUniqueValueCountDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'UniqueValueCountDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = UniqueValueCountDS(columns, et.getCategoricalCols(), et.getNumericalCols(), uniquevaluecountThreshold=200)
+            dictOfArguments = {}
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+
+    def testOverlyPredictiveDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'OverlyPredictiveDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = OverlyPredictiveDS(columns, et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol(), 4, 0.05, 0.35)
+            dictOfArguments = {}
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+
+    def testHighlyPredictiveSmallPopulationDS(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n'+\
+                    '                                                     '+\
+                    'HighlyPredictiveSmallPopulationDS: Using dataset {}'.format(et.getName()))
+            columns = et.getAllColsAsDict()
+            rule = HighlyPredictiveSmallPopulationDS(columns, et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol(), 4, 0.005)
+            dictOfArguments = {}
+            self.rowRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')

@@ -1,4 +1,4 @@
-from rulefwk import ColumnRule
+from rulefwk import ColumnRule, RuleResults
 from leframework.codestyle import overrides
 import pandas as pd
 from dataruleutilsds import convertCleanDataFrame
@@ -45,3 +45,21 @@ class LowCoverageDS(ColumnRule):
     @overrides(ColumnRule)
     def getColumnsToRemove(self):
         return {key: val[0] for key, val in self.columnsInfo.items()}
+
+    @overrides(ColumnRule)
+    def getConfParameters(self):
+        return { 'lowcoverageThreshold':self.lowcoverageThreshold }
+
+    @overrides(ColumnRule)
+    def getResults(self):
+        results = {}
+        for col, testResult in self.columnsInfo.iteritems():
+            rr = None
+            if testResult is None:
+                rr = RuleResults(True, 'Column not checked', {})
+            else:
+                (isFailed, nullRate) = testResult
+                rr = RuleResults(not isFailed, 'NULL rate is {0:.2%}'.format(nullRate), {'nullRate':nullRate})
+            results[col] = rr
+        return results
+

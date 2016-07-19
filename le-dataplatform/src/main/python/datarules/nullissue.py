@@ -1,4 +1,4 @@
-from rulefwk import ColumnRule
+from rulefwk import ColumnRule, RuleResults
 from leframework.codestyle import overrides
 import numpy as np
 from dataruleutils import getGroupedConversionRate, calculateOverallConversionRate, isNumerical, isCategorical
@@ -27,6 +27,7 @@ class NullIssue(ColumnRule):
 
     @overrides(ColumnRule)
     def apply(self, dataFrame, dictOfArguments):
+        self.results = {}
         for columnName, _ in self.columns.iteritems():
             if columnName in dataFrame:
                 try:
@@ -49,6 +50,7 @@ class NullIssue(ColumnRule):
         return None
 
     def checkIfColumnHasNullIssues(self, dataColumn, eventColumn, colType, columnName):
+
         overallPositiveCountAndConversionRate = calculateOverallConversionRate(eventColumn)
 
         dataColumn = dataColumn.replace(np.nan, "np.nan")
@@ -66,11 +68,15 @@ class NullIssue(ColumnRule):
             cntRateNull = [[x, y[0], y[1], y[2]]  for x, y in groupedCountAndConversionRate.items() if str(x).lower() in self.nullIssueNullValCat]
 
         if len(cntRateNull) == 0:
+            self.results[columnName] = RuleResults(True,'No NULL values to consider',{'cntRateNull':0})
             return False
         else:
             cntRateNull = cntRateNull[0]
 
         if int(cntRateNull[1]) >= self.nullIssueToDelThreshold * overallPositiveCountAndConversionRate[0]:
+            percNull = float(cntRateNull[1])/overallPositiveCountAndConversionRate[0]
+            rr = RuleResults(False,'Column is {0:.2%} NULL'.format(percNull),{'cntRateNull[1]':cntRateNull[1]})
+            self.results[columnName] = RuleResults(False,'Column is {0:.2%} NULL'.format(percNull),{'cntRateNull[1]':cntRateNull[1]})
             return True
 
         cntRateNonNull = [[x, y[0], y[1], y[2]] for x, y in groupedCountAndConversionRate.items()
@@ -88,13 +94,26 @@ class NullIssue(ColumnRule):
                 break
 
         if (event / pop - overallPositiveCountAndConversionRate[1]) < self.nullIssueLiftThreshold * (cntRateNull[2] - overallPositiveCountAndConversionRate[1]):
+            self.results[columnName] = RuleResults(False,'NULL conv. rate {0:.2%} (Non-NULL rate {1:.2%}; Overall rate {2:.2%})'.format(cntRateNull[2], event/pop, overallPositiveCountAndConversionRate[1]),{'cntRateNull[2]':cntRateNull[2], 'event / pop':event/pop})
             return True
         else:
+            self.results[columnName] = RuleResults(True,'NULL conv. rate {0:.2%} (Non-NULL rate {1:.2%}; Overall rate {2:.2%})'.format(cntRateNull[2], event/pop, overallPositiveCountAndConversionRate[1]),{'cntRateNull[2]':cntRateNull[2], 'event / pop':event/pop})
             return False
+
+    @overrides(ColumnRule)
+    def getConfParameters(self):
+        return {
+                'nullIssueToDelThreshold':self.nullIssueToDelThreshold,
+                'nullIssueTopPopPercThreshold':self.nullIssueTopPopPercThreshold,
+                'nullIssueLiftThreshold':self.nullIssueLiftThreshold }
 
     @overrides(ColumnRule)
     def getColumnsToRemove(self):
         return self.columnsThatFailedTest
+
+    @overrides(ColumnRule)
+    def getResults(self):
+        return self.results
 
     def getSummaryPerColumn(self):
         return self.groupedCountAndConversionRate

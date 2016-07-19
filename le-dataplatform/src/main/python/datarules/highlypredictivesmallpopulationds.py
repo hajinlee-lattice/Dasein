@@ -1,4 +1,4 @@
-from rulefwk import RowRule
+from rulefwk import RowRule, RuleResults
 from leframework.codestyle import overrides
 from dataruleutilsds import getRate
 from dataruleutilsds import getGroupedRate
@@ -90,10 +90,22 @@ class HighlyPredictiveSmallPopulationDS(RowRule):
                 else:
                     self.rowsToRemove[id] = [columnName]
 
-
     @overrides(RowRule)
     def getRowsToRemove(self):
         return self.rowsToRemove
+
+    @overrides(RowRule)
+    def getConfParameters(self):
+        return { 'highlyPredictiveSmallPopulationLiftThreshold':self.highlyPredictiveSmallPopulationLiftThreshold, \
+                 'highlyPredictiveSmallPopulationPopThreshold':self.highlyPredictiveSmallPopulationPopThreshold }
+
+    @overrides(RowRule)
+    def getResults(self):
+        results = {}
+        for rowid, columns in self.rowsToRemove.iteritems():
+            rr = RuleResults(False, 'Row failed', {})
+            results[rowid] = rr
+        return results
 
     def getColumnsInfo(self):
         return self.columnsInfo

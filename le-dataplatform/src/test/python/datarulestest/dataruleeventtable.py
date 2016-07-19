@@ -28,9 +28,10 @@ class DataRuleEventTable(object):
 
         self.name = name
         self.df = None
+        self.n_dfrows = -1
         self.allColsDict = {}
-        self.categoricalCols = []
-        self.numericalCols = []
+        self.categoricalCols = {}
+        self.numericalCols = {}
         self.eventCol = None
         self.logger = logging.getLogger(name=loggername)
 
@@ -43,10 +44,10 @@ class DataRuleEventTable(object):
                     self.allColsDict[col['name']] = None
                     datatype = col['type'][0]
 
-                    if datatype in ['int','long','double']:
-                        self.numericalCols.append(col['name'])
-                    elif datatype in ['boolean','string']:
-                        self.categoricalCols.append(col['name'])
+                    if datatype in ['int','long','double','boolean']:
+                        self.numericalCols[col['name']] = None
+                    elif datatype in ['string']:
+                        self.categoricalCols[col['name']] = None
 
                     if 'InterfaceName' in col.keys() and col['InterfaceName'] == 'Event':
                         self.eventCol = col['name']
@@ -69,8 +70,9 @@ class DataRuleEventTable(object):
         return self.eventCol
 
     def getDataFrame(self, nrows=-1):
-        if self.df is None:
+        if self.df is None or nrows != self.n_dfrows:
             self._readData(nrows)
+            self.n_dfrows = nrows
         return self.df
 
     def _readData(self, nrows):
