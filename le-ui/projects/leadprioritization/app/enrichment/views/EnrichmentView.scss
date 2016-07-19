@@ -25,6 +25,30 @@
     .subheader-container {
         @include flex-container;
         flex-wrap: wrap;
+        &.fixed {
+            position: fixed;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            z-index: 5;
+            &:after {
+                display: block;
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -1000px;
+                right: -1000px;
+                bottom: 0;
+                background: inherit;
+                z-index: -1;
+                min-height: 65px;
+                transition: none;
+                box-shadow: 0 3px 10px -5px rgba(0, 0, 0, 1);
+            }
+            ul.subheader {
+                margin-bottom: 0;
+            }
+        }
     }
     ul.subheader {
         @include flex-container;

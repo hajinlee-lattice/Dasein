@@ -2,7 +2,7 @@
 // limit number selectable to (10 for now)
 // green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($filter, $timeout, EnrichmentStore, EnrichmentData, EnrichmentService){
+.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentData, EnrichmentService){
     var vm = this;
 
     angular.extend(vm, {
@@ -98,6 +98,20 @@ angular.module('lp.enrichment.leadenrichment', [])
         });
     }
 
+    var _lockSubheader = function(){
+        var watched_el = document.querySelector('.summary .nav'),
+        top = watched_el.getBoundingClientRect().top;
+        el = document.querySelector('.subheader-container'),
+        $el = angular.element(el);
+        if(top < 0) {
+            $el.addClass('fixed');
+        } else {
+            $el.removeClass('fixed');
+        }
+    }
+
+    var lockSubheader = _.throttle(_lockSubheader, 100);
+
     vm.init = function() {
         EnrichmentStore.getCategories().then(function(result){
             vm.categories = result.data;
@@ -112,6 +126,8 @@ angular.module('lp.enrichment.leadenrichment', [])
 
             angular.extend(vm, result);
         });
+
+        angular.element($window).bind("scroll", lockSubheader);
     }
 
     vm.init();
