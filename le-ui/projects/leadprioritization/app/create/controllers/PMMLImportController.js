@@ -49,7 +49,7 @@ angular
             day = (day < 10 ? '0' + day : day),
             minutes = (minutes < 10 ? '0' + minutes : minutes),
             hours = (hours < 10 ? '0' + hours : hours),
-            timestamp = year +''+ month +''+ day +'-'+ hours +''+ minutes,
+            timestamp = year +''+ month +''+ day +'-'+ hours +''+ minutes + '-' + seconds,
             displayName = fileName.replace('.csv','').replace('.xml',''),
             displayName = displayName.substr(0, 50 - (timestamp.length + 1));
 

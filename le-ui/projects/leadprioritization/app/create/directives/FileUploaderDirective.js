@@ -53,7 +53,8 @@ angular
                     compressing: false,
                     compressed: true,
                     selectedFileDisplayName: '',
-                    message: $scope.defaultMessage || 'Example: us-enterprise-model.csv'
+                    defaultMessage: $scope.defaultMessage || 'Example: us-enterprise-model.csv',
+                    message: ''
                 },
                 element = this.element = $element[0];
 
@@ -103,6 +104,7 @@ angular
             } 
 
             vm.changeFile = function(scope) {
+                vm.cancel(true);
                 var input = element,
                     fileName = vm.getFileName(input.value);
 
@@ -373,7 +375,7 @@ angular
                     vm.message = 'Transfer aborted';
 
                     setTimeout(function() {
-                        vm.message = 'Choose a CSV file';
+                        vm.message = '';
                     }, 1500);
 
                     var errorCode = result.errorCode || 'LEDP_ERR';
@@ -445,6 +447,34 @@ angular
                 if (typeof vm.fileCancel == 'function') {
                     vm.fileCancel();
                 }
+            }
+
+            vm.showFileDisplayName = function() {
+                return vm.processing || vm.compressing || vm.uploading || vm.uploaded;
+            }
+
+            vm.showFileIcon = function() {
+                return !vm.processing && !vm.compressing && !vm.uploading && !vm.uploaded;
+            }
+
+            vm.showSpinnerIcon = function() {
+                return (vm.compressing || vm.processing || vm.uploading) && !vm.uploaded && vm.upload_percent == 0;
+            }
+
+            vm.showCancelIcon = function() {
+                return vm.uploading && vm.upload_percent > 0;
+            }
+
+            vm.showCancelIcon = function() {
+                return vm.uploaded;
+            }
+
+            vm.showCompressingBar = function() {
+                return vm.processing || vm.compressing;
+            }
+
+            vm.showUploadingBar = function() {
+                return vm.uploading || vm.uploaded;
             }
 
             angular.extend(vm, $scope, options);

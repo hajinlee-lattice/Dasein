@@ -347,7 +347,7 @@ html:not(.no-cssmask) {
 
 // Secondary Nav (Hamburger and Profile Nav)
 .secondary-nav {
-    border-bottom: #ddd solid 1px;
+    
     & > .ico {
         height: 40px;
         width: 40px;
@@ -386,10 +386,14 @@ html:not(.no-cssmask) {
             padding: 16px 20px 16px 20px;
             display: block;
             color: $dark-gray;
-            -webkit-transition: none;
-            -moz-transition: none;
-            -o-transition: none;
-            transition: none;
+
+            &:hover,
+            * {
+                -webkit-transition: none;
+                -moz-transition: none;
+                -o-transition: none;
+                transition: none;
+            }
             &:after {
                 content: "";
                 display: table;

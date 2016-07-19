@@ -240,7 +240,8 @@ angular.module('pd.jobs', [
             method: 'GET',
             url: url,
             headers: {
-                'If-Modified-Since': 0
+                'If-Modified-Since': 0,
+                'ErrorDisplayMethod': 'none'
             }
         }).then(
             function onSuccess(response) {
