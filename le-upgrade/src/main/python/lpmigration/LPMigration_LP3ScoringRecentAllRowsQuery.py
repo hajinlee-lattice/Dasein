@@ -72,10 +72,19 @@ class LPMigration_LP3ScoringRecentAllRowsQuery(StepBase):
                 'AppData_Lead_IsCreatedSinceModeling', ExpressionVDBImplFactory.create(defn_modeling), exp_modeling.OtherSpecs())
         conn_mgr.setNamedExpression(exp_scoring)
 
+        ## Create "Lead_RankForScoring"
+        exp_rankmodel = conn_mgr.getNamedExpression('Lead_RankForModeling')
+        defn_rankmodel = exp_rankmodel.Object().definition().replace(
+                'AppData_Lead_IsConsideredForModeling', 'AppData_Lead_IsCreatedSinceModeling')
+        exp_rankscore = NamedExpressionVDBImpl(
+                'Lead_RankForScoring', ExpressionVDBImplFactory.create(defn_rankmodel), exp_rankmodel.OtherSpecs())
+        conn_mgr.setNamedExpression(exp_rankscore)
+
         ## Create "Lead_IsSelectedForModeling_CreatedSinceModeling"
         exp_selmodeling = conn_mgr.getNamedExpression('Lead_IsSelectedForModeling')
-        defn_selmodeling = exp_selmodeling.Object().definition().replace(
-                'AppData_Lead_IsConsideredForModeling', 'AppData_Lead_IsCreatedSinceModeling')
+        defn_selmodeling = exp_selmodeling.Object().definition()\
+                .replace('AppData_Lead_IsConsideredForModeling', 'AppData_Lead_IsCreatedSinceModeling')\
+                .replace('Lead_RankForModeling', 'Lead_RankForScoring')
         exp_selcoring = NamedExpressionVDBImpl(
                 'Lead_IsSelectedForModeling_CreatedSinceModeling', ExpressionVDBImplFactory.create(defn_selmodeling), exp_selmodeling.OtherSpecs())
         conn_mgr.setNamedExpression(exp_selcoring)

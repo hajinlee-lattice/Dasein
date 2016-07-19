@@ -1,8 +1,8 @@
 
 #
-# $LastChangedBy: lyan $
-# $LastChangedDate: 2015-11-20 01:50:33 +0800 (Fri, 20 Nov 2015) $
-# $Rev: 71049 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 #
 
 from lxml import etree
@@ -15,7 +15,7 @@ class LP_020601_VDB_ResetLE_DomainInMKTO_LeadRecord( StepBase ):
   
   name        = 'LP_020601_VDB_ResetLE_DomainInMKTO_LeadRecord'
   description = 'Upgrade Modified Specs from 2.6.0 to 2.6.1:LP_020601_VDB_ResetLE_DomainInMKTO_LeadRecord'
-  version     = '$Rev: 71049 $'
+  version     = '$Rev$'
   def __init__( self, forceApply = False ):
     super( LP_020601_VDB_ResetLE_DomainInMKTO_LeadRecord, self ).__init__( forceApply )
 
