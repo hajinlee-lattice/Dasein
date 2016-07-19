@@ -84,9 +84,9 @@ public class AvroUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testConvertSqlServerTypeToAvro() throws IllegalArgumentException, IllegalAccessException {
-        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("NVARCHAR(255)"), Type.STRING);
-        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("date"), Type.LONG);
-        Assert.assertEquals(AvroUtils.convertSqlServerTypeToAvro("BINARY"), Type.BYTES);
+        Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("NVARCHAR(255)"), Type.STRING);
+        Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("date"), Type.LONG);
+        Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("BINARY"), Type.BYTES);
     }
 
     @DataProvider(name = "avscFileProvider")

@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -120,7 +121,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
-        modelSummary.setModelType(ModelSummary.PYTHON_SCRIPT_MODEL);
+        modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
         Table metadataTable = new Table();

@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.scoring.exposed.InternalResourceRestApiProxy;
@@ -130,7 +131,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), modelConfiguration.getEventTable(),
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
-        modelSummary.setModelType(ModelSummary.PYTHON_SCRIPT_MODEL);
+        modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
         ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),

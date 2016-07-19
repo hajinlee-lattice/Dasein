@@ -86,9 +86,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         String path = getExtractPath(rtsBulkScoringConfig);
         String customerSpace = rtsBulkScoringConfig.getCustomerSpace().toString();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
-        if (rtsBulkScoringConfig.getEnableLeadEnrichment()) {
+        if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
             leadEnrichmentAttributeMap = getLeadEnrichmentAttributes(rtsBulkScoringConfig.getCustomerSpace());
         }
+
         long startTime = System.currentTimeMillis();
         List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
         long endTime = System.currentTimeMillis();
@@ -138,7 +139,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             String fieldType = attribute.getFieldType();
             Schema.Type avroType = null;
             try {
-                avroType = AvroUtils.convertSqlServerTypeToAvro(fieldType);
+                avroType = AvroUtils.convertSqlTypeToAvro(fieldType);
             } catch (IllegalArgumentException e) {
                 throw new LedpException(LedpCode.LEDP_20040, e);
             } catch (IllegalAccessException e) {
@@ -178,7 +179,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         for (GenericRecord avroRecord : avroRecords) {
             i++;
             Record record = new Record();
-            record.setPerformEnrichment(rtsBulkScoringConfig.getEnableLeadEnrichment());
+            record.setPerformEnrichment(rtsBulkScoringConfig.isEnableLeadEnrichment());
             record.setIdType(DEFAULT_ID_TYPE);
 
             Object recordIdObj = avroRecord.get(InterfaceName.Id.toString());

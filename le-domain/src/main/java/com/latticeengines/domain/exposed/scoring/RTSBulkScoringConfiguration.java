@@ -41,7 +41,7 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     }
 
     @JsonProperty("enable_lead_enrichment")
-    public boolean getEnableLeadEnrichment() {
+    public boolean isEnableLeadEnrichment() {
         return this.enableLeadEnrichment;
     }
 

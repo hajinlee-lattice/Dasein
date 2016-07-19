@@ -54,9 +54,6 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact,
         Dimension {
 
-    public final static String PYTHON_SCRIPT_MODEL = "PythonScriptModel";
-    public final static String PMML_MODEL = "PmmlModel";
-
     private String id;
     private String name;
     private String displayName;

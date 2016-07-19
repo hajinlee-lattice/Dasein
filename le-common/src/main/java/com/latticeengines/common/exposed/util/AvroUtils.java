@@ -379,7 +379,7 @@ public class AvroUtils {
 
     }
 
-    public static Type convertSqlServerTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
+    public static Type convertSqlTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
         // the argument 'type' looks like NVARCHAR(MAX), or NVARCHAR(255), etc.
         String typeStr = org.apache.commons.lang.StringUtils.substringBefore(type.toLowerCase(), "(");
         Map<String, Integer> sqlTypeMap = new HashMap<String, Integer>();

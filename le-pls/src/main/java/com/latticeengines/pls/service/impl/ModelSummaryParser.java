@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -117,7 +118,7 @@ public class ModelSummaryParser {
         summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
         summary.setModelType(JsonUtils.getOrDefault(details.get("ModelType"), String.class,
-                ModelSummary.PYTHON_SCRIPT_MODEL));
+                ModelType.PYTHONMODEL.getModelType()));
         if (summary.getConstructionTime() == null) {
             summary.setConstructionTime(System.currentTimeMillis());
         }
