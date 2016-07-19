@@ -12,22 +12,22 @@ PIPELINESTEPS_SCRIPT_NAME = "pipelinesteps.py"
 SCORING_INPUT_PREFIX = "scoringinputfile-"
 SCORING_OUTPUT_PREFIX = "scoringoutputfile-"
 
-IMPUTATION_STEP_SCRIPT_NAME="imputationstep.py"
-IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME="imputationstepevpipeline.py"
-MAKE_FLOAT_SCRIPT_NAME="make_float.py"
-REPLACE_NULL_VALUE_SCRIPT_NAME="replace_null_value.py"
-COLUMNTRANFORM_SCRIPT_NAME="columntransform.py"
-REVENUE_COLUMN_SCRIPT_NAME="revenuecolumntransformstep.py"
-CLEANCATEGORICAL_SCRIPT_NAME="cleancategoricalcolumn.py"
-AGGREGATED_MODEL_SCRIPT_NAME="aggregatedmodel.py"
-ENUMERATED_COLUMN_SCRIPT_NAME="enumeratedcolumntransformstep.py"
-COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
-PIVOT_SCRIPT_NAME="pivotstep.py"
-EXPORT_DF_SCRIPT_NAME="exportdfstep.py"
-ASSIGNCONVERSIONRATE_SCRIPT_NAME="assignconversionratetocategoricalcolumns.py"
-REMEDIATEDATARULESSTEP_SCRIPT_NAME="remediatedatarulesstep.py"
-WEBHDFS_SCRIPT_NAME="webhdfs.py"
-CUSTOMPROXY_SCRIPT_NAME="customproxystep.py"
+IMPUTATION_STEP_SCRIPT_NAME = "imputationstep.py"
+IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME = "imputationstepevpipeline.py"
+MAKE_FLOAT_SCRIPT_NAME = "make_float.py"
+REPLACE_NULL_VALUE_SCRIPT_NAME = "replace_null_value.py"
+COLUMNTRANFORM_SCRIPT_NAME = "columntransform.py"
+REVENUE_COLUMN_SCRIPT_NAME = "revenuecolumntransformstep.py"
+CLEANCATEGORICAL_SCRIPT_NAME = "cleancategoricalcolumn.py"
+AGGREGATED_MODEL_SCRIPT_NAME = "aggregatedmodel.py"
+ENUMERATED_COLUMN_SCRIPT_NAME = "enumeratedcolumntransformstep.py"
+COLUMNTYPE_CONVERSION_SCRIPT_NAME = "columntypeconversionstep.py"
+PIVOT_SCRIPT_NAME = "pivotstep.py"
+EXPORT_DF_SCRIPT_NAME = "exportdfstep.py"
+ASSIGNCONVERSIONRATE_SCRIPT_NAME = "assignconversionratetocategoricalcolumns.py"
+REMEDIATEDATARULESSTEP_SCRIPT_NAME = "remediatedatarulesstep.py"
+WEBHDFS_SCRIPT_NAME = "webhdfs.py"
+CUSTOMPROXY_SCRIPT_NAME = "customproxystep.py"
 
 def main(argv):
     scoringFiles = [SCORING_SCRIPT_NAME,
@@ -57,17 +57,17 @@ def main(argv):
         leadFiles = []
         if index == 0:
             continue
-        #change the file name of supported files
+        # change the file name of supported files
         modelID = argv[index]
         manipulateSupportedFiles(modelID, scoringFiles, leadFiles)
-        #do scoring
+        # do scoring
         print "leadFiles are:"
         print leadFiles
         if len(leadFiles) == 0:
             raise "leadFile is null"
         for leadFile in leadFiles:
             modelEvaluate(modelID, leadFile)
-        #delete the supported files for the next round of scoring
+        # delete the supported files for the next round of scoring
         deleteFiles(scoringFiles)
         deleteFiles(leadFiles)
         deletePycFiles()
@@ -77,27 +77,35 @@ def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
     curFiles = os.listdir(os.getcwd())
     targetedFiles = []
     for f in scoringFiles:
-        targetedFiles.append(modelID+f)
+        targetedFiles.append(modelID + f)
     # loop through all the files in the current directory
     files = os.listdir('.')
     for f in files:
         if f.startswith(s):
-            updatedLeadName = SCORING_INPUT_PREFIX+f[len(s):]
+            updatedLeadName = SCORING_INPUT_PREFIX + f[len(s):]
             os.rename(f, updatedLeadName)
             leadFiles.append(updatedLeadName)
             continue
         for fileName in targetedFiles:
             if f.startswith(fileName):
                 os.rename(f, fileName[len(modelID):])
-    print "after the renaming, the files are"
-    print os.listdir('.')   
- 
+    # Rename any remaining files that end with PY or JSON
+    files = os.listdir('.')
+    for f in files:
+        if f.startswith(modelID) and (f.endswith('.json') or f.endswith('.py')):
+            try:
+                os.rename(f, f[len(modelID):])
+                print "renaming ", f
+            except:
+                print "scoring.py: error when trying to rename ", f
+                pass
+
 def modelEvaluate(modelID, leadFile):
     scoringScriptPath = os.path.abspath(SCORING_SCRIPT_NAME)
-    #scoringoutputfile name
+    # scoringoutputfile name
     outputFile = modelID + SCORING_OUTPUT_PREFIX + leadFile[len(SCORING_INPUT_PREFIX):] + ".txt"
     executable = "/usr/local/bin/python2.7"
-    popen = subprocess.Popen([executable, scoringScriptPath, leadFile, outputFile], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    popen = subprocess.Popen([executable, scoringScriptPath, leadFile, outputFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     s, stderr = popen.communicate()
     print s
     print stderr
@@ -112,7 +120,7 @@ def deleteFiles(files):
 def deletePycFiles():
     dir = os.listdir(os.getcwd())
     for f in dir:
-        ext ='.pyc'
+        ext = '.pyc'
         if f.lower().endswith(ext):
             print 'found file: '
             print f
