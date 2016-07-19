@@ -267,7 +267,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
                     fieldCsvValue, attr.getDisplayName()));
         }
-
     }
 
     @Override

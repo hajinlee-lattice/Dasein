@@ -58,7 +58,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private String customer = "SFDC-Eai-Customer";
 
-    @Autowired
     private ImportContext importContext;
 
     @Value("${eai.test.salesforce.username}")
@@ -117,7 +116,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
                 });
         when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(getSalesforceTables(tableNameList));
         dataExtractionService.setEaiMetadataService(eaiMetadataService);
-
+        importContext = new ImportContext(yarnConfiguration);
     }
 
     @AfterClass(groups = "functional")
@@ -132,7 +131,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
                 + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
-
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);

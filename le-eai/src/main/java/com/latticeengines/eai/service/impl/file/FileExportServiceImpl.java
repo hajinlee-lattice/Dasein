@@ -22,9 +22,6 @@ import com.latticeengines.eai.service.impl.ExportStrategy;
 public class FileExportServiceImpl extends ExportService {
 
     @Autowired
-    private ExportContext exportContext;
-
-    @Autowired
     private Configuration yarnConfiguration;
 
     protected FileExportServiceImpl() {
@@ -59,6 +56,7 @@ public class FileExportServiceImpl extends ExportService {
 
     @Override
     public ApplicationId submitDataExportJob(ExportConfiguration exportConfig) {
+        ExportContext exportContext = new ExportContext(yarnConfiguration);
         exportDataFromHdfs(exportConfig, exportContext);
         return exportContext.getProperty(ImportProperty.APPID, ApplicationId.class);
     }

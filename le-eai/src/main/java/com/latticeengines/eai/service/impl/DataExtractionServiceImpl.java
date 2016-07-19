@@ -51,9 +51,6 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     private JobService jobService;
 
     @Autowired
-    private ImportContext importContext;
-
-    @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
@@ -139,6 +136,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
+        ImportContext importContext = new ImportContext(yarnConfiguration);
         importContext.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomerSpace().toString());
 
         ApplicationId appId = null;

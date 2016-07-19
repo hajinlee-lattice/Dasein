@@ -9,6 +9,7 @@ import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.eclipse.jetty.client.HttpClient;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
@@ -47,7 +48,7 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
     private DataExtractionService dataExtractionService;
 
     @Autowired
-    private ImportContext importContext;
+    private Configuration yarnConfiguration;
 
     @Autowired
     private SalesforceComponent salesforce;
@@ -75,6 +76,7 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
         int i = 1;
         setProgress(0.05f * i);
         log.info("Routes are:" + camelContext.getRoutes());
+        ImportContext importContext = new ImportContext(yarnConfiguration);
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.METADATAURL, importConfig.getProperty(ImportProperty.METADATAURL));
         log.info("Starting extract and import.");

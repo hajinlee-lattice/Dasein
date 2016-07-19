@@ -29,7 +29,6 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
 
-    @Autowired
     private ImportContext importContext;
 
     private String customer = "SFDC-Eai-ImportMetadata-Customer";
@@ -68,6 +67,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
 
         Table account = SalesforceExtractAndImportUtil.createAccountWithNonExistingAttr();
         boolean exception = false;
+        importContext = new ImportContext(yarnConfiguration);
         try {
             salesforceImportStrategyBase.importMetadata(camelContext.createProducerTemplate(), account, "",
                     importContext);
