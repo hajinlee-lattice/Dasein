@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -112,16 +113,19 @@ public class ModelResource {
     @RequestMapping(value = "/pmml/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a PMML model from the supplied module. Returns the job id.")
-    public ResponseDocument<String> modelForPmml(@PathVariable String modelName, //
+    public ResponseDocument<String> modelForPmml(
+            @PathVariable String modelName, //
             @RequestParam(value = "module") String moduleName, //
             @RequestParam(value = "pivotfile", required = false) String pivotFileName, //
-            @RequestParam(value = "pmmlfile") String pmmlFileName) {
+            @RequestParam(value = "pmmlfile") String pmmlFileName,
+            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
-        String appId = pmmlModelWorkflowSubmitter.submit(modelName, moduleName, pivotFileName, pmmlFileName).toString();
+        String appId = pmmlModelWorkflowSubmitter.submit(modelName, moduleName, pivotFileName, pmmlFileName,
+                schemaInterpretation).toString();
         return ResponseDocument.successResponse(appId);
 
     }

@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
@@ -64,6 +65,7 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
                 .pivotArtifactPath(pivotValuesHdfsPath) //
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
+                .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.toString()) //
                 .build();
 
         return workflowConfig;

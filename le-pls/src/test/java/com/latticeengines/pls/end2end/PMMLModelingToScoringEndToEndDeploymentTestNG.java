@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -102,8 +103,9 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     public void createModel() throws InterruptedException {
         @SuppressWarnings("rawtypes")
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/pmml/%s?module=%s&pivotfile=%s&pmmlfile=%s", getRestAPIHostPort(),
-                        modelName, "module1", "pivotvalues.csv", "rfpmml.xml"), //
+                String.format("%s/pls/models/pmml/%s?module=%s&pivotfile=%s&pmmlfile=%s&schema=%s",
+                        getRestAPIHostPort(), modelName, "module1", "pivotvalues.csv", "rfpmml.xml",
+                        SchemaInterpretation.SalesforceLead), //
                 null, ResponseDocument.class);
         String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
         System.out.println(applicationId);
@@ -112,6 +114,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(completedStatus, JobStatus.COMPLETED);
         ModelSummary modelSummary = getModelSummary(modelName);
         modelId = modelSummary.getId();
+        assertEquals(modelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
+        assertNotNull(modelSummary.getPivotArtifactPath());
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {

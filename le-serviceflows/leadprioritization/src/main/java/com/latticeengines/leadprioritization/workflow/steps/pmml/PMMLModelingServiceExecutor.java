@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
-    
+
     private static final Log log = LogFactory.getLog(PMMLModelingServiceExecutor.class);
 
     public PMMLModelingServiceExecutor(Builder builder) {
@@ -75,23 +75,29 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
-    
+
     private String getProvenanceProperties() {
         List<String> props = new ArrayList<>();
         if (builder.getMetadataArtifacts() != null) {
             String path = builder.getMetadataArtifacts().get(ArtifactType.PMML);
             props.add("PMML_File=" + path);
         }
+        if (builder.getPivotArtifactPath() != null) {
+            props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
+        }
+        if (builder.getSourceSchemaInterpretation() != null) {
+            props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
+        }
         return StringUtils.join(props, " ");
     }
-    
+
     public void writeDataFiles() throws Exception {
         File localFile = createDummyTrainingAndTestData(builder.getSchemaContents());
         String trainingDataHdfsPath = String.format("%s/%s/data/%s/samples/allTraining.avro", //
                 modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable());
         String testDataHdfsPath = String.format("%s/%s/data/%s/samples/allTest.avro", //
                 modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable());
-        
+
         try {
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), trainingDataHdfsPath);
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), testDataHdfsPath);
@@ -103,12 +109,11 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
     private File createDummyTrainingAndTestData(String schemaContents) throws Exception {
         Schema schema = new Schema.Parser().parse(schemaContents);
         File f = new File("PMMLDummyFile-" + System.currentTimeMillis() + ".avro");
-        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>(schema))) {
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>(
+                schema))) {
             dataFileWriter.create(schema, f);
         }
         return f;
     }
-    
-
 
 }

@@ -114,6 +114,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
                 .metadataTable(String.format("%s-Event-Metadata", tableName)) //
                 .avroSchema(avroSchema) //
                 .metadataArtifacts(getMetadataArtifacts()) //
+                .sourceSchemaInterpretation(configuration.getSourceSchemaInterpretation()) //
+                .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .yarnConfiguration(yarnConfiguration);
 
         return bldr;

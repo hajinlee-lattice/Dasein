@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
@@ -26,7 +27,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
-    public ApplicationId submit(String modelName, String moduleName, String pivotFileName, String pmmlFileName) {
+    public ApplicationId submit(String modelName, String moduleName, String pivotFileName, String pmmlFileName, SchemaInterpretation schemaInterpretation) {
         Map<String, Artifact> pmmlArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
                 ArtifactType.PMML));
         Map<String, Artifact> pivotArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
@@ -61,6 +62,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
+                .sourceSchemaInterpretation(schemaInterpretation.name()) //
                 .build();
         return workflowJobService.submit(configuration);
     }
