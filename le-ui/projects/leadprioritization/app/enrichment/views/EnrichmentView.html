@@ -50,7 +50,10 @@
             ng-click="vm.showData(enrichment)">
                 <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
                 <div class="ico-container"><span class="ico ico-light-gray ico-locations"></span></div>
-                <h2>{{enrichment.DisplayName}}</h2>
+                <h2>
+                    <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                    <strong>{{enrichment.DisplayName}}</strong>
+                </h2>
                 <p>{{enrichment.Description}}</p>
                 <button class="button" 
                 ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'is-dirty': enrichment.IsDirty}" 

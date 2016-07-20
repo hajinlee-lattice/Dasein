@@ -98,6 +98,18 @@ angular.module('lp.enrichment.leadenrichment', [])
         });
     }
 
+    vm.fieldType = function(fieldType){
+        var fieldType = fieldType.replace(/[0-9]+/g, '*');
+        var fieldTypes = {
+            'default':'Text/String',
+            'NVARCHAR(*)':'Text/String',
+            'FLOAT':'Number/Float',
+            'INT':'Number/Int',
+            'BOOLEAN':'Boolean'
+        }
+        return fieldTypes[fieldType] || fieldTypes.default;
+    }
+
     var _lockSubheader = function(){
         var watched_el = document.querySelector('.summary .nav'),
         top = watched_el.getBoundingClientRect().top;
