@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -112,32 +113,43 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment) {
-
-        boolean useRtsApi = useRtsApiDefaultValue;
-        if (useRts != null) {
-            useRtsApi = useRts.booleanValue();
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        if (useRtsApi) {
-            boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
-            return scoreTestingDataUsingRtsApi(modelId, fileName, enableLeadEnrichment);
 
+        boolean useRtsApi = false;
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+            useRtsApi = true;
+        }
+
+        if (useRtsApi) {
+            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment);
         }
         return scoreTestingData(modelId, fileName);
     }
 
     @Override
     public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment) {
-
-        boolean useRtsApi = useRtsApiDefaultValue;
-        if (useRts != null) {
-            useRtsApi = useRts.booleanValue();
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
+
+        boolean useRtsApi = false;
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+            useRtsApi = true;
+        }
+
         if (useRtsApi) {
-            boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
-            return scoreTrainingDataUsingRtsApi(modelId, enableLeadEnrichment);
+            return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment);
 
         }
-        return scoreTrainingData(modelId);
+        return scoreTrainingData(modelSummary);
     }
 
     private Tenant getTenant() {
@@ -145,22 +157,17 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         return tenantEntityMgr.findByTenantId(tenant.getId());
     }
 
-    private String scoreTrainingData(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-
+    private String scoreTrainingData(ModelSummary modelSummary) {
         if (modelSummary.getTrainingTableName() == null) {
-            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
 
         String transformationGroupName = modelSummary.getTransformationGroupName();
         if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
         }
 
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data",
+        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(), "Training Data",
                 TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
@@ -174,25 +181,16 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                 TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
-    private String scoreTrainingDataUsingRtsApi(String modelId, boolean enableLeadEnrichment) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-
+    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment) {
         if (modelSummary.getTrainingTableName() == null) {
-            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
 
-        return rtsBulkScoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), enableLeadEnrichment,
+        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(), enableLeadEnrichment,
                 "Training Data").toString();
     }
 
-    private String scoreTestingDataUsingRtsApi(String modelId, String fileName, boolean enableLeadEnrichment) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelId, fileName, enableLeadEnrichment).toString();
+    private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName, boolean enableLeadEnrichment) {
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment).toString();
     }
 }
