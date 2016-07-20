@@ -76,7 +76,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
                 getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE", getRestAPIHostPort(), modelId), //
+                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE", getRestAPIHostPort(),
+                        modelId), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
@@ -186,8 +187,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
                 getRestAPIHostPort(), modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
-                        sourceFile.getName()), //
+                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                        getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score testing data applicationId = %s", applicationId));
