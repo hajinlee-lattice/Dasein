@@ -144,7 +144,11 @@ angular.module('pd.apiconsole.APIConsoleService', [
     };
 
     function getScoringApiUrl() {
-        var appUrl = $location.protocol() + '://' + $location.host();
+        var hostname = $location.host();
+        if (!hostname.startsWith('app')) {
+            hostname = 'app.lattice.local';
+        }
+        var appUrl = $location.protocol() + '://' + hostname;
         var port = $location.port();
         if (port != 80) {
             appUrl += ":" + port;
