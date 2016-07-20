@@ -7,8 +7,10 @@ import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -46,18 +48,41 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentCategories() {
+    public void testGetLeadEnrichmentCategories()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        Set<String> expectedCategoryStrSet = getExpectedCategorySet();
+
         String url = getRestAPIHostPort() + "/pls/enrichment/lead/categories";
+
         List<String> categoryStrList = restTemplate.getForObject(url, List.class);
         assertNotNull(categoryStrList);
 
-        Assert.assertEquals(categoryStrList.size(), Category.values().length);
+        Assert.assertEquals(categoryStrList.size(), expectedCategoryStrSet.size());
 
         for (String categoryStr : categoryStrList) {
             Assert.assertNotNull(categoryStr);
             Category category = Category.fromName(categoryStr);
             Assert.assertNotNull(category);
+            Assert.assertTrue(expectedCategoryStrSet.contains(categoryStr));
+            System.out.println("Category with non null attributes : " + categoryStr);
         }
+    }
+
+    private Set<String> getExpectedCategorySet()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+        totalLeadEnrichmentCount = combinedAttributeList.size();
+        Set<String> expectedCategorySet = new HashSet<>();
+
+        for (LeadEnrichmentAttribute attr : combinedAttributeList) {
+            if (!expectedCategorySet.contains(attr.getCategory())) {
+                expectedCategorySet.add(attr.getCategory());
+            }
+        }
+
+        return expectedCategorySet;
     }
 
     @Test(groups = "deployment", enabled = true)

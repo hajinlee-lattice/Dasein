@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,9 +48,14 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
+                null, false);
+
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
-            categoryStrList.add(category.toString());
+            if (containsAtleastOneAttributeForCategory(allAttributes, category)) {
+                categoryStrList.add(category.toString());
+            }
         }
         return categoryStrList;
     }
@@ -122,5 +128,18 @@ public class EnrichmentResource {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getSelectedAttributePremiumCount(tenant);
     }
+
+    private boolean containsAtleastOneAttributeForCategory(
+            List<LeadEnrichmentAttribute> allAttributes, Category category) {
+        if (!CollectionUtils.isEmpty(allAttributes)) {
+            for (LeadEnrichmentAttribute attr : allAttributes) {
+                if (category.toString().equals(attr.getCategory())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // ------------END for LeadEnrichment-------------------//
 }
