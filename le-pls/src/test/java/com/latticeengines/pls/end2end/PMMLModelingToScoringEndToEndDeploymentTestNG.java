@@ -168,7 +168,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = "createModel")
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void scoreRecords() throws IOException, InterruptedException {
         Map<String, Object> record = new HashMap<>();
         Fields fields = internalScoringApiProxy.getModelFields(modelId, tenantToAttach.getName());
