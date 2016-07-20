@@ -42,6 +42,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
         factory.setDataSource(dataSource);
         factory.setTransactionManager(getTransactionManager());
         factory.setDatabaseType(databaseType);
+        factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
         factory.setTablePrefix(WORKFLOW_PREFIX);
         factory.setValidateTransactionState(false);
         factory.afterPropertiesSet();
