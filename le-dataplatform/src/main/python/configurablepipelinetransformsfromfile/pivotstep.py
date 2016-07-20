@@ -48,7 +48,11 @@ class PivotStep(PipelineStep):
         for k, v in self.columnsToPivot.items():
             values = v[1]
             columnsToRemove.add(v[0])
-            dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values, str(k).endswith("__ISNULL__")))
+            try:
+                dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values, str(k).endswith("__ISNULL__")))
+            except:
+                logger.error("Caught exception while pivoting column", exc_info=True)
+                logger.error(self.columnsToPivot)
             self.__appendMetadataEntry(configMetadata, k)
 
         super(PivotStep, self).removeColumns(dataFrame, columnsToRemove)
@@ -80,10 +84,10 @@ class PivotStep(PipelineStep):
                 expected.append(float(value["count"]))
             totalObserved = sum(observed)
             totalExpected = sum(expected)
-            o = [100.0*x/totalObserved for x in observed]
-            e = [100.0*x/totalExpected for x in expected]
+            o = [100.0 * x / totalObserved for x in observed]
+            e = [100.0 * x / totalExpected for x in expected]
             c = chisquare(o, e)[1]
-            
+
             self.pValues[column] = "%f" % c
             if c < self.pvalueThreshold:
                 logger.info("Pivoting %s because chi-square returns %f < %f." % (column, c, self.pvalueThreshold))
@@ -179,7 +183,7 @@ class PivotStep(PipelineStep):
 
     def doColumnCheck(self):
         return False
-    
+
     def getDebugArtifacts(self):
         return [{"pivotstep-pvalues.json": self.pValues}]
 

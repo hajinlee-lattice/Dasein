@@ -16,6 +16,8 @@ def get_logger(name):
 def create_column(name, dataType):
     return { "name": name, "type": dataType }
 
+logger = get_logger("pipelinefwk")
+
 class Pipeline(object):
     pipelineSteps = []
     def __init__(self, pipelineSteps):
@@ -27,7 +29,10 @@ class Pipeline(object):
     def predict(self, dataFrame, configMetadata, test):
         transformed = dataFrame
         for step in self.pipelineSteps:
-            transformed = step.transform(transformed, configMetadata, test)
+            try:
+                transformed = step.transform(transformed, configMetadata, test)
+            except Exception as e:
+                logger.exception("Caught Exception while applying Transfrom. Stack trace below" + str(e))
         return transformed
 
     '''
@@ -95,7 +100,7 @@ class PipelineStep(object):
 
     def getDebugArtifacts(self):
         return []
-    
+
 class ModelStep(PipelineStep):
     model = None
     modelInputColumns = []
@@ -108,13 +113,13 @@ class ModelStep(PipelineStep):
     def getModelInputColumns(self):
         return self.modelInputColumns
 
-    def __init__(self, model = None, modelInputColumns = None, scoreColumnName="Score"):
+    def __init__(self, model=None, modelInputColumns=None, scoreColumnName="Score"):
         self.model = model
         self.modelInputColumns = modelInputColumns
         self.scoreColumnName = scoreColumnName
         self.setModelStep(True)
 
-    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
+    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName="Score"):
         return ModelStep(model, modelInputColumns, scoreColumnName)
 
     def transform(self, dataFrame, configMetadata, test):
