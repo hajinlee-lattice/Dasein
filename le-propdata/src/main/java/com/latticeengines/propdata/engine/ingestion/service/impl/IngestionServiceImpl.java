@@ -1,9 +1,11 @@
 package com.latticeengines.propdata.engine.ingestion.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,7 +39,9 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
+import com.latticeengines.domain.exposed.propdata.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.core.IngestionNames;
@@ -55,7 +59,6 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class IngestionServiceImpl implements IngestionService {
     private static Log log = LogFactory.getLog(IngestionServiceImpl.class);
 
-    private static final String CSV_GZ = ".csv.gz";
     private static final String BOMBORA_FIREHOSE = "Bombora_Firehose_";
 
     @Autowired
@@ -98,8 +101,16 @@ public class IngestionServiceImpl implements IngestionService {
         Ingestion ingestion = getIngestionByName(ingestionName);
         IngestionProgress progress = ingestionProgressService.createPreprocessProgress(ingestion,
                 ingestionRequest.getSubmitter(), ingestionRequest.getFileName());
+        if (ingestion.getIngestionType() == IngestionType.SFTP
+                && !ifSftpFileExists((SftpConfiguration) ingestion.getProviderConfiguration(),
+                        ingestionRequest.getFileName())) {
+            return ingestionProgressService.updateInvalidProgress(progress,
+                    progress.getDestination() + " does not exist in source SFTP");
+        }
         if (ingestionNewProgressValidator.isDuplicateProgress(progress)) {
-            return ingestionProgressService.updateDuplicateProgress(progress);
+            return ingestionProgressService.updateInvalidProgress(progress,
+                    "There is already a progress ingesting " + progress.getSource() + " to "
+                            + progress.getDestination());
         }
         return ingestionProgressService.saveProgress(progress);
     }
@@ -170,17 +181,26 @@ public class IngestionServiceImpl implements IngestionService {
     public List<IngestionProgress> getPreprocessProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
         switch (ingestion.getIngestionCriteria()) {
-        case ANY_MISSING_FILE:
-            List<String> missingFiles = getMissingFiles(ingestion);
-            for (String file : missingFiles) {
+            case ANY_MISSING_FILE:
+                List<String> missingFiles = getMissingFiles(ingestion);
+                for (String file : missingFiles) {
+                    IngestionProgress progress = ingestionProgressService.createPreprocessProgress(
+                            ingestion, PropDataConstants.SCAN_SUBMITTER, file);
+                    progresses.add(progress);
+                }
+                break;
+            case ALL_DATA:
+                SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) ingestion
+                        .getProviderConfiguration();
+                SimpleDateFormat format = new SimpleDateFormat("_yyyy_MM");
+                String fileName = format.format(new Date());
                 IngestionProgress progress = ingestionProgressService.createPreprocessProgress(
-                        ingestion, PropDataConstants.SCAN_SUBMITTER, file);
-                progresses.add(progress);
-            }
-            break;
-        default:
-            throw new UnsupportedOperationException("Ingestion criteria "
-                    + ingestion.getIngestionCriteria() + " is not supported.");
+                        ingestion, PropDataConstants.SCAN_SUBMITTER, fileName);
+                    progresses.add(progress);
+                break;
+            default:
+                throw new UnsupportedOperationException("Ingestion criteria "
+                        + ingestion.getIngestionCriteria() + " is not supported.");
         }
         return progresses;
     }
@@ -190,6 +210,8 @@ public class IngestionServiceImpl implements IngestionService {
         List<String> targetFiles = getTargetFiles(ingestion);
         if (ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)) {
             targetFiles = filterBomboraFiles(targetFiles);
+        } else if (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)) {
+            targetFiles = filterDnBFiles(targetFiles, "output");
         }
         com.latticeengines.domain.exposed.camille.Path hdfsDest = hdfsPathBuilder
                 .constructIngestionDir(ingestion.getIngestionName());
@@ -199,7 +221,11 @@ public class IngestionServiceImpl implements IngestionService {
                 List<String> hdfsFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
                         hdfsDest.toString(), null);
                 for (String file : hdfsFiles) {
-                    if (!HdfsUtils.isDirectory(yarnConfiguration, file) && file.endsWith(CSV_GZ)) {
+                    if (!HdfsUtils.isDirectory(yarnConfiguration, file)
+                    && ((ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)
+                        && file.endsWith(PropDataConstants.CSV_GZ))
+                     || (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)
+                        && file.endsWith(PropDataConstants.OUT_GZ)))) {
                         Path path = new Path(file);
                         existingFiles.add(path.getName());
                     }
@@ -258,7 +284,7 @@ public class IngestionServiceImpl implements IngestionService {
     @Override
     public List<String> getTargetFiles(Ingestion ingestion) {
         switch (ingestion.getIngestionType()) {
-        case SFTP_TO_HDFS:
+            case SFTP:
             return getSftpFiles((SftpConfiguration) ingestion.getProviderConfiguration());
         default:
             throw new RuntimeException(
@@ -268,7 +294,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @SuppressWarnings("unchecked")
-	private List<String> getSftpFiles(SftpConfiguration config) {
+    private List<String> getSftpFiles(SftpConfiguration config) {
         try {
             JSch jsch = new JSch();
             Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
@@ -296,6 +322,29 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
+    public boolean ifSftpFileExists(SftpConfiguration config, String fileName) {
+        boolean res = false;
+        try {
+            JSch jsch = new JSch();
+            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
+                    config.getSftpPort());
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            sftpChannel.cd("." + config.getSftpDir());
+            InputStream is = sftpChannel.get(fileName);
+            res = is != null;
+            sftpChannel.exit();
+            session.disconnect();
+        } catch (JSchException | SftpException e) {
+            res = false;
+        }
+        return res;
+    }
+
     private List<String> filterBomboraFiles(List<String> files) {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         Calendar cal = Calendar.getInstance();
@@ -304,8 +353,20 @@ public class IngestionServiceImpl implements IngestionService {
         Iterator<String> iter = files.iterator();
         while (iter.hasNext()) {
             String file = iter.next();
-            if (file.startsWith(BOMBORA_FIREHOSE) && file.endsWith(CSV_GZ)
-                    && file.compareTo(BOMBORA_FIREHOSE + cutoffDate + CSV_GZ) >= 0) {
+            if (file.startsWith(BOMBORA_FIREHOSE) && file.endsWith(PropDataConstants.CSV_GZ) && file
+                    .compareTo(BOMBORA_FIREHOSE + cutoffDate + PropDataConstants.CSV_GZ) >= 0) {
+                continue;
+            }
+            iter.remove();
+        }
+        return files;
+    }
+
+    private List<String> filterDnBFiles(List<String> files, String fileType) {
+        Iterator<String> iter = files.iterator();
+        while (iter.hasNext()) {
+            String file = iter.next();
+            if (file.startsWith("le_seed_" + fileType) && file.endsWith(PropDataConstants.OUT_GZ)) {
                 continue;
             }
             iter.remove();

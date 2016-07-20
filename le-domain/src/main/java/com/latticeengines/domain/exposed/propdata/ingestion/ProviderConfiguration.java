@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
-@JsonSubTypes({ @JsonSubTypes.Type(value = SftpConfiguration.class, name = "SftpProtocol") })
+@JsonSubTypes({ @JsonSubTypes.Type(value = SftpConfiguration.class, name = "SftpConfiguration"),
+                @JsonSubTypes.Type(value = SqlToTextConfiguration.class, name = "SqlToTextConfiguration")
+              })
 public abstract class ProviderConfiguration {
     private String className;
 

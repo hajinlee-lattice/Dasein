@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SftpConfiguration extends ProviderConfiguration {
 
-    private String sftpHost;
-    private Integer sftpPort;
-    private String sftpUserName;
-    private String sftpPasswordEncrypted;
-    private String sftpDir;
+    protected String sftpHost;
+    protected Integer sftpPort;
+    protected String sftpUserName;
+    protected String sftpPasswordEncrypted;
+    protected String sftpDir;
 
     @JsonProperty("SftpHost")
     public String getSftpHost() {

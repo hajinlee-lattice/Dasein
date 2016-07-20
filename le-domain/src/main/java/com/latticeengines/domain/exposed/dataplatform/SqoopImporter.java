@@ -236,6 +236,7 @@ public class SqoopImporter {
             importer.setYarnConfiguration(this.yarnConfiguration);
             importer.setSync(this.sync);
             importer.setProperties(this.properties);
+            importer.setQuery(query);
 
             Set<String> hadoopArgKeys = new HashSet<>();
             List<String> hadoopArgs = new ArrayList<>(importer.getHadoopArgs());
@@ -348,7 +349,7 @@ public class SqoopImporter {
             }
 
             if (Mode.QUERY.equals(this.mode) && StringUtils.isEmpty(this.query)) {
-                throw new IllegalStateException("Query not provided when importing in TABLE mode.");
+                throw new IllegalStateException("Query not provided when importing in QUERY mode.");
             }
 
             if (StringUtils.isEmpty(splitColumn) && this.numMappers > 1) {

@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PublishToSqlConfiguration extends PublicationConfiguration {
 
-    private String host;
-    private Integer port;
-    private String dbType = "SQLServer";
-    private String database;
-    private String defaultTableName;
-    private String username;
-    private String encryptedPassword;
-    private Alias alias;
-    private PublicationStrategy publicationStrategy;
+    protected String host;
+    protected Integer port;
+    protected String dbType = "SQLServer";
+    protected String database;
+    protected String defaultTableName;
+    protected String username;
+    protected String encryptedPassword;
+    protected Alias alias;
+    protected PublicationStrategy publicationStrategy;
 
     @Override
     @JsonProperty("ConfigurationType")

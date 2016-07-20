@@ -51,9 +51,18 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
             return false;
         }
 
-        if (noSourceAvro(publication.getSourceName(), currentVersion)) {
-            return false;
+        switch (publication.getMaterialType()) {
+            case SOURCE:
+                if (noSourceAvro(publication.getSourceName(), currentVersion)) {
+                    return false;
+                }
+                break;
+            case INGESTION:
+                if (noIngestionFile(publication.getSourceName(), currentVersion)) {
+                    return false;
+                }
         }
+
 
         return true;
     }
@@ -97,6 +106,23 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
             }
         } else {
             throw new UnsupportedOperationException("Only derived source can be published.");
+        }
+        return false;
+    }
+
+    private Boolean noIngestionFile(String ingestionName, String version) {
+        String ingestionDir = hdfsPathBuilder.constructIngestionDir(ingestionName, version).toString();
+        try {
+            if (!HdfsUtils.fileExists(yarnConfiguration, ingestionDir)) {
+                log.warn("The ingestion dir " + ingestionDir + " does not exists.");
+                return true;
+            }
+            if (!HdfsUtils.fileExists(yarnConfiguration, ingestionDir + "/" + HdfsPathBuilder.SUCCESS_FILE)) {
+                log.warn("Cannot find the _SUCCESS file in the ingestion dir " + ingestionDir);
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to verify file for ingestionname=" + ingestionName + ", version=" + version);
         }
         return false;
     }

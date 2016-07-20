@@ -33,7 +33,7 @@ public interface IngestionProgressService {
     public IngestionProgress updateSubmittedProgress(IngestionProgress progress,
             String applicationId);
 
-    public IngestionProgress updateDuplicateProgress(IngestionProgress progress);
+    public IngestionProgress updateInvalidProgress(IngestionProgress progress, String message);
 
     public void deleteProgress(IngestionProgress progress);
 

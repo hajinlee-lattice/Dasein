@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
@@ -66,14 +67,18 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     @Override
     public String constructSource(Ingestion ingestion, String fileName) {
         switch (ingestion.getIngestionType()) {
-        case SFTP_TO_HDFS:
+            case SFTP:
             SftpConfiguration sftpConfiguration = (SftpConfiguration) ingestion
                     .getProviderConfiguration();
             Path fileSource = new Path(sftpConfiguration.getSftpDir(), fileName);
             return fileSource.toString();
-        default:
-            throw new UnsupportedOperationException(
-                    "Ingestion type " + ingestion.getIngestionType() + " is not supported.");
+            case SQL_TO_CSVGZ:
+                SqlToTextConfiguration sqlToTextConfiguration = (SqlToTextConfiguration) ingestion
+                        .getProviderConfiguration();
+                return sqlToTextConfiguration.getDbTable();
+            default:
+                throw new UnsupportedOperationException(
+                        "Ingestion type " + ingestion.getIngestionType() + " is not supported.");
         }
     }
 
@@ -88,16 +93,38 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
                 format.setTimeZone(timezone);
                 String fileVersion = HdfsPathBuilder.dateFormat
                         .format(format.parse(fileName.substring(17, 25)));
-                fileDest = fileDest.append(fileVersion);
+                fileDest = fileDest.append(fileVersion).append(fileName);
             } catch (ParseException e) {
                 throw new RuntimeException("Failed to parse source file version");
             }
 
+        } else if (ingestion.getIngestionName().equals(IngestionNames.CACHESEED_CSVGZ)) {
+            try {
+                DateFormat format = new SimpleDateFormat("yyyyMMdd");
+                TimeZone timezone = TimeZone.getTimeZone("UTC");
+                format.setTimeZone(timezone);
+                String fileVersion = HdfsPathBuilder.dateFormat
+                        .format(format.parse(format.format(new Date())));
+                fileDest = fileDest.append(fileVersion).append(fileName);
+            } catch (ParseException e) {
+                throw new RuntimeException("Failed to parse source file version");
+            }
+        } else if (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)) {
+            try {
+                DateFormat format = new SimpleDateFormat("yyyy_MM");
+                TimeZone timezone = TimeZone.getTimeZone("UTC");
+                format.setTimeZone(timezone);
+                String fileVersion = HdfsPathBuilder.dateFormat
+                        .format(format.parse(fileName.substring(15, 22)));
+                fileDest = fileDest.append(fileVersion).append(fileName);
+            } catch (ParseException e) {
+                throw new RuntimeException("Failed to parse source file version");
+            }
         } else {
             String fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
-            fileDest = fileDest.append(fileVersion);
+            fileDest = fileDest.append(fileVersion).append(fileName);
         }
-        fileDest = fileDest.append(fileName);
+
         return fileDest.toString();
     }
 
@@ -116,7 +143,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     @Override
     public CamelRouteConfiguration createCamelRouteConfiguration(IngestionProgress progress) {
         switch (progress.getIngestion().getIngestionType()) {
-        case SFTP_TO_HDFS:
+            case SFTP:
             return createSftpToHdfsRouteConfiguration(progress);
         default:
             throw new UnsupportedOperationException("Ingestion type "
@@ -174,11 +201,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     }
 
     @Override
-    public IngestionProgress updateDuplicateProgress(IngestionProgress progress) {
+    public IngestionProgress updateInvalidProgress(IngestionProgress progress, String message) {
         return new IngestionProgressUpdaterImpl(progress).status(ProgressStatus.FAILED)
-                .errorMessage("There is already a progress ingesting " + progress.getSource()
-                        + " to " + progress.getDestination())
-                .commit(false);
+                .errorMessage(message).commit(false);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
@@ -160,6 +161,18 @@ public class HdfsUtils {
         }
     }
 
+    public static final void compressGZFileWithinHDFS(Configuration configuration,
+            String gzHdfsPath, String uncompressedFilePath) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            Path inputFilePath = new Path(uncompressedFilePath);
+            Path outputFilePath = new Path(gzHdfsPath);
+            try (OutputStream os = new GZIPOutputStream(fs.create(outputFilePath), true)) {
+                InputStream is = fs.open(inputFilePath);
+                org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration);
+            }
+        }
+    }
+
     public static final boolean fileExists(Configuration configuration, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.exists(new Path(hdfsPath));
@@ -206,8 +219,7 @@ public class HdfsUtils {
         }
     }
 
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
-            throws IOException {
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -286,8 +298,7 @@ public class HdfsUtils {
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths
-                            .addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
+                    filePaths.addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
@@ -314,9 +325,9 @@ public class HdfsUtils {
         FileSystem fs = FileSystem.newInstance(configuration);
         return fs.open(new Path(hdfsPath));
     }
-    
-    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws IOException{
-        try(FileSystem fs = FileSystem.newInstance(configuration)){
+
+    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
     }

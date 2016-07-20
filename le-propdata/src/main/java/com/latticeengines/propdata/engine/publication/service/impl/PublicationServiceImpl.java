@@ -143,8 +143,17 @@ public class PublicationServiceImpl implements PublicationService {
                     serviceTenantBootstrapped = true;
                 }
                 Publication publication = progress.getPublication();
-                Source source = sourceService.findBySourceName(publication.getSourceName());
-                String avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
+                String avroDir = null;
+                switch (publication.getMaterialType()) {
+                    case SOURCE:
+                        Source source = sourceService.findBySourceName(publication.getSourceName());
+                        avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
+                        break;
+                    case INGESTION:
+                        avroDir = hdfsPathBuilder.constructIngestionDir(publication.getSourceName(),
+                            progress.getSourceVersion()).toString();
+                        break;
+                }
                 PublicationProgressUpdater updater = publicationProgressService.update(progress)
                         .status(ProgressStatus.PROCESSING);
                 if (ProgressStatus.FAILED.equals(progress.getStatus())) {

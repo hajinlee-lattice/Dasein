@@ -55,6 +55,10 @@ public class Publication implements HasPid {
     @Column(name = "PublicationType", nullable = false, length = 20)
     private PublicationType publicationType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MaterialType", nullable = false, length = 20)
+    private MaterialType materialType;
+
     @Column(name = "CronExpression", length=20)
     protected String cronExpression;
 
@@ -124,6 +128,16 @@ public class Publication implements HasPid {
         this.publicationType = publicationType;
     }
 
+    @JsonProperty("MaterialType")
+    public MaterialType getMaterialType() {
+        return materialType;
+    }
+
+    @JsonProperty("MaterialType")
+    public void setMaterialType(MaterialType materialType) {
+        this.materialType = materialType;
+    }
+
     @JsonProperty("CronExpression")
     public String getCronExpression() {
         return cronExpression;
@@ -191,6 +205,10 @@ public class Publication implements HasPid {
 
     public enum PublicationType {
         SQL
+    }
+
+    public enum MaterialType {
+        SOURCE, INGESTION
     }
 
 }

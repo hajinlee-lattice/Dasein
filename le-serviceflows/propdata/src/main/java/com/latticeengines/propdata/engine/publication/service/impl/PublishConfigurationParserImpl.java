@@ -1,5 +1,9 @@
 package com.latticeengines.propdata.engine.publication.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hsqldb.lib.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +15,7 @@ import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
 import com.latticeengines.dataplatform.service.impl.metadata.SQLServerMetadataProvider;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.propdata.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
 import com.latticeengines.propdata.core.service.SourceService;
@@ -128,6 +133,52 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                 .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION) //
                 .setSync(false) //
                 .build();
+    }
+
+    @Override
+    public SqoopExporter constructSqoopExporter(PublishTextToSqlConfiguration textToSqlConfiguration, String textDir) {
+        SqlDestination destination = (SqlDestination) textToSqlConfiguration.getDestination();
+        String tableName = destination.getTableName();
+        String customer = String.format(EngineConstants.SQOOP_CUSTOMER_PATTERN, tableName);
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setCustomer(customer) //
+                .setNumMappers(numMappers) //
+                .setTable(tableName) //
+                .setSourceDir(textDir) //
+                .setDbCreds(getDbCreds(textToSqlConfiguration)) //
+                .addHadoopArg(JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT) //
+                .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION) //
+                .setSync(false) //
+                .build();
+        List<String> otherOptions = new ArrayList<String>();
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getNullString())) {
+            otherOptions.add("--input-null-string");
+            otherOptions.add(textToSqlConfiguration.getNullString());
+            otherOptions.add("--input-null-non-string");
+            otherOptions.add(textToSqlConfiguration.getNullString());
+        }
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getEnclosedBy())) {
+            otherOptions.add("--input-enclosed-by");
+            otherOptions.add(textToSqlConfiguration.getEnclosedBy());
+        }
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getOptionalEnclosedBy())) {
+            otherOptions.add("--input-optionally-enclosed-by");
+            otherOptions.add(textToSqlConfiguration.getOptionalEnclosedBy());
+        }
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getEscapedBy())) {
+            otherOptions.add("--input-escaped-by");
+            otherOptions.add(textToSqlConfiguration.getEscapedBy());
+        }
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getFieldTerminatedBy())) {
+            otherOptions.add("--input-fields-terminated-by");
+            otherOptions.add(textToSqlConfiguration.getFieldTerminatedBy());
+        }
+        if (!StringUtil.isEmpty(textToSqlConfiguration.getLineTerminatedBy())) {
+            otherOptions.add("--input-lines-terminated-by");
+            otherOptions.add(textToSqlConfiguration.getLineTerminatedBy());
+        }
+        exporter.setOtherOptions(otherOptions);
+        return exporter;
     }
 
     @Override

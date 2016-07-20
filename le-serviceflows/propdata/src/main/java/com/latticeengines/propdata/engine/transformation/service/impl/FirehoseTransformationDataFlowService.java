@@ -16,6 +16,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
@@ -32,8 +33,6 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     private static final String PART_FILE = "PART-0001";
 
-    private static final String CSV_GZ = ".csv.gz";
-
     @Autowired
     private SimpleCascadingExecutor simpleCascadingExecutor;
 
@@ -49,25 +48,29 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     private CsvToAvroFieldMapping fieldTypeMapping;
 
     @Override
-    public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
-            String dataFlowBean, TransformationConfiguration transformationConfiguration) {
+    public void executeDataProcessing(Source source, String workflowDir, String baseVersion,
+            String uid, String dataFlowBean,
+            TransformationConfiguration transformationConfiguration) {
         if (StringUtils.isEmpty(dataFlowBean) || fieldTypeMapping == null) {
             throw new LedpException(LedpCode.LEDP_25012,
-                    new String[] { source.getSourceName(), (fieldTypeMapping == null
-                            ? "CsvToAvroFieldMapping cannot be null" : "Name of FlowBean cannot be null") });
+                    new String[] { source.getSourceName(),
+                            (fieldTypeMapping == null ? "CsvToAvroFieldMapping cannot be null"
+                                    : "Name of FlowBean cannot be null") });
         }
 
         if (source instanceof DataImportedFromHDFS) {
-            String inputDir = hdfsPathBuilder.constructIngestionDir(source.getSourceName(), baseVersion).toString();
+            String inputDir = hdfsPathBuilder
+                    .constructIngestionDir(source.getSourceName(), baseVersion).toString();
             String gzHdfsPath = null;
 
             try {
-                gzHdfsPath = scanDir(inputDir, CSV_GZ);
+                gzHdfsPath = scanDir(inputDir, PropDataConstants.CSV_GZ);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
 
-            String uncompressedFilePath = workflowDir + HDFS_PATH_SEPARATOR + PART_FILE + CSV_EXTENSION;
+            String uncompressedFilePath = workflowDir + HDFS_PATH_SEPARATOR + PART_FILE
+                    + CSV_EXTENSION;
             String avroDirPath = workflowDir + HDFS_PATH_SEPARATOR + AVRO_DIR_FOR_CONVERSION;
 
             try {
@@ -107,9 +110,10 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, gzHdfsPath, uncompressedFilePath);
     }
 
-    private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String uncompressedFilePath,
-            String avroDirPath) throws IOException {
-        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath);
+    private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping,
+            String uncompressedFilePath, String avroDirPath) throws IOException {
+        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath,
+                avroDirPath);
     }
 
     @Override

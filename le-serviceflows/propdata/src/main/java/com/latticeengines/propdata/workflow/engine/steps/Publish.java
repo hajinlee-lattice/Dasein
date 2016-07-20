@@ -24,7 +24,9 @@ import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
+import com.latticeengines.domain.exposed.propdata.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
+import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration.PublicationStrategy;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
 import com.latticeengines.propdata.engine.publication.service.PublishConfigurationParser;
@@ -77,7 +79,9 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
             initializeYarnClient();
 
-            if (pubConfig instanceof PublishToSqlConfiguration) {
+            if (pubConfig instanceof PublishTextToSqlConfiguration) {
+                executePublishTextToSql((PublishTextToSqlConfiguration) pubConfig);
+            } else if (pubConfig instanceof PublishToSqlConfiguration) {
                 executePublishToSql((PublishToSqlConfiguration) pubConfig);
             }
 
@@ -90,6 +94,32 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                 log.error(e);
             }
         }
+    }
+
+    private void executePublishTextToSql(PublishTextToSqlConfiguration pubConfig) {
+        log.info("Execute publish from text to sql.");
+        pubConfig = (PublishTextToSqlConfiguration) configurationParser.parseSqlAlias(pubConfig);
+
+        JdbcTemplate jdbcTemplate = configurationParser.getJdbcTemplate(pubConfig);
+        log.info("Publication Strategy = " + pubConfig.getPublicationStrategy());
+
+        if (pubConfig.getPublicationStrategy() != PublicationStrategy.APPEND) {
+            throw new RuntimeException(
+                    "Publish Text to SQL only support APPEND publication strategy");
+        }
+
+        SqoopExporter exporter = configurationParser.constructSqoopExporter(pubConfig, getConfiguration().getAvroDir());
+        AppSubmission appSub = internalProxy.exportTable(exporter);
+        ApplicationId appId = ConverterUtils.toApplicationId(appSub.getApplicationIds().get(0));
+        FinalApplicationStatus finalStatus = waitForApplicationToFinish(appId);
+        if (FinalApplicationStatus.SUCCEEDED.equals(finalStatus)) {
+            progress = progressService.update(progress).progress(0.95f).commit();
+        } else {
+            throw new RuntimeException("The final status is " + finalStatus + " instead of " + FinalApplicationStatus.SUCCEEDED);
+        }
+
+        Long count = configurationParser.countPublishedTable(pubConfig, jdbcTemplate);
+        progress = progressService.update(progress).progress(1.0f).rowsPublished(count).status(ProgressStatus.FINISHED).commit();
     }
 
     private void executePublishToSql(PublishToSqlConfiguration sqlConfiguration) {

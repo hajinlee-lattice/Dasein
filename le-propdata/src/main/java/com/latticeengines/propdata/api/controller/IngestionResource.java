@@ -68,14 +68,14 @@ public class IngestionResource extends InternalResourceBase implements Ingestion
             HttpServletRequest request) {
         checkHeader(request);
         try {
-            checkIngestionRequest(ingestionRequest);
+            checkIngestionRequest(ingestionName, ingestionRequest);
             return ingestionService.ingestInternal(ingestionName, ingestionRequest, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25017, e);
         }
     }
 
-    private void checkIngestionRequest(IngestionRequest ingestionRequest) {
+    private void checkIngestionRequest(String ingestionName, IngestionRequest ingestionRequest) {
         if (StringUtils.isEmpty(ingestionRequest.getFileName())) {
             throw new IllegalArgumentException("Please provide file name in ingestion request");
         }

@@ -30,7 +30,7 @@ public class IngestionEntityMgrImplTestNG extends PropDataEngineFunctionalTestNG
         Assert.assertNotNull(ingestion, "Failed to get ingestion configuration");
         Assert.assertNotNull(ingestion.getProviderConfiguration(),
                 "Failed to parse provider configuration from source");
-        Assert.assertEquals(ingestion.getIngestionType(), IngestionType.SFTP_TO_HDFS);
+        Assert.assertEquals(ingestion.getIngestionType(), IngestionType.SFTP);
         SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
         log.info("SFTP configuration: " + sftpConfig.getSftpHost() + ":" + sftpConfig.getSftpPort()
                 + " " + sftpConfig.getSftpUserName() + "/" + sftpConfig.getSftpPasswordEncrypted()

@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.propdata.ingestion.SqlConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ConfigurationType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = PublishToSqlConfiguration.class, name = "PublishToSqlConfiguration")
+        @JsonSubTypes.Type(value = PublishToSqlConfiguration.class, name = "PublishToSqlConfiguration"),
+        @JsonSubTypes.Type(value = PublishTextToSqlConfiguration.class, name = "PublishTextToSqlConfiguration")
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class PublicationConfiguration {
