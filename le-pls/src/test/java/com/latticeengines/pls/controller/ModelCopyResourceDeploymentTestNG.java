@@ -80,14 +80,14 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-        HdfsUtils.rmdir(yarnConfiguration,
-                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-                        .toString());
-        HdfsUtils.rmdir(yarnConfiguration,
-                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId()))
-                        .toString());
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+//        HdfsUtils.rmdir(yarnConfiguration,
+//                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
+//                        .toString());
+//        HdfsUtils.rmdir(yarnConfiguration,
+//                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId()))
+//                        .toString());
+//        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
+//        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
     }
 
     private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
@@ -140,8 +140,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupSecurityContext(tenant1);
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
-        log.info("Wait for 10 seconds to download model summary");
-        Thread.sleep(15000L);
+        log.info("Wait for 30 seconds to download model summary");
+        Thread.sleep(30000L);
 
         setupSecurityContext(tenant2);
 
