@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.util;
+package com.latticeengines.domain.exposed.util;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -23,7 +23,8 @@ import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
-import com.latticeengines.serviceflows.workflow.modeling.PivotValuesLookup;
+import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
+
 
 public class ModelingUtils {
 

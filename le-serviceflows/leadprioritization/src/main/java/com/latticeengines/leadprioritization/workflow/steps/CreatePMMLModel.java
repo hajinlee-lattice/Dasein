@@ -42,19 +42,19 @@ import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
+import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PMMLModelingServiceExecutor;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PmmlField;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.SkipFilter;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.modeling.PivotValuesLookup;
-import com.latticeengines.serviceflows.workflow.util.ModelingUtils;
 
 @Component("createPMMLModel")
 public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfiguration> {

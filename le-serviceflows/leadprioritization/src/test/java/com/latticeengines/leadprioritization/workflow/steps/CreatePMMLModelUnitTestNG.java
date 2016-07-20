@@ -15,16 +15,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
+import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PmmlField;
-import com.latticeengines.serviceflows.workflow.modeling.PivotValuesLookup;
-import com.latticeengines.serviceflows.workflow.util.ModelingUtils;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
+
 
 public class CreatePMMLModelUnitTestNG {
 

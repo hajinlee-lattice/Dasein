@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.modeling;
+package com.latticeengines.domain.exposed.modeling;
 
 import java.util.AbstractMap;
 import java.util.List;

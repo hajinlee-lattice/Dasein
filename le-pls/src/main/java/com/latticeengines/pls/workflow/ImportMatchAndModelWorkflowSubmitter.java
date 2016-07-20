@@ -1,12 +1,10 @@
 package com.latticeengines.pls.workflow;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,10 +12,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -27,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -36,6 +33,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.DataRuleUtils;
+import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
@@ -189,13 +187,18 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                 trainingTableName);
         List<Attribute> trainingAttrs = trainingTable.getAttributes();
-        InputStream stream = null;
+        PivotValuesLookup pivotValues = null;
         try {
-            stream = HdfsUtils.getInputStream(yarnConfiguration, pivotArtifactPath);
-        } catch (IOException e) {
+            pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, pivotArtifactPath);
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(stream, trainingAttrs);
+        if (pivotValues == null) {
+            throw new RuntimeException("PivotValuesLookup is null.");
+        }
+        Set<String> sourceColumnNames = pivotValues.pivotValuesBySourceColumn.keySet();
+        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(sourceColumnNames, trainingAttrs);
+
         trainingTable.setAttributes(attrs);
         metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);
     }
