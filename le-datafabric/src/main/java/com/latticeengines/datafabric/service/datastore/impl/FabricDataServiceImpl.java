@@ -67,7 +67,9 @@ public class FabricDataServiceImpl implements FabricDataService {
             Set<String> sentinelSet = new HashSet<String>();
             String sentinels[] = redisServers.split(",");
             for (String sentinel : sentinels) {
-                sentinelSet.add(sentinel + ":" + redisPort);
+                String hap = sentinel + ":" + redisPort;
+                sentinelSet.add(hap);
+                log.info("Add " + hap + " to sentinelSet");
             }
             jedisPool = new JedisSentinelPool(redisMaster, sentinelSet, poolConfig);
         } else {
