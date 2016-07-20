@@ -120,7 +120,7 @@
     </Service>
 
     <Service name="SAML">
-        <Connector port="8086" protocol="HTTP/1.1" connectionTimeout="20000"/>
+        <Connector port="8087" protocol="HTTP/1.1" connectionTimeout="20000"/>
 
         <Engine name="SAMLEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">

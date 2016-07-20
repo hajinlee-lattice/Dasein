@@ -30,7 +30,7 @@
                     <Property name="jetty.host"/>
                 </Set>
                 <Set name="port">
-                    <Property name="jetty.https.port" default="8086"/>
+                    <Property name="jetty.https.port" default="8087"/>
                 </Set>
                 <Set name="idleTimeout">30000</Set>
             </New>
