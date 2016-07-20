@@ -16,7 +16,9 @@ angular.module('mainApp.models.controllers.ModelListController', [
 
     FeatureFlagService.GetAllFlags().then(function(result) {
         var flags = FeatureFlagService.Flags();
-        $scope.showUploadSummaryJson = FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
+
+        // disable Import JSON button for now
+        $scope.showUploadSummaryJson = false; //FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
     });
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();

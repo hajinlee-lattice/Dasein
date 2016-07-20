@@ -155,6 +155,7 @@ angular
 
         var options = {
                 modelName: this.modelDisplayName,
+                schema: vm.accountLeadCheck,
                 module: this.moduleName,
                 pmmlfile: this.pmmlFileName
             };

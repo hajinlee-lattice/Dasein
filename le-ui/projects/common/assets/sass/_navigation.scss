@@ -325,6 +325,11 @@ html.no-cssmask {
             -moz-transition: none;
             -ms-transition: none;
             transition: none;
+
+            .badge {
+                position: absolute;
+                right: 0.5em;
+            }
         }
         .open-button {
             .ico-arrow-open {

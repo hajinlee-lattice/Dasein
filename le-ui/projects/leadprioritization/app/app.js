@@ -4,7 +4,7 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
-    //'ngAnimate',
+    'ngAnimate',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.modules.ServiceErrorModule',

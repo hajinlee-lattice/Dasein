@@ -262,7 +262,8 @@ angular
             params: {
                 'module': options.module,
                 'pmmlfile': options.pmmlfile,
-                'pivotfile': options.pivotfile
+                'pivotfile': options.pivotfile,
+                'schema': options.schema
             },
             headers: { 'Content-Type': 'application/json' }
         })
