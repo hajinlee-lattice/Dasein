@@ -45,7 +45,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     @Autowired
     private MetadataProxy metadataProxy;
 
-    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/RTSBulkScoreWorkflowDeploymentTestNG/Tenants/RTSBulkScoreWorkflowDeploymentTestNG/Spaces/Production/Data/Tables/";
+    private static String TEST_INPUT_DATA_DIR;
 
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
 
@@ -55,11 +55,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
-    protected static final String TENANT_ID = "RTSBulkScoreWorkflowDeploymentTestNG";
+    protected static String TENANT_ID;
 
     protected Tenant tenant;
 
-    protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
+    protected static CustomerSpace customerSpace;
 
     private String artifactTableDir;
     private String artifactBaseDir;
@@ -69,6 +69,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
+        customerSpace = CustomerSpace.parse(TENANT_ID);
+        TEST_INPUT_DATA_DIR = String.format("/Pods/QA/Contracts/%s/Tenants/%s/Spaces/Production/Data/Tables/",
+                TENANT_ID, TENANT_ID);
+
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
