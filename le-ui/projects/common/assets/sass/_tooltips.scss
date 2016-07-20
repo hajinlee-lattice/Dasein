@@ -1,7 +1,12 @@
 /* 
 Informational Tooltips
 ====================================================== */
-label .more-info {
+
+.tooltip-label {
+  display: inline-block;
+  margin-right: 6px;
+}
+.more-info {
   color: #fff;
   background: #467dba;
   display: inline-block;
@@ -10,9 +15,9 @@ label .more-info {
   -moz-border-radius: 50%;
   border-radius: 50%;
   font-size: 11px;
-  margin-left: 10px;
+  margin-bottom: -3px;
 }
-$tolerance: 3px;
+$tolerance: -2px;
 $margin-tooltip-arrow: 6px;
 $padding-top-bottom-tooltip: 16px;
 $padding-rigth-left-tooltip: 16px;
@@ -101,29 +106,37 @@ tooltip {
     color: $tooltip-color;
     display: none;
     line-height: normal;
-    width: 500px;
     height: auto;
     opacity: 0;
     word-wrap: break-word;
     padding: $padding-top-bottom-tooltip $padding-rigth-left-tooltip;
     position: absolute;
     will-change: top, left, bottom, right;
+    .divider {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: rgba(255, 255, 255, 0.6) solid 1px;
+    }
     h4 {
       color: #fff;
       text-align: center;
       font-size: 18px;
-      &.divider {
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: rgba(255, 255, 255, 0.6) solid 1px;
-      }
+      margin-top: 10px;
     }
     a {
       display: block;
       margin-top: 10px;
     }
     p {
-      font-size: 16px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    ul {
+      margin-left: 20px;
+      li {
+        list-style: disc;
+        font-size: 14px;
+      }
     }
     &._hidden {
       display: block;
@@ -141,6 +154,7 @@ tooltip {
     font-size: .95em;
     &._large {
       font-size: 1.1em;
+      width: 700px;
     }
     &._small {
       font-size: .8em;

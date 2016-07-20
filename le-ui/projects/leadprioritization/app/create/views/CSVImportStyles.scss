@@ -1,9 +1,19 @@
 section.container.setup-import {
     font-size: 1.4em;
     margin-top: 5em;
-    tooltip {
+    tooltip._bottom {
         position: absolute;
         margin-top: -2px;
+        tip {
+            width: 600px;
+            transform: translateY(4px) translateX(70%);
+            .six h4 {
+                text-align: left;
+            }
+            tip-arrow {
+                left: 30%;
+            }
+        }
     }
     .placeholder {
         color: #888;
@@ -13,9 +23,12 @@ section.container.setup-import {
         color: #000;   
         span {
             color: #999;
-        }
-        span.more-info {
-            color: #fff;
+            &.tooltip-label {
+                color: #000;
+            }
+            &.more-info {
+                color: #fff;
+            }
         }
     }
     textarea {

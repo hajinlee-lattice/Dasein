@@ -23,7 +23,7 @@
                 </dd>
             </dl>
 
-            <div data-ng-hide="$state.includes('home.models.pmml.job')">
+            <div ng-if="!isPMMLJob">
                 <dl>
                     <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
                     <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>
