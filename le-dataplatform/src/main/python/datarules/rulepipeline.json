@@ -1,31 +1,5 @@
 {
   "columnTransformFiles": {
-    "CountUniqueValueRule": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "countuniquevaluerule",
-      "MainClassName": "CountUniqueValueRule",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn",
-        "uniqueCountThreshold":200
-      },
-      "ColumnTransformFilePath": "countuniquevaluerule.py"
-    },
-    "PopulatedRowCount": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "populatedrowcount",
-      "MainClassName": "PopulatedRowCount",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns"
-      },
-      "ColumnTransformFilePath": "populatedrowcount.py"
-    },
     "OverlyPredictiveDS": {
       "KeyWhenSortingByAscending": "4",
       "Name": "overlypredictiveds",
