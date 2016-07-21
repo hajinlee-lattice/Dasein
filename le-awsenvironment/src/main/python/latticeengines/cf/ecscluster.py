@@ -67,9 +67,9 @@ def create_template():
     return stack
 
 def provision_cli(args):
-    return provision(args.environment, args.stackname, args.port, consul=args.consul)
+    return provision(args.environment, args.stackname, args.port, init_cap=args.ic, max_cap=args.mc, consul=args.consul)
 
-def provision(environment, stackname, port=8080, consul=None):
+def provision(environment, stackname, port=8080, init_cap=2, max_cap=8, consul=None):
     config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -85,7 +85,9 @@ def provision(environment, stackname, port=8080, consul=None):
             PARAM_SECURITY_GROUP.config(config.kafka_sg()),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
-            PARAM_APP_PORT.config(port)
+            PARAM_APP_PORT.config(port),
+            PARAM_CAPACITY.config(str(init_cap)),
+            PARAM_MAX_CAPACITY.config(str(max_cap))
         ],
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',
