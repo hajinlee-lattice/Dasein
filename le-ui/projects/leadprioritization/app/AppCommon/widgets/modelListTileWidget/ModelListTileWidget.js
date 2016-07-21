@@ -96,12 +96,20 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         };
     };
 
+
     $scope.updateAsInactiveClick = function ($event) {
         if ($event != null) {
             $event.stopPropagation();
         }
+
+        $scope.Deactivating = true;
+
         DeactivateModelModal.show($scope.data.Id);
+        $scope.$on('deactivate:modal:cancel', function(event, args) {
+            $scope.Deactivating = false;
+        });
     };
+
 
     $scope.deleteModelClick = function ($event) {
         if ($event != null) {

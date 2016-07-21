@@ -52,6 +52,7 @@ angular.module('mainApp.models.modals.DeactivateModelModal', [
     }
 
     $scope.cancelClick = function () {
+        $rootScope.$broadcast('deactivate:modal:cancel');
         $("#modalContainer").modal('hide');
     };
 });
