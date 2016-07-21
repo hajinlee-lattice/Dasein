@@ -29,7 +29,7 @@ angular
             $scope.showEloquaSettings = FeatureFlagService.FlagIsEnabled(flags.USE_ELOQUA_SETTINGS);
             $scope.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
             $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
-            $scope.showLeadEnrichmentPage = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
+            $scope.showLeadEnrichmentPage = 1; 
         });
 
         $scope.statusFilter = function (item) { 

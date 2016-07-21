@@ -26,7 +26,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     var flags = FeatureFlagService.Flags();
     $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
     $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
-
+    $scope.showReviewAndClone = FeatureFlagService.FlagIsEnabled(flags.REVIEW_CLONE);
     $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
     if (widgetConfig == null || data == null) {
         return;

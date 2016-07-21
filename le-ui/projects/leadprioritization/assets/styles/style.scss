@@ -8299,9 +8299,17 @@ ul.sidebar-menu li ul.sub-plays li  a.status-le-average {
     margin-bottom:-83px;
 }
 div.alert {
-    position:relative;
-    z-index:1001;
-    border:1px solid;
+    position: relative;
+    z-index: 1001;
+    border: 1px solid;
+    padding: 5px;
+    padding-right: 20px;
+    button.close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+
+    }
 }
 div.alert:first-of-type {
         /* margin-top:15px; */
