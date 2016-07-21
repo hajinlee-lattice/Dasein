@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
+import com.latticeengines.domain.exposed.propdata.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
@@ -86,7 +87,7 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         publication.setNewJobMaxRetry(3);
         publication.setSchedularEnabled(true);
         publication.setPublicationType(Publication.PublicationType.SQL);
-
+        publication.setMaterialType(MaterialType.SOURCE);
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
         configuration.setAlias(PublishToSqlConfiguration.Alias.TestDB);
         configuration.setDefaultTableName(source.getSourceName());
