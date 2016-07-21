@@ -1,6 +1,6 @@
 DROP SCHEMA IF EXISTS `LDC_ManageDB`;
 CREATE SCHEMA IF NOT EXISTS `LDC_ManageDB`;
-GRANT ALL ON LDC_ManageDB.* TO root;
+GRANT ALL ON LDC_ManageDB.* TO root@localhost;
 USE `LDC_ManageDB`;
 
 source WSHOME/le-propdata/ddl_ldc_managedb_mysql5innodb.sql;

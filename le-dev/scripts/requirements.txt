@@ -1,3 +1,11 @@
 pexpect==4.0.1
 psutil==2.2.1
 kazoo
+#numpy==1.8.1
+#scipy==0.13.3
+#scikit-learn==0.14.1
+#openpyxl==1.8.6
+#pandas==0.13.1
+#patsy==0.3.0
+#statsmodels==0.5.0
+#lxml==3.4.0

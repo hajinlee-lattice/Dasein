@@ -1,6 +1,6 @@
 DROP SCHEMA IF EXISTS `ScoringDB`;
 CREATE SCHEMA IF NOT EXISTS `ScoringDB`;
-GRANT ALL ON ScoringDB.* TO root;
+GRANT ALL ON ScoringDB.* TO root@localhost;
 USE `ScoringDB`;
 
 source WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql;
