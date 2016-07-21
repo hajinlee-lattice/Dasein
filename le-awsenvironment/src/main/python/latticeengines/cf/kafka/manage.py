@@ -39,7 +39,7 @@ def template_cli(args):
     template(args.environment, args.upload)
     calc_heap_log(args.pth, args.ath)
 
-def template(environment, upload):
+def template(environment, upload=False):
     stack = create_template()
     if upload:
         stack.validate()

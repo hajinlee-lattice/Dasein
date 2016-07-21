@@ -24,7 +24,7 @@ class KafkaProfile:
                 self._construct(json.loads(f.read()))
         else:
             self._construct(profile)
-        # self._validate()
+        self._validate()
 
     def _construct(self, profile):
         self._profile = profile
@@ -40,14 +40,15 @@ class KafkaProfile:
         return self._profile[key] if key in self._profile else default
 
     def _validate(self):
+        if self._brokers < 2:
+            raise ValueError("Need at least 2 brokers")
+
         if self._broker_mem < 1024:
             raise ValueError("Need at least 1024 MB memory for each container")
 
-        tot_mem_avail = type_def[self._instance_type]["ecs_mem"] if "ecs_mem" in type_def[self._instance_type]["ecs_mem"] \
-            else ( type_def[self._instance_type]["mem_gb"] * 1024 - 256 ) * self._instances
-        tot_mem_needed = self._brokers * self._broker_mem
-        if tot_mem_avail < tot_mem_needed:
-            raise ValueError("You request %d mb memory in total, but only %d mb can be provided by then instances in your profile.")
+        print self._instance_type
+        if self._instance_type not in type_def:
+            raise ValueError("Unsupported instance type " + self._instance_type)
 
     def _set_broker_mem(self, mem):
         self._broker_heap = "%dm" % math.floor(mem / 1.1)
