@@ -18,7 +18,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -74,8 +73,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants();
         cleanup();
         setupHdfs();
-        log.info("Wait for 30 seconds to download model summary");
-        Thread.sleep(30000L);
+        log.info("Wait for 80 seconds to download model summary");
+        Thread.sleep(80000L);
         setupTables();
     }
 
@@ -148,8 +147,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupSecurityContext(tenant1);
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
-        log.info("Wait for 30 seconds to download model summary");
-        Thread.sleep(30000L);
+        log.info("Wait for 80 seconds to download model summary");
+        Thread.sleep(80000L);
 
         setupSecurityContext(tenant2);
 
