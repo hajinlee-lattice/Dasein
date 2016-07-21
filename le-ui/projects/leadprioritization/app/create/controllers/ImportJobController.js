@@ -20,7 +20,8 @@ angular.module('lp.create.import.job', [
         load_data: false, generate_insights: false, create_global_target_market: false
     };
 
-    $scope.$state = $state;
+
+    $scope.isPMMLJob = $state.includes('home.models.pmml.job');
 
 
     function updateStatesBasedOnJobStatus(jobStatus) {

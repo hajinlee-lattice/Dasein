@@ -18,7 +18,7 @@ angular
         ResourceUtility: ResourceUtility,
         endpoint: '/pls/metadatauploads/modules/',
         pmmlParams: {
-            infoTemplate: "<h4>PMML File</h4><p>Choose a PMML File</p>",
+            infoTemplate: "<h4>PMML File</h4><p>Upload a CSV file to score. The list of expected column headers is displayed below.</p>",
             defaultMessage: "Example: enterprise-pmml-model.xml",
             compressed: true,
             metadataFile: true
@@ -30,6 +30,7 @@ angular
             metadataFile: true
         }
     });
+
 
     vm.pmmlSelect = function(fileName) {
         vm.fileName = vm.pmmlFileName = fileName;

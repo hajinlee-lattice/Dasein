@@ -1,4 +1,4 @@
-<section class="container setup-import">
+<section class="container setup-import pmml-import">
 <form name="uploadForm" ng-controller="pmmlImportController as vm" novalidate>
   <div class="row">
     <div class="columns eight offset-two">
@@ -9,6 +9,7 @@
           label="PMML File"
           params="vm.pmmlParams"
           input-name="pmmlFileName"
+          info-template="vm.pmmlParams.infoTemplate"
           default-message="vm.pmmlParams.defaultMessage"
           file-accept=".pmml,.xml"
           file-select="vm.pmmlSelect(fileName)"

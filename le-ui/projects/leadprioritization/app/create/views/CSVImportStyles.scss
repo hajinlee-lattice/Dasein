@@ -15,6 +15,20 @@ section.container.setup-import {
             }
         }
     }
+    &.pmml-import {
+        tooltip._bottom {
+            tip {
+                width: 312px;
+                transform: translateY(4px) translateX(70%);
+                h4 {
+                    text-align: left;
+                }
+                tip-arrow {
+                    left: 30%;
+                }
+            }
+        }
+    }
     .placeholder {
         color: #888;
         text-transform: none;
@@ -329,6 +343,7 @@ section.container.custom-fields {
         padding: 0.5em;
     }
 }
+
 
 /* Map to Lattice Fields Modal */
 .lattice-mapping {

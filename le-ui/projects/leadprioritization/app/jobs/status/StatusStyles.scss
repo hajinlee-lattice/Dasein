@@ -134,9 +134,12 @@ span.chevron-content.chevron-content-text {
 .jobs-table-content {
     color: black;
     font-size: 15px;
-    
-    tooltip tip {
-        font-size: 14px;
+    tooltip {
+        tip {
+            font-size: 14px;
+            min-width: 120px;
+            width: auto;
+        }
     }
     
     span.button {
