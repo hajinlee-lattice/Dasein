@@ -28,6 +28,18 @@ class AllDataRuleTests(TestBase):
         cls.eventtable_mulesoft = DataRuleEventTable(
                 'Mulesoft NA',
                 'Mulesoft_Migration_LP3_ModelingLead_ReducedRows_Training_20160624_155355.avro')
+        cls.eventtable_telogis = DataRuleEventTable(
+                'Telogis POC',
+                'Telogis_POC_Training.avro')
+        cls.eventtable_hostingcom = DataRuleEventTable(
+                'Hosting.com POC',
+                'Hostingcom_POC_Training.avro')
+        cls.eventtable_alfresco = DataRuleEventTable(
+                'Alfresco',
+                'Alfresco_SFDC_LP3_ModelingLead_ReducedRowsEnhanced_Training_20160712_125241.avro')
+        cls.eventtable_nginx = DataRuleEventTable(
+                'NGINX',
+                'NGINX_PLS_LP3_ModelingLead_ReducedRowsEnhanced_Training_20160712_125224.avro')
 
     @classmethod
     def tearDownClass(cls):
@@ -72,17 +84,17 @@ class AllDataRuleTests(TestBase):
         self.logger.info('* Summary: {0} rows failed ({1:.2%})'.format(n_failed, float(n_failed)/float(n_rows)))
 
     def testPopulatedRowCountDS(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'PopulatedRowCountDS: Using dataset {}'.format(et.getName()))
             columns = et.getAllColsAsDict()
-            rule = PopulatedRowCountDS(columns, et.getCategoricalCols(), et.getNumericalCols(), 0.98, 0.98)
+            rule = PopulatedRowCountDS(columns, et.getCategoricalCols(), et.getNumericalCols(), 0.95, 0.95)
             dictOfArguments = {}
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
-    def testLowCoverageDS(self):
-        for et in [self.eventtable_mulesoft]:
+    def IGNOREtestLowCoverageDS(self):
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'LowCoverageDS: Using dataset {}'.format(et.getName()))
@@ -92,7 +104,7 @@ class AllDataRuleTests(TestBase):
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def testNullIssueDS(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'NullIssueDS: Using dataset {}'.format(et.getName()))
@@ -103,7 +115,7 @@ class AllDataRuleTests(TestBase):
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def testUniqueValueCountDS(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'UniqueValueCountDS: Using dataset {}'.format(et.getName()))
@@ -113,7 +125,7 @@ class AllDataRuleTests(TestBase):
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def testOverlyPredictiveDS(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'OverlyPredictiveDS: Using dataset {}'.format(et.getName()))
@@ -123,11 +135,11 @@ class AllDataRuleTests(TestBase):
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def testHighlyPredictiveSmallPopulationDS(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_nginx]:
             self.logger.info('________________________________________\n'+\
                     '                                                     '+\
                     'HighlyPredictiveSmallPopulationDS: Using dataset {}'.format(et.getName()))
             columns = et.getAllColsAsDict()
-            rule = HighlyPredictiveSmallPopulationDS(columns, et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol(), 4, 0.005)
+            rule = HighlyPredictiveSmallPopulationDS(columns, et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol(), 3, 0.01)
             dictOfArguments = {}
             self.rowRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
