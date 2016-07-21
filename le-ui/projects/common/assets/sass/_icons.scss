@@ -203,6 +203,9 @@ Icons
 	}
 }
 .no-cssmask {
+	.ico {
+		mask: none; // added to make debuging easier, remove if you see issues with svg masks moving forward. - ben2
+	}
 	.ico, .menu .active .ico {
 		background-color: transparent;
 	}
@@ -296,6 +299,7 @@ Icons
 	}
 	.ico-attributes {
 		background-image:  url("/assets/images/ico-attributes.png");
+		background-size: 20px;
 	}
 	.ico-leads {
 		background-image:  url("/assets/images/ico-leads.png");
