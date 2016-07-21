@@ -72,13 +72,13 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTwoTenants();
+        cleanup();
         setupHdfs();
         log.info("Wait for 30 seconds to download model summary");
         Thread.sleep(30000L);
         setupTables();
     }
 
-    @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration,
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
@@ -131,8 +131,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void setupHdfs() throws IOException {
-
         HdfsUtils.mkdir(yarnConfiguration, customerBase + tenant1.getId());
+        System.out.println(localPathBase + "/models");
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + tenant1.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + tenant1.getId());
         HdfsUtils.copyFromLocalToHdfs(
