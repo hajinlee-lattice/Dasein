@@ -1,4 +1,4 @@
-<div class="modal-dialog">
+<div class="modal-dialog" data-ng-controller="RefineModelThresholdController">
     <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -7,15 +7,20 @@
         <div class="modal-body">
           <div class="row">
             <div class="twelve columns">
-              <p>{{ResourceUtility.getString('MODEL_REVIEW_THRESHOLD_LABEL')}}</p>
+              <p data-ng-if="totalRows < 7000">Based on your selections, your training data has {{totalRowsDisplay}} rows, which is less than our recommendation of 7,000 rows.</p>
+              <p data-ng-if="totalRows >= 7000 && successEvents < 150">Based on your selections, your training data has {{successEventsDisplay}} success events, which is less than our recommendation of 150 success events.</p>
+              <p data-ng-if="totalRows >= 7000 && successEvents >= 150 && conversionRate > 10">Based on your selections, your training data has {{conversionRate}}% conversion rate, which is higher than our recommendation of <10%.</p>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <div class="row">
-            <div class="six columns offset-six">
-              <button class="button orange-button block-button" type="button" data-dismiss="modal" aria-hidden="true" data-ng-click="$('#modalContainer').modal('hide');">
-                  {{ResourceUtility.getString('BUTTON_OK_LABEL')}}
+            <div class="six columns">
+              <button class="button gray-button block-button" type="button" data-ng-click="$('#modalContainer').modal('hide');">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+            </div>
+            <div class="six columns">
+              <button class="button orange-button block-button" type="button" data-ng-click="createModelClicked()">
+                  {{ResourceUtility.getString('BUTTON_CONTINUE_ANYWAYS_LABEL')}}
               </button>
             </div>
           </div>

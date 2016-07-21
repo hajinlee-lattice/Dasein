@@ -1,9 +1,11 @@
 angular.module('lp.navigation.review', [
     'mainApp.appCommon.utilities.StringUtility',
     'lp.models.review',
-    'mainApp.setup.modals.UpdateFieldsModal'
+    'mainApp.setup.modals.UpdateFieldsModal',
+    'mainApp.models.modals.RefineModelThresholdModal'
 ])
-.controller('RefineModelSummaryController', function($scope, $stateParams, StringUtility, Model, ReviewData, ModelReviewService, ModelReviewStore, UpdateFieldsModal) {
+.controller('RefineModelSummaryController', function($scope, $stateParams, StringUtility, Model, ReviewData,
+    ModelReviewService, ModelReviewStore, UpdateFieldsModal, RefineModelThresholdModal) {
     var vm = this;
 
     angular.extend(vm, {
@@ -20,7 +22,11 @@ angular.module('lp.navigation.review', [
     });
 
     vm.createModelClicked = function() {
-       UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
+        if (vm.totalRecordsAfter < 7000 || vm.successEventsAfter < 150 || vm.conversionRateAfter > 10) {
+            RefineModelThresholdModal.show(vm.totalRecordsAfter, vm.successEventsAfter, vm.conversionRateAfter);
+        } else {
+            UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
+        }
     };
 
     ModelReviewService.GetModelReviewData(vm.modelId, vm.eventTableName).then(function(result) {
@@ -38,6 +44,9 @@ angular.module('lp.navigation.review', [
 
     $scope.$on('RowWarningToggled', function(event, warning, dataRule) {
         updateDisplay(warning, dataRule);
+    });
+    $scope.$on('ShowCreateModelPopup', function(event) {
+        UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
     });
 
     function updateDisplay(warning, dataRule) {

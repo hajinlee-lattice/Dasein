@@ -3,12 +3,17 @@ angular.module('mainApp.models.modals.RefineModelThresholdModal', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService'
 ])
-.service('RefineModelThresholdModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, ModelService) {
+.service('RefineModelThresholdModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, StringUtility, ModelService) {
     var self = this;
-    this.show = function () {
+    this.show = function (totalRows, successEvents, conversionRate) {
         $http.get('app/models/views/RefineModelThresholdModal.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.ResourceUtility = ResourceUtility;
+            scope.totalRows = totalRows;
+            scope.totalRowsDisplay = StringUtility.AddCommas(totalRows);
+            scope.successEvents = successEvents;
+            scope.successEventsDisplay = StringUtility.AddCommas(successEvents);
+            scope.conversionRate = conversionRate;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -24,5 +29,10 @@ angular.module('mainApp.models.modals.RefineModelThresholdModal', [
                 modalElement.empty();
             });
         });
+    };
+})
+.controller('RefineModelThresholdController', function($scope, $rootScope, ResourceUtility) {
+    $scope.createModelClicked = function() {
+        $rootScope.$broadcast('ShowCreateModelPopup');
     };
 });

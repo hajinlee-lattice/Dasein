@@ -2,11 +2,10 @@ angular.module('mainApp.models.review', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.models.services.ModelService',
     'mainApp.setup.services.MetadataService',
-    'mainApp.models.modals.RefineModelThresholdModal',
     'lp.models.review'
 ])
 .controller('ModelReviewRowController', function($scope, $stateParams, _, $rootScope, ResourceUtility, ModelService, ModelReviewStore,
-    ReviewData, RefineModelThresholdModal, Model) {
+    ReviewData, Model) {
     var vm = this,
         ruleNameToDataRules = {},
         modelId = $stateParams.modelId;
@@ -44,8 +43,6 @@ angular.module('mainApp.models.review', [
             vm.rowsExcluded += warning.flaggedItemCount;
         }
 
-        RefineModelThresholdModal.show();
-
         $rootScope.$broadcast('RowWarningToggled', warning, vm.ruleNameToDataRules[warning.dataRuleName]);
     };
 
@@ -56,7 +53,7 @@ angular.module('mainApp.models.review', [
     });
 })
 .controller('ModelReviewColumnController', function($scope, _, $stateParams, ModelService, MetadataService, ModelReviewStore,
-    ReviewData, MetadataStore, RefineModelThresholdModal) {
+    ReviewData, MetadataStore) {
         var vm = this,
             ruleNameToDataRules = {},
             modelId = $stateParams.modelId;
@@ -226,7 +223,7 @@ angular.module('mainApp.models.review', [
             interface: '='
         },
         controller: ['$scope', '$stateParams', 'ModelService', 'ModelReviewStore', 'MetadataStore',
-            'RefineModelThresholdModal', function($scope, $stateParams, ModelService, ModelReviewStore, MetadataStore, RefineModelThresholdModal) {
+            function($scope, $stateParams, ModelService, ModelReviewStore, MetadataStore) {
 
             $scope.modelId = $stateParams.modelId;
             $scope.columnWarning = $scope.column;
