@@ -1,12 +1,15 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
@@ -38,5 +41,18 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             boolean hasCompanyName, //
             boolean hasCompanyState, List<String> missingMatchFields) {
         return null;
+    }
+
+    @Override
+    protected boolean shouldThrowExceptionForMismatchedDataTypes() {
+        return false;
+    }
+
+    @Override
+    protected void handleException(
+            Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
+            String fieldName, Object fieldValue, FieldType fieldType, Map<String, Object> record) {
+        // just put field and original value for PMML model case
+        record.put(fieldName, fieldValue);
     }
 }

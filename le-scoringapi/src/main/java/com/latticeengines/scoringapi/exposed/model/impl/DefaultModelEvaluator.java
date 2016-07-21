@@ -40,6 +40,8 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
     private final PMMLManager manager;
 
+    protected static final double DEFAULT_DOUBLE_VALUE = 0.0d;
+
     public DefaultModelEvaluator(InputStream is) {
         PMML unmarshalled;
         try {
@@ -98,7 +100,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
                  * Set this in order to get through prepare so that we can
                  * collect all null fields before throwing an exception
                  */
-                value = 0.0d;
+                value = DEFAULT_DOUBLE_VALUE;
             }
             if (value instanceof Boolean) {
                 Boolean booleanValue = ((Boolean) value).booleanValue();
@@ -116,34 +118,24 @@ public class DefaultModelEvaluator implements ModelEvaluator {
             if (value instanceof Integer) {
                 value = ((Integer) value).doubleValue();
             }
-            try {
-                if (debugRow) {
-                    System.out.println(String.format("%s=%f", name, value));
-                }
-                arguments.put(name, evaluator.prepare(name, value));
-            } catch (Exception e) {
-                throw new ScoringApiException(LedpCode.LEDP_31103,
-                        new String[] { name.getValue(), String.valueOf(value) });
-            }
+            prepare(evaluator, arguments, debugRow, name, value);
         }
-        String nullFieldsMsg = "";
-        if (!nullFields.isEmpty()) {
-            nullFieldsMsg = Joiner.on(",").join(nullFields);
-            log.warn("Preevaluated fields with null values:" + nullFieldsMsg);
-            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
-        }
+
+        checkNullFields(nullFields);
 
         Map<FieldName, ?> results = null;
         try {
             results = evaluator.evaluate(arguments);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
+            throw new LedpException(LedpCode.LEDP_31014, e,
+                    new String[] { JsonUtils.serialize(arguments) });
         }
 
         if (results == null) {
             throw new LedpException(LedpCode.LEDP_31013);
         } else if (results.size() != 1) {
-            throw new LedpException(LedpCode.LEDP_31012, new String[] { String.valueOf(results.size()) });
+            throw new LedpException(LedpCode.LEDP_31012,
+                    new String[] { String.valueOf(results.size()) });
         }
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
@@ -151,6 +143,23 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         calculatePercentile(derivation, results, result);
 
         return result;
+    }
+
+    protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments,
+            boolean debugRow, FieldName name, Object value) {
+        try {
+            if (debugRow) {
+                System.out.println(String.format("%s=%f", name, value));
+            }
+            arguments.put(name, evaluator.prepare(name, value));
+        } catch (Exception e) {
+            throw new ScoringApiException(LedpCode.LEDP_31103,
+                new String[] { name.getValue(), String.valueOf(value) });
+        }
+    }
+
+    protected boolean shouldThrowExceptionForNullFields() {
+        return true;
     }
 
     protected void calculatePercentile(ScoreDerivation derivation, //
@@ -161,7 +170,8 @@ public class DefaultModelEvaluator implements ModelEvaluator {
             target = results.keySet().iterator().next().getValue();
         }
 
-        ProbabilityDistribution classification = (ProbabilityDistribution) results.get(new FieldName(target));
+        ProbabilityDistribution classification = (ProbabilityDistribution) results
+                .get(new FieldName(target));
         double predicted = classification.getProbability("1");
 
         result.put(ScoreType.PROBABILITY, predicted);
@@ -212,7 +222,18 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
     private boolean withinRange(BucketRange range, //
             double value) {
-        return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
+        return (range.lower == null || value >= range.lower)
+                && (range.upper == null || value < range.upper);
     }
 
+    private void checkNullFields(List<String> nullFields) {
+        String nullFieldsMsg = "";
+        if (!nullFields.isEmpty()) {
+            nullFieldsMsg = Joiner.on(",").join(nullFields);
+            log.warn("Preevaluated fields with null values:" + nullFieldsMsg);
+            if (shouldThrowExceptionForNullFields()) {
+                throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
+            }
+        }
+    }
 }
