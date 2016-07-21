@@ -17,7 +17,7 @@
                     </div>
                 </li>
             </ul>
-            <ul class="subheader">
+            <ul class="subheader"  ng-animate-children="true">
                 <li class="totals">
                     <ul>
                         <li>
@@ -37,6 +37,12 @@
                     <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.button_save}}</button>
                 </li>
             </ul>
+        </div>
+        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1 && vm.initialized">
+            <div class="twelve columns">
+                <pd-pagination-controls current="vm.metadata.current" max="vm.max = filteredList.length / vm.pagesize">
+                </pd-pagination-controls>
+            </div>
         </div>
         <ul class="enrichments">
             <li class="box" 
@@ -62,11 +68,11 @@
                     <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.button_select : (enrichment.IsDirty ? vm.button_deselect : vm.button_selected)}}</span>
                 </button>
             </li>
-            <li ng-show="!filteredList.length">
+            <li ng-show="!filteredList.length && vm.initialized">
               <h2>{{vm.no_results}}</h2>
             </li>
         </ul>
-        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1 && vm.initialized">
             <div class="twelve columns">
                 <pd-pagination-controls current="vm.metadata.current" max="vm.max = filteredList.length / vm.pagesize">
                 </pd-pagination-controls>

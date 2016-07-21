@@ -125,6 +125,7 @@ table {
 
 .job-td-row {   
     border-bottom: $palladium solid 1px;
+	height: 45px;
     &:nth-child(odd) {
         background: #f9f9f9;
     }
@@ -174,7 +175,7 @@ table {
 
 
 .required-fields-pagination {
-    margin-bottom: 2em;
+    margin-bottom: 0em;
 }
 .jobs-table-content {
     background: white;

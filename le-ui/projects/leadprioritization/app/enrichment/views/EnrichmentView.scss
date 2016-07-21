@@ -19,7 +19,6 @@
 }
 
 .enrichment-container {
-    perspective-origin: 50% 50%;
     min-height: 2155px;
     
     section {
@@ -114,6 +113,9 @@
         li.save {
         }
     }
+    ul.enrichments {
+        
+    }
     .box {
         padding: 10px;
         margin: 5px 0;
@@ -123,43 +125,6 @@
         min-height: 77px;
         padding-left: 90px;
         padding-right: 170px;
-
-        -webkit-backface-visibility: hidden;
-        -moz-backface-visibility: hidden;
-        -ms-backface-visibility: hidden;
-        backface-visibility: hidden;
-        transform-origin: 50% 50%;
-        
-        &.ng-animate,
-        &.ng-animate * {
-            transition: all 150ms ease;
-        }
-
-        &.ng-enter-stagger {
-          transition-delay: 50ms;
-          animation-delay: 50ms;
-        }
-
-        &.ng-enter  {
-            transform: scaleY(0);
-            position: absolute;
-            top: 0;
-        }
-
-        &.ng-enter-active {
-            transform: scaleY(100%);
-            position: absolute;
-            top: 0;
-        }
-
-        &.ng-leave  {
-            transform: scaleY(100%);
-        }
-
-        &.ng-leave-active {
-            transform: scaleY(0);
-        }
-
 
         & > .ico-container {
             position: absolute;

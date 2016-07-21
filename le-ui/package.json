@@ -49,6 +49,7 @@
     "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD",
     "InstallDev": "concurrent \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
     "dev": "npm run sass && concurrent -kr \"grunt dev\"   \"npm run sentry\"",
+    "devb": "npm run sass && concurrent -kr \"grunt devb\"   \"npm run sentry\"",
     "local": "npm run sass && concurrent -kr \"grunt local\" \"npm run sentry\"",
     "qa": "grunt qa",
     "prod": "grunt prod",

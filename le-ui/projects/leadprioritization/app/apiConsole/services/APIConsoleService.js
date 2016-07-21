@@ -150,7 +150,7 @@ angular.module('pd.apiconsole.APIConsoleService', [
         }
         var appUrl = $location.protocol() + '://' + hostname;
         var port = $location.port();
-        if (hostname.startsWith('localhost') {
+        if (hostname.startsWith('localhost')) {
             appUrl += ":8073"; // scoringapi runs on port 8043 locally
         } else if (port != 80) {
             appUrl += ":" + port;

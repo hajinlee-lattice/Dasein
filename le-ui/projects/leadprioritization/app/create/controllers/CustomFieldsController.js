@@ -1,6 +1,9 @@
 angular
 .module('lp.create.import')
-.controller('CustomFieldsController', function($scope, $state, $stateParams, ResourceUtility, ImportService, ImportStore, FieldDocument, UnmappedFields) {
+.controller('CustomFieldsController', function(
+    $scope, $state, $stateParams, $timeout, ResourceUtility, 
+    ImportService, ImportStore, FieldDocument, UnmappedFields
+) {
     var vm = this;
 
     angular.extend(vm, {
@@ -13,14 +16,20 @@ angular
             { id: 2, name: "Ignore this field" }
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
-        fieldMappings: FieldDocument.fieldMappings,
-        RequiredFields: []
+        fieldMappings: [],
+        RequiredFields: [],
+        initialized: false
     });
 
     vm.init = function() {
+        vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
+
+        for (var i=0; i < FieldDocument.fieldMappings.length; i++) {
+            vm.fieldMappings.push(FieldDocument.fieldMappings[i]);
+        }
 
         vm.UnmappedFields.forEach(function(field, index) {
             if (field.requiredType == 'Required') {
@@ -178,5 +187,7 @@ angular
         });
     }
 
-    vm.init();
+    $timeout(function() {
+        vm.init();
+    }, 1);
 });

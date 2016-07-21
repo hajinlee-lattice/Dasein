@@ -2,9 +2,9 @@
 	<form novalidate name="fieldMappingForm">
 	<div class="row">
 		<div class="ten columns offset-one">
-			<hgroup>
+			<hgroup ng-if="vm.RequiredFields.length > 0">
 				<h3>{{::ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
-					<span ng-repeat="RequiredField in ::vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span>
+					<span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span>
 				</h3>
 			</hgroup>
 		</div>
@@ -13,7 +13,7 @@
 	<div class="row field-mapping-form">
 		<div class="ten offset-one columns">
 			<table class="unstyled">
-				<thead>
+				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
@@ -23,7 +23,7 @@
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="fieldMapping in ::vm.fieldMappings">
+                    <tr ng-repeat="fieldMapping in vm.fieldMappings">
 						<td class="field_mapping_label">
 							<label for="fieldType_{{ ::fieldMapping.userField }}">{{ ::fieldMapping.userField }}</label>
 						</td>

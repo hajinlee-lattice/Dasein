@@ -12,7 +12,7 @@ angular.module('pd.jobs', [
 
     $interval(function() {
         JobsStore.getJobs();
-    }, 20 * 1000);
+    }, 30 * 1000);
 })
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;
@@ -64,13 +64,8 @@ angular.module('pd.jobs', [
                 for (var i=0; i<response.length; i++) {
                     var job = response[i];
 
-                    JobsStore.addJob(job.id, job);
-
-                    if (modelId) {
-                        JobsStore.data.models[modelId].push(job);
-                    } else {
-                        JobsStore.data.jobs.push(job);
-                    }
+                    JobsStore.addJobMap(job.id, job);
+                    JobsStore.addJob(job, modelId);
                 }
 
                 deferred.resolve(JobsStore.data.jobs);
@@ -80,7 +75,15 @@ angular.module('pd.jobs', [
         return deferred.promise;
     };
 
-    this.addJob = function(jobId, job) {
+    this.addJob = function(job, modelId) {
+        if (modelId) {
+            JobsStore.data.models[modelId].push(job);
+        } else {
+            JobsStore.data.jobs.push(job);
+        }
+    };
+
+    this.addJobMap = function(jobId, job) {
         this.data.jobsMap[jobId] = job;
     };
 
@@ -531,6 +534,7 @@ angular.module('pd.jobs', [
     $scope.showEmptyJobsMessage = false;
     $scope.hideCreationMessage = true;
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
+    $scope.jobs = [];
     
     var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 
@@ -540,8 +544,12 @@ angular.module('pd.jobs', [
         }
 
         $scope.jobs = JobsStore.data.models[modelId];
-    } else { 
-        $scope.jobs = JobsStore.data.jobs;
+    } else {
+
+        
+        $timeout(function() {
+            $scope.jobs = JobsStore.data.jobs;
+        },100);
     }
 
     function getAllJobs(use_cache) {
@@ -550,7 +558,7 @@ angular.module('pd.jobs', [
         });
     }
     
-    var BULK_SCORING_INTERVAL = 20 * 1000,
+    var BULK_SCORING_INTERVAL = 30 * 1000,
         BULK_SCORING_ID;
 
     // this stuff happens only on Model Bulk Scoring page

@@ -2,7 +2,7 @@
 // limit number selectable to (10 for now)
 // green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentData, EnrichmentService){
+.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories){
     var vm = this;
 
     angular.extend(vm, {
@@ -23,7 +23,9 @@ angular.module('lp.enrichment.leadenrichment', [])
         saveDisabled: 1,
         selectedCount: 0,
         premiumSelectLimit: 10,
-        pagesize: 25
+        pagesize: 25,
+        initialized: false,
+        enrichments: []
     });
 
     vm.changeCategory = function(){
@@ -125,23 +127,24 @@ angular.module('lp.enrichment.leadenrichment', [])
     var lockSubheader = _.throttle(_lockSubheader, 100);
 
     vm.init = function() {
-        EnrichmentStore.getCategories().then(function(result){
-            vm.categories = result.data;
-            angular.extend(vm, result);
-        });
+        vm.categories = EnrichmentCategories.data;
 
-        EnrichmentStore.getEnrichments().then(function(result){
-            vm.enrichments = result.data;
+        // firefox wont do the animations without this on page init... sigh
+        $timeout(function() {
+            vm.initialized = true;
+
+            // ng-animate stagger works better if we push items
+            for (var i=0; i < EnrichmentData.data.length; i++) {
+                vm.enrichments.push(EnrichmentData.data[i]);
+            }
+
             vm.selectedCount = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
             vm.userSelectedCount = vm.selectedCount;
             vm.selectDisabled = (vm.selectedCount ? 0 : 1);
-
-            angular.extend(vm, result);
-        });
+        }, 150);
 
         angular.element($window).bind("scroll", lockSubheader);
     }
 
     vm.init();
-
 });
