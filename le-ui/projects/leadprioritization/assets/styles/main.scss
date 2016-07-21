@@ -45,8 +45,6 @@ ul.menu li {
     transform-origin: 50% 50%;
   }
 
-  &.ng-leave-stagger,
-  &.ng-move-stagger,
   &.ng-enter-stagger {
       -webkit-transition-delay: 50ms;
       -moz-transition-delay: 50ms;
