@@ -635,23 +635,19 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('--peak-throughput', dest='pth', type=float, default='0.5', help='expected peak throughput in GB/sec')
     parser1.add_argument('--avg-throughput', dest='ath', type=float, default='2', help='expected average throughput in GB/day')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-z', dest='zkhosts', type=str, required=True, help='zk connection string')
     parser1.add_argument('--cleanup-zk', dest='cleanupzk',action='store_true', help='cleanup kafka root node from zk')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
     parser1.set_defaults(func=provision_cli)
-
-    parser1 = commands.add_parser("describe")
-    parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
-    parser1.set_defaults(func=describe)
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')

@@ -26,13 +26,14 @@ PARAM_APP_PORT = Parameter("ApplicationPort", "Exposed port on each ecs containe
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
 PARAM_MAX_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="8")
 
+PARAMS = [PARAM_ECS_INSTANCE_PROFILE, PARAM_APP_PORT, PARAM_CAPACITY, PARAM_MAX_CAPACITY]
+
 def main():
     args = parse_args()
     args.func(args)
 
 def template_cli(args):
     template(args.environment, args.upload)
-    calc_heap_log(args.pth, args.ath)
 
 def template(environment, upload=False):
     stack = create_template()
@@ -45,7 +46,7 @@ def template(environment, upload=False):
 
 def create_template():
     stack = Stack("AWS CloudFormation template for ECS cluster.")
-    stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP])
+    stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(PARAMS)
 
     # Broker resources
     elb = ElasticLoadBalancer("elb").listen(PARAM_APP_PORT, "80", protocol="http")
@@ -254,12 +255,12 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='ecscluster', help='stack name')
     parser1.add_argument('-p', dest='port', type=int, default='8080', help='application port')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='8080', help='initial capacity')
