@@ -9,10 +9,9 @@
     <div class="row">
         <div class="twelve columns list-header">
             <ul class="link-tabs">
-                <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All Warnings</a>
-                </li>
-                <li><a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Custom Fields</a></li>
-                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Data Cloud</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayNonLatticeWarningsClicked()" data-ng-class="vm.showCustomAttr ? 'selected' : ''">Company Attributes ({{vm.totalCustomColumnCount}})</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayLatticeWarningsClicked()" data-ng-class="vm.showLatticeAttr ? 'selected' : ''">Lattice Attributes ({{vm.totalLatticeColumnCount}})</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="vm.displayAllWarningsClicked()" data-ng-class="vm.showAll ? 'selected' : ''">All ({{vm.totalWarnedColumnCount}})</a></li>
             </ul>
         </div>
     </div>

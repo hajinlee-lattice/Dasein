@@ -44,6 +44,18 @@ angular
                  if (result.Success === true) {
                      var modelReviewData = result.Result;
                      ModelReviewStore.SetReviewData(modelId, modelReviewData);
+                     for (var ruleName in modelReviewData.ruleNameToColumnRuleResults) {
+                        var foundRule = false;
+                        modelReviewData.dataRules.forEach(function(dataRule) {
+                            if (dataRule.name == ruleName) {
+                                foundRule = true;
+                            }
+                        });
+                        if (!foundRule) {
+                            delete modelReviewData.ruleNameToColumnRuleResults[ruleName];
+                            console.log("rule in the column results is not valid, removing column result: " + ruleName);
+                        }
+                     }
                      deferred.resolve(result.Result);
                  }
              });

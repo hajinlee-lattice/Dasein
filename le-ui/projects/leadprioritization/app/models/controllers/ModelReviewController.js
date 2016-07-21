@@ -69,6 +69,8 @@ angular.module('mainApp.models.review', [
             showLatticeAttr: false,
             showCustomAttr: true,
             totalWarnedColumnCount: 0,
+            totalLatticeColumnCount: 0,
+            totalCustomColumnCount: 0,
             interface: {
                 totalExcludedColumnCount: 0,
                 latticeWarnedColumnCount: 0,
@@ -79,37 +81,18 @@ angular.module('mainApp.models.review', [
             columnNameToIsLatticeAttr: {}
         });
 
-        /*
-        vm.columnWarningsToDisplay = vm.allColumnWarnings;
-        vm.allColumnWarnings.forEach(function(columnWarning) {
-            vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
-            ReviewData.dataRules.forEach(function(dataRule) {
-                if (dataRule.enabled && dataRule.name == columnWarning.dataRuleName) {
-                    vm.interface.totalExcludedColumnCount += dataRule.columnsToRemediate.length;
-                }
-            });
-        });
-        */
-
         MetadataStore.GetMetadataForModel(modelId).then(function(modelMetadata) {
             vm.modelMetadata = modelMetadata;
             vm.allColumnWarnings.forEach(function(columnWarning) {
                 vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
-                ReviewData.dataRules.forEach(function(dataRule) {
-                    if (dataRule.name == columnWarning.dataRuleName) {
-                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                            vm.columnNameToIsLatticeAttr[columnName] = vm.isLatticeAttribute(vm.findMetadataItemByColumnName(columnName));
-                        });
-                        if (dataRule.enabled) {
-                            vm.interface.totalExcludedColumnCount += dataRule.flaggedItemCount;
-                        }
-                    }
-                    /* if (dataRule.enabled && isLatticeColumnWarning(columnWarning) && columnWarning.dataRuleName == dataRule.name) {
-                        vm.latticeWarnedColumnCount += dataRule.columnsToRemediate.length;
-                    } else if (dataRule.enabled && isNonLatticeColumnWarning(columnWarning) && columnWarning.dataRuleName == dataRule.name) {
-                        vm.customWarnedColumnCount += dataRule.columnsToRemediate.length;
-                    } */
+
+                columnWarning.flaggedColumnNames.forEach(function(columnName) {
+                    vm.columnNameToIsLatticeAttr[columnName] = vm.isLatticeAttribute(vm.findMetadataItemByColumnName(columnName));
+                    vm.columnNameToIsLatticeAttr[columnName] ? vm.totalLatticeColumnCount++ : vm.totalCustomColumnCount++;
                 });
+                if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
+                    vm.interface.totalExcludedColumnCount += columnWarning.flaggedItemCount;
+                }
             });
             vm.displayNonLatticeWarningsClicked();
         });
