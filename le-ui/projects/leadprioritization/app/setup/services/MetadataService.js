@@ -155,7 +155,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             name : modelName,
             displayName: modelDisplayName,
             description: 'cloned from model: ' + originalModelSummaryId,
-            attributes: fields,
+            attributes: fields || [],
             sourceModelSummaryId: originalModelSummaryId,
             deduplicationType: dedupType,
             excludePublicDomains: includePersonalEmailDomains ? false : true,
