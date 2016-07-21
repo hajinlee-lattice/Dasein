@@ -450,22 +450,22 @@ angular
             }
 
             vm.showFileDisplayName = function() {
-                return vm.processing || vm.compressing || vm.uploading || vm.uploaded;
+                return vm.compressing || vm.uploading || vm.uploaded;
             }
 
             vm.showFileIcon = function() {
-                return !vm.processing && !vm.compressing && !vm.uploading && !vm.uploaded;
+                return !vm.compressing && !vm.uploading && !vm.uploaded;
             }
 
             vm.showSpinnerIcon = function() {
-                return (vm.compressing || vm.processing || vm.uploading) && !vm.uploaded && vm.upload_percent == 0;
+                return vm.compressing && !vm.uploading && !vm.uploaded && vm.compress_percent < 100;
             }
 
             vm.showCancelIcon = function() {
                 return vm.uploading && vm.upload_percent > 0;
             }
 
-            vm.showCancelIcon = function() {
+            vm.showCheckIcon = function() {
                 return vm.uploaded;
             }
 
