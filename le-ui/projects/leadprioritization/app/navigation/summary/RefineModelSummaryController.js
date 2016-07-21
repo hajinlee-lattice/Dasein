@@ -25,7 +25,7 @@ angular.module('lp.navigation.review', [
         if (vm.totalRecordsAfter < 7000 || vm.successEventsAfter < 150 || vm.conversionRateAfter > 10) {
             RefineModelThresholdModal.show(vm.totalRecordsAfter, vm.successEventsAfter, vm.conversionRateAfter);
         } else {
-            UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
+            UpdateFieldsModal.show(false, false, vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
         }
     };
 
@@ -46,7 +46,7 @@ angular.module('lp.navigation.review', [
         updateDisplay(warning, dataRule);
     });
     $scope.$on('ShowCreateModelPopup', function(event) {
-        UpdateFieldsModal.show(false, false, vm.modelId, null, ModelReviewStore.GetDataRules(vm.modelId));
+        UpdateFieldsModal.show(false, false, vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
     });
 
     function updateDisplay(warning, dataRule) {

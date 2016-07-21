@@ -400,7 +400,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var editedData = getAllEditedData();
         if ((editedData != null && editedData.length > 0) || $scope.oneLeadPerDomain || !$scope.includePersonalEmailDomains) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.modelId, $scope.fields.concat($scope.fieldsNotDisplayed));
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.modelId,
+                $scope.fields.concat($scope.fieldsNotDisplayed), $scope.data.ModelDetails.DisplayName);
 
             $scope.saveInProgress = false;
         } else {

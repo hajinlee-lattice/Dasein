@@ -5,7 +5,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 ])
 .service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
-    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, modelSummaryId, allMetadataFields, dataRules) {
+    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, modelSummaryId, allMetadataFields, oldModelDisplayName, dataRules) {
         $http.get('app/setup/views/UpdateFieldsView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
@@ -13,6 +13,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             scope.allMetadataFields = allMetadataFields;
             scope.dataRules = dataRules;
             scope.includePersonalEmailDomains = includePersonalEmailDomains;
+            scope.modelDisplayName = oldModelDisplayName + " (copy)";
             var deduplicationTypes = [ "ONELEADPERDOMAIN", "MULTIPLELEADSPERDOMAIN" ];
             if (oneLeadPerDomain) {
                 scope.dedupType = deduplicationTypes[0];
