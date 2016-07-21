@@ -120,15 +120,16 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         Map<String, Object> enrichmentAttributes = null;
 
         if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
-            Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
-                    fieldSchemas, parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(), false);
+            Map<String, Map<String, Object>> matchedRecordEnrichmentMap = matcher.matchAndJoin(space,
+                    parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
+                    parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
+                    request.isPerformEnrichment());
+            Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
 
             if (request.isPerformEnrichment()) {
-                enrichmentAttributes = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
-                        fieldSchemas, parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
-                        true);
+                enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
             }
         } else {
             Map<String, Object> formattedPmmlRecord = parsedRecordAndInterpretedFields.getKey();
@@ -205,13 +206,16 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap = null;
 
         if (!partiallyOrderedParsedTupleList.isEmpty()) {
-            Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkMatchAndJoin(space,
-                    uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList, false);
+            Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = bulkMatchAndJoin(
+                    space, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList);
+
+            Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
+                    unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
+
             addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap, originalOrderParsedTupleList);
             unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
 
-            unorderedLeadEnrichmentMap = bulkMatchAndJoin(space, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList,
-                    originalOrderModelSummaryList, true);
+            unorderedLeadEnrichmentMap = bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         }
         if (!partiallyOrderedPmmlParsedRecordList.isEmpty()) {
             Map<RecordModelTuple, Map<String, Object>> unorderedFormattedPmmlRecordMap = format(
@@ -237,22 +241,47 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                     originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
         }
 
-        scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
-
-        split("scoreRecord");
         if (log.isInfoEnabled()) {
             log.info("Processed bulk score request for " + request.getRecords().size() + " records");
         }
+        split("scoreRecord");
+
+        scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
+        split("publishScoreHistory");
+
         return scoreResponse;
     }
 
-    Map<RecordModelTuple, Map<String, Object>> bulkMatchAndJoin(CustomerSpace space,
+    private Map<String, Object> extractMap(Map<String, Map<String, Object>> matchedRecordEnrichmentMap, String key) {
+        Map<String, Object> map = new HashMap<>();
+        if (matchedRecordEnrichmentMap.get(key) != null) {
+            Map<String, Object> dataMap = matchedRecordEnrichmentMap.get(key);
+            if (dataMap != null) {
+                map = dataMap;
+            }
+        }
+        return map;
+    }
+
+    private Map<RecordModelTuple, Map<String, Object>> bulkExtractMap(
+            Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap, String key) {
+        Map<RecordModelTuple, Map<String, Object>> map = new HashMap<>();
+        for (RecordModelTuple tupleKey : unorderedMatchedRecordEnrichmentMap.keySet()) {
+            Map<String, Object> dataMap = unorderedMatchedRecordEnrichmentMap.get(tupleKey).get(key);
+            if (dataMap != null) {
+                map.put(tupleKey, dataMap);
+            }
+        }
+        return map;
+    }
+
+    Map<RecordModelTuple, Map<String, Map<String, Object>>> bulkMatchAndJoin(CustomerSpace space,
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList,
-            boolean forEnrichment) {
-        Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = matcher.matchAndJoin(space,
-                partiallyOrderedParsedTupleList, uniqueFieldSchemasMap, originalOrderModelSummaryList, forEnrichment);
-        return unorderedMatchedRecordMap;
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList) {
+        Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = matcher
+                .matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
+                        originalOrderModelSummaryList);
+        return unorderedMatchedRecordEnrichmentMap;
     }
 
     private Map<RecordModelTuple, Map<String, Object>> format(

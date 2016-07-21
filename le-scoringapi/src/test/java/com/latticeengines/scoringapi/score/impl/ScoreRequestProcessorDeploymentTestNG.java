@@ -24,6 +24,7 @@ import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
+import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNG {
@@ -138,12 +139,13 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
     public void testBulkMatchAndJoin() {
-        unorderedMatchedRecordMap = scoreRequestProcessorImpl.bulkMatchAndJoin(customerSpace,
-                uniqueFieldSchemasMap, partiallyOrderedParsedTupleList,
-                originalOrderModelSummaryList, false);
-        unorderedLeadEnrichmentMap = scoreRequestProcessorImpl.bulkMatchAndJoin(customerSpace,
-                uniqueFieldSchemasMap, partiallyOrderedParsedTupleList,
-                originalOrderModelSummaryList, true);
+        Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
+                .bulkMatchAndJoin(customerSpace, uniqueFieldSchemasMap,
+                        partiallyOrderedParsedTupleList, originalOrderModelSummaryList);
+
+        unorderedMatchedRecordMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
+        unorderedLeadEnrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap,
+                Matcher.ENRICHMENT);
         Assert.assertNotNull(unorderedMatchedRecordMap);
         Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
                 unorderedMatchedRecordMap.size());
@@ -270,6 +272,19 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
                 }
             }
         }
+    }
 
+    private Map<RecordModelTuple, Map<String, Object>> extractMap(
+            Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap,
+            String key) {
+        Map<RecordModelTuple, Map<String, Object>> map = new HashMap<>();
+        for (RecordModelTuple tupleKey : unorderedMatchedRecordEnrichmentMap.keySet()) {
+            Map<String, Object> dataMap = unorderedMatchedRecordEnrichmentMap.get(tupleKey)
+                    .get(key);
+            if (dataMap != null) {
+                map.put(tupleKey, dataMap);
+            }
+        }
+        return map;
     }
 }

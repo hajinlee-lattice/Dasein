@@ -10,17 +10,18 @@ import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public interface Matcher {
+    public static final String RESULT = "RESULT";
+    public static final String ENRICHMENT = "ENRICHMENT";
 
-    Map<String, Object> matchAndJoin(CustomerSpace space, //
+    Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             InterpretedFields interpreted, //
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
             ModelSummary modelSummary, //
             boolean forEnrichment);
 
-    Map<RecordModelTuple, Map<String, Object>> matchAndJoin(CustomerSpace space, //
+    Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList, //
-            boolean forEnrichment);
+            List<ModelSummary> originalOrderModelSummaryList);
 
 }
