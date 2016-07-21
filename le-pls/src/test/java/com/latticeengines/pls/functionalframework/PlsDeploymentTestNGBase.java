@@ -17,7 +17,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     @Qualifier(value = "deploymentTestBed")
-    private GlobalAuthDeploymentTestBed deploymentTestBed;
+    protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Value("${pls.test.deployment.api}")
     private String deployedHostPort;

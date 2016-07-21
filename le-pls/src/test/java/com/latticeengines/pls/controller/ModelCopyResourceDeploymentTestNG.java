@@ -73,28 +73,36 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void setup() throws Exception {
         setupTwoTenants();
         setupHdfs();
-        log.info("Wait for 10 seconds to download model summary");
-        Thread.sleep(15000L);
+        log.info("Wait for 30 seconds to download model summary");
+        Thread.sleep(30000L);
         setupTables();
     }
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-//        HdfsUtils.rmdir(yarnConfiguration,
-//                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-//                        .toString());
-//        HdfsUtils.rmdir(yarnConfiguration,
-//                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId()))
-//                        .toString());
-//        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
-//        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+        HdfsUtils.rmdir(yarnConfiguration,
+                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
+                        .toString());
+        HdfsUtils.rmdir(yarnConfiguration,
+                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId()))
+                        .toString());
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
     }
 
     private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
         turnOffSslChecking();
-        testBed.bootstrap(2);
-        tenant1 = testBed.getTestTenants().get(0);
-        tenant2 = testBed.getTestTenants().get(1);
+        tenant1 = new Tenant();
+        tenant1.setName("T1.T1.Production");
+        tenant1.setId(tenant1.getName());
+
+        tenant2 = new Tenant();
+        tenant2.setName("T2.T2.Production");
+        tenant2.setId(tenant2.getName());
+        deploymentTestBed.deleteTenant(tenant1);
+        deploymentTestBed.createTenant(tenant1);
+        deploymentTestBed.deleteTenant(tenant2);
+        deploymentTestBed.createTenant(tenant2);
     }
 
     private void setupTables() throws IOException {
