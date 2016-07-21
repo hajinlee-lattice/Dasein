@@ -73,8 +73,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants();
         cleanup();
         setupHdfs();
-        log.info("Wait for 80 seconds to download model summary");
-        Thread.sleep(80000L);
+        log.info("Wait for 30 seconds to download model summary");
+        Thread.sleep(300000L);
         setupTables();
     }
 
@@ -147,8 +147,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupSecurityContext(tenant1);
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
-        log.info("Wait for 80 seconds to download model summary");
-        Thread.sleep(80000L);
+        log.info("Wait for 300 seconds to download model summary");
+        Thread.sleep(300000L);
 
         setupSecurityContext(tenant2);
 
