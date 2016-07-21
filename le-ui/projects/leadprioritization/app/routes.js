@@ -108,7 +108,8 @@ angular
                     return deferred.promise;
                 },
                 IsPmml: function(Model) {
-                    return typeof Model.ModelDetails.SourceSchemaInterpretation != 'string';
+                    console.log(Model.ModelDetails.ModelType);
+                    return Model.ModelDetails.ModelType == 'PmmlModel';
                 },
                 loadAlaSQL: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
@@ -711,6 +712,15 @@ angular
                             var deferred = $q.defer();
 
                             EnrichmentStore.getEnrichments().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentCategories: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getCategories().then(function(result) {
                                 deferred.resolve(result);
                             });
 
