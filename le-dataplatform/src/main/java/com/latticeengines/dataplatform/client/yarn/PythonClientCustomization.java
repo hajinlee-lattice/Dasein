@@ -87,7 +87,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
             
             properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
-            properties.put(PythonContainerProperty.SWLIBARTIFACT.name(), getSwlibArtifactHdfsPath(classifier));
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
@@ -107,89 +106,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
                 " Lattice_Version=" + properties.getProperty(PythonContainerProperty.VERSION.name()));
     }
     
-    @VisibleForTesting
-    String getSwlibArtifactHdfsPath(Classifier classifier) {
-        if (classifier == null) {
-            return "";
-        }
-        String provenanceProperties = classifier.getProvenanceProperties();
-        
-        try {
-            if (!StringUtils.isEmpty(provenanceProperties)) {
-                String[] properties = provenanceProperties.split("\\s");
-                
-                String module = null;
-                String groupId = null;
-                String artifactId = null;
-                String version = null;
-                for (String property : properties) {
-                    property = property.trim();
-                    if (property.startsWith("swlib.module=")) {
-                        module = property.split("=")[1];
-                    } else if (property.startsWith("swlib.artifact_id=")) {
-                        artifactId = property.split("=")[1];
-                    } else if (property.startsWith("swlib.group_id=")) {
-                        groupId = property.split("=")[1];
-                    } else if (property.startsWith("swlib.version=")) {
-                        version = property.split("=")[1];
-                    }
-                }
-                List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion( //
-                        module, versionManager.getCurrentVersionInStack(stackName));
-                if (StringUtils.isEmpty(versionManager.getCurrentVersionInStack(stackName))) {
-                    packages = softwareLibraryService.getLatestInstalledPackages(module);
-                }
-                
-                if (packages.size() == 0) {
-                    throw new Exception("No software library modules.");
-                }
-                
-                // if any of the required metadata is null, then return the first swlib package
-                if (module == null || groupId == null || artifactId == null || version == null) {
-                    SoftwarePackage pkg = packages.get(0);
-                    provenanceProperties = String.format("swlib.artifact_id=%s swlib.version=%s", //
-                            pkg.getArtifactId(), pkg.getVersion());
-                    classifier.setProvenanceProperties(classifier.getProvenanceProperties() + " " + provenanceProperties);
-                    return softwareLibraryService.getTopLevelPath() + "/" + pkg.getHdfsPath();
-                }
-                
-                for (SoftwarePackage pkg : packages) {
-                    if (version.equals("latest")) {
-                        version = pkg.getVersion();
-                    }
-                    if (artifactId.equals(pkg.getArtifactId()) //
-                            && groupId.equals(pkg.getGroupId()) //
-                            && module.equals(pkg.getModule()) //
-                            && version.equals(pkg.getVersion())) {
-                        resetClassifierWithProperProvenanceProperties(classifier, pkg);
-                        return softwareLibraryService.getTopLevelPath() + "/" + pkg.getHdfsPath();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn(LedpException.buildMessage(LedpCode.LEDP_00000, new String[] {}));
-            return classifier.getPythonPipelineLibHdfsPath();
-        }
-        return classifier.getPythonPipelineLibHdfsPath();
-    }
-    
-    void resetClassifierWithProperProvenanceProperties(Classifier classifier, SoftwarePackage pkg) {
-        String[] properties = classifier.getProvenanceProperties().split("\\s");
-        
-        List<String> finalProvenanceProperties = new ArrayList<>();
-        for (String property : properties) {
-            if (!property.startsWith("swlib.")) {
-                finalProvenanceProperties.add(property);
-            }
-        }
-        finalProvenanceProperties.add("swlib.artifact_id=" + pkg.getArtifactId());
-        finalProvenanceProperties.add("swlib.group_id=" + pkg.getGroupId());
-        finalProvenanceProperties.add("swlib.version=" + pkg.getVersion());
-        finalProvenanceProperties.add("swlib.module=" + pkg.getModule());
-        String provenanceProperties = StringUtils.join(finalProvenanceProperties, " ");
-        classifier.setProvenanceProperties(provenanceProperties);
-    }
-
     @Override
     public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
         Collection<CopyEntry> copyEntries = super.getCopyEntries(containerProperties);

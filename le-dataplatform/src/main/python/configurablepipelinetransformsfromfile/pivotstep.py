@@ -26,11 +26,11 @@ class PivotStep(PipelineStep):
     pValues = {}
 
     def __init__(self, columnsToPivot={},
-                        categoricalColumns={},
-                        dataprofile={},
-                        pvalueThreshold=0.10,
-                        minCategoricalCount=5,
-                        maxCategoricalCount=10):
+                       categoricalColumns={},
+                       dataprofile={},
+                       pvalueThreshold=0.10,
+                       minCategoricalCount=5,
+                       maxCategoricalCount=10):
         self.columnsToPivot = columnsToPivot
         self.categoricalColumns = categoricalColumns
         self.dataprofile = dataprofile
@@ -47,13 +47,11 @@ class PivotStep(PipelineStep):
         columnsToRemove = set()
         for k, v in self.columnsToPivot.items():
             values = v[1]
-            columnsToRemove.add(v[0])
-            try:
+    
+            if v[0] in dataFrame.columns:
                 dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values, str(k).endswith("__ISNULL__")))
-            except:
-                logger.error("Caught exception while pivoting column", exc_info=True)
-                logger.error(self.columnsToPivot)
-            self.__appendMetadataEntry(configMetadata, k)
+                self.__appendMetadataEntry(configMetadata, k)
+                columnsToRemove.add(v[0])
 
         super(PivotStep, self).removeColumns(dataFrame, columnsToRemove)
         return dataFrame

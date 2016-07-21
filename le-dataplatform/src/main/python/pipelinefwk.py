@@ -20,6 +20,7 @@ logger = get_logger("pipelinefwk")
 
 class Pipeline(object):
     pipelineSteps = []
+    mediator = {}
     def __init__(self, pipelineSteps):
         self.pipelineSteps = pipelineSteps
 
@@ -29,11 +30,16 @@ class Pipeline(object):
     def predict(self, dataFrame, configMetadata, test):
         transformed = dataFrame
         for step in self.pipelineSteps:
+            step.setMediator(self.mediator)
             try:
                 transformed = step.transform(transformed, configMetadata, test)
             except Exception as e:
                 logger.exception("Caught Exception while applying Transfrom. Stack trace below" + str(e))
+
         return transformed
+    
+    def getMediator(self):
+        return self.mediator
 
     '''
        This method only to be invoked from learning executor since it's learning from the data
@@ -84,9 +90,17 @@ class PipelineStep(object):
         return []
 
     def appendMetadataEntry(self, configMetadata, entry):
-        configMetadata.append(entry)
+        mediator = self.getMediator()
+        previousColumnsToAdd = self.getProperty("ADDEDCOLUMNS")
+        if previousColumnsToAdd is None:
+            previousColumnsToAdd = []
+        previousColumnsToAdd.append(entry)
+        self.setProperty("ADDEDCOLUMNS", previousColumnsToAdd)
+        mediator["ADDEDCOLUMNS"] = previousColumnsToAdd
+        
 
     def removeColumns(self, dataFrame, columnsToRemove):
+        mediator = self.getMediator()
         for c in columnsToRemove:
             dataFrame.drop(c, axis=1, inplace=True)
         previousColumnsToRemove = self.getProperty("REMOVEDCOLUMNS")
@@ -94,6 +108,7 @@ class PipelineStep(object):
             previousColumnsToRemove = []
         previousColumnsToRemove.extend(columnsToRemove)
         self.setProperty("REMOVEDCOLUMNS", previousColumnsToRemove)
+        mediator["REMOVEDCOLUMNS"] = previousColumnsToRemove
 
     def doColumnCheck(self):
         return True
@@ -101,6 +116,12 @@ class PipelineStep(object):
     def getDebugArtifacts(self):
         return []
 
+    def getMediator(self):
+        return self.getProperty("MEDIATOR")
+    
+    def setMediator(self, mediator):
+        self.setProperty("MEDIATOR", mediator)
+    
 class ModelStep(PipelineStep):
     model = None
     modelInputColumns = []
