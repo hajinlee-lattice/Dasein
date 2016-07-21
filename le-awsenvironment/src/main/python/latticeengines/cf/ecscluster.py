@@ -263,6 +263,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='ecscluster', help='stack name')
     parser1.add_argument('-p', dest='port', type=int, default='8080', help='application port')
+    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='8080', help='initial capacity')
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8080', help='maximum capacity')
     parser1.set_defaults(func=provision_cli)

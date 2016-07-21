@@ -5,7 +5,6 @@ import subprocess
 
 from ..conf import AwsEnvironment
 
-_ECR_REPO="158854640770.dkr.ecr.us-east-1.amazonaws.com"
 
 def main():
     args = parse_args()
@@ -42,7 +41,7 @@ def parse_args():
 
     subparser = commands.add_parser("push")
     subparser.add_argument('-i', dest='image', type=str, required=True, help='local docker image name. you can ignore the namespace latticeengines')
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='qa', help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag')
     subparser.set_defaults(func=push)
