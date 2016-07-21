@@ -90,7 +90,9 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/" + sourceDisplayName.replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
+                .outputFilename(
+                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'), ".csv") + "_scored_"
+                                + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .build();

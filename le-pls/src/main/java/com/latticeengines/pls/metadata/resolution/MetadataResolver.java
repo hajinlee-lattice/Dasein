@@ -37,16 +37,17 @@ public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
 
-    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[]{"Interest_esb__c", "Interest_tcat__c",
-            "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
-            "HasAnypointLogin", "HasCEDownload", "HasEEDownload"});
-    private static final Set<String> STR_SET = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-            "Source_Detail__c", "Cloud_Plan__c" });
+    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[] { "Interest_esb__c",
+            "Interest_tcat__c", "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed",
+            "kickboxDisposable", "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+    private static final Set<String> STR_SET = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus",
+            "SICCode", "Source_Detail__c", "Cloud_Plan__c" });
 
     private String csvPath;
     private SchemaInterpretation schema;
     private FieldMappingDocument fieldMappingDocument;
     private Configuration yarnConfiguration;
+    private Table metadata;
 
     private static class Result {
         public List<FieldMapping> fieldMappings;
@@ -55,11 +56,18 @@ public class MetadataResolver {
 
     private Result result;
 
-    public MetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation,
-                            Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
+    public MetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation, Configuration yarnConfiguration,
+            FieldMappingDocument fieldMappingDocument) {
         this.csvPath = csvPath;
         this.schema = schemaInterpretation;
         this.yarnConfiguration = yarnConfiguration;
+        this.fieldMappingDocument = fieldMappingDocument;
+        result = new Result();
+    }
+
+    public MetadataResolver(String csvPath, Table metadata, Configuration yarnConfiguration,
+            FieldMappingDocument fieldMappingDocument) {
+        this.metadata = metadata;
         this.fieldMappingDocument = fieldMappingDocument;
         result = new Result();
     }
@@ -73,9 +81,18 @@ public class MetadataResolver {
         return fieldMappingsDocument;
     }
 
+    public void calculateBasedOnFieldMappingDocumentAndTable() {
+        result.metadata = metadata;
+        calculateBasedOnMetadta();
+    }
+
     public void calculateBasedOnFieldMappingDocument() {
         SchemaRepository repository = SchemaRepository.instance();
         result.metadata = repository.getSchema(schema);
+        calculateBasedOnMetadta();
+    }
+
+    private void calculateBasedOnMetadta() {
         result.fieldMappings = new ArrayList<>();
 
         List<Attribute> attributes = result.metadata.getAttributes();
@@ -85,7 +102,7 @@ public class MetadataResolver {
             Attribute attribute = attrIterator.next();
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (fieldMapping.isMappedToLatticeField()) {
-                    if (isUserFieldMatchWithAttribute(fieldMapping.getMappedField(), attribute)) {
+                    if (fieldMapping.getMappedField().equals(attribute.getName())) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
                         attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
@@ -344,7 +361,7 @@ public class MetadataResolver {
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
         String mappedFieldName = columnHeaderName.replaceAll("[^A-Za-z0-9_]", "_");
-        if (mappedFieldName.startsWith("Activity_Count_")){
+        if (mappedFieldName.startsWith("Activity_Count_")) {
             return UserDefinedType.NUMBER;
         } else if (BOOLEAN_SET.contains(mappedFieldName)) {
             return UserDefinedType.BOOLEAN;

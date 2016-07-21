@@ -46,7 +46,7 @@ public class ScoringJobResource {
         try {
             InputStream is = scoringJobService.getResults(jobId);
             response.setContentType("application/csv");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "results.csv"));
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", scoringJobService.getResultFileName(jobId)));
             IOUtils.copy(is, response.getOutputStream());
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18102, e);

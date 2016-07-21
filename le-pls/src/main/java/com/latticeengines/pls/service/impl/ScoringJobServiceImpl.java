@@ -112,6 +112,25 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
+    public String getResultFileName(String workflowJobId) {
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        if (job == null) {
+            throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
+        }
+
+        String path = job.getOutputs().get(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+
+        if (path == null) {
+            throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
+        }
+        String fileName = StringUtils.substringAfterLast(path, "/");
+        if (!fileName.contains("_scored")) {
+            return "scored.csv";
+        }
+        return StringUtils.substringBeforeLast(fileName, "_scored") + "_scored.csv";
+    }
+
+    @Override
     public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {

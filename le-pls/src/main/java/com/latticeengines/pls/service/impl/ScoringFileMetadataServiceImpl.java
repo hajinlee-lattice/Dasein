@@ -89,6 +89,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
         final Table table = modelMetadataService.getEventTableFromModelId(modelId);
+        
+        log.info("table is: " + table.toString());
         final Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
@@ -105,13 +107,13 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 return false;
             }
         });
-        
+       
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, null);
         List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(fieldMappings);
-        resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument();
+        resolver = new MetadataResolver(sourceFile.getPath(), table, yarnConfiguration, fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocumentAndTable();
         log.info("After resolving table is: " + table.toString());
 
         // Don't dedup on primary key for scoring

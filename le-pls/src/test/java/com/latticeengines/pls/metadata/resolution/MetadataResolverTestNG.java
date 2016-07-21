@@ -2,16 +2,21 @@ package com.latticeengines.pls.metadata.resolution;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.Nullable;
+
 import com.latticeengines.domain.exposed.metadata.*;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
@@ -53,8 +58,10 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
 
-        path = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles/Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv").getPath();
+        path = ClassLoader
+                .getSystemResource(
+                        "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles/Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv")
+                .getPath();
 
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath2);
@@ -62,10 +69,12 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getFieldMappingsTest() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
 
-        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column" });
+        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column",
+                "Number Column", "Almost Boolean Column" });
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -113,7 +122,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToLatticeAttr_assertMappedCorrectly() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -135,7 +145,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_setColumnToSpecificType_assertTypeIsSet() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -174,7 +185,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
                 if (schema.getAttribute(attr.getName()) == null
                         && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
-                        ApprovedUsage.NONE.toString())) //
+                                ApprovedUsage.NONE.toString())) //
                         || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
                     log.info("Removing attr:" + attr.getName());
                     return true;
@@ -182,10 +193,16 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 return false;
             }
         });
-        assertEquals(table.getAttributes().size(), 31);
+        assertEquals(table.getAttributes().size(), 30);
 
-        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead,
+                yarnConfiguration, null);
         List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
+        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
+        fieldMappingDocument.setFieldMappings(fieldMappings);
+        resolver = new MetadataResolver(hdfsPath2, table, yarnConfiguration, fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocumentAndTable();
+
         boolean foundSomeColumn = false;
         for (FieldMapping fieldMapping : fieldMappings) {
             log.info(String.format("The field mapping is: %s", fieldMapping.getUserField()));
@@ -195,6 +212,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
         assertTrue(foundSomeColumn);
         assertEquals(fieldMappings.size(), 33);
+        assertEquals(table.getAttributes().size(), 33);
+        assertNotNull(table.getAttribute("BusinessCountry"));
     }
 
     @AfterClass(groups = "functional")
@@ -202,4 +221,3 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 }
-

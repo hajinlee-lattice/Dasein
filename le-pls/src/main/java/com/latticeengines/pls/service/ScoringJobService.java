@@ -15,4 +15,6 @@ public interface ScoringJobService {
 
     String scoreTrainingData(String modelId, Boolean useRtsApi, Boolean performEnrichmen);
 
+    String getResultFileName(String workflowJobId);
+
 }

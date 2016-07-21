@@ -140,6 +140,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
         assertTrue(results.length() > 0);
         CSVParser parser = null;
         InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(response.getBody()));
