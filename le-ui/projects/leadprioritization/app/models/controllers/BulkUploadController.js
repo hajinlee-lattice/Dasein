@@ -43,7 +43,11 @@ angular.module('mainApp.create.csvBulkUpload', [
     }
 
     vm.fileCancel = function() {
-        ImportStore.Get('cancelXHR', true).abort();
+        var xhr = ImportStore.Get('cancelXHR', true);
+
+        if (xhr) {
+            xhr.abort();
+        }
     }
 
     vm.clickNext = function() {

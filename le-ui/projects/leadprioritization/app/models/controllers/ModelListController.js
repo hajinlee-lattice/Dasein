@@ -50,7 +50,6 @@ angular.module('mainApp.models.controllers.ModelListController', [
                     $scope.showNoModels = true;
                 } else {
                     $scope.totalLength = modelList.length;
-
                     var active = modelList.filter(function(item) {
                         return item.Status == 'Active';
                     });

@@ -106,6 +106,7 @@ angular.module('mainApp.models.services.ModelService', [
                                 Id          : rawObj.Id,
                                 DisplayName : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
                                 CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
+                                ModelFileType: rawObj.ModelType,
                                 Status      : rawObj.Status,
                                 Incomplete  : rawObj.Incomplete,
                                 ModelType   : rawObj.SourceSchemaInterpretation

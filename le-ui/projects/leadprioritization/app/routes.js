@@ -108,7 +108,6 @@ angular
                     return deferred.promise;
                 },
                 IsPmml: function(Model) {
-                    console.log(Model.ModelDetails.ModelType);
                     return Model.ModelDetails.ModelType == 'PmmlModel';
                 },
                 loadAlaSQL: function($ocLazyLoad) {

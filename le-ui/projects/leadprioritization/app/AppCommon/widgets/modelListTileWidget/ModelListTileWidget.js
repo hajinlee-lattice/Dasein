@@ -13,7 +13,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 ])
 .controller('ModelListTileWidgetController', function (
     $http, $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility, 
-    DateTimeFormatUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, 
+    DateTimeFormatUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService,
     DeleteModelModal, StaleModelModal, DeactivateModelModal, FeatureFlagService, ModelService
 ) {
     $scope.ResourceUtility = ResourceUtility;
@@ -22,7 +22,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
     var widgetConfig = $scope.widgetConfig;
     var data = $scope.data;
-
     var flags = FeatureFlagService.Flags();
     $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
     $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
@@ -128,7 +127,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         }
         if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
-        } else if (!$scope.nameStatus.editing && incomplete && $scope.data.ModelType) {
+        } else if (!$scope.nameStatus.editing && incomplete && $scope.data.ModelFileType != "PmmlModel") {
             StaleModelModal.show($scope.data.Id);
         }
     };

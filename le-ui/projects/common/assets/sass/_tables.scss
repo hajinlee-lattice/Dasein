@@ -125,7 +125,7 @@ table {
 
 .job-td-row {   
     border-bottom: $palladium solid 1px;
-	height: 45px;
+	min-height: 45px;
     &:nth-child(odd) {
         background: #f9f9f9;
     }

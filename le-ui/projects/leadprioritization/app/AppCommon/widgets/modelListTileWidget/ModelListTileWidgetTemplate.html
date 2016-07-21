@@ -3,8 +3,8 @@
         ng-controller="ModelListTileWidgetController" 
         ng-click="tileClick($event)" 
         ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
-        ui-sref="{{data.ModelType?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">
-    <div class="model-image {{ data.ModelType }}"></div>
+        ui-sref="{{data.ModelFileType != 'PmmlModel'?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">
+    <div class="model-image {{ data.ModelType }} {{ data.ModelFileType }}"></div>
     <div class="model-title" data-ng-hide="nameStatus.editing">
         <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::displayName}}">{{::displayName | limitTo: 36 }}{{::displayName.length > 36 ? '&hellip;' : ''}}</h2>
         <h2 class="edit">

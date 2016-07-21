@@ -592,7 +592,6 @@ Model List
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 100px;
-        background-image: url(/assets/images/bkg-active-model-pmml.png);
 
         &.SalesforceLead, &.SalesforceAccount {
             background-size: 150px;
@@ -602,6 +601,10 @@ Model List
         }
         &.SalesforceAccount {
             background-image: url(/assets/images/bkg-active-model-account.png);
+        }
+        &.PmmlModel.SalesforceLead,
+        &.PmmlModel.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-pmml.png);
         }
     }
 
