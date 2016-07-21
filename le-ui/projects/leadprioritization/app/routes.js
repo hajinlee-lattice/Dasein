@@ -698,6 +698,11 @@ angular
                     },
                     controller: function($scope, EnrichmentStore) {
                         $scope.metadata = EnrichmentStore.metadata;
+                        $scope.$watch('metadata.current', function(newVal, oldVal){
+                            if(newVal !== oldVal) {
+                                angular.element(window).scrollTop(0,0);
+                            }
+                        });
                         $scope.selectToggle = function(bool) {
                             EnrichmentStore.setMetadata('selectedToggle', bool);
                             EnrichmentStore.setMetadata('current', 1);

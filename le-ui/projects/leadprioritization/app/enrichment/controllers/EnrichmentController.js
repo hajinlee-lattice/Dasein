@@ -113,10 +113,12 @@ angular.module('lp.enrichment.leadenrichment', [])
     }
 
     var _lockSubheader = function(){
-        var watched_el = document.querySelector('.summary .nav'),
-        top = watched_el.getBoundingClientRect().top;
-        el = document.querySelector('.subheader-container'),
-        $el = angular.element(el);
+        var el = document.querySelector('.subheader-container'),
+            $el = angular.element(el),
+            watched_el = document.querySelector('.summary .nav'),
+            $watched_el = angular.element(watched_el),
+            top = watched_el.getBoundingClientRect().top + $watched_el.height();
+
         if(top < 0) {
             $el.addClass('fixed');
         } else {
