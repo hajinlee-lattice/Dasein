@@ -53,7 +53,7 @@
 
     <bean name="dellebiDailyJob2" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dellebiDailyJob2" />
-        <property name="cronTrigger" value="0 0/5 * * * ?" />
+        <property name="cronTrigger" value="20 0/5 * * * ?" />
         <property name="destUrl" value="${quartz.dellebi.predefined.job.url:}" />
         <property name="queryApi" value="${quartz.dellebi.predefined.job.query.api:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dellEbiDailyJob2&quot;}" />
@@ -62,7 +62,7 @@
 
     <bean name="dellebiDailyJob3" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dellebiDailyJob3" />
-        <property name="cronTrigger" value="0 0/5 * * * ?" />
+        <property name="cronTrigger" value="40 0/5 * * * ?" />
         <property name="destUrl" value="${quartz.dellebi.predefined.job.url:}" />
         <property name="queryApi" value="${quartz.dellebi.predefined.job.query.api:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dellEbiDailyJob3&quot;}" />
