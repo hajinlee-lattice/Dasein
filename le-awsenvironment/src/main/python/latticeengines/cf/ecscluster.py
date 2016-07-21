@@ -24,7 +24,7 @@ logging.getLogger('kazoo.client').addHandler(ch)
 PARAM_ECS_INSTANCE_PROFILE = ArnParameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
 PARAM_APP_PORT = Parameter("ApplicationPort", "Exposed port on each ecs container host", default="8080")
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
-PARAM_MAX_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="8")
+PARAM_MAX_CAPACITY = Parameter("MaximumCapacity", "Desired number of containers", type="Number", default="8")
 
 PARAMS = [PARAM_ECS_INSTANCE_PROFILE, PARAM_APP_PORT, PARAM_CAPACITY, PARAM_MAX_CAPACITY]
 
@@ -266,8 +266,8 @@ def parse_args():
     parser1.add_argument('-s', dest='stackname', type=str, default='ecscluster', help='stack name')
     parser1.add_argument('-p', dest='port', type=str, default='8080', help='application port')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
-    parser1.add_argument('--initial-capacity', dest='ic', type=int, default='8080', help='initial capacity')
-    parser1.add_argument('--max-capacity', dest='mc', type=int, default='8080', help='maximum capacity')
+    parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
+    parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
