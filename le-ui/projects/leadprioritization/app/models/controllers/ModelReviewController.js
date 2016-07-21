@@ -153,8 +153,20 @@ angular.module('mainApp.models.review', [
             vm.showAll = true,
             vm.showLatticeAttr = false,
             vm.showCustomAttr = false;
+            vm.interface.totalExcludedColumnCount = 0;
 
-            vm.columnWarningsToDisplay = vm.allColumnWarnings.slice(0);
+            ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
+                for (var i in reviewData.dataRules) {
+                    ruleNameToDataRules[ReviewData.dataRules[i].name] = reviewData.dataRules[i];
+                }
+                vm.allColumnWarnings.forEach(function(columnWarning) {
+                    columnWarning.flaggedColumnNames.forEach(function(columnName) {
+                        if (vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
+                            vm.interface.totalExcludedColumnCount++;
+                        }
+                    });
+                });
+            });
             vm.interface.show = 'all';
         };
 
