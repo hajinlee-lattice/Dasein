@@ -21,6 +21,8 @@ class Parameter:
 
         return { self._name: defn }
 
+    def name(self):
+        return self._name
 
     def ref(self):
         return { "Ref": self._name }

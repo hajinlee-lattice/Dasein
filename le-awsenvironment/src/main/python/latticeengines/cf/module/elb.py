@@ -1,4 +1,5 @@
 from .ec2 import EC2Instance
+from .parameter import Parameter
 from .resource import Resource
 from .template import Template
 
@@ -119,12 +120,12 @@ class ElbListener(Template):
         if lb_port is None:
             lb_port = port
 
-        assert isinstance(int(port), int)
-        assert isinstance(int(lb_port), int)
+        assert isinstance(port, Parameter) or ( isinstance(port, str) and isinstance(int(port), int) )
+        assert isinstance(lb_port, Parameter) or ( isinstance(lb_port, str) and isinstance(int(lb_port), int) )
 
         self._template = {
-            "InstancePort" : port,
+            "InstancePort" : port.ref() if isinstance(port, Parameter) else port,
             "InstanceProtocol" : protocol,
-            "LoadBalancerPort" : lb_port,
+            "LoadBalancerPort" : lb_port.ref() if isinstance(lb_port, Parameter) else lb_port,
             "Protocol" : protocol
         }

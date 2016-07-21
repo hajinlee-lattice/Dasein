@@ -24,7 +24,6 @@ from ..module.template import TEMPLATE_DIR
 from ...conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/kafka'
-_EC2_PEM='~/aws.pem'
 _LOG_SIZE=10
 
 ch = logging.StreamHandler(sys.stdout)
