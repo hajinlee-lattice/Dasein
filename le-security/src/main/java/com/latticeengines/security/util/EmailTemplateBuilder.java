@@ -35,6 +35,21 @@ public class EmailTemplateBuilder {
         return mp;
     }
 
+    public Multipart buildMultipartWithoutWelcomeHeader() throws MessagingException, IOException {
+        Multipart mp = new MimeMultipart();
+        MimeBodyPart htmlPart = new MimeBodyPart();
+        htmlPart.setContent(htmlTemplate, "text/html");
+        mp.addBodyPart(htmlPart);
+        MimeBodyPart logoPart = new MimeBodyPart();
+        DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("com/latticeengines/security/email_header_with_logo.png"), "image/png");
+        logoPart.setDisposition(MimeBodyPart.INLINE);
+        logoPart.setDataHandler(new DataHandler(fds));
+        logoPart.setHeader("Content-ID", "<banner>");
+        mp.addBodyPart(logoPart);
+        return mp;
+    }
+
     private static void appendImagesToMultipart(Multipart mp) throws IOException, MessagingException {
         MimeBodyPart logoPart = new MimeBodyPart();
         DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
@@ -66,7 +81,9 @@ public class EmailTemplateBuilder {
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
         PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
         PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), //
-        SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html");
+        SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html"), //
+        PLS_JOB_SUCCESS("pls_job_success.html"), //
+        PLS_JOB_ERROR("pls_job_error.html"); 
 
         private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;

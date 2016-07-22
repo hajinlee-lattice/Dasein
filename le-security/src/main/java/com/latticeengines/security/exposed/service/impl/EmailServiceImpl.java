@@ -403,7 +403,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending PLS create model complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_JOB_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -411,7 +411,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{currentstep}}", "");
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Lead Prioritization - Model Creation Completed", mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS create model complete email to " + user.getEmail() + " succeeded.");
@@ -425,7 +425,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending PLS create model error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_JOB_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -434,7 +434,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Lead Prioritization - Model Creation Failed", mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS create model error email to " + user.getEmail() + " succeeded.");
@@ -448,7 +448,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending PLS scoring complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+                    EmailTemplateBuilder.Template.PLS_JOB_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
@@ -456,7 +456,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{currentstep}}", "");
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Lead Prioritization - Scoring Completed", mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
@@ -469,16 +469,16 @@ public class EmailServiceImpl implements EmailService {
         try {
             log.info("Sending PLS scoring error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
-                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
+                    EmailTemplateBuilder.Template.PLS_JOB_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
-            builder.replaceToken("{{job}}", "model creation");
+            builder.replaceToken("{{job}}", "scoring");
             builder.replaceToken("{{errormsg}}", "Failed to score.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Lead Prioritization - Scoring Failed", mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
