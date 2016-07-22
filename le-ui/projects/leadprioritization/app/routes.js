@@ -287,7 +287,8 @@ angular
                     
                     return deferred.promise;
                 }
-            },
+            }
+            /*
             views: {
                 "summary@": {
                     controller: 'RefineModelSummaryController',
@@ -300,10 +301,16 @@ angular
                     templateUrl: 'app/models/views/RefineModelRowsView.html'
                 }
             }
+            */
         })
         .state('home.model.review.columns', {
             url: '/columns',
             views: {
+                "summary@": {
+                    controller: 'RefineModelSummaryController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/navigation/summary/RefineModelSummaryView.html'
+                },
                 "main@": {
                     controller: 'ModelReviewColumnController',
                     controllerAs: 'vm',

@@ -51,7 +51,7 @@ angular
                                 foundRule = true;
                             }
                         });
-                        if (!foundRule) {
+                        if (!foundRule || ruleName == "OverlyPredictiveDS") {
                             delete modelReviewData.ruleNameToColumnRuleResults[ruleName];
                             console.log("rule in the column results is not valid, removing column result: " + ruleName);
                         }
