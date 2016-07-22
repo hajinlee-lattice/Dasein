@@ -1,0 +1,1223 @@
+{
+    "name": "SourceFile_file_1469152700642_csv",
+    "attributes": [
+        {
+            "name": "Id",
+            "length": null,
+            "nullable": false,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "AllowedDisplayNames": [
+                    "ID",
+                    "LEAD ID",
+                    "LEAD"
+                ],
+                "InterfaceName": "Id",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Id",
+            "source_logical_type": "string",
+            "logical_type": "Id",
+            "enum_values": ""
+        },
+        {
+            "name": "Email",
+            "length": null,
+            "nullable": false,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "FundamentalType": "email",
+                "StatisticalType": "nominal",
+                "AllowedDisplayNames": [
+                    "EMAIL"
+                ],
+                "InterfaceName": "Email",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Email",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Event",
+            "length": null,
+            "nullable": false,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "AllowedDisplayNames": [
+                    "EVENT",
+                    "WON"
+                ],
+                "InterfaceName": "Event",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Event",
+            "source_logical_type": "boolean",
+            "logical_type": "Event",
+            "enum_values": ""
+        },
+        {
+            "name": "CompanyName",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "COMPANY",
+                    "COMPANY NAME",
+                    "ACCOUNT"
+                ],
+                "InterfaceName": "CompanyName",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [
+                {
+                    "json": "{\"otherField\":\"Email\"}",
+                    "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+                }
+            ],
+            "display_name": "CompanyName",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "City",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "CITY"
+                ],
+                "InterfaceName": "City",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [
+                {
+                    "json": "{\"otherField\":\"Email\"}",
+                    "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+                }
+            ],
+            "display_name": "City",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "State",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "PROVINCE",
+                    "STATE"
+                ],
+                "InterfaceName": "State",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [
+                {
+                    "json": "{\"otherField\":\"Email\"}",
+                    "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+                }
+            ],
+            "display_name": "State",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Country",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "COUNTRY"
+                ],
+                "InterfaceName": "Country",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [
+                {
+                    "json": "{\"otherField\":\"Email\"}",
+                    "raw_type": "com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty"
+                }
+            ],
+            "display_name": "Country",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "CreatedDate",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "long",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "CREATED DATE",
+                    "CREATEDDATE"
+                ],
+                "InterfaceName": "CreatedDate",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "CreatedDate",
+            "source_logical_type": "long",
+            "logical_type": "Date",
+            "enum_values": ""
+        },
+        {
+            "name": "LastModifiedDate",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "long",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "LAST MODIFIED DATE",
+                    "LASTMODIFIEDDATE"
+                ],
+                "InterfaceName": "LastModifiedDate",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "LastModifiedDate",
+            "source_logical_type": "long",
+            "logical_type": "Date",
+            "enum_values": ""
+        },
+        {
+            "name": "FirstName",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "FIRST NAME",
+                    "FIRSTNAME"
+                ],
+                "InterfaceName": "FirstName",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "FirstName",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "LastName",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "LAST NAME",
+                    "LASTNAME"
+                ],
+                "InterfaceName": "LastName",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "LastName",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Title",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "TITLE"
+                ],
+                "InterfaceName": "Title",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Title",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "IsClosed",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "IS CLOSED",
+                    "ISCLOSED",
+                    "CLOSED"
+                ],
+                "InterfaceName": "IsClosed",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "IsClosed",
+            "source_logical_type": "boolean",
+            "logical_type": "Opportunity",
+            "enum_values": ""
+        },
+        {
+            "name": "StageName",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "STAGE NAME",
+                    "STAGE"
+                ],
+                "InterfaceName": "StageName",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "StageName",
+            "source_logical_type": "string",
+            "logical_type": "Opportunity",
+            "enum_values": ""
+        },
+        {
+            "name": "PhoneNumber",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "PHONE",
+                    "PHONE NUMBER"
+                ],
+                "InterfaceName": "PhoneNumber",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "PhoneNumber",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Industry",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "Category": "Lead Information",
+                "AllowedDisplayNames": [
+                    "INDUSTRY"
+                ],
+                "InterfaceName": "Industry",
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Industry",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Click_Email",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Click_Email",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Click_Link",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Click_Link",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Email_Bounced_Soft",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Email_Bounced_Soft",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Fill_Out_Form",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Fill_Out_Form",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Any",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Any",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Open_Email",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Open_Email",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Unsubscribe_Email",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Unsubscribe_Email",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Visit_Webpage",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Visit_Webpage",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Email",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Email",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Event",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Event",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Multiple",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Multiple",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Pricing",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Pricing",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Search",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Search",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_Webinar",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_Webinar",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Activity_Count_Interesting_Moment_key_web_page",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "double",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "ratio",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Activity_Count_Interesting_Moment_key_web_page",
+            "source_logical_type": "double",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Lead_Source_Asset__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Lead_Source_Asset__c",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "kickboxStatus",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "kickboxStatus",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Interest_esb__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Interest_esb__c",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Interest_tcat__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Interest_tcat__c",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "SICCode",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "SICCode",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "kickboxAcceptAll",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "kickboxAcceptAll",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Free_Email_Address__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Free_Email_Address__c",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "kickboxFree",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "kickboxFree",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Source_Detail__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Source_Detail__c",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Unsubscribed",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Unsubscribed",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "kickboxDisposable",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "kickboxDisposable",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "Cloud_Plan__c",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "string",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "alpha",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "Cloud_Plan__c",
+            "source_logical_type": "string",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "HasAnypointLogin",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "HasAnypointLogin",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "HasCEDownload",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "HasCEDownload",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "HasEEDownload",
+            "length": null,
+            "nullable": true,
+            "physicalDataType": "boolean",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "Tags": [
+                    "Internal"
+                ],
+                "FundamentalType": "boolean",
+                "Category": "Lead Information",
+                "StatisticalType": "nominal",
+                "ApprovedUsage": [
+                    "ModelAndAllInsights"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "HasEEDownload",
+            "source_logical_type": "boolean",
+            "logical_type": null,
+            "enum_values": ""
+        },
+        {
+            "name": "InternalId",
+            "length": null,
+            "nullable": false,
+            "physicalDataType": "long",
+            "precision": null,
+            "scale": null,
+            "properties": {
+                "ApprovedUsage": [
+                    "None"
+                ]
+            },
+            "validatorWrappers": [],
+            "display_name": "InternalId",
+            "source_logical_type": "",
+            "logical_type": "InternalId",
+            "enum_values": ""
+        }
+    ],
+    "extracts": [
+        {
+            "name": "*.avro",
+            "path": "/Pods/QA/Contracts/A_ForTest_0720/Tenants/A_ForTest_0720/Spaces/Production/Data/Tables/File/SourceFile_file_1469152700642_csv/Extracts/2016-07-21-21-59-08/*.avro",
+            "extraction_ts": 1469152748000,
+            "processed_records": 0
+        }
+    ],
+    "interpretation": "SalesforceLead",
+    "display_name": "SalesforceLead",
+    "primary_key": {
+        "name": "Id",
+        "attributes": [
+            "Id"
+        ],
+        "attributesAsStr": "Id",
+        "display_name": "Id"
+    },
+    "last_modified_key": {
+        "name": "LastModifiedDate",
+        "attributes": [
+            "LastModifiedDate"
+        ],
+        "attributesAsStr": "LastModifiedDate",
+        "display_name": "LastModifiedDate",
+        "last_modified_ts": 1469152754327
+    },
+    "marked_for_purge": false,
+    "data_rules": [],
+    "extracts_directory": "/Pods/QA/Contracts/A_ForTest_0720/Tenants/A_ForTest_0720/Spaces/Production/Data/Tables/File/SourceFile_file_1469152700642_csv/Extracts/2016-07-21-21-59-08"
+}
