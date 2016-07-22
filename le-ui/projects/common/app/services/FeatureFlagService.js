@@ -76,7 +76,6 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             for(var key in data) {
                 flagValues[key] = data[key];
             }
-            console.log(data);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();
