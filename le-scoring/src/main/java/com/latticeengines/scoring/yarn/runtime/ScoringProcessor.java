@@ -9,10 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -21,9 +27,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -59,6 +67,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     public static final String DEFAULT_ID_TYPE = "internal";
     public static final boolean DEFAULT_ENRICHMENT = false;
 
+    @Value("${scoring.processor.threadpool.size}")
+    private int threadpoolSize = 5;
+
+    @Value("${scoring.processor.threadpool.timeoutmin}")
+    private long threadPoolTimeoutMin = 1440;
+
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -84,42 +98,101 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
-        String customerSpace = rtsBulkScoringConfig.getCustomerSpace().toString();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
         if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
             leadEnrichmentAttributeMap = getLeadEnrichmentAttributes(rtsBulkScoringConfig.getCustomerSpace());
         }
 
-        long startTime = System.currentTimeMillis();
-        List<BulkRecordScoreRequest> bulkScoreRequestList = convertAvroToBulkScoreRequest(path, rtsBulkScoringConfig);
-        long endTime = System.currentTimeMillis();
-        long transformationTotalTime = endTime - startTime;
-        log.info("The transformation from avro to bulks score request takes " + (transformationTotalTime * 1.66667e-5)
-                + " mins");
-        long scoringStartTime = System.currentTimeMillis();
-        List<RecordScoreResponse> recordScoreResponseList = new ArrayList<RecordScoreResponse>();
-        for (BulkRecordScoreRequest scoreRequest : bulkScoreRequestList) {
-            startTime = System.currentTimeMillis();
-            log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
-                    .getRecords().size(), customerSpace));
-            List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(
-                    scoreRequest, customerSpace);
-            endTime = System.currentTimeMillis();
-            long oneBatchTime = endTime - startTime;
-            log.info("Sending this batch of score requests takes " + (oneBatchTime * 1.66667e-5) + " mins");
-            recordScoreResponseList.addAll(recordScoreResponse);
+        if (path == null) {
+            throw new IllegalArgumentException("The path is null.");
         }
-        long scoringEndTime = System.currentTimeMillis();
-        long scoringApiRequestTotalTime = scoringEndTime - scoringStartTime;
-        log.info("The sending scoring requests takes " + (scoringApiRequestTotalTime * 1.66667e-5) + " mins");
-        startTime = System.currentTimeMillis();
-        convertBulkScoreResponseToAvro(recordScoreResponseList, rtsBulkScoringConfig.getTargetResultDir(),
-                leadEnrichmentAttributeMap);
-        endTime = System.currentTimeMillis();
-        transformationTotalTime = endTime - startTime;
-        log.info("The transformation from bulks score response to avro takes " + (transformationTotalTime * 1.66667e-5)
-                + " mins");
+        List<String> modelGuids = rtsBulkScoringConfig.getModelGuids();
+        if (modelGuids.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_20033);
+        }
+
+        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        Schema schema = createOutputSchema(leadEnrichmentAttributeMap);
+
+        try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
+                DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            execute(rtsBulkScoringConfig, reader, dataFileWriter, builder, leadEnrichmentAttributeMap);
+        }
+
+        copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
+
         return "In side the rts bulk scoring processor.";
+    }
+
+    public String processBak(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
+        log.info("In side the rts bulk scoring processor.");
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(
+                rtsBulkScoringConfig.getInternalResourceHostPort());
+        String path = getExtractPath(rtsBulkScoringConfig);
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
+        if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
+            leadEnrichmentAttributeMap = getLeadEnrichmentAttributes(rtsBulkScoringConfig.getCustomerSpace());
+        }
+
+        if (path == null) {
+            throw new IllegalArgumentException("The path is null.");
+        }
+        List<String> modelGuids = rtsBulkScoringConfig.getModelGuids();
+        if (modelGuids.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_20033);
+        }
+
+        FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
+        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        Schema schema = createOutputSchema(leadEnrichmentAttributeMap);
+
+        try (DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+
+            BulkRecordScoreRequest scoreRequest = null;
+            do {
+                scoreRequest = getBulkScoreRequest(reader, rtsBulkScoringConfig);
+                if (scoreRequest == null) {
+                    break;
+                }
+                List<RecordScoreResponse> scoreResponseList = bulkScore(scoreRequest, rtsBulkScoringConfig
+                        .getCustomerSpace().toString());
+                appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap);
+            } while (scoreRequest != null);
+        }
+
+        copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
+
+        return "In side the rts bulk scoring processor.";
+    }
+
+    @VisibleForTesting
+    void copyScoreOutputToHdfs(String fileName, String targetDir) throws IOException {
+        String scorePath = String.format(targetDir + "/%s", fileName);
+        log.info("The output score path is " + scorePath);
+        HdfsUtils.copyLocalToHdfs(new Configuration(), fileName, scorePath);
+    }
+
+    @VisibleForTesting
+    DataFileWriter<GenericRecord> createDataFileWriter(Schema schema, String fileName) throws IOException {
+        DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+        DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter);
+        dataFileWriter.create(schema, new File(fileName));
+        return dataFileWriter;
+    }
+
+    private List<RecordScoreResponse> bulkScore(BulkRecordScoreRequest scoreRequest, String customerSpace) {
+        long startTime = System.currentTimeMillis();
+        log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
+                .getRecords().size(), customerSpace));
+        List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest,
+                customerSpace);
+        long endTime = System.currentTimeMillis();
+        long oneBatchTime = endTime - startTime;
+        log.info("Sending this batch of score requests takes " + (oneBatchTime * 1.66667e-5) + " mins");
+
+        return recordScoreResponse;
     }
 
     private String getExtractPath(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
@@ -152,32 +225,29 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     }
 
     @VisibleForTesting
-    List<BulkRecordScoreRequest> convertAvroToBulkScoreRequest(String path,
-            RTSBulkScoringConfiguration rtsBulkScoringConfig) throws IOException {
-        if (path == null) {
-            throw new IllegalArgumentException("The path is null.");
-        }
-        List<String> modelGuids = rtsBulkScoringConfig.getModelGuids();
-        if (modelGuids.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_20033);
-        }
-
-        List<BulkRecordScoreRequest> requestList = new ArrayList<BulkRecordScoreRequest>();
-
+    FileReader<GenericRecord> instantiateReaderForBulkScoreRequest(String path) throws IOException {
         String fileName = getAvroFileName(path);
-        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, fileName);
-        log.info(String.format("There are %d records in total,", avroRecords.size()));
-        Schema schema = avroRecords.get(0).getSchema();
-        List<Schema.Field> fields = schema.getFields();
+        return AvroUtils.getAvroFileReader(yarnConfiguration, new Path(fileName));
+    }
+
+    @VisibleForTesting
+    BulkRecordScoreRequest getBulkScoreRequest(FileReader<GenericRecord> reader,
+            RTSBulkScoringConfiguration rtsBulkScoringConfig) throws IOException {
+        if (!reader.hasNext()) {
+            return null;
+        }
 
         BulkRecordScoreRequest scoreRequest = new BulkRecordScoreRequest();
         scoreRequest.setSource(RECORD_SOURCE);
         List<Record> records = new ArrayList<Record>();
         scoreRequest.setRecords(records);
 
-        int i = 0;
-        for (GenericRecord avroRecord : avroRecords) {
-            i++;
+        int recordCount = 1;
+        while (reader.hasNext() && recordCount <= BulkRecordScoreRequest.MAX_ALLOWED_RECORDS) {
+            GenericRecord avroRecord = reader.next();
+            Schema schema = avroRecord.getSchema();
+            List<Schema.Field> fields = schema.getFields();
+
             Record record = new Record();
             record.setPerformEnrichment(rtsBulkScoringConfig.isEnableLeadEnrichment());
             record.setIdType(DEFAULT_ID_TYPE);
@@ -195,7 +265,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
 
             Map<String, Map<String, Object>> modelAttributeValuesMap = new HashMap<>();
-            for (String modelguid : modelGuids) {
+            for (String modelguid : rtsBulkScoringConfig.getModelGuids()) {
                 modelAttributeValuesMap.put(modelguid, attributeValues);
             }
 
@@ -204,30 +274,16 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             record.setRule(RECORD_RULE);
 
             records.add(record);
-
-            if (i % BulkRecordScoreRequest.MAX_ALLOWED_RECORDS == 0) {
-                requestList.add(scoreRequest);
-                scoreRequest = new BulkRecordScoreRequest();
-                scoreRequest.setSource(RECORD_SOURCE);
-                records = new ArrayList<Record>();
-                scoreRequest.setRecords(records);
-            }
+            recordCount++;
         }
 
-        if (records.size() > 0) {
-            requestList.add(scoreRequest);
-        }
+        log.info(String.format("score request contains %d records; is: %s", records.size(), scoreRequest));
 
-        return requestList;
+        return scoreRequest;
     }
 
     @VisibleForTesting
-    void convertBulkScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList, String targetPath,
-            Map<String, Schema.Type> leadEnrichmentAttributeMap) throws IOException {
-        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
-        String scorePath = String.format(targetPath + "/%s", fileName);
-        log.info("The output score path is " + scorePath);
-
+    Schema createOutputSchema(Map<String, Schema.Type> leadEnrichmentAttributeMap) {
         Table outputTable = new Table();
         outputTable.setName("scoreOutput");
         Attribute idAttr = new Attribute();
@@ -263,54 +319,51 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 outputTable.addAttribute(attr);
             }
         }
-        Schema schema = TableUtils.createSchema(outputTable.getName(), outputTable);
+        return TableUtils.createSchema(outputTable.getName(), outputTable);
+    }
 
-        DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
-
-            dataFileWriter.create(schema, new File(fileName));
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
-                log.info("the score response is: " + scoreResponse);
-                List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
-                String id = scoreResponse.getId();
-                if (StringUtils.isBlank(id)) {
-                    throw new LedpException(LedpCode.LEDP_20035);
+    @VisibleForTesting
+    void appendScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList,
+            DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
+            Map<String, Schema.Type> leadEnrichmentAttributeMap) throws IOException {
+        for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
+            log.info("the score response is: " + scoreResponse);
+            List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
+            String id = scoreResponse.getId();
+            if (StringUtils.isBlank(id)) {
+                throw new LedpException(LedpCode.LEDP_20035);
+            }
+            for (ScoreModelTuple tuple : scoreModelTupleList) {
+                builder.set("Id", id);
+                String modelId = tuple.getModelId();
+                if (StringUtils.isBlank(modelId)) {
+                    throw new LedpException(LedpCode.LEDP_20036);
                 }
-                for (ScoreModelTuple tuple : scoreModelTupleList) {
-                    builder.set("Id", id);
-                    String modelId = tuple.getModelId();
-                    if (StringUtils.isBlank(modelId)) {
-                        throw new LedpException(LedpCode.LEDP_20036);
-                    }
-                    double score = tuple.getScore();
-                    if (score > 99 || score < 5) {
-                        throw new LedpException(LedpCode.LEDP_20037);
-                    }
-                    builder.set("modelId", modelId);
-                    builder.set("score", score);
-
-                    Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
-                    if (leadEnrichmentAttributeMap != null) {
-                        if (enrichmentAttributeValues == null) {
-                            throw new LedpException(LedpCode.LEDP_20038);
-                        }
-                        Iterator<Entry<String, Object>> it = enrichmentAttributeValues.entrySet().iterator();
-                        while (it.hasNext()) {
-                            Entry<String, Object> entry = it.next();
-                            if (!leadEnrichmentAttributeMap.containsKey(entry.getKey())) {
-                                throw new LedpException(LedpCode.LEDP_20039, new String[] { entry.getKey() });
-                            }
-                            builder.set(entry.getKey(), entry.getValue());
-                        }
-                    }
-
-                    dataFileWriter.append(builder.build());
+                double score = tuple.getScore();
+                if (score > 99 || score < 5) {
+                    throw new LedpException(LedpCode.LEDP_20037);
                 }
+                builder.set("modelId", modelId);
+                builder.set("score", score);
+
+                Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
+                if (leadEnrichmentAttributeMap != null) {
+                    if (enrichmentAttributeValues == null) {
+                        throw new LedpException(LedpCode.LEDP_20038);
+                    }
+                    Iterator<Entry<String, Object>> it = enrichmentAttributeValues.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Entry<String, Object> entry = it.next();
+                        if (!leadEnrichmentAttributeMap.containsKey(entry.getKey())) {
+                            throw new LedpException(LedpCode.LEDP_20039, new String[] { entry.getKey() });
+                        }
+                        builder.set(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                dataFileWriter.append(builder.build());
             }
         }
-
-        HdfsUtils.copyLocalToHdfs(new Configuration(), fileName, scorePath);
     }
 
     private String getAvroFileName(String path) throws IOException {
@@ -320,6 +373,71 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             throw new LedpException(LedpCode.LEDP_12003, new String[] { path });
         }
         return fileName;
+    }
+
+    private void execute(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
+            DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
+            Map<String, Type> leadEnrichmentAttributeMap) throws Exception {
+        List<Future<Integer>> futures = new ArrayList<>();
+        ExecutorService scoreExecutorService = Executors.newFixedThreadPool(threadpoolSize);
+        for (int i = 0; i < threadpoolSize; i++) {
+            futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, reader,
+                    dataFileWriter, builder, leadEnrichmentAttributeMap)));
+        }
+
+        for (Future<Integer> future : futures) {
+            try {
+                future.get(threadPoolTimeoutMin, TimeUnit.MINUTES);
+            } catch (Exception e) {
+                log.fatal(e.getMessage(), e);
+                throw e;
+            }
+        }
+
+        scoreExecutorService.shutdown();
+        try {
+            scoreExecutorService.awaitTermination(threadPoolTimeoutMin, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    class BulkScoreApiCallable implements Callable<Integer> {
+
+        private RTSBulkScoringConfiguration rtsBulkScoringConfig;
+        private FileReader<GenericRecord> reader;
+        private DataFileWriter<GenericRecord> dataFileWriter;
+        private GenericRecordBuilder builder;
+        private Map<String, Schema.Type> leadEnrichmentAttributeMap;
+
+        BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
+                DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
+                Map<String, Type> leadEnrichmentAttributeMap) {
+            super();
+            this.rtsBulkScoringConfig = rtsBulkScoringConfig;
+            this.reader = reader;
+            this.dataFileWriter = dataFileWriter;
+            this.builder = builder;
+            this.leadEnrichmentAttributeMap = leadEnrichmentAttributeMap;
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            while (true) {
+                BulkRecordScoreRequest scoreRequest = null;
+                synchronized (reader) {
+                    scoreRequest = ScoringProcessor.this.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+                    if (scoreRequest == null) {
+                        break;
+                    }
+                }
+                List<RecordScoreResponse> scoreResponseList = ScoringProcessor.this.bulkScore(scoreRequest, rtsBulkScoringConfig
+                        .getCustomerSpace().toString());
+                synchronized (dataFileWriter) {
+                    ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap);
+                }
+            }
+            return null;
+        }
     }
 
 }

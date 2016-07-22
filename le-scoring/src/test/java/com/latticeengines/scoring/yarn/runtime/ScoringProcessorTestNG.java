@@ -1,14 +1,19 @@
 package com.latticeengines.scoring.yarn.runtime;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +25,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
@@ -29,6 +33,7 @@ import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -38,8 +43,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    private String tenant = CustomerSpace.parse(this.getClass().getSimpleName()).toString();
 
     private String dir;
 
@@ -75,8 +78,17 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         RTSBulkScoringConfiguration rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
         rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
 
-        List<BulkRecordScoreRequest> scoreRequestList = bulkScoringProcessor.convertAvroToBulkScoreRequest(dir,
-                rtsBulkScoringConfig);
+        List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
+        FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
+        BulkRecordScoreRequest scoreRequest = null;
+        do {
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+            if (scoreRequest == null) {
+                break;
+            }
+            scoreRequestList.add(scoreRequest);
+        } while (scoreRequest != null);
+
         Assert.assertEquals(scoreRequestList.size(), 107);
         BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
         Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
@@ -91,10 +103,24 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
     }
 
+    private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
+            Map<String, Schema.Type> leadEnrichmentAttributeMap, String targetDir) throws IOException {
+        String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap);
+        try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema, fileName)) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            bulkScoringProcessor.appendScoreResponseToAvro(recordScoreResponseList, dataFileWriter, builder,
+                    leadEnrichmentAttributeMap);
+        }
+        bulkScoringProcessor.copyScoreOutputToHdfs(fileName, targetDir);
+    }
+
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvro() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
-        bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score", null);
+
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
+        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 1);
@@ -111,8 +137,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = generateCorrectEnrichmentAttributeMap();
-        bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score",
-                leadEnrichmentAttributeMap);
+        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 1);
@@ -132,8 +157,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = generateIncorrectEnrichmentAttributeMap();
         try {
-            bulkScoringProcessor.convertBulkScoreResponseToAvro(recordScoreResponseList, dir + "/score",
-                    leadEnrichmentAttributeMap);
+            generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
             Assert.fail("Should have thrown exception");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20039);

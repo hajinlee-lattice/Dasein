@@ -9,6 +9,7 @@ public class LedpQueueAssigner {
     public static final String PRIORITY = "Priority";
     public static final Log log = LogFactory.getLog(LedpQueueAssigner.class);
 
+    private static final String RTSBULKSCORING_QUEUE_NAME = "RTSBulkScoring";
     private static final String SCORING_QUEUE_NAME = "Scoring";
     private static final String MODELING_QUEUE_NAME = "Modeling";
     private static final String PROPDATA_QUEUE_NAME = "PropData";
@@ -16,6 +17,10 @@ public class LedpQueueAssigner {
     private static final String DATAFLOW_QUEUE_NAME = "Dataflow";
     private static final String EAI_QUEUE_NAME = "Eai";
     private static final String DEFAULT_QUEUE_NAME = "default";
+
+    public static String getRtsBulkScoringQueueNameForSubmission() {
+        return RTSBULKSCORING_QUEUE_NAME;
+    }
 
     public static String getScoringQueueNameForSubmission() {
         return SCORING_QUEUE_NAME;

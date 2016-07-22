@@ -46,7 +46,8 @@ public class ScoringServiceImpl implements ScoringService {
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
+                LedpQueueAssigner.getRtsBulkScoringQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
         containerProperties.put(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG, rtsBulkScoringConfig.toString());
