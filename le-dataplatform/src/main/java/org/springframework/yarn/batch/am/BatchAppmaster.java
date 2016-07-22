@@ -15,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.conf.HAUtil;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.RackResolver;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -24,6 +26,7 @@ import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.yarn.am.AppmasterRmTemplate;
 import org.springframework.yarn.am.AppmasterService;
 import org.springframework.yarn.am.YarnAppmaster;
 import org.springframework.yarn.am.allocate.AbstractAllocator;
@@ -111,7 +114,23 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Override
     public void submitApplication() {
         log.info("Submitting application from custom BatchAppMaster.");
-        registerAppmaster();
+        try {
+            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+            try {
+                rmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("AppmasterRmTemplate refresh properties failed.");
+            }
+            registerAppmaster();
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
+                log.info("Retry submit application.");
+                performFailover();
+                registerAppmaster();
+            } else {
+                throw e;
+            }
+        }
         start();
         ApplicationAttemptId appAttemptId = getApplicationAttemptId();
         if (getAllocator() instanceof AbstractAllocator) {
@@ -232,7 +251,23 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     @Override
     public void doStop() {
-        super.doStop();
+        try {
+            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+            try {
+                rmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("AppmasterRmTemplate refresh properties failed.");
+            }
+            super.doStop();
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
+                log.info("Retry doStop.");
+                performFailover();
+                super.doStop();
+            } else {
+                throw e;
+            }
+        }
         cleanupJobDir();
     }
 
@@ -244,5 +279,37 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
             log.warn("Could not delete job dir " + dir + ".", e);
         }
 
+    }
+
+    private void performFailover() {
+        Configuration conf = getConfiguration();
+        Collection<String> rmIds = HAUtil.getRMHAIds(conf);
+        String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
+        int currentIndex = 0;
+        String currentHAId = conf.get(YarnConfiguration.RM_HA_ID);
+        for (int i = 0; i < rmServiceIds.length; i++) {
+            if (currentHAId.equals(rmServiceIds[i])) {
+                currentIndex = i;
+                break;
+            }
+        }
+        currentIndex = (currentIndex + 1) % rmServiceIds.length;
+        conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
+        String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        conf.set(YarnConfiguration.RM_ADDRESS, address);
+        conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
+        conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
+        setConfiguration(conf);
+        log.info(String.format("Fail over from %s to %s.", currentHAId, rmServiceIds[currentIndex]));
+        AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+        try {
+            rmTemplate.afterPropertiesSet();
+        } catch (Exception e) {
+            log.error("AppmasterRmTemplate refresh properties failed.");
+        }
     }
 }

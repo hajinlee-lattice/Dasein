@@ -30,7 +30,7 @@ public class CustomYarnClient extends CommandYarnClient {
         try {
             clientRmTemplate.afterPropertiesSet();
         } catch (Exception e) {
-            log.error("clientRmTemplate refresh properties faied.");
+            log.error("clientRmTemplate refresh properties failed.");
         }
         return submitApplication(true);
     }
@@ -41,7 +41,7 @@ public class CustomYarnClient extends CommandYarnClient {
             try {
                 clientRmTemplate.afterPropertiesSet();
             } catch (Exception e) {
-                log.error("clientRmTemplate refresh properties faied.");
+                log.error("clientRmTemplate refresh properties failed.");
             }
             ApplicationId applicationId = super.submitApplication(distribute);
             return applicationId;
@@ -63,7 +63,7 @@ public class CustomYarnClient extends CommandYarnClient {
             try {
                 clientRmTemplate.afterPropertiesSet();
             } catch (Exception e) {
-                log.error("clientRmTemplate refresh properties faied.");
+                log.error("clientRmTemplate refresh properties failed.");
             }
             return super.listApplications();
         } catch (Exception e) {
@@ -83,7 +83,7 @@ public class CustomYarnClient extends CommandYarnClient {
             try {
                 clientRmTemplate.afterPropertiesSet();
             } catch (Exception e) {
-                log.error("clientRmTemplate refresh properties faied.");
+                log.error("clientRmTemplate refresh properties failed.");
             }
             super.killApplication(applicationId);
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class CustomYarnClient extends CommandYarnClient {
             try {
                 clientRmTemplate.afterPropertiesSet();
             } catch (Exception e) {
-                log.error("clientRmTemplate refresh properties faied.");
+                log.error("clientRmTemplate refresh properties failed.");
             }
             return super.getApplicationReport(applicationId);
         } catch (Exception e) {
@@ -143,7 +143,7 @@ public class CustomYarnClient extends CommandYarnClient {
         try {
             clientRmTemplate.afterPropertiesSet();
         } catch (Exception e) {
-            log.error("clientRmTemplate refresh properties faied.");
+            log.error("clientRmTemplate refresh properties failed.");
         }
     }
 }
