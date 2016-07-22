@@ -25,6 +25,8 @@ public abstract class FirehoseTransformationDeploymentTestNGBase extends Transfo
             Assert.assertNotNull(transformationProgressList);
             Assert.assertTrue(transformationProgressList.size() > 0);
             Assert.assertNotNull(transformationProgressList.get(0).getYarnAppId());
+
+            finish(transformationProgressList.get(0));
         } finally {
             cleanupProgressTables();
         }

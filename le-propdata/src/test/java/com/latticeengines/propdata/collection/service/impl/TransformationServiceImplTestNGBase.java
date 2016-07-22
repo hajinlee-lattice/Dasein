@@ -24,6 +24,7 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 
 public abstract class TransformationServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
+    private static final int MAX_LOOPS = 100;
     TransformationService transformationService;
     TransformationProgressEntityMgr progressEntityMgr;
     Source source;
@@ -40,7 +41,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
 
     abstract TransformationConfiguration createTransformationConfiguration();
 
-    @BeforeMethod(groups = {"collection", "deployment"})
+    @BeforeMethod(groups = { "collection", "deployment" })
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -48,7 +49,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
         progressEntityMgr = getProgressEntityMgr();
     }
 
-    @AfterMethod(groups = {"collection", "deployment"})
+    @AfterMethod(groups = { "collection", "deployment" })
     public void tearDown() throws Exception {
     }
 
@@ -94,15 +95,23 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
     }
 
     protected TransformationProgress finish(TransformationProgress progress) {
-        TransformationProgress response = transformationService.finish(progress);
+        TransformationProgress progressInDb = null;
+        for (int i = 0; i < MAX_LOOPS; i++) {
+            progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
+            Assert.assertNotNull(progressInDb);
+            if (progressInDb.getStatus().equals(ProgressStatus.FINISHED)) {
+                break;
+            }
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-        Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
-
-        TransformationProgress progressInDb = progressEntityMgr
-                .findProgressByRootOperationUid(progress.getRootOperationUID());
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
-        return response;
+        return progressInDb;
     }
 
     protected void cleanupActiveFromProgressTables() {
