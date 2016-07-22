@@ -3,9 +3,10 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -18,6 +19,9 @@ public abstract class AbstractTransformationDataFlowService implements Transform
     abstract Configuration getYarnConfiguration();
 
     abstract String getCascadingPlatform();
+
+    @Value("${dataplatform.queue.scheme:legacy}")
+    private String yarnQueueScheme;
 
     protected DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
             String outputDir) {
@@ -38,8 +42,10 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         ctx.setProperty(DataFlowProperty.RECORDNAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
+        String translatedQueue = LedpQueueAssigner
+                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
 
-        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, getYarnConfiguration());
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, new Properties());

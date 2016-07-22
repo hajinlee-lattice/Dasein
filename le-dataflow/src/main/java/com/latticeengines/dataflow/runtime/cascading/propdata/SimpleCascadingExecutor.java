@@ -42,6 +42,9 @@ public class SimpleCascadingExecutor {
 
     private final Configuration yarnConfiguration;
 
+    @Value("${dataplatform.queue.scheme:legacy}")
+    private String yarnQueueScheme;
+
     public SimpleCascadingExecutor(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
     }
@@ -60,8 +63,9 @@ public class SimpleCascadingExecutor {
             properties.put(conf.getKey(), conf.getValue());
         }
 
-        // will configure this to run on tez instead of mapred in next txn
-        properties.put(MAPREDUCE_JOB_QUEUENAME, LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        String translatedQueue = LedpQueueAssigner
+                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
+        properties.put(MAPREDUCE_JOB_QUEUENAME, translatedQueue);
 
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         AvroScheme avroScheme = new AvroScheme(schema);
