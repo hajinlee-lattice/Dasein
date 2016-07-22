@@ -2,7 +2,11 @@
     <div class="secondary-nav">
         <!-- <img ng-show="!isModelDetailsPage" class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" /> -->
         <!-- <span class="ico ico-model ico-light-gray"></span> -->
-        <span ng-show="isModelDetailsPage" class="model-name">{{ displayName }}</span>
+        <span ng-if="pageDisplayIcon" class="page-icon ico-container">
+            <span class="ico {{ pageDisplayIcon }} ico-light-gray"></span>
+        </span>
+        <span ng-if="pageDisplayName" class="page-name">{{ pageDisplayName }}</span>
+        <span ng-if="isModelDetailsPage" class="model-name">{{ modelDisplayName }}</span>
         
         <div class="pull-right">
 

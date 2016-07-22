@@ -458,7 +458,7 @@ angular
             }
 
             vm.showSpinnerIcon = function() {
-                return vm.compressing && !vm.uploading && !vm.uploaded && vm.compress_percent < 100;
+                return vm.compressing && vm.compress_percent < 100;
             }
 
             vm.showCancelIcon = function() {

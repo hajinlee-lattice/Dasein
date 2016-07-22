@@ -246,6 +246,7 @@ Use this structure for angled buttons:
     border-radius: 0;
     border: 0;
     transition: none;
+    animation: none;
     transform: skewX(20deg);
     &:hover {
         cursor: default;

@@ -165,6 +165,13 @@ section.container.setup-import {
         &.fa-save {
             pointer-events: none;
         }
+        &.fa-spinner.ng-animate {
+            -webkit-transition: none;
+            -moz-transition: none;
+            -ms-transition: none;
+            transition: none;
+            animation: none;
+        }
     }
 }
 .animate > span:after {

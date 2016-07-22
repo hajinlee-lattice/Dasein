@@ -172,6 +172,11 @@ span.chevron-content.chevron-content-text {
     
     div.clearfix {
         padding-left: 10px;
+
+        * {
+            animation: none;
+            transition: all 0s linear;
+        }
         
         .Completed {
             color: rgb(113, 188, 81);

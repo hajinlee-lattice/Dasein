@@ -44,6 +44,51 @@ section.main-content {
     }
 }
 
+span.ico-container {
+    display: inline-block;
+    height: 36px;
+    width: 36px;
+    padding: 4px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    text-align: center;
+    position: relative;
+    animation-duration: 5s;
+
+    .ico {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%);
+        height: 20px;
+        width: 20px;
+        &.ico-marketo {
+            height: 13px;
+        }
+        &.ico-history {
+            height: 18px;
+        }
+        &.ico-salesforce {
+            height: 32px;
+            width: 32px;
+        }
+        &.ico-eloqua {
+            height: 30px;
+            width: 30px;
+        }
+        &.ico-user {
+            width: 19px;
+        }
+        &.ico-api-console {
+            height: 19px;
+        }
+        &.ico-alerts {
+          height: 19px;
+        }
+    }
+}
+
 nav.primary-nav {
     @include flex-item(0 1 auto);
     @include transition(width $slide-transition ease);
@@ -75,50 +120,6 @@ nav.primary-nav {
         white-space: nowrap;
         text-overflow: ellipsis;
         letter-spacing: 1px;
-    }
-    .ico-container {
-        display: inline-block;
-        height: 36px;
-        width: 36px;
-        padding: 4px;
-        overflow: hidden;
-        border-radius: 50%;
-        background: rgba(255,255,255,.08);
-        text-align: center;
-        position: relative;
-        animation-duration: 5s;
-        
-        .ico {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translateY(-50%) translateX(-50%);
-            height: 20px;
-            width: 20px;
-            &.ico-marketo {
-                height: 13px;
-            }
-            &.ico-history {
-                height: 18px;
-            }
-            &.ico-salesforce {
-                height: 32px;
-                width: 32px;
-            }
-            &.ico-eloqua {
-                height: 30px;
-                width: 30px;
-            }
-            &.ico-user {
-                width: 19px;
-            }
-            &.ico-api-console {
-                height: 19px;
-            }
-            &.ico-alerts {
-              height: 19px;
-            }
-        }
     }
     padding-top: 40px;
     .open-button {
@@ -385,13 +386,30 @@ html.no-cssmask {
             outline: 0;
         }
     }
+    .ng-animate {
+    }
+    .page-icon,
+    .page-name,
     .model-name {
         display: inline-block;
         font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
         color: #333;
         font-size: 22px;
-        margin-top: 16px;
-        margin-left: 20px;
+        margin-top: 17px;
+        margin-left: .5em;
+        vertical-align: middle;
+        transition: none;
+        animation: none;
+    }
+    .page-icon {
+        margin-left: 1em;
+        background-color: #e5e5e5;
+        span {
+            background-color: #222;
+        }
+    }
+    .model-name {
+        margin-left: .5em;
     }
     .header-tenant-name {
         padding: 20px 20px 20px 52px;

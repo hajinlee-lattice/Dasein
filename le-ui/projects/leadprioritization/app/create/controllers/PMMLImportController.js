@@ -69,10 +69,12 @@ angular
             .parent('div.form-group')
             .removeClass('is-pristine');
 
-        var timestamp = new Date().getTime(),
+        var fileName = vm.sanitize(fileName),
+            timestamp = new Date().getTime(),
             artifactName = vm.artifactName = vm.stripExt(fileName),
             moduleName = vm.moduleName = artifactName + '_' + timestamp;
 
+console.log(fileName, artifactName, moduleName);
         vm.pmmlUploaded = false;
         vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
         
@@ -80,10 +82,12 @@ angular
     }
 
     vm.pivotSelect = function(fileName) {
-        var artifactName = fileName,
+        var fileName = vm.sanitize(fileName),
+            artifactName = fileName,
             pivotFile = vm.pivotFileName = fileName,
             moduleName = vm.moduleName;
 
+console.log(fileName, artifactName, moduleName, pivotFile);
         vm.pivotUploaded = false;
         vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + vm.stripExt(artifactName);
         
@@ -139,6 +143,10 @@ angular
     vm.clickUpload = function() {
         vm.showImportError = false;
         vm.importErrorMsg = "";
+    }
+
+    vm.sanitize = function(fileName) {
+        return fileName.replace(/[^A-Za-z0-9_\.]/g,'_');
     }
 
     vm.stripExt = function(fileName) {
