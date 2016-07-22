@@ -79,7 +79,7 @@ angular.module('mainApp.setup.services.MetadataService', [
         if (dataItem.Tags == null) {
             return false;
         }
-        return dataItem.Tags.toLowerCase() === "external";
+        return dataItem.Tags.toLowerCase() === "external" || dataItem.Tags.toLowerCase() == "externaltransform";
     };
 
     this.GetOptions = function () {
