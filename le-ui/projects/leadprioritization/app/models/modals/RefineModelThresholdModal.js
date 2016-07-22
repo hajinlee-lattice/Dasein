@@ -35,4 +35,8 @@ angular.module('mainApp.models.modals.RefineModelThresholdModal', [
     $scope.createModelClicked = function() {
         $rootScope.$broadcast('ShowCreateModelPopup');
     };
+
+    $scope.cancelClicked = function() {
+        $("#modalContainer").modal('hide');
+    };
 });
