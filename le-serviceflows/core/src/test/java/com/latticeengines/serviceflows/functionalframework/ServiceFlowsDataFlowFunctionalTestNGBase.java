@@ -228,6 +228,7 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         ctx.setProperty(DataFlowProperty.SOURCETABLES, getSources());
         ctx.setProperty(DataFlowProperty.CUSTOMER, "customer");
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
+        ctx.setProperty(DataFlowProperty.DEBUG, false);
         return ctx;
     }
 

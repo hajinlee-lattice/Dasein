@@ -94,7 +94,7 @@ public class DedupEventTableDP3288TestNG extends ServiceFlowsDataFlowFunctionalT
 
     @Override
     protected String getScenarioName() {
-        return "leadBased";
+        return "dp3288";
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -269,7 +270,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     sourceTable.getLastModifiedKey().getAttributes().get(0)));
             String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0);
             Fields sortFields = new Fields(lastModifiedKeyColName);
-            sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
+            sortFields.setComparator(lastModifiedKeyColName, new NullComparator(Collections.reverseOrder()));
 
             Pipe groupby = new GroupBy(toRegister, new Fields(sourceTable.getPrimaryKey().getAttributeNames()),
                     sortFields);

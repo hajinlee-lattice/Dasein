@@ -26,7 +26,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
 
     @Override
     public Node construct(DedupEventTableParameters parameters) {
-        setDebug(true);
         Node eventTable = addSource(parameters.eventTable);
         if (parameters.deduplicationType == DedupType.MULTIPLELEADSPERDOMAIN) {
             return eventTable;
