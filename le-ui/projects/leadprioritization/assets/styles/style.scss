@@ -602,8 +602,13 @@ Model List
         &.SalesforceAccount {
             background-image: url(/assets/images/bkg-active-model-account.png);
         }
-        &.PmmlModel.SalesforceLead,
+        &.PmmlModel.SalesforceLead {
+            background-image: url(/assets/images/bkg-active-model-pmml-lead.png);
+        }
         &.PmmlModel.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-pmml-account.png);
+        }
+        &.PmmlModel {
             background-image: url(/assets/images/bkg-active-model-pmml.png);
         }
     }
