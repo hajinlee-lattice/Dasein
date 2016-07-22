@@ -31,7 +31,7 @@
 
                 <li 
                         ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" 
-                        data-ng-if="data.ModelType && showReviewAndClone"
+                        data-ng-if="data.ModelType && showReviewAndClone && data.ModelFileType != 'PmmlModel'"
                         data-ng-click="refineAndCloneClick($event)">
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
                     <i class="fa fa-copy"></i>
@@ -39,7 +39,7 @@
 
                 <li 
                         ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })" 
-                        data-ng-if="data.ModelType"
+                        data-ng-if="data.ModelType && data.ModelFileType != 'PmmlModel'"
                         data-ng-click="reviewClick($event)">
                     <a href="javascript:void(0)">Review Model</a>
                     <i class="fa fa-eye"></i>
