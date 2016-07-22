@@ -90,7 +90,11 @@ public class ModelingUtils {
                         public boolean apply(AttributeMetadata attr) {
                             return attr.getColumnName().equals(name);
                         }
-                    });
+                    }, null);
+            
+            if (attrMetadatum == null) {
+                continue;
+            }
             // build extension for pivot values
             List<Map<String, ?>> pValues = new ArrayList<>();
 
