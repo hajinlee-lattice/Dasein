@@ -33,7 +33,6 @@ import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
 public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(CSVExportMapper.class);
 
     private static final String OUTPUT_FILE = "output.csv";
@@ -103,11 +102,14 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
             }
             csvFilePrinter.print(fieldValue);
+        } else if (field.name() != null) {
+            log.info("Ignore field:" + field.name() + ", value:" + record.get(field.name()));
         }
     }
 
     @Override
     public void endRecord(Record record) throws IOException {
+        log.info(record);
         csvFilePrinter.println();
     }
 
