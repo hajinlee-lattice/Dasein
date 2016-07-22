@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 public class PropertyUtils extends PropertyPlaceholderConfigurer {
+    private static Logger log = Logger.getLogger(PropertyUtils.class);
 
     private static Map<String, String> propertiesMap;
 
@@ -21,15 +23,18 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
     }
 
     @Override
-    protected void processProperties(
-            ConfigurableListableBeanFactory beanFactory, Properties props)
+    protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
             throws BeansException {
 
-        propertiesMap = new HashMap<String, String>();
+        propertiesMap = new HashMap<>();
+
+        log.info("Loading properties");
+        for (String key : props.stringPropertyNames()) {
+            log.info(String.format("%s: %s", key, props.getProperty(key)));
+        }
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
-            String valueStr = resolvePlaceholder(keyStr, props,
-                    springSystemPropertiesMode);
+            String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
             // Decrypt credentials
             if (keyStr.contains(CipherUtils.ENCRYPTED)) {
                 try {
@@ -46,7 +51,7 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
     }
 
     public static String getProperty(String name) {
-        return propertiesMap.get(name).toString();
+        return propertiesMap.get(name);
     }
 
 }

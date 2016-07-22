@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
@@ -102,6 +103,13 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
+
+        String property = String.format("dataflowapi.flow.%s.debug", dataFlowConfig.getDataFlowBeanName());
+        String debugStr = PropertyUtils.getProperty(property);
+        log.info(String.format("%s: %s", property, debugStr));
+        boolean debug = Boolean.parseBoolean(debugStr);
+        ctx.setProperty(DataFlowProperty.DEBUG, debug);
+
         log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));

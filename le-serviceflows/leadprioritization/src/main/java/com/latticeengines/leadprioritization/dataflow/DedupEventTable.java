@@ -26,6 +26,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
 
     @Override
     public Node construct(DedupEventTableParameters parameters) {
+        setDebug(true);
         Node eventTable = addSource(parameters.eventTable);
         if (parameters.deduplicationType == DedupType.MULTIPLELEADSPERDOMAIN) {
             return eventTable;
@@ -34,16 +35,12 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         List<String> outputColumns = eventTable.getFieldNames();
 
         Node last = DataFlowUtils.extractDomain(eventTable, DOMAIN);
-        last = last.debug(1);
         last = addSortColumn(last, eventTable, SORT);
-        last = last.debug(1);
 
         Node emptyDomains = last //
                 .filter(String.format("%s == null || %s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN)) //
                 .renamePipe("nullDomains");
-        last = last.debug(1);
         last = last.filter(String.format("%s != null && !%s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN));
-        last = last.debug(1);
 
         if (!getPublicDomainResolutionFields(last).isEmpty()) {
 
@@ -52,25 +49,20 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
             publicDomain.discard(new FieldList(InterfaceName.Domain.name()));
 
             Node publicDomains = last.innerJoin(new FieldList(DOMAIN), publicDomain, new FieldList(DOMAIN));
-            publicDomains = publicDomains.debug(1);
             Node nonPublicDomains = last.stopList(publicDomain, DOMAIN, DOMAIN);
-            nonPublicDomains = nonPublicDomains.debug(1);
             nonPublicDomains = nonPublicDomains.groupByAndLimit(new FieldList(DOMAIN), //
                     new FieldList(SORT), //
                     1, //
                     true, //
                     false);
-            nonPublicDomains = nonPublicDomains.debug(1);
 
             publicDomains = publicDomains.discard(new FieldList(DOMAIN));
             publicDomains = addHash(publicDomains, DOMAIN);
-            publicDomains = publicDomains.debug(1);
             publicDomains = publicDomains.groupByAndLimit(new FieldList(DOMAIN), //
                     new FieldList(SORT), //
                     1, //
                     true, //
                     false);
-            publicDomains = publicDomains.debug(1);
 
             publicDomains = publicDomains.retain(new FieldList(outputColumns));
             nonPublicDomains = nonPublicDomains.retain(new FieldList(outputColumns));

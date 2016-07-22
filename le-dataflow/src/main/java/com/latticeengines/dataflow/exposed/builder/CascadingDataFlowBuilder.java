@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +59,7 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
@@ -116,7 +118,43 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     private String register(Pipe pipe, List<FieldMetadata> fields) {
-        return register(pipe, fields, null);
+        String nodename = register(pipe, fields, null);
+        return addDebugInfo(nodename, pipe, fields);
+    }
+
+    private String addDebugInfo(String prior, Pipe pipe, List<FieldMetadata> fields) {
+        if (isDebug()) {
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            String prefix = "undefined";
+            for (StackTraceElement elt : trace) {
+                if (elt.getClassName().equals(Node.class.getName())) {
+                    prefix = String.format("%s", elt.getMethodName(), elt.getFileName(), elt.getLineNumber());
+                    break;
+                }
+            }
+
+            // Search for TypesafeDataFlowBuilder implementation
+            List<StackTraceElement> reversed = Lists.reverse(Arrays.asList(trace));
+            int fetchAt = -1;
+            StackTraceElement builderStackElt = null;
+            for (int i = 0; i < reversed.size(); ++i) {
+                StackTraceElement elt = reversed.get(i);
+                if (fetchAt == i) {
+                    builderStackElt = elt;
+                    break;
+                }
+                if (elt.getClassName().equals(TypesafeDataFlowBuilder.class.getName())) {
+                    fetchAt = i + 2;
+                }
+            }
+            if (builderStackElt != null) {
+                prefix += String.format(" (%s:%d)", builderStackElt.getFileName(), builderStackElt.getLineNumber());
+            }
+
+            Operation debug = new DebugOperation(new Operation.Input(pipe, fields), prefix, 1);
+            return register(debug.getOutputPipe(), debug.getOutputMetadata(), null);
+        }
+        return prior;
     }
 
     private String register(Pipe pipe, List<FieldMetadata> fields, String lookupId) {
@@ -311,7 +349,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
             fields = new ArrayList<>(sourceSchema.getFields().size());
             for (Field field : sourceSchema.getFields()) {
-                Type avroType =AvroUtils.getType(field);
+                Type avroType = AvroUtils.getType(field);
                 FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
                 fields.add(fm);
             }

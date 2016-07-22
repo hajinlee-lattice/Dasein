@@ -30,12 +30,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private static final String FS_DEFAULT_FS = "fs.defaultFS";
 
-    private static final String JOBPROPERTIES = "JOBPROPERTIES";
-
-    private static final String CHECKPOINT = "CHECKPOINT";
-
-    private static final String HADOOPCONF = "HADOOPCONF";
-
     @Autowired
     private ApplicationContext appContext;
 
@@ -53,24 +47,25 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         validateParameters(context);
         overwriteYarnQueueAssignment(context);
 
-        boolean doCheckpoint = context.getProperty(CHECKPOINT, Boolean.class);
-
-        Configuration configuration = context.getProperty(HADOOPCONF, Configuration.class);
+        boolean doCheckpoint = context.getProperty(DataFlowProperty.CHECKPOINT, Boolean.class);
+        Boolean debug = context.getProperty(DataFlowProperty.DEBUG, Boolean.class);
+        Configuration configuration = context.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
 
         // Ensure that we use the fatjars rather than the hadoop class path to
         // resolve dependencies. This should eventually be set globally.
         configuration.setBoolean("mapreduce.job.user.classpath.first", true);
 
         Properties properties = new Properties();
-        if (context.getProperty(JOBPROPERTIES, Properties.class) != null) {
-            properties.putAll(context.getProperty(JOBPROPERTIES, Properties.class));
+        if (context.getProperty(DataFlowProperty.JOBPROPERTIES, Properties.class) != null) {
+            properties.putAll(context.getProperty(DataFlowProperty.JOBPROPERTIES, Properties.class));
         }
         properties.setProperty("mapred.mapper.new-api", "false");
-        context.setProperty(JOBPROPERTIES, properties);
+        context.setProperty(DataFlowProperty.JOBPROPERTIES, properties);
 
         dataFlow.setLocal(configuration == null || configuration.get(FS_DEFAULT_FS).equals(LOCAL_FS));
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.setEnforceGlobalOrdering(true);
+        dataFlow.setDebug(debug != null ? debug : false);
 
         return dataFlow.runFlow(context, versionManager.getCurrentVersionInStack(stackName));
     }
@@ -121,11 +116,11 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private void validateParameters(DataFlowContext dataFlowCtx) {
         validateParameters(dataFlowCtx, //
-                "TARGETTABLENAME", //
-                "QUEUE", //
-                "TARGETPATH", //
-                "CUSTOMER", //
-                "FLOWNAME", //
-                CHECKPOINT);
+                DataFlowProperty.TARGETTABLENAME, //
+                DataFlowProperty.QUEUE, //
+                DataFlowProperty.TARGETPATH, //
+                DataFlowProperty.CUSTOMER, //
+                DataFlowProperty.FLOWNAME, //
+                DataFlowProperty.CHECKPOINT);
     }
 }

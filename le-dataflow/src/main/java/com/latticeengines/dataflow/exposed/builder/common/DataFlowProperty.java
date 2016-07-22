@@ -20,4 +20,5 @@ public class DataFlowProperty {
     public static final String PARAMETERS = "PARAMETERS";
     public static final String JOBPROPERTIES = "JOBPROPERTIES";
     public static final String PARTITIONS = "PARTITIONS";
+    public static final String DEBUG = "DEBUG";
 }

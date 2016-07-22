@@ -37,4 +37,8 @@ public abstract class Operation {
         }
         return new Fields(fieldNames.toArray(new String[fieldNames.size()]));
     }
+
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 }

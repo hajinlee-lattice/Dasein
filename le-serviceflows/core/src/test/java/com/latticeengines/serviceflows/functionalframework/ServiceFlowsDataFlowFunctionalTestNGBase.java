@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.functionalframework;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
@@ -14,6 +15,7 @@ import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +36,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -57,6 +60,7 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
 
     protected Configuration yarnConfiguration = new Configuration();
     protected Map<String, String> sourcePaths = new HashMap<>();
+    protected Map<String, String> templatePaths = new HashMap<>();
 
     protected abstract String getFlowBeanName();
 
@@ -132,6 +136,18 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
             throw new RuntimeException(e);
         }
 
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources(getDirectory() + "/*/*.json");
+            templatePaths = new HashMap<>();
+            for (Resource resource : resources) {
+                String path = resource.getFile().getAbsolutePath();
+                String[] parts = path.split("\\/");
+                templatePaths.put(parts[parts.length - 2], path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Table executeDataFlow() {
@@ -149,13 +165,40 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
 
         for (String key : sourcePaths.keySet()) {
             String path = sourcePaths.get(key);
-            String idColumn = getIdColumnName(key);
-            String lastModifiedColumn = getLastModifiedColumnName(key);
-            Table table = MetadataConverter.getTable(yarnConfiguration, path, idColumn, lastModifiedColumn);
+            String template = templatePaths.get(key);
+            Table table;
+            if (template != null) {
+                table = retrieveSourceTableTemplate(key, path);
+            } else {
+                String idColumn = getIdColumnName(key);
+                String lastModifiedColumn = getLastModifiedColumnName(key);
+                table = MetadataConverter.getTable(yarnConfiguration, path, idColumn, lastModifiedColumn);
+            }
             postProcessSourceTable(table);
             sources.put(key, table);
         }
         return sources;
+    }
+
+    private Table retrieveSourceTableTemplate(String name, String extractPath) {
+        if (templatePaths.containsKey(name)) {
+            try (FileInputStream fis = new FileInputStream(templatePaths.get(name))) {
+                Table table = JsonUtils.deserialize(IOUtils.toString(fis), Table.class);
+                fixExtractPaths(table, extractPath);
+                return table;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new RuntimeException(String.format("Could not find table template for source with name %s", name));
+        }
+    }
+
+    private void fixExtractPaths(Table table, String extractPath) {
+        while (table.getExtracts().size() > 1) {
+            table.getExtracts().remove(1);
+        }
+        table.getExtracts().get(0).setPath(extractPath);
     }
 
     private void copy(List<AbstractMap.SimpleEntry<String, String>> entries) {

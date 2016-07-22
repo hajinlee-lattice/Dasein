@@ -32,6 +32,7 @@ public abstract class DataFlowBuilder {
     private boolean local;
     private boolean checkpoint;
     private boolean enforceGlobalOrdering;
+    private boolean debug;
     private DataFlowContext dataFlowCtx;
 
     public abstract Table runFlow(DataFlowContext dataFlowCtx, String artifactVersion);
@@ -42,6 +43,14 @@ public abstract class DataFlowBuilder {
 
     public void setLocal(boolean local) {
         this.local = local;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     @SuppressWarnings("deprecation")
