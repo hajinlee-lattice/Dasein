@@ -19,6 +19,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     var flags = {
         CHANGE_MODEL_NAME: 'ChangeModelNames',
         DELETE_MODEL: 'DeleteModels',
+        REVIEW_CLONE: 'ReviewClone',
         UPLOAD_JSON: 'UploadSummaryJson',
 
         USER_MGMT_PAGE: 'UserManagementPage',
@@ -28,7 +29,6 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         ADMIN_PAGE: 'AdminPage',
         ADMIN_ALERTS_TAB: 'AdminAlertsTab',
-        REVIEW_CLONE: 'ReviewClone',
 
         MODEL_HISTORY_PAGE: 'ModelCreationHistoryPage',
         SYSTEM_SETUP_PAGE: 'SystemSetupPage',
@@ -76,6 +76,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             for(var key in data) {
                 flagValues[key] = data[key];
             }
+            console.log(data);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();
@@ -118,6 +119,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     function UpdateFlagsBasedOnRights() {
         UpdateFlag(flags.CHANGE_MODEL_NAME, RightsUtility.currentUserMay("Edit", "Models"));
         UpdateFlag(flags.DELETE_MODEL, RightsUtility.currentUserMay("Edit", "Models"));
+        UpdateFlag(flags.REVIEW_CLONE, RightsUtility.currentUserMay("Edit", "Models"));
         UpdateFlag(flags.UPLOAD_JSON, RightsUtility.currentUserMay("Create", "Models"));
 
         UpdateFlag(flags.USER_MGMT_PAGE, RightsUtility.currentUserMay("View", "Users"));
@@ -126,8 +128,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         UpdateFlag(flags.DELETE_USER, RightsUtility.currentUserMay("Edit", "Users"));
 
         UpdateFlag(flags.ADMIN_PAGE, RightsUtility.currentUserMay("View", "Reporting"));
-        UpdateFlag(flags.ADMIN_ALERTS_TAB, RightsUtility.currentUserMay("View", "Reporting"));
-        UpdateFlag(flags.REVIEW_CLONE, RightsUtility.currentUserMay("View", "Reporting"));
+        UpdateFlag(flags.ADMIN_ALERTS_TAB, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.MODEL_HISTORY_PAGE, RightsUtility.currentUserMay("View", "Reporting"));
         UpdateFlag(flags.SYSTEM_SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.ACTIVATE_MODEL_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
