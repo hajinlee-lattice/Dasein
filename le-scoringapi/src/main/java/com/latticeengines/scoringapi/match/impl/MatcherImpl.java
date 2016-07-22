@@ -325,6 +325,9 @@ public class MatcherImpl implements Matcher {
 
                     matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
                             recordModelTuple.getParsedData().getKey(), modelSummary, selectedLeadEnrichmentAttributes));
+                } else {
+                    matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                            recordModelTuple.getParsedData().getKey(), modelSummary, null));
                 }
             } else {
                 matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
