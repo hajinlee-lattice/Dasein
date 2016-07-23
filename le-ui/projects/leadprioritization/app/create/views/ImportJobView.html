@@ -84,7 +84,7 @@
     <div class="row">
         <div class="six columns offset-three">
 
-            <div class="meter animate" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'">
+            <div class="meter animate" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
               <span style="width: 10%" data-ng-if="startTimestamp && jobStatus != 'Pending'"><span></span></span>
               <span style="width: 20%" data-ng-if="jobStatus == 'Pending' && jobStepsRunningStates.load_data"><span></span></span>
               <span style="width: 60%" data-ng-if="jobStepsRunningStates.generate_insights"><span></span></span>
@@ -93,8 +93,7 @@
             </div>
             <div>
                 <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed'"></i> {{jobStatus}}</p>
-                <a ui-sref="home.jobs.status.csv({{job.id}})" data-ng-if="jobStatus == 'Completed'">View Report</a>
-                {{jobId}}
+                <a ui-sref="home.jobs.status.csv({jobId: job.id})" data-ng-if="jobStatus == 'Completed'">View Report</a>
             </div>
         </div>
     </div>
