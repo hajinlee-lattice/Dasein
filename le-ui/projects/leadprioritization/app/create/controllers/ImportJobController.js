@@ -24,7 +24,7 @@ angular.module('lp.create.import.job', [
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
     $scope.compress_percent = 4;
 
-    var value = 0,
+    var value = 4,
         increment = 2,
         ceiling = 90;
 
