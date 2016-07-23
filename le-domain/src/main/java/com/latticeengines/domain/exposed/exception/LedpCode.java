@@ -17,6 +17,10 @@ public enum LedpCode {
     LEDP_10005("Could not deserialize data schema."), //
     LEDP_10006("Name is null."), //
     LEDP_10007("Invalid name: {0}"), //
+    LEDP_10008("Unable to validate the file"), //
+    LEDP_10009("Unable to find required columns {0} from the file"), //
+    LEDP_10010("User type {0} is not an accepted type."), //
+    LEDP_10011("File {0} cannot be found."), //
 
     // Metadata service: 11000-11999
     LEDP_11000("Could not load driver class {0}."), //
@@ -208,7 +212,7 @@ public enum LedpCode {
     LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes can be selected."), //
     LEDP_18113("Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
     LEDP_18114("Saving of lead enrichment selection failed, field name {0} is invalid."), //
-    LEDP_18115("Pivot File Validation Failed due to: {0}"), //
+    LEDP_18115("File Validation Failed due to: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

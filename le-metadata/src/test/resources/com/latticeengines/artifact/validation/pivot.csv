@@ -1,0 +1,122 @@
+Model Field,SFDC Table,Salesforce Field,Value
+x2Analyst,Contact,Occupation__c,Analyst
+x2Architect,Contact,Occupation__c,Architect
+x2Consultant,Contact,Occupation__c,Consultant
+x2CXOEVP,Contact,Occupation__c,CXO/EVP
+x2Developer,Contact,Occupation__c,Developer
+x2Director,Contact,Occupation__c,Senior Director/Director
+x2Educator,Contact,Occupation__c,Educator
+x2IndividualContributor,Contact,Occupation__c,Individual Contributor
+x2Manager,Contact,Occupation__c,Senior Manager/Manager
+x2ProfessionalStaff,Contact,Occupation__c,Professional Staff
+x2SupportStaff,Contact,Occupation__c,Support Staff
+x2SVPVP,Contact,Occupation__c,SVP/VP
+x3Creative,Contact,Functional_Area__c,Creative
+x3CustomerExperience,Contact,Functional_Area__c,Customer Experience
+x3eCommerce,Contact,Functional_Area__c,eCommerce
+x3EngineeringDevelopment,Contact,Functional_Area__c,Engineering/Development
+x3ExecutiveGeneralAdministration,Contact,Functional_Area__c,Executive/General Administration
+x3Finance,Contact,Functional_Area__c,Finance
+x3HumanResources,Contact,Functional_Area__c,Human Resources
+x3IT,Contact,Functional_Area__c,IT: General
+x3IT,Contact,Functional_Area__c, IT: Enterprise Applications
+x3IT,Contact,Functional_Area__c,IT: Desktop Applications
+x3Marketing,Contact,Functional_Area__c,Marketing: Search/SEO
+x3Marketing,Contact,Functional_Area__c,Marketing: Digital
+x3Marketing,Contact,Functional_Area__c,Marketing: General
+x3Operations,Contact,Functional_Area__c,Sales: Operations
+x3Operations,Contact,Functional_Area__c,Marketing: Operations
+x3Operations,Contact,Functional_Area__c,Operations
+x3Operations,Contact,Functional_Area__c,IT: Operations
+x3ProfessionalServices,Contact,Functional_Area__c,Services: Professional/Client
+x3ProfessionalServices,Contact,Functional_Area__c,Services: Media
+x3ProfessionalServices,Contact,Functional_Area__c,Services: Customer Support
+x3ProfessionalServices,Contact,Functional_Area__c,Services: Public/Social
+x3ProgramManagement,Contact,Functional_Area__c,Program Management
+x3PublicAffairsCommunications,Contact,Functional_Area__c,Public Affairs/Communications
+x3ResearchSciences,Contact,Functional_Area__c,Research/Sciences
+x3Sales,Contact,Functional_Area__c,Sales
+x3TrainingLearning,Contact,Functional_Area__c,Training/Learning
+x7ANALYTICS,Lead,Product_Outlook_Group__c,ANALYTICS
+x7CAMPAIGN,Lead,Product_Outlook_Group__c,CAMPAIGN
+x7CONNECT,Lead,Product_Outlook_Group__c,CONNECT
+x7DAM,Lead,Product_Outlook_Group__c,DAM
+x7DAT,Lead,Product_Outlook_Group__c,DAT
+x7DPS,Lead,Product_Outlook_Group__c,DPS
+x7FMS,Lead,Product_Outlook_Group__c,Flash Media Server
+x7LiveCycle,Lead,Product_Outlook_Group__c,LiveCycle
+x7MEDIAOPTIMIZER,Lead,Product_Outlook_Group__c,MEDIA OPTIMIZER
+x7SOCIAL,Lead,Product_Outlook_Group__c,SOCIAL
+x7TARGET,Lead,Product_Outlook_Group__c,TARGET
+x7WEM,Lead,Product_Outlook_Group__c,WEM
+x8AdobeTrial,Lead, LeadSource,Adobe Trial
+x8DownloadLead,Lead, LeadSource,Download Lead
+x8EventAttendance,Lead, LeadSource,Event Attendance
+x8EventRegistration,Lead, LeadSource,Event Registration
+x8MarketingWebForm,Lead, LeadSource,Marketing Web Form
+x8ThirdPartyInquiry,Lead, LeadSource,Third Party Inquiry
+x8TrialAccount,Lead, LeadSource,Trial Account
+x9Advertising,Lead,Activity_Type__c,Advertising
+x9Database,Lead,Activity_Type__c,Database
+x9Email,Lead,Activity_Type__c,Email
+x9Events,Lead,Activity_Type__c,Events
+x9Offer,Lead,Activity_Type__c,Offer
+x9Partner,Lead,Activity_Type__c,Partner
+x9SalesCalldown,Lead,Activity_Type__c,Sales Calldown
+x10AdobeEventsegSummit,Lead,Activity_Subtype__c,Adobe Events (e.g. Summit)
+x10AdobeEventsIESummit,Lead,Activity_Subtype__c,Adobe Events (I.E. Summit)
+x10ContentSyndication,Lead,Activity_Subtype__c,Content Syndication
+x10DataBaseBuilding,Lead,Activity_Subtype__c,Data Base Building
+x10DataBaseBuildingDataAppends,Lead,Activity_Subtype__c,Data Base Building/Data Appends
+x10Dinners,Lead,Activity_Subtype__c,Dinners
+x10EMail,Lead,Activity_Subtype__c,Email
+x10ESeminarEvent,Lead,Activity_Subtype__c,E-Seminar Event
+x10ListUploadInternalList,Lead,Activity_Subtype__c,List Upload (Internal List)
+x10ListUploadPurchasedfrom3rdParty,Lead,Activity_Subtype__c,List Upload (Purchased from 3rd Party)
+x10PartnerEnablement,Lead,Activity_Subtype__c,Partner Co-Marketing
+x10PartnerEnablement,Lead,Activity_Subtype__c,Partner-Led Marketing
+x10RFIRequestforInformation,Lead,Activity_Subtype__c,RFI (Request for Information)
+x10SuccessStoryCaseStudy,Lead,Activity_Subtype__c,Success Story (Case Study)
+x10Survey,Lead,Activity_Subtype__c,Survey
+x10TradeshowConference,Lead,Activity_Subtype__c,Tradeshow/Conference
+x10Trial,Lead,Activity_Subtype__c,Trial
+x10VideoFeaturedDemo,Lead,Activity_Subtype__c,Video (Featured Demo)
+x10VideoProductTour,Lead,Activity_Subtype__c,Video (Product Tour)
+x10WebinarLive,Lead,Activity_Subtype__c,Webinar - Live
+x10WebinarOnDemand,Lead,Activity_Subtype__c,Webinar - OnDemand
+x10WhitepaperExternalLicensed,Lead,Activity_Subtype__c,Whitepaper (External Licensed)
+x10WhitepaperInternalProduced,Lead,Activity_Subtype__c,Whitepaper (Internal Produced)
+x10WhitepaperProductOverview,Lead,Activity_Subtype__c,Whitepaper (Product Overview)
+x11AMERICAS,Account,Global_Region__c ,Americas
+x11ASIA,Account,Global_Region__c ,Asia
+x11EMEA,Account,Global_Region__c ,EMEA
+x11JAPAN,Account,Global_Region__c ,Japan
+x12,Account,AC_Revenue__c,
+x13,Account,D_B_Number_of_Employees__c,
+x14Advertising,Account,Industry,Advertising
+x14AssociationsNonProfit,Account,Industry,Non-Profit/Charity
+x14AutomotiveMFG,Account,Industry,Construction
+x14BioTechPharma,Account,Industry,Pharmaceuticals/Biotech
+x14Construction,Account,Industry,Construction
+x14ConsumerGoodsMFG,Account,Industry,
+x14EDUHigherEd,Account,Industry,Education: Higher ed
+x14EDUK12,Account,Industry,Education: K-12
+x14EnergyMiningOilGas,Account,Industry,Mining
+x14FinancialServices,Account,Industry,Financial Services
+x14GOVMilitary,Account,Industry,Government: Military/Aerospace/Defense
+x14GOVStateLocal,Account,Industry,Government: State/Local
+x14HealthCare,Account,Industry,Healthcare
+x14HoldingCompanies,Account,Industry,Holding and other investment offices
+x14IndustrialManufacturing,Account,Industry,Manufacturing
+x14Insurance,Account,Industry,Insurance
+x14MediaEntertainment,Account,Industry,Media/Entertainment/Arts
+x14ProfessionalandTechnicalServices,Account,Industry,"Professional Services (Technical,Web,IT)"
+x14ProfessionalandTechnicalServices,Account,Industry,Professional Services (Agency/Business)
+x14RealEstateandRentalandLeasing,Account,Industry,"Real Estate
+"
+x14Retail,Account,Industry,Retail
+x14TechManufacturingHardware,Account,Industry,
+x14TechnologySoftwareandServices,Account,Industry,Technology/High Tech
+x14Telecommunications,Account,Industry,Telecommunications
+x14TransportationWarehousing,Account,Industry,Transportation
+x14TravelLeisureHospitality,Account,Industry,Hospitality/Food services

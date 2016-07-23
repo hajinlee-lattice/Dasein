@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -53,6 +54,10 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
                         moduleName });
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, hdfsPath);
+            String validationError = metadataProxy.validateArtifact(customerSpace.toString(), artifactType, hdfsPath);
+            if (StringUtils.isNotEmpty(validationError)) {
+                throw new LedpException(LedpCode.LEDP_18115, new String[] { validationError });
+            }
             Artifact artifact = new Artifact();
             artifact.setPath(hdfsPath);
             artifact.setArtifactType(artifactType);

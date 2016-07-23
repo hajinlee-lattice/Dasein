@@ -6,7 +6,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
@@ -17,7 +20,8 @@ import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface, RuleResultInterface {
+public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface,
+        RuleResultInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -92,8 +96,9 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
 
     @Override
     public Table copyTable(String sourceTenantId, String tableName, String targetTenantId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/copy?targetcustomerspace={targetCustomerSpace}", sourceTenantId,
-                tableName, targetTenantId);
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/tables/{tableName}/copy?targetcustomerspace={targetCustomerSpace}",
+                sourceTenantId, tableName, targetTenantId);
         return post("copyTable", url, null, Table.class);
     }
 
@@ -136,6 +141,20 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
         return get("getArtifacts", url, List.class);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public String validateArtifact(String customerSpace, ArtifactType artifactType, String filePath) {
+        String url = constructUrl("/customerspaces/{customerSpace}/artifacttype/{artifactType}?file={filePath}",
+                customerSpace, artifactType, filePath);
+        ResponseDocument response = post("validateArtifact", url, null, ResponseDocument.class);
+        if (response.isSuccess()) {
+            return "";
+        } else {
+            List<String> error = new ObjectMapper().convertValue(response.getErrors(), List.class);
+            return error.toString();
+        }
+    }
+
     @Override
     public Boolean createColumnResults(List<ColumnRuleResult> results) {
         String url = constructUrl("/ruleresults/column");
@@ -164,7 +183,8 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
 
     @Override
     public ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName) {
-        String url = constructUrl("/ruleresults/reviewdata/{customerSpace}/{modelId}/{eventTableName}", customerSpace, modelId, eventTableName);
+        String url = constructUrl("/ruleresults/reviewdata/{customerSpace}/{modelId}/{eventTableName}", customerSpace,
+                modelId, eventTableName);
         return get("getReviewData", url, ModelReviewData.class);
     }
 

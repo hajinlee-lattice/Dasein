@@ -2,6 +2,7 @@ package com.latticeengines.network.exposed.metadata;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface MetadataInterface {
@@ -27,6 +28,8 @@ public interface MetadataInterface {
     void updateTable(String customerSpace, String tableName, Table table);
 
     Table cloneTable(String customerSpace, String tableName);
-    
+
     Table copyTable(String sourceTenantId, String targetCustomerSpace, String tableName);
+
+    String validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
 }

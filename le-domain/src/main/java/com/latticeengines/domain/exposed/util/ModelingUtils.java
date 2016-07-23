@@ -19,12 +19,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
-
 
 public class ModelingUtils {
 
@@ -47,8 +48,7 @@ public class ModelingUtils {
                         UserDefinedType userType = UserDefinedType.valueOf(sourceColumnType);
 
                         if (userType == null) {
-                            throw new RuntimeException(String.format("User type %s is not an accepted type.",
-                                    sourceColumnType));
+                            throw new LedpException(LedpCode.LEDP_10010, new String[] { sourceColumnType });
                         }
                         sourceColumnTypes.put(sourceColumn, userType);
 

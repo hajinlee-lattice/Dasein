@@ -4,16 +4,22 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.metadata.service.ArtifactService;
+import com.latticeengines.metadata.validation.service.impl.ArtifactValidation;
+import com.latticeeninges.metadata.validation.service.ArtifactValidationService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,29 +31,47 @@ public class ArtifactResource {
 
     @Autowired
     private ArtifactService artifactService;
-    
+
     @RequestMapping(value = "/modules/{moduleName}/artifacts/{artifactName}", //
-                    method = RequestMethod.POST, //
-                    headers = "Accept=application/json")
+    method = RequestMethod.POST, //
+    headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create artifact")
     public Boolean createArtifact(@PathVariable String customerSpace, //
-                                   @PathVariable String moduleName, //
-                                   @PathVariable String artifactName, //
-                                   @RequestBody Artifact artifact, //
-                                   HttpServletRequest request) {
+            @PathVariable String moduleName, //
+            @PathVariable String artifactName, //
+            @RequestBody Artifact artifact, //
+            HttpServletRequest request) {
         artifactService.createArtifact(customerSpace, moduleName, artifactName, artifact);
         return true;
     }
-    
+
     @RequestMapping(value = "/modules/{moduleName}", //
-                    method = RequestMethod.GET, //
-                    headers = "Accept=application/json")
+    method = RequestMethod.GET, //
+    headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of artifacts")
     public List<Artifact> getArtifacts(@PathVariable String customerSpace, //
-                                        @PathVariable String moduleName, //
-                                        HttpServletRequest request) {
+            @PathVariable String moduleName, //
+            HttpServletRequest request) {
         return artifactService.findAll(customerSpace, moduleName);
+    }
+
+    @RequestMapping(value = "/artifacttype/{artifactType}", //
+    method = RequestMethod.POST, //
+    headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Validate artifact file")
+    public ResponseDocument<String> validateArtifact(@PathVariable ArtifactType artifactType, //
+            @RequestParam("file") String artifactFilePath, HttpServletRequest request) {
+        ArtifactValidationService artifactValidationService = ArtifactValidation.getArtifactValidationService(artifactType);
+        if (artifactValidationService == null) {
+            return ResponseDocument.successResponse("");
+        }
+        String error = artifactValidationService.validate(artifactFilePath);
+        if (StringUtils.isEmpty(error)) {
+            return ResponseDocument.successResponse(error);
+        }
+        return ResponseDocument.failedResponse(new RuntimeException(error));
     }
 }
