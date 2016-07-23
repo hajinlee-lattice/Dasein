@@ -173,6 +173,46 @@ Icons
 		-webkit-mask-image:  url("/assets/images/ico-arrow-open.svg");
 		mask:  url("/assets/images/ico-arrow-open.svg");
     }
+    &.ico-attr-firmographics {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-firmographics.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-firmographics.svg");
+    }
+    &.ico-attr-geography {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-geography.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-geography.svg");
+    }
+    &.ico-attr-growth-trends {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-growth-trends.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-growth-trends.svg");
+    }
+    &.ico-attr-industry {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-industry.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-industry.svg");
+    }
+    &.ico-attr-intent {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-intent.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-intent.svg");
+    }
+    &.ico-attr-lead-information {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-lead-information.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-lead-information.svg");
+    }
+    &.ico-attr-online-presence {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-online-presence.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-online-presence.svg");
+    }
+    &.ico-attr-technology-profile {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-technology-profile.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-technology-profile.svg");
+    }
+    &.ico-attr-website-keywords {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-website-keywords.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-website-keywords.svg");
+    }
+    &.ico-attr-website-profile {
+		-webkit-mask-image:  url("/assets/images/enrichments/ico-attr-website-profile.svg");
+		mask:  url("/assets/images/enrichments/ico-attr-website-profile.svg");
+    }
 	&.ico-light-grey,
 	&.ico-light-gray {
 		background-color: #b3b5b8;
@@ -203,130 +243,166 @@ Icons
 	}
 }
 .no-cssmask {
-	.ico {
-		mask: none; // added to make debuging easier, remove if you see issues with svg masks moving forward. - ben2
-	}
 	.ico, .menu .active .ico {
 		background-color: transparent;
 	}
-	.ico-search {
-		background-image:  url("/assets/images/ico-search.png");
+	.ico {
+		-webkit-mask-image:  none;
+		mask: none; // added to make debuging easier, remove if you see issues with svg masks moving forward. - ben2
+
+		&.ico-search {
+			background-image:  url("/assets/images/ico-search.png");
+		}
+		&.ico-filter {
+			background-image:  url("/assets/images/ico-filter.png");
+		}
+		&.ico-sort {
+			background-image:  url("/assets/images/ico-sort.png");
+		}
+		&.ico-grid {
+			background-image:  url("/assets/images/ico-grid.png");
+		}
+		&.ico-list {
+			background-image:  url("/assets/images/ico-list.png");
+		}
+		&.ico-fingerprint {
+			background-image:  url("/assets/images/ico-fingerprint.png");
+		}
+		&.ico-bullseye {
+			background-image:  url("/assets/images/ico-bullseye.png");
+		}
+		&.ico-model {
+			background-image:  url("/assets/images/ico-model.png");
+		}
+		&.ico-cog {
+			background-image:  url("/assets/images/ico-cog.png");
+			background-size: 16px;
+		}
+		&.ico-step-open {
+			background-image: url("/assets/images/ico-step-open.png");
+		}
+		&.ico-step-current {
+			background-image: url("/assets/images/ico-step-current.png");
+		}
+		&.ico-step-checked {
+			background-image: url("/assets/images/ico-step-checked.png");
+		}
+		&.ico-user {
+			background-image:  url("/assets/images/ico-user.png");
+		}
+		&.ico-user-card {
+			background-image:  url("/assets/images/ico-user-card.png");
+		}
+		&.ico-industry {
+			background-image:  url("/assets/images/ico-industry.png");
+		}
+		&.ico-locations {
+			background-image:  url("/assets/images/ico-locations.png");
+		}
+		&.ico-alerts {
+			background-image:  url("/assets/images/ico-alerts.png");
+		}
+		&.ico-scoring {
+			background-image:  url("/assets/images/ico-scoring.png");
+		}
+		&.ico-refine {
+			background-image:  url("/assets/images/ico-refine.png");
+		}
+		&.ico-marketo-apikey {
+			background-image:  url("/assets/images/ico-marketo-apikey.png");
+			background-size: 20px;
+		}
+		&.ico-marketo-models {
+			background-image:  url("/assets/images/ico-marketo-models.png");
+			background-size: 20px;
+		}
+		&.ico-performance {
+			background-image: url("/assets/images/ico-performance.png");
+		}
+		&.ico-tmb-user {
+			background-image:  url("/assets/images/ico-employee-range.png");
+		}
+		&.ico-tmb-chart {
+			background-image:  url("/assets/images/ico-revenue-range.png");
+		}
+		&.ico-tech-profile {
+			background-image:  url("/assets/images/ico-web.png");
+		}
+		&.ico-web {
+			background-image:  url("/assets/images/ico-web.png");
+		}
+		&.ico-chip {
+			background-image:  url("/assets/images/ico-chip.png");
+		}
+		&.ico-history {
+			background-image:  url("/assets/images/ico-model-history-10.png");
+			background-size: 16px;
+		}
+		&.ico-attributes {
+			background-image:  url("/assets/images/ico-attributes.png");
+			background-size: 20px;
+		}
+		&.ico-leads {
+			background-image:  url("/assets/images/ico-leads.png");
+			background-size: 20px;
+		}
+		&.ico-datatable {
+			background-image:  url("/assets/images/ico-datatable.png");
+			background-size: 18px;
+		}
+		&.ico-marketo {
+			background-image:  url("/assets/images/ico-marketo.png");
+			background-size: 16px;
+		}
+		&.ico-eloqua {
+			background-image:  url("/assets/images/ico-app-settings.png");
+			background-size: 16px;
+		}	
+		&.ico-salesforce {
+			background-image:  url("/assets/images/ico-salesforce.png");
+			background-size: 16px;
+		}
+		&.ico-api-console {
+			background-image:  url("/assets/images/ico-api-console.png");
+			background-size: 16px;
+		}
+		&.ico-arrow-open {
+			background-image:  url("/assets/images/ico-arrow-open.png");
+			background-size: 16px;
+		}
+		&.ico-attr-firmographics {
+			background-image:  url("/assets/images/enrichments/ico-attr-firmographics.png");
+		}
+		&.ico-attr-geography {
+			background-image:  url("/assets/images/enrichments/ico-attr-geography.png");
+		}
+		&.ico-attr-growth-trends {
+			background-image:  url("/assets/images/enrichments/ico-attr-growth-trends.png");
+		}
+		&.ico-attr-industry {
+			background-image:  url("/assets/images/enrichments/ico-attr-industry.png");
+		}
+		&.ico-attr-intent {
+			background-image:  url("/assets/images/enrichments/ico-attr-intents.png");
+		}
+		&.ico-attr-lead-information {
+			background-image:  url("/assets/images/enrichments/ico-attr-lead-information.png");
+		}
+		&.ico-attr-online-presence {
+			background-image:  url("/assets/images/enrichments/ico-attr-online-presence.png");
+		}
+		&.ico-attr-technololgy-profile {
+			background-image:  url("/assets/images/enrichments/ico-attr-technology-profile.png");
+		}
+		&.ico-attr-website-keywords {
+			background-image:  url("/assets/images/enrichments/ico-attr-website-keywords.png");
+		}
+		&.ico-attr-website-profile {
+			background-image:  url("/assets/images/enrichments/ico-attr-website-profile.png");
+		}
+		&.ico-light-grey-from-black,
+		&.ico-light-gray-from-black {
+			opacity: .4;
+		}
 	}
-	.ico-filter {
-		background-image:  url("/assets/images/ico-filter.png");
-	}
-	.ico-sort {
-		background-image:  url("/assets/images/ico-sort.png");
-	}
-	.ico-grid {
-		background-image:  url("/assets/images/ico-grid.png");
-	}
-	.ico-list {
-		background-image:  url("/assets/images/ico-list.png");
-	}
-	.ico-fingerprint {
-		background-image:  url("/assets/images/ico-fingerprint.png");
-	}
-	.ico-bullseye {
-		background-image:  url("/assets/images/ico-bullseye.png");
-	}
-	.ico-model {
-		background-image:  url("/assets/images/ico-model.png");
-	}
-	.ico-cog {
-		background-image:  url("/assets/images/ico-cog.png");
-		background-size: 16px;
-	}
-	.ico-step-open {
-		background-image: url("/assets/images/ico-step-open.png");
-	}
-	.ico-step-current {
-		background-image: url("/assets/images/ico-step-current.png");
-	}
-	.ico-step-checked {
-		background-image: url("/assets/images/ico-step-checked.png");
-	}
-	.ico-user {
-		background-image:  url("/assets/images/ico-user.png");
-	}
-	.ico-user-card {
-		background-image:  url("/assets/images/ico-user-card.png");
-	}
-	.ico-industry {
-		background-image:  url("/assets/images/ico-industry.png");
-	}
-	.ico-locations {
-		background-image:  url("/assets/images/ico-locations.png");
-	}
-	.ico-alerts {
-		background-image:  url("/assets/images/ico-alerts.png");
-	}
-	.ico-scoring {
-		background-image:  url("/assets/images/ico-scoring.png");
-	}
-	.ico-refine {
-		background-image:  url("/assets/images/ico-refine.png");
-	}
-	.ico-marketo-apikey {
-		background-image:  url("/assets/images/ico-marketo-apikey.png");
-		background-size: 20px;
-	}
-	.ico-marketo-models {
-		background-image:  url("/assets/images/ico-marketo-models.png");
-		background-size: 20px;
-	}
-	.ico-performance {
-	    background-image: url("/assets/images/ico-performance.png");
-	}
-	.ico-tmb-user {
-		background-image:  url("/assets/images/ico-employee-range.png");
-	}
-	.ico-tmb-chart {
-		background-image:  url("/assets/images/ico-revenue-range.png");
-	}
-	.ico-tech-profile {
-		background-image:  url("/assets/images/ico-web.png");
-	}
-	.ico-web {
-		background-image:  url("/assets/images/ico-web.png");
-	}
-	.ico-chip {
-		background-image:  url("/assets/images/ico-chip.png");
-	}
-	.ico-history {
-		background-image:  url("/assets/images/ico-model-history-10.png");
-		background-size: 16px;
-	}
-	.ico-attributes {
-		background-image:  url("/assets/images/ico-attributes.png");
-		background-size: 20px;
-	}
-	.ico-leads {
-		background-image:  url("/assets/images/ico-leads.png");
-		background-size: 20px;
-	}
-	.ico-datatable {
-		background-image:  url("/assets/images/ico-datatable.png");
-		background-size: 18px;
-	}
-	.ico-marketo {
-		background-image:  url("/assets/images/ico-marketo.png");
-		background-size: 16px;
-	}
-	.ico-eloqua {
-		background-image:  url("/assets/images/ico-app-settings.png");
-		background-size: 16px;
-	}	
-	.ico-salesforce {
-		background-image:  url("/assets/images/ico-salesforce.png");
-		background-size: 16px;
-	}
-	.ico-api-console {
-		background-image:  url("/assets/images/ico-api-console.png");
-		background-size: 16px;
-	}
-    .ico-arrow-open {
-		background-image:  url("/assets/images/ico-arrow-open.png");
-		background-size: 16px;
-    }
 }

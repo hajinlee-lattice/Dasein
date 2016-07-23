@@ -31,13 +31,16 @@ angular.module('lp.enrichment.leadenrichment', [])
     vm.changeCategory = function(){
         vm.category = vm.categoryOption;
     }
+    vm.categoryClass = function(category){
+        var category = category.toLowerCase().replace(' ','-');
+        return category;
+    }
 
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
         if(enrichment.IsPremium) {
             var premiums = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
-            console.log(premiums);
             if(premiums > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;

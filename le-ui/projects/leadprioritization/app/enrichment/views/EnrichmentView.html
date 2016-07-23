@@ -48,7 +48,7 @@
             </div>
         </div>
         <ul class="enrichments">
-            <li class="box" 
+            <li class="box category-{{vm.categoryClass(enrichment.Category)}}" 
             ng-repeat="enrichment in (filteredList = (vm.enrichments 
             | filter: vm.query
             | orderBy: SortOrder
@@ -58,7 +58,7 @@
             ng-class="{'active': enrichment.IsSelected}" 
             ng-click="vm.showData(enrichment)">
                 <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
-                <div class="ico-container"><span class="ico ico-light-gray ico-locations"></span></div>
+                <div class="ico-container"><span class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></span></div>
                 <h2>
                     <em>{{vm.fieldType(enrichment.FieldType)}}</em>
                     <strong>{{enrichment.DisplayName}}</strong>
