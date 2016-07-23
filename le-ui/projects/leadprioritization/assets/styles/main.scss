@@ -28,6 +28,7 @@
 
 }
 .ng-leave {
+
 }
 .ng-leave-active {
 
@@ -39,8 +40,6 @@ table,
 ul.model-menu,
 ul.enrichments,
 ul.menu {
-  
-
   * {
     &.ng-animate {
       -webkit-backface-visibility: hidden;
@@ -76,7 +75,6 @@ ul.menu {
     }
 
     &.ng-enter-active {
-
     }
 
     &.ng-leave  {

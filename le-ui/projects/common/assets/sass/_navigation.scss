@@ -392,7 +392,7 @@ html.no-cssmask {
     .page-name,
     .model-name {
         display: inline-block;
-        font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
+        /*font-family: 'ProximaNova-Bold','Open Sans',sans-serif;*/
         color: #333;
         font-size: 22px;
         margin-top: 17px;
@@ -400,6 +400,8 @@ html.no-cssmask {
         vertical-align: middle;
         transition: none;
         animation: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
     }
     .page-icon {
         margin-left: 1em;

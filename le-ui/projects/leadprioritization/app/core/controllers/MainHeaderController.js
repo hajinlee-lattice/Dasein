@@ -20,31 +20,31 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     var StateToPageTitleMap = {
         'home.models': {
             icon: 'ico-model',
-            title: 'Model Workshop'
+            title: 'My Models'
         },
         'home.models.history': {
             icon: 'ico-history',
-            title: 'Model Creation History'
+            title: 'My Models'
         },
         'home.models.import': {
             icon: 'ico-model',
-            title: 'Create Model - CSV Training File'
+            title: 'Create Model - CSV'
         },
         'home.models.import.columns': {
             icon: 'ico-model',
-            title: 'Create Model - CSV Training File - Field Mapping'
+            title: 'Create Model - CSV'
         },
         'home.models.import.job': {
             icon: 'ico-model',
-            title: 'Create Model - CSV Training File - Build'
+            title: 'Create Model - CSV'
         },
         'home.models.pmml': {
             icon: 'ico-model',
-            title: 'Create Model - PMML Import'
+            title: 'Create Model - PMML'
         },
         'home.models.pmml.job': {
             icon: 'ico-model',
-            title: 'Create Model - PMML Import - Build'
+            title: 'Create Model - PMML'
         },
         'home.model.attributes': {
             icon: 'ico-attributes',
@@ -88,11 +88,11 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         },
         'home.enrichment': {
             icon: 'ico-history',
-            title: 'Lead Enrichment'
+            title: 'Enrichment'
         },
         'home.jobs.status': {
             icon: 'ico-cog',
-            title: 'Jobs Status'
+            title: 'Jobs'
         },
         'home.jobs.status.ready': {
             icon: 'ico-cog',
@@ -106,7 +106,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             icon: 'ico-marketo',
             title: 'Marketo Settings'
         },
+        'home.marketosettings.models': {
+            icon: 'ico-marketo',
+            title: 'Marketo Settings'
+        },
         'home.eloquasettings.apikey': {
+            icon: 'ico-eloqua',
+            title: 'Eloqua Settings'
+        }, 
+        'home.eloquasettings.models': {
             icon: 'ico-eloqua',
             title: 'Eloqua Settings'
         }, 

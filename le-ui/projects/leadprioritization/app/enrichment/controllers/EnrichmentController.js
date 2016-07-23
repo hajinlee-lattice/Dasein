@@ -148,5 +148,12 @@ angular.module('lp.enrichment.leadenrichment', [])
         angular.element($window).bind("scroll", lockSubheader);
     }
 
+    vm.clickPaginate = function() {
+        vm.initialized = false;
+        $timeout(function() {
+            vm.initialized = true;
+        }, 1000)
+    }
+
     vm.init();
 });
