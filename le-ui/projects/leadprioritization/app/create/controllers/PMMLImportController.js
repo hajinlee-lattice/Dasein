@@ -74,7 +74,6 @@ angular
             artifactName = vm.artifactName = vm.stripExt(fileName),
             moduleName = vm.moduleName = artifactName + '_' + timestamp;
 
-console.log(fileName, artifactName, moduleName);
         vm.pmmlUploaded = false;
         vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
         
@@ -87,7 +86,6 @@ console.log(fileName, artifactName, moduleName);
             pivotFile = vm.pivotFileName = fileName,
             moduleName = vm.moduleName;
 
-console.log(fileName, artifactName, moduleName, pivotFile);
         vm.pivotUploaded = false;
         vm.pivotParams.url = vm.endpoint + moduleName + '/pivotmappings?artifactName=' + vm.stripExt(artifactName);
         
@@ -163,14 +161,14 @@ console.log(fileName, artifactName, moduleName, pivotFile);
         ShowSpinner('Modeling...');
 
         var options = {
-                modelName: this.modelDisplayName,
+                modelName: vm.sanitize(this.modelDisplayName),
                 schema: vm.accountLeadCheck,
                 module: this.moduleName,
-                pmmlfile: this.pmmlFileName
+                pmmlfile: vm.sanitize(this.pmmlFileName)
             };
 
         if (this.pivotFileName) {
-            options.pivotfile = vm.stripExt(this.pivotFileName) + '.csv';
+            options.pivotfile = vm.stripExt(vm.sanitize(this.pivotFileName)) + '.csv';
         }
 
         ImportService.StartPMMLModeling(options).then(function(result) {
