@@ -22,7 +22,7 @@ angular.module('lp.create.import.job', [
 
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
-    $scope.compress_percent = 0;
+    $scope.compress_percent = 4;
 
     var value = 0,
         increment = 2,
@@ -34,7 +34,7 @@ angular.module('lp.create.import.job', [
         }
         $scope.compress_percent = value;
     }
-    setInterval(PerformCalc, 3000);
+    setInterval(PerformCalc, 10000);
 
 
 
