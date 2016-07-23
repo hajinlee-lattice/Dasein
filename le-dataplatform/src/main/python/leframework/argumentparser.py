@@ -182,7 +182,7 @@ class ArgumentParser(object):
                 logger.info("Adding %s with index %d" % (fName, i))
                 includedNames.append(fName)
                 included.append(i)
-                if (fType == 'string' or fType == 'bytes') and fName != self.target:
+                if (fType == 'string' or fType == 'boolean' or fType == 'bytes') and fName != self.target:
                     self.stringColNames.add(fName)
 
         tmpData = []
