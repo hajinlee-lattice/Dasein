@@ -1,10 +1,11 @@
+from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
+
 
 class DP628ProfilingTest(ProfilingTestBase):
 
     def testExecuteProfiling(self):
         from launcher import Launcher
-        from leframework.executors.learningexecutor import LearningExecutor
         profilinglauncher = Launcher("profiledriver-dp628.json")
         profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
@@ -21,8 +22,8 @@ class DP628ProfilingTest(ProfilingTestBase):
         
         # boolean to STR
         self.assertEquals(len(metadata['MKTOLead_IsFirstLastNameSame']), 2)
-        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][0]['Dtype'], 'STR')
-        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][1]['Dtype'], 'STR')
+        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][0]['Dtype'], 'BND')
+        self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][1]['Dtype'], 'BND')
         # string to STR
         self.assertEqual(metadata['BusinessECommerceSite'][0]['Dtype'], 'STR')
         
