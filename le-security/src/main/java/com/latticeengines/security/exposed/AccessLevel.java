@@ -10,6 +10,7 @@ public enum AccessLevel {
             )), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
@@ -40,6 +41,7 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_REPORTING, //
             GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
