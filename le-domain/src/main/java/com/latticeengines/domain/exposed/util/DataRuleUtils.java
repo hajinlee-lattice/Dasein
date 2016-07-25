@@ -14,7 +14,7 @@ public class DataRuleUtils {
                 rule.setDisplayName("Detected Too Many Distinct Values");
                 break;
             case "PopulatedRowCountDS":
-                rule.setDescription("Remove predictors when the predictive power comes from noise");
+                rule.setDescription("Remove attributes when the predictive power comes from noise");
                 rule.setDisplayName("Detected Sampling Noise");
                 break;
             case "OverlyPredictiveDS":
@@ -23,11 +23,11 @@ public class DataRuleUtils {
                 break;
             case "LowCoverageDS":
                 rule.setDescription("Remove attributes that have very low coverage");
-                rule.setDisplayName("Detected Low Coverage in Predictors");
+                rule.setDisplayName("Detected Low Coverage in Attributes");
                 break;
             case "NullIssueDS":
                 rule.setDescription("Remove attributes when lift from NULL values is too strong compared to other values");
-                rule.setDisplayName("Detected Predictors Over Using NULL Values");
+                rule.setDisplayName("Detected Attributes Over Using NULL Values");
                 break;
             case "HighlyPredictiveSmallPopulationDS":
                 rule.setDescription("Remove small groups of events that bias the model and overset lift expectation");
