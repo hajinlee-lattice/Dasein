@@ -5,7 +5,8 @@ angular.module('pd.jobs', [
     'pd.jobs.status',
     'pd.navigation.pagination',
     'mainApp.models.leadenrichment',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'mainApp.core.utilities.BrowserStorageUtility',
+    '720kb.tooltips'
 ])
 .run(function($interval, JobsStore) {
     JobsStore.getJobs();

@@ -1,6 +1,6 @@
 angular
     .module('pd.jobs.status', [
-        'mainApp.core.utilities.BrowserStorageUtility',
+        'mainApp.core.utilities.BrowserStorageUtility'
     ])
     .directive('jobStatusRow', function(BrowserStorageUtility) {
         return {
@@ -40,15 +40,15 @@ angular
                 var periodicQueryId;
                 var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
-                $scope.cancelJob = function(jobId) {
-                    
-                    console.log("cancel job");
 
-                    $scope.cancelClicked = true;
-                    $scope.cancelling[job.id] = true;
-                    JobsService.cancelJob(jobId);
-
+                $scope.cancelJobClick = function ($event) {
+                    if ($event != null) {
+                        $event.stopPropagation();
+                    }
+                    CancelJobModal.show(job.id);
                 };
+
+
 
                 if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {
                     $scope.jobStepsRunningStates = { 
