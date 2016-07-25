@@ -2,7 +2,7 @@
 
     <div class="row">
         <div class="twelve columns list-header">
-            <div class="pull-left number-of-items">{{vm.showAll ? vm.interface.totalExcludedColumnCount : vm.showLatticeAttr ? vm.interface.latticeWarnedColumnCount : vm.interface.customWarnedColumnCount}} of {{vm.totalWarnedColumnCount}} columns excluded</div>
+            <div class="pull-left number-of-items">{{vm.showAll ? vm.interface.totalExcludedColumnCount : vm.showLatticeAttr ? vm.interface.latticeWarnedColumnCount : vm.interface.customWarnedColumnCount}} of {{vm.totalWarnedColumnCount}} attributes excluded</div>
         </div>
     </div>
 
@@ -23,8 +23,8 @@
                   <tr>
                     <th>Exclude</th>
                     <th>Columns</th>
-                    <th>Warning Type</th>
-                    <th>Description</th>
+                    <th>Issue</th>
+                    <th>Recommendation</th>
                     <th>&nbsp;</th>
                     <!-- <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th> -->
                   </tr>

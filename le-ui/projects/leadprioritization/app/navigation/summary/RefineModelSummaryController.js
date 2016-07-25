@@ -18,7 +18,8 @@ angular.module('lp.navigation.review', [
         successEventsAfterDisplay: StringUtility.AddCommas(Model.ModelDetails.TotalConversions),
         conversionRate: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
         conversionRateAfter: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
-        eventTableName: Model.EventTableProvenance.EventTableName
+        eventTableName: Model.EventTableProvenance.EventTableName,
+        schemaInterpretation: Model.ModelDetails.SourceSchemaInterpretation
     });
 
     vm.createModelClicked = function() {

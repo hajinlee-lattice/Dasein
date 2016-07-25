@@ -3,7 +3,7 @@
 	<div class="data">
 		<div class="type-overview">
 	        <div class="stats black-summary-list stats-group">
-	            <h3 class="summary-title">Total Records</h3>
+	            <h3 class="summary-title">{{vm.schemaInterpretation == 'SalesforceLead' ? 'Leads' : 'Accounts'}}</h3>
 	            <dl>
 	                <dt>Before</dt>
 	                <dd id="detail-status">{{vm.totalRecords}}</dd>
