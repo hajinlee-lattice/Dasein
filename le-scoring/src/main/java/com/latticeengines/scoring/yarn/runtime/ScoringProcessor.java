@@ -457,7 +457,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                             leadEnrichmentAttributeMap);
                 }
             }
-            return null;
+            return 0;
         }
     }
 
