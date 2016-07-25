@@ -132,13 +132,15 @@ angular.module('lp.enrichment.leadenrichment', [])
     var lockSubheader = _.throttle(_lockSubheader, 100);
 
     vm.init = function() {
+        vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
 
-        // firefox wont do the animations without this on page init... sigh
+        angular.element($window).bind("scroll", lockSubheader);
+
+        /*
         $timeout(function() {
             vm.initialized = true;
 
-            // ng-animate stagger works better if we push items
             for (var i=0; i < EnrichmentData.data.length; i++) {
                 vm.enrichments.push(EnrichmentData.data[i]);
             }
@@ -147,15 +149,16 @@ angular.module('lp.enrichment.leadenrichment', [])
             vm.userSelectedCount = vm.selectedCount;
             vm.selectDisabled = (vm.selectedCount ? 0 : 1);
         }, 150);
-
-        angular.element($window).bind("scroll", lockSubheader);
+        */
     }
 
     vm.clickPaginate = function() {
+        /*
         vm.initialized = false;
         $timeout(function() {
             vm.initialized = true;
         }, 1000)
+        */
     }
 
     vm.init();

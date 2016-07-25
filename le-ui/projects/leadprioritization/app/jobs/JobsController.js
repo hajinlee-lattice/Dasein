@@ -545,11 +545,9 @@ angular.module('pd.jobs', [
 
         $scope.jobs = JobsStore.data.models[modelId];
     } else {
-
-        
-        $timeout(function() {
+        //$timeout(function() {
             $scope.jobs = JobsStore.data.jobs;
-        },100);
+        //},100);
     }
 
     function getAllJobs(use_cache) {

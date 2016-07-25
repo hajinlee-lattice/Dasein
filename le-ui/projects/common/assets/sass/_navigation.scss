@@ -395,7 +395,7 @@ html.no-cssmask {
         /*font-family: 'ProximaNova-Bold','Open Sans',sans-serif;*/
         color: #333;
         font-size: 22px;
-        margin-top: 17px;
+        margin-top: 18px;
         margin-left: .5em;
         vertical-align: middle;
         transition: none;
@@ -411,7 +411,12 @@ html.no-cssmask {
         }
     }
     .model-name {
-        margin-left: .5em;
+        position: absolute;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        left: 3em;
+        right: 9em;
     }
     .header-tenant-name {
         padding: 20px 20px 20px 52px;

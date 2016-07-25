@@ -16,7 +16,7 @@ angular
             { id: 2, name: "Ignore this field" }
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
-        fieldMappings: [],
+        fieldMappings: FieldDocument.fieldMappings,
         RequiredFields: [],
         initialized: false
     });
@@ -27,9 +27,11 @@ angular
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
+        /*
         for (var i=0; i < FieldDocument.fieldMappings.length; i++) {
             vm.fieldMappings.push(FieldDocument.fieldMappings[i]);
         }
+        */
 
         vm.UnmappedFields.forEach(function(field, index) {
             if (field.requiredType == 'Required') {
@@ -187,7 +189,7 @@ angular
         });
     }
 
-    $timeout(function() {
+    //$timeout(function() {
         vm.init();
-    }, 1);
+    //}, 1);
 });

@@ -17,11 +17,11 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
     'mainApp.sfdc.sfdcCredentials',
-    'lp.create.import',
-    'lp.models.review',
     'pd.navigation',
     'pd.jobs',
     'pd.apiconsole',
+    'lp.create.import',
+    'lp.models.review',
     'lp.enrichment.leadenrichment'
 ])
 

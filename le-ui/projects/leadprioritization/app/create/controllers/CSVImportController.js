@@ -45,8 +45,11 @@ angular
     });
 
     vm.advancedSettingsClicked = function() {
-        FieldMappingSettingsModal.showForModelCreation(ImportStore.GetAdvancedSetting('oneLeadPerDomain'),
-            ImportStore.GetAdvancedSetting('includePersonalEmailDomains'), ImportStore.GetAdvancedSetting('useLatticeAttributes'));
+        FieldMappingSettingsModal.showForModelCreation(
+            ImportStore.GetAdvancedSetting('oneLeadPerDomain'),
+            ImportStore.GetAdvancedSetting('includePersonalEmailDomains'), 
+            ImportStore.GetAdvancedSetting('useLatticeAttributes')
+        );
     };
 
     vm.fileLoad = function(headers) {
