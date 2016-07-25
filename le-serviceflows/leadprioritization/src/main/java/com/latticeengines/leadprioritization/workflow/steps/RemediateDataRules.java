@@ -65,6 +65,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                         for (ColumnRuleResult result : results) {
                             if (result.getDataRuleName().equals(dataRule.getName())) {
                                 columnNames = result.getFlaggedColumnNames();
+                                dataRule.setColumnsToRemediate(columnNames);
                             }
                         }
                     }
