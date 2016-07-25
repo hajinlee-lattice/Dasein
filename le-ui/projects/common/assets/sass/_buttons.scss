@@ -120,7 +120,7 @@ button.button, a.button, .button {
 	&.block-button {
 		display: block;
 		width: 100%;
-	}
+	} 
 	@include media(">medium") {
 		display: inline-block;
 		padding: 0.85em 3em 0.8em;

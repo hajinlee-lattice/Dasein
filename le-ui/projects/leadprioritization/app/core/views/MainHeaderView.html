@@ -14,8 +14,8 @@
                 <a ng-click="headerClicked($event)" href="javascript:void(0)" ng-class="{'active' : showProfileNav}">
                     <img src="/assets/images/ico-user-profile.svg" />
                     <div>
-                        <div class="pd-header-username">{{userDisplayName}}</div>
-                        <div class="tenant-name">{{tenantName}}</div>
+                        <div class="pd-header-username" title="{{userDisplayName}}">{{userDisplayName}}</div>
+                        <div class="tenant-name" title="{{tenantName}}">{{tenantName}}</div>
                     </div>
                     <span class="fa fa-chevron-down"></span>
                 </a>
