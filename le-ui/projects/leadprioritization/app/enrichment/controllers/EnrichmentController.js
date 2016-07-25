@@ -14,7 +14,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         categories_see_all: 'See All Categories',
         categories_select_all: 'All Categories',
         premiumSelectError: 'Premium attribute limit reached',
-        no_results: 'No enrichments were found',
+        no_results: 'No attributes were found',
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         category: null,

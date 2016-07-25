@@ -123,6 +123,7 @@ angular
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
                             $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
+                            $scope.showReviewAndClone = FeatureFlagService.FlagIsEnabled(flags.REVIEW_CLONE);
                         });
                         
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });

@@ -27,7 +27,7 @@
         <li ng-if="!IsPmml" ui-sref-active="active">
             <a ui-sref="home.model.review.columns"><span class="ico-container"><span class="ico ico-datatable ico-light-gray" title="{{ResourceUtility.get('NAVIGATION_SIDEBAR_LP_REVIEW')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}</span></a>
         </li>
-        <li ng-if="!IsPmml" role="presentation" ui-sref-active="active">
+        <li ng-if="!IsPmml && showReviewAndClone" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.refine"><span class="ico-container"><span class="ico ico-refine ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
         </li>
     </ul>
