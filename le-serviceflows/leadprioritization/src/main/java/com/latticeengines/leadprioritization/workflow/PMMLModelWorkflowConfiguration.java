@@ -44,6 +44,11 @@ public class PMMLModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder displayName(String displayName) {
+            model.setDisplayName(displayName);
+            return this;
+        }
+
         public Builder module(String moduleName) {
             model.setModuleName(moduleName);
             return this;

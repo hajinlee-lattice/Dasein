@@ -27,6 +27,7 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
 
     protected void setupForPMMLModel() throws Exception {
         pmmlTenant = setupTenant(PMML_CUSTOMERSPACE);
+        setupSecurityContext(pmmlTenant);
         setupUsers(PMML_CUSTOMERSPACE);
         setupCamille(PMML_CUSTOMERSPACE);
         setupHdfs(PMML_CUSTOMERSPACE);
@@ -36,8 +37,8 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
     private void setupFiles(CustomerSpace customerSpace) throws Exception {
         URL pmmlFile = ClassLoader
                 .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pmmlfiles/rfpmml.xml");
-        URL pivotFile = ClassLoader.getSystemResource(
-                "com/latticeengines/workflowapi/flows/leadprioritization/pivotfiles/pivotvalues.txt");
+        URL pivotFile = ClassLoader
+                .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pivotfiles/pivotvalues.txt");
 
         Path pmmlFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
                 customerSpace, "module1", ArtifactType.PMML);
@@ -66,9 +67,9 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name()) //
+                .displayName("PMML MODEL - " + System.currentTimeMillis()) //
                 .build();
 
         return workflowConfig;
     }
-
 }

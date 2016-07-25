@@ -115,6 +115,7 @@ public class ModelResource {
     @ApiOperation(value = "Generate a PMML model from the supplied module. Returns the job id.")
     public ResponseDocument<String> modelForPmml(
             @PathVariable String modelName, //
+            @RequestParam(value = "displayName") String modelDisplayName, //
             @RequestParam(value = "module") String moduleName, //
             @RequestParam(value = "pivotfile", required = false) String pivotFileName, //
             @RequestParam(value = "pmmlfile") String pmmlFileName,
@@ -124,8 +125,8 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
-        String appId = pmmlModelWorkflowSubmitter.submit(modelName, moduleName, pivotFileName, pmmlFileName,
-                schemaInterpretation).toString();
+        String appId = pmmlModelWorkflowSubmitter.submit(modelName, modelDisplayName, moduleName, pivotFileName,
+                pmmlFileName, schemaInterpretation).toString();
         return ResponseDocument.successResponse(appId);
 
     }

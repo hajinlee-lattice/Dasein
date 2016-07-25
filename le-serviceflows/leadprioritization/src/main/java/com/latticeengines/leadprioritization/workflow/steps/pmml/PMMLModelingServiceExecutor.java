@@ -57,6 +57,9 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         model.setFeaturesList(Arrays.asList(builder.getFeatureList()));
         model.setSchemaContents(builder.getSchemaContents());
         model.setProvenanceProperties(getProvenanceProperties());
+        if (builder.getDisplayName() != null) {
+            model.setDisplayName(builder.getDisplayName());
+        }
 
         AppSubmission submission = modelProxy.submit(model);
         String appId = submission.getApplicationIds().get(0);

@@ -117,7 +117,9 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
                 .sourceSchemaInterpretation(configuration.getSourceSchemaInterpretation()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .yarnConfiguration(yarnConfiguration);
-
+        if (configuration.getDisplayName() != null) {
+            bldr = bldr.displayName(configuration.getDisplayName());
+        }
         return bldr;
     }
 

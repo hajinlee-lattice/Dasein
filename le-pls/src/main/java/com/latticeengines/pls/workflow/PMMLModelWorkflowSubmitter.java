@@ -27,7 +27,8 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
-    public ApplicationId submit(String modelName, String moduleName, String pivotFileName, String pmmlFileName, SchemaInterpretation schemaInterpretation) {
+    public ApplicationId submit(String modelName, String modelDisplayName, String moduleName, String pivotFileName,
+            String pmmlFileName, SchemaInterpretation schemaInterpretation) {
         Map<String, Artifact> pmmlArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
                 ArtifactType.PMML));
         Map<String, Artifact> pivotArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
@@ -58,6 +59,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .workflow("pmmlModelWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName(modelName) //
+                .displayName(modelDisplayName) //
                 .pmmlArtifactPath(pmmlArtifact.getPath()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .inputProperties(inputProperties) //
