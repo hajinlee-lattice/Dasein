@@ -122,7 +122,7 @@ angular
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
-                            $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
+                            $scope.showAlerts = 0;// disable for all (PLS-1670) FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
                             $scope.showReviewAndClone = FeatureFlagService.FlagIsEnabled(flags.REVIEW_CLONE);
                         });
                         
