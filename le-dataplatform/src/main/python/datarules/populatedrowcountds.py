@@ -6,7 +6,7 @@ from collections import Counter
 
 class PopulatedRowCountDS(ColumnRule):
 
-    def __init__(self, columns, categoricalColumns, numericalColumns, populatedrowcountCatThreshold = 0.98,populatedrowcountNumThreshold = 0.98, numChklist = [0, 1,-1]):
+    def __init__(self, columns, categoricalColumns, numericalColumns, populatedrowcountCatThreshold = 0.95,populatedrowcountNumThreshold = 0.95, numChklist = [0, 1,-1]):
         self.columns = columns.keys()
         self.catColumn = set(categoricalColumns.keys())
         self.numColumn = set(numericalColumns.keys())

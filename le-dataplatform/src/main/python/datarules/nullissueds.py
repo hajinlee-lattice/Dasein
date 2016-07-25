@@ -8,7 +8,7 @@ import pandas as pd
 
 class NullIssueDS(ColumnRule):
 
-    def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, numBucket = 20, nullIssueLiftThreshold = 1.1, nullIssueToppopPercThreshold = 0.1, nullIssuePredictiveThreshold = 1.5):
+    def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, numBucket = 20, nullIssueLiftThreshold = 1.2, nullIssueToppopPercThreshold = 0.1, nullIssuePredictiveThreshold = 1.5):
         self.columns = columns.keys()
         self.catColumn = set(categoricalColumns.keys())
         self.numColumn = set(numericalColumns.keys())

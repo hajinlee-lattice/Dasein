@@ -8,7 +8,7 @@ import pandas as pd
 
 class HighlyPredictiveSmallPopulationDS(RowRule):
 
-    def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, highlyPredictiveSmallPopulationLiftThreshold = 4, highlyPredictiveSmallPopulationPopThreshold = 0.005):
+    def __init__(self, columns, categoricalColumns, numericalColumns, eventColumn, highlyPredictiveSmallPopulationLiftThreshold = 3, highlyPredictiveSmallPopulationPopThreshold = 0.01):
         self.columns = columns.keys()
         self.catColumn = set(categoricalColumns.keys())
         self.numColumn = set(numericalColumns.keys())
