@@ -145,7 +145,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Lattice Password Reset", mp, Collections.singleton(user.getEmail()));
             log.info("Sending forget password email " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
