@@ -73,6 +73,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             url: '/pls/config/featureflags?tenantId=' + tenantId
         })
         .success(function(data) {
+            console.log(data);
             for(var key in data) {
                 flagValues[key] = data[key];
             }

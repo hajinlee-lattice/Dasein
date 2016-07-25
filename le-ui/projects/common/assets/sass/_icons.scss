@@ -123,6 +123,11 @@ Icons
 		-webkit-mask-image:  url("/assets/images/ico-model-history-10.svg");
 		mask:  url("/assets/images/ico-model-history-10.svg");
 	}
+	&.ico-enrichment {
+		background-color: $pearl-white;
+		-webkit-mask-image:  url("/assets/images/ico-enrichment.svg");
+		mask:  url("/assets/images/ico-enrichment.svg");
+	}
 	&.ico-datatable {
 		background-color: $pearl-white;
 		-webkit-mask-image:  url("/assets/images/ico-datatable.svg");
@@ -158,8 +163,8 @@ Icons
 		mask:  url("/assets/images/ico-marketo.svg");
 	}
 	&.ico-eloqua {
-		-webkit-mask-image:  url("/assets/images/ico_app-settings.svg");
-		mask:  url("/assets/images/ico_app-settings.svg");
+		-webkit-mask-image:  url("/assets/images/ico-app-settings.svg");
+		mask:  url("/assets/images/ico-app-settings.svg");
 	}
 	&.ico-salesforce {
 		-webkit-mask-image:  url("/assets/images/ico-salesforce.svg");
@@ -337,6 +342,9 @@ Icons
 		&.ico-history {
 			background-image:  url("/assets/images/ico-model-history-10.png");
 			background-size: 16px;
+		}
+		&.ico-enrichment {
+			background-image:  url("/assets/images/ico-enrichment.png");
 		}
 		&.ico-attributes {
 			background-image:  url("/assets/images/ico-attributes.png");

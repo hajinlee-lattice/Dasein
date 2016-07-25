@@ -61,31 +61,26 @@ span.ico-container {
         top: 50%;
         left: 50%;
         transform: translateY(-50%) translateX(-50%);
-        height: 20px;
-        width: 20px;
+        height: 24px;
+        width: 24px;
         &.ico-marketo {
-            height: 13px;
-        }
-        &.ico-history {
-            height: 18px;
-        }
-        &.ico-salesforce {
-            height: 32px;
-            width: 32px;
-        }
-        &.ico-eloqua {
-            height: 30px;
-            width: 30px;
+            height: 16px;
         }
         &.ico-user {
-            width: 19px;
+            height: 21px;
+            width: 21px;
         }
-        &.ico-api-console {
-            height: 19px;
+        &.ico-salesforce {
+            height: 40px;
+            width: 45px;
         }
-        &.ico-alerts {
-          height: 19px;
-        }
+    }
+}
+
+.menu.model-view {
+    .ico {
+        height: 20px;
+        width: 20px;
     }
 }
 
