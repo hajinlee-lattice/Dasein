@@ -264,7 +264,7 @@ public enum LedpCode {
     LEDP_20031("The uploaded file does not have model Id column."), //
     LEDP_20032("The uploaded file does not have record Id column."), //
     LEDP_20033("This modelGuids is not set in the rts bulk scoring configuration."), //
-    LEDP_20034("This row of the uploaded file had empty valie for record Id column."), //
+    LEDP_20034("This row of the uploaded file had empty value for Id column."), //
     LEDP_20035("This score does not have score row Id."), //
     LEDP_20036("This score does not have model Id."), //
     LEDP_20037("This score does not have valid score."), //

@@ -83,6 +83,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    private boolean useInternalId = false;
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -253,7 +255,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             record.setIdType(DEFAULT_ID_TYPE);
 
             Object recordIdObj = avroRecord.get(InterfaceName.Id.toString());
-            if (StringUtils.isBlank(recordIdObj.toString())) {
+            Object internalIdObj = avroRecord.get(InterfaceName.InternalId.toString());
+            String idStr = null;
+            if (recordIdObj != null) {
+                idStr = recordIdObj.toString();
+            } else if (recordIdObj == null && internalIdObj != null) {
+                idStr = internalIdObj.toString();
+                useInternalId = true;
+            } else {
                 throw new LedpException(LedpCode.LEDP_20034);
             }
 
@@ -270,7 +279,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
 
             record.setModelAttributeValuesMap(modelAttributeValuesMap);
-            record.setRecordId(recordIdObj.toString());
+            record.setRecordId(idStr);
             record.setRule(RECORD_RULE);
 
             records.add(record);
@@ -287,10 +296,17 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Table outputTable = new Table();
         outputTable.setName("scoreOutput");
         Attribute idAttr = new Attribute();
-        idAttr.setName("Id");
-        idAttr.setDisplayName("Id");
-        idAttr.setSourceLogicalDataType("");
-        idAttr.setPhysicalDataType(Type.STRING.name());
+        if (!useInternalId) {
+            idAttr.setName(InterfaceName.Id.toString());
+            idAttr.setDisplayName(InterfaceName.Id.toString());
+            idAttr.setSourceLogicalDataType("");
+            idAttr.setPhysicalDataType(Type.STRING.name());
+        } else {
+            idAttr.setName(InterfaceName.InternalId.toString());
+            idAttr.setDisplayName(InterfaceName.InternalId.toString());
+            idAttr.setSourceLogicalDataType("");
+            idAttr.setPhysicalDataType(Type.LONG.name());
+        }
         Attribute modelIdAttr = new Attribute();
         modelIdAttr.setName("modelId");
         modelIdAttr.setDisplayName("modelId");
@@ -334,7 +350,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 throw new LedpException(LedpCode.LEDP_20035);
             }
             for (ScoreModelTuple tuple : scoreModelTupleList) {
-                builder.set("Id", id);
+                if (!useInternalId) {
+                    builder.set(InterfaceName.Id.toString(), id);
+                } else {
+                    builder.set(InterfaceName.InternalId.toString(), Long.valueOf(id));
+                }
                 String modelId = tuple.getModelId();
                 if (StringUtils.isBlank(modelId)) {
                     throw new LedpException(LedpCode.LEDP_20036);
@@ -430,10 +450,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         break;
                     }
                 }
-                List<RecordScoreResponse> scoreResponseList = ScoringProcessor.this.bulkScore(scoreRequest, rtsBulkScoringConfig
-                        .getCustomerSpace().toString());
+                List<RecordScoreResponse> scoreResponseList = ScoringProcessor.this.bulkScore(scoreRequest,
+                        rtsBulkScoringConfig.getCustomerSpace().toString());
                 synchronized (dataFileWriter) {
-                    ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap);
+                    ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder,
+                            leadEnrichmentAttributeMap);
                 }
             }
             return null;
