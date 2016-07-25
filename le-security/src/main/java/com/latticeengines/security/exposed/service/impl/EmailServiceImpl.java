@@ -498,7 +498,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{username}}", tenantId);
             builder.replaceToken("{{accessToken}}", accessToken);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Salesforce Access Token", mp, Collections.singleton(user.getEmail()));
             log.info(String.format("Sending PLS one-time SFDC access token to: %s for tenant: %s succeeded",
                     user.getEmail(), tenantId));
