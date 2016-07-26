@@ -103,8 +103,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     public void createModel() throws InterruptedException {
         @SuppressWarnings("rawtypes")
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/pmml/%s?module=%s&pivotfile=%s&pmmlfile=%s&schema=%s",
-                        getRestAPIHostPort(), modelName, "module1", "pivotvalues.csv", "rfpmml.xml",
+                String.format("%s/pls/models/pmml/%s?displayname=%s&module=%s&pivotfile=%s&pmmlfile=%s&schema=%s",
+                        getRestAPIHostPort(), modelName, "PMML MODEL", "module1", "pivotvalues.csv", "rfpmml.xml",
                         SchemaInterpretation.SalesforceLead), //
                 null, ResponseDocument.class);
         String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);

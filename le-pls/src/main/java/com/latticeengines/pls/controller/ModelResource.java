@@ -115,7 +115,7 @@ public class ModelResource {
     @ApiOperation(value = "Generate a PMML model from the supplied module. Returns the job id.")
     public ResponseDocument<String> modelForPmml(
             @PathVariable String modelName, //
-            @RequestParam(value = "displayName") String modelDisplayName, //
+            @RequestParam(value = "displayname") String modelDisplayName, //
             @RequestParam(value = "module") String moduleName, //
             @RequestParam(value = "pivotfile", required = false) String pivotFileName, //
             @RequestParam(value = "pmmlfile") String pmmlFileName,
