@@ -48,6 +48,11 @@ angular
                     CancelJobModal.show(job.id);
                 };
 
+                $scope.cancelJobClickConfirm = function () {
+                    $scope.cancelClicked = true;
+                    $scope.cancelling[job.id] = true;
+                };
+
 
 
                 if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {

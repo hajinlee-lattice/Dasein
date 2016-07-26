@@ -7,7 +7,7 @@ angular.module('pd.jobs.status.cancelmodal', [
         $http.get('app/jobs/status/CancelJobModalView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
-            scope.modelId = modelId;
+            scope.jobId = jobId;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -27,21 +27,17 @@ angular.module('pd.jobs.status.cancelmodal', [
 })
 .controller('CancelJobController', function ($scope, $rootScope, $state, ResourceUtility, JobsService) {
     $scope.ResourceUtility = ResourceUtility;
-
     $scope.cancelJobClickConfirm = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-
         updateAsCancelledJob($scope.jobId);
     };
 
     function updateAsCancelledJob(jobId) {
-        
-        console.log("cancel job");
-        $scope.cancelClicked = true;
-        $scope.cancelling[job.id] = true;
+        console.log(jobId);
         JobsService.cancelJob(jobId);
+        $("#modalContainer").modal('hide');
     }
 
     $scope.cancelClick = function () {
