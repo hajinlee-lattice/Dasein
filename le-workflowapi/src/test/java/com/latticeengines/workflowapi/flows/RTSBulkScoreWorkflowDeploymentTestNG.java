@@ -4,9 +4,12 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -17,6 +20,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelType;
@@ -33,6 +38,9 @@ import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
 
+    @Value("${scoring.pls.api.hostport}")
+    private String plsApiHostPort;
+    
     @Autowired
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
@@ -51,13 +59,16 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private static final String AVRO_FILE = "part-m-00000.avro";
 
-    private static final String TEST_MODEL_NAME_PREFIX = "a8684c37-a3b9-452f-b7e3-af440e4365b8";
+    private static final String TEST_MODEL_NAME_PREFIX = "c8684c37-a3b9-452f-b7e3-af440e4365b8";
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
     protected static String TENANT_ID;
 
     protected Tenant tenant;
+    
+    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
+
 
     protected static CustomerSpace customerSpace;
 
@@ -82,7 +93,44 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         tenant = setupTenant();
         summary = createModel(tenant, modelConfiguration, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
+        saveAttributeSelection(customerSpace);
     }
+    
+    private void saveAttributeSelection(CustomerSpace customerSpace) {
+        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
+                plsApiHostPort);
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+    }
+
+    private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, false);
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
+        List<String> selectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setSelectedAttributes(selectedAttributes);
+        List<String> deselectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
+        int premiumSelectCount = 2;
+        int selectCount = 1;
+
+        for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
+            if (attr.getIsPremium()) {
+                if (premiumSelectCount > 0) {
+                    premiumSelectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            } else {
+                if (selectCount > 0) {
+                    selectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            }
+        }
+
+        return selectedAttributeMap;
+    }
+
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {

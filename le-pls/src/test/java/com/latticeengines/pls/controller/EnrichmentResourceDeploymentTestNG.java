@@ -29,12 +29,12 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String SEARCH_DISPLAY_NAME_STR1 = "OuNtR";
+    private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "eEs r";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cQ";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
-    private static final int MAX_DESELECT = 5;
-    private static final int MAX_SELECT = 4;
+    private static final int MAX_DESELECT = 2;
+    private static final int MAX_SELECT = 1;
     private static final int MAX_PREMIUM_SELECT = 2;
     private int selectCount = 0;
     private int premiumSelectCount = 0;
@@ -99,8 +99,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testGetLeadEnrichmentAttributesBeforeSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributesBeforeSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave() {
         checkLimitation();
     }
@@ -133,8 +132,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(selectCount, MAX_SELECT);
         assertEquals(premiumSelectCount, MAX_PREMIUM_SELECT);
         assertEquals(deselectCount, 0);
-        assertEquals(attributesOperationMap.getSelectedAttributes().size(),
-                MAX_PREMIUM_SELECT + MAX_SELECT);
+        assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
 
         String url = getRestAPIHostPort() + "/pls/enrichment/lead";
 
@@ -148,12 +146,10 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
         List<LeadEnrichmentAttribute> selectedEnrichmentList = getLeadEnrichmentAttributeList(true);
         assertEquals(selectedEnrichmentList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
-        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT,
-                MAX_SELECT);
+        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT, MAX_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testSaveLeadEnrichmentAttributes" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributes" })
     public void testSaveLeadEnrichmentAttributesFailure()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
@@ -203,8 +199,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testSaveLeadEnrichmentAttributesFailure" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesFailure" })
     public void testGetLeadEnrichmentAttributes()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
@@ -218,8 +213,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(selectedAttributeList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testGetLeadEnrichmentAttributes" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
     public void testGetLeadEnrichmentPremiumAttributesLimitation() {
         checkLimitation();
     }
@@ -233,8 +227,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(count.intValue(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributeCount" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCount" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCount() {
         String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -252,15 +245,13 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(selectCount, MAX_SELECT);
         assertEquals(premiumSelectCount, MAX_PREMIUM_SELECT);
         assertEquals(deselectCount, MAX_DESELECT);
-        assertEquals(attributesOperationMap.getSelectedAttributes().size(),
-                MAX_PREMIUM_SELECT + MAX_SELECT);
+        assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
         assertEquals(attributesOperationMap.getDeselectedAttributes().size(), MAX_DESELECT);
 
         String url = getRestAPIHostPort() + "/pls/enrichment/lead";
 
         ObjectMapper om = new ObjectMapper();
-        System.out.println(
-                "attributesOperationMap = " + om.writeValueAsString(attributesOperationMap));
+        System.out.println("attributesOperationMap = " + om.writeValueAsString(attributesOperationMap));
         restTemplate.put(url, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
@@ -270,14 +261,11 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         checkSelection(enrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1, MAX_SELECT);
 
         List<LeadEnrichmentAttribute> selectedEnrichmentList = getLeadEnrichmentAttributeList(true);
-        assertEquals(selectedEnrichmentList.size(),
-                2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
-        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1,
-                MAX_SELECT);
+        assertEquals(selectedEnrichmentList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        checkSelection(selectedEnrichmentList, attributesOperationMap, MAX_PREMIUM_SELECT + 1, MAX_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testSaveLeadEnrichmentAttributesForSecondSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesForSecondSave" })
     public void testGetLeadEnrichmentAttributesAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
@@ -288,8 +276,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
         assertNotNull(selectedAttributeList);
         assertFalse(selectedAttributeList.isEmpty());
-        assertEquals(selectedAttributeList.size(),
-                2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        assertEquals(selectedAttributeList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -313,8 +300,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
-        assertEquals(count.intValue(),
-                MAX_PREMIUM_SELECT + (MAX_SELECT + MAX_PREMIUM_SELECT - MAX_DESELECT));
+        assertEquals(count.intValue(), MAX_PREMIUM_SELECT + (MAX_SELECT + MAX_PREMIUM_SELECT - MAX_DESELECT));
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -322,43 +308,37 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
-                SEARCH_DISPLAY_NAME_STR1, Category.FIRMOGRAPHICS);
+                SEARCH_DISPLAY_NAME_STR1, Category.WEBSITE_PROFILE);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR1 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR1 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
         }
 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
-                Category.FIRMOGRAPHICS);
+                Category.WEBSITE_PROFILE);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR3 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR3 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
         }
 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
-                Category.FIRMOGRAPHICS);
+                Category.WEBSITE_PROFILE);
         assertNotNull(combinedAttributeList);
         assertTrue(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR2 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR2 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
         }
 
         assertEquals(combinedAttributeList.size(), 0);
@@ -369,10 +349,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR2 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR2 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
         }
 
         assertEquals(combinedAttributeList.size(), 4);
@@ -381,10 +359,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                 Category.TECHNOLOGY_PROFILE);
         assertNotNull(combinedAttributeList);
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR4 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR4.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR4 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR4.toUpperCase()));
         }
         assertTrue(combinedAttributeList.isEmpty());
 
@@ -396,10 +372,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertTrue(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
-            System.out.println(
-                    "Check for " + SEARCH_DISPLAY_NAME_STR1 + " - " + attr.getDisplayName());
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
+            System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR1 + " - " + attr.getDisplayName());
+            assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR1.toUpperCase()));
         }
 
         assertEquals(combinedAttributeList.size(), 0);
@@ -484,8 +458,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         ObjectMapper om = new ObjectMapper();
 
         for (Object obj : combinedAttributeObjList) {
-            LeadEnrichmentAttribute attr = om.readValue(om.writeValueAsString(obj),
-                    LeadEnrichmentAttribute.class);
+            LeadEnrichmentAttribute attr = om.readValue(om.writeValueAsString(obj), LeadEnrichmentAttribute.class);
             combinedAttributeList.add(attr);
         }
 
@@ -493,8 +466,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     private void checkSelection(List<LeadEnrichmentAttribute> enrichmentList,
-            LeadEnrichmentAttributesOperationMap attributesOperationMap, int premiumSelectCount,
-            int selectCount) {
+            LeadEnrichmentAttributesOperationMap attributesOperationMap, int premiumSelectCount, int selectCount) {
         for (LeadEnrichmentAttribute attr : enrichmentList) {
             for (String selectedAttr : attributesOperationMap.getSelectedAttributes()) {
                 if (attr.getFieldName().equals(selectedAttr)) {

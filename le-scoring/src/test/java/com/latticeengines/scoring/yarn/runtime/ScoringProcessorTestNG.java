@@ -104,13 +104,16 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
-            Map<String, Schema.Type> leadEnrichmentAttributeMap, String targetDir) throws IOException {
+            Map<String, Schema.Type> leadEnrichmentAttributeMap,
+            Map<String, String> leadEnrichmentAttributeDisplayNameMap, String targetDir) throws IOException {
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
-        Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap);
-        try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema, fileName)) {
+        Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap,
+                leadEnrichmentAttributeDisplayNameMap);
+        try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema,
+                fileName)) {
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             bulkScoringProcessor.appendScoreResponseToAvro(recordScoreResponseList, dataFileWriter, builder,
-                    leadEnrichmentAttributeMap);
+                    leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
         }
         bulkScoringProcessor.copyScoreOutputToHdfs(fileName, targetDir);
     }
@@ -120,7 +123,9 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
 
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
-        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
+        Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
+        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap,
+                leadEnrichmentAttributeDisplayNameMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 1);
@@ -136,8 +141,11 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
-        Map<String, Schema.Type> leadEnrichmentAttributeMap = generateCorrectEnrichmentAttributeMap();
-        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
+        Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
+        generateCorrectEnrichmentAttributeMap(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+        generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap,
+                leadEnrichmentAttributeDisplayNameMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 1);
@@ -152,29 +160,34 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap() throws IllegalArgumentException,
-            Exception {
+    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap()
+            throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
-        Map<String, Schema.Type> leadEnrichmentAttributeMap = generateIncorrectEnrichmentAttributeMap();
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
+        Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
+        generateIncorrectEnrichmentAttributeMap(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
         try {
-            generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap, dir + "/score");
+            generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap,
+                    leadEnrichmentAttributeDisplayNameMap, dir + "/score");
             Assert.fail("Should have thrown exception");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20039);
         }
     }
 
-    private Map<String, Type> generateCorrectEnrichmentAttributeMap() {
-        Map<String, Schema.Type> attributeMap = new HashMap<String, Schema.Type>();
-        attributeMap.put("attr1", Schema.Type.STRING);
-        attributeMap.put("attr2", Schema.Type.BOOLEAN);
-        return attributeMap;
+    private void generateCorrectEnrichmentAttributeMap(Map<String, Type> leadEnrichmentAttributeMap,
+            Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
+        leadEnrichmentAttributeMap.put("attr1", Schema.Type.STRING);
+        leadEnrichmentAttributeMap.put("attr2", Schema.Type.BOOLEAN);
+        leadEnrichmentAttributeDisplayNameMap.put("attr1", "Display name of attr1");
+        leadEnrichmentAttributeDisplayNameMap.put("attr2", "Display name of attr2");
     }
 
-    private Map<String, Type> generateIncorrectEnrichmentAttributeMap() {
-        Map<String, Schema.Type> attributeMap = generateCorrectEnrichmentAttributeMap();
-        attributeMap.remove("attr1");
-        return attributeMap;
+    private void generateIncorrectEnrichmentAttributeMap(Map<String, Type> leadEnrichmentAttributeMap,
+            Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
+        generateCorrectEnrichmentAttributeMap(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+        leadEnrichmentAttributeMap.remove("attr1");
+        leadEnrichmentAttributeDisplayNameMap.remove("attr1");
     }
 
     private List<RecordScoreResponse> generateRecordScoreResponseWithEnrichmentAttributeMap() {
