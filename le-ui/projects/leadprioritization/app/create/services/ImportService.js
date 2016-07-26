@@ -260,6 +260,7 @@ angular
             method: 'POST',
             url: '/pls/models/pmml/' + options.modelName,
             params: {
+                'displayname': options.displayname,
                 'module': options.module,
                 'pmmlfile': options.pmmlfile,
                 'pivotfile': options.pivotfile,

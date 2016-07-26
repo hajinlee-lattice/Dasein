@@ -71,6 +71,10 @@ angular
         }) 
         .state('home.models', {
             url: '/models',
+            params: {
+                pageTitle: 'My Models',
+                pageIcon: 'ico-model'
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -85,6 +89,10 @@ angular
         })
         .state('home.models.history', {
             url: '/history',
+            params: {
+                pageIcon: 'ico-history',
+                pageTitle: 'My Models'
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -141,6 +149,10 @@ angular
         })
         .state('home.model.attributes', {
             url: '/attributes',
+            params: {
+                pageIcon: 'ico-attributes',
+                pageTitle: ''
+            },
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
@@ -153,6 +165,10 @@ angular
         })
         .state('home.model.performance', {
             url: '/performance',
+            params: {
+                pageIcon: 'ico-performance',
+                pageTitle: ''
+            },
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
@@ -165,6 +181,10 @@ angular
         })
         .state('home.model.leads', {
             url: '/leads',
+            params: {
+                pageIcon: 'ico-leads',
+                pageTitle: ''
+            },
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
@@ -177,6 +197,10 @@ angular
         })
         .state('home.model.summary', {
             url: '/summary',
+            params: {
+                pageIcon: 'ico-datatable',
+                pageTitle: ''
+            },
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore, IsPmml) {
@@ -189,6 +213,10 @@ angular
         })
         .state('home.model.alerts', {
             url: '/alerts',
+            params: {
+                pageIcon: 'ico-alerts',
+                pageTitle: ''
+            },
             views: {
                 "main@": {
                     resolve: {
@@ -259,6 +287,10 @@ angular
         })
         .state('home.model.refine', {
             url: '/refine',
+            params: {
+                pageIcon: 'ico-refine',
+                pageTitle: ''
+            },
             resolve: {
                 loadKendo: ['$ocLazyLoad', function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/kendo.all.min.js');
@@ -276,6 +308,10 @@ angular
         })
         .state('home.model.review', {
             url: '/review',
+            params: {
+                pageIcon: 'ico-datatable',
+                pageTitle: ''
+            },
             resolve: {
                 ReviewData: function($q, $stateParams, $http, Model, ModelReviewStore) {
                     var deferred = $q.defer(),
@@ -306,6 +342,10 @@ angular
         })
         .state('home.model.review.columns', {
             url: '/columns',
+            params: {
+                pageIcon: 'ico-datatable',
+                pageTitle: ''
+            },
             views: {
                 "summary@": {
                     controller: 'RefineModelSummaryController',
@@ -363,6 +403,10 @@ angular
         })
         .state('home.marketosettings.apikey', {
             url: '/apikey',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings'
+            },
             views: {
                 "summary@": {
                     resolve: { 
@@ -388,6 +432,10 @@ angular
         })
         .state('home.marketosettings.models', {
             url: '/models',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings'
+            },
             views: { 
                 "summary@": {
                     resolve: { 
@@ -413,6 +461,10 @@ angular
         })
         .state('home.eloquasettings', {
             url: '/eloquasettings',
+            params: {
+                pageIcon: 'ico-eloqua',
+                pageTitle: 'Eloqua Settings'
+            }, 
             redirectto: 'eloquasettings.apikey',
             resolve: {
                 urls: function($q, $http) {
@@ -454,6 +506,10 @@ angular
         })
         .state('home.eloquasettings.apikey', {
             url: '/apikey',
+            params: {
+                pageIcon: 'ico-eloqua',
+                pageTitle: 'Eloqua Settings'
+            }, 
             views: {
                 "summary@": {
                     resolve: {
@@ -479,6 +535,10 @@ angular
         })
         .state('home.eloquasettings.models', {
             url: '/models',
+            params: {
+                pageIcon: 'ico-eloqua',
+                pageTitle: 'Eloqua Settings'
+            }, 
             views: {
                 "summary@": {
                     resolve: {
@@ -504,6 +564,10 @@ angular
         })
         .state('home.sfdcsettings', {
             url: '/sfdcsettings',
+            params: {
+                pageIcon: 'ico-salesforce',
+                pageTitle: 'Salesforce Settings'
+            }, 
             views: {
                 "summary@": {
                     resolve: {
@@ -522,6 +586,10 @@ angular
         })
         .state('home.apiconsole', {
             url: '/apiconsole',
+            params: {
+                pageIcon: 'ico-api-console',
+                pageTitle: 'API Console'
+            },
             views: {
                 "main@": {
                     templateUrl: 'app/apiConsole/views/APIConsoleView.html'
@@ -550,6 +618,10 @@ angular
         })
         .state('home.updatepassword', {
             url: '/updatepassword',
+            params: {
+                pageIcon: 'ico-user',
+                pageTitle: 'User Settings'
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -613,6 +685,10 @@ angular
         })
         .state('home.users', {
             url: '/users',
+            params: {
+                pageIcon: 'ico-user',
+                pageTitle: 'Manage Users'
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -694,6 +770,10 @@ angular
         })
         .state('home.enrichment', {
             url: '/enrichment',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Enrichment'
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'

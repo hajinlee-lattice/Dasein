@@ -14,6 +14,10 @@ angular
         })
         .state('home.model.jobs', {
             url: '/jobs/:{jobCreationSuccess}',
+            params: {
+                pageIcon: 'ico-scoring',
+                pageTitle: ''
+            },
             views: {
                 "summary@": {
                     resolve: {
@@ -42,6 +46,10 @@ angular
         })
         .state('home.jobs.status', {
             url: '/status/:{jobCreationSuccess}',
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'Jobs'
+            },
             views: {
                 "summary@": {
                     resolve: { 
@@ -59,6 +67,10 @@ angular
         })
         .state('home.jobs.status.ready', {
             url: '/ready/:jobId',
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'View Report'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/table/TableView.html'
@@ -70,6 +82,10 @@ angular
         })
         .state('home.jobs.status.csv', {
             url: '/csv/:jobId',
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'View Report'
+            },
             resolve: {
                 JobResult: function($q, $stateParams, JobsStore, ServiceErrorUtility) {
                     var deferred = $q.defer();

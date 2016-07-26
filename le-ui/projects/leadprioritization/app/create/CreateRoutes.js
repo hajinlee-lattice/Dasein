@@ -4,6 +4,10 @@ angular
     $stateProvider
         .state('home.models.import', {
             url: '/import',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Create Model - CSV'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
@@ -15,6 +19,10 @@ angular
         })
         .state('home.models.pmml', {
             url: '/pmml',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Create Model - PMML'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/PMMLCreateView.html'
@@ -26,6 +34,10 @@ angular
         })
         .state('home.models.import.columns', {
             url: '/:csvFileName/columns',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Create Model - CSV'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
@@ -60,6 +72,10 @@ angular
         })
         .state('home.models.import.job', {
             url: '/:applicationId/job',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Create Model - CSV'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
@@ -72,6 +88,10 @@ angular
         })
         .state('home.models.pmml.job', {
             url: '/:applicationId/job',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Create Model - PMML'
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/PMMLCreateView.html'

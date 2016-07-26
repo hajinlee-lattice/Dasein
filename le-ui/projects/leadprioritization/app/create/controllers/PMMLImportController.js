@@ -161,6 +161,7 @@ angular
         ShowSpinner('Modeling...');
 
         var options = {
+                displayname: this.modelDisplayName,
                 modelName: vm.sanitize(this.modelDisplayName),
                 schema: vm.accountLeadCheck,
                 module: this.moduleName,
