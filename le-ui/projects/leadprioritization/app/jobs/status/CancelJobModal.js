@@ -1,8 +1,5 @@
-angular.module('mainApp.jobs.status.CancelJobModal', [
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.utilities.NavUtility',
-    'mainApp.jobs.JobsService'
+angular.module('pd.jobs.status.cancelmodal', [
+    'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .service('CancelJobModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, JobsService) {
     var self = this;
@@ -28,7 +25,7 @@ angular.module('mainApp.jobs.status.CancelJobModal', [
         });
     };
 })
-.controller('CancelJobController', function ($scope, $rootScope, $state, ResourceUtility, NavUtility, JobsService) {
+.controller('CancelJobController', function ($scope, $rootScope, $state, ResourceUtility, JobsService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.cancelJobClickConfirm = function ($event) {

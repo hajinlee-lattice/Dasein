@@ -1,8 +1,8 @@
 angular
     .module('pd.jobs.status', [
-        'mainApp.core.utilities.BrowserStorageUtility'
+        'pd.jobs.status.cancelmodal'
     ])
-    .directive('jobStatusRow', function(BrowserStorageUtility) {
+    .directive('jobStatusRow', function() {
         return {
             restrict: 'EA',
             templateUrl: 'app/jobs/status/JobStatusRow.html',
@@ -13,7 +13,7 @@ angular
                 expanded: '=',
                 cancelling: '='
             },
-            controller: ['$http', '$scope', '$rootScope', '$state', 'JobsStore', 'JobsService', function ($http, $scope, $rootScope, $state, JobsStore, JobsService) {
+            controller: function ($http, $scope, $rootScope, $state, JobsStore, JobsService, CancelJobModal) {
                 var job = $scope.job;
                 $scope.showProgress = false;
                 $scope.jobType = job.jobType ? job.jobType : 'placeholder';
@@ -224,7 +224,7 @@ angular
                 $scope.$on("$destroy", function() {
                     cancelPeriodJobStatusQuery();
                 });
-            }]
+            }
         };
     }
 );
