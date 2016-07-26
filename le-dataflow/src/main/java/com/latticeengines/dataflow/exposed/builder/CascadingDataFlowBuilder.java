@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -236,14 +237,20 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         new ArrayList<>(allColumns.keySet()).toArray(sortedAllColumns);
         Fields declaredFields = new Fields(sortedAllColumns);
         Pipe[] pipes = new Pipe[extracts.size()];
+
         for (Extract extract : extracts) {
             Set<String> allColumnsClone = new HashSet<>(allColumns.keySet());
             for (Field field : allSchemas[i].getFields()) {
                 allColumnsClone.remove(field.name());
             }
-
-            String source = addSource(String.format("%s-%s", sourceTableName, extract.getName()), //
-                    extract.getPath(), true);
+            String sourceName = String.format("%s-%s", sourceTableName, extract.getName());
+            if (taps.containsKey(sourceName)) {
+                String newName = sourceName + "_" + UUID.randomUUID();
+                log.warn(String.format("Changing source %s to %s to avoid collision with existing source", sourceName,
+                        newName));
+                sourceName = newName;
+            }
+            String source = addSource(sourceName, extract.getPath(), true);
             String[] extraCols = new String[allColumnsClone.size()];
             allColumnsClone.toArray(extraCols);
 
