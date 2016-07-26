@@ -5,6 +5,8 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
+import com.latticeengines.propdata.match.service.ExternalColumnService;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +42,9 @@ public class InternalResource extends InternalResourceBase implements InternalIn
 
     @Autowired
     private InternalService internalService;
+
+    @Autowired
+    private ExternalColumnService externalColumnService;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {
@@ -86,6 +91,14 @@ public class InternalResource extends InternalResourceBase implements InternalIn
         checkHeader(request);
         ApplicationId applicationId = yarnService.submitPropDataJob(jobConfiguration);
         return new AppSubmission(Collections.singletonList(applicationId));
+    }
+
+    @RequestMapping(value = "/externalcolumncache", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Invalidate and rebuild caches in ExternalColumnService")
+    public String invalidateExternalColumnsCache() {
+        externalColumnService.loadCache();
+        return "OK";
     }
 
     @RequestMapping(value = "/currentcachetableversion", method = RequestMethod.GET, headers = "Accept=application/json")

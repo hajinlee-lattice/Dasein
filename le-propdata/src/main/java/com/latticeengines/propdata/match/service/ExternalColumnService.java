@@ -11,4 +11,6 @@ public interface ExternalColumnService {
 
     ExternalColumn getExternalColumn(String externalColumnId);
 
+    void loadCache();
+
 }
