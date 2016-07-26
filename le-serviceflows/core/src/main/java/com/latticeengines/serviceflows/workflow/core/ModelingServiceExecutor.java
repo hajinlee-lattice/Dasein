@@ -169,7 +169,6 @@ public class ModelingServiceExecutor {
         config.setCustomer(builder.getCustomer());
         config.setTable(builder.getTable());
         config.setMetadataTable(builder.getMetadataTable());
-        config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
         config.setTargets(Arrays.asList(builder.getTargets()));
         config.setDataRules(builder.getDataRules());
