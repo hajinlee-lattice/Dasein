@@ -73,12 +73,11 @@ angular.module('mainApp.models.review', [
             totalCustomColumnCount: 0,
             interface: {
                 totalExcludedColumnCount: 0,
-                latticeWarnedColumnCount: 0,
-                customWarnedColumnCount : 0,
                 show: 'custom'
             },
             columnWarningsToDisplay: [],
-            columnNameToIsLatticeAttr: {}
+            columnNameToIsLatticeAttr: {},
+            columnNameToColumnDisplayName: {}
         });
 
         MetadataStore.GetMetadataForModel(modelId).then(function(modelMetadata) {
@@ -87,11 +86,22 @@ angular.module('mainApp.models.review', [
                 vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
 
                 columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                    vm.columnNameToIsLatticeAttr[columnName] = vm.isLatticeAttribute(vm.findMetadataItemByColumnName(columnName));
+                    var column =  vm.findMetadataItemByColumnName(columnName);
+                    vm.columnNameToIsLatticeAttr[columnName] = vm.isLatticeAttribute(column);
                     vm.columnNameToIsLatticeAttr[columnName] ? vm.totalLatticeColumnCount++ : vm.totalCustomColumnCount++;
+                    vm.columnNameToColumnDisplayName[columnName] = column.DisplayName;
+                });
+                ReviewData.dataRules.forEach(function(dataRule) {
+                    for (var i in dataRule.columnsToRemediate) {
+                        if (! dataRule.columnsToRemediate[i] in vm.ruleNameToColumnRuleResults[dataRule.name]) {
+                            console.log('column: ' + dataRule.columnsToRemediate[i] + ' removed for rule: ' + dataRule.name);
+                            dataRule.columnsToRemediate.splice(i, 1);
+                        }
+                    }
+                    ModelReviewStore.AddDataRule(modelId, dataRule);
                 });
                 if (ruleNameToDataRules[columnWarning.dataRuleName].enabled) {
-                    vm.interface.totalExcludedColumnCount += columnWarning.flaggedItemCount;
+                    vm.interface.totalExcludedColumnCount += vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.length;
                 }
             });
             vm.displayNonLatticeWarningsClicked();
@@ -102,7 +112,6 @@ angular.module('mainApp.models.review', [
             vm.showCustomAttr = false,
             vm.showLatticeAttr = true;
             vm.columnWarningsToDisplay = [];
-            vm.interface.latticeWarnedColumnCount = 0;
 
             ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
                 for (var i in reviewData.dataRules) {
@@ -111,12 +120,6 @@ angular.module('mainApp.models.review', [
                 vm.allColumnWarnings.forEach(function(columnWarning) {
                     if (isLatticeColumnWarning(columnWarning)) {
                         vm.columnWarningsToDisplay.push(columnWarning);
-                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                            if (vm.ruleNameToDataRules[columnWarning.dataRuleName].enabled && vm.columnNameToIsLatticeAttr[columnName]
-                                && vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
-                                vm.interface.latticeWarnedColumnCount++;
-                            }
-                        });
                     }
                 });
             });
@@ -128,7 +131,6 @@ angular.module('mainApp.models.review', [
             vm.showLatticeAttr = false,
             vm.showCustomAttr = true;
             vm.columnWarningsToDisplay = [];
-            vm.interface.customWarnedColumnCount = 0;
 
             ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
                 for (var i in reviewData.dataRules) {
@@ -137,12 +139,6 @@ angular.module('mainApp.models.review', [
                 vm.allColumnWarnings.forEach(function(columnWarning) {
                     if (isNonLatticeColumnWarning(columnWarning)) {
                         vm.columnWarningsToDisplay.push(columnWarning);
-                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                            if (vm.ruleNameToDataRules[columnWarning.dataRuleName].enabled && !vm.columnNameToIsLatticeAttr[columnName]
-                                && vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
-                                vm.interface.customWarnedColumnCount++;
-                            }
-                        });
                     }
                 });
             });
@@ -154,7 +150,6 @@ angular.module('mainApp.models.review', [
             vm.showLatticeAttr = false,
             vm.showCustomAttr = false;
             vm.columnWarningsToDisplay = [];
-            vm.interface.totalExcludedColumnCount = 0;
 
             ModelReviewStore.GetReviewData(modelId).then(function(reviewData) {
                 for (var i in reviewData.dataRules) {
@@ -163,11 +158,6 @@ angular.module('mainApp.models.review', [
                 vm.allColumnWarnings.forEach(function(columnWarning) {
                     if (columnWarning.flaggedItemCount != 0) {
                         vm.columnWarningsToDisplay.push(columnWarning);
-                        columnWarning.flaggedColumnNames.forEach(function(columnName) {
-                            if (vm.ruleNameToDataRules[columnWarning.dataRuleName].columnsToRemediate.indexOf(columnName) > -1) {
-                                vm.interface.totalExcludedColumnCount++;
-                            }
-                        });
                     }
                 });
             });
@@ -234,6 +224,7 @@ angular.module('mainApp.models.review', [
             $scope.columnTotal = $scope.columnWarning.flaggedItemCount;
             $scope.latticeWarningTotal = 0;
             $scope.customWarningTotal = 0;
+            $scope.columnNameToColumnDisplayName = $scope.$parent.vm.columnNameToColumnDisplayName;
 
             $scope.columnWarning.flaggedColumnNames.forEach(function(columnName) {
                 if ($scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
@@ -251,30 +242,18 @@ angular.module('mainApp.models.review', [
                 var ruleEnabledBefore = $scope.dataRule.enabled;
                 if (ruleEnabledBefore && $scope.columnsToRemediate.length < $scope.columnWarning.flaggedItemCount) { // warning was partially enabled
                     $scope.interface.totalExcludedColumnCount -= $scope.columnsToRemediate.length;
-                    warning.flaggedColumnNames.forEach(function(columnName) {
-                        if (!$scope.columnRemediated(columnName) && $scope.$parent.vm.columnNameToIsLatticeAttr[columnName]) {
-                            $scope.interface.latticeWarnedColumnCount++;
-                        } else if (!$scope.columnRemediated(columnName)) {
-                            $scope.interface.customWarnedColumnCount++;
-                        }
-                    });
+                    $scope.interface.totalExcludedColumnCount += warning.flaggedColumnNames.length;
                     $scope.columnsToRemediate = $scope.columnWarning.flaggedColumnNames.slice(0);
                     $('#' + warning.dataRuleName).trigger('click');
                 } else if (ruleEnabledBefore) { // warning was all enabled
                     $scope.interface.totalExcludedColumnCount -= $scope.columnsToRemediate.length;
-                    warning.flaggedColumnNames.forEach(function(columnName) {
-                        $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount-- : $scope.interface.customWarnedColumnCount--;
-                    });
                     $scope.columnsToRemediate = [];
                     $scope.dataRule.enabled = false;
                 } else {
                     $scope.columnsToRemediate = $scope.columnWarning.flaggedColumnNames.slice(0);
-                    warning.flaggedColumnNames.forEach(function(columnName) {
-                        $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount++ : $scope.interface.customWarnedColumnCount++;
-                    });
+                    $scope.interface.totalExcludedColumnCount += warning.flaggedColumnNames.length;
                     $scope.dataRule.enabled = true;
                 }
-                $scope.interface.totalExcludedColumnCount += $scope.columnsToRemediate.length;
                 $scope.dataRule.columnsToRemediate = $scope.columnsToRemediate;
                 ModelReviewStore.AddDataRule($scope.modelId, $scope.dataRule);
             };
@@ -283,14 +262,12 @@ angular.module('mainApp.models.review', [
                 if ($scope.columnRemediated(columnName)) {
                     $scope.interface.totalExcludedColumnCount--;
                     $scope.columnsToRemediate.splice($scope.columnsToRemediate.indexOf(columnName), 1);
-                    $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount-- : $scope.interface.customWarnedColumnCount--;
                     if ($scope.columnsToRemediate.length == 0) {
                         $scope.dataRule.enabled = false;
                     }
                 } else {
                     $scope.interface.totalExcludedColumnCount++;
                     $scope.columnsToRemediate.push(columnName);
-                    $scope.$parent.vm.columnNameToIsLatticeAttr[columnName] ? $scope.interface.latticeWarnedColumnCount++ : $scope.interface.customWarnedColumnCount++;
                     if ($scope.columnsToRemediate.length == 1) {
                         $scope.dataRule.enabled = true;
                     }
