@@ -59,7 +59,8 @@ public class ModelReviewServiceImpl implements ModelReviewService {
         return reviewData;
     }
 
-    private void filterColumnsToRemediate(List<DataRule> rules, Map<String, ColumnRuleResult> ruleNameToColumnRuleResults) {
+    private void filterColumnsToRemediate(List<DataRule> rules,
+            Map<String, ColumnRuleResult> ruleNameToColumnRuleResults) {
         for (DataRule rule : rules) {
             ColumnRuleResult columnResult = ruleNameToColumnRuleResults.get(rule.getName());
             if (columnResult != null && columnResult.getFlaggedColumnNames() != null) {
@@ -68,6 +69,10 @@ public class ModelReviewServiceImpl implements ModelReviewService {
                 columnsToRemediateSet.retainAll(flaggedColumnNames);
                 List<String> columnsToRemediate = new ArrayList<>(columnsToRemediateSet);
                 rule.setColumnsToRemediate(columnsToRemediate);
+            }
+            if (rule.isEnabled() && rule.getColumnsToRemediate().isEmpty()
+                    && !columnResult.getFlaggedColumnNames().isEmpty()) {
+                rule.setColumnsToRemediate(columnResult.getFlaggedColumnNames());
             }
         }
 
