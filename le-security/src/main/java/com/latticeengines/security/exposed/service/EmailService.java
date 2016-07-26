@@ -10,7 +10,8 @@ import com.latticeengines.domain.exposed.security.User;
 
 public interface EmailService {
 
-    void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients);
+    void sendSimpleEmail(String subject, Object content, String contentType,
+            Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
@@ -25,10 +26,6 @@ public interface EmailService {
     void sendPdNewExternalUserEmail(User user, String password, String hostport);
 
     void sendPdExistingExternalUserEmail(Tenant tenant, User user, String hostport);
-
-    void sendPdNewInternalUserEmail(User user, String password, String hostport);
-
-    void sendPdExistingInternalUserEmail(Tenant tenant, User user, String hostport);
 
     void sendPlsForgetPasswordEmail(User user, String password, String hostport);
 
@@ -56,7 +53,6 @@ public interface EmailService {
 
     void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
 
-    void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
-            String emailAddress, EmailSettings settings);
-
+    void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username,
+            String password, String emailAddress, EmailSettings settings);
 }

@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
@@ -254,17 +254,17 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         restTemplate.delete(url);
     }
 
-    public ProductAndAdminInfo generateLPAandEmptyExternalAdminInfo() {
-        ProductAndAdminInfo prodAndAminInfo = new ProductAndAdminInfo();
+    public ProductAndExternalAdminInfo generateLPAandEmptyExternalAdminInfo() {
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = new ProductAndExternalAdminInfo();
         List<LatticeProduct> products = Arrays.asList(LatticeProduct.LPA);
         Map<String, Boolean> externalEmailMap = new HashMap<String, Boolean>();
-        prodAndAminInfo.setExternalAdminEmailMap(externalEmailMap);
-        prodAndAminInfo.setProducts(products);
-        return prodAndAminInfo;
+        prodAndExternalAminInfo.setExternalEmailMap(externalEmailMap);
+        prodAndExternalAminInfo.setProducts(products);
+        return prodAndExternalAminInfo;
     }
 
-    public ProductAndAdminInfo generateProductAndExternalAdminInfo() {
-        ProductAndAdminInfo prodAndExternalAminInfo = new ProductAndAdminInfo();
+    public ProductAndExternalAdminInfo generateProductAndExternalAdminInfo() {
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = new ProductAndExternalAdminInfo();
         List<LatticeProduct> products = new ArrayList<LatticeProduct>();
         products.add(LatticeProduct.LPA);
         products.add(LatticeProduct.PD);
@@ -272,7 +272,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         externalEmailMap.put("michael@fake.com", false);
         externalEmailMap.put("jane@fake.com", false);
         externalEmailMap.put("lucas@fake.com", true);
-        prodAndExternalAminInfo.setExternalAdminEmailMap(externalEmailMap);
+        prodAndExternalAminInfo.setExternalEmailMap(externalEmailMap);
         prodAndExternalAminInfo.setProducts(products);
         return prodAndExternalAminInfo;
     }

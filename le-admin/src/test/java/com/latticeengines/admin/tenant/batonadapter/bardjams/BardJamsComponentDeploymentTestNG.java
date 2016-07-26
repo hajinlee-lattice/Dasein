@@ -15,7 +15,7 @@ import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponentDeploymentTestNG;
@@ -128,7 +128,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         properties.put(VisiDBDLComponent.componentName, sDir.flatten());
 
         properties.put(getServiceName(), jamsConfig.flatten());
-        ProductAndAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
     }

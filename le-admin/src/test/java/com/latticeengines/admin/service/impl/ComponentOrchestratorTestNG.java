@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndAdminInfo;
+import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -76,8 +76,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getServiceNames() throws Exception {
         orchestrator = new ComponentOrchestrator(originalComponents);
-        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate",
-                "Modeling")) {
+        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate", "Modeling")) {
             Assert.assertTrue(orchestrator.getServiceNames().contains(name));
         }
     }
@@ -168,7 +167,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
             properties.put(component.getName(), sDir.flatten());
         }
 
-        ProductAndAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
+        ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
         orchestrator.orchestrate(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
 
