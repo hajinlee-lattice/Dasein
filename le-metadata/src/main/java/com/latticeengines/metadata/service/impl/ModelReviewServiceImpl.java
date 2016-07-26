@@ -1,8 +1,11 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,6 +49,8 @@ public class ModelReviewServiceImpl implements ModelReviewService {
             ruleNameToRowRuleResults.put(rowRuleResult.getDataRuleName(), rowRuleResult);
         }
 
+        filterColumnsToRemediate(rules, ruleNameToColumnRuleResults);
+
         ModelReviewData reviewData = new ModelReviewData();
         reviewData.setDataRules(rules);
         reviewData.setRuleNameToColumnRuleResults(ruleNameToColumnRuleResults);
@@ -54,5 +59,17 @@ public class ModelReviewServiceImpl implements ModelReviewService {
         return reviewData;
     }
 
+    private void filterColumnsToRemediate(List<DataRule> rules, Map<String, ColumnRuleResult> ruleNameToColumnRuleResults) {
+        for (DataRule rule : rules) {
+            ColumnRuleResult columnResult = ruleNameToColumnRuleResults.get(rule.getName());
+            if (columnResult != null && columnResult.getFlaggedColumnNames() != null) {
+                Set<String> columnsToRemediateSet = new HashSet<>(rule.getColumnsToRemediate());
+                Set<String> flaggedColumnNames = new HashSet<>(columnResult.getFlaggedColumnNames());
+                columnsToRemediateSet.retainAll(flaggedColumnNames);
+                List<String> columnsToRemediate = new ArrayList<>(columnsToRemediateSet);
+                rule.setColumnsToRemediate(columnsToRemediate);
+            }
+        }
 
+    }
 }
