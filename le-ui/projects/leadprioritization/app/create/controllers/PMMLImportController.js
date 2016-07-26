@@ -164,7 +164,7 @@ angular
                 modelName: vm.sanitize(this.modelDisplayName),
                 schema: vm.accountLeadCheck,
                 module: this.moduleName,
-                pmmlfile: vm.sanitize(this.pmmlFileName)
+                pmmlfile: vm.stripExt(vm.sanitize(this.pmmlFileName)) + '.xml'
             };
 
         if (this.pivotFileName) {

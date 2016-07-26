@@ -87,7 +87,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             title: 'Manage Users'
         },
         'home.enrichment': {
-            icon: 'ico-history',
+            icon: 'ico-enrichment',
             title: 'Enrichment'
         },
         'home.jobs.status': {
