@@ -40,7 +40,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @Value("${scoring.pls.api.hostport}")
     private String plsApiHostPort;
-    
+
     @Autowired
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
@@ -66,9 +66,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     protected static String TENANT_ID;
 
     protected Tenant tenant;
-    
-    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     protected static CustomerSpace customerSpace;
 
@@ -95,7 +94,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
     }
-    
+
     private void saveAttributeSelection(CustomerSpace customerSpace) {
         internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
                 plsApiHostPort);
@@ -131,7 +130,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         return selectedAttributeMap;
     }
 
-
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
         internalResourceProxy.deleteTenant(customerSpace);
@@ -141,7 +139,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testScoreAccount() throws Exception {
         Assert.assertNotNull(summary);
         score(summary.getId(), summary.getTrainingTableName());
