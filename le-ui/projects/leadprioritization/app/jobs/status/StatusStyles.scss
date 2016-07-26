@@ -137,7 +137,7 @@ span.chevron-content.chevron-content-text {
     tooltip {
         tip {
             font-size: 14px;
-            min-width: 120px;
+            min-width: 122px;
             width: auto;
         }
     }
@@ -184,6 +184,9 @@ span.chevron-content.chevron-content-text {
         
         .Failed, .Cancelled {
             color: rgb(233, 33, 45);
+        }
+        .ng-hide-add-active {
+            display: none;
         }
     }
 
