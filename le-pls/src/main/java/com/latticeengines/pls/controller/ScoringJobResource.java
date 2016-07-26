@@ -3,10 +3,8 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
+import javax.ws.rs.core.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -45,9 +44,11 @@ public class ScoringJobResource {
     public void getResultsCsv(@PathVariable String jobId, HttpServletResponse response) {
         try {
             InputStream is = scoringJobService.getResults(jobId);
-            response.setContentType("application/csv");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", scoringJobService.getResultFileName(jobId)));
-            IOUtils.copy(is, response.getOutputStream());
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setHeader("Content-Encoding", "gzip");
+            response.setHeader("Content-Disposition",
+                    String.format("attachment; filename=\"%s\"", scoringJobService.getResultFileName(jobId)));
+            GzipUtils.copyAndCompressStream(is, response.getOutputStream());
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18102, e);
         }

@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -84,7 +85,9 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .modelId(modelId) //
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/Export_" + DateTime.now().getMillis()) //
+                .outputFilename(
+                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'), ".csv") + "_scored_"
+                                + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .internalResourcePort(internalResourceHostPort) //

@@ -4,11 +4,21 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,12 +26,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -35,6 +54,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -58,6 +78,12 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
+
+    private Long jobId;
+
+    private String applicationId;
+
+    private static final int TOTAL_QUALIFIED_LINES = 1126;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -177,7 +203,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         }
         record.put("PD_DA_JobTitle", "_Part_Time");
         DebugScoreResponse response = score(record, modelId);
-        System.out.print(response.getScore());
+        System.out.println(response.getScore());
     }
 
     private DebugScoreResponse score(Map<String, Object> record, String modelId) {
@@ -206,10 +232,10 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
-    public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+    public void scoreTestingData() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE",
                 getRestAPIHostPort(), modelId, sourceFile.getName()));
-        String applicationId = selfServiceModeling.getRestTemplate().postForObject(
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
                         sourceFile.getName()), //
                 null, String.class);
@@ -219,6 +245,98 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         waitForWorkflowStatus(applicationId, true);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "scoreTestingData", timeOut = 120000)
+    public void testJobIsListed() {
+        final String jobType = "importAndRTSBulkScoreWorkflow";
+        boolean any = false;
+        while (true) {
+            @SuppressWarnings("unchecked")
+            List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
+                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Job> jobs = JsonUtils.convertList(raw, Job.class);
+            any = Iterables.any(jobs, new Predicate<Job>() {
+
+                @Override
+                public boolean apply(@Nullable Job job) {
+                    String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+                    return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId);
+                }
+            });
+
+            if (any) {
+                break;
+            }
+            sleep(500);
+        }
+
+        assertTrue(any);
+    }
+
+    private void sleep(long msec) {
+        try {
+            Thread.sleep(msec);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testJobIsListed", timeOut = 1800000)
+    public void poll() {
+        JobStatus terminal;
+        while (true) {
+            Job job = selfServiceModeling.getRestTemplate().getForObject(
+                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
+            assertNotNull(job);
+            jobId = job.getId();
+            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
+                terminal = job.getJobStatus();
+                break;
+            }
+            sleep(1000);
+        }
+
+        assertEquals(terminal, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "poll")
+    public void downloadCsv() throws IOException {
+        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
+                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String results = new String(response.getBody());
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
+        assertTrue(results.length() > 0);
+        CSVParser parser = null;
+        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStreamReader reader = new InputStreamReader(is);
+        CSVFormat format = LECSVFormat.format;
+        try {
+            parser = new CSVParser(reader, format);
+            Set<String> csvHeaders = parser.getHeaderMap().keySet();
+            assertTrue(csvHeaders.contains("Id"));
+            assertTrue(csvHeaders.contains("CompanyName"));
+            assertTrue(csvHeaders.contains("SourceColumn"));
+            assertTrue(csvHeaders.contains("Score"));
+            assertTrue(csvHeaders.contains("Event"));
+
+            int line = 1;
+            for (CSVRecord record : parser.getRecords()) {
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
+                line++;
+            }
+            assertEquals(line, TOTAL_QUALIFIED_LINES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            parser.close();
+        }
     }
 
 }

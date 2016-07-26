@@ -322,13 +322,13 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             idAttr.setPhysicalDataType(Type.LONG.name());
         }
         Attribute modelIdAttr = new Attribute();
-        modelIdAttr.setName("modelId");
-        modelIdAttr.setDisplayName("modelId");
+        modelIdAttr.setName("ModelId");
+        modelIdAttr.setDisplayName("ModelId");
         modelIdAttr.setSourceLogicalDataType("");
         modelIdAttr.setPhysicalDataType(Type.STRING.name());
         Attribute scoreAttr = new Attribute();
-        scoreAttr.setName("score");
-        scoreAttr.setDisplayName("score");
+        scoreAttr.setName("Score");
+        scoreAttr.setDisplayName("Score");
         scoreAttr.setSourceLogicalDataType("");
         scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
         outputTable.addAttribute(idAttr);
@@ -377,8 +377,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (score != null && (score > 99 || score < 5)) {
                     throw new LedpException(LedpCode.LEDP_20037);
                 }
-                builder.set("modelId", modelId);
-                builder.set("score", score);
+                builder.set("ModelId", modelId);
+                builder.set("Score", score);
 
                 Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
                 if (leadEnrichmentAttributeMap != null) {
