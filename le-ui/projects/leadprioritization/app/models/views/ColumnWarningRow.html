@@ -32,7 +32,7 @@
     <div>
         {{interface.show == 'all' ? columnTotal : interface.show == 'lattice' ? latticeWarningTotal : customWarningTotal}}
     </div>
-    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames" data-ng-if="shouldDisplayColumn(columnName)" class="expanded-rule">
+    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames" data-ng-if="shouldDisplayColumn(columnName)" class="expanded-rule" title="{{columnNameToColumnDisplayName[columnName]}}">
         {{columnNameToColumnDisplayName[columnName]}}
     </div>
 </td>
