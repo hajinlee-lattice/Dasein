@@ -1,8 +1,10 @@
 // lock sub-header
 // limit number selectable to (10 for now)
 // green msg after save, 3s
-angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories){
+angular.module('lp.enrichment.leadenrichment', [
+    'mainApp.core.services.FeatureFlagService'
+])
+.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, FeatureFlagService){
     var vm = this;
 
     angular.extend(vm, {
@@ -26,7 +28,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         selectDisabled: 1,
         saveDisabled: 1,
         selectedCount: 0,
-        premiumSelectLimit: 15,
+        premiumSelectLimit: 10, // default, per tenant limit is set in init()
         pagesize: 26, // keep this number even
         initialized: false,
         enrichments: [],
@@ -138,6 +140,11 @@ angular.module('lp.enrichment.leadenrichment', [])
     var lockSubheader = _.throttle(_lockSubheader, 100);
 
     vm.init = function() {
+        FeatureFlagService.GetAllFlags().then(function(result) {
+            var flags = FeatureFlagService.Flags();
+            vm.premiumSelectLimit = FeatureFlagService.FlagIsEnabled(flags.PREMIUM_SELECT_LIMIT) || 15;
+        });
+
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
 

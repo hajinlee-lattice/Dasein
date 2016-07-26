@@ -46,7 +46,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         ALLOW_PIVOT_FILE:'AllowPivotFile',
         USE_ELOQUA_SETTINGS: 'UseEloquaSettings',
         USE_MARKETO_SETTINGS: 'UseMarketoSettings',
-        USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings'
+        USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings',
+
+        PREMIUM_SELECT_LIMIT: 'PremiumSelectLimit'
     };
     this.Flags = function(){ return flags; };
 
@@ -92,6 +94,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.LEAD_ENRICHMENT_PAGE, false);
+            SetFlag(flags.PREMIUM_SELECT_LIMIT, 10);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();

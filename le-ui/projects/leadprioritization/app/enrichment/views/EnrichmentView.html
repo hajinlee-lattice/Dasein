@@ -24,7 +24,7 @@
                             {{vm.label.total}} <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}}</em>
                         </li>
                         <li>
-                            {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}}</em>
+                            {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}} / {{vm.premiumSelectLimit}}</em>
                         </li>
                     </ul>
                 </li>

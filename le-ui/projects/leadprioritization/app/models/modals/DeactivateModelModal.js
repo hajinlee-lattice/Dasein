@@ -26,6 +26,11 @@ angular.module('mainApp.models.modals.DeactivateModelModal', [
             modalElement.on('hidden.bs.modal', function (evt) {
                 modalElement.empty();
             });
+
+            var close_button = angular.element('[data-ng-controller="DeactivateModelController"] .modal-header button.close');
+            close_button.click(function(){
+                $rootScope.$broadcast('deactivate:modal:cancel');
+            });
         });
     };
 })
