@@ -4,7 +4,7 @@
             <ul class="subheader">
                 <li class="categories">
                     <select class="form-control" ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory(); vm.metadata.current = 1;">
-                        <option value="">{{vm.category ? vm.categories_see_all : vm.categories_select_all}}</option>
+                        <option value="">{{vm.category ? vm.label.categories_see_all : vm.label.categories_select_all}}</option>
                     </select>
                 </li>
                 <li class="query">
@@ -21,10 +21,10 @@
                 <li class="totals">
                     <ul>
                         <li>
-                            Total Selected <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}}</em>
+                            {{vm.label.total}} <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}}</em>
                         </li>
                         <li>
-                            Premium Selected <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}}</em>
+                            {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}}</em>
                         </li>
                     </ul>
                 </li>
@@ -32,13 +32,16 @@
                     <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
                         <span class="fa fa-sort-alpha-{{ SortOrder == 'FieldName' ? 'asc' : 'desc' }}"></span>
                     </a>
+                    <a ng-if="vm.enable_grid" class="button icon-button white-button" ng-click="vm.view = (vm.view === 'list' ? 'grid' : 'list')">
+                        <span class="fa {{(vm.view === 'list' ? 'fa-th-large' : 'fa-th-list')}}"></span>
+                    </a>
                 </li>
                 <li class="save">
-                    <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.button_save}}</button>
+                    <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
             </ul>
         </div>
-                <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
             <div class="twelve columns">
                 <pd-pagination-controls 
                         ng-click="vm.clickPaginate()"
@@ -47,7 +50,7 @@
                 </pd-pagination-controls>
             </div>
         </div>
-        <ul class="enrichments">
+        <ul class="enrichments {{vm.view}}">
             <li class="box category-{{vm.categoryClass(enrichment.Category)}}" 
             ng-repeat="enrichment in (filteredList = (vm.enrichments 
             | filter: vm.query
@@ -68,14 +71,14 @@
                 ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'is-dirty': enrichment.IsDirty}" 
                 ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)" n
                 g-class="{'is-dirty': enrichment.IsDirty}">
-                    <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.button_select : (enrichment.IsDirty ? vm.button_deselect : vm.button_selected)}}</span>
+                    <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                 </button>
             </li>
-            <li ng-show="!filteredList.length && vm.initialized">
-              <h2>{{vm.no_results}}</h2>
+            <li ng-show="!filteredList.length">
+              <h2>{{vm.label.no_results}}</h2>
             </li>
         </ul>
-        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1 && vm.initialized">
+        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
             <div class="twelve columns">
                 <pd-pagination-controls 
                         ng-click="vm.clickPaginate()"

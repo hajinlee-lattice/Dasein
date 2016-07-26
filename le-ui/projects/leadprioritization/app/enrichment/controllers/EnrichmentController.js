@@ -6,15 +6,19 @@ angular.module('lp.enrichment.leadenrichment', [])
     var vm = this;
 
     angular.extend(vm, {
-        button_save: 'Save',
-        button_select: 'Turn On',
-        button_selected: 'On',
-        button_deselect: 'Turn Off',
-        deselected_messsage: 'Attribute will be turned off for enrichment',
-        categories_see_all: 'See All Categories',
-        categories_select_all: 'All Categories',
-        premiumSelectError: 'Premium attribute limit reached',
-        no_results: 'No attributes were found',
+        label: {
+            total: 'Total',
+            premium: 'Premium',
+            button_save: 'Save',
+            button_select: 'Turn On',
+            button_selected: 'On',
+            button_deselect: 'Turn Off',
+            deselected_messsage: 'Attribute will be turned off for enrichment',
+            categories_see_all: 'See All Categories',
+            categories_select_all: 'All Categories',
+            premiumSelectError: 'Premium attribute limit reached',
+            no_results: 'No attributes were found',
+        },
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         category: null,
@@ -22,10 +26,12 @@ angular.module('lp.enrichment.leadenrichment', [])
         selectDisabled: 1,
         saveDisabled: 1,
         selectedCount: 0,
-        premiumSelectLimit: 10,
-        pagesize: 25,
+        premiumSelectLimit: 15,
+        pagesize: 26, // keep this number even
         initialized: false,
-        enrichments: []
+        enrichments: [],
+        enable_grid: true,
+        view: 'list'
     });
 
     vm.changeCategory = function(){
@@ -44,10 +50,10 @@ angular.module('lp.enrichment.leadenrichment', [])
             if(premiums > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
-                enrichment.button_select = vm.premiumSelectError;
+                enrichment.button_select = vm.label.premiumSelectError;
                 enrichment.button_error = true;
                 $timeout(function(){
-                    enrichment.button_select = vm.button_select;
+                    enrichment.button_select = vm.label.button_select;
                     enrichment.button_error = false;
                 }, 3000);
                 return false;
@@ -58,11 +64,11 @@ angular.module('lp.enrichment.leadenrichment', [])
         } else {
             vm.userSelectedCount--;
             if(!enrichment.WasDirty) {
-                enrichment.button_select = vm.deselected_messsage;
+                enrichment.button_select = vm.label.deselected_messsage;
                 enrichment.WasDirty = true;
                 enrichment.button_msg = true;
                 $timeout(function(){
-                    enrichment.button_select = vm.button_select;
+                    enrichment.button_select = vm.label.button_select;
                     enrichment.button_msg = false;
                 }, 3000);
             }
