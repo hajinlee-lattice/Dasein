@@ -4,10 +4,14 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> extends CascadingDataFlowBuilder {
+    private static final Logger log = Logger.getLogger(TypesafeDataFlowBuilder.class);
 
     public void validate(T parameters) {
     }
@@ -30,7 +34,7 @@ public abstract class TypesafeDataFlowBuilder<T extends DataFlowParameters> exte
         } catch (Exception e) {
             throw new RuntimeException("Flow failed validations", e);
         }
-
+        log.info(String.format("Running flow with the following parameters: %s", JsonUtils.serialize(casted)));
         return construct(casted);
     }
 

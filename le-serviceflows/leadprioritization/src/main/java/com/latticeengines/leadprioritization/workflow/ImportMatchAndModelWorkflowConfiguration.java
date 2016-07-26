@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -113,11 +112,6 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder eventTableReportNamePrefix(String eventTableReportName) {
             createEventTableReport.setReportNamePrefix(eventTableReportName);
-            return this;
-        }
-
-        public Builder deduplicationType(DedupType dedupType) {
-            dedupEventTable.setDeduplicationType(dedupType);
             return this;
         }
 

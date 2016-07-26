@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -113,11 +112,6 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder sourceModelSummary(ModelSummary modelSummary) {
             model.setSourceModelSummary(modelSummary);
-            return this;
-        }
-
-        public Builder deduplicationType(DedupType dedupType) {
-            dedupEventTable.setDeduplicationType(dedupType);
             return this;
         }
 

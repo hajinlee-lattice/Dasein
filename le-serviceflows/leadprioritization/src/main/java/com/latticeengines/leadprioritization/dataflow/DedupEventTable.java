@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,8 @@ import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("dedupEventTable")
 public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTableParameters> {
+    private static final Logger log = Logger.getLogger(DedupEventTable.class);
+
     private static final String DOMAIN = "__Domain";
     private static final String SORT = "__Sort";
     public static final int OPTIMAL_CREATION_TIME_DAYS_FROM_TODAY = 45;
@@ -28,6 +31,8 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
     public Node construct(DedupEventTableParameters parameters) {
         Node eventTable = addSource(parameters.eventTable);
         if (parameters.deduplicationType == DedupType.MULTIPLELEADSPERDOMAIN) {
+            log.info(String.format("Not performing dedup because deduplication type is %s",
+                    parameters.deduplicationType));
             return eventTable;
         }
 

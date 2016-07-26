@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -12,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -133,10 +135,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .internalResourceHostPort(internalResourceHostPort) //
                 .importReportNamePrefix(sourceFile.getName() + "_Report") //
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
-                .deduplicationType(parameters.getDeduplicationType()) //
                 .dedupDataFlowBeanName("dedupEventTable")
-                //
-                .dedupDataFlowParams(
+                .dedupDataFlowParams( //
                         new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain", parameters
                                 .getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
@@ -197,7 +197,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             throw new RuntimeException("PivotValuesLookup is null.");
         }
         Set<String> sourceColumnNames = pivotValues.pivotValuesBySourceColumn.keySet();
-        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(sourceColumnNames, trainingAttrs);
+        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(sourceColumnNames,
+                trainingAttrs);
 
         trainingTable.setAttributes(attrs);
         metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);

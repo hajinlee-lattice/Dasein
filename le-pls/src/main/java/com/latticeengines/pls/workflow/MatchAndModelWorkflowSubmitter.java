@@ -76,17 +76,15 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .trainingTableName(cloneTableName) //
                 .transformationGroup(transformationGroup) //
                 .sourceModelSummary(modelSummary) //
-                .deduplicationType(parameters.getDeduplicationType()) //
                 .dedupDataFlowBeanName("dedupEventTable") //
-                .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain")) //
+                .dedupDataFlowParams(
+                        new DedupEventTableParameters(cloneTableName, "PublicDomain", parameters.getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null) // null
-                                                                                              // means
-                                                                                              // latest
+                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null)
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(parameters.getDataRules()) //
