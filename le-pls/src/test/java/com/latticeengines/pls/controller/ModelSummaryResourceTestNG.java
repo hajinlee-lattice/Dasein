@@ -156,7 +156,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         switchToExternalUser();
         assertDeleteModelSummaryGet500();
     }
-    
+
     private void assertDeleteModelSummaryGet500() {
         boolean exception = false;
         try {
@@ -170,7 +170,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         }
         assertTrue(exception);
     }
-    
+
     private void assertDeleteModelSummaryGet403() {
         boolean exception = false;
         try {
@@ -236,13 +236,13 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertUpdatePredictorsSuccess();
 
         switchToInternalUser();
-        assertUpdatePredictorsGet403();
+        assertUpdatePredictorsSuccess();
 
         switchToExternalAdmin();
         assertUpdatePredictorsGet403();
 
         switchToExternalUser();
-        assertUpdatePredictorsGet403();
+        assertUpdatePredictorsSuccess();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
