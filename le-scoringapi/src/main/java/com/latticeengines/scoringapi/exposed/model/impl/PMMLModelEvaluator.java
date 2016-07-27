@@ -9,10 +9,8 @@ import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ProbabilityDistribution;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoringapi.exposed.ScoreType;
-import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 
 public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
@@ -29,8 +27,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
             Map<ScoreType, Object> result) {
         String target = results.keySet().iterator().next().getValue();
 
-        ProbabilityDistribution classification = (ProbabilityDistribution) results
-                .get(new FieldName(target));
+        ProbabilityDistribution classification = (ProbabilityDistribution) results.get(new FieldName(target));
         double predicted = classification.getProbability("1");
 
         result.put(ScoreType.PROBABILITY, predicted);
@@ -43,12 +40,33 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
     }
 
     @Override
-    protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments,
-            boolean debugRow, FieldName name, Object value) {
+    protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments, boolean debugRow, FieldName name,
+            Object value) {
         try {
             super.prepare(evaluator, arguments, debugRow, name, value);
         } catch (Exception e) {
             super.prepare(evaluator, arguments, debugRow, name, DEFAULT_DOUBLE_VALUE);
         }
+    }
+
+    @Override
+    protected void inspectEvaluatedResult(Map<FieldName, ?> results) {
+        // do nothing for PMML model
+    }
+
+    @Override
+    protected ProbabilityDistribution getClassification(Map<FieldName, ?> results, String target) {
+        ProbabilityDistribution classification = null;
+        if (target == null) {
+            for (Map.Entry<FieldName, ?> entry : results.entrySet()) {
+                if (entry.getValue() instanceof ProbabilityDistribution) {
+                    classification = (ProbabilityDistribution) entry.getValue();
+                    break;
+                }
+            }
+        } else {
+            classification = (ProbabilityDistribution) results.get(new FieldName(target));
+        }
+        return classification;
     }
 }

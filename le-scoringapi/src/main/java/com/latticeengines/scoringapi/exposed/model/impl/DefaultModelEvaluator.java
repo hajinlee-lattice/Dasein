@@ -127,15 +127,13 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         try {
             results = evaluator.evaluate(arguments);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31014, e,
-                    new String[] { JsonUtils.serialize(arguments) });
+            throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
         }
 
         if (results == null) {
             throw new LedpException(LedpCode.LEDP_31013);
-        } else if (results.size() != 1) {
-            throw new LedpException(LedpCode.LEDP_31012,
-                    new String[] { String.valueOf(results.size()) });
+        } else {
+            inspectEvaluatedResult(results);
         }
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
@@ -145,16 +143,21 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         return result;
     }
 
-    protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments,
-            boolean debugRow, FieldName name, Object value) {
+    protected void inspectEvaluatedResult(Map<FieldName, ?> results) {
+        if ((results.size() != 1)) {
+            throw new LedpException(LedpCode.LEDP_31012, new String[] { String.valueOf(results.size()) });
+        }
+    }
+
+    protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments, boolean debugRow, FieldName name,
+            Object value) {
         try {
             if (debugRow) {
                 System.out.println(String.format("%s=%f", name, value));
             }
             arguments.put(name, evaluator.prepare(name, value));
         } catch (Exception e) {
-            throw new ScoringApiException(LedpCode.LEDP_31103,
-                new String[] { name.getValue(), String.valueOf(value) });
+            throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(), String.valueOf(value) });
         }
     }
 
@@ -166,12 +169,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
             Map<FieldName, ?> results, //
             Map<ScoreType, Object> result) {
         String target = derivation.target;
-        if (target == null) {
-            target = results.keySet().iterator().next().getValue();
-        }
-
-        ProbabilityDistribution classification = (ProbabilityDistribution) results
-                .get(new FieldName(target));
+        ProbabilityDistribution classification = getClassification(results, target);
         double predicted = classification.getProbability("1");
 
         result.put(ScoreType.PROBABILITY, predicted);
@@ -220,10 +218,18 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         }
     }
 
+    protected ProbabilityDistribution getClassification(Map<FieldName, ?> results, String target) {
+        if (target == null) {
+            target = results.keySet().iterator().next().getValue();
+        }
+
+        ProbabilityDistribution classification = (ProbabilityDistribution) results.get(new FieldName(target));
+        return classification;
+    }
+
     private boolean withinRange(BucketRange range, //
             double value) {
-        return (range.lower == null || value >= range.lower)
-                && (range.upper == null || value < range.upper);
+        return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
     }
 
     private void checkNullFields(List<String> nullFields) {
