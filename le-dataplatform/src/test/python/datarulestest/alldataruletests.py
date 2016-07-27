@@ -281,7 +281,7 @@ class AllDataRuleTests(TestBase):
             self.atestOverlyPredictiveDS()
             self.atestUniqueValueCountDS()
 
-    def testdoParameterSearch(self):
+    def atestdoParameterSearch(self):
         for et in [self.eventtable_mulesoft]:
             self.logger.info('________________________________________\n' + \
                     '                                                     ' + \
