@@ -142,6 +142,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
                 String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
                 byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
         String results = new String(response.getBody());
         assertTrue(results.length() > 0);
         CSVParser parser = null;
@@ -154,10 +155,10 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
             assertTrue(csvHeaders.contains("Activity_Count_Click_Email"));
             assertTrue(csvHeaders.contains("Industry"));
             assertTrue(csvHeaders.contains("PhoneNumber"));
-            assertTrue(csvHeaders.contains("score"));
+            assertTrue(csvHeaders.contains("Score"));
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
-                assertTrue(StringUtils.isNotEmpty(record.get("score")));
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
                 line++;
             }
             assertEquals(line, TOTAL_QUALIFIED_LINES);
