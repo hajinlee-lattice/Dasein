@@ -9,7 +9,7 @@ from testbase import TestBase
 class BucketerConsolidatorTest(TestBase, BucketerTestBase):
 
     def setUp(self):
-        self.bucketer = BucketConsolidator(5, 0.2, 0.2)
+        self.bucketer = BucketConsolidator(5, 0.4, 0.2)
 
     def testBucketConsolidator(self):
         foo = pd.DataFrame(columns=['x', 'event'])
@@ -30,23 +30,23 @@ class BucketerConsolidatorTest(TestBase, BucketerTestBase):
     def testGetNextConsolidationByLift_0_3(self):
         zippedList = [(1, 5), (5, 10), (10, 20), (20, 50), (50, 100), (100, 200)]
 
-        eventSums = [(2, 0), (2, 10), (5, 10), (6, 10), (6, 10), (10, 10)] 
+        eventSums = [(2, 0), (2, 10), (5, 10), (6, 10), (6, 10), (10, 10)]
         removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 0)
-  
-        eventSums = [(2, 10), (2, 10), (5, 10), (6, 10), (6, 10), (10, 10)] 
+
+        eventSums = [(2, 10), (2, 10), (5, 10), (6, 10), (6, 10), (10, 10)]
         removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 0)
-  
-        eventSums = [(2, 10), (3, 10), (5, 10), (6, 10), (6, 10), (10, 10)] 
-        removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
-        self.assertEqual(removedIndex, 3)
-  
-        eventSums = [(1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (6, 10)] 
+
+        eventSums = [(2, 10), (3, 10), (5, 10), (6, 10), (6, 10), (10, 10)]
         removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 3)
 
-        eventSums = [(1, 100), (2, 100), (3, 100), (4, 100), (5, 100), (6, 100)] 
+        eventSums = [(1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (6, 10)]
+        removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
+        self.assertEqual(removedIndex, 3)
+
+        eventSums = [(1, 100), (2, 100), (3, 100), (4, 100), (5, 100), (6, 100)]
         removedIndex = self.bucketer._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 4)
 
@@ -55,22 +55,22 @@ class BucketerConsolidatorTest(TestBase, BucketerTestBase):
         zippedList = [(1, 5), (5, 10), (10, 20), (20, 50), (50, 100), (100, 200)]
         bucketer2 = BucketConsolidator(5, 0.2, 0.2)
 
-        eventSums = [(1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (6, 10)] 
+        eventSums = [(1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (6, 10)]
         removedIndex = bucketer2._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 3)
 
-        eventSums = [(1, 100), (2, 100), (3, 100), (4, 100), (5, 100), (6, 100)] 
+        eventSums = [(1, 100), (2, 100), (3, 100), (4, 100), (5, 100), (6, 100)]
         removedIndex = bucketer2._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 4)
 
         zippedList = [(1, 5), (5, 10), (10, 20)]
-        eventSums = [(1, 2), (2, 3), (3, 4)] 
+        eventSums = [(1, 2), (2, 3), (3, 4)]
         removedIndex = bucketer2._getNextConsolidationByLift(zippedList, eventSums)
         self.assertEqual(removedIndex, 1)
 
-    def testCombineAdjacentBins(self):  
+    def testCombineAdjacentBins(self):
         zippedList = [(1, 5), (5, 10), (10, 20), (20, 50), (50, 100), (100, 200)]
         eventSums = [(2, 10), (3, 10), (5, 10), (6, 10), (6, 10), (10, 10)]
         newZippedList, newEventSums = self.bucketer._combineAdjacentBins(zippedList, eventSums, 2);
         self.assertEqual(newZippedList, [(1, 5), (5, 10), (10, 50), (50, 100), (100, 200)])
-        self.assertEqual(newEventSums,  [(2, 10), (3, 10), (11, 20), (6, 10), (10, 10)])
+        self.assertEqual(newEventSums, [(2, 10), (3, 10), (11, 20), (6, 10), (10, 10)])
