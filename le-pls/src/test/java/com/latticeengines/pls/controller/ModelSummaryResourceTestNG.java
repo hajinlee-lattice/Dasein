@@ -218,13 +218,13 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertChangeModelDisplayNameFail();
 
         switchToInternalUser();
-        assertChangeModelDisplayNameGet403();
+        assertChangeModelDisplayNameSuccess();
 
         switchToExternalAdmin();
         assertChangeModelDisplayNameGet403();
 
         switchToExternalUser();
-        assertChangeModelDisplayNameGet403();
+        assertChangeModelDisplayNameSuccess();
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "testUpdateModelSummary" })
