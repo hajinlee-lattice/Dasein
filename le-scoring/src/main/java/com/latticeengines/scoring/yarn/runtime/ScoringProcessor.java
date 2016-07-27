@@ -57,8 +57,8 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
-        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
+        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -120,6 +120,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
 
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
 
         try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
@@ -159,6 +160,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
         FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
 
         try (DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
@@ -170,8 +172,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (scoreRequest == null) {
                     break;
                 }
-                List<RecordScoreResponse> scoreResponseList = bulkScore(scoreRequest,
-                        rtsBulkScoringConfig.getCustomerSpace().toString());
+                List<RecordScoreResponse> scoreResponseList = bulkScore(scoreRequest, rtsBulkScoringConfig
+                        .getCustomerSpace().toString());
                 appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap,
                         leadEnrichmentAttributeDisplayNameMap);
             } while (scoreRequest != null);
@@ -199,8 +201,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private List<RecordScoreResponse> bulkScore(BulkRecordScoreRequest scoreRequest, String customerSpace) {
         long startTime = System.currentTimeMillis();
-        log.info(String.format("Sending internal scoring api with %d records to for tenant %s",
-                scoreRequest.getRecords().size(), customerSpace));
+        log.info(String.format("Sending internal scoring api with %d records to for tenant %s", scoreRequest
+                .getRecords().size(), customerSpace));
         List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest,
                 customerSpace);
         long endTime = System.currentTimeMillis();
@@ -267,17 +269,13 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             record.setPerformEnrichment(rtsBulkScoringConfig.isEnableLeadEnrichment());
             record.setIdType(DEFAULT_ID_TYPE);
 
-            Object recordIdObj = avroRecord.get(InterfaceName.Id.toString());
-            Object internalIdObj = avroRecord.get(InterfaceName.InternalId.toString());
             String idStr = null;
-            if (recordIdObj != null) {
-                idStr = recordIdObj.toString();
-            } else if (recordIdObj == null && internalIdObj != null) {
-                idStr = internalIdObj.toString();
-                useInternalId = true;
+            if (!useInternalId) {
+                idStr = avroRecord.get(InterfaceName.Id.toString()).toString();
             } else {
-                throw new LedpException(LedpCode.LEDP_20034);
+                idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
             }
+            log.info("idStr is " + idStr);
 
             Map<String, Object> attributeValues = new HashMap<>();
             for (Schema.Field field : fields) {
@@ -305,8 +303,25 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     }
 
     @VisibleForTesting
+    void checkForInternalId(String path) throws IOException {
+        try (FileReader<GenericRecord> prereader = instantiateReaderForBulkScoreRequest(path);) {
+            GenericRecord avroRecord = prereader.next();
+            Object idObj = avroRecord.get(InterfaceName.Id.toString());
+            if (idObj == null) {
+                idObj = avroRecord.get(InterfaceName.InternalId.toString());
+                useInternalId = true;
+            }
+            if (idObj == null) {
+                throw new LedpException(LedpCode.LEDP_20034);
+            }
+            log.info("useInternalId is " + useInternalId);
+        }
+    }
+
+    @VisibleForTesting
     Schema createOutputSchema(Map<String, Schema.Type> leadEnrichmentAttributeMap,
             Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
+
         Table outputTable = new Table();
         outputTable.setName("scoreOutput");
         Attribute idAttr = new Attribute();
@@ -447,8 +462,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
         BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
                 DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-                Map<String, Type> leadEnrichmentAttributeMap,
-                Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
+                Map<String, Type> leadEnrichmentAttributeMap, Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
             super();
             this.rtsBulkScoringConfig = rtsBulkScoringConfig;
             this.reader = reader;
