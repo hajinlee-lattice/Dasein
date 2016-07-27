@@ -88,7 +88,7 @@ angular.module('lp.create.import.job', [
                 }
 
                 $scope.jobStatus = response.resultObj.jobStatus;
-                $scope.jobId = response.resultObj.jobId;
+                $scope.jobId = response.resultObj.id;
                 
                 if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
                     cancelPeriodJobStatusQuery();

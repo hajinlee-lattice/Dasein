@@ -89,7 +89,7 @@
             </div>
             <div>
                 <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed'"></i> {{jobStatus}}</p>
-                <a ui-sref="home.jobs.status.csv({jobId: job.id})" data-ng-if="jobStatus == 'Completed'">View Report</a>
+                <a ui-sref="home.jobs.status.csv({jobId: jobId})" data-ng-if="jobStatus == 'Completed'">View Report</a>
             </div>
         </div>
     </div>
