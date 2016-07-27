@@ -14,7 +14,7 @@ from datarules.uniquevaluecountds import UniqueValueCountDS
 from datarules.overlypredictiveds import OverlyPredictiveDS
 from testbase import TestBase
 
-class AllDataRuleTests(TestBase):
+class AllDataRuleTest(TestBase):
 
     eventtable_mulesoft = None
     logger = logging.getLogger(name='AllDataRuleTests')
