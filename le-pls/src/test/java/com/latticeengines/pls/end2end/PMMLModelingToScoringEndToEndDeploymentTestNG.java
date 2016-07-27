@@ -91,7 +91,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
         log.info("Test environment setup finished.");
-        fileName = "Lattice_Relaunch_Small.csv";
+        fileName = "Lattice_Relaunch_Small_NO_ID.csv";
     }
 
     @SuppressWarnings("rawtypes")
@@ -320,7 +320,6 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         try {
             parser = new CSVParser(reader, format);
             Set<String> csvHeaders = parser.getHeaderMap().keySet();
-            assertTrue(csvHeaders.contains("Id"));
             assertTrue(csvHeaders.contains("CompanyName"));
             assertTrue(csvHeaders.contains("SourceColumn"));
             assertTrue(csvHeaders.contains("Score"));
