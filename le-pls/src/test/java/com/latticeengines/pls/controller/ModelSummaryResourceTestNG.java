@@ -144,16 +144,33 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
-        switchToInternalUser();
-        assertDeleteModelSummaryGet403();
-
         switchToExternalAdmin();
-        assertDeleteModelSummaryGet403();
-
-        switchToExternalUser();
         assertDeleteModelSummaryGet403();
     }
 
+    @Test(groups = { "functional" })
+    public void mockDeleteModelSummaryHasEditPlsModelsRight() {
+        switchToInternalUser();
+        assertDeleteModelSummaryGet500();
+
+        switchToExternalUser();
+        assertDeleteModelSummaryGet500();
+    }
+    
+    private void assertDeleteModelSummaryGet500() {
+        boolean exception = false;
+        try {
+            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
+        } catch (Exception e) {
+            exception = true;
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Should return 500, but got " + getErrorHandler().getResponseString());
+            assertTrue(e.getMessage().contains("Model with id 123 not found"));
+        }
+        assertTrue(exception);
+    }
+    
     private void assertDeleteModelSummaryGet403() {
         boolean exception = false;
         try {
