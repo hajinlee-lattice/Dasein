@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class ModelRunResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {

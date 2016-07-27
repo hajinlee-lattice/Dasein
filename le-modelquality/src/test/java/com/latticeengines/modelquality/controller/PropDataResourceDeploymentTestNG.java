@@ -8,21 +8,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.modelquality.DataSet;
+import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class DataSetResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class PropDataResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        dataSetEntityMgr.deleteAll();
+        propDataEntityMgr.deleteAll();
     }
 
     @Test(groups = "deployment")
-    public void upsertDataSets() {
+    public void upsertPropDatas() {
         try {
-            DataSet dataSets = createDataSet();
-            ResponseDocument<String> response = modelQualityProxy.upsertDataSets(Arrays.asList(dataSets));
+            PropData propDatas = createPropData();
+            ResponseDocument<String> response = modelQualityProxy.upsertPropDatas(Arrays.asList(propDatas));
             Assert.assertTrue(response.isSuccess());
 
         } catch (Exception ex) {
@@ -31,10 +31,10 @@ public class DataSetResourceTestNG extends ModelQualityDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertDataSets")
-    public void getDataSets() {
+    @Test(groups = "deployment", dependsOnMethods = "upsertPropDatas")
+    public void getPropDatas() {
         try {
-            ResponseDocument<List<DataSet>> response = modelQualityProxy.getDataSets();
+            ResponseDocument<List<PropData>> response = modelQualityProxy.getPropDatas();
             Assert.assertTrue(response.isSuccess());
             Assert.assertEquals(response.getResult().size(), 1);
         } catch (Exception ex) {

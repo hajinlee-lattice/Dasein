@@ -8,21 +8,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.modelquality.PropData;
+import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class PropDataResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class SamplingResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        propDataEntityMgr.deleteAll();
+        samplingEntityMgr.deleteAll();
     }
 
     @Test(groups = "deployment")
-    public void upsertPropDatas() {
+    public void upsertSamplings() {
         try {
-            PropData propDatas = createPropData();
-            ResponseDocument<String> response = modelQualityProxy.upsertPropDatas(Arrays.asList(propDatas));
+            Sampling samplings = createSampling();
+            ResponseDocument<String> response = modelQualityProxy.upsertSamplings(Arrays.asList(samplings));
             Assert.assertTrue(response.isSuccess());
 
         } catch (Exception ex) {
@@ -31,10 +31,10 @@ public class PropDataResourceTestNG extends ModelQualityDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertPropDatas")
-    public void getPropDatas() {
+    @Test(groups = "deployment", dependsOnMethods = "upsertSamplings")
+    public void getSamplings() {
         try {
-            ResponseDocument<List<PropData>> response = modelQualityProxy.getPropDatas();
+            ResponseDocument<List<Sampling>> response = modelQualityProxy.getSamplings();
             Assert.assertTrue(response.isSuccess());
             Assert.assertEquals(response.getResult().size(), 1);
         } catch (Exception ex) {

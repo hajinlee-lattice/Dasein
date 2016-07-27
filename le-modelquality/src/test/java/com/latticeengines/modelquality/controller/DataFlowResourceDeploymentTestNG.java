@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class DataFlowResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class DataFlowResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {

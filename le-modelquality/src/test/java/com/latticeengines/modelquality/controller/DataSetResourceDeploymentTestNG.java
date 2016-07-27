@@ -8,22 +8,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
-import com.latticeengines.domain.exposed.modelquality.Algorithm;
+import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class AlgorithmResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class DataSetResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        algorithmEntityMgr.deleteAll();
+        dataSetEntityMgr.deleteAll();
     }
 
     @Test(groups = "deployment")
-    public void upsertAlgorithms() {
+    public void upsertDataSets() {
         try {
-            Algorithm algorithms = createAlgorithm(AlgorithmFactory.ALGORITHM_NAME_RF);
-            ResponseDocument<String> response = modelQualityProxy.upsertAlgorithms(Arrays.asList(algorithms));
+            DataSet dataSets = createDataSet();
+            ResponseDocument<String> response = modelQualityProxy.upsertDataSets(Arrays.asList(dataSets));
             Assert.assertTrue(response.isSuccess());
 
         } catch (Exception ex) {
@@ -32,10 +31,10 @@ public class AlgorithmResourceTestNG extends ModelQualityDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertAlgorithms")
-    public void getAlgorithms() {
+    @Test(groups = "deployment", dependsOnMethods = "upsertDataSets")
+    public void getDataSets() {
         try {
-            ResponseDocument<List<Algorithm>> response = modelQualityProxy.getAlgorithms();
+            ResponseDocument<List<DataSet>> response = modelQualityProxy.getDataSets();
             Assert.assertTrue(response.isSuccess());
             Assert.assertEquals(response.getResult().size(), 1);
         } catch (Exception ex) {

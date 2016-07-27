@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class PipelineResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @Value("${modelquality.file.upload.hdfs.dir}")
     private String hdfsDir;

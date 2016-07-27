@@ -8,21 +8,22 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.modelquality.Sampling;
+import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class SamplingResourceTestNG extends ModelQualityDeploymentTestNGBase {
+public class AlgorithmResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        samplingEntityMgr.deleteAll();
+        algorithmEntityMgr.deleteAll();
     }
 
     @Test(groups = "deployment")
-    public void upsertSamplings() {
+    public void upsertAlgorithms() {
         try {
-            Sampling samplings = createSampling();
-            ResponseDocument<String> response = modelQualityProxy.upsertSamplings(Arrays.asList(samplings));
+            Algorithm algorithms = createAlgorithm(AlgorithmFactory.ALGORITHM_NAME_RF);
+            ResponseDocument<String> response = modelQualityProxy.upsertAlgorithms(Arrays.asList(algorithms));
             Assert.assertTrue(response.isSuccess());
 
         } catch (Exception ex) {
@@ -31,10 +32,10 @@ public class SamplingResourceTestNG extends ModelQualityDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertSamplings")
-    public void getSamplings() {
+    @Test(groups = "deployment", dependsOnMethods = "upsertAlgorithms")
+    public void getAlgorithms() {
         try {
-            ResponseDocument<List<Sampling>> response = modelQualityProxy.getSamplings();
+            ResponseDocument<List<Algorithm>> response = modelQualityProxy.getAlgorithms();
             Assert.assertTrue(response.isSuccess());
             Assert.assertEquals(response.getResult().size(), 1);
         } catch (Exception ex) {
