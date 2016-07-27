@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -143,7 +145,8 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         String results = new String(response.getBody());
         assertTrue(results.length() > 0);
         CSVParser parser = null;
-        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(response.getBody()));
+        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStreamReader reader = new InputStreamReader(is);
         CSVFormat format = LECSVFormat.format;
         try {
             parser = new CSVParser(reader, format);
