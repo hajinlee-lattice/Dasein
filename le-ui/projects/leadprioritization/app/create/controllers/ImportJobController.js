@@ -22,21 +22,41 @@ angular.module('lp.create.import.job', [
 
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
-    $scope.compress_percent = 4;
+    $scope.compress_percent = 0;
 
-    var value = 4,
-        increment = 2,
-        ceiling = 90;
 
-    function PerformCalc(){
-        if (value <= ceiling){
-            value += increment
-        }
-        $scope.compress_percent = value;
+
+    var up = true,
+        value = 0,
+        increment = 4,
+        ceiling = 10;
+    function performCalc(){
+
+        JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
+            if (response.success) {
+
+                var jobStatus = response.resultObj;
+
+                if (jobStatus.stepRunning == 'load_data'){
+                    ceiling = 30;
+                } else if (jobStatus.stepRunning == 'generate_insights'){
+                    ceiling = 60;
+                } else if (jobStatus.stepRunning == 'create_global_target_market'){
+                    ceiling = 90;
+                }
+
+                console.log(jobStatus.stepRunning, value, ceiling);
+                if (up == true && value <= ceiling){
+                    value += increment
+                }
+                if (value == ceiling){
+                    up = false;
+                }
+                $scope.compress_percent = value;
+            };
+        });
     }
-    setInterval(PerformCalc, 10000);
-
-
+    setInterval(performCalc, TIME_BETWEEN_JOB_REFRESH);
 
 
     function updateStatesBasedOnJobStatus(jobStatus) {
@@ -95,6 +115,7 @@ angular.module('lp.create.import.job', [
                 }
 
                 updateStatesBasedOnJobStatus(response.resultObj);
+                performCalc(response.resultObj);
 
                 JobsStore.getJobs();
             } else {
