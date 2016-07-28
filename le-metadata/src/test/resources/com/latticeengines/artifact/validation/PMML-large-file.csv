@@ -1,0 +1,121 @@
+TargetColumn,SourceColumn,SourceColumnType,Value
+x2Analyst,Occupation__c,TEXT,Analyst
+x2Architect,Occupation__c,TEXT,Architect
+x2Consultant,Occupation__c,TEXT,Consultant
+x2CXOEVP,Occupation__c,TEXT,CXO/EVP
+x2Developer,Occupation__c,TEXT,Developer
+x2Director,Occupation__c,TEXT,Senior Director/Director
+x2Educator,Occupation__c,TEXT,Educator
+x2IndividualContributor,Occupation__c,TEXT,Individual Contributor
+x2Manager,Occupation__c,TEXT,Senior Manager/Manager
+x2ProfessionalStaff,Occupation__c,TEXT,Professional Staff
+x2SupportStaff,Occupation__c,TEXT,Support Staff
+x2SVPVP,Occupation__c,TEXT,SVP/VP
+x3Creative,Functional_Area__c,TEXT,Creative
+x3CustomerExperience,Functional_Area__c,TEXT,Customer Experience
+x3eCommerce,Functional_Area__c,TEXT,eCommerce
+x3EngineeringDevelopment,Functional_Area__c,TEXT,Engineering/Development
+x3ExecutiveGeneralAdministration,Functional_Area__c,TEXT,Executive/General Administration
+x3Finance,Functional_Area__c,TEXT,Finance
+x3HumanResources,Functional_Area__c,TEXT,Human Resources
+x3IT,Functional_Area__c,TEXT,IT: General
+x3IT,Functional_Area__c,TEXT, IT: Enterprise Applications
+x3IT,Functional_Area__c,TEXT,IT: Desktop Applications
+x3Marketing,Functional_Area__c,TEXT,Marketing: Search/SEO
+x3Marketing,Functional_Area__c,TEXT,Marketing: Digital
+x3Marketing,Functional_Area__c,TEXT,Marketing: General
+x3Operations,Functional_Area__c,TEXT,Sales: Operations
+x3Operations,Functional_Area__c,TEXT,Marketing: Operations
+x3Operations,Functional_Area__c,TEXT,Operations
+x3Operations,Functional_Area__c,TEXT,IT: Operations
+x3ProfessionalServices,Functional_Area__c,TEXT,Services: Professional/Client
+x3ProfessionalServices,Functional_Area__c,TEXT,Services: Media
+x3ProfessionalServices,Functional_Area__c,TEXT,Services: Customer Support
+x3ProfessionalServices,Functional_Area__c,TEXT,Services: Public/Social
+x3ProgramManagement,Functional_Area__c,TEXT,Program Management
+x3PublicAffairsCommunications,Functional_Area__c,TEXT,Public Affairs/Communications
+x3ResearchSciences,Functional_Area__c,TEXT,Research/Sciences
+x3Sales,Functional_Area__c,TEXT,Sales
+x3TrainingLearning,Functional_Area__c,TEXT,Training/Learning
+x7ANALYTICS,Product_Outlook_Group__c,TEXT,ANALYTICS
+x7CAMPAIGN,Product_Outlook_Group__c,TEXT,CAMPAIGN
+x7CONNECT,Product_Outlook_Group__c,TEXT,CONNECT
+x7DAM,Product_Outlook_Group__c,TEXT,DAM
+x7DAT,Product_Outlook_Group__c,TEXT,DAT
+x7DPS,Product_Outlook_Group__c,TEXT,DPS
+x7FMS,Product_Outlook_Group__c,TEXT,Flash Media Server
+x7LiveCycle,Product_Outlook_Group__c,TEXT,LiveCycle
+x7MEDIAOPTIMIZER,Product_Outlook_Group__c,TEXT,MEDIA OPTIMIZER
+x7SOCIAL,Product_Outlook_Group__c,TEXT,SOCIAL
+x7TARGET,Product_Outlook_Group__c,TEXT,TARGET
+x7WEM,Product_Outlook_Group__c,TEXT,WEM
+x8AdobeTrial, LeadSource,TEXT,Adobe Trial
+x8DownloadLead, LeadSource,TEXT,Download Lead
+x8EventAttendance, LeadSource,TEXT,Event Attendance
+x8EventRegistration, LeadSource,TEXT,Event Registration
+x8MarketingWebForm, LeadSource,TEXT,Marketing Web Form
+x8ThirdPartyInquiry, LeadSource,TEXT,Third Party Inquiry
+x8TrialAccount, LeadSource,TEXT,Trial Account
+x9Advertising,Activity_Type__c,TEXT,Advertising
+x9Database,Activity_Type__c,TEXT,Database
+x9Email,Activity_Type__c,TEXT,Email
+x9Events,Activity_Type__c,TEXT,Events
+x9Offer,Activity_Type__c,TEXT,Offer
+x9Partner,Activity_Type__c,TEXT,Partner
+x9SalesCalldown,Activity_Type__c,TEXT,Sales Calldown
+x10AdobeEventsegSummit,Activity_Subtype__c,TEXT,Adobe Events (e.g. Summit)
+x10AdobeEventsIESummit,Activity_Subtype__c,TEXT,Adobe Events (I.E. Summit)
+x10ContentSyndication,Activity_Subtype__c,TEXT,Content Syndication
+x10DataBaseBuilding,Activity_Subtype__c,TEXT,Data Base Building
+x10DataBaseBuildingDataAppends,Activity_Subtype__c,TEXT,Data Base Building/Data Appends
+x10Dinners,Activity_Subtype__c,TEXT,Dinners
+x10EMail,Activity_Subtype__c,TEXT,Email
+x10ESeminarEvent,Activity_Subtype__c,TEXT,E-Seminar Event
+x10ListUploadInternalList,Activity_Subtype__c,TEXT,List Upload (Internal List)
+x10ListUploadPurchasedfrom3rdParty,Activity_Subtype__c,TEXT,List Upload (Purchased from 3rd Party)
+x10PartnerEnablement,Activity_Subtype__c,TEXT,Partner Co-Marketing
+x10PartnerEnablement,Activity_Subtype__c,TEXT,Partner-Led Marketing
+x10RFIRequestforInformation,Activity_Subtype__c,TEXT,RFI (Request for Information)
+x10SuccessStoryCaseStudy,Activity_Subtype__c,TEXT,Success Story (Case Study)
+x10Survey,Activity_Subtype__c,TEXT,Survey
+x10TradeshowConference,Activity_Subtype__c,TEXT,Tradeshow/Conference
+x10Trial,Activity_Subtype__c,TEXT,Trial
+x10VideoFeaturedDemo,Activity_Subtype__c,TEXT,Video (Featured Demo)
+x10VideoProductTour,Activity_Subtype__c,TEXT,Video (Product Tour)
+x10WebinarLive,Activity_Subtype__c,TEXT,Webinar - Live
+x10WebinarOnDemand,Activity_Subtype__c,TEXT,Webinar - OnDemand
+x10WhitepaperExternalLicensed,Activity_Subtype__c,TEXT,Whitepaper (External Licensed)
+x10WhitepaperInternalProduced,Activity_Subtype__c,TEXT,Whitepaper (Internal Produced)
+x10WhitepaperProductOverview,Activity_Subtype__c,TEXT,Whitepaper (Product Overview)
+x11AMERICAS,Global_Region__c ,TEXT,Americas
+x11ASIA,Global_Region__c ,TEXT,Asia
+x11EMEA,Global_Region__c ,TEXT,EMEA
+x11JAPAN,Global_Region__c ,TEXT,Japan
+x12,AC_Revenue__c,TEXT,
+x13,D_B_Number_of_Employees__c,TEXT,
+x14Advertising,Industry,TEXT,Advertising
+x14AssociationsNonProfit,Industry,TEXT,Non-Profit/Charity
+x14AutomotiveMFG,Industry,TEXT,Construction
+x14BioTechPharma,Industry,TEXT,Pharmaceuticals/Biotech
+x14Construction,Industry,TEXT,Construction
+x14ConsumerGoodsMFG,Industry,TEXT,
+x14EDUHigherEd,Industry,TEXT,Education: Higher ed
+x14EDUK12,Industry,TEXT,Education: K-12
+x14EnergyMiningOilGas,Industry,TEXT,Mining
+x14FinancialServices,Industry,TEXT,Financial Services
+x14GOVMilitary,Industry,TEXT,Government: Military/Aerospace/Defense
+x14GOVStateLocal,Industry,TEXT,Government: State/Local
+x14HealthCare,Industry,TEXT,Healthcare
+x14HoldingCompanies,Industry,TEXT,Holding and other investment offices
+x14IndustrialManufacturing,Industry,TEXT,Manufacturing
+x14Insurance,Industry,TEXT,Insurance
+x14MediaEntertainment,Industry,TEXT,Media/Entertainment/Arts
+x14ProfessionalandTechnicalServices,Industry,TEXT,"Professional Services (Technical,Web,IT)"
+x14ProfessionalandTechnicalServices,Industry,TEXT,Professional Services (Agency/Business)
+x14RealEstateandRentalandLeasing,Industry,TEXT,"Real Estate"
+x14Retail,Industry,TEXT,Retail
+x14TechManufacturingHardware,Industry,TEXT,
+x14TechnologySoftwareandServices,Industry,TEXT,Technology/High Tech
+x14Telecommunications,Industry,TEXT,Telecommunications
+x14TransportationWarehousing,Industry,TEXT,Transportation
+x14TravelLeisureHospitality,Industry,TEXT,Hospitality/Food services

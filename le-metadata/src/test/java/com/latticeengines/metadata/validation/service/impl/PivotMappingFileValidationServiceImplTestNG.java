@@ -32,5 +32,14 @@ public class PivotMappingFileValidationServiceImplTestNG extends MetadataFunctio
                 hdfsPath + "/pivotvalues.csv");
 
         assertEquals(error, "");
+
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration,
+                ClassLoader.getSystemResource(RESOURCE_BASE + "/PMML-large-file.csv").getPath(), hdfsPath);
+        error = ArtifactValidation.getArtifactValidationService(ArtifactType.PivotMapping).validate(
+                hdfsPath + "/PMML-large-file.csv");
+
+        assertEquals(error, "Found unsupported character in \" LeadSource\" in Pivot Mapping File.");
     }
 }

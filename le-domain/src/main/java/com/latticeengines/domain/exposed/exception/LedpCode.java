@@ -21,7 +21,7 @@ public enum LedpCode {
     LEDP_10009("Unable to find required columns {0} from the file"), //
     LEDP_10010("User type {0} is not an accepted type."), //
     LEDP_10011("File {0} cannot be found."), //
-
+    LEDP_10012("Found unsupported character in \"{0}\" in Pivot Mapping File."), //
     // Metadata service: 11000-11999
     LEDP_11000("Could not load driver class {0}."), //
     LEDP_11001("Failed connecting to db."), //

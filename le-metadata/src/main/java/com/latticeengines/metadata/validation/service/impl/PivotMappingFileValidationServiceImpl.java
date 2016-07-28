@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -45,6 +48,7 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
                         filePath)), "UTF-8")) {
                     try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
                         validateHeader(parser.getHeaderMap().keySet());
+                        validateSourceColumn(parser.iterator());
                     }
                 }
             } catch (IOException e) {
@@ -55,6 +59,7 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
             log.error(ExceptionUtils.getFullStackTrace(e));
             return e.getMessage();
         }
+
     }
 
     private void validateHeader(Set<String> headers) {
@@ -66,6 +71,16 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
         }
         if (!CollectionUtils.isEmpty(missingHeaders)) {
             throw new LedpException(LedpCode.LEDP_10009, new String[] { missingHeaders.toString() });
+        }
+
+    }
+
+    private void validateSourceColumn(Iterator<CSVRecord> iter) {
+        while (iter.hasNext()) {
+            String sourceColumn = iter.next().get("SourceColumn");
+            if (!NameValidationUtils.validateColumnName(sourceColumn)) {
+                throw new LedpException(LedpCode.LEDP_10012, new String[] { sourceColumn });
+            }
         }
 
     }
