@@ -33,23 +33,30 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.upload)
+    template(args.environment, args.upload, public=args.public)
 
-def template(environment, upload=False):
-    stack = create_template()
+def template(environment, upload=False, public=False):
+    stack = create_template(public=public)
+
+    s3path=_S3_CF_PATH + ("_public" if public else "_private")
+
     if upload:
         stack.validate()
-        stack.upload(environment, _S3_CF_PATH)
+        stack.upload(environment, s3path)
     else:
         print stack.json()
         stack.validate()
 
-def create_template():
+def create_template(public=False):
     stack = Stack("AWS CloudFormation template for ECS cluster.")
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP]).add_params(PARAMS)
 
     # Broker resources
     elb = ElasticLoadBalancer("elb").listen(PARAM_APP_PORT, "80", protocol="http")
+
+    if not public:
+        elb.internal()
+
     ecscluster = ECSCluster("ECSCluster")
     stack.add_resources([elb, ecscluster])
 
@@ -67,22 +74,36 @@ def create_template():
     return stack
 
 def provision_cli(args):
-    return provision(args.environment, args.stackname, args.port, init_cap=args.ic, max_cap=args.mc, consul=args.consul)
+    return provision(args.environment, args.stackname, args.port, init_cap=args.ic, max_cap=args.mc, consul=args.consul, public=args.public)
 
-def provision(environment, stackname, port=8080, init_cap=2, max_cap=8, consul=None):
+def provision(environment, stackname, port=8080, init_cap=2, max_cap=8, consul=None, public=False):
     config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
+
+    if public:
+        subnet1 = config.public_subnet_1()
+        subnet2 = config.public_subnet_2()
+        subnet3 = config.public_subnet_3()
+        tomcat_sg = config.tomcat_sg()
+    else:
+        subnet1 = config.private_subnet_1()
+        subnet2 = config.private_subnet_2()
+        subnet3 = config.private_subnet_3()
+        tomcat_sg = config.tomcat_internal_sg()
+
+    s3path=_S3_CF_PATH + ("_public" if public else "_private")
+
     response = client.create_stack(
         StackName=stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json'),
+        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), s3path, 'template.json'),
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
-            PARAM_SUBNET_1.config(config.private_subnet_1()),
-            PARAM_SUBNET_2.config(config.private_subnet_2()),
-            PARAM_SUBNET_3.config(config.private_subnet_3()),
+            PARAM_SUBNET_1.config(subnet1),
+            PARAM_SUBNET_2.config(subnet2),
+            PARAM_SUBNET_3.config(subnet3),
             PARAM_KEY_NAME.config(config.ec2_key()),
-            PARAM_SECURITY_GROUP.config(config.kafka_sg()),
+            PARAM_SECURITY_GROUP.config(tomcat_sg),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
             PARAM_APP_PORT.config(port),
@@ -259,6 +280,7 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-e', dest='environment', type=str, default='qa', choices=['qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
+    parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
@@ -266,6 +288,7 @@ def parse_args():
     parser1.add_argument('-s', dest='stackname', type=str, default='ecscluster', help='stack name')
     parser1.add_argument('-p', dest='port', type=str, default='8080', help='application port')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
+    parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity')
     parser1.set_defaults(func=provision_cli)

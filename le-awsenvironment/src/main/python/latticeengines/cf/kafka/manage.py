@@ -201,7 +201,7 @@ def broker_service(ecscluster, asgroup):
 
     container = ContainerDefinition("bkr", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-        "/kafka"
+        "/latticeengines/kafka"
         ] ]}) \
         .mem_mb({ "Ref" : "BrokerMemory" }).publish_port(9092, 9092) \
         .set_env("ZK_HOSTS", { "Ref" : "ZookeeperHosts" }) \
@@ -291,7 +291,7 @@ def schema_registry_service(ecscluster, broker, ec2s):
     extaddr= Volume("externaladdr", "/etc/externaladdr.txt")
     container = ContainerDefinition("sr", { "Fn::Join" : [ "", [
             { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-            "/schema-registry"
+            "/latticeengines/schema-registry"
         ] ]}) \
         .mem_mb(1900).publish_port(9022, 9022) \
         .set_env("SCHEMA_REGISTRY_HEAP_OPTS", "-Xms1800m -Xms1800m") \
@@ -320,7 +320,7 @@ def schema_registry_service(ecscluster, broker, ec2s):
 def kafka_connect_service(ecscluster, elb9092, elb9022, sr):
     container = ContainerDefinition("connect", { "Fn::Join" : [ "", [
             { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-            "/kafka-connect"
+            "/latticeengines/kafka-connect"
         ] ]}) \
         .mem_mb(1900).publish_port(9024, 9024) \
         .set_env("KAFKA_HEAP_OPTS", "-Xms1800m -Xms1800m") \

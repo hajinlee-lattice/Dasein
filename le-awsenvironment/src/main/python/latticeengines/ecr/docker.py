@@ -15,14 +15,15 @@ def push(args):
     config = AwsEnvironment(args.environment)
     print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
     login_cmd = login(args.environment)
-    destination = config.ecr_registry() + "/" + args.image + ":" + args.remotetag
+    destination = config.ecr_registry() + "/latticeengines/" + args.image + ":" + args.remotetag
     subprocess.call(login_cmd + "; docker push %s" % destination, shell=True)
+    subprocess.call("docker rmi " + destination, shell=True)
 
 def tag(args):
     config = AwsEnvironment(args.environment)
     print "tagging image %s:%s as %s ..." % (args.image, args.localtag, args.remotetag)
     source = "latticeengines/" +  args.image + ":" + args.localtag
-    destination = config.ecr_registry() + "/" + args.image + ":" + args.remotetag
+    destination = config.ecr_registry() + "/latticeengines/" + args.image + ":" + args.remotetag
     subprocess.call(["docker", "tag", source, destination])
 
 def login(environment):

@@ -59,6 +59,10 @@ class ElasticLoadBalancer(Resource):
         self._template["Properties"]["Policies"].append(policy.template())
         return self
 
+    def internal(self):
+        self._template["Properties"]["Scheme"] = "internal"
+        return self
+
     def proxy(self, port):
         return self.add_policy(ProxyPolicy(port))
 
