@@ -46,13 +46,43 @@ def main(argv):
 def updateFeatureFlag(contract, env, newfeatureFlags, zk):
     znode = os.path.join("/Pods", env, "Contracts", contract, "Tenants", contract, "Spaces", "Production/feature-flags.json")
     if (zk.exists(znode)):
-        print "Current znode is: ", znode
         existingFeatureFlags = zk.get(znode)[0]
+        print "Current znode is: ", znode, ". Existing feature flags are: ", existingFeatureFlags
         combinedFf = combineFeatureFlags(existingFeatureFlags, newfeatureFlags)
         zk.set(znode, combinedFf)
+        doubleCheckFeatureFlags(zk, znode, existingFeatureFlags, newfeatureFlags)
     else:
         print "znode ", znode, "does not exist"
 
+def doubleCheckFeatureFlags(zk, znode, existingFeatureFlags, newfeatureFlags):
+    combinedFeatureFlagsContents = findBetween(zk.get(znode)[0], '{', '}')
+    combinedFeatureFlagsContentsList = combinedFeatureFlagsContents.split(',')
+    
+    combinedDic = {}
+    for combinedFeatureFlagsContent in combinedFeatureFlagsContentsList:
+        flag = combinedFeatureFlagsContent.split(':')[0]
+        value = combinedFeatureFlagsContent.split(':')[1]
+        combinedDic[flag] = value
+        
+    existingContents = findBetween(existingFeatureFlags, '{', '}')
+    existingContentsList = existingContents.split(',')
+    for existingContent in existingContentsList:
+        flag = existingContent.split(':')[0]
+        if not combinedDic.has_key(flag):
+            print "Error! The ", flag, " is not in the combined value!"
+            sys.exit()
+    
+    newfeatureFlagsContentsList = newfeatureFlags.split(',')
+    for newfeatureFlagsContent in newfeatureFlagsContentsList:
+        flag = '"' + newfeatureFlagsContent.split(':')[0] + '"'
+        value = newfeatureFlagsContent.split(':')[1]
+        if not combinedDic.has_key(flag):
+            print "Error! The ", flag, " is not in the combined value!"
+            sys.exit()
+        else:
+            if combinedDic[flag] != value:
+                print "Error! The ", value, " does not match with ", combinedDic[flag], " for the flag of ", flag
+                sys.exit()
 
 def combineFeatureFlags(existingFeatureFlags, newFeatureFlags):
     #print "existing feature flags are ", existingFeatureFlags
