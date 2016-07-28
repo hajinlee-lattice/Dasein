@@ -27,6 +27,18 @@
     .subheader-container {
         @include flex-container;
         flex-wrap: wrap;
+        &.wrapped {
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            ul.subheader {
+                &:first-child {
+                    -webkit-justify-content: center;
+                    -ms-flex-pack: center;
+                    justify-content: center;
+                }
+            }
+        }
         ul.subheader {
             @include flex-container;
             @include flex-item(0 1 auto);
@@ -59,6 +71,14 @@
                     border-radius: 6px;
                     display: inline-block;
                     padding: 10px;
+                    & option {
+                        line-height: 43px;
+
+                    }
+                &::-ms-expand {
+                    border: 0;
+                    background: 0;
+                }
                 }
             }
             li.query {

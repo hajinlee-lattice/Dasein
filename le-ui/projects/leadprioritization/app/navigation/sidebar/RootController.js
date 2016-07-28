@@ -5,7 +5,7 @@ angular
         'mainApp.core.services.FeatureFlagService'
     ])
     .controller('SidebarRootController', function(
-        $scope, $state, FeatureFlagService, ResourceUtility, JobsStore
+        $scope, $rootScope, $state, FeatureFlagService, ResourceUtility, JobsStore
     ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
@@ -18,7 +18,9 @@ angular
             if (typeof(sessionStorage) !== 'undefined'){
                 sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
             }
+            $rootScope.$broadcast('sidebar:toggle');
         }
+
         
         FeatureFlagService.GetAllFlags().then(function(result) {
             var flags = FeatureFlagService.Flags();

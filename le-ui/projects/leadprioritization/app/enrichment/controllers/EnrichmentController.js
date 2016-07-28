@@ -1,6 +1,6 @@
 // green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+.controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this;
 
     angular.extend(vm, {
@@ -105,7 +105,7 @@ angular.module('lp.enrichment.leadenrichment', [])
             }
         });
     }
-
+    
     vm.fieldType = function(fieldType){
         var fieldType = fieldType.replace(/[0-9]+/g, '*');
         var fieldTypes = {
@@ -118,7 +118,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
-    var _lockSubheader = function(){
+    var _scrolled = function() {
         var el = document.querySelector('.subheader-container'),
             $el = angular.element(el),
             watched_el = document.querySelector('.summary .nav'),
@@ -132,14 +132,34 @@ angular.module('lp.enrichment.leadenrichment', [])
         }
     }
 
-    var lockSubheader = _.throttle(_lockSubheader, 100);
+    var _resized = function(event, wait) {
+        var wait = wait || 0;
+        $timeout(function(){
+            var container = document.querySelector('.subheader-container'),
+            height = container.offsetHeight;
+
+            if(height > 70) {
+                angular.element(container).addClass('wrapped');
+            } else {
+                angular.element(container).removeClass('wrapped');
+            }
+        }, wait);
+    }
+
+    var scrolled = _.throttle(_scrolled, 120);
+    var resized = _.throttle(_resized, 120);
+    $scope.$on('sidebar:toggle', function(event) {
+        _resized(event, 100);
+    });
 
     vm.init = function() {
+        _resized();
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
         vm.premiumSelectLimit = EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Sourcex'] || 10;
 
-        angular.element($window).bind("scroll", lockSubheader);
+        angular.element($window).bind("scroll", scrolled);
+        angular.element($window).bind("resize", resized);
 
         /*
         $timeout(function() {
