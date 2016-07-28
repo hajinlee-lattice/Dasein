@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -69,9 +72,9 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
             ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
                     ResponseDocument.class);
             ResponseDocument responseDoc = response.getBody();
-            Assert.assertTrue(responseDoc.isSuccess());
+            assertTrue(responseDoc.isSuccess());
             Map<String, Object> result = (Map) response.getBody().getResult();
-            Assert.assertTrue((boolean) result.get("Exists"));
+            assertTrue((boolean) result.get("Exists"));
         }
 
         modelSummaries = modelSummaryEntityMgr.getAll();
@@ -101,4 +104,21 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Assert.assertFalse((boolean) result.get("Exists"));
     }
 
+    @Test(groups = "functional")
+    public void testRetrieveSvnRevision() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
+        Map response = restTemplate.getForObject(String.format("%s/pls/internal/currentstack", getRestAPIHostPort()),
+                Map.class);
+        String revision = null;
+        for (Object key : response.keySet()) {
+            if (key.equals("SvnRevision")) {
+                revision = (String) response.get("SvnRevision");
+            }
+        }
+        assertNotNull(revision);
+        int irevision = Integer.parseInt(revision);
+        assertTrue(irevision > 0);
+    }
 }

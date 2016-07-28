@@ -11,6 +11,12 @@
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
+    <scm>
+        <connection>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</connection>
+        <developerConnection>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</developerConnection>
+        <url>scm:svn:https://lesvn/svn/lattice/LEDP/branches/develop/ledp</url>
+    </scm>
+
     <properties>
         <branchPath>trunk</branchPath>
         <argLine>-XX:MaxPermSize=1024m -Dsqoop.throwOnError=true</argLine>
@@ -120,6 +126,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
+
 
     <profiles>
         <profile>
@@ -574,9 +581,53 @@
     </distributionManagement>
 
     <build>
+        <plugins>
+            <!-- Add svn revision into all jars and wars -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <LE-SCM-Revision>${buildNumber}</LE-SCM-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <LE-SCM-Revision>${buildNumber}</LE-SCM-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+
+
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
+
                 <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add
                     it to any webapp project that is structured according to the usual Maven defaults. The plugin can then
                     periodically scan your project for changes and automatically redeploy the webapp if any are found. This
