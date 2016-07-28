@@ -70,7 +70,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void importMetadata() {
         List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
 
@@ -82,7 +82,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = true)
+    @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = false)
     public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
