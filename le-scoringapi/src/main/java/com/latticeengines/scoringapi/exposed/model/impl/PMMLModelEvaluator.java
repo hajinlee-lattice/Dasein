@@ -48,25 +48,4 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
             super.prepare(evaluator, arguments, debugRow, name, DEFAULT_DOUBLE_VALUE);
         }
     }
-
-    @Override
-    protected void inspectEvaluatedResult(Map<FieldName, ?> results) {
-        // do nothing for PMML model
-    }
-
-    @Override
-    protected ProbabilityDistribution getClassification(Map<FieldName, ?> results, String target) {
-        ProbabilityDistribution classification = null;
-        if (target == null) {
-            for (Map.Entry<FieldName, ?> entry : results.entrySet()) {
-                if (entry.getValue() instanceof ProbabilityDistribution) {
-                    classification = (ProbabilityDistribution) entry.getValue();
-                    break;
-                }
-            }
-        } else {
-            classification = (ProbabilityDistribution) results.get(new FieldName(target));
-        }
-        return classification;
-    }
 }

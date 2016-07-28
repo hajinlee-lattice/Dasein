@@ -132,8 +132,6 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
         if (results == null) {
             throw new LedpException(LedpCode.LEDP_31013);
-        } else {
-            inspectEvaluatedResult(results);
         }
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
@@ -141,12 +139,6 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         calculatePercentile(derivation, results, result);
 
         return result;
-    }
-
-    protected void inspectEvaluatedResult(Map<FieldName, ?> results) {
-        if ((results.size() != 1)) {
-            throw new LedpException(LedpCode.LEDP_31012, new String[] { String.valueOf(results.size()) });
-        }
     }
 
     protected void prepare(Evaluator evaluator, Map<FieldName, FieldValue> arguments, boolean debugRow, FieldName name,
@@ -219,11 +211,17 @@ public class DefaultModelEvaluator implements ModelEvaluator {
     }
 
     protected ProbabilityDistribution getClassification(Map<FieldName, ?> results, String target) {
+        ProbabilityDistribution classification = null;
         if (target == null) {
-            target = results.keySet().iterator().next().getValue();
+            for (Map.Entry<FieldName, ?> entry : results.entrySet()) {
+                if (entry.getValue() instanceof ProbabilityDistribution) {
+                    classification = (ProbabilityDistribution) entry.getValue();
+                    break;
+                }
+            }
+        } else {
+            classification = (ProbabilityDistribution) results.get(new FieldName(target));
         }
-
-        ProbabilityDistribution classification = (ProbabilityDistribution) results.get(new FieldName(target));
         return classification;
     }
 

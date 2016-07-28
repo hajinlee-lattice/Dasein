@@ -62,8 +62,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
-        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT,
-                customerSpace.toString());
+        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT, customerSpace.toString());
         Assert.assertEquals(models.size(), 1);
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
         Assert.assertEquals(models.get(0).getName(), MODEL_NAME);
@@ -120,8 +119,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
-                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n"
-                + om.writeValueAsString(scoreResponse));
+                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
     }
 
@@ -137,17 +135,14 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertTrue(difference < 0.1);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
-                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n"
-                + om.writeValueAsString(scoreResponse));
+                + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
     }
 
     @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
-        URL scoreRequestUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
-        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()),
-                Charset.defaultCharset());
+        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
+        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
 
         scoreRequest.setModelId(MODEL_ID);
@@ -161,21 +156,18 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void getModelFieldsAfterScoring() {
-        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT,
-                customerSpace.toString());
+        List<Model> models = internalScoringApiProxy.getActiveModels(ModelType.CONTACT, customerSpace.toString());
         for (Model model : models) {
-            Fields fields = internalScoringApiProxy.getModelFields(model.getModelId(),
-                    customerSpace.toString());
-            checkFields(model.getName(), fields, TEST_MODEL_NAME_PREFIX,
-                    TestRegisterModels.DISPLAY_NAME_PREFIX);
+            Fields fields = internalScoringApiProxy.getModelFields(model.getModelId(), customerSpace.toString());
+            checkFields(model.getName(), fields, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
         }
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void getPaginatedModels() throws ParseException {
         Long start = System.currentTimeMillis();
-        List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(new Date(0), true, 1,
-                50, customerSpace.toString());
+        List<ModelDetail> models = internalScoringApiProxy.getPaginatedModels(new Date(0), true, 1, 50,
+                customerSpace.toString());
         System.out.println("Time taken in getPaginatedModels for " + models.size() + " models = "
                 + (System.currentTimeMillis() - start) + " ms");
         checkModelDetails(models, TEST_MODEL_NAME_PREFIX, TestRegisterModels.DISPLAY_NAME_PREFIX);
@@ -199,8 +191,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         getModelCount(0, false, new Date(), true);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords",
-            "getModelsCountAfterBulkScoring", "getPaginatedModels" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords", "getModelsCountAfterBulkScoring",
+            "getPaginatedModels" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
         modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
@@ -208,20 +200,19 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         getModelCount(0, false, new Date(), true);
     }
 
-    private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime,
-            boolean shouldAssert) {
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModels", "getModelsCountAll",
+            "getModelsCountActive" })
+    public void scoreRecords() throws IOException, InterruptedException {
+        final String url = apiHostPort + "/scoreinternal/records";
+        runScoringTest(url, true, false);
+    }
+
+    private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {
         int modelsCount = internalScoringApiProxy.getModelCount(lastUpdateTime, considerAllStatus,
                 customerSpace.toString());
         if (shouldAssert) {
             Assert.assertTrue(modelsCount >= n);
         }
         return n;
-    }
-
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "getModels",
-            "getModelsCountAll", "getModelsCountActive" })
-    public void scoreRecords() throws IOException, InterruptedException {
-        final String url = apiHostPort + "/scoreinternal/records";
-        runScoringTest(url, true, false);
     }
 }

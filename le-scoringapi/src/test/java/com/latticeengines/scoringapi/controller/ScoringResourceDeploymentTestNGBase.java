@@ -170,7 +170,11 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
                 if (record.isPerformEnrichment()) {
                     Assert.assertNotNull(result.getEnrichmentAttributeValues());
-                    Assert.assertTrue(result.getEnrichmentAttributeValues().size() > 0);
+                    if (shouldSelectAttributeBeforeTest()) {
+                        Assert.assertTrue(result.getEnrichmentAttributeValues().size() > 0);
+                    } else {
+                        Assert.assertEquals(result.getEnrichmentAttributeValues().size(), 0);
+                    }
                 } else {
                     Assert.assertNull(result.getEnrichmentAttributeValues());
                 }

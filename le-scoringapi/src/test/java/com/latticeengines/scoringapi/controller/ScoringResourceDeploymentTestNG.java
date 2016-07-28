@@ -193,6 +193,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         return "DUMMY_APP2";
     }
 
+    @Override
+    protected boolean shouldSelectAttributeBeforeTest() {
+        return false;
+    }
+
     private List<ModelDetail> getPaginatedModels(String serviceHostPort, Date start, boolean considerAllStatus,
             int offset, int maximum) {
         String url = serviceHostPort
