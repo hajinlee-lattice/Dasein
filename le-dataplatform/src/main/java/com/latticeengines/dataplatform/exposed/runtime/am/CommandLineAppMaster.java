@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.exposed.runtime.am;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -15,9 +16,12 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.apache.hadoop.yarn.conf.HAUtil;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.yarn.am.AppmasterRmTemplate;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
@@ -89,7 +93,23 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Override
     public void submitApplication() {
-        super.submitApplication();
+        try {
+            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+            try {
+                rmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("AppmasterRmTemplate refresh properties failed.");
+            }
+            super.submitApplication();
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
+                log.info("Retry submit application.");
+                performFailover();
+                super.submitApplication();
+            } else {
+                throw e;
+            }
+        }
         String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationAttemptId().getApplicationId().toString();
 
@@ -191,7 +211,23 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Override
     protected void doStop() {
-        super.doStop();
+        try {
+            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+            try {
+                rmTemplate.afterPropertiesSet();
+            } catch (Exception e) {
+                log.error("AppmasterRmTemplate refresh properties failed.");
+            }
+            super.doStop();
+        } catch (Exception e) {
+            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
+                log.info("Retry doStop.");
+                performFailover();
+                super.doStop();
+            } else {
+                throw e;
+            }
+        }
         cleanupJobDir();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
         // Immediately publish
@@ -238,6 +274,38 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
         Iterator<File> it = FileUtils.iterateFilesAndDirs(new File("."), filter, filter);
         while (it.hasNext()) {
             log.info(it.next().getAbsolutePath());
+        }
+    }
+
+    private void performFailover() {
+        Configuration conf = getConfiguration();
+        Collection<String> rmIds = HAUtil.getRMHAIds(conf);
+        String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
+        int currentIndex = 0;
+        String currentHAId = conf.get(YarnConfiguration.RM_HA_ID);
+        for (int i = 0; i < rmServiceIds.length; i++) {
+            if (currentHAId.equals(rmServiceIds[i])) {
+                currentIndex = i;
+                break;
+            }
+        }
+        currentIndex = (currentIndex + 1) % rmServiceIds.length;
+        conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
+        String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        conf.set(YarnConfiguration.RM_ADDRESS, address);
+        conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
+        conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
+        setConfiguration(conf);
+        log.info(String.format("Fail over from %s to %s.", currentHAId, rmServiceIds[currentIndex]));
+        AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+        try {
+            rmTemplate.afterPropertiesSet();
+        } catch (Exception e) {
+            log.error("AppmasterRmTemplate refresh properties failed.");
         }
     }
 }
