@@ -11,7 +11,7 @@ import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 
-@Component
+@Component("builtWithMostRecent")
 public class BuiltWithMostRecent implements MostRecentSource, DomainBased {
 
     private static final long serialVersionUID = -3304714347997988410L;

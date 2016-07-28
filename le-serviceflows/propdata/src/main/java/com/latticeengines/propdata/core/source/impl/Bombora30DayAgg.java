@@ -1,34 +1,30 @@
 package com.latticeengines.propdata.core.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
-import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("hgDataPivoted")
-public class HGDataPivoted implements PivotedSource, DomainBased, HasSqlPresence {
+@Component("bombora30DayAgg")
+public class Bombora30DayAgg implements DomainBased, DerivedSource, HasSqlPresence {
 
-    private static final long serialVersionUID = 5193097838348800451L;
-
-    @Value("${propdata.job.hgdata.pivot.schedule:}")
     private String cronExpression;
 
     @Autowired
-    private HGData baseSource;
+    private BomboraDepivoted baseSource;
 
     @Override
     public String getSourceName() {
-        return "HGDataPivoted";
+        return "Bombora30DayAgg";
     }
 
     @Override
     public String getSqlTableName() {
-        return "HGData_Pivoted_Source";
+        return "MadisonLogicAggregated_Source";
     }
 
     @Override
@@ -38,7 +34,7 @@ public class HGDataPivoted implements PivotedSource, DomainBased, HasSqlPresence
 
     @Override
     public String getTimestampField() {
-        return "Timestamp";
+        return "Date";
     }
 
     @Override
@@ -58,22 +54,21 @@ public class HGDataPivoted implements PivotedSource, DomainBased, HasSqlPresence
 
     @Override
     public String getSqlMatchDestination() {
-        return "HGData_Pivoted_Source";
+        return "MadisonLogicAggregated_Source";
     }
 
     @Override
     public PurgeStrategy getPurgeStrategy() {
-        return PurgeStrategy.NUM_VERSIONS;
+        return PurgeStrategy.NEVER;
     }
 
     @Override
     public Integer getNumberOfVersionsToKeep() {
-        return 2;
+        return null;
     }
 
     @Override
     public Integer getNumberOfDaysToKeep() {
-        return 7;
+        return null;
     }
-
 }

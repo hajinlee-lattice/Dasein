@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 
-@Component
+@Component("builtWith")
 public class BuiltWith implements CollectedSource, HasSqlPresence {
 
     private static final long serialVersionUID = -1192390855705582815L;

@@ -1,40 +1,40 @@
 package com.latticeengines.propdata.core.source.impl;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
-import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
+import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
+import com.latticeengines.propdata.core.source.Source;
 
-@Component("featureMostRecent")
-public class FeatureMostRecent implements MostRecentSource, DomainBased {
+@Component("hpaNewPivoted")
+public class HPANewPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
-    private static final long serialVersionUID = 3483355190999074200L;
-
-    @Value("${propdata.job.feature.refresh.schedule:}")
     private String cronExpression;
 
     @Autowired
-    private Feature baseSource;
+    private HPANewMostRecent baseSource;
 
     @Override
     public String getSourceName() {
-        return "FeatureMostRecent";
+        return "HPANewPivoted";
+    }
+
+    @Override
+    public String getSqlTableName() {
+        return "HPA_New_Pivoted_Source";
     }
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "URL", "Feature" };
+        return new String[] { "URL" };
     }
 
     @Override
     public String getTimestampField() {
-        return "LE_Last_Upload_Date";
+        return "Timestamp";
     }
 
     @Override
@@ -43,18 +43,18 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     }
 
     @Override
-    public CollectedSource[] getBaseSources() {
-        return new CollectedSource[] { baseSource };
-    }
-
-    @Override
-    public Long periodToKeep() {
-        return TimeUnit.DAYS.toMillis(365);
+    public Source[] getBaseSources() {
+        return new Source[] { baseSource };
     }
 
     @Override
     public String getDefaultCronExpression() {
         return cronExpression;
+    }
+
+    @Override
+    public String getSqlMatchDestination() {
+        return "HPA_New_Pivoted_Source";
     }
 
     @Override
@@ -71,5 +71,4 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     public Integer getNumberOfDaysToKeep() {
         return 7;
     }
-
 }

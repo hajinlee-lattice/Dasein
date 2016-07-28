@@ -1,21 +1,17 @@
 package com.latticeengines.propdata.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
 
-@Component("feature")
-public class Feature implements CollectedSource {
+@Component("semrush")
+public class Semrush implements CollectedSource {
 
-    private static final long serialVersionUID = 2079061038810691592L;
-
-    @Value("${propdata.job.feature.archive.schedule:}")
     private String cronExpression;
 
     @Override
     public String getSourceName() {
-        return "Feature";
+        return "Semrush";
     }
 
     @Override
@@ -25,7 +21,7 @@ public class Feature implements CollectedSource {
 
     @Override
     public String getCollectedTableName() {
-        return "Feature";
+        return "Semrush";
     }
 
     @Override
@@ -35,7 +31,7 @@ public class Feature implements CollectedSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "URL", "Feature", "LE_Last_Upload_Date" };
+        return new String[] { "Domain", "LE_Last_Upload_Date" };
     }
 
     @Override

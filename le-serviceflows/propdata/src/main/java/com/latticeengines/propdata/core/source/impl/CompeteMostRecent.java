@@ -3,33 +3,35 @@ package com.latticeengines.propdata.core.source.impl;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 
-@Component("featureMostRecent")
-public class FeatureMostRecent implements MostRecentSource, DomainBased {
+@Component("competeMostRecent")
+public class CompeteMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
 
-    private static final long serialVersionUID = 3483355190999074200L;
-
-    @Value("${propdata.job.feature.refresh.schedule:}")
     private String cronExpression;
 
     @Autowired
-    private Feature baseSource;
+    private Compete baseSource;
 
     @Override
     public String getSourceName() {
-        return "FeatureMostRecent";
+        return "CompeteMostRecent";
+    }
+
+    @Override
+    public String getSqlTableName() {
+        return "Compete_MostRecent";
     }
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "URL", "Feature" };
+        return new String[] { "domain" };
     }
 
     @Override
@@ -39,7 +41,7 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
 
     @Override
     public String getDomainField() {
-        return "URL";
+        return "domain";
     }
 
     @Override
@@ -49,12 +51,17 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
 
     @Override
     public Long periodToKeep() {
-        return TimeUnit.DAYS.toMillis(365);
+        return TimeUnit.DAYS.toMillis(365 * 2);
     }
 
     @Override
     public String getDefaultCronExpression() {
         return cronExpression;
+    }
+
+    @Override
+    public String getSqlMatchDestination() {
+        return "Compete";
     }
 
     @Override
@@ -71,5 +78,4 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     public Integer getNumberOfDaysToKeep() {
         return 7;
     }
-
 }

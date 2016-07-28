@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
 
-@Component
+@Component("orbIntelligence")
 public class OrbIntelligence implements CollectedSource {
 
     private static final long serialVersionUID = 3359238491845056238L;
