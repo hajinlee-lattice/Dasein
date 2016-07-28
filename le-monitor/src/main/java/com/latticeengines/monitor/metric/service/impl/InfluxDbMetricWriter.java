@@ -47,7 +47,7 @@ import com.latticeengines.monitor.metric.service.MetricWriter;
 @Component("influxDbMetricWriter")
 public class InfluxDbMetricWriter implements MetricWriter {
 
-    private static final Log log = LogFactory.getLog(MetricServiceImpl.class);
+    private static final Log log = LogFactory.getLog(InfluxDbMetricWriter.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
 
@@ -220,7 +220,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
                     getInfluxDB().write(batchPoints);
                     log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
                 } catch (Exception e) {
-                    log.error(e);
+                    log.error("Failed to write metric.", e);
                 }
             }
         }
