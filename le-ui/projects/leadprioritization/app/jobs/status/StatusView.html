@@ -51,8 +51,8 @@
 
 
 
-                <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
-                    <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
+                <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == '' ? '-' : '')" ng-init="SortOrder = '-'">
+                    <span class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
                 </a>
                 <!--
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
@@ -73,20 +73,20 @@
     
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
-            <div class="row panel-heading custom-heading">
-                <span class="columns two">Timestamp</span>
-                <span class="columns two" ng-if="state == 'model'">File Name</span>
-                <span class="columns two" ng-if="state != 'model'">Job Type</span>
-                <span class="columns two">Status</span>
+            <div class="row panel-heading custom-heading" ng-init="SortProperty = 'timestamp'">
+                <span class="columns two" ng-click="SortProperty = 'timestamp'">Timestamp</span>
+                <span class="columns two" ng-click="SortProperty = 'source'" ng-if="state == 'model'">File Name</span>
+                <span class="columns two" ng-click="SortProperty = 'jobType'" ng-if="state != 'model'">Job Type</span>
+                <span class="columns two" ng-click="SortProperty = 'status'">Status</span>
                 <span class="columns three">&nbsp;</span>
-                <span class="columns three">User</span>
+                <span class="columns three" ng-click="SortProperty = 'user'">User</span>
             </div>
             <div class="jobs-table-content">
                 <div 
                     data-job-status-row 
                     data-ng-repeat="job in jobs | 
                         filter: query | 
-                        orderBy: SortOrder | 
+                        orderBy: SortOrder + SortProperty | 
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize" 
                     job="job"

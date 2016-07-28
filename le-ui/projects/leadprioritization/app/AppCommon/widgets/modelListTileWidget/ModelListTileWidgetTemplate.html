@@ -1,12 +1,11 @@
 <div 
-        class="model {{isActive ? '' : 'inactive'}}" 
-        ng-controller="ModelListTileWidgetController" 
+        class="model-tile {{isActive ? '' : 'inactive'}}" 
         ng-click="tileClick($event)" 
         ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
         ui-sref="{{data.ModelFileType != 'PmmlModel'?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">
     <div class="model-image {{ data.ModelType }} {{ data.ModelFileType }}"></div>
-    <div class="model-title" data-ng-hide="nameStatus.editing">
-        <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::displayName}}">{{::displayName | limitTo: 36 }}{{::displayName.length > 36 ? '&hellip;' : ''}}</h2>
+    <div class="model-title" data-ng-if="!nameStatus.editing">
+        <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::data.DisplayName}}">{{::data.DisplayName | limitTo: 36 }}{{::data.DisplayName.length > 36 ? '&hellip;' : ''}}</h2>
         <h2 class="edit">
             <button 
                     type="button"
@@ -14,7 +13,7 @@
                     ng-class="{ 'open': showCustomMenu }">
                 <span class="fa fa-ellipsis-v"></span>
             </button>
-            <ul class="model-menu" ng-show="showCustomMenu">
+            <ul class="model-menu" ng-if="showCustomMenu">
                 <li 
                         data-ng-if="!isActive" 
                         data-ng-click="updateAsActiveClick($event); Activating = true;">
@@ -64,12 +63,12 @@
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
         <div novalidate class="form-inline editable-container editableform" name="form">
             <div class="control-group">
-                <input type="text" class="form-control" data-ng-model="displayName" placeholder="{{::displayName}}"/>
+                <input type="text" class="form-control" data-ng-model="DisplayName" placeholder="{{::DisplayName}}"/>
                 <div class="editable-buttons">
                     <button class="button blue-button editable-cancel" data-ng-click="cancel($event)">Cancel</button>
                     <button class="button orange-button editable-submit" data-ng-click="submit($event)">Save</button>
                 </div>
-                <label class="global-error model-error" data-ng-show="showNameEditError">
+                <label class="global-error model-error" data-ng-if="showNameEditError">
                     <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{::nameEditErrorMessage}}</span>
                 </label>
             </div>
@@ -78,11 +77,11 @@
     <div class="meta-data">
         <dl class="stats">
             <dt>{{::ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
-            <dd class="small">{{::createdDate}}</dd>
+            <dd class="small">{{::data.CreatedDate}}</dd>
         </dl>
         <div class="status">
-            <span data-ng-show="!isActive" class="error-text">{{::ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
-            <span data-ng-show="isActive" class="success-text">{{::ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
+            <span data-ng-if="!isActive" class="error-text">{{::ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
+            <span data-ng-if="isActive" class="success-text">{{::ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
         </div>
     </div>
 

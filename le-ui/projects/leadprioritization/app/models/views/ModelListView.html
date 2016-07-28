@@ -1,56 +1,90 @@
-<div class="container" data-ng-controller="ModelListController">
-
+<div class="container">
     <section id="main-content" class="container lp-model-list">
 
         <div class="row twelve columns">        
-            <div data-ng-show="loading">
-                <div class="loader"> </div>
-                <h2 class="text-center">{{::ResourceUtility.getString('GENERAL_LOADING')}}</h2>
-            </div>
-
-            <div class="no-models text-center" data-ng-show="showNoModels">
-                <h2>{{::ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
+            <div class="no-models text-center" ng-if="vm.models.length == 0">
+                <h2>{{::vm.ResourceUtility.getString('MODEL_LIST_NO_MODELS')}}</h2>
             </div>
         </div>
 
-        <div class="row" data-ng-hide="showNoModels || loading">
-            <div class="twelve columns list-header">
-                <div class="pull-left number-of-items" ng-if="totalLength">
-                    <!--{{::ResourceUtility.getString('MODEL_LIST_TOTAL_MODELS', [totalLength, activeLength])}}-->
-                    Total: <span class="badge blue-badge">{{totalLength}}</span>&nbsp;
-                    Active: <span class="badge grey-badge">{{activeLength}}</span>
-                </div>
+        <div class="row">
+            <div class="list-header">
+                <ul class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                    <li><span>Total:</span> <i class="badge blue-badge">{{vm.totalLength}}</i></li>
+                    <li><span>Active:</span> <i class="badge grey-badge">{{vm.activeLength}}</i></li>
+                    <li ng-if="vm.pmmlLength > 0"><span>PMML:</span> <i class="badge grey-badge">{{vm.pmmlLength}}</i></li>
+                </ul>
+                
                 <div class="create-model-menu">
-                    <button 
-                            type="button"
-                            class="button icon-button orange-button create-model"
-                            ng-click="showCustomMenu = !showCustomMenu" 
-                            ng-class="{ 'open': showCustomMenu }">
-                        Create Model
-                        <span class="fa fa-chevron-down" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
-                    </button>
-                    <ul class="model-menu" ng-show="showCustomMenu">
-                        <li>
-                            <a ui-sref="home.models.import">From Training Set</a>
-                            <i class="fa fa-file-excel-o"></i>
-                        </li>
-                        <li>
-                            <a ui-sref="home.models.pmml">From PMML File</a>
-                            <i class="fa fa-file-code-o"></i>
-                        </li>
-                        <li ng-if="showUploadSummaryJson">
-                            <a href="javascript:void(0)" ng-click="importJSON()">Import a JSON File</a>
-                            <i class="fa fa-file-text-o"></i>
-                        </li>
-                    </ul>
+                    <div class="ng-search">
+                        <input type="text" class="form-control" placeholder="Search" ng-model="query" ng-show="ShowSearch" />
+                        <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                            <span class="fa fa-search" ng-show="!ShowSearch"></span>
+                            <span class="fa fa-times" ng-show="ShowSearch"></span>
+                        </a>
+                    </div>
+                    
+                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == '' ? '-' : '')" ng-init="SortOrder = '-'">
+                        <span class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
+                    </a>
+
+                    <div class="create-model-menu">
+                        <button 
+                                type="button"
+                                class="button icon-button orange-button create-model"
+                                ng-click="showCustomMenu = !showCustomMenu" 
+                                ng-class="{ 'open': showCustomMenu }">
+                            Create Model
+                            <span class="fa fa-chevron-down" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
+                        </button>
+                        <ul class="model-menu" ng-show="showCustomMenu">
+                            <li>
+                                <a ui-sref="home.models.import">From Training Set</a>
+                                <i class="fa fa-file-excel-o"></i>
+                            </li>
+                            <li>
+                                <a ui-sref="home.models.pmml">From PMML File</a>
+                                <i class="fa fa-file-code-o"></i>
+                            </li>
+                            <li ng-if="showUploadSummaryJson">
+                                <a href="javascript:void(0)" ng-click="vm.importJSON()">Import a JSON File</a>
+                                <i class="fa fa-file-text-o"></i>
+                            </li>
+                        </ul>
+                    </div> 
                 </div> 
             </div>
         </div>
 
-        <div class="row" data-ng-hide="showNoModels || loading">
-            <div id="modelListContainer" class="twelve columns model-list"></div>
+        <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls current="current" max="max = vm.models.length / pagesize">
+                </pd-pagination-controls>
+            </div>
+        </div>
+
+        <div class="row" ng-if="vm.models.length > 0">
+            <ul class="twelve columns model-list">
+                <li 
+                        data-model-list-tile-widget
+                        class="model"
+                        ng-repeat="
+                            model in vm.models |
+                            filter: query | 
+                            orderBy: SortOrder+'CreatedDate' |
+                            startFrom: (current - 1) * pagesize |
+                            limitTo: pagesize" 
+                        data="model">
+                </li>
+            </ul>
+        </div>
+
+        <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls current="current" max="max = vm.models.length / pagesize">
+                </pd-pagination-controls>
+            </div>
         </div>
 
     </section>
-
 </div>

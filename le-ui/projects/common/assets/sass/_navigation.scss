@@ -8,7 +8,7 @@ $slide-transition: 200ms;
     -o-transition: $args;
     transition: $args;
 }
-
+ 
 @mixin flex-container($args...) {
     display: -ms-flexbox;
     display: -webkit-flex;

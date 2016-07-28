@@ -1,78 +1,49 @@
-angular.module('mainApp.models.controllers.ModelListController', [
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.services.WidgetService',
+angular.module('lp.models.list', [
     'mainApp.core.services.FeatureFlagService',
-    'mainApp.appCommon.widgets.ModelListTileWidget',
-    'mainApp.models.services.ModelService'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.widgets.ModelListTileWidget'
 ])
 .controller('ModelListController', function (
-    $scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, 
-    WidgetService, ModelService, ModelStore, ImportModelModal, FeatureFlagService
+    ResourceUtility, ModelList, ModelStore, ImportModelModal, FeatureFlagService
 ) {
-    $scope.ResourceUtility = ResourceUtility;
-    $scope.loading = true;
+    var vm = this;
+    angular.extend(vm, {  
+        ResourceUtility: ResourceUtility,
+        models: ModelList || [],
 
-    FeatureFlagService.GetAllFlags().then(function(result) {
-        var flags = FeatureFlagService.Flags();
+        init: function() {
+            FeatureFlagService.GetAllFlags().then(function(result) {
+                var flags = FeatureFlagService.Flags();
 
-        // disable Import JSON button for now
-        $scope.showUploadSummaryJson = false; //FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
+                // disable Import JSON button for now
+                vm.showUploadSummaryJson = false; //FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
+            });
+
+            vm.processModels(vm.models);
+
+            ModelStore.getModels().then(vm.processModels);
+        },
+
+        importJSON: function() {
+            ImportModelModal.show();
+        },
+
+        processModels: function(models) {
+            vm.models = models;
+            vm.totalLength = models.length;
+console.log(models);
+            var active = models.filter(function(item) {
+                return item.Status == 'Active';
+            });
+
+            var pmml = models.filter(function(item) {
+                return item.ModelFileType == 'PmmlModel';
+            });
+
+            vm.activeLength = active.length;
+            vm.pmmlLength = pmml.length;
+        }
     });
 
-    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
-    if (widgetConfig == null) {
-        return;
-    }
-    
-    var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
-        widgetConfig,
-        "modelListScreenWidget"
-    );
-    
-    if (screenWidgetConfig == null) {
-        return;
-    }
-
-    $scope.showNoModels = false;
-
-    $scope.importJSON = function() {
-        ImportModelModal.show();
-    }
-
-    function getModels(use_cache) {
-        ModelStore.getModels(use_cache).then(function(result) {
-            $scope.loading = false;
-            if (result && result.length > 0) {
-                var modelList = result;
-                if (modelList == null || modelList.length === 0) {
-                    $scope.showNoModels = true;
-                } else {
-                    $scope.totalLength = modelList.length;
-                    var active = modelList.filter(function(item) {
-                        return item.Status == 'Active';
-                    });
-
-                    $scope.activeLength = active.length;
-
-                    var contentContainer = $('#modelListContainer');
-                    WidgetFrameworkService.CreateWidget({
-                        element: contentContainer,
-                        widgetConfig: screenWidgetConfig,
-                        metadata: null,
-                        data: modelList,
-                        parentData: modelList
-                    });
-                }
-            } else if (result.resultErrors === "NO TENANT FOUND") {
-                $scope.showNoModels = true;
-            }
-        });
-    }
-
-    getModels(true);
-    getModels();
-    
-
+    vm.init();
 });

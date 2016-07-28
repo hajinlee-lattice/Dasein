@@ -331,6 +331,7 @@ Model list title
   border-top-left-radius: 6px; 
   font-family:'ProximaNova-Regular','Open Sans',sans-serif;
   li {
+    display: block;
     list-style: none;
     padding: 0.3em 1em;
     text-align: right;
@@ -386,7 +387,7 @@ Model list title
 .model-title .edit button.open {
     background: #222;
     color: #fff;
-    border-radius: 4px;
+    border-radius: 2px;
     border-bottom-color: #aaa;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;

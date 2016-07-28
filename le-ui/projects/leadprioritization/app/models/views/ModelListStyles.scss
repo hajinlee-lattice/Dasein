@@ -1,7 +1,23 @@
 .lp-model-list {
+	.list-header {
+		margin: 0 .5%;
+		
+		.number-of-items li {
+			margin-right: 1em;
+			float: left;
+			/*
+			cursor: pointer;
+			
+			&:hover span {
+				text-decoration: underline;
+			}
+			*/
+		}
+	}
+
 	.create-model-menu {
 		position: relative;
-		margin-right: 0.75em;
+		margin: 0;
 		float: right;
 		z-index: 10;
 		border-bottom-color: transparent;
@@ -10,6 +26,7 @@
 						
 		button {
 			vertical-align: top;
+			margin-left: .45em;
 			
 			&.open {
 				background-color: #222;

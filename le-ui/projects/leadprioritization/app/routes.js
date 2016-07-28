@@ -16,6 +16,13 @@ angular
     
     $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
     });
+    
+    $rootScope.$on('$stateChangeError', function(evt, to, params) {
+        if ($state.current.name != to.name) {
+            console.log('-!- error; could not load '+to.name);
+            $state.reload();
+        }
+    });
 }])
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/tenant/');
@@ -75,6 +82,17 @@ angular
                 pageTitle: 'My Models',
                 pageIcon: 'ico-model'
             },
+            resolve: {
+                ModelList: function($q, ModelStore) {
+                    var deferred = $q.defer();
+
+                    ModelStore.getModels(true).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -83,6 +101,8 @@ angular
                     templateUrl: 'app/navigation/summary/ModelListView.html'
                 },
                 "main@": {
+                    controller: 'ModelListController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelListView.html'
                 }
             }
@@ -90,7 +110,7 @@ angular
         .state('home.models.history', {
             url: '/history',
             params: {
-                pageIcon: 'ico-history',
+                pageIcon: 'ico-model',
                 pageTitle: 'My Models'
             },
             views: {

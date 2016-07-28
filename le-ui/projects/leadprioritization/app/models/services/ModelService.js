@@ -6,10 +6,12 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.core.services.SessionService',
     'mainApp.appCommon.services.ModelSummaryValidationService'
 ])
-.service('ModelStore', function($q, ModelService) {
+.service('ModelStore', function($q, ModelService, $timeout) {
     var ModelStore = this;
+
     this.models = [];
     this.modelsMap = {};
+    this.stale = true;
 
     // checks if items matching args exists, performs XHR to fetch if they don't
     this.getModel = function(modelId) {
@@ -35,14 +37,9 @@ angular.module('mainApp.models.services.ModelService', [
     this.getModels = function(use_cache) {
         var deferred = $q.defer();
 
-        if (use_cache) {
-            if (ModelStore.models && ModelStore.models.length > 0) {
-                deferred.resolve(ModelStore.models);
-            } else {
-                ModelStore.models = [];
-                deferred.resolve([]);
-            }
-        } else {
+        if (use_cache && ModelStore.models.length > 0) {
+            deferred.resolve(ModelStore.models);
+        } else if (this.stale) {
             ModelService.GetAllModels().then(function(response) {
                 var models = response.resultObj;
 
@@ -52,8 +49,16 @@ angular.module('mainApp.models.services.ModelService', [
                     ModelStore.models.push(model);
                 });
 
+                ModelStore.stale = false;
+
+                $timeout(function() {
+                    ModelStore.stale = true;
+                }, 500);
+
                 deferred.resolve(models);
             });
+        } else {
+            deferred.resolve(ModelStore.models);
         }
 
         return deferred.promise;
