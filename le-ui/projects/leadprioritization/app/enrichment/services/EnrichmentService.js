@@ -4,6 +4,7 @@ angular.module('lp.enrichment.leadenrichment')
     this.enrichments = null;
     this.categories = null;
     this.selectedCount = null;
+    this.premiumSelectMaximum = null;
     this.metadata = {
         selectedToggle: false,
         current: 1
@@ -15,6 +16,23 @@ angular.module('lp.enrichment.leadenrichment')
 
     this.setMetadata = function(name, value) {
         return this.metadata[name] = value;
+    }
+
+    this.getPremiumSelectMaximum = function(){
+        var deferred = $q.defer();
+        if (this.premiumSelectMaximum) {
+            deferred.resolve(this.premiumSelectMaximum);
+        } else {
+            EnrichmentService.getPremiumSelectMaximum().then(function(response){
+                EnrichmentStore.setPremiumSelectMaximum(response);
+                deferred.resolve(response);
+            });
+        }
+        return deferred.promise;
+    }
+
+    this.setPremiumSelectMaximum = function(item){
+        this.premiumSelectMaximum = item;
     }
 
     this.getCategories = function(){
@@ -64,6 +82,19 @@ angular.module('lp.enrichment.leadenrichment')
     }
 })
 .service('EnrichmentService', function($q, $http){
+    this.getPremiumSelectMaximum = function(){
+        var deferred = $q.defer();
+        $http({
+            method: 'get',
+            //ENVs: Default, QA, Production
+            //url: '/Pods/<ENV>/Default/PLS/EnrichAttributeMaxNumber'
+            url: '/pls/enrichment/lead/premiumattributeslimitation'
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
     this.getSelectedCount = function(){
         var deferred = $q.defer();
         $http({

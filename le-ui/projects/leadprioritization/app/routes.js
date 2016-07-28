@@ -817,6 +817,15 @@ angular
                             });
 
                             return deferred.promise;
+                        },
+                        EnrichmentPremiumSelectMaximum: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getPremiumSelectMaximum().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
                         }
                     },
                     controller: 'EnrichmentController',

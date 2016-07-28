@@ -41,13 +41,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $scope.modelDisplayName = args.displayName;
     });
     
-    checkBrowserWidth();
+    var _checkBrowserWidth = _.debounce(checkBrowserWidth, 250);
 
-    $(window).resize(checkBrowserWidth);
+    angular.element(window).resize(_checkBrowserWidth);
 
     $scope.handleSidebarToggle = function ($event) {
-        $("body").toggleClass("open-nav");
-        $("body").addClass("controlled-nav");  // indicate the user toggled the nav
+        angular.element("body").toggleClass("open-nav");
+        angular.element("body").addClass("controlled-nav");  // indicate the user toggled the nav
     }
 
     $(document.body).click(function() {
@@ -63,21 +63,21 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     };
 
     function checkBrowserWidth(){
-      // if the user has closed the nav, leave it closed when increasing size
-      if (window.matchMedia("(min-width: 1200px)").matches && !$("body").hasClass("controlled-nav")) {
-        if (typeof(sessionStorage) !== 'undefined') {
-            if(sessionStorage.getItem('open-nav') === 'true') {
-                $("body").addClass('open-nav');
-            } else {
-                $("body").removeClass('open-nav');
+        // if the user has closed the nav, leave it closed when increasing size
+        if (window.matchMedia("(min-width: 1200px)").matches && !angular.element("body").hasClass("controlled-nav")) {
+            if (typeof(sessionStorage) !== 'undefined') {
+                if(sessionStorage.getItem('open-nav') === 'true') {
+                    angular.element("body").addClass('open-nav');
+                } else {
+                    angular.element("body").removeClass('open-nav');
+                }
             }
+        } else {
+            if(angular.element("body").hasClass("open-nav")) {
+                // if the nav is open when scaling down close it but allow it to re-open by removing our user controlled class indicator
+                angular.element("body").removeClass("controlled-nav");
+            }
+            angular.element("body").removeClass("open-nav");
         }
-      } else {
-        if($("body").hasClass("open-nav")) {
-          // if the nav is open when scaling down close it but allow it to re-open by removing our user controlled class indicator
-          $("body").removeClass("controlled-nav");
-        }
-        $("body").removeClass("open-nav");
-      }
     }
 });

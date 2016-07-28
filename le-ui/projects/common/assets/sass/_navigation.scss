@@ -307,6 +307,13 @@ html.no-cssmask {
             }
         }
     }
+    .secondary-nav {
+        .page-icon {
+            span {
+                background-color: transparent;
+            }
+        }
+    }
 }
 
 .open-nav {
@@ -402,7 +409,6 @@ html.no-cssmask {
         margin-left: 1em;
         background-color: #e5e5e5;
         span {
-            background-color: #222;
             -webkit-transition: all 250ms linear, transform 0s linear;
             -moz-transition: all 250ms linear, transform 0s linear;
             -ms-transition: all 250ms linear, transform 0s linear;
