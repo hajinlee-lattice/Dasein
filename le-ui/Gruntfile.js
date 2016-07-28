@@ -13,6 +13,7 @@ module.exports = function (grunt) {
             dev: {
                 NODE_ENV: 'development',
                 API_URL: 'http://app.lattice.local',
+                APICON_URL: 'http://api.lattice.local',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -25,6 +26,7 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 API_URL: 'http://10.41.0.13:3000',
                 //API_URL: 'https://app3.lattice-engines.com',
+                APICON_URL: 'http://10.41.0.13:8073',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -36,6 +38,7 @@ module.exports = function (grunt) {
             local: {
                 NODE_ENV: 'development',
                 API_URL: 'http://localhost:8081',
+                APICON_URL: 'http://localhost:8073',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -47,6 +50,7 @@ module.exports = function (grunt) {
             integration: {
                 NODE_ENV: 'integration',
                 API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                APICON_URL: 'http://localhost:8073',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -59,6 +63,7 @@ module.exports = function (grunt) {
             qa: {
                 NODE_ENV: 'qa',
                 API_URL: 'http://app.lattice.local',
+                APICON_URL: 'http://api.lattice.local',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -70,11 +75,12 @@ module.exports = function (grunt) {
             },
             production: {
                 NODE_ENV: 'production',
-                API_URL: false,
+                API_URL: 'https://app.lattice-engines.com',
+                APICON_URL: 'https://api.lattice-engines.com',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
-                HTTPS_PORT: false,
+                HTTPS_PORT: 3001,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,

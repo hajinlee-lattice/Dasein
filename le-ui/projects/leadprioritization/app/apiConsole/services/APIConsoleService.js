@@ -42,7 +42,7 @@ angular.module('pd.apiconsole.APIConsoleService', [
 
         $http({
             method: 'GET',
-            url: getScoringApiUrl() + '/models/' + modelId + '/fields',
+            url: '/score/models/' + modelId + '/fields',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + accessToken
@@ -109,7 +109,7 @@ angular.module('pd.apiconsole.APIConsoleService', [
 
         $http({
             method: 'POST',
-            url: getScoringApiUrl() + '/record',
+            url: '/score/record',
             data: scoreRequest,
             headers: {
                 'Content-Type': 'application/json',
@@ -142,29 +142,4 @@ angular.module('pd.apiconsole.APIConsoleService', [
 
         return deferred.promise;
     };
-
-    function getScoringApiUrl() {
-        var hostname = $location.host();
-        if (! hostname.startsWith('localhost') && ! hostname.startsWith('app')) {
-            hostname = 'app.lattice.local';
-        }
-        var appUrl = $location.protocol() + '://' + hostname;
-        var port = $location.port();
-        if (hostname.startsWith('localhost')) {
-            appUrl += ":8073"; // scoringapi runs on port 8073 locally
-        } else if (port != 80) {
-            appUrl += ":" + port;
-        }
-
-        // e.g. http://app.lattice.local --> http://api.lattice.local
-        var apiUrl = appUrl.replace(/app/i, 'api');
-        if (apiUrl.charAt(apiUrl.length - 1) ===  '/') {
-            apiUrl += 'score';
-        } else {
-            apiUrl += '/score';
-        }
-
-        return apiUrl;
-    }
-
 });

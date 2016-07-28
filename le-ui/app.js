@@ -21,6 +21,7 @@ const options   = {
     HTTPS_CRT:  process.env.HTTPS_CRT   || './server/certs/certificate.crt',
     HTTPS_PASS: process.env.HTTPS_PASS  || false,
     API_URL:    process.env.API_URL     || 'http://app.lattice.local',
+    APICON_URL: process.env.APICON_URL  || 'http://localhost:8073',
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || false,
     LOGGING:    process.env.LOGGING     || './server/log',
@@ -47,6 +48,10 @@ options.LOGGING
 // when false, API proxy is disabled
 options.API_URL
     ? server.useApiProxy(options.API_URL) : null;
+
+// when false, API proxy is disabled
+options.APICON_URL
+    ? server.useApiProxy(options.APICON_URL, '/score') : null;
 
 // whitelist for proxies
 options.WHITELIST
