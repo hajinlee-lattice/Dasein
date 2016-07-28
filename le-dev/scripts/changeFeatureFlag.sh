@@ -97,7 +97,7 @@ def combineFeatureFlags(existingFeatureFlags, newFeatureFlags):
             #print "existingContents is " + existingContents
             newFeatureFlag = '"'+featureFlag+'":'+featureFlagValue
             #print "newFeatureFlag is ", newFeatureFlag
-            if not existingContents.strip() or existingFeatureFlags == '{}':
+            if not existingContents.strip():
                 existingContents = newFeatureFlag 
             else:
                 existingContents = existingContents + ',' + newFeatureFlag 
@@ -125,6 +125,8 @@ def parseArguments():
     return result
 
 def findBetween(s, first, last):
+    if not s.strip():
+        return s
     start = s.index(first) + len(first)
     end = s.index(last, start)
     return s[start:end]
