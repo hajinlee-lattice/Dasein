@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.modelquality.metrics.ModelQualityMetrics;
-import com.latticeengines.modelquality.metrics.ModelingMesurement;
+import com.latticeengines.modelquality.metrics.ModelingMeasurement;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("fileModelRunService")
@@ -70,7 +70,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config) {
         log.info("Model Summary=" + modelSummary.toString());
         ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
-        ModelingMesurement measurement = new ModelingMesurement(metrics);
+        ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
     }
 

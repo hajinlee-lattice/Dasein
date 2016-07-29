@@ -26,7 +26,7 @@ public class ModelingMetricsTestNG extends ModelQualityDeploymentTestNGBase {
         SelectedConfig config = getSelectedConfig(AlgorithmFactory.ALGORITHM_NAME_RF);
 
         ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
-        ModelingMesurement measurement = new ModelingMesurement(metrics);
+        ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
         try {
             Thread.sleep(5000L);
