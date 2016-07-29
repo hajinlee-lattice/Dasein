@@ -44,29 +44,16 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
             "");
 
     @Override
-    public void run(ModelRun modelRun) {
+    public String run(ModelRun modelRun) {
 
-        try {
-            SelectedConfig config = modelRun.getSelectedConfig();
-            setup(config);
-            modelRunEntityMgr.create(modelRun);
+        runAsync(modelRun);
+        return modelRun.getPid() + "";
+    }
 
-            runModel(config);
-
-            modelRun.setStatus(ModelRunStatus.COMPLETED);
-            modelRunEntityMgr.update(modelRun);
-
-        } catch (Exception ex) {
-            modelRun.setStatus(ModelRunStatus.FAILED);
-            System.out.println(ex.getMessage());
-            modelRun.setErrorMessage(ex.getMessage());
-            modelRunEntityMgr.update(modelRun);
-            log.error("Failed!", ex);
-            throw new RuntimeException(ex);
-
-        } finally {
-            cleanup();
-        }
+    private void runAsync(ModelRun modelRun) {
+        Runnable runnable = new ModelRunRunnable(modelRun);
+        Thread runner = new Thread(runnable);
+        runner.start();
     }
 
     protected abstract void runModel(SelectedConfig config);
@@ -102,5 +89,36 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         } catch (Exception ex) {
             log.warn("Failed to logout!", ex);
         }
+    }
+
+    private class ModelRunRunnable implements Runnable {
+        private ModelRun modelRun;
+
+        public ModelRunRunnable(ModelRun modelRun) {
+            this.modelRun = modelRun;
+        }
+
+        @Override
+        public void run() {
+            try {
+                SelectedConfig config = modelRun.getSelectedConfig();
+                setup(config);
+                modelRunEntityMgr.create(modelRun);
+                runModel(config);
+
+                modelRun.setStatus(ModelRunStatus.COMPLETED);
+                modelRunEntityMgr.update(modelRun);
+
+            } catch (Exception ex) {
+                modelRun.setStatus(ModelRunStatus.FAILED);
+                modelRun.setErrorMessage(ex.getMessage());
+                modelRunEntityMgr.update(modelRun);
+                log.error("Failed!", ex);
+
+            } finally {
+                cleanup();
+            }
+        }
+
     }
 }
