@@ -15,6 +15,8 @@ import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.Dedup
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -23,13 +25,18 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
@@ -63,6 +70,12 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
+        List<DataRule> dataRules = parameters.getDataRules();
+        if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
+            Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), modelSummary.getEventTableName());
+            dataRules = eventTable.getDataRules();
+        }
+
         MatchAndModelWorkflowConfiguration.Builder builder = new MatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -87,7 +100,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null)
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
-                .dataRules(parameters.getDataRules()) //
+                .dataRules(dataRules) //
                 .userRefinedAttributes(userRefinedAttributes);
         if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
             builder.dedupTargetTableName(cloneTableName + "_deduped");

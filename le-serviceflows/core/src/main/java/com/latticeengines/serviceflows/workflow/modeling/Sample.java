@@ -5,16 +5,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("sample")
-public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
+public class Sample extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(Sample.class);
 
@@ -39,15 +37,6 @@ public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
         String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
                 + eventTable.getName() + "/csv_files/postMatchEventTable";
         executionContext.putString(EXPORT_OUTPUT_PATH, outputPath);
-    }
-
-    private Table getEventTable() {
-        if (configuration.getEventTableName() != null) {
-            return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                    configuration.getEventTableName());
-        } else {
-            return JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
-        }
     }
 
     private void sample(Table eventTable) throws Exception {

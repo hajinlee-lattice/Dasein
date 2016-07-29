@@ -118,7 +118,7 @@ public class ReviewModel extends BaseModelStep<ModelStepConfiguration> {
         String ruleResultFileName = filePath.substring(filePath.lastIndexOf("/") + 1);
         String dataRuleName = ruleResultFileName.substring(0, ruleResultFileName.indexOf("_"));
         result.setDataRuleName(dataRuleName);
-        // modelId and tenant will be set on tenant in modelSummaryDownload step
+        // modelId and tenant will be set on tenant in persistDataRules step
     }
 
 }

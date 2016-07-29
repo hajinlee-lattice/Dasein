@@ -36,7 +36,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
         if (configuration.getDataRules() == null) {
             log.info("No datarules in configuration, nothing to do.");
         } else {
-            List<DataRule> dataRules = configuration.getDataRules();
+            List<DataRule> dataRules = new ArrayList<>(configuration.getDataRules());
             log.info("Remediating datarules: " + JsonUtils.serialize(dataRules));
             Table eventTable = JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
             eventTable = remediateAttributes(dataRules, eventTable, configuration.isDefaultDataRuleConfiguration());
@@ -46,6 +46,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                         .updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
             }
             putObjectInContext(EVENT_TABLE, JsonUtils.serialize(eventTable));
+            putObjectInContext(DATA_RULES, dataRules);
         }
     }
 
@@ -74,13 +75,16 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                         columnNames = dataRule.getColumnsToRemediate();
                     }
                 }
+                log.info(String.format("Enabled Datarule %s flagged %d columns for remediation: %s",
+                        dataRule.getName(), columnNames.size(), JsonUtils.serialize(columnNames)));
                 for (String columnName : columnNames) {
                     columnsToRemove.add(columnName);
                 }
             }
         }
 
-        log.info("Remediating these columns: " + JsonUtils.serialize(columnsToRemove));
+        log.info(String.format("Remediating total %d columns: %s", columnsToRemove.size(),
+                JsonUtils.serialize(columnsToRemove)));
         for (Attribute attr : eventTable.getAttributes()) {
             if (columnsToRemove.contains(attr.getName())) {
                 attr.setApprovedUsage(ApprovedUsage.NONE);

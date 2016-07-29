@@ -29,11 +29,11 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
     protected MetadataProxy metadataProxy;
 
     protected Table getEventTable() {
-        if (configuration.getEventTableName() != null) {
+        if (executionContext.containsKey(EVENT_TABLE)) {
+            return JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+        } else {
             return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getEventTableName());
-        } else {
-            return JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
         }
     }
 

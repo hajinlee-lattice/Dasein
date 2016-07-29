@@ -36,7 +36,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private AddStandardAttributesViaJavaFunction addStandardAttributesViaJavaFunction;
 
     @Autowired
-    private InitialModelWorkflow initialModelWorkflow;
+    private ModelWorkflow modelWorkflow;
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -54,7 +54,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(modelValidationWorkflow) //
                 .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributesViaJavaFunction) //
-                .next(initialModelWorkflow) //
+                .next(modelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

@@ -4,7 +4,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -181,19 +181,22 @@ public class ModelingServiceExecutor {
 
     @VisibleForTesting
     String getEnabledRulesAsPipelineProp(List<DataRule> dataRules) {
+        log.info("dataRules class:" + dataRules.getClass().getName());
         String enabledRulesProp = "";
         if (CollectionUtils.isNotEmpty(dataRules)) {
-            StringBuilder enabledRules = new StringBuilder();
-            for (Iterator<DataRule> iterator = dataRules.iterator(); iterator.hasNext();) {
-                DataRule dataRule = iterator.next();
+            Map<String, List<String>> enabledRules = new HashMap<>();
+            DataRule rule = dataRules.get(0);
+            log.info("First rule:" + JsonUtils.serialize(rule));
+            for (DataRule dataRule : dataRules) {
                 if (dataRule.isEnabled()) {
-                    enabledRules.append("\"").append(dataRule.getName()).append("\"");
-                    if (iterator.hasNext()) {
-                        enabledRules.append(", ");
-                    }
+                    enabledRules.put(
+                            dataRule.getName(),
+                            dataRule.getColumnsToRemediate() == null ? new ArrayList<String>() : dataRule
+                                    .getColumnsToRemediate());
                 }
             }
-            enabledRulesProp = String.format("remediatedatarulestep.enabledrules=[%s]", enabledRules.toString());
+            enabledRulesProp = String.format("remediatedatarulesstep.enabledRules=%s",
+                    JsonUtils.serialize(enabledRules));
         }
         return enabledRulesProp;
     }
@@ -203,7 +206,11 @@ public class ModelingServiceExecutor {
 
         String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
         if (StringUtils.isNotEmpty(enabledRulesProp)) {
-            algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " " + enabledRulesProp);
+            if (!algorithm.getPipelineProperties().isEmpty()) {
+                algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " " + enabledRulesProp);
+            } else {
+                algorithm.setPipelineProperties(enabledRulesProp);
+            }
         }
 
         ModelDefinition modelDef = new ModelDefinition();

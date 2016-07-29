@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -70,6 +71,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TRANSFORMATION_GROUP_NAME = "TRANSFORMATION_GROUP_NAME";
     protected static final String COLUMN_RULE_RESULTS = "COLUMN_RULE_RESULTS";
     protected static final String ROW_RULE_RESULTS = "ROW_RULE_RESULTS";
+    protected static final String EVENT_TO_MODELID = "EVENT_TO_MODELID";
+    protected static final String DATA_RULES = "DATA_RULES";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -142,6 +145,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return JsonUtils.serialize(dataComposition);
     }
 
+    @SuppressWarnings("unchecked")
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             ModelStepConfiguration modelStepConfiguration, Table eventTable) {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
@@ -155,6 +159,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
 
         String dataCompositionContents = getDataCompositionContents(eventTable);
+
+        List<DataRule> dataRules = null;
+        if (executionContext.containsKey(DATA_RULES)) {
+            dataRules = (List<DataRule>) executionContext.get(DATA_RULES);
+        } else {
+            dataRules = modelStepConfiguration.getDataRules();
+        }
 
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
         bldr.sampleSubmissionUrl("/modeling/samples") //
@@ -173,7 +184,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 .table(eventTable.getName()) //
                 .modelProxy(modelProxy) //
                 .jobProxy(jobProxy) //
-                .dataRules(modelStepConfiguration.getDataRules()) //
+                .dataRules(dataRules) //
                 .runTimeParams(modelStepConfiguration.runTimeParams()) //
                 .productType(modelStepConfiguration.getProductType());
 

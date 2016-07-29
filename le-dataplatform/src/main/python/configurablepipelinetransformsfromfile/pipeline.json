@@ -8,7 +8,10 @@
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
         "params": "params",
-        "enabledRules": []
+        "enabledRules": {
+            "PopulatedRowCountDS": [],
+            "UniqueValueCountDS": []
+        }
       },
       "ColumnTransformFilePath": "remediatedatarulesstep.py"
     },
@@ -84,7 +87,7 @@
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {
         	"enabled": "false",
-        	"columnsToTransform": "categoricalColumns", 
+        	"columnsToTransform": "categoricalColumns",
         	"targetColumn": "targetColumn"
         },
         "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"

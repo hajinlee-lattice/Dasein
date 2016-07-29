@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.steps.PersistDataRules;
+import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
@@ -44,6 +46,12 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     @Autowired
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
+    @Autowired
+    private PersistDataRules persistDataRules;
+
+    @Autowired
+    private RemediateDataRules remediateDataRules;
+
     @Bean
     public Job modelWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -57,8 +65,11 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
                 .next(writeMetadataFiles) //
                 .next(profile) //
                 .next(reviewModel) //
+                .next(remediateDataRules) //
+                .next(writeMetadataFiles) // Repeat to write out the post-datarule datacomposition
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
+                .next(persistDataRules) //
                 .build();
     }
 }

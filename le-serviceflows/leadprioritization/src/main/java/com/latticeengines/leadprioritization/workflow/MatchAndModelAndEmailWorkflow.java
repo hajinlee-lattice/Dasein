@@ -34,9 +34,6 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private ModelWorkflow modelWorkflow;
 
     @Autowired
-    private RemediateDataRules remediateDataRules;
-
-    @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Bean
@@ -49,7 +46,6 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
         return new WorkflowBuilder().next(dedupEventTable) //
                 .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributesViaJavaFunction) //
-                .next(remediateDataRules) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //
