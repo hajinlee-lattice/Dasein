@@ -181,12 +181,9 @@ public class ModelingServiceExecutor {
 
     @VisibleForTesting
     String getEnabledRulesAsPipelineProp(List<DataRule> dataRules) {
-        log.info("dataRules class:" + dataRules.getClass().getName());
         String enabledRulesProp = "";
         if (CollectionUtils.isNotEmpty(dataRules)) {
             Map<String, List<String>> enabledRules = new HashMap<>();
-            DataRule rule = dataRules.get(0);
-            log.info("First rule:" + JsonUtils.serialize(rule));
             for (DataRule dataRule : dataRules) {
                 if (dataRule.isEnabled()) {
                     enabledRules.put(
