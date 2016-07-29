@@ -30,7 +30,7 @@ public class ModelRunResource {
 
     @Autowired
     private ModelRunEntityMgr modelRunEntityMgr;
-    
+
     private static final Log log = LogFactory.getLog(ModelRunResource.class);
 
     @RequestMapping(value = "/runmodel", method = RequestMethod.POST)
@@ -38,15 +38,15 @@ public class ModelRunResource {
     @ApiOperation(value = "Run a Model")
     public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun) {
         try {
-            modelRunService.run(modelRun);
-            return ResponseDocument.successResponse("OK");
+            String modelRunId = modelRunService.run(modelRun);
+            return ResponseDocument.successResponse(modelRunId);
 
         } catch (Exception e) {
             log.error("Failed on this API!", e);
             return ResponseDocument.failedResponse(e);
         }
     }
-    
+
     @RequestMapping(value = "/modelruns", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get ModelRuns")
@@ -54,13 +54,13 @@ public class ModelRunResource {
         try {
             List<ModelRun> modelRuns = modelRunEntityMgr.findAll();
             return ResponseDocument.successResponse(modelRuns);
-            
+
         } catch (Exception e) {
             log.error("Failed on this API!", e);
             return ResponseDocument.failedResponse(e);
         }
     }
-    
+
     @RequestMapping(value = "/modelruns", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete ModelRuns")

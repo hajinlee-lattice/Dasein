@@ -24,13 +24,13 @@ public class ModelRunServiceImpl implements ModelRunService {
     private ModelRunService eventTableModelRunService;
     
     @Override
-    public void run(ModelRun modelRun) {
+    public String run(ModelRun modelRun) {
         SelectedConfig config = modelRun.getSelectedConfig();
         DataSetType dataSetType = config.getDataSet().getDataSetType();
         if (dataSetType == DataSetType.SOURCETABLE) {
-            fileModelRunService.run(modelRun);
+            return fileModelRunService.run(modelRun);
         } else {
-            eventTableModelRunService.run(modelRun);
+            return eventTableModelRunService.run(modelRun);
         }
     }
 }

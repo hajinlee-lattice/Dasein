@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.modelquality.ModelRun;
 
 public interface ModelRunService {
 
-    void run(ModelRun modelRun);
+    String run(ModelRun modelRun);
 
 }
