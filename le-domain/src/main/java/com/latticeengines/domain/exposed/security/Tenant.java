@@ -106,11 +106,12 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         return JsonUtils.serialize(this);
     }
 
-    @JsonIgnore
+    @JsonProperty("RegisteredTime")
     public Long getRegisteredTime() {
         return registeredTime;
     }
 
+    @JsonProperty("RegisteredTime")
     public void setRegisteredTime(Long registeredTime) {
         this.registeredTime = registeredTime;
     }

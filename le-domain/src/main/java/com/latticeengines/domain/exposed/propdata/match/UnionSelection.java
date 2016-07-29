@@ -7,10 +7,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public class UnionSelection {
 
-    @JsonProperty("predefined_selections")
+    @JsonProperty("PredefinedSelections")
     private Map<ColumnSelection.Predefined, String> predefinedSelections;
 
-    @JsonProperty("custom_selection")
+    @JsonProperty("CustomSelection")
     private ColumnSelection customSelection;
 
 
