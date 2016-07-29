@@ -88,7 +88,18 @@ public class MetricUtilsUnitTestNG {
 
         tagSet = MetricUtils.parseTags(instance);
         Assert.assertEquals(tagSet.size(), 3);
+    }
 
+    @Test(groups = "unit")
+    public void testNullMetricTagGroup() throws NoSuchMethodException {
+        ComplexTestClass instance = new ComplexTestClass();
+
+        TestDimension tagGroup2 = new TestDimension();
+        tagGroup2.setDimensionTag("dimension");
+        instance.addDimension(tagGroup2);
+
+        Map<String, String> tagSet = MetricUtils.parseTags(instance);
+        Assert.assertEquals(tagSet.size(), 1);
     }
 
     @Test(groups = "unit")

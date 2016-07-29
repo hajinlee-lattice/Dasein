@@ -41,6 +41,9 @@ public class MetricUtils {
 
     private static Map<String, String> parseTagsInternal(Object dimension) {
         Map<String, String> tagMap = new HashMap<>();
+        if (dimension == null) {
+            return tagMap;
+        }
         for (Method method : dimension.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(MetricTag.class)) {
                 Map.Entry<String, String> entry = parseTag(dimension, method);
@@ -69,6 +72,9 @@ public class MetricUtils {
 
     private static Map<String, Object> parseFieldsInternal(Object fact) {
         Map<String, Object> fieldMap = new HashMap<>();
+        if (fact == null) {
+            return fieldMap;
+        }
         for (Method method : fact.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(MetricField.class)) {
                 Map.Entry<String, Object> entry = parseField(fact, method);
