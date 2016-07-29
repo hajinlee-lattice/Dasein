@@ -116,7 +116,7 @@ def startAllServers(waitminute):
         os.chdir(os.environ['WSHOME'] + '/le-pls')
         envvars = os.environ.copy()
         envvars['MAVEN_OPTS'] = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m"
-        proc = subprocess.Popen(['mvn', '-Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks', '-Djetty.port=8081', '-Pfunctional', '-DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled', 'jetty:run'], env=envvars)
+        proc = subprocess.Popen(['mvn', '-Djavax.net.ssl.trustStore=certificates/ledp_keystore.jks', '-Djetty.port=8081', '-Pfunctional', '-DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled', 'jetty:run'], env=envvars)
         if proc:
             global plsPid
             plsPid = proc.pid
@@ -143,7 +143,7 @@ def startAllServers(waitminute):
         subprocess.call(['rm', '-f', '/var/log/ledp/le-admin*.log'])
         envvars = os.environ.copy()
         envvars['MAVEN_OPTS'] = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m"
-        proc = subprocess.Popen(['mvn', '-DADMIN_PROPDIR=conf/env/dev', '-Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks', '-Djetty.port=8085', '-Pfunctional', '-DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled', 'jetty:run'], env=envvars)
+        proc = subprocess.Popen(['mvn', '-DADMIN_PROPDIR=conf/env/dev', '-Djavax.net.ssl.trustStore=certificates/ledp_keystore.jks', '-Djetty.port=8085', '-Pfunctional', '-DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled', 'jetty:run'], env=envvars)
         if proc:
             global adminPid
             adminPid = proc.pid
@@ -210,7 +210,7 @@ def uploadNecessaryFilesToHDFS():
 
 def runPDMockedEndToEndTest():
     os.chdir(os.environ['WSHOME'] + '/le-pls')
-    ret = subprocess.call(['mvn', '-Pdeployment', '-Ddeployment.groups=deployment.precheckin', '-DargLine=""', '-Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks', '-Djava.util.logging.config.file=../le-dev/test-logging.properties', 'clean', 'verify', '-Dtest=PDMockedEndToEnd*'])
+    ret = subprocess.call(['mvn', '-Pdeployment', '-Ddeployment.groups=deployment.precheckin', '-DargLine=""', '-Djavax.net.ssl.trustStore=certificates/ledp_keystore.jks', '-Djava.util.logging.config.file=../le-dev/test-logging.properties', 'clean', 'verify', '-Dtest=PDMockedEndToEnd*'])
     assert ret == 0, 'PD EndToEnd Test Failed'
 
 def runTestSetupScript():

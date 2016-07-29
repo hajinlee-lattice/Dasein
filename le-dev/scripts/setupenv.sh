@@ -27,7 +27,7 @@ sudo pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
 pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
 
 sudo mkdir -p /etc/ledp
-sudo cp $WSHOME/le-security/certificates/laca-ldap.dev.lattice.local.jks /etc/ledp
+sudo cp $WSHOME/le-security/certificates/ledp_keystore.jks /etc/ledp
 
 sudo mkdir -p /var/log/scoring/mapper || true
 sudo chmod a+w /var/log/scoring/mapper

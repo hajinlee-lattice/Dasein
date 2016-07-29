@@ -16,8 +16,6 @@
         <le.network.version>2.0.36-SNAPSHOT</le.network.version>
         <le.monitor.version>2.0.36-SNAPSHOT</le.monitor.version>
         <le.auth.version>2.0.36-SNAPSHOT</le.auth.version>
-        <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
-        <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
