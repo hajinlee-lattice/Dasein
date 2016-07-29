@@ -67,7 +67,9 @@ public class MetadataResolver {
 
     public MetadataResolver(String csvPath, Table metadata, Configuration yarnConfiguration,
             FieldMappingDocument fieldMappingDocument) {
+        this.csvPath = csvPath;
         this.metadata = metadata;
+        this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
         result = new Result();
     }
@@ -84,6 +86,30 @@ public class MetadataResolver {
     public void calculateBasedOnFieldMappingDocumentAndTable() {
         result.metadata = metadata;
         calculateBasedOnMetadta();
+        // sort the order based on header fields
+        sortAttributesBasedOnSourceFileSequence();
+    }
+
+    private void sortAttributesBasedOnSourceFileSequence() {
+        log.info("Current metadata attribute list: " + result.metadata.getAttributes());
+        Set<String> headerFields = getHeaderFields();
+        log.info("Current header list: " + headerFields);
+        List<Attribute> attrs = new ArrayList<>();
+        for (final String header : headerFields) {
+            Attribute attr = Iterables.find(result.metadata.getAttributes(), new Predicate<Attribute>() {
+                @Override
+                public boolean apply(Attribute input) {
+                    if (input.getDisplayName().equals(header)) {
+                        return true;
+                    }
+                    return false;
+                }
+
+            });
+            attrs.add(attr);
+        }
+        result.metadata.setAttributes(attrs);
+        log.info("After sorting header list: " + result.metadata.getAttributes());
     }
 
     public void calculateBasedOnFieldMappingDocument() {

@@ -214,6 +214,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(fieldMappings.size(), 33);
         assertEquals(table.getAttributes().size(), 33);
         assertNotNull(table.getAttribute("BusinessCountry"));
+        assertEquals(table.getAttributes().get(0).getDisplayName(), "LEAD");
+        assertEquals(table.getAttributes().get(32).getDisplayName(), "SourceColumn");
     }
 
     @AfterClass(groups = "functional")
