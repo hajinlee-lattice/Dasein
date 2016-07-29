@@ -448,7 +448,7 @@ public enum LedpCode {
     LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
     LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31107("unsupported_model_type", "Unsupported model type {0}"), //
-    LEDP_31199("missing_domain", "Domain field(s) are missing {0}. In case of lead type model, " //
+    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
             + "make sure to specify 'Email' field and for non-lead type model " //
             + "specify either 'Website' or 'Domain' fields. If these fields " //
             + "are not specified then specify both 'CompanyName' " //
