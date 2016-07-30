@@ -70,9 +70,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private int errorLineNumber;
 
-    private long importedLineNum;
+    private long lineNum = 1;
 
     private String avroFileName;
+
+    private String id;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -86,7 +88,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
 
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber",
+        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber", "Id",
                 "ErrorMessage"));
 
         errorLineNumber = conf.getInt("errorLineNumber", 1000);
@@ -119,9 +121,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
                 try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
                     dataFileWriter.create(schema, new File(avroFileName));
-                    for (Iterator<CSVRecord> iterator = parser.iterator();;) {
-                        LOG.info("Start to processing line: " + parser.getRecordNumber());
-                        importedLineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue();
+                    for (Iterator<CSVRecord> iterator = parser.iterator();; lineNum++) {
+                        id = null;
+                        LOG.info("Start to processing line: " + lineNum);
                         CSVRecord csvRecord = null;
                         missingRequiredColValue = false;
                         fieldMalFormed = false;
@@ -152,7 +154,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             }
                             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
                             if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() <= errorLineNumber) {
-                                csvFilePrinter.printRecord(parser.getRecordNumber() + 1, errorMap.values().toString());
+                                id = id != null ? id : "";
+                                csvFilePrinter.printRecord(parser.getRecordNumber() + 1, id, errorMap.values()
+                                        .toString());
                                 csvFilePrinter.flush();
                             }
                             errorMap.clear();
@@ -197,6 +201,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     avroFieldValue = null;
                 } else {
                     avroFieldValue = toAvro(csvFieldValue, avroType, attr);
+                    if (attr.getName().equals(InterfaceName.Id.name())) {
+                        id = String.valueOf(avroFieldValue);
+                    }
                 }
                 avroRecord.put(attr.getName(), avroFieldValue);
             } catch (Exception e) {
@@ -204,7 +211,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 errorMap.put(header, e.getMessage());
             }
         }
-        avroRecord.put(InterfaceName.InternalId.name(), importedLineNum + 1);
+        avroRecord.put(InterfaceName.InternalId.name(), lineNum);
         return avroRecord;
     }
 
@@ -253,8 +260,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             default:
                 LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
-                        + attr.getPhysicalDataType());
+                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType
+                        + ", physicalDatalType:" + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;

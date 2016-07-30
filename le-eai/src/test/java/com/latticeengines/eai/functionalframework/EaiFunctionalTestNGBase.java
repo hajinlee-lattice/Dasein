@@ -5,9 +5,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema.Type;
@@ -18,6 +20,8 @@ import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -36,6 +40,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
@@ -233,17 +238,32 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             for (String avroFile : avroFiles) {
                 try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config,
                         new org.apache.hadoop.fs.Path(avroFile))) {
+                    long prev = 0;
                     for (; reader.hasNext(); numRows++) {
                         GenericRecord record = reader.next();
-                        assertEquals(
-                                Long.valueOf(record.get(InterfaceName.InternalId.name()).toString()).compareTo(
-                                        numRows + 1), 0);
+                        long current = Long.valueOf(record.get(InterfaceName.InternalId.name()).toString());
+                        assertTrue(current > prev);
+                        prev = current;
                     }
                 }
+                validateErrorFile(avroFile);
             }
         }
         assertEquals(numRows, expectedNumRows);
+    }
 
+    private void validateErrorFile(String avroFile) throws IOException {
+        String errorPath = StringUtils.substringBeforeLast(avroFile, "/") + "/error.csv";
+        try (CSVParser parser = new CSVParser(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
+                errorPath)), LECSVFormat.format)) {
+            Set<String> headers = parser.getHeaderMap().keySet();
+            assertTrue(headers.contains("Id"));
+            assertTrue(headers.contains("LineNumber"));
+            assertTrue(headers.contains("ErrorMessage"));
+
+            List<CSVRecord> records = parser.getRecords();
+            assertEquals(records.size(), 10);
+        }
     }
 
     protected List<String> getFilesFromHdfs(String targetPath, String table) throws Exception {

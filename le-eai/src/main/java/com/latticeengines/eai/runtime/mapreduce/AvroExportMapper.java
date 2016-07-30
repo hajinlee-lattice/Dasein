@@ -15,7 +15,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AvroExportMapper.class);
 
     private Schema schema;
@@ -45,6 +44,7 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
         config = context.getConfiguration();
         schema = AvroJob.getInputKeySchema(config);
         avroRowHandler = initialize(context, schema);
+        log.info(schema);
     }
 
     @Override
