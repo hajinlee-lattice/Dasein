@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,6 +55,22 @@ public class ModelRunResource {
         try {
             List<ModelRun> modelRuns = modelRunEntityMgr.findAll();
             return ResponseDocument.successResponse(modelRuns);
+
+        } catch (Exception e) {
+            log.error("Failed on this API!", e);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @RequestMapping(value = "/modelrun/{modelRunId}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get ModelRun")
+    public ResponseDocument<ModelRun> getModelRun(@PathVariable String modelRunId) {
+        try {
+            ModelRun modelRun = new ModelRun();
+            modelRun.setPid(Long.valueOf(modelRunId));
+            ModelRun returnedModelRun = modelRunEntityMgr.findByKey(modelRun);
+            return ResponseDocument.successResponse(returnedModelRun);
 
         } catch (Exception e) {
             log.error("Failed on this API!", e);

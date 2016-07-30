@@ -29,7 +29,10 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
                             "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
             ResponseDocument<String> response = modelQualityProxy.runModel(modelRun);
             Assert.assertTrue(response.isSuccess());
-
+            
+            String modelRunId = response.getResult();
+            waitAndCheckModelRun(modelRunId);
+            
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Failed", ex);
@@ -48,6 +51,9 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             ResponseDocument<String> response = modelQualityProxy.runModel(modelRun);
             Assert.assertTrue(response.isSuccess());
 
+            String modelRunId = response.getResult();
+            waitAndCheckModelRun(modelRunId);
+
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Failed", ex);
@@ -65,6 +71,9 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
                             "/Pods/Default/Services/ModelQuality/NGINX_PLS_LP3_ModelingLead_ReducedRows_20160712_125224.csv");
             ResponseDocument<String> response = modelQualityProxy.runModel(modelRun);
             Assert.assertTrue(response.isSuccess());
+            
+            String modelRunId = response.getResult();
+            waitAndCheckModelRun(modelRunId);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -81,5 +90,6 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             Assert.fail(ex.getMessage());
         }
     }
+
 
 }

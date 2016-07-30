@@ -10,7 +10,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -288,6 +290,35 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         
         return algorithm;
 
+    }
+    
+    protected void waitAndCheckModelRun(String modelRunId) {
+        Assert.assertTrue(modelRunId != null && modelRunId != "");
+        
+        long start = System.currentTimeMillis();
+        while (true) {
+            ResponseDocument<ModelRun> result = modelQualityProxy.getModelRun(modelRunId);
+            Assert.assertTrue(result.isSuccess(), "Failed for modelRunId=" + modelRunId);
+            
+            ModelRun modelRun = result.getResult();
+            if (modelRun.getStatus().equals(ModelRunStatus.COMPLETED)) {
+                break;
+            }
+            if (modelRun.getStatus().equals(ModelRunStatus.FAILED)) {
+                Assert.fail("Faield due to= " + modelRun.getErrorMessage());
+                break;
+            }
+            System.out.println("Wainting for modelRunId=" + modelRunId + " Status:" + modelRun.getStatus().toString());
+            long end = System.currentTimeMillis();
+            if ((end - start) > 3 * 3_600_000) { // 3 hours max
+                Assert.fail("Timeout for modelRunId=" + modelRunId);
+            }
+            try {
+                Thread.sleep(300_000); // 5 mins
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
 }

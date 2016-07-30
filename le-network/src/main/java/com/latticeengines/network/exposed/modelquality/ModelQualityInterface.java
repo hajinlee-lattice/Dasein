@@ -53,4 +53,6 @@ public interface ModelQualityInterface {
 
     ResponseDocument<String> uploadPipelineStepFile(String fileName,
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity);
+
+    ResponseDocument<ModelRun> getModelRun(String modelRunId);
 }

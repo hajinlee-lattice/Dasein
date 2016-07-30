@@ -135,4 +135,10 @@ public class ModelQualityProxy extends BaseRestApiProxy implements ModelQualityI
         return post("uploadPipelineStepFile", url, requestEntity, ResponseDocument.class);
     }
 
+    @Override
+    public ResponseDocument<ModelRun> getModelRun(String modelRunId) {
+        String url = constructUrl("/modelrun/{modelRunId}", modelRunId);
+        return get("getModelRun", url, ResponseDocument.class);
+    }
+
 }

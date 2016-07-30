@@ -46,11 +46,15 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     @Override
     public String run(ModelRun modelRun) {
 
+        modelRun.setStatus(ModelRunStatus.PROGRESS);
+        modelRunEntityMgr.create(modelRun);
+        
         runAsync(modelRun);
         return modelRun.getPid() + "";
     }
 
     private void runAsync(ModelRun modelRun) {
+        
         Runnable runnable = new ModelRunRunnable(modelRun);
         Thread runner = new Thread(runnable);
         runner.start();
@@ -103,7 +107,6 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
             try {
                 SelectedConfig config = modelRun.getSelectedConfig();
                 setup(config);
-                modelRunEntityMgr.create(modelRun);
                 runModel(config);
 
                 modelRun.setStatus(ModelRunStatus.COMPLETED);
