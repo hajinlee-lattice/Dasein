@@ -1,5 +1,6 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -62,6 +63,13 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     public void delete(GlobalAuthUser gaUser) {
         log.info(String.format("Deleting user %s (%d)", gaUser.getEmail(), gaUser.getPid()));
         super.delete(gaUser);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public void update(GlobalAuthUser gaUser) {
+        gaUser.setLastModificationDate(new Date(System.currentTimeMillis()));
+        super.update(gaUser);
     }
 
     @Override

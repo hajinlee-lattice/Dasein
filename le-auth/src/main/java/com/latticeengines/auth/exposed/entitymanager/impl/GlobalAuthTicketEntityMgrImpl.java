@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 
+import java.util.Date;
+
 @Component("globalAuthTicketEntityMgr")
 public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTicket> implements
         GlobalAuthTicketEntityMgr {
@@ -44,6 +46,7 @@ public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthTicket gaTicket) {
+        gaTicket.setLastModificationDate(new Date(System.currentTimeMillis()));
         super.update(gaTicket);
     }
 }

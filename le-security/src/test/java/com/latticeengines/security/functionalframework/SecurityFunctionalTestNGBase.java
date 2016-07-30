@@ -259,6 +259,21 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
     }
 
+    protected Boolean changePassword(Ticket ticket, String username, String oldPassword, String newPassword) {
+        try {
+            Credentials oldCreds = new Credentials();
+            oldCreds.setUsername(username);
+            oldCreds.setPassword(oldPassword);
+            Credentials newCreds = new Credentials();
+            newCreds.setUsername(username);
+            newCreds.setPassword(newPassword);
+            return globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+        } catch (Exception e) {
+            log.info("Can't change password for user " + username);
+            return false;
+        }
+    }
+
     protected void makeSureUserDoesNotExist(String username) {
         assertTrue(globalUserManagementService.deleteUser(username));
         assertNull(globalUserManagementService.getUserByUsername(username));

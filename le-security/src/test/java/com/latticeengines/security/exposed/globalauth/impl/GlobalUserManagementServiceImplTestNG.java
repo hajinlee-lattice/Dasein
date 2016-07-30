@@ -99,13 +99,16 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     }
 
     @Test(groups = "functional")
-    public void resetLatticeCredentials() {
+    public void resetAndModifyLatticeCredentials() {
         String newPassword = globalUserManagementService.resetLatticeCredentials(testUsername);
         assertNotNull(newPassword);
 
         Ticket ticket = globalAuthenticationService.authenticateUser(testUsername, DigestUtils.sha256Hex(newPassword));
         assertNotNull(ticket);
         assertEquals(ticket.getTenants().size(), 1);
+
+        assertTrue(changePassword(ticket, testUsername, DigestUtils.sha256Hex(newPassword), DigestUtils.sha256Hex
+                ("admin")));
 
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);
