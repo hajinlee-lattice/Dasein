@@ -12,6 +12,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
@@ -300,7 +301,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
             ResponseDocument<ModelRun> result = modelQualityProxy.getModelRun(modelRunId);
             Assert.assertTrue(result.isSuccess(), "Failed for modelRunId=" + modelRunId);
             
-            ModelRun modelRun = result.getResult();
+            ModelRun modelRun = new ObjectMapper().convertValue(result.getResult(), ModelRun.class);
             if (modelRun.getStatus().equals(ModelRunStatus.COMPLETED)) {
                 break;
             }
@@ -308,7 +309,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
                 Assert.fail("Faield due to= " + modelRun.getErrorMessage());
                 break;
             }
-            System.out.println("Wainting for modelRunId=" + modelRunId + " Status:" + modelRun.getStatus().toString());
+            System.out.println("Waiting for modelRunId=" + modelRunId + " Status:" + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
             if ((end - start) > 3 * 3_600_000) { // 3 hours max
                 Assert.fail("Timeout for modelRunId=" + modelRunId);

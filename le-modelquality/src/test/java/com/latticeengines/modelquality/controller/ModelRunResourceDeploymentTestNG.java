@@ -91,5 +91,14 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         }
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "getModelRuns")
+    public void deleteModelRuns() {
+        try {
+            modelQualityProxy.deleteModelRuns();
+        } catch (Exception ex) {
+            Assert.fail(ex.getMessage());
+        }
+    }
+
 
 }

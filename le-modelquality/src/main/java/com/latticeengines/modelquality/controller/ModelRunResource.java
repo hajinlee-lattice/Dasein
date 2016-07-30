@@ -34,7 +34,7 @@ public class ModelRunResource {
 
     private static final Log log = LogFactory.getLog(ModelRunResource.class);
 
-    @RequestMapping(value = "/runmodel", method = RequestMethod.POST)
+    @RequestMapping(value = "/runmodel", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Run a Model")
     public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun) {
@@ -48,7 +48,7 @@ public class ModelRunResource {
         }
     }
 
-    @RequestMapping(value = "/modelruns", method = RequestMethod.GET)
+    @RequestMapping(value = "/modelruns", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ModelRuns")
     public ResponseDocument<List<ModelRun>> getModelRuns() {
@@ -62,7 +62,7 @@ public class ModelRunResource {
         }
     }
 
-    @RequestMapping(value = "/modelrun/{modelRunId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/modelrun/{modelRunId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ModelRun")
     public ResponseDocument<ModelRun> getModelRun(@PathVariable String modelRunId) {
@@ -78,7 +78,7 @@ public class ModelRunResource {
         }
     }
 
-    @RequestMapping(value = "/modelruns", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/modelruns", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete ModelRuns")
     public void deleteModelRuns() {
