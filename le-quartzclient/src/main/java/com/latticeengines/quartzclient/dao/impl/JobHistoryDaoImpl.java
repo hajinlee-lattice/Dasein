@@ -1,17 +1,16 @@
 package com.latticeengines.quartzclient.dao.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
+import com.latticeengines.quartzclient.dao.JobHistoryDao;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
-import com.latticeengines.quartzclient.dao.JobHistoryDao;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component("jobHistoryDao")
 public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHistoryDao {
@@ -26,7 +25,7 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         Class<JobHistory> entityClz = getEntityClass();
         String queryStr = String
                 .format(
-                        "from %s where TenantId = :tenantId and JobName = :jobName order by TriggeredTime desc",
+                        "from %s where TenantId = :tenantId and JobName = :jobName order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);
@@ -61,7 +60,8 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         Class<JobHistory> entityClz = getEntityClass();
         String queryStr = String
                 .format(
-                        "from %s where TenantId = :tenantId and JobName = :jobName and TriggeredJobStatus = :jobStatus order by TriggeredTime desc",
+                        "from %s where TenantId = :tenantId and JobName = :jobName and " +
+                                "TriggeredJobStatus = :jobStatus order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);
@@ -82,7 +82,8 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         Class<JobHistory> entityClz = getEntityClass();
         String queryStr = String
                 .format(
-                        "from %s where TenantId = :tenantId and JobName = :jobName and TriggeredJobHandle = :jobHandle order by TriggeredTime desc",
+                        "from %s where TenantId = :tenantId and JobName = :jobName and " +
+                                "TriggeredJobHandle = :jobHandle order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);

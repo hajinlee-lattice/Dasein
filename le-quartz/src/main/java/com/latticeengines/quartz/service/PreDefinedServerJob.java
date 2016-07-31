@@ -107,8 +107,12 @@ public class PreDefinedServerJob extends QuartzJobBean {
                         jobHistory.setErrorMessage(e.getMessage());
                     }
                     jobHistoryEntityMgr.saveJobHistory(jobHistory);
+                } else {
+                    log.info(String.format("%s was not triggered because the former job is running.", jobName));
                 }
             }
+        } else {
+            log.warn("Active stack & current stack don't match!");
         }
 
     }
