@@ -44,8 +44,8 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     }
 
     @Override
-    @MatchStep
-    public List<MatchContext> execute(List<MatchContext> matchContexts) {
+    @MatchStep(threshold = 10000L)
+    public List<MatchContext> executeBulk(List<MatchContext> matchContexts) {
         List<String> rootUids = fetcher.enqueue(matchContexts);
         matchContexts = fetcher.waitForResult(rootUids);
         for (MatchContext matchContext : matchContexts) {

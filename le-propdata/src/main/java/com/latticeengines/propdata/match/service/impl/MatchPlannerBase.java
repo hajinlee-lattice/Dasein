@@ -56,7 +56,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    @MatchStep
     ColumnSelection parseColumnSelection(MatchInput input) {
         if (input.getUnionSelection() != null) {
             return combineSelections(input.getUnionSelection());
@@ -67,6 +66,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
+    @MatchStep(threshold = 100L)
     private ColumnSelection combineSelections(UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
         for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections()
@@ -93,7 +93,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return version;
     }
 
-    @MatchStep
     MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
@@ -117,7 +116,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return context;
     }
 
-    @MatchStep
+    @MatchStep(threshold = 100L)
     MatchContext sketchExecutionPlan(MatchContext matchContext) {
         ColumnSelection columnSelection = matchContext.getColumnSelection();
         matchContext.setPartitionColumnsMap(columnSelectionService.getPartitionColumnMap(columnSelection));
@@ -136,7 +135,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    @MatchStep
     MatchOutput initializeMatchOutput(MatchInput input) {
         MatchOutput output = new MatchOutput(input.getUuid());
         output.setReceivedAt(new Date());
@@ -270,7 +268,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return posMap;
     }
 
-    @MatchStep
+    @MatchStep(threshold = 100L)
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
         matchOutput.setMetadata(metadata);

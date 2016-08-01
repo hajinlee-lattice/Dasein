@@ -68,9 +68,9 @@ public class MatchResource implements MatchInterface {
     public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();
         try {
-            return realTimeMatchService.match(input);
+            return realTimeMatchService.matchBulk(input);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed.", e);
+            throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
         } finally {
             log.info((System.currentTimeMillis() - time) + " milli for matching " + input.getInputList().size()
                     + " match inputs");

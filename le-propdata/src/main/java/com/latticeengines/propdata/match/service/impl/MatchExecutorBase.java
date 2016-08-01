@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -268,7 +266,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 if (internalRecord.getErrorMessages() == null) {
                     internalRecord.setErrorMessages(new ArrayList<String>());
                 }
-                internalRecord.getErrorMessages().add("The input does not match to any source.");
+                internalRecord.getErrorMessages().add("The input does not matchBulk to any source.");
             }
 
             internalRecord.setResultsInPartition(null);
@@ -290,13 +288,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
 
         return matchContext;
-    }
-
-    @Override
-    public MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
-        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
-        matchOutput.setMetadata(metadata);
-        return matchOutput;
     }
 
 }

@@ -1,15 +1,21 @@
 package com.latticeengines.propdata.match.aspect;
 
+import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
 @Component
@@ -18,7 +24,8 @@ public class MatchStepAspect {
 
     public static Log log = LogFactory.getLog(MatchStepAspect.class);
 
-    ThreadLocal<String> tracker = new ThreadLocal<>();
+    private ThreadLocal<String> tracker = new ThreadLocal<>();
+    private ConcurrentMap<String, Long> logThreshold = new ConcurrentHashMap<>();
 
     @Around("@annotation(com.latticeengines.propdata.match.annotation.MatchStep)")
     public Object logMatchStep(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -43,7 +50,7 @@ public class MatchStepAspect {
         String trackId = tracker.get();
         Object[] allObjs = combineArgsAndReturn(joinPoint.getArgs(), retVal);
         String uid = getRootOperationUID(allObjs);
-        if (uid != null && uid != trackId) {
+        if (uid != null && !uid.equalsIgnoreCase(trackId)) {
             trackId = uid;
         }
 
@@ -51,8 +58,22 @@ public class MatchStepAspect {
             logMsg += " RootOperationUID=" + trackId;
             tracker.set(trackId);
         }
-        log.info(logMsg);
+
+        upsertAndRetrieveThreshold((MethodSignature) joinPoint.getSignature());
+        Long threshold = logThreshold.get(signature);
+        if (threshold <= elapsedTime) {
+            log.info(logMsg);
+        }
         return retVal;
+    }
+
+    private Long upsertAndRetrieveThreshold(MethodSignature signature) {
+        if (!logThreshold.containsKey(signature.toShortString())) {
+            Method method = signature.getMethod();
+            MatchStep step = method.getAnnotation(MatchStep.class);
+            logThreshold.putIfAbsent(signature.toShortString(), step.threshold());
+        }
+        return logThreshold.get(signature.toShortString());
     }
 
     private Object[] combineArgsAndReturn(Object[] args, Object retVal) {

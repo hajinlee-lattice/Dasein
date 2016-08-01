@@ -31,7 +31,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         return context;
     }
 
-    @MatchStep
     private void validate(MatchInput input) {
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
     }

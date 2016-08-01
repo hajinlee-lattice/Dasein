@@ -10,7 +10,6 @@ import com.latticeengines.propdata.match.service.MatchPlanner;
 @Component("bulkMatchPlanner")
 public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
-    @MatchStep
     public MatchContext plan(MatchInput input) {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);

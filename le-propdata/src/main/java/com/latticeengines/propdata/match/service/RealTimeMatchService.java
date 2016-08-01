@@ -9,6 +9,6 @@ public interface RealTimeMatchService {
 
     MatchOutput match(MatchInput input);
 
-    BulkMatchOutput match(BulkMatchInput input);
+    BulkMatchOutput matchBulk(BulkMatchInput input);
 
 }

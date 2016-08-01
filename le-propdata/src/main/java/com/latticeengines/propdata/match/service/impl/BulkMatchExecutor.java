@@ -19,7 +19,6 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     private MatchFetcher fetcher;
 
     @Override
-    @MatchStep
     public MatchContext execute(MatchContext matchContext) {
         matchContext = fetcher.fetch(matchContext);
         matchContext = complete(matchContext);
@@ -27,7 +26,7 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     }
 
     @Override
-    public List<MatchContext> execute(List<MatchContext> matchContexts) {
+    public List<MatchContext> executeBulk(List<MatchContext> matchContexts) {
         List<MatchContext> result = new ArrayList<>(matchContexts.size());
         for (MatchContext matchContext : matchContexts) {
             result.add(execute(matchContext));

@@ -29,7 +29,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     private MatchExecutor matchExecutor;
 
     @Override
-    @MatchStep
+    @MatchStep(threshold = 0L)
     public MatchOutput match(MatchInput input) {
         MatchContext matchContext = prepareMatchContext(input);
         matchContext = executeMatch(matchContext);
@@ -37,10 +37,10 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     }
 
     @Override
-    @MatchStep
-    public BulkMatchOutput match(BulkMatchInput input) {
+    @MatchStep(threshold = 0L)
+    public BulkMatchOutput matchBulk(BulkMatchInput input) {
         List<MatchContext> matchContexts = doPreProcessing(input);
-        matchContexts = matchExecutor.execute(matchContexts);
+        matchContexts = matchExecutor.executeBulk(matchContexts);
         return doPostProcessing(input, matchContexts);
     }
 
