@@ -74,7 +74,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private static final String MODEL_TYPE_KEY = "__type";
     private static final String MODEL_KEY = "Model";
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
-    public static final String HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
+    public static final String HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR = "/user/s-analytics/customers/%s/data/%s-*-Metadata/";
     public static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     public static final String MODEL_JSON_SUFFIX = "_model.json";

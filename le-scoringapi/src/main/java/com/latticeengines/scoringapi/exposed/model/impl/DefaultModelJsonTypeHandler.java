@@ -74,8 +74,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             modelEvaluator = initModelEvaluator(is);
 
             if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
-                        localPathToPersist + PMML_FILENAME);
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
@@ -96,8 +95,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
-                        localPathToPersist + SCORE_DERIVATION_FILENAME);
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + SCORE_DERIVATION_FILENAME);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
@@ -114,8 +112,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
-                        localPathToPersist + DATA_COMPOSITION_FILENAME);
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
@@ -125,11 +122,31 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDir, //
+    public DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDirWithWildChar, //
             String localPathToPersist) {
-        String path = hdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
+        String path = null;
         String content = null;
+
         try {
+            path = hdfsScoreArtifactTableDirWithWildChar;
+
+            List<String> resolvedHdfsScoreArtifactTableDirs = HdfsUtils.getFilesByGlob(yarnConfiguration,
+                    hdfsScoreArtifactTableDirWithWildChar);
+            String resolvedHdfsScoreArtifactTableDir = null;
+            for (String dir : resolvedHdfsScoreArtifactTableDirs) {
+                if (!dir.endsWith(PATH_SEPARATOR)) {
+                    dir += PATH_SEPARATOR;
+                }
+
+                if (!hdfsScoreArtifactTableDirWithWildChar.equals(dir)) {
+                    // pick first matching dir
+                    resolvedHdfsScoreArtifactTableDir = dir;
+                    break;
+                }
+            }
+
+            path = resolvedHdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
+
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
             if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
@@ -181,9 +198,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     @Override
-    public AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
-            String recordId, Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            String modelId) {
+    public AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String modelId) {
         Map<String, Object> parsedRecord = new HashMap<String, Object>(record.size());
         parsedRecord.putAll(record);
 
@@ -212,23 +228,19 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                     new String[] { JsonUtils.serialize(mismatchedDataTypes) });
         }
 
-        return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord,
-                interpretedFields);
+        return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
 
     protected boolean shouldThrowExceptionForMismatchedDataTypes() {
         return true;
     }
 
-    protected void handleException(
-            Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
+    protected void handleException(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
             String fieldName, Object fieldValue, FieldType fieldType, Map<String, Object> record) {
-        mismatchedDataTypes.put(fieldName,
-                new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(), fieldValue));
+        mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(), fieldValue));
     }
 
-    private void interpretFields(InterpretedFields interpretedFields, String fieldName,
-            FieldSchema schema) {
+    private void interpretFields(InterpretedFields interpretedFields, String fieldName, FieldSchema schema) {
         switch (schema.interpretation) {
         case Id:
             interpretedFields.setRecordId(fieldName);
@@ -259,8 +271,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         }
     }
 
-    private void setFieldTypes(
-            Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
+    private void setFieldTypes(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
             Map<String, Object> record, String fieldName, FieldSchema schema) {
         Object fieldValue = record.get(fieldName);
         if (schema.source == FieldSource.REQUEST && fieldValue != null) {
@@ -270,10 +281,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         }
     }
 
-    private void parseField(
-            Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
-            Map<String, Object> record, String fieldName, FieldSchema schema, Object fieldValue,
-            FieldType fieldType) {
+    private void parseField(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
+            Map<String, Object> record, String fieldName, FieldSchema schema, Object fieldValue, FieldType fieldType) {
         try {
             if (schema.interpretation == FieldInterpretation.Date) {
                 if (!StringUtils.objectIsNullOrEmptyString(fieldValue)) {
@@ -288,15 +297,13 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         }
     }
 
-    private void addWarning(WarningCode code, String recordId, List<String> fields,
-            String modelId) {
-        warnings.addWarning(recordId, new Warning(code,
-                new String[] { getWarningPrefix(modelId) + Joiner.on(",").join(fields) }));
+    private void addWarning(WarningCode code, String recordId, List<String> fields, String modelId) {
+        warnings.addWarning(recordId,
+                new Warning(code, new String[] { getWarningPrefix(modelId) + Joiner.on(",").join(fields) }));
     }
 
     private String getWarningPrefix(String modelId) {
-        return StringUtils.objectIsNullOrEmptyString(modelId) ? ""
-                : "[For ModelId - " + modelId + "] => ";
+        return StringUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
     }
 
     protected boolean shouldStopCheckForScoreDerivation(String path) throws IOException {
@@ -309,16 +316,16 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord) {
-        Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator()
-                .evaluate(transformedRecord, scoringArtifacts.getScoreDerivation());
+        Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
+                scoringArtifacts.getScoreDerivation());
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 
         int percentile = (int) percentileObject;
         if (percentile > 99 || percentile < 5) {
             if (log.isDebugEnabled()) {
-                log.debug(String.format("Score out of range; percentile: %d probability: %,.7f",
-                        percentile, (double) evaluation.get(ScoreType.PROBABILITY)));
+                log.debug(String.format("Score out of range; percentile: %d probability: %,.7f", percentile,
+                        (double) evaluation.get(ScoreType.PROBABILITY)));
             }
             percentile = Math.min(percentile, 99);
             percentile = Math.max(percentile, 5);

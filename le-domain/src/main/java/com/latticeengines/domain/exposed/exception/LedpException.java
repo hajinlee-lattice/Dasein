@@ -37,7 +37,13 @@ public class LedpException extends RuntimeException {
         String msg = code.getMessage();
 
         for (int i = 0; i < params.length; i++) {
-            msg = msg.replaceAll("\\{" + i + "\\}", params[i]);
+            String param = params[i];            
+            if (param != null) {
+                // we need to escape $ from param otherwise it interfere with
+                // replace logic
+                param = param.replace("$", "\\$");
+            }
+            msg = msg.replaceAll("\\{" + i + "\\}", param);
         }
         return msg;
     }
