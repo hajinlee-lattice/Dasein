@@ -40,6 +40,7 @@ public class SamplingConfiguration {
 
     private boolean parallelEnabled;
     private String hdfsDirPath;
+    private Long randomSeed = -1L;
 
     public void addSamplingElement(SamplingElement samplingElement) {
         samplingElements.add(samplingElement);
@@ -204,6 +205,16 @@ public class SamplingConfiguration {
     @JsonProperty(value = "hdfs_dir_path", required = false)
     public void setHdfsDirPath(String hdfsDirPath) {
         this.hdfsDirPath = hdfsDirPath;
+    }
+    
+    @JsonProperty(value = "random_seed", required = false)
+    public void setRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
+    }
+    
+    @JsonProperty(value = "random_seed", required = false)
+    public Long getRandomSeed() {
+        return randomSeed;
     }
 
 }
