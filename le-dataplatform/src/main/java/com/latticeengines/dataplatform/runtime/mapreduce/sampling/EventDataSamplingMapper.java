@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
 
     private SamplingConfiguration sampleConfig = null;
+    private Random random = null;
     
     @Override
     public void setup(Context context) {
@@ -30,6 +31,11 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
             throw new LedpException(LedpCode.LEDP_12004);
         }
         sampleConfig = JsonUtils.deserialize(sampleConfigStr, SamplingConfiguration.class);
+        random = new Random();
+        if (sampleConfig.getRandomSeed() != -1) {
+            random.setSeed(sampleConfig.getRandomSeed());
+        }
+
     }
 
     @Override
@@ -37,7 +43,7 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
             InterruptedException {
         List<SamplingElement> samplingElements = sampleConfig.getSamplingElements();
         int trainingPct = sampleConfig.getTrainingPercentage();
-        Random random = new Random();
+        
         for (SamplingElement samplingElement : samplingElements) {
             int sampleRate = samplingElement.getPercentage();
             int sample = random.nextInt(100);

@@ -52,6 +52,7 @@ public class EventDataSamplingJobUnitTestNG {
         s1.setPercentage(60);
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
+        samplingConfig.setRandomSeed(1469677778189L);
     }
 
     private File[] getAvroFilesForDir(String parentDir) {
@@ -101,7 +102,9 @@ public class EventDataSamplingJobUnitTestNG {
             System.out.println("File = " + avroFile.getName());
             System.out.println("Number of rows = " + retval.value());
             for (Map.Entry<Object, Integer> entry : retval.key().entrySet()) {
-                System.out.println("Key = " + entry.getKey() + " Pct = " + getPercentage(entry.getValue(), retval.value()));
+                System.out.println("Key = " + entry.getKey() + //
+                        " Pct = " + getPercentage(entry.getValue(), retval.value()) + //
+                        " Num items = " + entry.getValue());
             }
             System.out.println("**************************");
         }
