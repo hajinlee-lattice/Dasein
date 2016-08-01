@@ -35,11 +35,11 @@ public class TestRegisterModels {
 
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
             InternalResourceRestApiProxy plsRest, Tenant tenant, TestModelConfiguration modelConfiguration,
-            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser)
+            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser, String hdfsSubPathForModel)
             throws IOException {
         createModel(plsRest, tenant, modelConfiguration, customerSpace, testModelSummaryParser);
         TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
-                tenant, modelConfiguration);
+                tenant, modelConfiguration,  hdfsSubPathForModel);
         createTableEntryForModel(modelConfiguration.getEventTable(),
                 testModelArtifactDataComposition.getEventTableDataComposition().fields, customerSpace, metadataProxy);
         return testModelArtifactDataComposition;
@@ -73,10 +73,12 @@ public class TestRegisterModels {
     }
 
     private TestModelArtifactDataComposition setupHdfsArtifacts(Configuration yarnConfiguration, Tenant tenant,
-            TestModelConfiguration modelConfiguration) throws IOException {
+            TestModelConfiguration modelConfiguration, String hdfsSubPathForModel) throws IOException {
         String tenantId = tenant.getId();
         String artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 modelConfiguration.getEventTable());
+        artifactTableDir = artifactTableDir.replaceAll("\\*", hdfsSubPathForModel);
+
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());

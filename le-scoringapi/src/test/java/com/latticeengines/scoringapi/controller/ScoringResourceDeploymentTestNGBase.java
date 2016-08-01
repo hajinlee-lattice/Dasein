@@ -279,11 +279,17 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
         TestRegisterModels modelCreator = new TestRegisterModels();
 
+        String hdfsSubPathForModel = "Event";
         for (int i = 0; i < MAX_MODELS; i++) {
             String testModelFolderName = TEST_MODEL_NAME_PREFIX + i + "20160314_112802";
             if (modelId != null) {
                 testModelFolderName = modelId;
             }
+
+            if (i > 0) {
+                hdfsSubPathForModel = "Random" + i;
+            }
+
             String applicationId = "application_" + i + "1457046993615_3823";
             String modelVersion = "ba99b36-c222-4f93" + i + "-ab8a-6dcc11ce45e9";
             TestModelConfiguration modelConfiguration = null;
@@ -295,7 +301,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                         modelConfiguration,
                         (customerSpace != null ? customerSpace
                                 : ScoringApiControllerDeploymentTestNGBase.customerSpace),
-                        metadataProxy, getTestModelSummaryParser());
+                        metadataProxy, getTestModelSummaryParser(), hdfsSubPathForModel);
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
                         modelVersion);
