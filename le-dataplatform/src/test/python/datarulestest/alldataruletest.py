@@ -82,7 +82,7 @@ class AllDataRuleTest(TestBase):
         self.logger.info('* Summary: {0} rows failed ({1:.2%})'.format(n_failed, float(n_failed) / float(n_rows)))
 
     def atestPopulatedRowCountDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                     '                                                     ' + \
@@ -115,7 +115,7 @@ class AllDataRuleTest(TestBase):
 
     def atestLowCoverageDS(self, doParameterSearch=False):
         if doParameterSearch:
-            for et in [self.eventtable_mulesoft]:
+            for et in [self.eventtable_hostingcom]:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
                         'Parameter Search LowCoverageDS: Using dataset {}'.format(et.getName()))
@@ -135,7 +135,7 @@ class AllDataRuleTest(TestBase):
             self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestNullIssueDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
@@ -180,7 +180,7 @@ class AllDataRuleTest(TestBase):
                 self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestUniqueValueCountDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
@@ -201,7 +201,7 @@ class AllDataRuleTest(TestBase):
                 self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestOverlyPredictiveDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
@@ -241,7 +241,7 @@ class AllDataRuleTest(TestBase):
                 self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestHighlyPredictiveSmallPopulationDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
@@ -271,7 +271,7 @@ class AllDataRuleTest(TestBase):
                 self.rowRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def testAll(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             self.logger.info('________________________________________\n' + \
                     '                                                     ' + \
                     'DataRules: Using dataset {}'.format(et.getName()))
@@ -282,7 +282,7 @@ class AllDataRuleTest(TestBase):
             self.atestUniqueValueCountDS()
 
     def atestdoParameterSearch(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             self.logger.info('________________________________________\n' + \
                     '                                                     ' + \
                     'Parameter Search DataRules: Using dataset {}'.format(et.getName()))
