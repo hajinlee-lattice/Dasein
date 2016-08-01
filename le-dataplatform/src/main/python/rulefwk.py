@@ -50,6 +50,7 @@ class DataRulePipeline(Pipeline):
         for step in self.pipelineSteps:
             logger.info("Processing results for DataRule " + step.__class__.__name__)
             fileSuffix = ""
+            detailedresults = step.getResults()
             if isinstance(step, ColumnRule):
                 avroSchema = getColumnSchema()
                 fileSuffix = "ColumnRule"
@@ -68,13 +69,23 @@ class DataRulePipeline(Pipeline):
             outputFileName = step.__class__.__name__ + '_' + fileSuffix + '.avro'
             dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
                                                  recordWriter, writers_schema=avroSchema, codec='deflate')
-
             if not results:
                 logger.info("No DataRule results for " + step.__class__.__name__)
                 dataWriter.close() # write out avro file with no rows
                 continue
             else:
-                logger.info("DataRule results: " + str(results))
+                details = ''
+                n_cols = 0
+                n_failed = 0
+                for c, r in detailedresults.iteritems():
+                    n_cols += 1
+                    if not r.isPassed():
+                        n_failed += 1
+                    if not r.isPassed():
+                        details = details + '{0:50s} FAILED: {1}\n'.format(c, r.getMessage())
+                    else:
+                        details = details + '{0:50s} PASSED: {1}\n'.format(c, r.getMessage())
+                logger.info('DataRule results: {0} columns failed ({1:.2%})\n{2}'.format(n_failed, float(n_failed)/float(n_cols), details))
 
             index = 1
             if isinstance(step, ColumnRule):

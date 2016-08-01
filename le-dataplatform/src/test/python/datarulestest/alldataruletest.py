@@ -38,6 +38,9 @@ class AllDataRuleTest(TestBase):
         cls.eventtable_nginx = DataRuleEventTable(
                 'NGINX',
                 'NGINX_PLS_LP3_ModelingLead_ReducedRowsEnhanced_Training_20160712_125224.avro')
+        cls.eventtable_seagate = DataRuleEventTable(
+                'Seagate',
+                'Seagate.avro')
 
     @classmethod
     def tearDownClass(cls):
@@ -51,20 +54,37 @@ class AllDataRuleTest(TestBase):
     # #   "failed", "passed", "all", "none"
 
     def columnRuleTestAlgorithm(self, colrule, dataframe, dictOfArguments, reportset='failed'):
+        colstoremove = set()
         for p, v in colrule.getConfParameters().iteritems():
             self.logger.info('* Parameter {0:29s} = {1}'.format(p, v))
         colrule.apply(dataframe, dictOfArguments)
         n_cols = 0
         n_failed = 0
+        details = ''
+        detailedresults = colrule.getResults()
         for c, r in colrule.getResults().iteritems():
             n_cols += 1
             if not r.isPassed():
+                colstoremove.add(c)
                 n_failed += 1
             if not r.isPassed() and reportset in ['all', 'failed']:
                 self.logger.info('! Failed Column {0}: {1}'.format(c, r.getMessage()))
             elif reportset in ['all', 'passed']:
                 self.logger.info('o Passed Column {0}: {1}'.format(c, r.getMessage()))
         self.logger.info('* Summary: {0} columns failed ({1:.2%})'.format(n_failed, float(n_failed) / float(n_cols)))
+        return colstoremove
+
+    def columnRuleTestAlgorithmMany(self, colrulelist, dataframe, reportset='failed'):
+        colstoremove = set()
+        for colrule in colrulelist:
+            self.logger.info('________________________________________\n' + \
+                        '                                                     ' + \
+                        '{}'.format(type(colrule).__name__))
+            colstoremove = colstoremove | self.columnRuleTestAlgorithm(colrule, dataframe, {}, reportset)
+        colstr = ''
+        for c in sorted(colstoremove):
+            colstr += (c + '\n')
+        self.logger.info('* ALL COLUMNS TO REMOVE ({0} TOTAL):\n{1}'.format(len(colstoremove), colstr))
 
     def rowRuleTestAlgorithm(self, rowrule, dataframe, dictOfArguments, reportset='failed'):
         for p, v in rowrule.getConfParameters().iteritems():
@@ -114,8 +134,8 @@ class AllDataRuleTest(TestBase):
                 self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestLowCoverageDS(self, doParameterSearch=False):
-        if doParameterSearch:
-            for et in [self.eventtable_hostingcom]:
+        for et in [self.eventtable_mulesoft]:
+            if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
                         'Parameter Search LowCoverageDS: Using dataset {}'.format(et.getName()))
@@ -125,14 +145,14 @@ class AllDataRuleTest(TestBase):
                     rule = LowCoverageDS(columns, et.getCategoricalCols(), et.getNumericalCols(), lowcoverageThreshold=x)
                     dictOfArguments = {}
                     self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
-        else:
-            self.logger.info('________________________________________\n' + \
-                    '                                                     ' + \
-                    'LowCoverageDS: Using dataset {}'.format(et.getName()))
-            columns = et.getAllColsAsDict()
-            rule = LowCoverageDS(columns, et.getCategoricalCols(), et.getNumericalCols(), lowcoverageThreshold=0.95)
-            dictOfArguments = {}
-            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
+            else:
+                self.logger.info('________________________________________\n' + \
+                        '                                                     ' + \
+                        'LowCoverageDS: Using dataset {}'.format(et.getName()))
+                columns = et.getAllColsAsDict()
+                rule = LowCoverageDS(columns, et.getCategoricalCols(), et.getNumericalCols(), lowcoverageThreshold=0.95)
+                dictOfArguments = {}
+                self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestNullIssueDS(self, doParameterSearch=False):
         for et in [self.eventtable_hostingcom]:
@@ -270,7 +290,7 @@ class AllDataRuleTest(TestBase):
                 dictOfArguments = {}
                 self.rowRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
-    def testAll(self):
+    def atestAll(self):
         for et in [self.eventtable_hostingcom]:
             self.logger.info('________________________________________\n' + \
                     '                                                     ' + \
@@ -292,3 +312,12 @@ class AllDataRuleTest(TestBase):
             self.atestOverlyPredictiveDS(doParameterSearch=True)
             self.atestUniqueValueCountDS(doParameterSearch=True)
 
+    def testCombination(self):
+        for et in [self.eventtable_mulesoft]:
+            colrulelist = []
+            colrulelist.append(PopulatedRowCountDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols()))
+            colrulelist.append(LowCoverageDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols()))
+            colrulelist.append(NullIssueDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol()))
+            colrulelist.append(UniqueValueCountDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols()))
+            colrulelist.append(OverlyPredictiveDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols(), et.getEventCol()))
+            self.columnRuleTestAlgorithmMany(colrulelist, et.getDataFrame(), 'none')

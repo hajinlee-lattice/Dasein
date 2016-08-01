@@ -29,6 +29,7 @@ class DataRuleEventTable(object):
         self.name = name
         self.df = None
         self.n_dfrows = -1
+        self.includedCols = []
         self.allColsDict = {}
         self.categoricalCols = {}
         self.numericalCols = {}
@@ -41,16 +42,18 @@ class DataRuleEventTable(object):
                 schema = reader.schema
                 fields = schema['fields']
                 for col in fields:
+                    if 'InterfaceName' in col.keys() and col['InterfaceName'] == 'Event':
+                        self.includedCols.append(col['name'])
+                        self.eventCol = col['name']
+                    if col['ApprovedUsage'] == '[None]':
+                        continue
                     self.allColsDict[col['name']] = None
+                    self.includedCols.append(col['name'])
                     datatype = col['type'][0]
-
                     if datatype in ['int','long','double','boolean']:
                         self.numericalCols[col['name']] = None
                     elif datatype in ['string']:
                         self.categoricalCols[col['name']] = None
-
-                    if 'InterfaceName' in col.keys() and col['InterfaceName'] == 'Event':
-                        self.eventCol = col['name']
             else:
                 raise ValueError('Filetype {} not supported'.format(filetype))
 
@@ -88,7 +91,8 @@ class DataRuleEventTable(object):
                     if nrows > -1 and i > nrows:
                         i-=1
                         break
-                    rows.append(record)
+                    reduced = {cname:record[cname] for cname in self.includedCols}
+                    rows.append(reduced)
                     if (i % 5000 == 0):
                         self.logger.info('* Read {} records'.format(i))
                         self.df = self.df.append(rows, ignore_index=True)
