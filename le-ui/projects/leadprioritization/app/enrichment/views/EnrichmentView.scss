@@ -114,7 +114,8 @@
                 z-index: -1;
                 min-height: 65px;
                 transition: none;
-                box-shadow: 0 3px 10px -5px rgba(0, 0, 0, 1);
+                border: 1px solid rgba(0,0,0,.2);
+                box-shadow: 0 7px 0 -5px rgba(0, 0, 0, .05);
             }
             ul.subheader {
                 margin: 10px;
@@ -129,6 +130,31 @@
     }
     .enrichments {
         .box {
+            &.active {
+                .box-inner {
+                    display: block;
+                    & > button {
+                        &:not(.is-dirty) {
+                            border: 0;
+                            background: 0;
+                            color: black;
+                            text-align: right;
+                            padding-right: 44px;
+                            &:after {
+                                @include font-awesome-inline("\f00c");
+                                color: #6fbe4a;
+                                position: absolute;
+                                top: 50%;
+                                right: 0;
+                                transform: translateY(-50%);
+                                font-size: 33px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .box-inner {
             padding: 10px;
             margin: 5px 0;
             border: 1px solid rgba(0,0,0,.2);
@@ -181,26 +207,6 @@
                     font-size: 14px;
                 }
             }
-            &.active {
-               & > button {
-                    &:not(.is-dirty) {
-                        border: 0;
-                        background: 0;
-                        color: black;
-                        text-align: right;
-                        padding-right: 44px;
-                        &:after {
-                            @include font-awesome-inline("\f00c");
-                            color: #6fbe4a;
-                            position: absolute;
-                            top: 50%;
-                            right: 0;
-                            transform: translateY(-50%);
-                            font-size: 33px;
-                        }
-                    }
-               }
-            }
             [data-corner-ribbon] {
                 position: absolute;
                 left: -5px; 
@@ -219,7 +225,6 @@
                     width: 100px;
                     display: block;
                     background: #f16a22;
-                    box-shadow: 0 3px 10px -5px rgba(0, 0, 0, 1);
                     position: absolute;
                     top: 15px; 
                     left: -22px;
@@ -249,7 +254,7 @@
             }
         }
         &.list {
-            .box {
+            .box-inner {
                 padding-left: 90px;
                 padding-right: 170px;
                 & > .ico-container {
@@ -274,26 +279,51 @@
             -webkit-align-content: flex-start;
             -ms-flex-line-pack: start;
             align-content: flex-start;
+            &[data-across="2"] .box {
+                width: calc(100% / 2);
+                &:nth-child(2n) .box-inner {
+                    margin-right: 0;
+                }
+            }
+            &[data-across="3"] .box {
+                width: calc(100% / 3);
+                &:nth-child(3n) .box-inner {
+                    margin-right: 0;
+                }
+            }
+            &[data-across="4"] .box {
+                width: calc(100% / 4);
+                &:nth-child(4n) .box-inner {
+                    margin-right: 0;
+                }
+            }
+            &[data-across="5"] .box {
+                width: calc(100% / 5);
+                &:nth-child(5n) .box-inner {
+                    margin-right: 0;
+                }
+            }
             .box {
                 @include flex-item(0 1 auto);
-                width: calc(50% - 10px);
-                padding-left: 20px;
-                padding-bottom: 70px;
-                &:nth-child(odd) {
+                margin-bottom: 10px;
+                & > .box-inner {
+                    height: 100%;
                     margin-right: 10px;
-                }
-                & > .ico-container {
-                    display: inline-block;
-                    margin-right: 10px;
-                }
-                & > h2 {
-                    display: inline-block;
-                    vertical-align: middle;
-                }
-                & > button {
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
+                    padding-left: 20px;
+                    padding-bottom: 70px;
+                    & > .ico-container {
+                        display: inline-block;
+                        margin-right: 10px;
+                    }
+                    & > h2 {
+                        display: inline-block;
+                        vertical-align: middle;
+                    }
+                    & > button {
+                        position: absolute;
+                        bottom: 10px;
+                        right: 10px;
+                    }
                 }
             }
         }

@@ -50,7 +50,7 @@
                 </pd-pagination-controls>
             </div>
         </div>
-        <ul class="enrichments {{vm.view}}">
+        <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
             <li class="box category-{{vm.categoryClass(enrichment.Category)}}" 
             ng-repeat="enrichment in (filteredList = (vm.enrichments 
             | filter: vm.query
@@ -60,19 +60,22 @@
             | limitTo: vm.pagesize" 
             ng-class="{'active': enrichment.IsSelected}" 
             ng-click="vm.showData(enrichment)">
-                <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
-                <div class="ico-container"><span class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></span></div>
-                <h2>
-                    <em>{{vm.fieldType(enrichment.FieldType)}}</em>
-                    <strong>{{enrichment.DisplayName}}</strong>
-                </h2>
-                <p>{{enrichment.Description}}</p>
-                <button class="button" 
-                ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'is-dirty': enrichment.IsDirty}" 
-                ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)" n
-                g-class="{'is-dirty': enrichment.IsDirty}">
-                    <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
-                </button>
+                <div 
+                    class="box-inner">
+                    <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
+                    <div class="ico-container"><span class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></span></div>
+                    <h2>
+                        <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                        <strong>{{enrichment.DisplayName}}</strong>
+                    </h2>
+                    <p>{{enrichment.Description}}</p>
+                    <button class="button" 
+                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'is-dirty': enrichment.IsDirty}" 
+                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)" n
+                    g-class="{'is-dirty': enrichment.IsDirty}">
+                        <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+                    </button>
+                </div>
             </li>
             <li ng-show="!filteredList.length">
               <h2>{{vm.label.no_results}}</h2>

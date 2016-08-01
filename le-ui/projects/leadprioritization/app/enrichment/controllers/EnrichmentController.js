@@ -1,7 +1,10 @@
 // green msg after save, 3s
 angular.module('lp.enrichment.leadenrichment', [])
 .controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
-    var vm = this;
+    var vm = this,
+        across = 3, // how many across in grid view
+        approximate_pagesize = 25,
+        pagesize = Math.round(approximate_pagesize / across) * across;
 
     angular.extend(vm, {
         label: {
@@ -24,7 +27,8 @@ angular.module('lp.enrichment.leadenrichment', [])
         selectDisabled: 1,
         saveDisabled: 1,
         selectedCount: 0,
-        pagesize: 26, // keep this number even
+        pagesize: pagesize,
+        across: across,
         initialized: false,
         enrichments: [],
         enable_grid: true,
