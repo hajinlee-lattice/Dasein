@@ -160,7 +160,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         _resized();
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
-        vm.premiumSelectLimit = EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Sourcex'] || 10;
+        vm.premiumSelectLimit = EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source'] || 10;
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);
