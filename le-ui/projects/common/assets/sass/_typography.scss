@@ -48,7 +48,11 @@ $header-color: $onyx;
        url('../../lib/fonts/ProximaNova-Bold-webfont.ttf')  format('truetype'), /* Safari, Android, iOS */
        url('../../lib/fonts/ProximaNova-Bold-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
 }
-
+html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    height: 100%;
+}
 body {
 	color: $gun-metal;
 	font-size: 14px;
@@ -114,6 +118,17 @@ Body Copy
 	font-size: 10px;
 }
 
+/*
+Text Selection Styles
+====================================================== */
+::selection {
+    background:#1FB5AD;
+    color:#fff;
+}
+::-moz-selection {
+    background:#1FB5AD;
+    color:#fff;
+}
 
 /* 
 Links

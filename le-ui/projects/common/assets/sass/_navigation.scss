@@ -413,6 +413,8 @@ html.no-cssmask {
             -moz-transition: all 250ms linear, transform 0s linear;
             -ms-transition: all 250ms linear, transform 0s linear;
             transition: all 250ms linear, transform 0s linear;
+            width: 16px;
+            height: 16px;
         }
     }
     .model-name {
@@ -477,6 +479,9 @@ html.no-cssmask {
             span {
                 margin: 1em 0 0 1em;
                 width: 1em;
+            }
+            .fa-chevron-down {
+                margin: 12px 0 0;
             }
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;

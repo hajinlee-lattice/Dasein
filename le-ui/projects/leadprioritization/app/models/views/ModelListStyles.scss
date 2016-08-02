@@ -50,3 +50,238 @@
 		}
 	}
 }
+
+/*
+Model List
+================================================================== */
+.no-models {
+    padding: 10em 0 6em;
+    margin-bottom: 10em;
+    background: url(/lp/assets/images/bg_no_models.png) no-repeat center center;
+}
+.home #main-content {
+    margin-top: 20px;
+}
+
+.create-model {
+    margin-right: 1%;
+}
+
+@keyframes colorShift {
+  0% {
+    -webkit-filter: saturate(100%);
+    -moz-filter: saturate(100%);
+    filter: saturate(100%);
+  }
+  100% {
+    -webkit-filter: saturate(166%);
+    -moz-filter: saturate(166%);
+    filter: saturate(166%);
+  }
+}
+.model {
+    position: relative;
+    margin: 0 .5% 3px .5%;
+    display: block;
+    width: 100%;
+
+    .model-tile {
+        min-height: 300px;
+        background-color: #fff;
+        border: #e0e3e6 solid 2px;
+        border-radius: 4px; 
+    }
+    .model-image {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 100px;
+
+        &.SalesforceLead, &.SalesforceAccount {
+            background-size: 150px;
+        }
+        &.SalesforceLead {
+            background-image: url(/assets/images/bkg-active-model-lead.png);
+        }
+        &.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-account.png);
+        }
+        &.PmmlModel {
+            background-image: url(/assets/images/bkg-active-model-pmml.png);
+        }
+        &.PmmlModel.SalesforceLead {
+            background-image: url(/assets/images/bkg-active-model-pmml-lead.png);
+        }
+        &.PmmlModel.SalesforceAccount {
+            background-image: url(/assets/images/bkg-active-model-pmml-account.png);
+        }
+    }
+
+    &.inactive .model-image {
+        -webkit-filter: grayscale(100%);
+        -moz-filter: grayscale(100%);
+        filter: grayscale(100%);
+    }
+
+    &:hover {
+        transition: all 0ms ease 0s;
+        border-color: #87AAD2;
+        
+        .model-image {
+            cursor: pointer;
+            transition: all 0ms ease 0s;
+            animation-iteration-count: 1;
+            animation-duration: 1.2s;
+            animation-delay: 0s;
+            animation-name: colorShift;
+            -webkit-filter: grayscale(0%) saturate(133%);
+            -moz-filter: grayscale(0%) saturate(133%);
+            filter: grayscale(0%) saturate(133%);
+        }
+
+        &.inactive .model-image {
+            animation-duration: 0s;
+            -webkit-filter: grayscale(66%);
+            -moz-filter: grayscale(66%);
+            filter: grayscale(66%);
+        }
+    }
+}
+@media (min-width: 640px) {
+    .model{
+        display: inline-block;
+        width: 49%;
+    }
+}
+@media (min-width: 800px) {
+    .model{
+        width: 32.3%;
+    }
+}
+@media (min-width: 1024px) {
+    .model{
+        width: 24%;
+    }
+}
+.model-title {
+    position: absolute;
+    top: 0px;
+    z-index: 2;
+    width: 100%;
+    padding: 13px;
+    word-wrap: break-word;
+    h2 {
+        margin: 0;
+        color: #333333;
+        font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+        padding-right: 1.75em;
+        font-size: 18px;
+        background: url(/lp/assets/images/ico-pencil.png) no-repeat top right;
+        text-align: left;
+        &:hover {
+            background: url(/lp/assets/images/ico-pencil-hover.png) no-repeat top right;
+        }
+        &:after {
+            color: #bfbfbf;
+            font-style: normal;
+            font-weight: normal;
+            top: 1em;
+            right: 1em;
+            position: absolute;
+        }
+    }
+    h2.editable-click:hover {
+        padding-right: 1.75em;
+        cursor: pointer;
+    }
+    .editable-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        width: 100%;
+        height: 296px;
+        background: rgba(48, 102, 165, 0.6);
+        & > div {
+            background: #fff;
+            padding: 10px 16px;
+        }
+        .form-control {
+            padding: 0;
+            font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+            height: 30px;
+            font-size: 18px;
+            color: #333;
+            border: none;
+        }
+    }
+    .editable-cancel {
+        float: left;
+        width: 48.5%;
+        font-size: 1.25em;
+    }
+    .editable-submit {
+        float: right;
+        width: 47.5%;
+        font-size: 1.25em;
+    }
+}
+.editableform > div {
+    width: 100%;
+}
+.editable-buttons {
+    margin-top:1.5em;
+    margin-bottom: 1.5em;
+    &:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+    button {
+        width: 48%;
+        padding: 0.75em 0;
+    }
+}
+.model-title:hover h2:after {
+    color: #477cba;
+}
+.model-title .edit {
+    top: 0;
+    right: 0;
+    position: absolute;
+}
+.meta-data {
+    position: absolute;
+    bottom: 13px;
+    left: 13px;
+    width: 94%;
+    .stats, .status {
+        display: inline-block;
+    }
+    .status {
+        padding-left: 16px;
+        vertical-align: text-bottom;
+        margin-left: 16px;
+        border-left: #ddd solid 1px;
+        font-size: 1.45em;
+    }
+}
+.delete-model {
+    position: absolute;
+    bottom: 0px;
+    right: 8px;
+    z-index: 1;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: #bfbfbf;
+    font-size: 2em;
+}
+    .delete-model:hover {
+        color: #477cba;
+    }
+
