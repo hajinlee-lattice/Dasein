@@ -189,6 +189,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         String tenantId = tenant.getId();
         artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 modelConfiguration.getEventTable());
+        artifactTableDir = artifactTableDir.replaceAll("\\*", "Event");
         artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId,
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());

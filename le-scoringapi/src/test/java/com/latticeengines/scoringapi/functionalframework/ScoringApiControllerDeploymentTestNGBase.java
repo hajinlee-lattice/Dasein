@@ -242,6 +242,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         String tenantId = tenant.getId();
         String artifactTableDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId,
                 EVENT_TABLE);
+        artifactTableDir = artifactTableDir.replaceAll("\\*", "Event");
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId, EVENT_TABLE,
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
