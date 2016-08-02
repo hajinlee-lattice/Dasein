@@ -31,7 +31,7 @@ angular.module('lp.models.list', [
         processModels: function(models) {
             vm.models = models;
             vm.totalLength = models.length;
-console.log(models);
+            
             var active = models.filter(function(item) {
                 return item.Status == 'Active';
             });

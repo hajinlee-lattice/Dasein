@@ -12,6 +12,9 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     $scope.ResourceUtility = ResourceUtility;
     $scope.models = $scope.data;
     var flags = FeatureFlagService.Flags();
+    
+    $scope.showUploadSummaryJson = FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
+
     $scope.showUploadModel = FeatureFlagService.FlagIsEnabled(flags.UPLOAD_JSON);
 
     $scope.undoDeleteModel = function (modelId) {
@@ -32,6 +35,10 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     $scope.importClicked = function() {
         ImportModelModal.show();
     };
+
+    $scope.importJSON = function() {
+        ImportModelModal.show();
+    }
 })
 .directive('modelListCreationHistoryWidget', function () {
     return {

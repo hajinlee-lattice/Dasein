@@ -1,12 +1,6 @@
 <div class="container">
     <section id="main-content" class="container lp-model-list">
 
-        <div class="row twelve columns">        
-            <div class="no-models text-center" ng-if="vm.models.length == 0">
-                <h2>{{::vm.ResourceUtility.getString('MODEL_LIST_NO_MODELS')}}</h2>
-            </div>
-        </div>
-
         <div class="row">
             <div class="list-header">
                 <ul class="pull-left number-of-items" ng-if="vm.totalLength > 0">
@@ -46,13 +40,19 @@
                                 <a ui-sref="home.models.pmml">From PMML File</a>
                                 <i class="fa fa-file-code-o"></i>
                             </li>
-                            <li ng-if="showUploadSummaryJson">
+                            <li ng-if="vm.showUploadSummaryJson">
                                 <a href="javascript:void(0)" ng-click="vm.importJSON()">Import a JSON File</a>
                                 <i class="fa fa-file-text-o"></i>
                             </li>
                         </ul>
                     </div> 
                 </div> 
+            </div>
+        </div>
+
+        <div class="row twelve columns">        
+            <div class="no-models text-center" ng-if="vm.models.length == 0">
+                <h2>{{::vm.ResourceUtility.getString('MODEL_LIST_NO_MODELS')}}</h2>
             </div>
         </div>
 

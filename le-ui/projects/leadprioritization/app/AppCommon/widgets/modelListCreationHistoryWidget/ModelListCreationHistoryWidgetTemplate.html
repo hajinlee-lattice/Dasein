@@ -8,6 +8,10 @@
             <!--button class="pull-right button orange-button" id="model-mgmt-import-model-btn" data-ng-click="importClicked()">
                 {{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}
             </button-->
+            <div class="pull-right" ng-if="showUploadSummaryJson">
+                <a href="javascript:void(0)" ng-click="importJSON()">Import a JSON File</a>
+                <i class="fa fa-file-text-o"></i>
+            </div>
         </div>
     </div><br>
     <div class="row">
