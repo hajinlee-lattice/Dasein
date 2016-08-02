@@ -1,54 +1,9 @@
 {
   "columnTransformFiles": {
-    "TestColumnRule": {
-      "KeyWhenSortingByAscending": "1",
-      "Name": "testcolumnrule",
-      "MainClassName": "TestColumnRule",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "threshold": 4
-      },
-      "ColumnTransformFilePath": "testcolumnrule.py"
-    },
-    "TestRowRule": {
-      "KeyWhenSortingByAscending": "2",
-      "Name": "testrowrule",
-      "MainClassName": "TestRowRule",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "threshold": 4
-      },
-      "ColumnTransformFilePath": "testrowrule.py"
-    },
-    "TestRowRuleTwo": {
-      "KeyWhenSortingByAscending": "3",
-      "Name": "testrowruletwo",
-      "MainClassName": "TestRowRuleTwo",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "threshold": 4
-      },
-      "ColumnTransformFilePath": "testrowruletwo.py"
-    },
-    "TestRowRuleThree": {
-      "KeyWhenSortingByAscending": "3",
-      "Name": "testrowrulethree",
-      "MainClassName": "TestRowRuleThree",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "threshold": 4,
-        "enabled": "false"
-      },
-      "ColumnTransformFilePath": "testrowrulethree.py"
-    },
-    "FrequencyIssue": {
+    "HighlyPredictiveSmallPopulationDS": {
       "KeyWhenSortingByAscending": "4",
-      "Name": "frequencyissue",
-      "MainClassName": "FrequencyIssue",
+      "Name": "highlypredictivesmallpopulationds",
+      "MainClassName": "HighlyPredictiveSmallPopulationDS",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
@@ -57,62 +12,7 @@
         "numericalColumns": "numericalColumns",
         "eventColumn": "targetColumn"
       },
-      "ColumnTransformFilePath": "frequencyissue.py"
-    },
-    "FutureInformation": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "futureinformation",
-      "MainClassName": "FutureInformation",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "futureinformation.py"
-    },
-    "HighlyPredictiveSmallPopulation": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "highlypredictivesmallpopulation",
-      "MainClassName": "HighlyPredictiveSmallPopulation",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "highlypredictivesmallpopulation.py"
-    },
-    "NullIssue": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "nullissue",
-      "MainClassName": "NullIssue",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "nullissue.py"
-    },          
-    "UncertaintyThreshold": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "uncertaintythreshold",
-      "MainClassName": "UncertaintyThreshold",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "columns": "allColumns",
-        "dataProfile": "dataprofile",
-        "miThreshold": 0.01
-      },
-      "ColumnTransformFilePath": "uncertaintyThreshold.py"
+      "ColumnTransformFilePath": "highlypredictivesmallpopulationds.py"
     }
   }
 }
