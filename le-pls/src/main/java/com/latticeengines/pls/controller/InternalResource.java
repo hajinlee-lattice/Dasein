@@ -517,7 +517,6 @@ public class InternalResource extends InternalResourceBase {
         Map<String, String> response = new HashMap<>();
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
-        response.put("SvnRevision", versionManager.getCurrentSvnRevision());
         return response;
     }
 
