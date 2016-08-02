@@ -1,6 +1,8 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -10,6 +12,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.exceptions.YarnException;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -137,7 +141,49 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
     @Override
     public MatchCommand getByRootOperationUid(String rootOperationUid) {
-        return matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
+        MatchCommand command = matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
+
+        if (command == null) {
+            return null;
+        }
+
+        if (MatchStatus.NEW.equals(command.getMatchStatus()) || command.getLatestStatusUpdate() == null
+                || (System.currentTimeMillis() - command.getLatestStatusUpdate().getTime()) > TimeUnit.MINUTES
+                        .toMillis(20)) {
+            String appIdStr = command.getApplicationId();
+            if (StringUtils.isNotEmpty(appIdStr)) {
+                FinalApplicationStatus status = getAppStatus(appIdStr);
+                if (FinalApplicationStatus.FAILED.equals(status) || FinalApplicationStatus.KILLED.equals(status)) {
+                    MatchStatus matchStatus = command.getMatchStatus();
+                    switch (status) {
+                    case FAILED:
+                        matchStatus = MatchStatus.FAILED;
+                        break;
+                    case KILLED:
+                        matchStatus = MatchStatus.ABORTED;
+                    default:
+                        break;
+                    }
+                    update(rootOperationUid).status(matchStatus).commit();
+                    command = matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
+                }
+            }
+        }
+        return command;
+    }
+
+    private FinalApplicationStatus getAppStatus(String appIdStr) {
+        int retries = 0;
+        while (retries++ < 5) {
+            try {
+                ApplicationId applicationId = ConverterUtils.toApplicationId(appIdStr);
+                ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+                return report.getFinalApplicationStatus();
+            } catch (IOException | YarnException e) {
+                log.error("Failed to get application status for " + appIdStr + " retries=" + retries);
+            }
+        }
+        throw new RuntimeException("Failed to get final application status for " + appIdStr + " within 5 retries.");
     }
 
     private static String columnSelectionString(MatchInput input) {
