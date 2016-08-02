@@ -133,16 +133,21 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             List<String> resolvedHdfsScoreArtifactTableDirs = HdfsUtils.getFilesByGlob(yarnConfiguration,
                     hdfsScoreArtifactTableDirWithWildChar);
             String resolvedHdfsScoreArtifactTableDir = null;
-            for (String dir : resolvedHdfsScoreArtifactTableDirs) {
-                if (!dir.endsWith(PATH_SEPARATOR)) {
-                    dir += PATH_SEPARATOR;
-                }
+            if (resolvedHdfsScoreArtifactTableDirs.size() == 1) {
+                resolvedHdfsScoreArtifactTableDir = resolvedHdfsScoreArtifactTableDirs.get(0);
+            } else {
+                for (String dir : resolvedHdfsScoreArtifactTableDirs) {
 
-                if (!hdfsScoreArtifactTableDirWithWildChar.equals(dir)) {
-                    // pick first matching dir
-                    resolvedHdfsScoreArtifactTableDir = dir;
-                    break;
+                    if (!hdfsScoreArtifactTableDirWithWildChar.equals(dir)) {
+                        // pick first matching dir
+                        resolvedHdfsScoreArtifactTableDir = dir;
+                        break;
+                    }
                 }
+            }
+
+            if (!resolvedHdfsScoreArtifactTableDir.endsWith(PATH_SEPARATOR)) {
+                resolvedHdfsScoreArtifactTableDir += PATH_SEPARATOR;
             }
 
             path = resolvedHdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
