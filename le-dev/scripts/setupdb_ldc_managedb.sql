@@ -19,6 +19,14 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,ExternalColumnID,DefaultColumnName,TablePartition,Description,DataType,DisplayName,Category,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,MatchDestination,Tags);
 
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/AccountMasterColumn.csv' INTO TABLE `AccountMasterColumn`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,Groups);
+
+
 LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/Publication.csv' INTO TABLE `Publication`
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'

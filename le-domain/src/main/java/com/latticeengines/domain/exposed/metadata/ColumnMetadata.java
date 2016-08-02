@@ -18,6 +18,7 @@ public class ColumnMetadata {
     private String columnName;
     private String description;
     private String dataType;
+    private String javaClass;
     private String displayName;
     private Category category;
     private StatisticalType statisticalType;
@@ -66,6 +67,16 @@ public class ColumnMetadata {
     @JsonProperty("DataType")
     public void setDataType(String dataType) {
         this.dataType = dataType;
+    }
+
+    @JsonProperty("JavaClass")
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    @JsonProperty("JavaClass")
+    public void setJavaClass(String javaClass) {
+        this.javaClass = javaClass;
     }
 
     @JsonProperty("DisplayName")
