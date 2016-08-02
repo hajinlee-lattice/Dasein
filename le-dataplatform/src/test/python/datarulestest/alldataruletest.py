@@ -134,7 +134,7 @@ class AllDataRuleTest(TestBase):
                 self.columnRuleTestAlgorithm(rule, et.getDataFrame(), dictOfArguments, 'none')
 
     def atestLowCoverageDS(self, doParameterSearch=False):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             if doParameterSearch:
                 self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
@@ -313,7 +313,7 @@ class AllDataRuleTest(TestBase):
             self.atestUniqueValueCountDS(doParameterSearch=True)
 
     def testCombination(self):
-        for et in [self.eventtable_mulesoft]:
+        for et in [self.eventtable_hostingcom]:
             colrulelist = []
             colrulelist.append(PopulatedRowCountDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols()))
             colrulelist.append(LowCoverageDS(et.getAllColsAsDict(), et.getCategoricalCols(), et.getNumericalCols()))
