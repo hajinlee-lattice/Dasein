@@ -1,34 +1,6 @@
 #!/usr/bin/env bash
 
-export ADMIN_PROPDIR=$WSHOME/le-admin/conf/env/dev
-export API_PROPDIR=$WSHOME/le-api/conf/env/dev
-export DATAPLATFORM_PROPDIR=$WSHOME/le-dataplatform/conf/env/dev
-export DB_PROPDIR=$WSHOME/le-db/conf/env/dev
-export SECURITY_PROPDIR=$WSHOME/le-security/conf/env/dev
-export EAI_PROPDIR=$WSHOME/le-eai/conf/env/dev
-export METADATA_PROPDIR=$WSHOME/le-metadata/conf/env/dev
-export MICROSERVICE_PROPDIR=$WSHOME/le-microservice/core/conf/env/dev
-export DATAFLOWAPI_PROPDIR=$WSHOME/le-dataflowapi/conf/env/dev
-export DATAFABRIC_PROPDIR=$WSHOME/le-datafabric/conf/env/dev
-export PROPDATA_PROPDIR=$WSHOME/le-propdata/conf/env/dev
-export MONITOR_PROPDIR=$WSHOME/le-monitor/conf/env/dev
-export WORKFLOWAPI_PROPDIR=$WSHOME/le-workflowapi/conf/env/dev
-export PROXY_PROPDIR=$WSHOME/le-proxy/conf/env/dev
-export SCORING_PROPDIR=$WSHOME/le-scoring/conf/env/dev
-export CAMILLE_PROPDIR=$WSHOME/le-camille/conf/env/dev
-export DATAFLOW_PROPDIR=$WSHOME/le-dataflow/conf/env/dev
-export PLS_PROPDIR=$WSHOME/le-pls/conf/env/dev
-export WORKFLOW_PROPDIR=$WSHOME/le-workflow/conf/env/dev
-export PROPDATA_PROPDIR=$WSHOME/le-propdata/conf/env/dev
-export JOB_PROPDIR=$WSHOME/le-job/conf/env/dev
-export DELLEBI_PROPDIR=$WSHOME/le-dellebi/conf/env/dev
-export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
-export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
-export QUARTZCLIENT_PROPDIR=$WSHOME/le-quartzclient/conf/env/dev
-export QUARTZ_PROPDIR=$WSHOME/le-quartz/conf/env/dev
-export MODELQUALITY_PROPDIR=$WSHOME/le-modelquality/conf/env/dev
 export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
-export AUTH_PROPDIR=$WSHOME/le-auth/conf/env/dev
 
 export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=1g -Xmx4g"

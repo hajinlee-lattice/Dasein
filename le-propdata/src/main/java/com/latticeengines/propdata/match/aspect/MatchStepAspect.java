@@ -39,9 +39,6 @@ public class MatchStepAspect {
     private Object logMatchStepMetrics(ProceedingJoinPoint joinPoint) throws Throwable {
         Long startTime = System.currentTimeMillis();
         String signature = joinPoint.getSignature().toShortString();
-        if (log.isDebugEnabled()) {
-            log.debug("Entering " + signature);
-        }
 
         Object retVal = joinPoint.proceed();
         Long elapsedTime = System.currentTimeMillis() - startTime;
