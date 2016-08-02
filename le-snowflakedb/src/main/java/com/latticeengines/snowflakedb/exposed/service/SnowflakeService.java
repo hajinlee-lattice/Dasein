@@ -10,9 +10,9 @@ public interface SnowflakeService {
 
     void dropDatabaseIfExists(String db);
 
-    void createAvroTable(String db, String table, Schema schema);
+    void createAvroTable(String db, String table, Schema schema, Boolean replace);
 
-    void createAvroTable(String db, String table, Schema schema, List<String> columnsToExpose);
+    void createAvroTable(String db, String table, Schema schema, Boolean replace, List<String> columnsToExpose);
 
     void loadAvroTableFromS3(String db, String table, String s3Folder);
 }

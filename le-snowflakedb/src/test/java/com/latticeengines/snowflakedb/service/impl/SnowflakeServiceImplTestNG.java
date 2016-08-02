@@ -87,7 +87,7 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
                         + "{\"name\":\"Field3\",\"type\":[\"string\",\"null\"]}," //
                         + "{\"name\":\"Field4\",\"type\":[\"int\",\"null\"]}]}");
 
-        snowflakeService.createAvroTable(dbName, table, schema, Arrays.asList("field1", "field2", "field3"));
+        snowflakeService.createAvroTable(dbName, table, schema, true, Arrays.asList("field1", "field2", "field3"));
 
         snowflakeJdbcTemplate.execute(String.format(
                 "INSERT INTO %s SELECT "
@@ -109,7 +109,7 @@ public class SnowflakeServiceImplTestNG extends AbstractTestNGSpringContextTests
         String table = "AvroTable2";
         InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/hgdata.avro");
         Schema schema = AvroUtils.readSchemaFromInputStream(avroStream);
-        snowflakeService.createAvroTable(dbName, table, schema, Arrays.asList("Domain", "Creation_Date"));
+        snowflakeService.createAvroTable(dbName, table, schema, true, Arrays.asList("Domain", "Creation_Date"));
         uploadAvroToS3();
         snowflakeService.loadAvroTableFromS3(dbName, table, leStack + "/hgdata");
 

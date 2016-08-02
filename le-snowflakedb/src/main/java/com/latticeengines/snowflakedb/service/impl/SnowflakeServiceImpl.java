@@ -35,7 +35,7 @@ public class SnowflakeServiceImpl implements SnowflakeService {
     @Override
     public void createDatabase(String db, String s3Bucket) {
         log.info("Creating database [" + db + "]");
-        snowflakeJdbcTemplate.execute("CREATE DATABASE " + db);
+        snowflakeJdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + db);
         addAvroStage(db, s3Bucket);
     }
 
@@ -46,17 +46,22 @@ public class SnowflakeServiceImpl implements SnowflakeService {
     }
 
     @Override
-    public void createAvroTable(String db, String table, Schema schema) {
-        createAvroTable(db, table, schema, null);
+    public void createAvroTable(String db, String table, Schema schema, Boolean replace) {
+        createAvroTable(db, table, schema, replace, null);
     }
 
     @Override
-    public void createAvroTable(String db, String table, Schema schema, List<String> columnsToExpose) {
+    public void createAvroTable(String db, String table, Schema schema, Boolean replace, List<String> columnsToExpose) {
         log.info("Creating AVRO table [" + table + "] in [" + db + "]");
 
         // create the single column json table
-        snowflakeJdbcTemplate.execute(String.format("CREATE OR REPLACE TABLE %s (%s VARIANT);\n",
-                SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)), SnowflakeUtils.AVRO_COLUMN));
+        if (replace) {
+            snowflakeJdbcTemplate.execute(String.format("CREATE OR REPLACE TABLE %s (%s VARIANT);\n",
+                    SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)), SnowflakeUtils.AVRO_COLUMN));
+        } else {
+            snowflakeJdbcTemplate.execute(String.format("CREATE TABLE IF NOT EXISTS %s (%s VARIANT);\n",
+                    SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)), SnowflakeUtils.AVRO_COLUMN));
+        }
 
         // create a view on top of it
         String view = SnowflakeUtils.schemaToView(schema, columnsToExpose);
@@ -70,13 +75,12 @@ public class SnowflakeServiceImpl implements SnowflakeService {
 
     @Override
     public void loadAvroTableFromS3(String db, String table, String s3Folder) {
-        String sql = String.format("COPY INTO %s \n" +
-                "from @%s/%s/\n" +
-                "pattern = '.*.avro'\n" +
-                "on_error = 'continue'",
+        log.info("Loading data from S3 folder " + s3Folder + " to "
+                + SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)));
+        String sql = String.format(
+                "COPY INTO %s \n" + "from @%s/%s/\n" + "pattern = '.*.avro'\n" + "on_error = 'continue'",
                 SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)),
-                SnowflakeUtils.toQualified(db, SnowflakeUtils.AVRO_STAGE),
-                s3Folder);
+                SnowflakeUtils.toQualified(db, SnowflakeUtils.AVRO_STAGE), s3Folder);
         snowflakeJdbcTemplate.execute(sql);
     }
 
@@ -86,11 +90,9 @@ public class SnowflakeServiceImpl implements SnowflakeService {
         String region = awsRegion.replace("-", "_").toUpperCase();
         String url = String.format("s3://%s/%s/", s3Bucket, SnowflakeUtils.AVRO_STAGE);
 
-        String sql = String.format("CREATE OR REPLACE STAGE %s\n" +
-                "  URL = '%s'\n" +
-                "  CREDENTIALS = (AWS_KEY_ID='%s' AWS_SECRET_KEY='%s') \n" +
-                "  REGION = '%s' \n" +
-                "  FILE_FORMAT = ( TYPE='AVRO') \n", stageName, url, awsAccessKey, awsSecretKey, region);
+        String sql = String.format("CREATE OR REPLACE STAGE %s\n" + "  URL = '%s'\n"
+                + "  CREDENTIALS = (AWS_KEY_ID='%s' AWS_SECRET_KEY='%s') \n" + "  REGION = '%s' \n"
+                + "  FILE_FORMAT = ( TYPE='AVRO') \n", stageName, url, awsAccessKey, awsSecretKey, region);
 
         snowflakeJdbcTemplate.execute(sql);
     }

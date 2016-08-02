@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.eai.exposed.service.EaiService;
@@ -76,13 +76,13 @@ public class S3ExportServiceImpl extends ExportService {
     }
 
     private ApplicationId submitS3ExportJob(ExportContext context, ExportFormat format) {
-        HdfsToS3RouteConfiguration routeConfiguration = getRouteConfiguration(context, format);
+        HdfsToS3Configuration routeConfiguration = getRouteConfiguration(context, format);
         ImportConfiguration importConfiguration = ImportConfiguration.createForAmazonS3Configuration(routeConfiguration);
         importConfiguration.setCustomerSpace(CustomerSpace.parse(context.getProperty(ExportProperty.CUSTOMER, String.class)));
         return eaiService.extractAndImport(importConfiguration);
     }
 
-    private HdfsToS3RouteConfiguration getRouteConfiguration(ExportContext context, ExportFormat format) {
+    private HdfsToS3Configuration getRouteConfiguration(ExportContext context, ExportFormat format) {
         String prefix = context.getProperty(ExportProperty.TARGETPATH, String.class);
         String hdfsPath = context.getProperty(ExportProperty.INPUT_FILE_PATH, String.class);
         String fileName = context.getProperty(ExportProperty.TARGET_FILE_NAME, String.class);
@@ -103,7 +103,7 @@ public class S3ExportServiceImpl extends ExportService {
             throw new IllegalArgumentException("hdfsPath cannot be null");
         }
 
-        HdfsToS3RouteConfiguration configuration = new HdfsToS3RouteConfiguration();
+        HdfsToS3Configuration configuration = new HdfsToS3Configuration();
         configuration.setS3Bucket(bucket);
         configuration.setS3Prefix(prefix);
         configuration.setHdfsPath(hdfsPath);

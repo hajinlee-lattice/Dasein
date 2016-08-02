@@ -2,9 +2,7 @@ package com.latticeengines.domain.exposed.eai.route;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class HdfsToS3RouteConfiguration extends CamelRouteConfiguration {
-
-    public static final String OPEN_SUFFIX = "_EXPORTING_";
+public class HdfsToS3Configuration extends CamelRouteConfiguration {
 
     @JsonProperty("s3_bucket")
     private String s3Bucket;
@@ -22,10 +20,10 @@ public class HdfsToS3RouteConfiguration extends CamelRouteConfiguration {
     private Long splitSize;
 
     @JsonProperty("hdfs_path")
-    private String hdfsPath;
+    private String hdfsPath; // the avro glob pattern in hdfs
 
     @JsonProperty("target_filename")
-    private String targetFilename;
+    private String targetFilename; // the file name to be used in s3, may be suffixed by partition number if splitted.
 
     public String getS3Bucket() {
         return s3Bucket;

@@ -15,11 +15,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 
 /**
  * This one was suppose to be a new type of camel route service, but the camel
@@ -31,27 +30,22 @@ public class HdfsToS3RouteService {
 
     private static final Log log = LogFactory.getLog(HdfsToS3RouteService.class);
 
-    private static final Long MIN_SPLIT_SIZE = 10L * 1024L * 1024L;
+    private static final Long MIN_SPLIT_SIZE = 100L * 1024L * 1024L; // 100 GB
     private static final String LOCAL_CACHE = "tmp/camel";
 
     @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
-    private AmazonS3 s3Client;
-
-    @Autowired
     private S3Service s3Service;
 
-    private Integer numSplits = 1;
-
-    public void upload(HdfsToS3RouteConfiguration config) {
+    public void upload(HdfsToS3Configuration config) {
         String bucket = config.getS3Bucket();
         String prefix = config.getS3Prefix();
         s3Service.uploadLocalDirectory(bucket, prefix, LOCAL_CACHE, true);
     }
 
-    private Boolean shouldSplit(HdfsToS3RouteConfiguration config) {
+    private Boolean shouldSplit(HdfsToS3Configuration config) {
         if (config.getSplitSize() == null) {
             return false;
         } else if (config.getSplitSize() >= MIN_SPLIT_SIZE) {
@@ -61,14 +55,14 @@ public class HdfsToS3RouteService {
         }
     }
 
-    private String splitFileName(HdfsToS3RouteConfiguration config, Integer splitIdx) {
+    private String splitFileName(HdfsToS3Configuration config, Integer splitIdx) {
         String originalName = config.getTargetFilename();
         String withoutExt = originalName.substring(0, originalName.indexOf("."));
         String newWithOutExt = String.format("%s-%05d", withoutExt, splitIdx);
         return originalName.replace(withoutExt, newWithOutExt);
     }
 
-    public void downloadToLocal(HdfsToS3RouteConfiguration config) {
+    public void downloadToLocal(HdfsToS3Configuration config) {
         Long splitSize = config.getSplitSize();
         String hdfsPath = config.getHdfsPath();
         String fileName = config.getTargetFilename();
@@ -110,7 +104,6 @@ public class HdfsToS3RouteService {
                 }
                 splitIdx++;
             }
-            numSplits = splitIdx;
         } else {
             log.info("split_size is not specified. download the whole file.");
             try {

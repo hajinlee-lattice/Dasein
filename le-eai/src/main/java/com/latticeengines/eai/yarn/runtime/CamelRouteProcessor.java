@@ -2,8 +2,6 @@ package com.latticeengines.eai.yarn.runtime;
 
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
-import com.latticeengines.eai.service.impl.camel.HdfsToS3RouteService;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -17,8 +15,12 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.service.CamelRouteService;
+import com.latticeengines.eai.service.impl.camel.HdfsToS3RouteService;
+import com.latticeengines.eai.service.impl.camel.HdfsToSnowflakeService;
 import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
 
 @Component("camelRouteProcessor")
@@ -32,7 +34,10 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
     @Autowired
-    private HdfsToS3RouteService amazonS3ExportService;
+    private HdfsToS3RouteService hdfsToS3RouteService;
+
+    @Autowired
+    private HdfsToSnowflakeService hdfsToSnowflakeService;
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
@@ -47,7 +52,16 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
         CamelRouteConfiguration camelRouteConfiguration = importConfig.getCamelRouteConfiguration();
 
         if (ImportConfiguration.ImportType.AmazonS3.equals(importConfig.getImportType())) {
-            invokdeS3Upload((HdfsToS3RouteConfiguration) camelRouteConfiguration);
+
+            if (camelRouteConfiguration instanceof HdfsToS3Configuration) {
+                invokeS3Upload((HdfsToS3Configuration) camelRouteConfiguration);
+            } else if (camelRouteConfiguration instanceof HdfsToSnowflakeConfiguration) {
+                invokeSnowflakeExport((HdfsToSnowflakeConfiguration) camelRouteConfiguration);
+            } else {
+                throw new UnsupportedOperationException(
+                        camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
+            }
+
         } else {
             CamelContext camelContext = new DefaultCamelContext();
             CamelRouteService<?> camelRouteService;
@@ -69,9 +83,20 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
         return null;
     }
 
-    private void invokdeS3Upload(HdfsToS3RouteConfiguration configuration) {
-        amazonS3ExportService.downloadToLocal(configuration);
-        amazonS3ExportService.upload(configuration);
+    private void invokeS3Upload(HdfsToS3Configuration configuration) {
+        hdfsToS3RouteService.downloadToLocal(configuration);
+        setProgress(0.30f);
+        hdfsToS3RouteService.upload(configuration);
+        setProgress(0.99f);
+    }
+
+    private void invokeSnowflakeExport(HdfsToSnowflakeConfiguration configuration) {
+        hdfsToSnowflakeService.uploadToS3(configuration);
+        setProgress(0.6f);
+        hdfsToSnowflakeService.copyToSnowflake(configuration);
+        setProgress(0.85f);
+        hdfsToSnowflakeService.cleanupS3(configuration);
+        setProgress(0.95f);
     }
 
     private void waitForRouteToFinish(CamelRouteService<?> camelRouteService,

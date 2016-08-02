@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 @Component("hdfsToS3RouteTestNG")
@@ -59,7 +59,7 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "aws")
     public void testUploadToS3() throws Exception {
-        HdfsToS3RouteConfiguration configuration = getRouteConfiguration();
+        HdfsToS3Configuration configuration = getRouteConfiguration();
         routeService.downloadToLocal(configuration);
         routeService.upload(configuration);
         Assert.assertTrue(s3Service.listObjects(s3Bucket, s3Prefix).size() > 0);
@@ -71,8 +71,8 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
         FileUtils.deleteQuietly(new File("tmp"));
     }
 
-    HdfsToS3RouteConfiguration getRouteConfiguration() {
-        HdfsToS3RouteConfiguration configuration = new HdfsToS3RouteConfiguration();
+    HdfsToS3Configuration getRouteConfiguration() {
+        HdfsToS3Configuration configuration = new HdfsToS3Configuration();
         configuration.setS3Bucket(s3Bucket);
         configuration.setS3Prefix(s3Prefix);
         configuration.setHdfsPath(HDFS_DIR + "/*.avro");

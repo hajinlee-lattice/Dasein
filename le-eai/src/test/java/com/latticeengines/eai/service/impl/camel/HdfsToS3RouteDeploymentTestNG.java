@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3RouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 
@@ -40,7 +40,7 @@ public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "aws", enabled = false)
     public void testDownloadSftpByRestCall() throws Exception {
-        HdfsToS3RouteConfiguration camelRouteConfiguration =  hdfsToS3RouteTestNG.getRouteConfiguration();
+        HdfsToS3Configuration camelRouteConfiguration =  hdfsToS3RouteTestNG.getRouteConfiguration();
         ImportConfiguration importConfig =
                 ImportConfiguration.createForAmazonS3Configuration(camelRouteConfiguration);
         importConfig.setCustomerSpace(customerSpace);
