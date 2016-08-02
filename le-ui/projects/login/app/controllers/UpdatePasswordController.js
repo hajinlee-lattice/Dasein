@@ -8,6 +8,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
 ])
 
 .controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, NavUtility, LoginService) {
+    angular.element('body').addClass('update-password-body');
     $scope.ResourceUtility = ResourceUtility;
     $scope.oldPassword = null;
     $scope.newPassword = null;

@@ -1,15 +1,20 @@
-.login-body {
+.login-body, .update-password-body {
 	padding-top: 20px;
 	@include media(">medium") {
 		padding-top: 5%;
 	}
 	img {
 		width: 100%;
-		margin-top: 80px;
+		//margin-top: 80px;
 	}
 	i.fa-spinner {
 		vertical-align: baseline;
 		margin-left: 0.6em;
+	}
+}
+.update-password-body {
+	@include media(">medium") {
+		padding-top: 0;
 	}
 }
 .login-content {

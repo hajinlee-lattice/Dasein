@@ -236,43 +236,47 @@ Sign In, Forgot Password, and Update Password Forms
     bottom:-35px;
     color: #b8bab9;
 }
+
 .form-update-password {
+    @include flex-container;
     width: 600px;
-    margin: 6em auto 6em; 
-}
-    .form-update-password .form, .form-update-password .form-title {
-        float: left;
-    }
-        .form-update-password .form-title h2 {
-            font-family: "ProximaNova-Regular","Open Sans",sans-serif;
-            font-size: 2em;
+    margin: 0 auto;
+    margin-top: 6em;
+    .form-title {
+        float: none;
+        @include flex-item(0 1 auto);
+        font-family: "ProximaNova-Regular","Open Sans",sans-serif;
+        font-weight: normal;
+        @include flex-container;
+        -webkit-align-items: center;
+        -ms-flex-align: center;
+        align-items: center; 
+        h2 {
+            display: table-cell;
+            vertical-align: middle;
+            height: 80%;
+            width: 175px;
             text-align: right;
-            margin-top: 0;
-            margin-right: 1em;
-            padding-right: 1em;
-            padding-bottom: 7em;
+            font-size: 27px;
             border-right: #ccc solid 1px;
-            font-weight: normal;
+            margin-right: 20px;
+            padding-right: 20px;
+            /*
+            @include flex-container;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center; 
+            */
         }
-        .form-update-password:after {
-            display: table;
-            content: "";
-            clear: both;
+    }
+    .form {
+        float: none;
+        @include flex-item(1 1 auto);
+        div {
+            margin-bottom: 10px;
         }
-        .form-update-password .form {
-            width: 60%;
-        }
-            .form-update-password .form > div {
-                margin-bottom: 0.5em;
-            }
-                .form-update-password .form > div:last-of-type {
-                    margin: 2em 0 0;
-                }
-         .form-update-password .form-title {
-            width: 40%;
-         }
-
-
+    }
+}
 
 /*
 Forms for System SetUp Page
