@@ -11,7 +11,7 @@ def main():
     args.func(args)
 
 def push(args):
-    tag(args)
+    tag_for_remote(args)
     config = AwsEnvironment(args.environment)
     print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
     login_cmd = login(args.environment)
@@ -19,11 +19,29 @@ def push(args):
     subprocess.call(login_cmd + "; docker push %s" % destination, shell=True)
     subprocess.call("docker rmi " + destination, shell=True)
 
-def tag(args):
+def pull(args):
+    print "pulling image %s:%s from repo to local ..." % (args.image, args.remotetag)
+    pull_internal(args.environment, args.image, args.remotetag, args.localtag)
+
+def pull_internal(environment, image, remotetag, localtag):
+    registry = AwsEnvironment(environment).ecr_registry()
+    source = registry + "/latticeengines/" + image + ":" + remotetag
+    login_cmd = login(environment)
+    subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
+    tag_for_local(registry, image, remotetag, localtag)
+    subprocess.call("docker rmi " + source, shell=True)
+
+def tag_for_remote(args):
     config = AwsEnvironment(args.environment)
     print "tagging image %s:%s as %s ..." % (args.image, args.localtag, args.remotetag)
     source = "latticeengines/" +  args.image + ":" + args.localtag
     destination = config.ecr_registry() + "/latticeengines/" + args.image + ":" + args.remotetag
+    subprocess.call(["docker", "tag", source, destination])
+
+def tag_for_local(registry, image, remotetag, localtag):
+    source = registry + "/latticeengines/" + image + ":" + remotetag
+    print "tagging image %s as %s:%s ..." % (source, image, localtag)
+    destination = "latticeengines/" +  image + ":" + localtag
     subprocess.call(["docker", "tag", source, destination])
 
 def login(environment):
@@ -41,11 +59,18 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     subparser = commands.add_parser("push")
-    subparser.add_argument('-i', dest='image', type=str, required=True, help='local docker image name. you can ignore the namespace latticeengines')
-    subparser.add_argument('-e', dest='environment', type=str, default='qa', help='environment')
-    subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag')
-    subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag')
+    subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace latticeengines')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['qa','prod'], help='environment')
+    subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
+    subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.set_defaults(func=push)
+
+    subparser = commands.add_parser("pull")
+    subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace latticeengines')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['qa','prod'], help='environment')
+    subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
+    subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
+    subparser.set_defaults(func=pull)
 
     args = parser.parse_args()
     return args
