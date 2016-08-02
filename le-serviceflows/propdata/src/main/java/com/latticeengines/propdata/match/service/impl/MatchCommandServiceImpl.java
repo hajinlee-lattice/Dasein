@@ -174,13 +174,23 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
     private FinalApplicationStatus getAppStatus(String appIdStr) {
         int retries = 0;
+        long sleepTime = 500L;
         while (retries++ < 5) {
             try {
                 ApplicationId applicationId = ConverterUtils.toApplicationId(appIdStr);
                 ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+                if (report == null) {
+                    throw new IOException("Cannot find application report for ApplicationId " + applicationId);
+                }
                 return report.getFinalApplicationStatus();
             } catch (IOException | YarnException e) {
-                log.error("Failed to get application status for " + appIdStr + " retries=" + retries);
+                log.error("Failed to get application status for " + appIdStr + " retries=" + retries, e);
+                try {
+                    Thread.sleep(sleepTime);
+                    sleepTime += sleepTime;
+                } catch (InterruptedException e2) {
+                    // ignore;
+                }
             }
         }
         throw new RuntimeException("Failed to get final application status for " + appIdStr + " within 5 retries.");
