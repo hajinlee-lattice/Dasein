@@ -65,7 +65,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
     }
 
     @Override
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);

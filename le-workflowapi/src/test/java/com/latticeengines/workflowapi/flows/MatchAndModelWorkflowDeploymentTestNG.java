@@ -103,7 +103,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                         + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/");
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void modelAccountData() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);

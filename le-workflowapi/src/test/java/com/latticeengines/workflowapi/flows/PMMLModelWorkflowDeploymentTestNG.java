@@ -43,7 +43,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         setupForPMMLModel();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
 
         PMMLModelWorkflowConfiguration workflowConfig = generatePMMLModelWorkflowConfiguration();
