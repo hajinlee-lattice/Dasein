@@ -87,7 +87,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -98,7 +98,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
-        Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject("http://" + restEndpointHost
+        Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject(restEndpointHost
                 + "/rest/load", config, HashMap.class, new Object[] {});
         assertTrue(errorResult.containsKey("errorCode"));
     }
@@ -106,7 +106,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = getSampleConfig(model);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -117,7 +117,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
         DataProfileConfiguration config = getProfileConfig(model);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -126,7 +126,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(3, submission.getApplicationIds().size());
 

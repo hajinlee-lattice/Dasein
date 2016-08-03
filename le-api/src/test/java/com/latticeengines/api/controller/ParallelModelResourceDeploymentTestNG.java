@@ -72,7 +72,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     @Test(groups = "deployment")
     public void parallel_load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -84,7 +84,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         samplingConfig.setParallelEnabled(true);
 
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -97,7 +97,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         DataProfileConfiguration config = getProfileConfig(model);
         config.setParallelEnabled(true);
 
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -107,7 +107,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "parallel_profile" })
     public void submit() throws Exception {
         model.setParallelEnabled(true);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 

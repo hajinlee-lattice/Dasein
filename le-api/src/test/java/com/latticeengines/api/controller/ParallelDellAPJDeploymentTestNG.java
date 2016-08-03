@@ -52,7 +52,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
-        StringList features = restTemplate.postForObject("http://" + restEndpointHost + "/rest/features", model,
+        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new AbstractMap.SimpleEntry<String, List<String>>("Target", features.getElements());
     }
@@ -61,7 +61,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig(model);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -73,7 +73,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         samplingConfig.setParallelEnabled(true);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -86,7 +86,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
         log.info("               info..............." + this.getClass().getSimpleName() + "profile");
         DataProfileConfiguration config = getProfileConfig(model);
         config.setParallelEnabled(true);
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -99,7 +99,7 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setFeaturesList(targetAndFeatures.getValue());
         model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 
