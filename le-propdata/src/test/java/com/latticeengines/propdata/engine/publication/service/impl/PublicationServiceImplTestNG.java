@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
+import com.latticeengines.domain.exposed.propdata.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
@@ -145,6 +146,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         publication.setSourceName(source.getSourceName());
         publication.setNewJobMaxRetry(3);
         publication.setSchedularEnabled(true);
+        publication.setMaterialType(MaterialType.INGESTION);;
         publication.setPublicationType(Publication.PublicationType.SQL);
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();

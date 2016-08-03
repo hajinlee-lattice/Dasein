@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
+import com.latticeengines.domain.exposed.propdata.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
@@ -97,7 +98,7 @@ public class PublicationProgressServiceImplTestNG extends PropDataEngineFunction
         publication.setSourceName("TestSource");
         publication.setNewJobMaxRetry(3);
         publication.setPublicationType(Publication.PublicationType.SQL);
-
+        publication.setMaterialType(MaterialType.INGESTION);
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
         configuration.setDefaultTableName("DefaultTable");
         configuration.setPublicationStrategy(PublishToSqlConfiguration.PublicationStrategy.VERSIONED);
