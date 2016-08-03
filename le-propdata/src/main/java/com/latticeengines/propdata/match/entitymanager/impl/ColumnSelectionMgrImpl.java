@@ -3,19 +3,20 @@ package com.latticeengines.propdata.match.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.match.entitymanager.ColumnSelectionMgr;
-import com.latticeengines.propdata.match.entitymanager.ExternalColumnEntityMgr;
+import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
 
 @Component
 public class ColumnSelectionMgrImpl implements ColumnSelectionMgr {
 
-    @Autowired
-    private ExternalColumnEntityMgr externalColumnEntityMgr;
+    @Resource(name="externalColumnEntityMgr")
+    private MetadataColumnEntityMgr<ExternalColumn> externalColumnEntityMgr;
 
     @Override
     public ColumnSelection getPredefined(ColumnSelection.Predefined predefined) {
@@ -25,7 +26,7 @@ public class ColumnSelectionMgrImpl implements ColumnSelectionMgr {
         columnSelection.setVersion(getCurrentVersionOfPredefined(predefined));
 
         List<ColumnSelection.Column> columns = new ArrayList<>();
-        for (ExternalColumn externalColumn: externalColumns) {
+        for (ExternalColumn externalColumn : externalColumns) {
             if (externalColumn.getTagList().contains(predefined.getName())) {
                 ColumnSelection.Column column = new ColumnSelection.Column();
                 column.setExternalColumnId(externalColumn.getExternalColumnID());
