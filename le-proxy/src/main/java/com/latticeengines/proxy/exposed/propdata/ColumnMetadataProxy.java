@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,11 +23,17 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName) {
+    public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName, String dataCloudVersion) {
         String url = constructUrl("/predefined/{selectName}", String.valueOf(selectName.name()));
+        if (StringUtils.isNotBlank(dataCloudVersion)) {
+            url = constructUrl("/predefined/{selectName}?datacloudversion", String.valueOf(selectName.name()),
+                    dataCloudVersion);
+        }
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
         List<ColumnMetadata> metadataList = new ArrayList<>();
-        if (metadataObjs == null) { return metadataList; }
+        if (metadataObjs == null) {
+            return metadataList;
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         try {

@@ -21,6 +21,10 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="accountMasterColumnDao" class="com.latticeengines.propdata.match.dao.impl.AccountMasterColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+    
     <task:executor id="matchExecutor"
                    pool-size="8-32"
                    queue-capacity="1000"

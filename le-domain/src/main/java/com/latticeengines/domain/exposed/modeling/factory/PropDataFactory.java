@@ -26,6 +26,9 @@ public class PropDataFactory {
         if (propData.getVersion() != null) {
             parameters.setSelectedVersion(propData.getVersion());
         }
+        if (propData.getDataCloudVersion() != null) {
+            parameters.setDataCloudVersion(propData.getDataCloudVersion());
+        }
         parameters.setExcludePropDataColumns(propData.isExcludePropDataColumns());
         
         log.info("Successfully configured the propData");

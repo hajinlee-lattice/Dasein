@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesViaJavaFunction;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
-import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;

@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -77,7 +79,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     @Qualifier("bulkMatchExecutor")
     private MatchExecutor matchExecutor;
 
-    @Autowired
+    @Resource(name = "columnMetadataServiceDispatch")
     private ColumnMetadataService columnMetadataService;
 
     @Autowired
@@ -157,7 +159,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             divider = new BlockDivider(avroPath, yarnConfiguration, groupSize);
             log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize);
             inputSchema = jobConfiguration.getInputAvroSchema();
-            outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"));
+            outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
+                    jobConfiguration.getDataCloudVersion());
             Integer rowsProcessed = 0;
             setProgress(0.07f);
 
@@ -282,8 +285,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     }
 
     @MatchStep
-    private Schema constructOutputSchema(String recordName) {
-        Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName);
+    private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
+        Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
         if (inputSchema == null) {
             inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
             log.info("Using extracted input schema: \n"
@@ -304,8 +307,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
             if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
-                throw new RuntimeException(String
-                        .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
+                throw new RuntimeException(String.format(
+                        "Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }
         } else {
             // check matched rows

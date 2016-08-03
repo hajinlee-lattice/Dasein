@@ -91,11 +91,15 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
         ColumnSelection.Predefined selection = ColumnSelection.Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
-        if (summary != null && summary.getPredefinedSelection() != null) {
-            selection = summary.getPredefinedSelection();
-            if (StringUtils.isNotEmpty(summary.getPredefinedSelectionVersion())) {
-                selectionVersion = summary.getPredefinedSelectionVersion();
+        String dataCloudVersion = null;
+        if (summary != null) {
+            if (summary.getPredefinedSelection() != null) {
+                selection = summary.getPredefinedSelection();
+                if (StringUtils.isNotEmpty(summary.getPredefinedSelectionVersion())) {
+                    selectionVersion = summary.getPredefinedSelectionVersion();
+                }
             }
+            dataCloudVersion = summary.getDataCloudVersion();
         }
 
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
@@ -114,6 +118,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(selection, selectionVersion) //
+                .dataCloudVersion(dataCloudVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/" + sourceFileDisplayName.replace(' ', '_') + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //

@@ -552,17 +552,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedMean() {
-        return getSummaryFieldValue("CrossValidatedMeanOfModelAccuracy");
+        return getSummaryFieldDoubleValue("CrossValidatedMeanOfModelAccuracy");
     }
 
     @Transient
     @JsonIgnore
     @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedStd() {
-        return getSummaryFieldValue("CrossValidatedStdOfModelAccuracy");
+        return getSummaryFieldDoubleValue("CrossValidatedStdOfModelAccuracy");
     }
 
-    private Double getSummaryFieldValue(String field) {
+    private Double getSummaryFieldDoubleValue(String field) {
         if (getDetails() == null || getDetails().getPayload() == null) {
             return null;
         }
@@ -570,6 +570,26 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
         JsonNode std = modelSummaryJson.get(field);
         return std != null ? std.asDouble() : 0D;
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getDataCloudVersion() {
+        return getSummaryFieldStringValue("EventTableProvenance", "Data_Cloud_Version");
+    }
+
+    private String getSummaryFieldStringValue(String field1, String field2) {
+        if (getDetails() == null || getDetails().getPayload() == null) {
+            return null;
+        }
+        if (field1 == null || field2 == null) {
+            return null;
+        }
+        String rawModelSummary = getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode field1Node = modelSummaryJson.get(field1);
+        JsonNode field2Node = field1Node != null ? field1Node.get(field2) : null;; 
+        return field2Node != null ? field2Node.textValue() : null;
     }
 
     // this annotation is not being called, for now I'll set lastUpdateTime

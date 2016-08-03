@@ -2,13 +2,13 @@ package com.latticeengines.propdata.api.controller;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
@@ -22,7 +22,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends PropDataApiDeploymen
     @Test(groups = "deployment")
     public void testPredefined() {
         for (ColumnSelection.Predefined predefined: ColumnSelection.Predefined.values()) {
-            List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined);
+            List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined, null);
             Assert.assertNotNull(columnMetadataList);
             for (ColumnMetadata columnMetadata : columnMetadataList) {
                 Assert.assertTrue(
@@ -35,7 +35,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends PropDataApiDeploymen
     @Test(groups = "deployment")
     public void testLeadEnrichment() {
         List<ColumnMetadata> columnMetadataList =
-                columnMetadataProxy.columnSelection(ColumnSelection.Predefined.LeadEnrichment);
+                columnMetadataProxy.columnSelection(ColumnSelection.Predefined.LeadEnrichment, null);
         Assert.assertNotNull(columnMetadataList);
         for (ColumnMetadata columnMetadata : columnMetadataList) {
             Assert.assertNotNull(columnMetadata.getDisplayName());

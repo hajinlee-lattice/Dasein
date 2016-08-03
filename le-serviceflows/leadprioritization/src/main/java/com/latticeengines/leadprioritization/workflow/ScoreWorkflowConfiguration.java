@@ -137,7 +137,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setCustomizedColumnSelection(customizedColumnSelection);
             return this;
         }
-
+        
         /**
          * You can provide a full column selection object or the name of a predefined selection.
          * When both are present, predefined one will be used.
@@ -151,6 +151,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            match.setDataCloudVersion(dataCloudVersion);
+            return this;
+        }
+        
         public ScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -168,5 +173,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
             return configuration;
         }
+
     }
 }

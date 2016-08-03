@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.match.service.ExternalColumnService;
+import com.latticeengines.propdata.match.service.MetadataColumnService;
 
 @Component("testMatchInputService")
 public class TestMatchInputService {
 
     @Autowired
-    private ExternalColumnService externalColumnService;
+    private MetadataColumnService<ExternalColumn> externalColumnService;
 
     public ColumnSelection enrichmentSelection() {
         List<ExternalColumn> columns = new ArrayList<>();
-        for (String id: Arrays.asList("TechIndicator_AddThis", "TechIndicator_AdobeCreativeSuite")) {
-            columns.add(externalColumnService.getExternalColumn(id));
+        for (String id : Arrays.asList("TechIndicator_AddThis", "TechIndicator_AdobeCreativeSuite")) {
+            columns.add(externalColumnService.getMetadataColumn(id));
         }
         return new ColumnSelection(columns);
     }

@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.dataloader.SourceTableMetadataResult;
 import com.latticeengines.domain.exposed.dataloader.SourceTableMetadataResult.SourceColumnMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
@@ -54,7 +54,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
         try {
             List<LeadEnrichmentAttribute> attributes = new ArrayList<LeadEnrichmentAttribute>();
             List<ColumnMetadata> columns = columnMetadataProxy
-                    .columnSelection(ColumnSelection.Predefined.LeadEnrichment);
+                    .columnSelection(ColumnSelection.Predefined.LeadEnrichment, null);
             for (ColumnMetadata column : columns) {
                 LeadEnrichmentAttribute attribute = toLeadEnrichmentAttribute(column);
                 attributes.add(attribute);

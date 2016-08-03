@@ -6,7 +6,7 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.match.service.ExternalColumnService;
+import com.latticeengines.propdata.match.service.MetadataColumnService;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,7 +44,7 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     private InternalService internalService;
 
     @Autowired
-    private ExternalColumnService externalColumnService;
+    private MetadataColumnService externalColumnService;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {

@@ -101,6 +101,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
+        
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            scoreWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            return this;
+        }
 
         public Builder outputFilename(String outputFilename) {
             scoreWorkflowConfigurationBuilder.outputFilename(outputFilename);

@@ -1,7 +1,7 @@
 PID,AMColumnID,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,Groups
-4,EmployeesTotal,Total Employees,Employees of the whole enterprise,Long,FIRMOGRAPHICS,NULL,NORMINAL,NULL,NUMERIC,ModelAndAllInsights,0,RTS
-3,LocalSales,Local Sales,Annual sales of the local site,Long,FIRMOGRAPHICS,NULL,NORMINAL,NULL,NUMERIC,ModelAndAllInsights,0,RTS
-5,TechIndicator_Amazon,Has Amazon (AWS),The domain is using Amazon AWS,String,WEBSITE_PROFILE,Cloud Hosting,NORMINAL,NULL,BOOLEAN,None,0,Enrichment
-6,TechIndicator_Dropbox,Has Dropbox,The domain is using DropBox,String,TECHNOLOGY_PROFILE,Software as a Service (SaaS),NORMINAL,NULL,BOOLEAN,None,1,Enrichment
-1,TradestyleName,Tradestyle Name,Trademark name,String,FIRMOGRAPHICS,NULL,NORMINAL,NULL,ALPHA,ModelAndAllInsights,0,Enrichment
-2,YearStarted,Year Started,Start year of the business,Integer,FIRMOGRAPHICS,NULL,NORMINAL,NULL,YEAR,ModelAndAllInsights,0,RTS
+4,EmployeesTotal,Total Employees,Employees of the whole enterprise,Long,FIRMOGRAPHICS,NULL,NOMINAL,NULL,NUMERIC,ModelAndAllInsights,0,RTS
+3,LocalSales,Local Sales,Annual sales of the local site,Long,FIRMOGRAPHICS,NULL,NOMINAL,NULL,NUMERIC,ModelAndAllInsights,0,RTS
+5,TechIndicator_Amazon,Has Amazon (AWS),The domain is using Amazon AWS,String,WEBSITE_PROFILE,Cloud Hosting,NOMINAL,NULL,BOOLEAN,None,0,Enrichment
+6,TechIndicator_Dropbox,Has Dropbox,The domain is using DropBox,String,TECHNOLOGY_PROFILE,Software as a Service (SaaS),NOMINAL,NULL,BOOLEAN,None,1,Enrichment
+1,TradestyleName,Tradestyle Name,Trademark name,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,ModelAndAllInsights,0,Enrichment
+2,YearStarted,Year Started,Start year of the business,Integer,FIRMOGRAPHICS,NULL,NOMINAL,NULL,YEAR,ModelAndAllInsights,0,RTS

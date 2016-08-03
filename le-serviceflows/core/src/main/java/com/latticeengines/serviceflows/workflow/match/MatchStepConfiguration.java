@@ -47,9 +47,12 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     private ColumnSelection.Predefined predefinedColumnSelection;
     private String predefinedSelectionVersion;
 
+    private String dataCloudVersion;
+
     private ColumnSelection customizedColumnSelection;
 
     private String matchQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
+
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -176,6 +179,16 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         return predefinedSelectionVersion;
     }
 
+    @JsonProperty("data_cloud_version")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonProperty("data_cloud_version")
+    public void setDataCloudVersion(String dataCloudVersion) {
+          this.dataCloudVersion = dataCloudVersion;
+    }
+    
     @JsonProperty("predefined_selection_version")
     public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
         this.predefinedSelectionVersion = predefinedSelectionVersion;
@@ -190,4 +203,5 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     public void setCustomizedColumnSelection(ColumnSelection customizedColumnSelection) {
         this.customizedColumnSelection = customizedColumnSelection;
     }
+
 }

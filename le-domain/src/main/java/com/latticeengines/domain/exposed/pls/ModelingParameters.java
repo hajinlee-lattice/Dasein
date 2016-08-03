@@ -53,6 +53,9 @@ public class ModelingParameters {
     @JsonProperty
     public Map<String, String> runTimeParams;
 
+    @JsonProperty
+    private String dataCloudVersion;
+
     public String getFilename() {
         return filename;
     }
@@ -131,6 +134,14 @@ public class ModelingParameters {
 
     public void setSelectedVersion(String selectedVersion) {
         this.selectedVersion = selectedVersion;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     public String getModuleName() {

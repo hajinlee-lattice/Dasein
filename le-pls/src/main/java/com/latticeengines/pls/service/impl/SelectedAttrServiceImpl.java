@@ -99,7 +99,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant,
             String attributeDisplayNameFilter, Category category, Boolean onlySelectedAttributes) {
         List<ColumnMetadata> allColumns = columnMetadataProxy
-                .columnSelection(Predefined.Enrichment);
+                .columnSelection(Predefined.Enrichment, null);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,

@@ -149,6 +149,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null
                                                                                             // means
                                                                                             // latest
+                .dataCloudVersion(parameters.getDataCloudVersion())
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //

@@ -97,6 +97,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             executionContext.put(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
 
         }
+        matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
+        log.info("Using Data Cloud Version = " + getConfiguration().getDataCloudVersion());
+        
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 

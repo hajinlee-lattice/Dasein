@@ -247,6 +247,9 @@ public class ModelingServiceExecutor {
         if (builder.getPivotArtifactPath() != null) {
             props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
         }
+        if (builder.dataCloudVersion != null) {
+            props.add("Data_Cloud_Version=" + builder.dataCloudVersion);
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
 
@@ -379,6 +382,7 @@ public class ModelingServiceExecutor {
         private Map<ArtifactType, String> metadataArtifacts;
         private List<DataRule> dataRules;
         private Map<String, String> runTimeParams;
+        private String dataCloudVersion;
 
         public Builder() {
         }
@@ -603,6 +607,11 @@ public class ModelingServiceExecutor {
 
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             this.runTimeParams = runTimeParams;
+            return this;
+        }
+        
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            this.dataCloudVersion = dataCloudVersion;
             return this;
         }
 

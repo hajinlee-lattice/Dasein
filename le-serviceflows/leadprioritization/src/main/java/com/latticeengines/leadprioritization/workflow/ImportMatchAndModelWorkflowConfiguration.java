@@ -186,6 +186,13 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            match.setDataCloudVersion(dataCloudVersion);
+            model.setDataCloudVersion(dataCloudVersion);
+            return this;
+        }
+        
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
@@ -259,5 +266,6 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
             return configuration;
         }
+
     }
 }

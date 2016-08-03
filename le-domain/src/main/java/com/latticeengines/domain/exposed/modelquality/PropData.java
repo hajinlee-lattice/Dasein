@@ -43,9 +43,9 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @Column(name = "VERSION", nullable = false)
     private String version;
 
-    @JsonProperty("metadata_version")
-    @Column(name = "METADATA_VERSION", nullable = false)
-    private String metadataVersion;
+    @JsonProperty("data_cloud_version")
+    @Column(name = "DATA_CLOUD_VERSION", nullable = false)
+    private String dataCloudVersion;
 
     @Override
     public String getName() {
@@ -73,13 +73,13 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
         this.version = version;
     }
 
-    @MetricTag(tag = "PropDataMetadataVersion")
-    public String getMetadataVersion() {
-        return metadataVersion;
+    @MetricTag(tag = "DataCloudVersion")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
     }
 
-    public void setMetadataVersion(String metadataVersion) {
-        this.metadataVersion = metadataVersion;
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     @JsonIgnore
