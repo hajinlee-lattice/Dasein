@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,7 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 @Access(AccessType.FIELD)
 @Table(name = "ExternalColumn")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ExternalColumn implements HasPid, Serializable {
+public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
 
     private static final long serialVersionUID = 6232580467581472718L;
 
@@ -107,6 +108,11 @@ public class ExternalColumn implements HasPid, Serializable {
         this.externalColumnID = externalColumnID;
     }
     
+    @Transient
+    public String getColumnId() {
+        return externalColumnID;
+    }
+    
     @JsonIgnore
     public String getDefaultColumnName() {
 		return defaultColumnName;
@@ -147,6 +153,7 @@ public class ExternalColumn implements HasPid, Serializable {
         this.dataType = dataType;
     }
 
+    @Override
     @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
@@ -312,6 +319,7 @@ public class ExternalColumn implements HasPid, Serializable {
         this.tags = StringUtils.join(tokens, ",");
     }
 
+    @Override
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setColumnId(getExternalColumnID());

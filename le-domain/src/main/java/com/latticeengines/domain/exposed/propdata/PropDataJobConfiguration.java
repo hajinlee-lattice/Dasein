@@ -34,6 +34,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private Boolean excludePublicDomains = Boolean.FALSE;
     private String yarnQueue;
     private Schema inputAvroSchema;
+    private String dataCloudVersion;
 
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
@@ -137,6 +138,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
         this.predefinedSelectionVersion = predefinedSelectionVersion;
     }
+    
+    @JsonProperty("data_cloud_version")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonProperty("data_cloud_version")
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
     @JsonProperty("customized_selection")
     public ColumnSelection getCustomizedSelection() {
@@ -222,4 +233,5 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

@@ -45,6 +45,8 @@ public class MatchInput implements Fact, Dimension {
     // if not provided, pick latest
     private String predefinedVersion;
 
+    private String dataCloudVersion;
+
     private String matchEngine;
     private Integer numSelectedColumns;
 
@@ -52,6 +54,7 @@ public class MatchInput implements Fact, Dimension {
     private String yarnQueue;
 
     private UUID uuid;
+
 
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
@@ -173,6 +176,16 @@ public class MatchInput implements Fact, Dimension {
         this.predefinedVersion = predefinedVersion;
     }
 
+    @JsonProperty("DataCloudVersion")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonProperty("DataCloudVersion")
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+    
     @JsonProperty("CustomSelection")
     public ColumnSelection getCustomSelection() {
         return customSelection;
@@ -239,4 +252,5 @@ public class MatchInput implements Fact, Dimension {
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

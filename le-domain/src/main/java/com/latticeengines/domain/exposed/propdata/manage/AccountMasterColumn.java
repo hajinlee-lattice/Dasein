@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,7 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 @Access(AccessType.FIELD)
 @Table(name = "AccountMasterColumn")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AccountMasterColumn implements HasPid, Serializable  {
+public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
@@ -97,6 +98,12 @@ public class AccountMasterColumn implements HasPid, Serializable  {
         return amColumnId;
     }
 
+    @Transient
+    @Override
+    public String getColumnId() {
+        return amColumnId;
+    }
+
     @JsonProperty("AMColumnID")
     public void setAmColumnId(String amColumnId) {
         this.amColumnId = amColumnId;
@@ -122,6 +129,7 @@ public class AccountMasterColumn implements HasPid, Serializable  {
         this.javaClass = javaClass;
     }
 
+    @Override
     @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
@@ -233,14 +241,17 @@ public class AccountMasterColumn implements HasPid, Serializable  {
     @JsonIgnore
     private List<ApprovedUsage> getApprovedUsageList() {
         List<ApprovedUsage> approvedUsages = new ArrayList<>();
-        if (StringUtils.isEmpty(approvedUsage)) {  return approvedUsages; }
+        if (StringUtils.isEmpty(approvedUsage)) {
+            return approvedUsages;
+        }
         List<String> tokens = Arrays.asList(approvedUsage.split(","));
-        for (String token: tokens) {
+        for (String token : tokens) {
             approvedUsages.add(ApprovedUsage.fromName(token));
         }
         return approvedUsages;
     }
 
+    @Override
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setColumnId(getAmColumnId());
