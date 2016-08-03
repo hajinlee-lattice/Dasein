@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -23,15 +24,15 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
-import com.latticeengines.propdata.match.service.ExternalColumnService;
+import com.latticeengines.propdata.match.service.MetadataColumnService;
 
 @Component
 public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     private Log log = LogFactory.getLog(ColumnSelectionServiceImpl.class);
 
-    @Autowired
-    private ExternalColumnService externalColumnService;
+    @Resource(name = "externalColumnService")
+    private MetadataColumnService<ExternalColumn> externalColumnService;
 
     private ConcurrentMap<ColumnSelection.Predefined, ColumnSelection> predefinedSelectionMap = new ConcurrentHashMap<>();
 
@@ -62,8 +63,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public List<String> getMatchedColumns(ColumnSelection selection) {
         List<String> columnNames = new ArrayList<>();
-        for (ColumnSelection.Column column: selection.getColumns()) {
-            ExternalColumn externalColumn = externalColumnService.getExternalColumn(column.getExternalColumnId());
+        for (ColumnSelection.Column column : selection.getColumns()) {
+            ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId());
             if (externalColumn != null) {
                 columnNames.add(externalColumn.getDefaultColumnName());
             } else {
@@ -78,7 +79,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         Map<String, Set<String>> partitionColumnMap = new HashMap<>();
         for (ColumnSelection.Column column : selection.getColumns()) {
             String colId = column.getExternalColumnId();
-            ExternalColumn col = externalColumnService.getExternalColumn(colId);
+            ExternalColumn col = externalColumnService.getMetadataColumn(colId);
             String partition = col.getTablePartition();
             if (partitionColumnMap.containsKey(partition)) {
                 partitionColumnMap.get(partition).add(col.getDefaultColumnName());

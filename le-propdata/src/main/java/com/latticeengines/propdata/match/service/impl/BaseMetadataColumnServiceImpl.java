@@ -1,0 +1,79 @@
+package com.latticeengines.propdata.match.service.impl;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
+import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
+import com.latticeengines.propdata.match.service.MetadataColumnService;
+
+public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
+
+    private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
+
+    @PostConstruct
+    private void postConstruct() {
+        loadCache();
+    }
+
+    @Override
+    public List<E> findByColumnSelection(ColumnSelection.Predefined selectName) {
+        return getMetadataColumnEntityMgr().findByTag(selectName.getName());
+    }
+
+    @Override
+    public E getMetadataColumn(String columnId) {
+        if (getBlackColumnCache().contains(columnId)) {
+            return null;
+        }
+
+        if (!getWhiteColumnCache().containsKey(columnId)) {
+            synchronized (getWhiteColumnCache()) {
+                E column;
+                try {
+                    column = getMetadataColumnEntityMgr().findById(columnId);
+                } catch (Exception e) {
+                    log.error(String.format("Failed to retrieve column information for [%s]", columnId), e);
+                    return null;
+                }
+                if (column == null) {
+                    getBlackColumnCache().add(columnId);
+                    return null;
+                } else {
+                    getWhiteColumnCache().put(columnId, column);
+                    return column;
+                }
+            }
+        } else {
+            return getWhiteColumnCache().get(columnId);
+        }
+    }
+
+    @Override
+    public void loadCache() {
+        log.info("Start loading black and white column caches.");
+        getBlackColumnCache().clear();
+        getWhiteColumnCache().clear();
+        List<E> columns = getMetadataColumnEntityMgr().findAll();
+        synchronized (getWhiteColumnCache()) {
+            for (E column : columns) {
+                getWhiteColumnCache().put(column.getColumnId(), column);
+            }
+        }
+        log.info("Loaded " + getWhiteColumnCache().size() + " columns into white cache.");
+    }
+
+    abstract protected MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
+
+    abstract protected ConcurrentMap<String, E> getWhiteColumnCache();
+
+    abstract protected ConcurrentSkipListSet<String> getBlackColumnCache();
+
+}

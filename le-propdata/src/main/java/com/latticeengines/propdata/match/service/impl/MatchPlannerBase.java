@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -40,7 +42,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     protected ColumnSelectionService columnSelectionService;
 
-    @Autowired
+    @Resource(name = "columnMetadataServiceDispatch")
     protected ColumnMetadataService columnMetadataService;
 
     @Autowired
@@ -51,8 +53,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            input.setPredefinedVersion(
-                    validateOrAssignPredefinedVersion(input.getPredefinedSelection(), input.getPredefinedVersion()));
+            input.setPredefinedVersion(validateOrAssignPredefinedVersion(input.getPredefinedSelection(),
+                    input.getPredefinedVersion()));
         }
     }
 
@@ -69,8 +71,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @MatchStep(threshold = 100L)
     private ColumnSelection combineSelections(UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
-        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections()
-                .entrySet()) {
+        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
             ColumnSelection.Predefined predefined = entry.getKey();
             validateOrAssignPredefinedVersion(predefined, entry.getValue());
             selections.add(columnSelectionService.parsePredefined(predefined));
@@ -87,8 +88,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             log.debug("Assign version " + version + " to column selection " + predefined);
         }
         if (!columnSelectionService.isValidVersion(predefined, version)) {
-            throw new IllegalArgumentException(
-                    "The specified version " + version + " is invalid for the selection " + predefined);
+            throw new IllegalArgumentException("The specified version " + version + " is invalid for the selection "
+                    + predefined);
         }
         return version;
     }
@@ -101,9 +102,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<NameLocation> nameLocationSet = new HashSet<>();
 
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
-                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
-                    input.getExcludePublicDomains());
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i, input.getFields()
+                    .size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomains());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<Boolean>());
                 records.add(record);
@@ -141,7 +141,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
-        output = appendMetadata(output, parseColumnSelection(input));
+        output = appendMetadata(output, parseColumnSelection(input), input.getDataCloudVersion());
         output = parseOutputFields(output);
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
@@ -269,8 +269,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection) {
-        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection);
+    private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
+        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
         matchOutput.setMetadata(metadata);
         return matchOutput;
     }
