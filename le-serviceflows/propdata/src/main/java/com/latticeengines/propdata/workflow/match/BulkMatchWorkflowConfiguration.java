@@ -43,6 +43,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             }
             prepareConfig.setPredefinedSelection(matchInput.getPredefinedSelection());
             prepareConfig.setPredefinedSelectionVersion(matchInput.getPredefinedVersion());
+            prepareConfig.setDataCloudVersion(matchInput.getDataCloudVersion());
             prepareConfig.setCustomizedSelection(matchInput.getCustomSelection());
             prepareConfig.setYarnQueue(matchInput.getYarnQueue());
             return this;

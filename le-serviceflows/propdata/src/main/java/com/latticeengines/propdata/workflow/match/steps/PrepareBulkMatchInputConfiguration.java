@@ -57,6 +57,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
 
     private String yarnQueue;
 
+    private String dataCloudVersion;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -160,6 +162,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.predefinedSelectionVersion = predefinedSelectionVersion;
     }
 
+    @JsonProperty("data_cloud_version")
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonProperty("data_cloud_version")
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+    
     @JsonProperty("customized_selection")
     public ColumnSelection getCustomizedSelection() {
         return customizedSelection;
@@ -209,5 +221,6 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
     }
+
 }
 
