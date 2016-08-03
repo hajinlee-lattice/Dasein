@@ -57,13 +57,18 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     public void beforeCreateLocalLauncherContextFile(Properties properties) {
         try {
             String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
-            String importConfig = (String) properties.remove(getModuleName() + "Config");
+            String importConfig = properties.getProperty(getModuleName() + "Config");
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, importConfig);
             properties.put(ContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public void afterCreateLocalLauncherContextFile(Properties containerProperties) {
+        containerProperties.remove(getModuleName() + "Config");
     }
 
     @Override

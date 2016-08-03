@@ -20,6 +20,8 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private List<String> modelGuids = new ArrayList<>();
 
+    private String importErrorPath;
+
     @JsonProperty("model_guids")
     public List<String> getModelGuids() {
         return this.modelGuids;
@@ -68,6 +70,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     @JsonProperty("internal_resource_host_port")
     public String getInternalResourceHostPort() {
         return this.internalResourceHostPort;
+    }
+
+    @JsonProperty("import_error_path")
+    public String getImportErrorPath() {
+        return importErrorPath;
+    }
+
+    @JsonProperty("import_error_path")
+    public void setImportErrorPath(String importErrorPath) {
+        this.importErrorPath = importErrorPath;
     }
 
     @Override

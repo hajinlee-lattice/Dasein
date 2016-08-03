@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.yarn.runtime;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.DatumWriter;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
@@ -66,6 +69,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     public static final String RECORD_SOURCE = "file";
     public static final String DEFAULT_ID_TYPE = "internal";
     public static final boolean DEFAULT_ENRICHMENT = false;
+    public static final String Import_Error_File_Name = "error.csv";
 
     @Value("${scoring.processor.threadpool.size}")
     private int threadpoolSize = 5;
@@ -85,6 +89,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean useInternalId = false;
 
+    private Map<String, Long> idToInternalIdMap = new HashMap<>();
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -96,7 +102,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @Override
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
-        log.info("In side the rts bulk scoring processor.");
+        log.info("Inside the rts bulk scoring processor.");
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
@@ -123,20 +129,26 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
 
-        try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
-                DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            execute(rtsBulkScoringConfig, reader, dataFileWriter, builder, leadEnrichmentAttributeMap,
-                    leadEnrichmentAttributeDisplayNameMap);
+        try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter()) {
+            try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
+                    DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                execute(rtsBulkScoringConfig, reader, dataFileWriter, builder, leadEnrichmentAttributeMap,
+                        leadEnrichmentAttributeDisplayNameMap, csvFilePrinter);
+            }
         }
-
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
         return "In side the rts bulk scoring processor.";
     }
 
+    public CSVPrinter initErrorCSVFilePrinter() throws IOException {
+        return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), // 
+                LECSVFormat.format.withSkipHeaderRecord());
+    }
+
     public String processBak(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
-        log.info("In side the rts bulk scoring processor.");
+        log.info("Inside the rts bulk scoring processor.");
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
@@ -175,7 +187,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 List<RecordScoreResponse> scoreResponseList = bulkScore(scoreRequest, rtsBulkScoringConfig
                         .getCustomerSpace().toString());
                 appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap,
-                        leadEnrichmentAttributeDisplayNameMap);
+                        leadEnrichmentAttributeDisplayNameMap, initErrorCSVFilePrinter());
             } while (scoreRequest != null);
         }
 
@@ -188,7 +200,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     void copyScoreOutputToHdfs(String fileName, String targetDir) throws IOException {
         String scorePath = String.format(targetDir + "/%s", fileName);
         log.info("The output score path is " + scorePath);
-        HdfsUtils.copyLocalToHdfs(new Configuration(), fileName, scorePath);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, scorePath);
+
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, Import_Error_File_Name, targetDir + "/error.csv");
     }
 
     @VisibleForTesting
@@ -272,6 +286,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             String idStr = null;
             if (!useInternalId) {
                 idStr = avroRecord.get(InterfaceName.Id.toString()).toString();
+                idToInternalIdMap.put(idStr, Long.valueOf(avroRecord.get(InterfaceName.Id.toString()).toString()));
             } else {
                 idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
             }
@@ -371,7 +386,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     void appendScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
             Map<String, Schema.Type> leadEnrichmentAttributeMap,
-            Map<String, String> leadEnrichmentAttributeDisplayNameMap) throws IOException {
+            Map<String, String> leadEnrichmentAttributeDisplayNameMap, CSVPrinter csvFilePrinter) throws IOException {
         for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
             List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
             String id = scoreResponse.getId();
@@ -395,6 +410,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 builder.set("ModelId", modelId);
                 builder.set("Score", score);
 
+                writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());
+
                 Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
                 if (leadEnrichmentAttributeMap != null) {
                     if (enrichmentAttributeValues == null) {
@@ -409,8 +426,17 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         builder.set(entry.getKey(), entry.getValue());
                     }
                 }
-
                 dataFileWriter.append(builder.build());
+            }
+        }
+    }
+
+    private void writeToErrorFile(CSVPrinter csvFilePrinter, String id, String errorMessage) throws IOException {
+        if (StringUtils.isNotEmpty(errorMessage)) {
+            if (!useInternalId) {
+                csvFilePrinter.printRecord(idToInternalIdMap.get(id), id, errorMessage);
+            } else {
+                csvFilePrinter.printRecord(id, "", errorMessage);
             }
         }
     }
@@ -426,13 +452,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private void execute(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-            Map<String, Type> leadEnrichmentAttributeMap, Map<String, String> leadEnrichmentAttributeDisplayNameMap)
-            throws Exception {
+            Map<String, Type> leadEnrichmentAttributeMap, Map<String, String> leadEnrichmentAttributeDisplayNameMap,
+            CSVPrinter csvFilePrinter) throws Exception {
         List<Future<Integer>> futures = new ArrayList<>();
         ExecutorService scoreExecutorService = Executors.newFixedThreadPool(threadpoolSize);
         for (int i = 0; i < threadpoolSize; i++) {
             futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, reader,
-                    dataFileWriter, builder, leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap)));
+                    dataFileWriter, builder, leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap,
+                    csvFilePrinter)));
         }
 
         for (Future<Integer> future : futures) {
@@ -459,10 +486,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         private GenericRecordBuilder builder;
         private Map<String, Schema.Type> leadEnrichmentAttributeMap;
         private Map<String, String> leadEnrichmentAttributeDisplayNameMap;
+        private CSVPrinter csvFilePrinter;
 
         BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
                 DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-                Map<String, Type> leadEnrichmentAttributeMap, Map<String, String> leadEnrichmentAttributeDisplayNameMap) {
+                Map<String, Type> leadEnrichmentAttributeMap,
+                Map<String, String> leadEnrichmentAttributeDisplayNameMap, CSVPrinter csvFilePrinter) {
             super();
             this.rtsBulkScoringConfig = rtsBulkScoringConfig;
             this.reader = reader;
@@ -470,6 +499,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             this.builder = builder;
             this.leadEnrichmentAttributeMap = leadEnrichmentAttributeMap;
             this.leadEnrichmentAttributeDisplayNameMap = leadEnrichmentAttributeDisplayNameMap;
+            this.csvFilePrinter = csvFilePrinter;
         }
 
         @Override
@@ -486,7 +516,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         rtsBulkScoringConfig.getCustomerSpace().toString());
                 synchronized (dataFileWriter) {
                     ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder,
-                            leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+                            leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap, csvFilePrinter);
                 }
             }
             return 0;

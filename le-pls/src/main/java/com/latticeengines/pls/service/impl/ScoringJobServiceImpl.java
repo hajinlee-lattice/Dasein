@@ -1,5 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -186,8 +189,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
         }
 
-        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(), "Training Data",
-                TransformationGroup.fromName(transformationGroupName)).toString();
+        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                "Training Data", TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     private String scoreTestingData(String modelId, String fileName) {
@@ -205,11 +208,32 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
 
-        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(), enableLeadEnrichment,
-                "Training Data").toString();
+        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                enableLeadEnrichment, "Training Data").toString();
     }
 
     private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName, boolean enableLeadEnrichment) {
-        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment).toString();
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment)
+                .toString();
+    }
+
+    @Override
+    public InputStream getScoringErrorStream(String workflowJobId) {
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        if (job == null) {
+            throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
+        }
+
+        String path = job.getOutputs().get(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH);
+
+        try {
+            if (path == null) {
+                return new ByteArrayInputStream(new byte[0]);
+            }
+            return HdfsUtils.getInputStream(yarnConfiguration, path);
+
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18102, e, new String[] { workflowJobId });
+        }
     }
 }

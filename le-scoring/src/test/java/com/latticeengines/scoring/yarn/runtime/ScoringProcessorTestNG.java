@@ -1,8 +1,12 @@
 package com.latticeengines.scoring.yarn.runtime;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +18,10 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +31,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -34,8 +43,6 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
@@ -72,7 +79,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, dir);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void testConvertAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
         RTSBulkScoringConfiguration rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
@@ -106,20 +112,25 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
             Map<String, Schema.Type> leadEnrichmentAttributeMap,
             Map<String, String> leadEnrichmentAttributeDisplayNameMap, String targetDir) throws IOException {
+        createErrorCSV();
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap,
                 leadEnrichmentAttributeDisplayNameMap);
-        try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema,
-                fileName)) {
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            bulkScoringProcessor.appendScoreResponseToAvro(recordScoreResponseList, dataFileWriter, builder,
-                    leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+        try (CSVPrinter csvFilePrinter = bulkScoringProcessor.initErrorCSVFilePrinter()) {
+            try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema,
+                    fileName)) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                bulkScoringProcessor.appendScoreResponseToAvro(recordScoreResponseList, dataFileWriter, builder,
+                        leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap, csvFilePrinter);
+            }
         }
         bulkScoringProcessor.copyScoreOutputToHdfs(fileName, targetDir);
+        FileUtils.deleteQuietly(new File("error.csv"));
     }
 
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvro() throws IllegalArgumentException, Exception {
+        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
 
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
@@ -128,18 +139,20 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
                 leadEnrichmentAttributeDisplayNameMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
-        Assert.assertEquals(files.size(), 1);
+        Assert.assertEquals(files.size(), 2);
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
         Assert.assertNotNull(contents);
         List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(files.get(0)));
-        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.size(), 4);
         for (GenericRecord ele : list) {
             System.out.println(ele.toString());
         }
+        checkErrorCSV(files.get(1));
     }
 
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
+        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -148,20 +161,24 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
                 leadEnrichmentAttributeDisplayNameMap, dir + "/score");
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
-        Assert.assertEquals(files.size(), 1);
+        Assert.assertEquals(files.size(), 2);
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
         Assert.assertNotNull(contents);
-        List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(files.get(0)));
-        Assert.assertEquals(list.size(), 3);
+        contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(1));
+        Assert.assertNotNull(contents);
+        List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(files.get(0)));
+        Assert.assertEquals(list.size(), 4);
         for (GenericRecord ele : list) {
             Assert.assertNotNull(ele.get("attr1"));
             Assert.assertNotNull(ele.get("attr2"));
         }
+        checkErrorCSV(files.get(1));
     }
 
     @Test(groups = "functional")
-    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap()
-            throws IllegalArgumentException, Exception {
+    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap() throws IllegalArgumentException,
+            Exception {
+        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -172,6 +189,25 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.fail("Should have thrown exception");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20039);
+            FileUtils.deleteQuietly(new File("error.csv"));
+        }
+    }
+
+    private void createErrorCSV() throws IOException {
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter("error.csv"), LECSVFormat.format.withHeader(
+                "LineNumber", "Id", "ErrorMessage"))) {
+        }
+
+    }
+
+    private void checkErrorCSV(String filePath) throws IOException {
+        try (CSVParser parser = new CSVParser(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
+                filePath)), LECSVFormat.format)) {
+            List<CSVRecord> records = parser.getRecords();
+            Assert.assertEquals(records.size(), 1);
+            CSVRecord record = records.get(0);
+            Assert.assertEquals(record.get("Id"), "2");
+            Assert.assertEquals(record.get("ErrorMessage"), "some error occurred");
         }
     }
 
@@ -224,6 +260,11 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         tuple3.setModelId("model1");
         tuple3.setScore(8.0);
         scores2.add(tuple3);
+
+        ScoreModelTuple tuple4 = new ScoreModelTuple();
+        tuple4.setModelId("model2");
+        tuple4.setErrorDescription("some error occurred");
+        scores2.add(tuple4);
         record1.setScores(scores1);
         record2.setScores(scores2);
         recordScoreResponseList.add(record1);

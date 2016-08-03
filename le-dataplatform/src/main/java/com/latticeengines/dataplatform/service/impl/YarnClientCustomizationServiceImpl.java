@@ -73,10 +73,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-        String containerCount = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name());
-        if (containerCount == null) {
-            containerCount = "1";
-        }
+        String containerCount = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name(), "1");
+
         containerProperties.put(AppmasterConstants.CONTAINER_COUNT, containerCount);
         containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
@@ -87,6 +85,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         int virtualCores = customization.getVirtualcores(appMasterProperties);
         int priority = customization.getPriority(appMasterProperties);
         String queue = customization.getQueue(appMasterProperties);
+
+        customization.afterCreateLocalLauncherContextFile(containerProperties);
         List<String> commands = customization.getCommands(containerProperties);
         Map<String, String> environment = customization.setEnvironment(client.getEnvironment(), containerProperties);
         client.setAppName(appName(appMasterProperties, clientName));

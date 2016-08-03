@@ -215,6 +215,20 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         downloadCsv();
     }
 
+    @Test(groups = "deployment.lp", dependsOnMethods = "downloadTestingDataScoreResultCsv", enabled = true)
+    public void downloadTestingDataErrorsFile() throws IOException {
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                String.format("%s/pls/scores/jobs/%s/errors", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String errors = new String(response.getBody());
+        assertTrue(errors.length() > 0);
+    }
+
     private void sleep(long msec) {
         try {
             Thread.sleep(msec);

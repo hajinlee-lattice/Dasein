@@ -17,4 +17,6 @@ public interface ScoringJobService {
 
     String getResultFileName(String workflowJobId);
 
+    InputStream getScoringErrorStream(String jobId);
+
 }

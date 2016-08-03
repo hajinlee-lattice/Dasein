@@ -76,6 +76,10 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         sourceFile.setState(SourceFileState.Imported);
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         proxy.updateSourceFile(sourceFile, space.toString());
+
+        Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
+                sourceFile.getTableName());
+        putObjectInContext(SOURCE_IMPORT_TABLE, JsonUtils.serialize(table));
     }
 
     private Table retrieveMetadata(SourceFile sourceFile) {

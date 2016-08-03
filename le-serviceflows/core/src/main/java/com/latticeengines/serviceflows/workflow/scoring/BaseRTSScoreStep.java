@@ -1,19 +1,27 @@
 package com.latticeengines.serviceflows.workflow.scoring;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -36,7 +44,8 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         RTSBulkScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
         String appId = scoringProxy.submitBulkScoreJob(scoringConfig).getApplicationIds().get(0);
         waitForAppId(appId, configuration.getMicroServiceHostPort());
-
+        putOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
+                scoringConfig.getTargetResultDir() + "/error.csv");
         if (configuration.isRegisterScoredTable()) {
             try {
                 registerTable(scoringConfigAndTableName.getValue(), scoringConfig.getTargetResultDir());
@@ -61,6 +70,25 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         scoringConfig.setMetadataTable(metadataTable);
         scoringConfig.setCustomerSpace(configuration.getCustomerSpace());
         scoringConfig.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
+
+        String sourceImportTable = getStringValueFromContext(SOURCE_IMPORT_TABLE);
+        String importErrorPath = "";
+        if (StringUtils.isNotEmpty(sourceImportTable)) {
+            Table table = JsonUtils.deserialize(sourceImportTable, Table.class);
+            importErrorPath = table.getExtractsDirectory() + "/error.csv";
+        } else {
+            log.info("Context is not set, so looking for extract from input table for scoring training table.");
+            importErrorPath = metadataTable.getExtractsDirectory() + "/error.csv";
+        }
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
+                scoringConfig.setImportErrorPath(importErrorPath);
+            }
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
+            throw new LedpException(LedpCode.LEDP_00002);
+        }
+
         return new AbstractMap.SimpleEntry<RTSBulkScoringConfiguration, String>(scoringConfig, tableName);
     }
 

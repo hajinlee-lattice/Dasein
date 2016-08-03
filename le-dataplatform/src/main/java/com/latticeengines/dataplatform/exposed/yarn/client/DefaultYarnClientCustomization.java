@@ -32,7 +32,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     protected VersionManager versionManager;
 
     protected String stackName;
-    
+
     protected SoftwareLibraryService softwareLibraryService;
 
     private String hdfsJobBaseDir;
@@ -87,14 +87,17 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/conf/latticeengines.properties", versionManager.getCurrentVersionInStack(stackName)), //
+                String.format("/app/%s/conf/latticeengines.properties",
+                        versionManager.getCurrentVersionInStack(stackName)), //
                 false));
 
         if (!excludeDataplatformLib) {
-            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                    LocalResourceVisibility.PUBLIC, //
-                    String.format("/app/%s/dataplatform/lib/*.jar", versionManager.getCurrentVersionInStack(stackName)), //
-                    false));
+            hdfsEntries
+                    .add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                            LocalResourceVisibility.PUBLIC, //
+                            String.format("/app/%s/dataplatform/lib/*.jar",
+                                    versionManager.getCurrentVersionInStack(stackName)), //
+                            false));
         }
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -200,6 +203,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public void finalize(Properties appMasterProperties, Properties containerProperties) {
     }
 
+    @Override
+    public void afterCreateLocalLauncherContextFile(Properties containerProperties) {
+    }
+
     private String setupParameters(Properties containerProperties) {
         Properties prop = new Properties();
         for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
@@ -236,4 +243,5 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public Configuration getConfiguration() {
         return yarnConfiguration;
     }
+
 }

@@ -49,4 +49,6 @@ public abstract class YarnClientCustomization {
     public abstract void finalize(Properties appMasterProperties, Properties containerProperties);
 
     public abstract Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties);
+
+    public abstract void afterCreateLocalLauncherContextFile(Properties containerProperties);
 }

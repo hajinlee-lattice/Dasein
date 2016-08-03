@@ -169,6 +169,21 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         }
     }
 
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "downloadCsv")
+    public void retrieveErrorsFile() {
+        // Relies on error in Account.csv
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                String.format("%s/pls/scores/jobs/%s/errors", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String errors = new String(response.getBody());
+        assertTrue(errors.length() > 0);
+    }
+
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv")
     public void uploadTestingDataFile() {
@@ -212,6 +227,11 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = true)
     public void downloadTestingDataScoreResultCsv() throws IOException {
         downloadCsv();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "downloadTestingDataScoreResultCsv", enabled = true)
+    public void downloadTestingDataErrorsFile() throws IOException {
+        retrieveErrorsFile();
     }
 
     private void sleep(long msec) {

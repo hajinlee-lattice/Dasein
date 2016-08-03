@@ -3,8 +3,11 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +54,20 @@ public class ScoringJobResource {
             GzipUtils.copyAndCompressStream(is, response.getOutputStream());
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18102, e);
+        }
+    }
+
+    @RequestMapping(value = "{jobId}/errors", method = RequestMethod.GET, produces = "application/csv")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve file import errors")
+    public void getImportErrors(@PathVariable String jobId, HttpServletResponse response) {
+        try {
+            InputStream is = scoringJobService.getScoringErrorStream(jobId);
+            response.setContentType("application/csv");
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "errors.csv"));
+            IOUtils.copy(is, response.getOutputStream());
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18093, e);
         }
     }
 }
