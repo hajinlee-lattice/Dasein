@@ -2,6 +2,7 @@ import logging
 
 import columntransform
 import encoder
+import json
 from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
 from rulefwk import DataRulePipeline
@@ -26,6 +27,19 @@ def encodeCategoricalColumnsForMetadata(metadata):
         for value in values:
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.encode(value["hashValue"])
+
+def getObjectFromJSON(objectType, jsonString):
+    try:
+        objectFromJson = json.loads(jsonString)
+        if type(objectFromJson) is dict and objectType is dict:
+            return objectFromJson
+        elif type(objectFromJson) is dict and objectType is list:
+            return objectFromJson.keys()
+        else:
+            return objectFromJson
+    except Exception as e:
+        logger.error("Error converting JSON string. JsonString: {0}, objectType: {1}, Stacktrace below".format(jsonString, objectType))
+        logger.error(e)
 
 def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
@@ -67,7 +81,15 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
                             if tokens[1] == 'enabled' and value.lower() == 'true':
                                 enabledSteps.append(step)
                             currentValue = getattr(step, tokens[1])
-                            setattr(step, tokens[1], (type(currentValue))(value))
+                            if type(currentValue) not in [type(list()), type(dict())]:
+                                setattr(step, tokens[1], (type(currentValue))(value))
+                            else:
+                                try:
+                                    objectFromJson = getObjectFromJSON(type(currentValue), value)
+                                    setattr(step, tokens[1], objectFromJson)
+                                except Exception as e:
+                                    logger.error("Couldn't set object property correctly. Stacktrace below")
+                                    logger.error(e)
                 except Exception as propError:
                     logger.error(str(propError))
         except Exception as e:
@@ -76,7 +98,7 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
         for disabledStep in reversed(disabledSteps):
             logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
             steps.remove(disabledStep)
-            
+
         for disabledStep in reversed(defaultDisabledSteps):
             if disabledStep in steps and disabledStep not in enabledSteps:
                 logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
