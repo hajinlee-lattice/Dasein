@@ -1,5 +1,6 @@
 from .elb import ElasticLoadBalancer
 from .iam import Role
+from .parameter import Parameter
 from .resource import Resource
 from .template import Template
 
@@ -17,6 +18,8 @@ class ECSService(Resource):
         assert isinstance(ecscluster, ECSCluster)
         assert isinstance(task, TaskDefinition)
 
+        assert isinstance(init_count, int) or isinstance(init_count, Parameter)
+
         Resource.__init__(self, logicalId)
         self._template = {
             "Type" : "AWS::ECS::Service",
@@ -26,6 +29,10 @@ class ECSService(Resource):
                 "TaskDefinition" : task.ref()
             }
         }
+
+        if isinstance(init_count, Parameter):
+            self._template['Properties']["DesiredCount"] = init_count.ref()
+
 
     def set_min_max_percent(self, min_pct, max_pct):
         self._template["Properties"]["DeploymentConfiguration"] = {

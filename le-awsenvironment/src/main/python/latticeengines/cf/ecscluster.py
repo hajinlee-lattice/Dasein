@@ -30,7 +30,7 @@ def create_template():
     stack = ECSStack("AWS CloudFormation template for ECS cluster.")
     task = httpd_task()
     stack.add_resource(task)
-    stack.add_service("webapp", task, 2)
+    stack.add_service("webapp", task)
     return stack
 
 def httpd_task():

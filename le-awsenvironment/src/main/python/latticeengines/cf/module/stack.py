@@ -128,10 +128,9 @@ class ECSStack(Stack):
         self._elbs += list(extra_elbs)
         self._ecscluster, self._asgroup = self._construct(self._elbs)
 
-    def add_service(self, service_name, task, num_tasks=2):
-        min_health = 50 if num_tasks > 1 else 100
-        service = ECSService(service_name, self._ecscluster, task, num_tasks)\
-            .set_min_max_percent(min_health, 200) \
+    def add_service(self, service_name, task):
+        service = ECSService(service_name, self._ecscluster, task, PARAM_CAPACITY)\
+            .set_min_max_percent(50, 200) \
             .depends_on(self._asgroup)
         self.add_resource(service)
 
