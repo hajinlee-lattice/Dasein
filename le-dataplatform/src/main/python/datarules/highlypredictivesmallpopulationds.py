@@ -58,9 +58,10 @@ class HighlyPredictiveSmallPopulationDS(RowRule):
 
             cntRateGrouped = getGroupedRate(colVal, eventCol)
 
-            for key, x in cntRateGrouped.items():
-                if x[0]*1.0/cntRateOverall[0] <= self.highlyPredictiveSmallPopulationPopThreshold and x[1]*1.0/cntRateOverall[1] >= self.highlyPredictiveSmallPopulationLiftThreshold:
-                    highlyPositivelyPredictiveSmallPopulation.append([colType, key, x[0], x[0]*x[1], x[1]/cntRateOverall[1]])
+            if len(cntRateGrouped.keys()) <= 200:
+                for key, x in cntRateGrouped.items():
+                    if x[0]*1.0/cntRateOverall[0] <= self.highlyPredictiveSmallPopulationPopThreshold and x[1]*1.0/cntRateOverall[1] >= self.highlyPredictiveSmallPopulationLiftThreshold:
+                        highlyPositivelyPredictiveSmallPopulation.append([colType, key, x[0], x[0]*x[1], x[1]/cntRateOverall[1]])
         # for numerical variable, only null value need to be looked at. rows with null values are marked at bucket 0
         elif colType == 'num':
             colEventTup = [x for x in zip(colVal,eventCol) if pd.isnull(x[0])]
