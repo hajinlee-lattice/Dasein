@@ -9,12 +9,12 @@ build_docker() {
 	mv Dockerfile.bak Dockerfile
 }
 
-pushd le-discover
-build_docker latticeengines/discover
-popd
-
 pushd le-centos
 build_docker latticeengines/centos
+popd
+
+pushd le-httpd
+build_docker latticeengines/httpd
 popd
 
 pushd le-ubuntu

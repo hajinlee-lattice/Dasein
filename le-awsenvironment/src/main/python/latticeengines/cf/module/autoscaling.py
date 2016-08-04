@@ -51,10 +51,13 @@ class AutoScalingGroup(Resource):
         return self
 
     def attache_elb(self, elb):
-        assert isinstance(elb, ElasticLoadBalancer)
+        assert isinstance(elb, ElasticLoadBalancer) or isinstance(elb, Parameter)
         if "LoadBalancerNames" not in self._template["Properties"]:
             self._template["Properties"]["LoadBalancerNames"] = []
-        self._template["Properties"]["LoadBalancerNames"].append(elb.get_name())
+        if isinstance(elb, ElasticLoadBalancer):
+            self._template["Properties"]["LoadBalancerNames"].append(elb.get_name())
+        else:
+            self._template["Properties"]["LoadBalancerNames"].append(elb.ref())
         return self
 
     def attach_elbs(self, elbs):

@@ -69,3 +69,10 @@ class AwsEnvironment:
         return {
             "EcrRegistry": self.ecr_registry()
         }
+
+    @staticmethod
+    def create_env_props_map():
+        map = {}
+        for env in ('dev', 'qa', 'prod'):
+            map[env] = AwsEnvironment(env).to_props()
+        return map

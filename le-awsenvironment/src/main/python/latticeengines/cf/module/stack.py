@@ -5,9 +5,12 @@ import sys
 import time
 from boto3.s3.transfer import S3Transfer
 
+from .autoscaling import AutoScalingGroup, LaunchConfiguration
 from .condition import Condition
 from .ec2 import EC2Instance
-from .parameter import COMMON_PARAMETERS, Parameter
+from .ecs import ECSCluster, ECSService
+from .iam import InstanceProfile
+from .parameter import *
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
 from ...conf import AwsEnvironment
@@ -116,6 +119,180 @@ class Stack(Template):
             data["Environment2Props"] = AwsEnvironment.create_env_props_map()
             self._merge_into_attr('Mappings', data)
             return self
+
+class ECSStack(Stack):
+    def __init__(self, description, extra_elbs=()):
+        Stack.__init__(self, description)
+        self.add_params(ECS_PARAMETERS)
+        self._elbs = [ PARAM_ELB_NAME ]
+        self._elbs += list(extra_elbs)
+        self._ecscluster, self._asgroup = self._construct(self._elbs)
+
+    def add_service(self, service_name, task, num_tasks=2):
+        min_health = 50 if num_tasks > 1 else 100
+        service = ECSService(service_name, self._ecscluster, task, num_tasks)\
+            .set_min_max_percent(min_health, 200) \
+            .depends_on(self._asgroup)
+        self.add_resource(service)
+
+    def _construct(self, elbs):
+        ecscluster = ECSCluster("ecscluster")
+        self.add_resource(ecscluster)
+        asgroup = self._create_asgroup(ecscluster, elbs, PARAM_ECS_INSTANCE_PROFILE)
+        return ecscluster, asgroup
+
+    def _create_asgroup(self, ecscluster, elbs, instance_profile):
+        assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
+
+        asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
+        launchconfig = LaunchConfiguration("containerpool").set_instance_profile(instance_profile)
+        launchconfig.set_metadata(ECSStack._metadata(launchconfig, ecscluster))
+        launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
+
+        asgroup.add_pool(launchconfig)
+        asgroup.attach_elbs(elbs)
+        self.add_resources([asgroup, launchconfig])
+        return asgroup
+
+    @staticmethod
+    def _userdata(ec2, asgroup):
+        assert isinstance(ec2, LaunchConfiguration)
+        assert isinstance(asgroup, AutoScalingGroup)
+        return { "Fn::Base64" : { "Fn::Join" : ["", [
+            "#!/bin/bash -xe\n",
+            "yum install -y aws-cfn-bootstrap\n",
+
+            "/opt/aws/bin/cfn-init -v",
+            "         -c bootstrap"
+            "         --stack ", { "Ref" : "AWS::StackName" },
+            "         --resource %s " % ec2.logical_id(),
+            "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+            "/opt/aws/bin/cfn-signal -e $? ",
+            "         --stack ", { "Ref" : "AWS::StackName" },
+            "         --resource %s " % asgroup.logical_id(),
+            "         --region ", { "Ref" : "AWS::Region" }, "\n"
+        ]]}}
+
+    @staticmethod
+    def _metadata(ec2, ecscluster):
+        assert isinstance(ec2, LaunchConfiguration)
+        assert isinstance(ecscluster, ECSCluster)
+        return {
+            "AWS::CloudFormation::Init" : {
+                "configSets": {
+                    "bootstrap": [ "install" ],
+                    "reload": [ "install" ]
+                },
+                "install" : {
+                    "files" : {
+                        "/etc/cfn/cfn-hup.conf" : {
+                            "content" : { "Fn::Join" : ["", [
+                                "[main]\n",
+                                "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                                "region=", { "Ref" : "AWS::Region" }, "\n"
+                            ]]},
+                            "mode"    : "000400",
+                            "owner"   : "root",
+                            "group"   : "root"
+                        },
+                        "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                            "content": { "Fn::Join" : ["", [
+                                "[cfn-auto-reloader-hook]\n",
+                                "triggers=post.update\n",
+                                "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
+                                "action=/opt/aws/bin/cfn-init -v",
+                                "         -c reload",
+                                "         --stack ", { "Ref" : "AWS::StackName" },
+                                "         --resource %s " % ec2.logical_id(),
+                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                                "runas=root\n"
+                            ]]}
+                        }
+                    },
+                    "commands" : {
+                        "01_save_ip" : {
+                            "command" : { "Fn::Join": [ "\n", [
+                                "#!/bin/bash",
+                                "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
+                                "echo $ADDR >> /etc/internaladdr.txt",
+                                "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
+                                "echo $PUBADDR >> /etc/externaladdr.txt"
+                            ] ] }
+                        },
+                        "02_add_instance_to_cluster" : {
+                            "command" : { "Fn::Join": [ "", [
+                                "#!/bin/bash\n",
+                                "rm -rf /etc/ecs/ecs.config\n",
+                                "touch /etc/ecs/ecs.config\n",
+                                "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
+                                "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
+                                "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
+                            ] ] }
+                        }
+                    },
+                    "services" : {
+                        "sysvinit" : {
+                            "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
+                        }
+                    }
+                }
+            }
+        }
+
+    @staticmethod
+    def provision(environment, s3cfpath, stackname, elb, init_cap=2, max_cap=8, public=False):
+        config = AwsEnvironment(environment)
+        client = boto3.client('cloudformation')
+        check_stack_not_exists(client, stackname)
+
+        if public:
+            subnet1 = config.public_subnet_1()
+            subnet2 = config.public_subnet_2()
+            subnet3 = config.public_subnet_3()
+            tomcat_sg = config.tomcat_sg()
+        else:
+            subnet1 = config.private_subnet_1()
+            subnet2 = config.private_subnet_2()
+            subnet3 = config.private_subnet_3()
+            tomcat_sg = config.tomcat_internal_sg()
+
+        response = client.create_stack(
+            StackName=stackname,
+            TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), s3cfpath, 'template.json'),
+            Parameters=[
+                PARAM_VPC_ID.config(config.vpc()),
+                PARAM_SUBNET_1.config(subnet1),
+                PARAM_SUBNET_2.config(subnet2),
+                PARAM_SUBNET_3.config(subnet3),
+                PARAM_KEY_NAME.config(config.ec2_key()),
+                PARAM_SECURITY_GROUP.config(tomcat_sg),
+                PARAM_INSTANCE_TYPE.config('t2.medium'),
+                PARAM_ENVIRONMENT.config(environment),
+                PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
+                PARAM_ELB_NAME.config(elb),
+                PARAM_CAPACITY.config(str(init_cap)),
+                PARAM_MAX_CAPACITY.config(str(max_cap))
+            ],
+            TimeoutInMinutes=60,
+            OnFailure='ROLLBACK',
+            Capabilities=[
+                'CAPABILITY_IAM',
+            ],
+            Tags=[
+                {
+                    'Key': 'com.lattice-engines.cluster.name',
+                    'Value': stackname
+                },
+                {
+                    'Key': 'com.lattice-engines.cluster.type',
+                    'Value': 'ecs'
+                },
+            ]
+        )
+        print 'Got StackId: %s' % response['StackId']
+        wait_for_stack_creation(client, stackname)
+
 
 def check_stack_not_exists(client, stackname):
     print 'verifying stack name "%s"...' % stackname
