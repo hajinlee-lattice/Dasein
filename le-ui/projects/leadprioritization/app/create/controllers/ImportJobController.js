@@ -27,6 +27,8 @@ angular.module('lp.create.import.job', [
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
     $scope.compress_percent = 0;
 
+    $scope.create_new_sref = ($scope.isPMMLJob ? 'home.models.pmml' : 'home.models.import');
+
     var up = true,
         value = 0,
         increment = 4,
