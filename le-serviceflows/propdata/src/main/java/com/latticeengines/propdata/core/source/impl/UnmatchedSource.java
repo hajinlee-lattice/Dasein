@@ -1,0 +1,42 @@
+package com.latticeengines.propdata.core.source.impl;
+
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.propdata.core.source.CollectedSource;
+
+@Component("unmatchedSource")
+public class UnmatchedSource implements CollectedSource {
+
+    private String cronExpression;
+
+    @Override
+    public String getSourceName() {
+        return "UnmatchedSource";
+    }
+
+    @Override
+    public String getDownloadSplitColumn() {
+        return "LE_Last_Upload_Date";
+    }
+
+    @Override
+    public String getCollectedTableName() {
+        return "UnmatchedSource";
+    }
+
+    @Override
+    public String getTimestampField() {
+        return "LE_Last_Upload_Date";
+    }
+
+    @Override
+    public String[] getPrimaryKey() {
+        return new String[] { "Domain", "LE_Last_Upload_Date" };
+    }
+
+    @Override
+    public String getDefaultCronExpression() {
+        return cronExpression;
+    }
+
+}
