@@ -17,7 +17,7 @@
         <div data-ng-hide="saveInProgress">
             <div class="modal-body">
                 <div class="row">
-                    <div class="form-group" ng-class="{ 'has-error' : modelform.modelDisplayName.$invalid && !modelform.modelDisplayName.$pristine }">
+                    <div class="form-group" ng-class="{ 'has-error' : modelform.modelDisplayName.$invalid && !modelform.modelDisplayName.$pristine || !modelform.modelDisplayName.$valid}">
                         <form name="modelform">
                             <label>Model Name <!-- <span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span> --></label>
                             <input
@@ -29,7 +29,10 @@
                                     ng-maxlength="50"
                                     placeholder="Example: US-Enterprise-model"
                                     required />
-                            <p class="help-block">* Model Name cannot be empty, must be less than 50 characters.</p>
+                            <ul class="help-block">
+                                <li ng-show="!modelform.modelDisplayName.$viewValue.length">Model Name cannot be empty</li>
+                                <li ng-show="modelform.modelDisplayName.$viewValue.length >= 50">Model must be less than 50 characters. <em>[{{modelform.modelDisplayName.$viewValue.length}} of 50]<em></li>
+                            </ul>
 
                         </form>
                     </div>

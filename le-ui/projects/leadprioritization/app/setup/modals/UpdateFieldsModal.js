@@ -13,7 +13,8 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             scope.allMetadataFields = allMetadataFields;
             scope.dataRules = dataRules;
             scope.includePersonalEmailDomains = includePersonalEmailDomains;
-            scope.modelDisplayName = oldModelDisplayName + " (copy)";
+            var copy_text = " (copy)";
+            scope.modelDisplayName = oldModelDisplayName + (oldModelDisplayName.length + copy_text.length <= 50 ? copy_text : '');
             var deduplicationTypes = [ "ONELEADPERDOMAIN", "MULTIPLELEADSPERDOMAIN" ];
             if (oneLeadPerDomain) {
                 scope.dedupType = deduplicationTypes[0];

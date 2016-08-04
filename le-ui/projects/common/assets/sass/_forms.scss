@@ -1255,6 +1255,13 @@ select[multiple].input-lg {
   margin-bottom: 10px;
   color: #737373;
 }
+ul.help-block {
+  list-style-type:  disc;
+  list-style-position: inside;
+}
+ul.help-block > li > em {
+  color: #b50b20;
+}
 .has-error .help-block {
   display: block;
 }
