@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.dataflow.DepivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
-import com.latticeengines.propdata.core.IngenstionNames;
+import com.latticeengines.propdata.core.IngestionNames;
 
 import cascading.operation.Function;
 
@@ -34,7 +34,7 @@ import cascading.operation.Function;
 public class BomboraDepivotFlow extends TypesafeDataFlowBuilder<DepivotDataFlowParameters> {
     @Override
     public Node construct(DepivotDataFlowParameters parameters) {
-        Node node = addSource(IngenstionNames.BOMBORA_FIREHOSE);
+        Node node = addSource(IngestionNames.BOMBORA_FIREHOSE);
         setSchemaToNode(node, parameters.getBaseSourceColumns().get(0));
         try {
             node = addDepivotNode(node, parameters.getColumns());
