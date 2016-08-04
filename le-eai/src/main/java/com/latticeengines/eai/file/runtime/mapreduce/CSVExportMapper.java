@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
@@ -20,6 +19,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
@@ -114,7 +115,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     }
 
     private static boolean outputField(Field field) {
-        return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString());
+        return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString())
+                && !field.name().equals(ScoreResultField.RawScore.displayName);
     }
-
 }

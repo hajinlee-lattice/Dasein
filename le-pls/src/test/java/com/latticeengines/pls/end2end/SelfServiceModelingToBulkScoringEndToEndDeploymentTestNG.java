@@ -1,6 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -156,6 +157,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             assertTrue(csvHeaders.contains("Some Column"));
             assertTrue(csvHeaders.contains("Score"));
             assertTrue(csvHeaders.contains("BusinessCountry"));
+            assertFalse(csvHeaders.contains("RawScore"));
 
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {
