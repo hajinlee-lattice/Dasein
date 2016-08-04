@@ -340,7 +340,7 @@ public class MatcherImpl implements Matcher {
     private ModelSummary getModelSummary(List<ModelSummary> modelSummaryList, //
             String modelId) {
         for (ModelSummary summary : modelSummaryList) {
-            if (summary.getId().equals(modelId)) {
+            if (summary != null && summary.getId() != null && summary.getId().equals(modelId)) {
                 return summary;
             }
         }

@@ -344,6 +344,7 @@ public enum LedpCode {
     LEDP_25018("Could not find schema"), //
     LEDP_25019("Could not find java type for Avro type {0}"), //
     LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
+    LEDP_25021("unsupported_match_version_type", "Unsupported match version {0}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
@@ -448,6 +449,10 @@ public enum LedpCode {
     LEDP_31105("mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), //
     LEDP_31106("invalid_start_date", "{0} is not a valid start date"), //
     LEDP_31107("unsupported_model_type", "Unsupported model type {0}"), //
+    LEDP_31108("error_scoring_data", "Error in calculating score for input record, Cause: {0}"), //
+    LEDP_31109("error_parsing_data", "Input record contains columns that are not parsable. Cause: {0}"), //
+    LEDP_31110("error_transforming_data", "Input record contains columns that cannot be transformed. Cause: {0}"), //
+    LEDP_31111("api_error", "Could not process record. Cause: {0}"), //
     LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
             + "make sure to specify 'Email' field and for non-lead type model " //
             + "specify either 'Website' or 'Domain' fields. If these fields " //

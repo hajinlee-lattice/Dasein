@@ -59,7 +59,7 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
     public void mismatchedDatatype() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
-        scoreRequest.getRecord().put("Activity_Count_Click_Email", "ModelExpects $this to be a number$");
+        scoreRequest.getRecord().put("Activity_Count_Click_Email", "$200 to $1000 range ModelExpects this to be a number");
 
         AbstractMap.SimpleEntry<LedpResponseErrorHandler, ExceptionHandlerErrors> handlerAndErrors = post(url, scoreRequest);
         Assert.assertEquals(handlerAndErrors.getKey().getStatusCode(), HttpStatus.BAD_REQUEST);

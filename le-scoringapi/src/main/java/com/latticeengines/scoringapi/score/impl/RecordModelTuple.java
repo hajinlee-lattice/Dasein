@@ -50,4 +50,11 @@ public class RecordModelTuple {
     public ScoringApiException getException() {
         return exception;
     }
+
+    public void setException(ScoringApiException exception) {
+        // do not overwrite original exception obj
+        if (this.exception == null) {
+            this.exception = exception;
+        }
+    }
 }
