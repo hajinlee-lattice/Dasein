@@ -45,13 +45,17 @@ const server = new Server(express, app, options);
 options.LOGGING
     ? server.startLogging(options.LOGGING) : null;
 
-// when false, API proxy is disabled
+// setup API proxy
 options.API_URL
-    ? server.useApiProxy(options.API_URL) : null;
+    ? server.createApiProxy(options.API_URL) : null;
 
-// when false, API proxy is disabled
+// setup apiconsole proxy
 options.APICON_URL
-    ? server.useApiProxy(options.APICON_URL, '/score') : null;
+    ? server.createApiProxy(options.APICON_URL, '/score') : null;
+
+// proxy so clients can download files that need Authorization header
+options.API_URL
+    ? server.createFileProxy(options.API_URL, '/files', '/pls') : null;
 
 // whitelist for proxies
 options.WHITELIST

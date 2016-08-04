@@ -141,7 +141,48 @@ span.chevron-content.chevron-content-text {
             width: auto;
         }
     }
-    
+
+    .ngAnimate,
+    .ngAnimate * {
+      -webkit-transition: all 200ms linear;
+      transition: all 200ms linear;
+      
+      &.ng-animate {
+        overflow: hidden;
+      }
+
+      &.ng-enter  {
+          min-height: 0;
+          max-height: 0;
+      }
+
+      &.ng-enter-active {
+          min-height: 45px;
+          max-height: auto;
+      }
+
+      &.ng-leave  {
+          min-height: 45px;
+          max-height: auto;
+      }
+
+      &.ng-leave-active {
+          min-height: 0;
+          max-height: 0;
+      }
+    }
+        
+    .job-td-row {
+        position: relative;
+        min-height: 45px;
+        width: 100%;
+        box-shadow: 0 -1px 0px 0px #e7e7e7 inset;
+        
+        .job-list-item {
+            position: relative;
+        }
+    }
+
     span.button {
         padding: 0;
         border-radius: 3px;

@@ -25,13 +25,18 @@ angular
 })
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
-        if (response && response.data && (response.data.errorCode || response.data.errorMsg)) {
+        console.log('check', response);
+        return (response && response.data && (response.data.errorCode || response.data.errorMsg));
+    };
+
+    this.process = function (response) {
+        if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
                 method = params[0],
                 state = params[1] || null, // state or elementQuery
                 stateParams = params[2] || null;
-
+console.log(method, state, stateParams, params, config, response)
             switch (method) {
                 case 'none': break;
                 case 'popup': this.showModal(response, false, state, stateParams); break;
@@ -48,6 +53,10 @@ angular
     };
 
     this.showBanner = function (response, elementQuery) {
+        if (!this.check(response)) {
+            return;
+        }
+
         $http.get('/app/modules/ServiceError/ServiceErrorBanner.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new(),
                 data = response.data;
@@ -62,6 +71,10 @@ angular
     };
 
     this.showModal = function (response, isModal, state, stateParams) {
+        if (!this.check(response)) {
+            return;
+        }
+        
         $http.get('/app/modules/ServiceError/ServiceErrorModal.html', { cache: $templateCache }).success(function (html) {
             var modalElement = $("#modalContainer"),
                 scope = $rootScope.$new(),

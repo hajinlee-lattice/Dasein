@@ -1,11 +1,11 @@
 angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.config.services.ConfigService',
     'mainApp.core.services.SessionService'
 ])
-.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService, ConfigService, BrowserStorageUtility) {
+.controller('AdminInfoSummaryWidgetController', function (
+    $scope, ResourceUtility, ThresholdExplorerService, BrowserStorageUtility
+) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
@@ -17,6 +17,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.TenantName = clientSession.Tenant.DisplayName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
+    $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);

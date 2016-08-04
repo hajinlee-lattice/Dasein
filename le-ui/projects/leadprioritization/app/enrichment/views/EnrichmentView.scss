@@ -129,6 +129,36 @@
         }
     }
     .enrichments {
+        .ngAnimate,
+        .ngAnimate * {
+          -webkit-transition: all 200ms linear;
+          transition: all 200ms linear;
+          
+          &.ng-animate {
+            overflow: hidden;
+          }
+
+          &.ng-enter  {
+              min-height: 0;
+              max-height: 0;
+          }
+
+          &.ng-enter-active {
+              min-height: 95px;
+              max-height: auto;
+          }
+
+          &.ng-leave  {
+              min-height: 95px;
+              max-height: auto;
+          }
+
+          &.ng-leave-active {
+              min-height: 0;
+              max-height: 0;
+          }
+        }
+
         .box {
             &.active {
                 .box-inner {
@@ -160,7 +190,8 @@
             border: 1px solid rgba(0,0,0,.2);
             border-radius: 10px;
             position: relative;
-            min-height: 77px;
+            min-height: 95px;
+            
             .ico {
               height: 46px;
               width: 46px;

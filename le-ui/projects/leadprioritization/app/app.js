@@ -19,9 +19,10 @@ var mainApp = angular.module('mainApp', [
     'mainApp.sfdc.sfdcCredentials',
     'pd.navigation',
     'pd.jobs',
-    'pd.apiconsole',
-    'lp.create.import',
+    'lp.apiconsole',
+    'lp.models.list',
     'lp.models.review',
+    'lp.create.import',
     'lp.enrichment.leadenrichment'
 ])
 
@@ -58,6 +59,10 @@ var mainApp = angular.module('mainApp', [
     $httpProvider.defaults.headers.get['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
     $httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+})
+
+.config(function($animateProvider){
+  $animateProvider.classNameFilter(/ngAnimate/);
 })
 
 // add escape filter to angular {{ foobar | escape }}

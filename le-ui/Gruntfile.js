@@ -12,8 +12,8 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'http://app.lattice.local',
-                APICON_URL: 'http://api.lattice.local',
+                API_URL: 'https://testapp.lattice-engines.com',
+                APICON_URL: 'https://testapi.lattice-engines.com:8073',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -24,9 +24,9 @@ module.exports = function (grunt) {
             },
             devb: {
                 NODE_ENV: 'development',
-                API_URL: 'http://10.41.0.13:3000',
+                API_URL: 'https://10.41.0.13:3000',
                 //API_URL: 'https://app3.lattice-engines.com',
-                APICON_URL: 'http://10.41.0.13:8073',
+                APICON_URL: 'https://10.41.0.13:8073',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -62,8 +62,8 @@ module.exports = function (grunt) {
             },
             qa: {
                 NODE_ENV: 'qa',
-                API_URL: 'http://app.lattice.local',
-                APICON_URL: 'http://api.lattice.local',
+                API_URL: 'https://testapp.lattice-engines',
+                APICON_URL: 'https://testapi.lattice-engines',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -77,7 +77,7 @@ module.exports = function (grunt) {
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
                 APICON_URL: 'https://api.lattice-engines.com',
-                COMPRESSED: false,
+                COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
                 HTTPS_PORT: 3001,

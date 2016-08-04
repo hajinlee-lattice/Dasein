@@ -1,9 +1,8 @@
-angular.module('pd.apiconsole.ScoringResponseController', [
+angular.module('lp.apiconsole.ScoringResponseController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.directives.charts.ArcChartDirective',
-    'pd.apiconsole.APIConsoleService'
+    'lp.apiconsole.APIConsoleService'
 ])
-
 .directive('scoringResponse', function () {
     return {
         templateUrl: 'app/apiConsole/views/ScoringResponseView.html',

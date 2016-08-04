@@ -1,7 +1,6 @@
 angular
 .module('mainApp')
-.run(['$rootScope', '$state', 'ResourceUtility', 'ServiceErrorUtility', function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
-
+.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
         var LoadingString = ResourceUtility.getString("");
 
@@ -15,6 +14,7 @@ angular
     });
     
     $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
+
     });
     
     $rootScope.$on('$stateChangeError', function(evt, to, params) {
@@ -23,13 +23,14 @@ angular
             $state.reload();
         }
     });
-}])
-.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+})
+.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
+    $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/tenant/');
 
     $stateProvider
         .state('home', {
-            url: '/tenant/:tenantId',
+            url: '/tenant/:tenantName',
             resolve: {
                 WidgetConfig: function($q, ConfigService) {
                     var deferred = $q.defer();
@@ -63,13 +64,16 @@ angular
             views: {
                 "navigation": {
                     controller: function($rootScope, $stateParams, $state, BrowserStorageUtility) {
-                        var tenantId = $stateParams.tenantId,
+                        var tenantName = $stateParams.tenantName,
                             ClientSession = BrowserStorageUtility.getClientSession(),
                             Tenant = ClientSession ? ClientSession.Tenant : null;
 
-                        if (tenantId != Tenant.DisplayName) {
+                        if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
-                            $state.go('home.models', { tenantId: $rootScope.tenantName });
+                            
+                            $state.go('home.models', { 
+                                tenantName: Tenant.DisplayName
+                            });
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -854,7 +858,7 @@ angular
                 }   
             }
         });
-}]);
+});
 
 function ShowSpinner(LoadingString) {
     // state change spinner

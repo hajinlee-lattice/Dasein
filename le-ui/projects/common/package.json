@@ -7,12 +7,8 @@
     "type": "svn",
     "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
-  "scripts": {
-    "postinstall": "bower install"
-  },
   "dependencies": {},
   "devDependencies": {
-    "bower": "^1.7.7",
     "grunt": "^0.4.5",
     "grunt-concurrent": "^2.2.1",
     "grunt-contrib-concat": "^1.0.0",

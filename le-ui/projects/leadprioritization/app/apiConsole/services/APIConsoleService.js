@@ -1,4 +1,4 @@
-angular.module('pd.apiconsole.APIConsoleService', [
+angular.module('lp.apiconsole.APIConsoleService', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.AnimationUtility'

@@ -13,6 +13,7 @@ const fs        = require('fs');
 const helmet    = require('helmet');
 //const session   = require('express-session');
 const compress  = require('compression');
+const chalk     = require('chalk');
 
 class Server {
     constructor(express, app, options) {
@@ -54,16 +55,16 @@ class Server {
         this.setMiddleware();
 
         process.on('uncaughtException', err => {
-            console.log('uncaughtException', err);
+            console.log(chalk.red('uncaughtException'), err);
             //this.app.close();
         });
         
         process.on('SIGTERM', err => {
-            console.log('SIGTERM', err);
+            console.log(chalk.red('SIGTERM'), err);
         });
         
         process.on('ECONNRESET', err => { 
-            console.log('ECONNRESET', err);
+            console.log(chalk.red('ECONNRESET'), err);
         });
     }
 
@@ -93,19 +94,26 @@ class Server {
         try {
             var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
             
-            morgan.token("datetime", function getDateTime() { 
+            morgan.token("datetime", function getDateTime() {
+                const ts = new Date();
+                
+                return (ts.getMonth() + 1) + '/' + ts.getDate() + '/' + ts.getFullYear() + ' ' +
+                        ts.getHours() + ':' + ts.getMinutes() + ':' + ts.getSeconds();
+            });
+
+            morgan.token("utctime", function getDateTime() {
                 return new Date().getTime();
             });
             
             this.app.use(morgan(
-                ':datetime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', 
+                ':utctime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', 
                 { 
                     stream: accessLogStream 
                 }
             ));
 
             this.app.use(morgan(
-                ':datetime :method :url :status :response-time ms - :res[content-length]', 
+                ':datetime> :method :url :status :response-time ms - :res[content-length]', 
                 { 
                     skip: function (req, res) { 
                         return res.statusCode < 400
@@ -133,9 +141,11 @@ class Server {
     }
 
     // forward API requests for dev
-    useApiProxy(API_URL, API_PATH) {
+    createApiProxy(API_URL, API_PATH) {
         if (API_URL) {
-            this.API_PATH = API_PATH = API_PATH || '/pls';
+            var API_PATH = API_PATH || '/pls';
+            
+            console.log(chalk.white('>') + ' API PROXY:', API_PATH, ' -> ', API_URL+API_PATH);
 
             try {
                 this.app.use(API_PATH, (req, res) => {
@@ -166,6 +176,34 @@ class Server {
         }
     }
 
+    // this is needed so that the browser can download files
+    // that need to be hidden behind the Authorization token
+    createFileProxy(API_URL, API_PATH, PATH) {
+        if (API_URL) {
+            var API_PATH = API_PATH || '/pls',
+                PATH = PATH || '/pls';
+
+            console.log(chalk.white('>') + ' FILE PROXY:', API_PATH, ' -> ', API_URL+PATH);
+
+            this.app.use(API_PATH, (req, res) => {
+                // urls heading to /files/* will go to /pls/* with Auth token
+                const url = API_URL + PATH + req.url;
+
+                try {
+                    let r = request(url);
+
+                    if (typeof req.query == 'object') {
+                        req.headers["Authorization"] = req.query.Authorization || '';
+                    }
+
+                    req.pipe(r).pipe(res);
+                } catch(err) {
+                    console.log(err);
+                }
+            });
+        }
+    }
+
     setAppRoutes(routes) {
         routes.forEach(route => {
             const dir = this.options.APP_ROOT + route.path;
@@ -176,23 +214,24 @@ class Server {
                     displayString += (displayString ? ', ' : '') + route.folders[folder];
                     this.app.use(
                         folder, 
-                        this.express.static(dir + route.folders[folder], { maxAge: 31557600 })
+                        this.express.static(dir + route.folders[folder]) //, { maxAge: 3600000 })
                     );
                 });
             }
 
             console.log(
-                '> PATH:\t'+route.path.replace(this.options.SRC_PATH,""),
+                chalk.white('>') + ' PATH:\t'+route.path.replace(this.options.SRC_PATH,""),
                 '[ '+displayString+' ]'
             );
 
             displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
+                var html5mode = route.html5mode == true;
                 Object.keys(route.pages).forEach(page => {
                     //console.log('\t'+route.pages[page]+'\t->',page);
                     this.app.get(
-                        page, 
+                        page + (html5mode ? '*' : ''), 
                         (req, res) => res.render(dir + '/' + route.pages[page])
                     );
                 });
@@ -238,24 +277,39 @@ class Server {
 
     start() {
         const options = this.options;
+        const line = '-------------------------------------------------------------------------------';
 
-        console.log('> SERVER OPTIONS:');
+        if (options.NODE_ENV == 'development') {
+            console.log(chalk.yellow('> TLS:') + ' Allow Unauthorized in Development Mode')
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        }
+
+        console.log(chalk.white('>') + ' SERVER SETTINGS:');
 
         Object.keys(options).forEach(key => {
-            var value = options[key];
+            var value = options[key],
+                ignore = ['TIMESTAMP'];
 
-            console.log('\t' + key + ':\t' + value + ' (' + typeof value + ')');
+            if (ignore.indexOf(key) < 0) {
+                console.log(chalk.white('\t' + key + ':\t') + value + ' (' + typeof value + ')');
+            }
         });
 
-        console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
+        console.log(line);
 
         if (this.httpServer) {
-            this.httpServer.listen(options.HTTP_PORT, () => { console.log('> LISTENING: http://localhost:' + options.HTTP_PORT); });
+            this.httpServer.listen(options.HTTP_PORT, () => { 
+                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + options.HTTP_PORT); 
+            });
         }
 
         if (this.httpsServer) {
-            this.httpsServer.listen(options.HTTPS_PORT, () => { console.log('> LISTENING: https://localhost:' + options.HTTPS_PORT); });
+            this.httpsServer.listen(options.HTTPS_PORT, () => { 
+                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + options.HTTPS_PORT);
+                console.log(line);
+            });
         }
+
     }
 }
 

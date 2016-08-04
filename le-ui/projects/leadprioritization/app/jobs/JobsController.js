@@ -261,6 +261,7 @@ angular.module('pd.jobs', [
                     
                     return {
                         id: job.id,
+                        applicationId: job.applicationId,
                         timestamp: job.startTimestamp,
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,

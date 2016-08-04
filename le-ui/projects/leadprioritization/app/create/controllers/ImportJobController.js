@@ -4,38 +4,55 @@ angular.module('lp.create.import.job', [
     'pd.jobs'
 ])
 .controller('ImportJobController', function(
-    $scope, $state, $stateParams, ResourceUtility, JobsService, 
-    JobsStore, ImportStore
+    $scope, $state, $stateParams, $interval, ResourceUtility, 
+    JobsStore, JobsService, ImportStore, ServiceErrorUtility
 ) {
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
-    var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;
+    var REFRESH_PERFORM_CALC_ID; 
+    var TIME_BETWEEN_JOB_REFRESH = 500;
 
     getJobStatusFromAppId();
-    REFRESH_JOB_INTERVAL_ID = setInterval(getJobStatusFromAppId, TIME_BETWEEN_JOB_REFRESH);
+
+    REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppId, TIME_BETWEEN_JOB_REFRESH);
+
     $scope.jobStepsRunningStates = {
         load_data: false, generate_insights: false, create_global_target_market: false
     };
+
     $scope.jobStepsCompletedStates = {
         load_data: false, generate_insights: false, create_global_target_market: false
     };
 
-
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
     $scope.compress_percent = 0;
-
-
 
     var up = true,
         value = 0,
         increment = 4,
         ceiling = 10;
-    function performCalc(){
 
-        JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
-            if (response.success) {
+    $scope.$on("$destroy", function() {
+        $interval.cancel(REFRESH_JOB_INTERVAL_ID);
+        $interval.cancel(REFRESH_PERFORM_CALC_ID);
+    });
 
-                var jobStatus = response.resultObj;
+    function performCalc() {
+        JobsStore.getJobs(true).then(function(jobs) {
+            if (jobs.length > 0) {
+                for (var i=0; i<jobs.length; i++) {
+                    if (jobs.applicationId == $scope.applicationId) {
+                        var resultObj = jobs[i];
+                    }
+                }
+
+                if (!resultObj) {
+                    return;
+                }
+                
+                ServiceErrorUtility.process({ data: resultObj });
+
+                var jobStatus = job.resultObj;
 
                 if (jobStatus.stepRunning == 'load_data'){
                     ceiling = 30;
@@ -45,7 +62,6 @@ angular.module('lp.create.import.job', [
                     ceiling = 90;
                 }
 
-                console.log(jobStatus.stepRunning, value, ceiling);
                 if (up == true && value <= ceiling){
                     value += increment
                 }
@@ -55,9 +71,9 @@ angular.module('lp.create.import.job', [
                 $scope.compress_percent = value;
             };
         });
-    }
-    setInterval(performCalc, TIME_BETWEEN_JOB_REFRESH);
+    };
 
+    REFRESH_PERFORM_CALC_ID = $interval(performCalc, TIME_BETWEEN_JOB_REFRESH);
 
     function updateStatesBasedOnJobStatus(jobStatus) {
         $scope.startTimestamp = jobStatus.startTimestamp;
@@ -96,26 +112,37 @@ angular.module('lp.create.import.job', [
     }
 
     function cancelPeriodJobStatusQuery() {
-        clearInterval(REFRESH_JOB_INTERVAL_ID);
+        $interval.cancel(REFRESH_JOB_INTERVAL_ID);
         REFRESH_JOB_INTERVAL_ID = null;
     }
 
     function getJobStatusFromAppId() {
-        JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
-            if (response.success) {
-                if ($scope.jobStatus == response.resultObj.jobStatus) {
+        JobsStore.getJobs(true).then(function(jobs) {
+            if (jobs.length > 0) {
+                for (var i=0; i<jobs.length; i++) {
+                    if (jobs[i].applicationId == $scope.applicationId) {
+                        var resultObj = jobs[i];
+                    }
+                }
+
+                if (!resultObj) {
                     return;
                 }
 
-                $scope.jobStatus = response.resultObj.jobStatus;
-                $scope.jobId = response.resultObj.id;
+                if ($scope.jobStatus == resultObj.jobStatus) {
+                    return;
+                }
+
+                $scope.jobStatus = resultObj.jobStatus;
+                $scope.jobId = resultObj.id;
                 
                 if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
+                    ServiceErrorUtility.process({ data: resultObj });
                     cancelPeriodJobStatusQuery();
                 }
 
-                updateStatesBasedOnJobStatus(response.resultObj);
-                performCalc(response.resultObj);
+                updateStatesBasedOnJobStatus(resultObj);
+                performCalc(resultObj);
 
                 JobsStore.getJobs();
             } else {

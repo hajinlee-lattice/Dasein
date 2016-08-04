@@ -10,7 +10,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.login.controllers.UpdatePasswordController',
     'mainApp.userManagement.controllers.UserManagementController',
     'mainApp.models.controllers.AdminInfoController',
-    'lp.models.list',
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.controllers.ModelCreationHistoryController',
     'mainApp.models.controllers.ActivateModelController',

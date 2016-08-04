@@ -1,18 +1,22 @@
-angular.module('pd.apiconsole.ScoringRequestController', [
+angular.module('lp.apiconsole.ScoringRequestController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.directives.charts.ArcChartDirective',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'pd.apiconsole.APIConsoleService'
+    'lp.apiconsole.APIConsoleService'
 ])
-
 .directive('scoringRequest', function () {
     return {
         templateUrl: 'app/apiConsole/views/ScoringRequestView.html',
-        controller: ['$scope', '$q', '$stateParams', '_', 'ResourceUtility', 'BrowserStorageUtility', 'APIConsoleService',
-                     function ($scope, $q, $stateParams, _, ResourceUtility, BrowserStorageUtility, APIConsoleService) {
+        controller: function (
+            $scope, $rootScope, $q, $stateParams, _, ResourceUtility, 
+            BrowserStorageUtility, APIConsoleService
+        ) {
             $scope.ResourceUtility = ResourceUtility;
             $scope.showScoringRequestError = false;
             initValues();
+
+            var ClientSession = BrowserStorageUtility.getClientSession(),
+                Tenant = ClientSession ? ClientSession.Tenant : {},
+                tenantId = (Tenant.Identifier || '').split('.')[0];
 
             var displayOrder = ["Email", "CompanyName", "State", "Country", "Website", "FirstName", "LastName"];
             var oldFieldsValuesHash = {};
@@ -35,7 +39,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     if (token != null) {
                         getModelFields(token);
                     } else {
-                        APIConsoleService.GetOAuthAccessToken($stateParams.tenantId).then(function (tokenResult) {
+                        APIConsoleService.GetOAuthAccessToken(tenantId).then(function (tokenResult) {
                             if (tokenResult.Success) {
                                 BrowserStorageUtility.setOAuthAccessToken(tokenResult.ResultObj);
                                 getModelFields(tokenResult.ResultObj);
@@ -137,7 +141,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 if (token != null) {
                     getScoreRecordWithRetries(token, scoreRequest);
                 } else {
-                    APIConsoleService.GetOAuthAccessToken($stateParams.tenantId).then(function (tokenResult) {
+                    APIConsoleService.GetOAuthAccessToken(tenantId).then(function (tokenResult) {
                         if (tokenResult.Success) {
                             BrowserStorageUtility.setOAuthAccessToken(tokenResult.ResultObj);
                             getScoreRecord(tokenResult.ResultObj, scoreRequest).then(function(scoringResult) {
@@ -160,7 +164,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     accessToken: null
                 }
 
-                APIConsoleService.GetOAuthAccessToken($stateParams.tenantId).then(function (tokenResult) {
+                APIConsoleService.GetOAuthAccessToken(tenantId).then(function (tokenResult) {
                     if (tokenResult.Success) {
                         var accessToken = tokenResult.ResultObj;
                         BrowserStorageUtility.setOAuthAccessToken(accessToken);
@@ -233,6 +237,6 @@ angular.module('pd.apiconsole.ScoringRequestController', [
             function stringDivider(str, width, spaceReplacer) {
 
             }
-        }]
+        }
     };
 });

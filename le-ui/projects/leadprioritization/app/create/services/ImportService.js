@@ -80,13 +80,13 @@ angular
 
         xhr.addEventListener('load', function(event) {
             xhr.data = JSON.parse(this.responseText);
-            ServiceErrorUtility.check(xhr);
+            ServiceErrorUtility.process(xhr);
             deferred.resolve(xhr.data);
         });
 
         xhr.addEventListener('error', function(event) {
             xhr.data = JSON.parse(this.responseText);
-            ServiceErrorUtility.check(xhr);
+            ServiceErrorUtility.process(xhr);
 
             var result = {
                 Success: false,

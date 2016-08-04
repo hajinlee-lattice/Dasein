@@ -22,26 +22,26 @@
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
                     <td>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/modeljson?modelId={{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader><br/></span>
+                        <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="modelsummary.json" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/predictorcsv?modelId={{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader><br/></span>
+                        <a href="/files/datafiles/predictorcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="predictors.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/diagnosticsjson?modelId={{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader><br/></span>
+                        <a href="/files/datafiles/diagnosticsjson?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="diagnostics.json" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/metadataavsc?modelId={{ModelId}}" filename="metadata.avsc" filetype="application/json"></data-file-downloader></span>
+                        <a href="/files/datafiles/metadataavsc?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="metadata.avsc" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a></span>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/readoutcsv?modelId={{ModelId}}" filename="readout.csv" filetype="text/csv"></data-file-downloader>
+                        <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="readout.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/scorecsv?modelId={{ModelId}}" filename="scores.csv" filetype="text/csv"></data-file-downloader>
+                        <a href="/files/datafiles/scorecsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="scores.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
@@ -51,14 +51,14 @@
                         <a href="javascript:void(0)" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/rfmodelcsv?modelId={{ModelId}}" filename="rfmodel.csv" filetype="text/csv"></data-file-downloader>
+                        <a href="/files/datafiles/rfmodelcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="rfmodel.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_POST_MATCH_EVENT_TABLE_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_TRAINING_CSV')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/postmatcheventtablecsv/training?modelId={{ModelId}}" filename="training.csv" filetype="text/csv"></data-file-downloader>
+                        <a href="/files/datafiles/postmatcheventtablecsv/training?modelId={{ModelId}}&Authorization={{AuthToken}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
             </tbody>

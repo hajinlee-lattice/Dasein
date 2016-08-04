@@ -1,6 +1,6 @@
 export NODE_ENV=qa
-export API_URL=http://${OUTSIDE_TOMCAT}:8081
-export APICON_URL=http://${INSIDE_TOMCAT}:8073
+export API_URL=https://${OUTSIDE_TOMCAT}:8081
+export APICON_URL=https://${INSIDE_TOMCAT}:8073
 export COMPRESSED=true
 export HTTP_PORT=false
 export HTTPS_PORT=3000

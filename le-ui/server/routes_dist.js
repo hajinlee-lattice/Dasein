@@ -36,6 +36,7 @@ module.exports = [
         }
     },{
         path: '/projects/leadprioritization',
+        html5mode: true,
         pages: {
             '/lp/': 'assets/index.html',
             '/lp/index': 'assets/index.html'

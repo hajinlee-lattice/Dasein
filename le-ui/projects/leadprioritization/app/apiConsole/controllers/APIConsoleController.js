@@ -1,11 +1,9 @@
-angular.module('pd.apiconsole', [
+angular.module('lp.apiconsole', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.models.services.ModelService',
-    'pd.navigation.pagination',
-    'pd.apiconsole.ScoringRequestController',
-    'pd.apiconsole.ScoringResponseController'
+    'lp.apiconsole.ScoringRequestController',
+    'lp.apiconsole.ScoringResponseController'
 ])
-
 .controller('APIConsoleController', function($scope, $state, $stateParams, $rootScope, ResourceUtility, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
