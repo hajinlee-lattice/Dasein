@@ -197,7 +197,6 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         PropData propData = new PropData();
         propData.setName("propData1");
         propData.setDataCloudVersion("1.0.0");
-        propData.setVersion("");
         return propData;
     }
 

@@ -40,9 +40,6 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PREDEFINED_SELECTION_NAME", nullable = true)
     private String predefinedSelectionName;
 
-    @Column(name = "VERSION", nullable = false)
-    private String version;
-
     @JsonProperty("data_cloud_version")
     @Column(name = "DATA_CLOUD_VERSION", nullable = false)
     private String dataCloudVersion;
@@ -63,14 +60,6 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
 
     public void setPid(Long pid) {
         this.pid = pid;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     @MetricTag(tag = "DataCloudVersion")

@@ -592,12 +592,4 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return field2Node != null ? field2Node.textValue() : null;
     }
 
-    // this annotation is not being called, for now I'll set lastUpdateTime
-    // explicitly
-    //
-    // @PreUpdate
-    // protected void onUpdate() {
-    // lastUpdateTime = System.currentTimeMillis();
-    // }
-
 }

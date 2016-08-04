@@ -23,9 +23,6 @@ public class PropDataFactory {
         if (propData.getPredefinedSelectionName() != null) {
             parameters.setPredefinedSelectionName(propData.getPredefinedSelectionName());
         }
-        if (propData.getVersion() != null) {
-            parameters.setSelectedVersion(propData.getVersion());
-        }
         if (propData.getDataCloudVersion() != null) {
             parameters.setDataCloudVersion(propData.getDataCloudVersion());
         }

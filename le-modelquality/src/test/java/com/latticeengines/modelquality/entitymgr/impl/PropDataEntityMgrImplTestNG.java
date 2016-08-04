@@ -26,8 +26,7 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         propData = new PropData();
         propData = new PropData();
         propData.setName("PropData1");
-        propData.setVersion("");
-        propData.setDataCloudVersion("2.0.0");
+        propData.setDataCloudVersion("2.0.1470268608");
     }
 
     @Test(groups = "functional")
@@ -39,7 +38,6 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         PropData retrievedPropData = propDatas.get(0);
 
         assertEquals(retrievedPropData.getName(), propData.getName());
-        assertEquals(retrievedPropData.getVersion(), propData.getVersion());
         assertEquals(retrievedPropData.getDataCloudVersion(), propData.getDataCloudVersion());
     }
 }
