@@ -114,6 +114,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         useEloquaSettingsProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> allowPivotFileProdSet = new HashSet<LatticeProduct>();
         allowPivotFileProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> useAccountMasterProdSet = new HashSet<LatticeProduct>();
+        useAccountMasterProdSet.add(LatticeProduct.LPA3);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -137,9 +139,12 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition useEloquaSettingsFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName(),
                 LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getDocumentation(), useEloquaSettingsProdSet, true);
-        FeatureFlagDefinition allowPivotFileProdSetFeatureFlag = createDefaultFeatureFlag(
+        FeatureFlagDefinition allowPivotFileFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), LatticeFeatureFlag.ALLOW_PIVOT_FILE.getDocumentation(),
                 allowPivotFileProdSet, true);
+        FeatureFlagDefinition useAccountMasterFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName(),
+                LatticeFeatureFlag.USE_ACCOUNT_MASTER.getDocumentation(), useAccountMasterProdSet, true);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -153,8 +158,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_MARKETO_SETTINGS.getName(),
                 useMarketoSettingsFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName(), useEloquaSettingsFeatureFlag);
-        FeatureFlagClient
-                .setDefinition(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), allowPivotFileProdSetFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), allowPivotFileFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName(), useAccountMasterFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,

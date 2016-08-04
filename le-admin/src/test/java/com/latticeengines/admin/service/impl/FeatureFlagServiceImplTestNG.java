@@ -73,9 +73,13 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName());
         Assert.assertNotNull(useEloquaSettingsFeatureFlag);
 
-        FeatureFlagDefinition allowPivotFileProdSetFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName());
-        Assert.assertNotNull(allowPivotFileProdSetFeatureFlag);
+        FeatureFlagDefinition allowPivotFileFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.ALLOW_PIVOT_FILE
+                .getName());
+        Assert.assertNotNull(allowPivotFileFeatureFlag);
+
+        FeatureFlagDefinition useAccountMasterFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName());
+        Assert.assertNotNull(useAccountMasterFeatureFlag);
 
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
@@ -115,10 +119,15 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && useEloquaSettingsFeatureFlag.getDisplayName() != null
                 && useEloquaSettingsFeatureFlag.getDocumentation() != null);
 
-        Assert.assertTrue(allowPivotFileProdSetFeatureFlag.getConfigurable()
-                && allowPivotFileProdSetFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && allowPivotFileProdSetFeatureFlag.getDisplayName() != null
-                && allowPivotFileProdSetFeatureFlag.getDocumentation() != null);
+        Assert.assertTrue(allowPivotFileFeatureFlag.getConfigurable()
+                && allowPivotFileFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && allowPivotFileFeatureFlag.getDisplayName() != null
+                && allowPivotFileFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(useAccountMasterFeatureFlag.getConfigurable()
+                && useAccountMasterFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && useAccountMasterFeatureFlag.getDisplayName() != null
+                && useAccountMasterFeatureFlag.getDocumentation() != null);
 
     }
 

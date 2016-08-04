@@ -15,7 +15,8 @@ public enum LatticeFeatureFlag {
     USE_SALESFORCE_SETTINGS("UseSalesforceSettings", "Use Salesforce settings"), //
     USE_MARKETO_SETTINGS("UseMarketoSettings", "Use Marketo settings"), //
     USE_ELOQUA_SETTINGS("UseEloquaSettings", "Use Eloqua settings"), //
-    ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file");
+    ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
+    USE_ACCOUNT_MASTER("UseAccountMaster", "Use Account Master");
 
     private String name;
     private String documentation;
