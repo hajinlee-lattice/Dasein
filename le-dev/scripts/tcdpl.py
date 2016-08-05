@@ -5,7 +5,7 @@ import psutil
 import signal
 import subprocess
 import time
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, copytree
 
 tomcatPid = None
 tomcatProc = None
@@ -25,7 +25,7 @@ if HADOOP_COMMON_JAR is None or HADOOP_COMMON_JAR == '':
 else:
     print 'HADOOP_COMMON_JAR=%s' % HADOOP_COMMON_JAR
 
-LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml']
+LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality']
 
 def cleanupWars():
@@ -69,12 +69,17 @@ def deployApp(app, modules):
 
     webappName = 'oauth' if (app == 'oauth2') else app
     webappWar = 'ROOT.war'
-    webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName, webappWar)
+    webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName)
 
-    copyfile(os.path.join(targetDir, appWar), webappDir + ".copy")
-    os.rename(webappDir + ".copy", webappDir)
+    if not os.path.isdir(webappDir):
+        os.makedirs(webappDir)
+        copytree(os.path.join(CATALINA_HOME, 'webapps', 'manager'), os.path.join(webappDir, 'manager'))
 
-    print 'deployed %s to %s\n' % (appWar, webappDir)
+    webappFile = os.path.join(webappDir, webappWar)
+    copyfile(os.path.join(targetDir, appWar), webappFile + ".copy")
+    os.rename(webappFile + ".copy", webappFile)
+
+    print 'deployed %s to %s\n' % (appWar, webappFile)
 
 
 def deployMs(mods):

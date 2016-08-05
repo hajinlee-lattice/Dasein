@@ -25,7 +25,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 public class SwaggerConfig {
 
     @Autowired
-    private VersionManager versionManager;
+    private VersionManager docVersionManager;
 
     @Bean
     public Docket api() {
@@ -51,7 +51,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder() //
                 .title("Lattice Engines Score REST API") //
                 .description("This is the REST API exposed for the Lattice Engines score service.  In order to make authorized calls to Lattice APIs, your application must first obtain an OAuth access token.") //
-                .version(versionManager.getCurrentVersion()) //
+                .version(docVersionManager.getCurrentVersion()) //
                 .termsOfServiceUrl("termsofservice.html") //
                 .license("License") //
                 .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0") //

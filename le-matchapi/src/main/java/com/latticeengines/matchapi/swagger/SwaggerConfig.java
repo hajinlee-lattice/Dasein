@@ -1,4 +1,4 @@
-package com.latticeengines.admin.swagger;
+package com.latticeengines.matchapi.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -9,6 +9,9 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import com.latticeengines.common.exposed.util.SwaggerUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.ResponseMessageBuilder;
@@ -17,9 +20,6 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import com.latticeengines.common.exposed.util.SwaggerUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 
 @Configuration
 @EnableWebMvc
@@ -34,11 +34,10 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
-                .apis(SwaggerUtils.getApiSelector("com.latticeengines.admin.controller.*",
-                        "com.latticeengines.security.controller.ActiveDirectoryLoginResource")) //
+                .apis(SwaggerUtils.getApiSelector("com.latticeengines.matchapi.controller.*")) //
                 .paths(PathSelectors.any()) //
                 .build() //
-                .pathMapping("/admin") //
+                .pathMapping("/match") //
                 .apiInfo(apiInfo()) //
                 .useDefaultResponseMessages(false).globalResponseMessage(RequestMethod.GET,
                         newArrayList(
@@ -47,13 +46,13 @@ public class SwaggerConfig {
                                 new ResponseMessageBuilder().code(400).message("Bad Request").build(), //
                                 new ResponseMessageBuilder().code(401).message("Unauthorized").build(), //
                                 new ResponseMessageBuilder().code(402).message("Request Failed").build() //
-        ));
+                        ));
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder() //
-                .title("Lattice Engines Admin REST API") //
-                .description("This is the REST API exposed for the different admin services.") //
+                .title("Lattice Engines Match API") //
+                .description("This is the REST API for match services.") //
                 .version(docVersionManager.getCurrentVersion()) //
                 .termsOfServiceUrl("termsofservice.html") //
                 .license("License") //

@@ -43,6 +43,7 @@
         <module>le-web</module>
         <module>le-dataflow</module>
         <module>le-serviceflows</module>
+        <module>le-matchapi</module>
         <module>le-propdata</module>
         <module>le-auth</module>
         <module>le-security</module>

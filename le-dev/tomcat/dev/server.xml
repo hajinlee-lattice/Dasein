@@ -167,4 +167,20 @@
         </Engine>
     </Service>
 
+    <Service name="MatchAPI">
+        <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000"/>
+
+        <Engine name="MatchApiEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+
+            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="false" autoDeploy="true"
+                  undeployOldVersions="true">
+                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
+            </Host>
+        </Engine>
+    </Service>
+
 </Server>
