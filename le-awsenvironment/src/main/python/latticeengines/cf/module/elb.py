@@ -19,7 +19,7 @@ class ElasticLoadBalancer(Resource):
             "Properties": {
                 "Listeners" : [ ],
                 "SecurityGroups" : [{ "Ref": "SecurityGroupId" }],
-                "Subnets" : [ { "Ref" : "SubnetId1" }, {"Ref": "SubnetId2"} ],
+                "Subnets" : [ { "Ref" : "SubnetId1" }, {"Ref": "SubnetId2"}, {"Ref": "SubnetId3"} ],
                 "LoadBalancerName":  self.__name
             }
         }

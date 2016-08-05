@@ -121,15 +121,18 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, extra_elbs=()):
+    def __init__(self, description, extra_elbs=(), use_external_elb=True):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
-        self._elbs = [ PARAM_ELB_NAME ]
+        self._elbs = [ PARAM_ELB_NAME ] if use_external_elb else []
         self._elbs += list(extra_elbs)
         self._ecscluster, self._asgroup = self._construct(self._elbs)
 
-    def add_service(self, service_name, task):
-        service = ECSService(service_name, self._ecscluster, task, PARAM_CAPACITY)\
+    def add_service(self, service_name, task, capacity=None):
+        if capacity is None:
+            capacity = PARAM_CAPACITY
+
+        service = ECSService(service_name, self._ecscluster, task, capacity) \
             .set_min_max_percent(50, 200) \
             .depends_on(self._asgroup)
         self.add_resource(service)

@@ -71,7 +71,6 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
-    parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")

@@ -10,7 +10,7 @@ class AutoScalingGroup(Resource):
         self._template = {
             "Type" : "AWS::AutoScaling::AutoScalingGroup",
             "Properties" : {
-                "VPCZoneIdentifier" : [ { "Ref" : "SubnetId1" }, {"Ref": "SubnetId2"} ],
+                "VPCZoneIdentifier" : [ { "Ref" : "SubnetId1" }, {"Ref": "SubnetId2"}, {"Ref": "SubnetId3"} ],
                 "Cooldown": "1200",
                 "MinSize" : min_size.ref() if isinstance(min_size, Parameter) else min_size,
                 "MaxSize" : max_size.ref() if isinstance(max_size, Parameter) else max_size,
