@@ -27,8 +27,10 @@ public class ModelQualityProxy extends BaseRestApiProxy implements ModelQualityI
     }
 
     @Override
-    public ResponseDocument<String> runModel(ModelRun modelRun) {
-        String url = constructUrl("/runmodel");
+    public ResponseDocument<String> runModel(ModelRun modelRun, String tenant, String username,
+            String encryptedPassword, String apiHostPort) {
+        String url = constructUrl("/runmodel?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
+                tenant, username, encryptedPassword, apiHostPort);
         return post("runModel", url, modelRun, ResponseDocument.class);
     }
 
@@ -140,5 +142,6 @@ public class ModelQualityProxy extends BaseRestApiProxy implements ModelQualityI
         String url = constructUrl("/modelrun/{modelRunId}", modelRunId);
         return get("getModelRun", url, ResponseDocument.class);
     }
+
 
 }
