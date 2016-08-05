@@ -78,7 +78,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testWorkflow" })
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "testWorkflow" })
     public void scoreRecords() throws IOException, InterruptedException {
 
         Model model = testPMMLScoring.getModel(modelDisplayName, PMML_CUSTOMERSPACE, pmmlTenant);
