@@ -5,7 +5,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 ])
 .service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
-    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, modelSummaryId, allMetadataFields, oldModelDisplayName, dataRules) {
+    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, modelSummaryId, allMetadataFields, oldModelDisplayName, dataRules) {
         $http.get('app/setup/views/UpdateFieldsView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
@@ -13,6 +13,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             scope.allMetadataFields = allMetadataFields;
             scope.dataRules = dataRules;
             scope.includePersonalEmailDomains = includePersonalEmailDomains;
+            scope.useLatticeAttributes = useLatticeAttributes;
             var copy_text = " (copy)";
             scope.modelDisplayName = oldModelDisplayName + (oldModelDisplayName.length + copy_text.length <= 50 ? copy_text : '');
             var deduplicationTypes = [ "ONELEADPERDOMAIN", "MULTIPLELEADSPERDOMAIN" ];
@@ -58,8 +59,8 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 
         $scope.saveInProgress = true;
 
-        MetadataService.UpdateAndCloneFields($scope.dedupType, $scope.includePersonalEmailDomains, modelName, $scope.modelDisplayName, $scope.modelSummaryId,
-            $scope.allMetadataFields, $scope.dataRules).then(function(result){
+        MetadataService.UpdateAndCloneFields($scope.dedupType, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes,
+            modelName, $scope.modelDisplayName, $scope.modelSummaryId, $scope.allMetadataFields, $scope.dataRules).then(function(result){
 
             if (result.Success) {
                 $("#modalContainer").modal('hide');

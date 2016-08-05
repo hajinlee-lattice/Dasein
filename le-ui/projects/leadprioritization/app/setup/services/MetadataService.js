@@ -148,7 +148,8 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.UpdateAndCloneFields = function (dedupType, includePersonalEmailDomains, modelName, modelDisplayName, originalModelSummaryId, fields, dataRules) {
+    this.UpdateAndCloneFields = function (dedupType, includePersonalEmailDomains, useLatticeAttributes, modelName,
+                                        modelDisplayName, originalModelSummaryId, fields, dataRules) {
         var deferred = $q.defer();
 
         var cloneParams = {
@@ -159,6 +160,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             sourceModelSummaryId: originalModelSummaryId,
             deduplicationType: dedupType,
             excludePublicDomains: includePersonalEmailDomains ? false : true,
+            excludeLatticeAttributes: useLatticeAttributes ? false : true,
             dataRules: dataRules
         };
 

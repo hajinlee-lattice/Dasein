@@ -105,4 +105,42 @@ angular
 
         return deferred.promise;
     };
+
+    this.GetUserUploadedAttributes = function(modelId) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/modelsummaries/trainingdata/' + modelId,
+            headers: { 'Content-Type' : 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null || !data.Success) {
+                if (data && data.Errors.length > 0) {
+                    var errors = data.Errors.join('\n');
+                }
+                result = {
+                    Success: false,
+                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    Result: null
+                };
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: data.Errors,
+                    Result: data.Result
+                };
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 });

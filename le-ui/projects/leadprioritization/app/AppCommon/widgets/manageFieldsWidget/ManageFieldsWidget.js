@@ -22,9 +22,9 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.dirtyRows = {};
     $scope.indexToOldFieldsForSingleFieldPage = {};
     $scope.indexToOldFieldsForListFieldsPage = {};
-    $scope.oneLeadPerDomain = false;
-    $scope.includePersonalEmailDomains = true;
-    $scope.useLatticeAttributes = true;
+    $scope.oneLeadPerDomain = $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain == "true";
+    $scope.includePersonalEmailDomains = $scope.data.EventTableProvenance.Exclude_Public_Domains == "false";
+    $scope.useLatticeAttributes = $scope.data.EventTableProvenance.Exclude_Propdata_Columns == "false";
 
     getOptionsAndFields();
 
@@ -345,7 +345,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.saveInProgress) { return; }
 
         var editedData = getAllEditedData();
-        if ((editedData != null && editedData.length > 0) || $scope.oneLeadPerDomain) {
+        if ((editedData != null && editedData.length > 0) || advancedSettingsFlagsChanged()) {
             DiscardEditFieldsModel.show($scope);
         } else {
             $scope.showEditFieldsError = true;
@@ -360,6 +360,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
         $scope.oneLeadPerDomain = oneLeadPerDomain;
         $scope.includePersonalEmailDomains = includePersonalEmailDomains;
+        $scope.useLatticeAttributes = useLatticeAttributes;
 
         if ($scope.useLatticeAttributes != useLatticeAttributes) {
             if (!useLatticeAttributes) {
@@ -394,13 +395,22 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
     }
 
+    function advancedSettingsFlagsChanged() {
+        if ($scope.oneLeadPerDomain != $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain ||
+            $scope.includePersonalEmailDomains == $scope.data.EventTableProvenance.Exclude_Public_Domains ||
+            $scope.useLatticeAttributes == $scope.data.EventTableProvenance.Exclude_Propdata_Columns) {
+            return true;
+        }
+        return false;
+    }
+
     $scope.remodelClicked = function($event) {
         if ($scope.saveInProgress) { return; }
         $scope.showEditFieldsError = false;
 
         var editedData = getAllEditedData();
-        if ((editedData != null && editedData.length > 0) || $scope.oneLeadPerDomain || !$scope.includePersonalEmailDomains) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.modelId,
+        if ((editedData != null && editedData.length > 0) || advancedSettingsFlagsChanged()) {
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.modelId,
                 $scope.fields.concat($scope.fieldsNotDisplayed), $scope.data.ModelDetails.DisplayName);
 
             $scope.saveInProgress = false;
@@ -414,9 +424,9 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
-        $scope.oneLeadPerDomain = false;
-        $scope.includePersonalEmailDomains = true;
-        $scope.useLatticeAttributes = true;
+        $scope.oneLeadPerDomain = $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain;
+        $scope.includePersonalEmailDomains = !$scope.data.EventTableProvenance.Exclude_Public_Domains;
+        $scope.useLatticeAttributes = !scope.data.EventTableProvenance.Exclude_Propdata_Columns;
         $scope.dirtyRows = {};
 
         $scope.indexToOldFieldsForListFieldsPage = {};

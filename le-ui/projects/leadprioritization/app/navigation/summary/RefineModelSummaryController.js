@@ -19,14 +19,18 @@ angular.module('lp.navigation.review', [
         conversionRate: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
         conversionRateAfter: getConversionRate(Model.ModelDetails.TotalConversions, Model.ModelDetails.TotalLeads),
         eventTableName: Model.EventTableProvenance.EventTableName,
-        schemaInterpretation: Model.ModelDetails.SourceSchemaInterpretation
+        schemaInterpretation: Model.ModelDetails.SourceSchemaInterpretation,
+        oneLeadPerDomain: Model.EventTableProvenance.Is_One_Lead_Per_Domain == "true",
+        includePersonalEmailDomains: Model.EventTableProvenance.Exclude_Public_Domains == "false",
+        useLatticeAttributes: Model.EventTableProvenance.Exclude_Propdata_Columns == "false"
     });
 
     vm.createModelClicked = function() {
         if (vm.totalRecordsAfter < 7000 || vm.successEventsAfter < 150 || vm.conversionRateAfter > 10) {
             RefineModelThresholdModal.show(vm.totalRecordsAfter, vm.successEventsAfter, vm.conversionRateAfter);
         } else {
-            UpdateFieldsModal.show(false, false, vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
+            UpdateFieldsModal.show(vm.oneLeadPerDomain, vm.includePersonalEmailDomains, vm.useLatticeAttributes,
+                vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
         }
     };
 
