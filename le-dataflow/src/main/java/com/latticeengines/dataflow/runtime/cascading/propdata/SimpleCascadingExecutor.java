@@ -28,6 +28,7 @@ import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
+import cascading.tuple.Fields;
 
 public class SimpleCascadingExecutor {
     private static final Log log = LogFactory.getLog(SimpleCascadingExecutor.class);
@@ -55,8 +56,12 @@ public class SimpleCascadingExecutor {
     @Value("${dataflow.hdfs.stack:}")
     private String stackName;
 
-    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath)
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath,
+            String avroDirPath, String delimiter, String qualifier, String charset)
             throws IOException {
+        delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
+        qualifier = qualifier == null ? QUOTE : qualifier;
+
         Schema schema = fieldMapping.getAvroSchema();
         Properties properties = new Properties();
         for (Entry<String, String> conf : yarnConfiguration) {
@@ -70,10 +75,12 @@ public class SimpleCascadingExecutor {
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
-        DelimitedParser delimitedParser = new CustomDelimitedParser(fieldMapping, CSV_DELIMITER, QUOTE, false, true,
-                fieldTypeResolver);
+        DelimitedParser delimitedParser = new CustomDelimitedParser(fieldMapping, delimiter,
+                qualifier, false, true, fieldTypeResolver);
+        TextDelimited textDelimited = charset == null ? new TextDelimited(true, delimitedParser)
+                : new TextDelimited(Fields.ALL, null, true, true, charset, delimitedParser);
 
-        Tap<?, ?, ?> csvTap = new Hfs(new TextDelimited(true, delimitedParser), uncompressedFilePath);
+        Tap<?, ?, ?> csvTap = new Hfs(textDelimited, uncompressedFilePath);
         Tap<?, ?, ?> avroTap = new Hfs(avroScheme, avroDirPath, SinkMode.REPLACE);
 
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);

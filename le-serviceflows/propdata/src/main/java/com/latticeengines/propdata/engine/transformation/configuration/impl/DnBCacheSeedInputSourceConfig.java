@@ -3,7 +3,8 @@ package com.latticeengines.propdata.engine.transformation.configuration.impl;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.transformation.configuration.FileInputSourceConfig;
 
-public class BomboraFirehoseInputSourceConfig extends FileInputSourceConfig {
+public class DnBCacheSeedInputSourceConfig extends FileInputSourceConfig {
+
     @Override
     public String getQualifier() {
         return "\"";
@@ -11,16 +12,16 @@ public class BomboraFirehoseInputSourceConfig extends FileInputSourceConfig {
 
     @Override
     public String getDelimiter() {
-        return ",";
+        return "|";
     }
 
     @Override
     public String getExtension() {
-        return PropDataConstants.CSV_GZ;
+        return PropDataConstants.OUT_GZ;
     }
 
     @Override
     public String getCharset() {
-        return null;
+        return "ISO-8859-1";
     }
 }

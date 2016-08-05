@@ -20,27 +20,26 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
-import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
+import com.latticeengines.propdata.core.source.impl.DnBCacheSeed;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-@Component("bomboraFirehoseIngestionService")
-public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService
+@Component("dnbCacheSeedIngestionService")
+public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformationService
         implements TransformationService {
+    private static final String DATA_FLOW_BEAN_NAME = "dnbCacheSeedUncompressAndConvertToAvroFlow";
 
-    private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
-
-    private static final Log log = LogFactory.getLog(BomboraFirehoseIngestionService.class);
+    private static final Log log = LogFactory.getLog(DnBCacheSeedIngestionService.class);
 
     private static final String PATH_SEPARATOR = "/";
 
     private static final String SCHEMA = "schema";
 
-    private static final String BOMBORA_FIREHOSE_AVRO_SCHEMA_AVSC = "BomboraFirehoseAvroSchema.avsc";
+    private static final String DNB_CACHESEED_AVRO_SCHEMA_AVSC = "DnBCacheSeedAvroSchema.avsc";
 
     private static final String VERSION = "VERSION";
 
@@ -48,7 +47,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     private TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    private BomboraFirehose source;
+    private DnBCacheSeed source;
 
     @Autowired
     private FirehoseTransformationDataFlowService transformationDataFlowService;
@@ -79,13 +78,15 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
         CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(
                 transformationConfiguration.getSourceColumns());
         transformationDataFlowService.setFieldTypeMapping(fieldTypeMapping);
-        transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
-                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
+        transformationDataFlowService.executeDataProcessing(source, workflowDir,
+                getVersion(progress), progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME,
+                transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        BomboraFirehoseConfiguration conf = (BomboraFirehoseConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(
+            TransformationConfiguration transformationConfiguration) {
+        DnBCacheSeedConfiguration conf = (DnBCacheSeedConfiguration) transformationConfiguration;
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -97,30 +98,34 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     @Override
     protected TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
             String newLatestVersion, List<SourceColumn> sourceColumns) {
-        BomboraFirehoseConfiguration configuration = new BomboraFirehoseConfiguration();
+        DnBCacheSeedConfiguration configuration = new DnBCacheSeedConfiguration();
         configuration.setInputFirehoseVersion(latestBaseVersion.get(0));
-        BomboraFirehoseInputSourceConfig inputSourceConfig = new BomboraFirehoseInputSourceConfig();
+        DnBCacheSeedInputSourceConfig inputSourceConfig = new DnBCacheSeedInputSourceConfig();
         inputSourceConfig.setVersion(latestBaseVersion.get(0));
-        configuration.setBomboraFirehoseInputSourceConfig(inputSourceConfig);
+        configuration.setDnbCacheSeedInputSourceConfig(inputSourceConfig);
         setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
         return configuration;
     }
 
     @Override
     void uploadSourceSchema(String workflowDir) throws IOException {
-        String schemaFileName = BOMBORA_FIREHOSE_AVRO_SCHEMA_AVSC;
-        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
+        String schemaFileName = DNB_CACHESEED_AVRO_SCHEMA_AVSC;
+        InputStream fileStream = ClassLoader
+                .getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
         String targetPath = workflowDir + PATH_SEPARATOR + schemaFileName;
+
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
-        return JsonUtils.deserialize(confStr, BomboraFirehoseConfiguration.class);
+    TransformationConfiguration readTransformationConfigurationObject(String confStr)
+            throws IOException {
+        return JsonUtils.deserialize(confStr, DnBCacheSeedConfiguration.class);
     }
 
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
-        return BomboraFirehoseConfiguration.class;
+        return DnBCacheSeedConfiguration.class;
     }
+
 }

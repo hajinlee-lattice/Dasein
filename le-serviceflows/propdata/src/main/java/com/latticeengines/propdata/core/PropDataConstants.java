@@ -9,6 +9,6 @@ public final class PropDataConstants {
             .toString();
     public static final String SCAN_SUBMITTER = "RESTScanner";
     public static final String CSV_GZ = ".csv.gz";
-    public static final String OUT_GZ = ".out.gz";
+    public static final String OUT_GZ = ".OUT.gz";
     public static final String GZ = ".gz";
 }

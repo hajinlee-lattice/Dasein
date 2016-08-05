@@ -105,7 +105,7 @@ public class IngestionServiceImpl implements IngestionService {
                 && !ifSftpFileExists((SftpConfiguration) ingestion.getProviderConfiguration(),
                         ingestionRequest.getFileName())) {
             return ingestionProgressService.updateInvalidProgress(progress,
-                    progress.getDestination() + " does not exist in source SFTP");
+                    ingestionRequest.getFileName() + " does not exist in source SFTP");
         }
         if (ingestionNewProgressValidator.isDuplicateProgress(progress)) {
             return ingestionProgressService.updateInvalidProgress(progress,
@@ -211,7 +211,7 @@ public class IngestionServiceImpl implements IngestionService {
         if (ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)) {
             targetFiles = filterBomboraFiles(targetFiles);
         } else if (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)) {
-            targetFiles = filterDnBFiles(targetFiles, "output");
+            targetFiles = filterDnBFiles(targetFiles, "OUTPUT");
         }
         com.latticeengines.domain.exposed.camille.Path hdfsDest = hdfsPathBuilder
                 .constructIngestionDir(ingestion.getIngestionName());
@@ -309,7 +309,7 @@ public class IngestionServiceImpl implements IngestionService {
             Vector<ChannelSftp.LsEntry> files = sftpChannel.ls(".");
             List<String> fileSources = new ArrayList<String>();
             for (int i = 0; i < files.size(); i++) {
-                ChannelSftp.LsEntry file = (ChannelSftp.LsEntry) files.get(i);
+                ChannelSftp.LsEntry file = files.get(i);
                 if (!file.getAttrs().isDir()) {
                     fileSources.add(file.getFilename());
                 }
@@ -322,6 +322,7 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
+    @Override
     public boolean ifSftpFileExists(SftpConfiguration config, String fileName) {
         boolean res = false;
         try {
@@ -366,7 +367,7 @@ public class IngestionServiceImpl implements IngestionService {
         Iterator<String> iter = files.iterator();
         while (iter.hasNext()) {
             String file = iter.next();
-            if (file.startsWith("le_seed_" + fileType) && file.endsWith(PropDataConstants.OUT_GZ)) {
+            if (file.startsWith("LE_SEED_" + fileType) && file.endsWith(PropDataConstants.OUT_GZ)) {
                 continue;
             }
             iter.remove();

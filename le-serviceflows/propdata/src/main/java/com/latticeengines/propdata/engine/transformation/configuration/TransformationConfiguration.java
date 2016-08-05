@@ -12,7 +12,7 @@ public interface TransformationConfiguration {
 
     Map<String, String> getSourceConfigurations();
 
-    InputSourceConfig getInputSourceConfig(String inputSourceName) throws MethodNotSupportedException;
+    InputSourceConfig getInputSourceConfig() throws MethodNotSupportedException;
 
     String getVersion();
 

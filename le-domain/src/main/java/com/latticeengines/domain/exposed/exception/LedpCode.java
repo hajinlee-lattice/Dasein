@@ -345,6 +345,7 @@ public enum LedpCode {
     LEDP_25019("Could not find java type for Avro type {0}"), //
     LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
     LEDP_25021("unsupported_match_version_type", "Unsupported match version {0}"), //
+    LEDP_25022("InputSourceConfig is not FileInputSourceConfig"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

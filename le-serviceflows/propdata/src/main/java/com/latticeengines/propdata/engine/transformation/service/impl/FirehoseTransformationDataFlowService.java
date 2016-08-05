@@ -3,7 +3,11 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import javax.mail.MethodNotSupportedException;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +20,16 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.transformation.configuration.FileInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("firehoseTransformationDataFlowService")
 public class FirehoseTransformationDataFlowService extends AbstractTransformationDataFlowService {
+
+    private static final Log log = LogFactory.getLog(FirehoseTransformationDataFlowService.class);
 
     private static final String HDFS_PATH_SEPARATOR = "/";
 
@@ -58,13 +64,21 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                                     : "Name of FlowBean cannot be null") });
         }
 
+        FileInputSourceConfig inputConfig = null;
+        try {
+            inputConfig = (FileInputSourceConfig) transformationConfiguration
+                    .getInputSourceConfig();
+        } catch (MethodNotSupportedException e1) {
+            throw new LedpException(LedpCode.LEDP_25022);
+        }
+
         if (source instanceof DataImportedFromHDFS) {
             String inputDir = hdfsPathBuilder
                     .constructIngestionDir(source.getSourceName(), baseVersion).toString();
             String gzHdfsPath = null;
 
             try {
-                gzHdfsPath = scanDir(inputDir, PropDataConstants.CSV_GZ);
+                gzHdfsPath = scanDir(inputDir, inputConfig.getExtension());
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
@@ -75,7 +89,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
             try {
                 untarGZFile(gzHdfsPath, uncompressedFilePath);
-                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath);
+                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, inputConfig);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
@@ -111,9 +125,11 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     }
 
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping,
-            String uncompressedFilePath, String avroDirPath) throws IOException {
+            String uncompressedFilePath, String avroDirPath, FileInputSourceConfig inputConfig)
+                    throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath,
-                avroDirPath);
+                avroDirPath, inputConfig.getDelimiter(), inputConfig.getQualifier(),
+                inputConfig.getCharset());
     }
 
     @Override

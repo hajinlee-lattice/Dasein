@@ -7,15 +7,15 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public class BomboraFirehoseConfiguration implements TransformationConfiguration {
+public class DnBCacheSeedConfiguration implements TransformationConfiguration {
     private String version;
     private String sourceName;
     private Map<String, String> sourceConfigurations;
     private String inputFirehoseVersion;
-    private String serviceBeanName = "bomboraFirehoseIngestionService";
+    private String serviceBeanName = "dnbCacheSeedIngestionService";
     private String rootOperationId;
     private List<SourceColumn> sourceColumns;
-    private BomboraFirehoseInputSourceConfig inputSourceConfig;
+    private DnBCacheSeedInputSourceConfig inputSourceConfig;
 
     @Override
     public String getSourceName() {
@@ -32,8 +32,7 @@ public class BomboraFirehoseConfiguration implements TransformationConfiguration
         return inputSourceConfig;
     }
 
-    public void setBomboraFirehoseInputSourceConfig(
-            BomboraFirehoseInputSourceConfig inputSourceConfig) {
+    public void setDnbCacheSeedInputSourceConfig(DnBCacheSeedInputSourceConfig inputSourceConfig) {
         this.inputSourceConfig = inputSourceConfig;
     }
 
@@ -89,5 +88,4 @@ public class BomboraFirehoseConfiguration implements TransformationConfiguration
     public void setSourceColumns(List<SourceColumn> sourceColumns) {
         this.sourceColumns = sourceColumns;
     }
-
 }

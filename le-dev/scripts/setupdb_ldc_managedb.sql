@@ -10,7 +10,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(SourceColumnID, SourceName, ColumnName, ColumnType, BaseSource, Preparation, Priority, GroupBy, Calculation, Arguments, Groups);
+(SourceColumnID, Arguments, BaseSource, Calculation, ColumnName, ColumnType, GroupBy, Groups, Preparation, Priority, SourceName);
 
 LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ExternalColumn.csv' INTO TABLE `ExternalColumn`
 FIELDS TERMINATED BY ','
@@ -53,5 +53,9 @@ WHERE FundamentalType = '';
 UPDATE ExternalColumn
 SET DataType = NULL
 WHERE DataType = '';
+
+UPDATE LDC_ManageDB.SourceColumn
+SET Arguments = REPLACE(Arguments, 'Â', '')
+WHERE BaseSource = 'DnBCacheSeed'
 
 SET SQL_SAFE_UPDATES = 1;
