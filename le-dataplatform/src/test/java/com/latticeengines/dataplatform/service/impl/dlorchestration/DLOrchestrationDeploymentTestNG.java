@@ -104,10 +104,10 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         ModelCommandId commandId = ModelingServiceTestUtils.createModelCommandId();
         modelCommandIdEntityMgr.create(commandId);
         log.info(commandId.getPid());
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersFeatureSelection(commandId.getPid(),
-                TEMP_EVENTTABLE, false, false);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersFeatureSelection(
+                commandId.getPid(), TEMP_EVENTTABLE, false, false);
         modelCommandEntityMgr.create(command);
-
+        log.info("data populated, testing started.");
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
                 && iterations < 100) { // Wait maximum of 25 minutes to process
