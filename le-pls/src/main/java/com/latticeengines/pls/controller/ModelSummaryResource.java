@@ -30,6 +30,11 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +61,9 @@ public class ModelSummaryResource {
 
     @Autowired
     private ModelMetadataService modelMetadataService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -90,7 +98,8 @@ public class ModelSummaryResource {
     @RequestMapping(value = "/alerts/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get diagnostic alerts for a model.")
-    public String getModelAlerts(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response) {
+    public String getModelAlerts(@PathVariable String modelId, HttpServletRequest request,
+            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
         if (!modelSummaryService.modelIdinTenant(modelId, tenant.getId())) {
@@ -100,8 +109,8 @@ public class ModelSummaryResource {
         }
 
         ModelAlerts alerts = new ModelAlerts();
-        ModelAlerts.ModelQualityWarnings modelQualityWarnings = modelAlertService.generateModelQualityWarnings(
-                tenantId, modelId);
+        ModelAlerts.ModelQualityWarnings modelQualityWarnings = modelAlertService.generateModelQualityWarnings(tenantId,
+                modelId);
         ModelAlerts.MissingMetaDataWarnings missingMetaDataWarnings = modelAlertService
                 .generateMissingMetaDataWarnings(tenantId, modelId);
         alerts.setMissingMetaDataWarnings(missingMetaDataWarnings);
@@ -191,6 +200,16 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get metadata for the event table used for the specified model")
     public List<VdbMetadataField> getMetadata(@PathVariable String modelId) {
         return modelMetadataService.getMetadata(modelId);
+    }
+
+    @RequestMapping(value = "/trainingdata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get training table attributes used for the specified model")
+    public ResponseDocument<List<Attribute>> getTableAttributes(@PathVariable String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                modelSummary.getTrainingTableName());
+        return ResponseDocument.successResponse(trainingTable.getAttributes());
     }
 
     @RequestMapping(value = "/metadata/required/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")

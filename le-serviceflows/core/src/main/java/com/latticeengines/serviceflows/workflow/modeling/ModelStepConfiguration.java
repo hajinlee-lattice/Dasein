@@ -9,11 +9,12 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
-
     @NotEmptyString
     @NotNull
     private String modelingServiceHdfsBaseDir;
@@ -36,12 +37,12 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private ModelSummary sourceModelSummary;
 
-    private boolean excludePropDataColumns;
-    
+    private ModelSummaryProvenance modelSummaryProvenance = new ModelSummaryProvenance();
+
     private String pivotArtifactPath;
 
     private Map<String, String> runTimeParams;
-    
+
     private boolean defaultDataRuleConfiguration;
 
     private List<DataRule> dataRules;
@@ -146,14 +147,18 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
         this.sourceModelSummary = sourceModelSummary;
     }
 
-    @JsonProperty
-    public boolean excludePropDataColumns() {
-        return excludePropDataColumns;
+    @JsonProperty("modelSummaryProvenance")
+    public ModelSummaryProvenance getModelSummaryProvenance() {
+        return modelSummaryProvenance;
     }
 
-    @JsonProperty
-    public void setExcludePropDataColumns(boolean excludePropDataColumns) {
-        this.excludePropDataColumns = excludePropDataColumns;
+    @JsonProperty("modelSummaryProvenance")
+    public void setModelSummaryProvenance(ModelSummaryProvenance modelSummaryProvenance) {
+        this.modelSummaryProvenance = modelSummaryProvenance;
+    }
+
+    public void addProvenanceProperty(ProvenancePropertyName propertyName, Object value) {
+        modelSummaryProvenance.setProvenanceProperty(propertyName, value);
     }
 
     @JsonProperty

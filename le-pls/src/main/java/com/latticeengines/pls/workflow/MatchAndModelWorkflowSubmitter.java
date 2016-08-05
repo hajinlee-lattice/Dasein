@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -53,8 +54,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummaryId });
         }
 
-        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName, parameters,
-                TransformationGroup.fromName(transformationGroupName), userRefinedAttributes, modelSummary);
+        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName,
+                parameters, TransformationGroup.fromName(transformationGroupName),
+                userRefinedAttributes, modelSummary);
         return workflowJobService.submit(configuration);
     }
 
@@ -72,7 +74,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
         List<DataRule> dataRules = parameters.getDataRules();
         if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
-            Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), modelSummary.getEventTableName());
+            Table eventTable = metadataProxy.getTable(
+                    MultiTenantContext.getCustomerSpace().toString(),
+                    modelSummary.getEventTableName());
             dataRules = eventTable.getDataRules();
         }
 
@@ -90,11 +94,17 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .transformationGroup(transformationGroup) //
                 .sourceModelSummary(modelSummary) //
                 .dedupDataFlowBeanName("dedupEventTable") //
-                .dedupDataFlowParams(
-                        new DedupEventTableParameters(cloneTableName, "PublicDomain", parameters.getDeduplicationType())) //
+                .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain",
+                        parameters.getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
+                        parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
+                        parameters.isExcludePropDataAttributes()) //
+                .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
+                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null)

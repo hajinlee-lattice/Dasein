@@ -18,6 +18,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -70,7 +72,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
-    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
+    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(
+            ModelingParameters parameters) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
@@ -81,27 +84,32 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         String trainingTableName = sourceFile.getTableName();
 
         if (trainingTableName == null) {
-            throw new LedpException(LedpCode.LEDP_18099, new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18099,
+                    new String[] { sourceFile.getDisplayName() });
         }
 
         if (hasRunningWorkflow(sourceFile)) {
-            throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18081,
+                    new String[] { sourceFile.getDisplayName() });
         }
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndModelWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
+                "importMatchAndModelWorkflow");
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
-        ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined.getDefaultSelection();
+        ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined
+                .getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
             predefinedSelection = ColumnSelection.Predefined.fromName(predefinedSelectionName);
             if (predefinedSelection == null) {
-                throw new IllegalArgumentException("Cannot parse column selection named " + predefinedSelectionName);
+                throw new IllegalArgumentException(
+                        "Cannot parse column selection named " + predefinedSelectionName);
             }
         }
 
@@ -119,7 +127,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 }
             }, null);
             if (pivotFileName != null && pivotArtifact == null) {
-                throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
+                throw new LedpException(LedpCode.LEDP_28026,
+                        new String[] { pivotFileName, moduleName });
             }
         }
         if (pivotArtifact != null) {
@@ -137,13 +146,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
                 .dedupDataFlowBeanName("dedupEventTable")
                 .dedupDataFlowParams( //
-                        new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain", parameters
-                                .getDeduplicationType())) //
+                        new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain",
+                                parameters.getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchClientDocument) //
-                .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null
@@ -158,7 +166,13 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .minDedupedRows(minDedupedRows) //
                 .minPositiveEvents(minPositiveEvents) //
                 .transformationGroup(parameters.getTransformationGroup()) //
-                .excludePropDataColumns(parameters.getExcludePropDataColumns()) //
+                .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
+                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
+                        parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
+                        parameters.getExcludePropDataColumns()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
@@ -185,8 +199,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     }
 
     private void updateTrainingTable(String pivotArtifactPath, String trainingTableName) {
-        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                trainingTableName);
+        Table trainingTable = metadataProxy
+                .getTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName);
         List<Attribute> trainingAttrs = trainingTable.getAttributes();
         PivotValuesLookup pivotValues = null;
         try {
@@ -198,11 +212,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             throw new RuntimeException("PivotValuesLookup is null.");
         }
         Set<String> sourceColumnNames = pivotValues.pivotValuesBySourceColumn.keySet();
-        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(sourceColumnNames,
-                trainingAttrs);
+        List<Attribute> attrs = PivotMappingFileUtils
+                .createAttrsFromPivotSourceColumns(sourceColumnNames, trainingAttrs);
 
         trainingTable.setAttributes(attrs);
-        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);
+        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(),
+                trainingTableName, trainingTable);
     }
 
     private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {

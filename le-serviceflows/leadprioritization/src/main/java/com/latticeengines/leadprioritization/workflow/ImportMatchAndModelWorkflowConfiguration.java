@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -223,11 +224,6 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder excludePropDataColumns(boolean excludePropDataColumns) {
-            model.setExcludePropDataColumns(excludePropDataColumns);
-            return this;
-        }
-
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             model.setRunTimeParams(runTimeParams);
             addStandardAttributes.setRuntimeParams(runTimeParams);
@@ -241,6 +237,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder isDefaultDataRules(boolean isDefaultDataRules) {
             model.setDefaultDataRuleConfiguration(isDefaultDataRules);
+            return this;
+        }
+
+        public Builder addProvenanceProperty(ProvenancePropertyName propertyName, Object value) {
+            model.addProvenanceProperty(propertyName, value);
             return this;
         }
 

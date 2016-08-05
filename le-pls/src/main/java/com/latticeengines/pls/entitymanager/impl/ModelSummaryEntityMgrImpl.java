@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.latticeengines.pls.dao.ModelSummaryProvenancePropertyDao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
@@ -22,12 +23,6 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.pls.PredictorElement;
-import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -35,6 +30,13 @@ import com.latticeengines.pls.dao.ModelSummaryDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.security.exposed.dao.TenantDao;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
@@ -59,6 +61,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Autowired
     private TenantDao tenantDao;
 
+    @Autowired
+    private ModelSummaryProvenancePropertyDao modelSummaryProvenancePropertyDao;
+
     @Override
     public BaseDao<ModelSummary> getDao() {
         return modelSummaryDao;
@@ -80,6 +85,11 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
 
         modelSummaryDao.create(summary);
+
+        for (ModelSummaryProvenanceProperty provenanceProperty : summary.getModelSummaryProvenanceProperties()) {
+            provenanceProperty.setModelSummary(summary);
+            modelSummaryProvenancePropertyDao.create(provenanceProperty);
+        }
 
         for (Predictor predictor : summary.getPredictors()) {
             predictor.setTenantId(tenantId);

@@ -27,7 +27,7 @@ public class ModelingParameters {
     private String description;
 
     @JsonProperty
-    private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
+    private DedupType deduplicationType = DedupType.MULTIPLELEADSPERDOMAIN;
 
     @JsonProperty
     private boolean excludePropDataColumns = false;

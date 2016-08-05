@@ -47,7 +47,8 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
     public <V> V get(E option, Class<V> clazz, Function<String, V> parser) {
         HasOptionAndValue inner = findOption(option);
         if (inner == null) {
-            throw new RuntimeException(String.format("Required option %s was not specified", option));
+            throw new RuntimeException(
+                    String.format("Required option %s was not specified", option));
         }
         return parser.apply(inner.getValue());
     }
@@ -69,7 +70,8 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
             }
             return clazz.getConstructor(new Class[] { String.class }).newInstance(string);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to parse %s as a %s", string, clazz.getSimpleName()));
+            throw new RuntimeException(
+                    String.format("Failed to parse %s as a %s", string, clazz.getSimpleName()));
         }
     }
 
@@ -145,7 +147,8 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
 
     @SuppressWarnings("unchecked")
     private Class<T> classT() {
-        Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+        Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass())
+                .getActualTypeArguments();
         Type type = typeArguments[0];
         return (Class<T>) type;
     }

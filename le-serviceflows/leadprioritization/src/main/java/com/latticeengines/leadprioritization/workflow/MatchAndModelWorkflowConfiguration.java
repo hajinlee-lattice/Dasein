@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -146,6 +147,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             match.setExcludePublicDomains(excludePublicDomains);
+            return this;
+        }
+
+        public Builder addProvenanceProperty(ProvenancePropertyName propertyName, Object value) {
+            model.addProvenanceProperty(propertyName, value);
             return this;
         }
 

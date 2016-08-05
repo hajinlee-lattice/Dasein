@@ -28,15 +28,14 @@ class ProvenanceGenerator(State):
                 self.result["SourceSchemaInterpretation"] = properties["Source_Schema_Interpretation"]
             if "Training_Table_Name" in properties.keys():
                 self.result["TrainingTableName"] = properties["Training_Table_Name"]
-            if "Transformation_Group_Name" in properties.keys():
-                self.result["Transformation_Group_Name"] = properties["Transformation_Group_Name"]
             if "Predefined_ColumnSelection_Name" in properties.keys():
                 self.result["Predefined_ColumnSelection_Name"] = properties["Predefined_ColumnSelection_Name"]
                 self.result["Predefined_ColumnSelection_Version"] = properties["Predefined_ColumnSelection_Version"]
             elif "Customized_ColumnSelection" in properties.keys():
                 self.result["Customized_ColumnSelection"] = properties["Customized_ColumnSelection"]
-            if "Pivot_Artifact_Path" in properties.keys():
-                self.result["Pivot_Artifact_Path"] = properties["Pivot_Artifact_Path"]
+
+            for propertyName in properties:
+                self.result[propertyName] = properties[propertyName]
             if "Data_Cloud_Version" in properties.keys():
                 self.result["Data_Cloud_Version"] = properties["Data_Cloud_Version"]
         else:

@@ -90,6 +90,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private ColumnSelection customizedColumnSelection;
     private String pivotArtifactPath;
     private String modelType;
+    private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -494,6 +495,33 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("ModelType")
     public void setModelType(String modelType) {
         this.modelType = modelType;
+    }
+
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "modelSummary", fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("ModelSummaryProvenanceProperties")
+    public List<ModelSummaryProvenanceProperty> getModelSummaryProvenanceProperties() {
+        return modelSummaryProvenanceProperties;
+    }
+
+    public void setModelSummaryProvenanceProperties(List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties) {
+        this.modelSummaryProvenanceProperties = modelSummaryProvenanceProperties;
+    }
+
+    public void addModelSummaryProvenanceProperty(ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
+        this.modelSummaryProvenanceProperties.add(modelSummaryProvenanceProperty);
+    }
+
+    @Transient
+    @JsonIgnore
+    public ModelSummaryProvenance getModelSummaryConfiguration() {
+        return new ModelSummaryProvenance(modelSummaryProvenanceProperties);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setModelSummaryConfiguration(ModelSummaryProvenance modelSummaryProvenance) {
+        this.modelSummaryProvenanceProperties = modelSummaryProvenance.getBag();
     }
 
     @Transient

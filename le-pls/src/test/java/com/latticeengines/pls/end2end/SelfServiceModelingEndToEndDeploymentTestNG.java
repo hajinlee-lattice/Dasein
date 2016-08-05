@@ -162,6 +162,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setFilename(sourceFile.getName());
         parameters.setModuleName("module1");
         parameters.setPivotFileName("pivotvalues.csv");
+        parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
+        parameters.setExcludePublicDomains(true);
+        parameters.setExcludePropDataColumns(true);
         modelName = parameters.getName();
         model(parameters);
     }

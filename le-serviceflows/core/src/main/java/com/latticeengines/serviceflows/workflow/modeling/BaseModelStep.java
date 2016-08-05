@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -106,9 +107,10 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         return targets.toArray(new String[targets.size()]);
     }
 
-    protected ModelingServiceExecutor createModelingServiceExecutor(Table eventTable, Attribute currentEvent)
-            throws Exception {
-        ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
+    protected ModelingServiceExecutor createModelingServiceExecutor(Table eventTable,
+            Attribute currentEvent) throws Exception {
+        ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration,
+                eventTable);
 
         List<String> excludedColumns = new ArrayList<>();
 
@@ -120,17 +122,21 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
             excludedColumns.add(event.getName());
         }
 
-        log.info("Exclude prop data columns = " + configuration.excludePropDataColumns());
+        log.info("Exclude prop data columns = " + configuration.getModelSummaryProvenance()
+                .getBoolean(ProvenancePropertyName.ExcludePropdataColumns, false));
 
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null //
                     || attr.getApprovedUsage().size() == 0 //
                     || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
-            } else if (configuration.excludePropDataColumns() && attr.getTags() != null) {
+            } else if (configuration.getModelSummaryProvenance()
+                    .getBoolean(ProvenancePropertyName.ExcludePropdataColumns, false)
+                    && attr.getTags() != null) {
                 Set<String> tags = new HashSet<>(attr.getTags());
 
-                if (tags.contains(Tag.EXTERNAL.getName()) || tags.contains(Tag.EXTERNAL_TRANSFORM.getName())) {
+                if (tags.contains(Tag.EXTERNAL.getName())
+                        || tags.contains(Tag.EXTERNAL_TRANSFORM.getName())) {
                     excludedColumns.add(attr.getName());
                 }
             }
@@ -149,16 +155,20 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .transformationGroupName(getTransformationGroupName()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .productType(configuration.getProductType()) //
+                .setModelSummaryProvenance(configuration.getModelSummaryProvenance()) //
+                .dataCloudVersion(configuration.dataCloudVersion()) //
                 .runTimeParams(configuration.getRunTimeParams());
         if (getPredefinedSelection() != null) {
-            bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
+            bldr = bldr.predefinedColumnSelection(getPredefinedSelection(),
+                    getPredefinedSelectionVersion());
         } else if (getCustomizedSelection() != null) {
             bldr = bldr.customizedColumnSelection(getCustomizedSelection());
         } else {
             log.warn("Neither PredefinedSelection nor CustomizedSelection is provided.");
         }
         if (events.size() > 1) {
-            bldr = bldr.modelName(configuration.getModelName() + " (" + currentEvent.getDisplayName() + ")");
+            bldr = bldr.modelName(
+                    configuration.getModelName() + " (" + currentEvent.getDisplayName() + ")");
         }
         if (configuration.getDisplayName() != null) {
             bldr = bldr.displayName(configuration.getDisplayName());

@@ -24,13 +24,16 @@ public class CloneModelingParameters {
     private List<VdbMetadataField> attributes;
 
     @JsonProperty
-    private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
+    private DedupType deduplicationType = DedupType.MULTIPLELEADSPERDOMAIN;
 
     @JsonProperty
     private List<DataRule> dataRules;
 
     @JsonProperty
     private boolean excludePublicDomains = false;
+
+    @JsonProperty
+    private boolean excludePropDataAttributes = false;
 
     public String getName() {
         return name;
@@ -94,6 +97,14 @@ public class CloneModelingParameters {
 
     public void setExcludePublicDomains(boolean excludePublicDomains) {
         this.excludePublicDomains = excludePublicDomains;
+    }
+
+    public boolean isExcludePropDataAttributes() {
+        return excludePropDataAttributes;
+    }
+
+    public void setExcludePropDataAttributes(boolean excludePropDataAttributes) {
+        this.excludePropDataAttributes = excludePropDataAttributes;
     }
 
     @Override
