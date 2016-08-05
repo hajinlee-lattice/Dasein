@@ -79,6 +79,17 @@ public class AlgorithmFactory extends ModelFactory {
         configAlgorithm(algo, modelAlgo);
         return algo;
     }
+    
+    private static AlgorithmPropertyDef getRandomSeedPropertyDef() {
+        AlgorithmPropertyDef def = new AlgorithmPropertyDef();
+        def.setName("random_state");
+        AlgorithmPropertyValue value = new AlgorithmPropertyValue();
+        value.setValue("123456");
+        
+        def.addAlgorithmPropertyValue(value);
+        
+        return def;
+    }
 
     private static void configAlgorithm(AlgorithmBase algo,
             com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo) {
@@ -88,6 +99,7 @@ public class AlgorithmFactory extends ModelFactory {
         algo.setName(modelAlgo.getName());
         algo.setSampleName(SAMPLE_NAME);
         List<AlgorithmPropertyDef> defs = modelAlgo.getAlgorithmPropertyDefs();
+        defs.add(getRandomSeedPropertyDef());
         if (CollectionUtils.isNotEmpty(defs)) {
             StringBuilder builder = new StringBuilder();
             for (AlgorithmPropertyDef def : defs) {

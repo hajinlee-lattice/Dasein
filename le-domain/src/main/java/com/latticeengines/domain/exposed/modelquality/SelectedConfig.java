@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 /**
  * This class represents the holder for all the top-level dimensions. This class
@@ -86,5 +87,10 @@ public class SelectedConfig implements Fact, Dimension {
 
     public void setSampling(Sampling sampling) {
         this.sampling = sampling;
+    }
+    
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

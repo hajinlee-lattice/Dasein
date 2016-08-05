@@ -33,6 +33,7 @@ public class SamplingFactory extends ModelFactory {
         samplingConfig.setParallelEnabled(sampling.isParallelEnabled());
         Map<String, String> paramMap = getParamMap(sampling);
         try {
+            samplingConfig.setRandomSeed(123456L);
             if (paramMap.containsKey(MODEL_SAMPLING_RATE_KEY)) {
                 samplingConfig.setSamplingRate(Integer.parseInt(paramMap.get(MODEL_SAMPLING_RATE_KEY)));
             }
