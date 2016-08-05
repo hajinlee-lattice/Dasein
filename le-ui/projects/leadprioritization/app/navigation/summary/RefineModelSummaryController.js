@@ -51,7 +51,8 @@ angular.module('lp.navigation.review', [
         updateDisplay(warning, dataRule);
     });
     $scope.$on('ShowCreateModelPopup', function(event) {
-        UpdateFieldsModal.show(false, false, vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
+        UpdateFieldsModal.show(vm.oneLeadPerDomain, vm.includePersonalEmailDomains, vm.useLatticeAttributes, vm.modelId,
+            null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
     });
 
     function updateDisplay(warning, dataRule) {
