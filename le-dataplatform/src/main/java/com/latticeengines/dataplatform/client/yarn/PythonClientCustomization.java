@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.client.yarn;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
@@ -31,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
-import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("pythonClientCustomization")

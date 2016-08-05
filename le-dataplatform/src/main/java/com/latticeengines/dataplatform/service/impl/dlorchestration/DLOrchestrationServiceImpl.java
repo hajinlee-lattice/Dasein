@@ -117,7 +117,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
             .rowWarnThreshold(rowWarnThreshold) //
             .positiveEventFailThreshold(positiveEventFailThreshold) //
             .positiveEventWarnThreshold(positiveEventWarnThreshold) //
-            .featuresThreshold(featuresThreshold)
+            .featuresThreshold(featuresThreshold) //
             .metadataService(metadataService);
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
         }

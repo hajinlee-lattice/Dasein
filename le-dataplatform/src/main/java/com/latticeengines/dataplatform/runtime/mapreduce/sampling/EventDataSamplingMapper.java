@@ -7,6 +7,8 @@ import java.util.Random;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -19,6 +21,8 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
+    
+    private static final Log log = LogFactory.getLog(EventDataSamplingMapper.class);
 
     private SamplingConfiguration sampleConfig = null;
     private Random random = null;
@@ -33,7 +37,11 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
         sampleConfig = JsonUtils.deserialize(sampleConfigStr, SamplingConfiguration.class);
         random = new Random();
         if (sampleConfig.getRandomSeed() != -1) {
-            random.setSeed(sampleConfig.getRandomSeed());
+            Long seed = sampleConfig.getRandomSeed();
+            log.info("Random seed = " + seed);
+            random.setSeed(seed);
+        } else {
+            log.info("No random seed.");
         }
 
     }

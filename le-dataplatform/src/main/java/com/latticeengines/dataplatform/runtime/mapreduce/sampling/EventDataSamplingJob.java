@@ -130,6 +130,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             mrJob.setReducerClass(EventDataSamplingReducer.class);
             mrJob.setOutputKeyClass(AvroKey.class);
             mrJob.setOutputValueClass(NullWritable.class);
+            
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
         } catch (Exception e) {
