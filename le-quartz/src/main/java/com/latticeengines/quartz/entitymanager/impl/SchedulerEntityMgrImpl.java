@@ -202,7 +202,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
 
     @SuppressWarnings("unchecked")
     @PostConstruct
-    private void AddPredifinedJobs() {
+    private void addPredefinedJobs() {
         if (addPredefinedJobs) {
             log.info("Add predefined jobs.");
             List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("predefinedJobs");
