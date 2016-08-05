@@ -278,17 +278,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @Override
     protected void cleanup(Context context) throws IOException {
-        csvFilePrinter.flush();
         csvFilePrinter.close();
         HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
         if (context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).setValue(0);
         }
-        if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0) {
-            context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
-        } else {
-            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
-        }
+
+        HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
+        
         if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {
             context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).setValue(0);
         }
