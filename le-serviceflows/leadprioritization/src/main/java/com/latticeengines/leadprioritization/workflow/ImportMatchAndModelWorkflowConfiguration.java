@@ -230,6 +230,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             model.setRunTimeParams(runTimeParams);
+            addStandardAttributes.setRuntimeParams(runTimeParams);
             return this;
         }
 

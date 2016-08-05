@@ -1,8 +1,11 @@
 package com.latticeengines.leadprioritization.dataflow;
 
 import java.util.Set;
-import org.apache.log4j.Logger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
@@ -14,7 +17,7 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 @Component("addStandardAttributesViaJavaFunction")
 public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
 
-    private static final Logger log = Logger.getLogger(AddStandardAttributes.class);
+    private static final Log log = LogFactory.getLog(AddStandardAttributesViaJavaFunction.class);
 
     @Override
     public Node construct(AddStandardAttributesParameters parameters) {
@@ -31,6 +34,11 @@ public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilde
         for (TransformDefinition definition : definitions) {
             last = addFunction(last, eventTable, definition);
         }
+        
+        if (parameters.doSort) {
+            last = last.sort("InternalId", true);
+        }
+        
         return last;
     }
 

@@ -3,7 +3,6 @@ package com.latticeengines.leadprioritization.dataflow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
