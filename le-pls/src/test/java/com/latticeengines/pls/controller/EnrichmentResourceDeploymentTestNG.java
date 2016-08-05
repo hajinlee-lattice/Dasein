@@ -300,7 +300,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
-        assertEquals(count.intValue(), MAX_PREMIUM_SELECT + (MAX_SELECT + MAX_PREMIUM_SELECT - MAX_DESELECT));
+        assertEquals(count.intValue(), 2);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -401,7 +401,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                     deselectCount++;
                     attr.setIsSelected(false);
                     deselectedAttributeList.add(attr.getFieldName());
-                    System.out.println("Try to delete: " + attr.getDisplayName());
+                    System.out.println(
+                            "Try to delete" + (attr.getIsPremium() ? " premium" : "") + ": " + attr.getDisplayName());
                 }
             } else {
                 if (selectCount < MAX_SELECT && !attr.getIsPremium()) {
@@ -414,7 +415,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                     attr.setIsSelected(true);
                     attr.setIsPremium(true);
                     newSelectedAttributeList.add(attr.getFieldName());
-                    System.out.println("Try to add: " + attr.getDisplayName());
+                    System.out.println("Try to add premium: " + attr.getDisplayName());
                 }
             }
         }
