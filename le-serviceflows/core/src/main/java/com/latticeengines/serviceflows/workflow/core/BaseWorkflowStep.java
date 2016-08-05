@@ -186,7 +186,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 .modelProxy(modelProxy) //
                 .jobProxy(jobProxy) //
                 .dataRules(dataRules) //
-                .runTimeParams(modelStepConfiguration.runTimeParams()) //
+                .runTimeParams(modelStepConfiguration.getRunTimeParams()) //
                 .productType(modelStepConfiguration.getProductType());
 
         return bldr;

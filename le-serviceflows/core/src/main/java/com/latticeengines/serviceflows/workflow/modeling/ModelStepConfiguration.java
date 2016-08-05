@@ -167,7 +167,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty
-    public Map<String, String> runTimeParams() {
+    public Map<String, String> getRunTimeParams() {
         return this.runTimeParams;
     }
 

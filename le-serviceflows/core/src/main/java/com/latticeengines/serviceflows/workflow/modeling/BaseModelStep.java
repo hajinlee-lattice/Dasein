@@ -149,8 +149,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .transformationGroupName(getTransformationGroupName()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .productType(configuration.getProductType()) //
-                .runTimeParams(configuration.runTimeParams())
-                .dataCloudVersion(configuration.dataCloudVersion());
+                .runTimeParams(configuration.getRunTimeParams());
         if (getPredefinedSelection() != null) {
             bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());
         } else if (getCustomizedSelection() != null) {
