@@ -24,10 +24,10 @@ public class FileModelRunSerivceImplTestNG extends ModelQualityDeploymentTestNGB
     @Test(groups = "manual")
     public void run() {
         try {
-            modelRunService.run(modelRun1);
+            modelRunService.run(modelRun1, null);
             System.out.println("Finished modelRun1");
 
-            modelRunService.run(modelRun2);
+            modelRunService.run(modelRun2, null);
             System.out.println("Finished modelRun2");
 
         } catch (Exception ex) {

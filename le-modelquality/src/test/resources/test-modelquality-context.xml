@@ -13,4 +13,10 @@
     <import resource="classpath:modelquality-context.xml" />
     <import resource="classpath:common-properties-context.xml" />
 
+    <bean id="deploymentTestBed" class="com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed">
+        <constructor-arg name="plsApiHostPort" value="${modelquality.test.pls.deployment.api}"/>
+        <constructor-arg name="adminApiHostPort" value="${modelquality.test.admin.deployment.api}"/>
+        <constructor-arg name="environment" value="${modelquality.test.env}"/>
+    </bean>
+
 </beans>

@@ -62,20 +62,20 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String modelName = createModel(config, sourceFile);
         ModelSummary modelSummary = retrieveModelSummary(modelName);
 
-        String modelId = modelSummary.getId();
+        log.info(modelSummary.getId());
         
         saveMetricsToReportDB(modelSummary, config);
     }
 
     private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config) {
-        log.info("Model Summary=" + modelSummary.toString());
+        modelSummary.setDetails(null);
+        log.info("Model Summary=\n" + modelSummary.toString());
         ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
     }
 
     public SourceFile uploadFile(SelectedConfig config) {
-
         DataSet dataSet = config.getDataSet();
         SchemaInterpretation schemaInterpretation = dataSet.getSchemaInterpretation();
 
@@ -87,7 +87,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(yarnConfiguration))) {
             resource = resourceLoader.getResource(dataSet.getTrainingSetHdfsPath());
         } catch (IOException ex) {
-            log.error("Faield to load file!", ex);
+            log.error("Failed to load file!", ex);
             throw new RuntimeException(ex);
         }
 
@@ -147,6 +147,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String configJson = JsonUtils.serialize(config);
         Map<String, String> runTimeParams = new HashMap<>();
         runTimeParams.put(AlgorithmFactory.MODEL_CONFIG, configJson);
+        runTimeParams.put(DataFlowFactory.DATAFLOW_DO_SORT_FOR_ATTR_FLOW, "true");
         parameters.setRunTimeParams(runTimeParams);
 
         DataFlowFactory.configDataFlow(config, parameters);
@@ -194,8 +195,9 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
                     found = summary;
                 }
             }
-            if (found != null)
+            if (found != null) {
                 break;
+            }
             Thread.sleep(1000);
         }
 

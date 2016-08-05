@@ -1,0 +1,42 @@
+{
+  "predictors": [],
+  "Id": "ms__370489bc-2a2c-4bc4-a17d-fd92bb6a2d32-SelfServ",
+  "Name": "SelfServiceModelingByModelQuality1470167957554-08/02/2016 09:22:59 GMT",
+  "DisplayName": "SelfServiceModelingByModelQuality1470167957554",
+  "Tenant": {
+    "Identifier": "LETest1470167938965.LETest1470167938965.Production",
+    "DisplayName": "LETest1470167938965_LP3",
+    "RegisteredTime": 1470167942810,
+    "UIVersion": "3.0"
+  },
+  "RocScore": 0.9124195970629737,
+  "LookupId": "LETest1470167938965.LETest1470167938965.Production|DataCloudMatchEvent_6C1E75A8-828B-4A18-B28E-C5ADF77CD36C_with_std_attrib|370489bc-2a2c-4bc4-a17d-fd92bb6a2d32",
+  "Incomplete": false,
+  "Uploaded": false,
+  "TrainingRowCount": 74880,
+  "TestRowCount": 19014,
+  "TotalRowCount": 93894,
+  "TrainingConversionCount": 4201,
+  "TestConversionCount": 1070,
+  "TotalConversionCount": 5271,
+  "Details": {
+    "Payload": ""
+  },
+  "ConstructionTime": 1470172979000,
+  "LastUpdateTime": 1470173288049,
+  "Status": "Inactive",
+  "RawFile": null,
+  "Top10PctLift": 6.575072931907374,
+  "Top20PctLift": 4.0680126150577856,
+  "Top30PctLift": 2.949142277831023,
+  "ApplicationId": "application_1470111084227_0073",
+  "EventTableName": "DataCloudMatchEvent_6C1E75A8-828B-4A18-B28E-C5ADF77CD36C_with_std_attrib",
+  "SourceSchemaInterpretation": "SalesforceLead",
+  "TrainingTableName": "SourceFile_file_1470167956780_csv",
+  "TransformationGroupName": "standard",
+  "PredefinedSelectionName": "RTS",
+  "PredefinedSelectionVersion": "1.0",
+  "CustomizedColumnSelection": null,
+  "PivotArtifactPath": null,
+  "ModelType": "PythonScriptModel"
+}

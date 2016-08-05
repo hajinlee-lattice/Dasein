@@ -1,8 +1,12 @@
 package com.latticeengines.modelquality.metrics;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -15,19 +19,18 @@ public class ModelingMetricsTestNG extends ModelQualityDeploymentTestNGBase {
     private MetricService metricService;
 
     @Test(groups = "deployment")
-    public void run() {
-        ModelSummary modelSummary = new ModelSummary();
-        modelSummary.setId("Id1");
-        modelSummary.setRocScore(0.875);
-        modelSummary.setTop10PercentLift(0.5);
-        modelSummary.setTop20PercentLift(0.7);
-        modelSummary.setTop30PercentLift(0.85);
+    public void run() throws Exception {
+        String mStr = FileUtils.readFileToString(new File( // 
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelsummary.json").getFile()));
+        String cStr = FileUtils.readFileToString(new File( // 
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/selectedconfig.json").getFile()));
+        ModelSummary m = JsonUtils.deserialize(mStr, ModelSummary.class);
+        SelectedConfig s = JsonUtils.deserialize(cStr, SelectedConfig.class);
 
-        SelectedConfig config = getSelectedConfig(AlgorithmFactory.ALGORITHM_NAME_RF);
-
-        ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
+        ModelQualityMetrics metrics = new ModelQualityMetrics(m, s);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
+        
         try {
             Thread.sleep(5000L);
         } catch (Exception e) {

@@ -1,11 +1,15 @@
 package com.latticeengines.modelquality.functionalframework;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -14,6 +18,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -49,6 +54,7 @@ import com.latticeengines.modelquality.entitymgr.PropDataEntityMgr;
 import com.latticeengines.modelquality.entitymgr.SamplingEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
+import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-modelquality-context.xml" })
@@ -74,8 +80,34 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     protected ModelQualityProxy modelQualityProxy;
 
+    @Value("${modelquality.test.pls.deployment.api}")
+    protected String plsDeployedHostPort;
+
+    @Value("${modelquality.test.admin.deployment.api}")
+    protected String adminDeployedHostPort;
+
+    @Autowired
+    protected GlobalAuthDeploymentTestBed deploymentTestBed;
+    
+    protected Tenant mainTestTenant;
+
     @Resource(name = "modelRunService")
     protected ModelRunService modelRunService;
+
+    protected void setTestBed(GlobalAuthDeploymentTestBed testBed) {
+        this.deploymentTestBed = testBed;
+    }
+    
+    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)
+            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        deploymentTestBed.bootstrapForProduct(product);
+        mainTestTenant = deploymentTestBed.getMainTestTenant();
+        switchToSuperAdmin();
+    }
+
+    protected void switchToSuperAdmin() {
+        deploymentTestBed.switchToSuperAdmin(mainTestTenant);
+    }
 
     protected void cleanup() {
         algorithmEntityMgr.deleteAll();
@@ -152,7 +184,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         dataFlow.setName("dataFlow1");
         dataFlow.setMatch(true);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
-        dataFlow.setDedupType(DedupType.ONELEADPERDOMAIN);
+        dataFlow.setDedupType(DedupType.MULTIPLELEADSPERDOMAIN);
         return dataFlow;
     }
 

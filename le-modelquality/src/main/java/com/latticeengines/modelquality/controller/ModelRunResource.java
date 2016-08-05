@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -14,13 +11,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.modelquality.Environment;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to run model for model quality")
 @RestController
@@ -37,9 +39,19 @@ public class ModelRunResource {
     @RequestMapping(value = "/runmodel", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Run a Model")
-    public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun) {
+    public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun, //
+            @RequestParam("tenant") String tenant, //
+            @RequestParam("username") String username, //
+            @RequestParam("password") String encryptedPassword, //
+            @RequestParam("apiHostPort") String apiHostPort) {
         try {
-            String modelRunId = modelRunService.run(modelRun);
+            Environment env = new Environment();
+            env.tenant = tenant;
+            env.username = username;
+            env.encryptedPassword = encryptedPassword;
+            env.apiHostPort = apiHostPort;
+            modelRunService.setEnvironment(env);
+            String modelRunId = modelRunService.run(modelRun, env);
             return ResponseDocument.successResponse(modelRunId);
 
         } catch (Exception e) {

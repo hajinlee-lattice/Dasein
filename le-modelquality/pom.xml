@@ -15,6 +15,7 @@
         <le.security.version>2.0.36-SNAPSHOT</le.security.version>
         <le.dataplatform.version>2.0.36-SNAPSHOT</le.dataplatform.version>
         <le.monitor.version>2.0.36-SNAPSHOT</le.monitor.version>
+        <le.testfwk.version>2.0.36-SNAPSHOT</le.testfwk.version>
     </properties>
 
     <parent>
@@ -144,6 +145,19 @@
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 
