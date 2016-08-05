@@ -64,10 +64,10 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     @Autowired
     private DataLoaderService dataLoaderService;
 
-    public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHost, String environment) {
+    public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHostPort, String environment) {
         super();
         setPlsApiHostPort(plsApiHostPort);
-        setAdminApiHostPort(adminApiHost);
+        setAdminApiHostPort(adminApiHostPort);
         if (environment.contains("prod")) {
             this.enviroment = ENV_PROD;
         } else {
