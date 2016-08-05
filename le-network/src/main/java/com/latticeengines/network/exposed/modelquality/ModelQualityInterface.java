@@ -17,7 +17,8 @@ import com.latticeengines.domain.exposed.modelquality.Sampling;
 
 public interface ModelQualityInterface {
 
-    ResponseDocument<String> runModel(ModelRun modelRun);
+    ResponseDocument<String> runModel(ModelRun modelRun, //
+            String tenant, String username, String encryptedPassword, String apiHostPort);
 
     ResponseDocument<List<ModelRun>> getModelRuns();
 
