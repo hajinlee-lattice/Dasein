@@ -34,7 +34,7 @@ if [ -z "${DISCOVER_SERVICE}" ]; then
 else
 
     if [ -z "${ZK_CLUSTER_NAME}" ]; then
-        echo "Must provide KAFKA_CLUSTER_NAME"
+        echo "Must provide ZK_CLUSTER_NAME"
         exit -1
     fi
 
@@ -49,34 +49,43 @@ else
         exit -1
     fi
 
-    QUORUM=""
-	while [ -z "${QUORUM}" ];
+    HOSTS=""
+	while [ -z "${HOSTS}" ];
 	do
 
         echo "Attempt to get quorum from external discover service ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}&ip=${ADVERTISE_IP}"
-        QUORUM=`curl -X GET -m 120 ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}\&ip=${ADVERTISE_IP}`
+        HOSTS=`curl -X GET -m 120 ${DISCOVER_SERVICE}/quorums/${ZK_CLUSTER_NAME}?n=${ZK_CLUSTER_SIZE}\&ip=${ADVERTISE_IP}`
 
-	    echo "Got response \"${QUORUM}\""
+	    echo "Got response \"${HOSTS}\""
 	    sleep 3
 
-	    ERROR=`echo $QUORUM | grep "500 Internal Server Error"`
+	    ERROR=`echo $HOSTS | grep "500 Internal Server Error"`
 	    if [ -z "${ERROR}" ]; then
 	        echo "Great! there is no error."
 	    else
-	        echo "Error:\n${ERROR}"
-	        QUORUM=""
+	        echo "Error:\n${HOSTS}"
+	        HOSTS=""
 	        continue;
 	    fi
-	    if [ -z "${QUORUM}" ]; then
+	    if [ -z "${HOSTS}" ]; then
 	        continue
 	    fi
 	done
-	echo "QUORUM=${QUORUM}"
+	echo "HOSTS=${HOSTS}"
 
-	for SERVER in $QUORUM;
+    for i in $(seq 1 ${ZK_CLUSTER_SIZE});
+    do
+        SERVER="server.${i}=node${i}:2888:3888"
+        echo sed -i 's/$SERVER//g' $ZK_CONF
+        echo $SERVER >> $ZK_CONF
+    done
+
+	for H in $HOSTS;
 	do
-	    echo $SERVER >> $ZK_CONF
+	    H=`echo $H | sed "s|=|    |g"`
+	    echo $H >> /etc/hosts
 	done
+	cat /etc/hosts
 
     MY_ID=""
     while [ -z "${MY_ID}" ];

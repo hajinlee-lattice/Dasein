@@ -32,10 +32,10 @@ def register_quorum_api(quorum_name):
     quorum_size = int(request.args['n']) if 'n' in request.args else 3
     quorum = register_quorum_internal(quorum_name, host)
     if len(quorum) != quorum_size:
-        print "Only %d clients have been registered to the quorum of target size %d" % (len(quorum), quorum_size)
+        app.logger.info("Only %d clients have been registered to the quorum of target size %d" % (len(quorum), quorum_size))
         return ""
     else:
-        return print_quorum(quorum)
+        return print_hosts(quorum)
 
 @app.route("/quorums/<quorum_name>/myid")
 def get_myid_in_quorum(quorum_name):
@@ -53,6 +53,13 @@ def get_zkhosts_in_quorum(quorum_name):
         return print_zkhosts(quorum)
     return ""
 
+@app.route("/quorums/<quorum_name>/hosts")
+def get_hosts_in_quorum(quorum_name):
+    if quorum_name in quorum_map:
+        quorum = quorum_map[quorum_name]
+        return print_zkhosts(quorum)
+    return ""
+
 def acquire_lock(quorum_name):
     master_lock.acquire()
     try:
@@ -60,7 +67,7 @@ def acquire_lock(quorum_name):
             rlock_map[quorum_name] = Rlock()
         rlock_map[quorum_name].acquire()
     except:
-        print "Error while registering a reentry lock for the quorum [%s]" % quorum_name
+        app.logger.error("Error while registering a reentry lock for the quorum [%s]" % quorum_name)
     finally:
         master_lock.release()
 
@@ -70,14 +77,14 @@ def release_lock(quorum_name):
         if quorum_name in rlock_map:
             rlock_map[quorum_name].release()
     except:
-        print "Error while registering a reentry lock for the quorum [%s]" % quorum
+        app.logger.error("Error while registering a reentry lock for the quorum [%s]" % quorum)
     finally:
         master_lock.release()
 
 def register_quorum_internal(quorum_name, host):
     acquire_lock(quorum_name)
     try:
-        print "Registering %s to quorum %s ..." % (host, quorum_name)
+        app.logger.info("Registering %s to quorum %s ..." % (host, quorum_name))
         if quorum_name not in quorum_map:
             quorum_map[quorum_name] = {}
 
@@ -87,15 +94,15 @@ def register_quorum_internal(quorum_name, host):
 
         return quorum_map[quorum_name]
     except:
-        print "Error registering [%s] in quorum [%s]" % (host, quorum_name)
+        app.logger.error("Error registering [%s] in quorum [%s]" % (host, quorum_name))
     finally:
         release_lock(quorum_name)
 
-def print_quorum(quorum):
-    return '\n'.join("server.%d=%s:2888:3888" % (i, h) for h, i in quorum.items())
-
 def print_zkhosts(quorum):
     return ','.join("%s:2181" % h for h in quorum.keys())
+
+def print_hosts(quorum):
+    return '\n'.join("%s=node%d" % (h, i) for h, i in sorted(quorum.items(), key=lambda x: x[1]))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
