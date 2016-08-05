@@ -577,7 +577,7 @@ public class AvroUtils {
 
     public static Schema readSchemaFromInputStream(InputStream inputStream) throws IOException {
         Schema schema;
-        try (DataFileStream stream = new DataFileStream<GenericRecord>(inputStream,
+        try (DataFileStream<GenericRecord> stream = new DataFileStream<>(inputStream, //
                 new GenericDatumReader<GenericRecord>())) {
             schema = stream.getSchema();
         }
