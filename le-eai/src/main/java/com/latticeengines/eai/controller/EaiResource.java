@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -26,9 +25,6 @@ public class EaiResource implements EaiInterface {
 
     @Autowired
     private EaiService eaiService;
-
-    @Autowired
-    private JobService jobService;
 
     @RequestMapping(value = "/importjobs", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
