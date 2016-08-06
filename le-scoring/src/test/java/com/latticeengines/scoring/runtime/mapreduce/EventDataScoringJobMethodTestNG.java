@@ -14,9 +14,6 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 public class EventDataScoringJobMethodTestNG extends ScoringFunctionalTestNGBase{
 
     @Autowired
-    private EventDataScoringJob scoringJob;
-
-    @Autowired
     private Configuration hadoopConfiguration;
 
     @Value("${dataplatform.customer.basedir}")
