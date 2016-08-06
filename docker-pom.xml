@@ -16,5 +16,6 @@
 
     <modules>
         <module>le-datafabric/pom-connect-shaded.xml</module>
+        <module>le-matchapi</module>
     </modules>
 </project>

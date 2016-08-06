@@ -9,7 +9,8 @@
 
     <properties>
         <component-name>docker</component-name>
-        <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect/plugin</kafka.connect.docker.context>
+        <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
+        <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
     </properties>
 
     <parent>
@@ -32,10 +33,14 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target name="copy datafabric connector shaded jar">
+                            <tasks>
                                 <copy file="${project.basedir}/../le-datafabric/target/le-datafabric-connect-${project.version}-shaded.jar"
-                                      tofile="${project.basedir}/${kafka.connect.docker.context}/le-datafabric-connect-${project.version}-shaded.jar" />
-                            </target>
+                                      tofile="${project.basedir}/${kafka.connect.docker.context}/plugin/le-datafabric-connect-${project.version}-shaded.jar"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
+                                      tofile="${project.basedir}/${matchapi.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                            </tasks>
                         </configuration>
                     </execution>
                 </executions>

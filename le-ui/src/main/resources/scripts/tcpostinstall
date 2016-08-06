@@ -22,7 +22,6 @@ cp /opt/node/latest/conf/env/${LE_ENVIRONMENT}/ENV_VARS /opt/node/latest
 chmod -R 755 /opt/node/latest
 
 cat ${STACK_PROFILE}
-ls /opt/node/latest/conf/env/${LE_ENVIRONMENT}/
 python replace_token.py /opt/node/latest/conf/env/${LE_ENVIRONMENT}/ ${STACK_PROFILE}
 
 echo "cleaning up"

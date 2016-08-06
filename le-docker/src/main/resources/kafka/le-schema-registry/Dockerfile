@@ -2,7 +2,7 @@ FROM latticeengines/kafka
 
 
 # put a random value here to invalidate docker cache
-RUN echo invalidate cache 12311345 > /dev/null
+RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD schema-registry.properties /etc/schema-registry/schema-registry.properties
 ADD start.sh /start.sh
 
