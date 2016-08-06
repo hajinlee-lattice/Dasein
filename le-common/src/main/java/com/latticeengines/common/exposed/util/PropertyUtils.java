@@ -28,9 +28,11 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
 
         propertiesMap = new HashMap<>();
 
-        log.info("Loading properties");
-        for (String key : props.stringPropertyNames()) {
-            log.info(String.format("%s: %s", key, props.getProperty(key)));
+        if (log.isDebugEnabled()) {
+            log.debug("Loading properties");
+            for (String key : props.stringPropertyNames()) {
+                log.debug(String.format("%s: %s", key, props.getProperty(key)));
+            }
         }
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
