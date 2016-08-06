@@ -11,14 +11,14 @@ echo "copying files"
 cd /tmp/le-ui
 tar xzf le-ui.tar.gz
 
-cat ${STACK_PROFILE}
-ls conf/env/${LE_ENVIRONMENT}
-python replace_token.py conf/env/${LE_ENVIRONMENT} ${STACK_PROFILE}
-
 cd le-ui
 cp -rf . /opt/node/latest
 cp /opt/node/latest/conf/env/${LE_ENVIRONMENT}/ENV_VARS /opt/node/latest
 chmod -R 755 /opt/node/latest
+
+cat ${STACK_PROFILE}
+ls /opt/node/latest/conf/env/${LE_ENVIRONMENT}/
+python replace_token.py /opt/node/latest/conf/env/${LE_ENVIRONMENT}/ ${STACK_PROFILE}
 
 echo "cleaning up"
 rm -rf /opt/node/latest/conf
