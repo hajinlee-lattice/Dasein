@@ -1,4 +1,4 @@
-alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -Pgenerate -DskipTests clean install'
+alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -DskipTests clean install'
 alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
 alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
@@ -34,7 +34,7 @@ alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-contin
 
 alias apidpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-api-*-SNAPSHOT.war $JETTY_HOME/webapps'
 alias scoringapidpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scoringapi-*-SNAPSHOT.war $JETTY_HOME/webapps'
-alias secdpl='mvn -Pgenerate -DskipTests -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean install'
+alias secdpl='mvn -DskipTests -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean install'
 alias scheddpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scheduler-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 alias perfdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-perf-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 
@@ -65,8 +65,8 @@ alias scoringapitests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctio
 alias scoringapidptests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pdeployment -DargLine="" -Djetty.port=8011 clean verify'
 alias mtrtests='mvn -Pfunctional -DargLine="" verify'
 alias admindpltests='mvn -Pdeployment -DargLine= -DGMAIL_APP_PASSWORD=puntdwffotmrruwu -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djava.util.logging.config.file=../le-dev/test-logging.properties verify'
-alias admintests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate -DargLine="" -Djetty.port=8085 clean verify'
-alias sectests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate -DargLine="" -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean verify'
+alias admintests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -DargLine="" -Djetty.port=8085 clean verify'
+alias sectests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -DargLine="" -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean verify'
 alias plsdeptests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pdeployment -DargLine="" -Djetty.port=8081 clean verify'
 alias plstests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -DargLine="" -Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 verify'
 alias wftests='mvn -Pfunctional -DargLine="" verify'
@@ -87,7 +87,7 @@ alias recordtransformertest='MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m" mvn -Pf
 alias cleanuptesttenants='python $WSHOME/le-dev/scripts/cleanup.py'
 
 alias runjettyapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/etc/hadoop:$HADOOP_HOME/share/hadoop/common/hadoop-common-$HADOOP_VERSION.$HDP_VERSION.jar -Pfunctional -Djetty.port=8074 jetty:run'
-alias runjettysec='rm -f /var/log/ledp/le-pls*.log && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate clean jetty:run'
+alias runjettysec='rm -f /var/log/ledp/le-pls*.log && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional clean jetty:run'
 alias runjettypls='bash -c "rm -f /var/log/ledp/le-pls*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -o -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 -Pfunctional -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled -Djava.util.logging.config.file=../le-dev/test-logging.properties jetty:run'
 alias runjettyplsnodl='bash -c "rm -f /var/log/ledp/le-pls*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -o -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 -Pfunctional -DLOCAL_MODEL_DL_QUARTZ_ENABLED=disabled -Djava.util.logging.config.file=../le-dev/test-logging.properties jetty:run'
 export runjettypls='bash -c "rm -f /var/log/ledp/le-pls*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 -Pfunctional -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled jetty:run'
