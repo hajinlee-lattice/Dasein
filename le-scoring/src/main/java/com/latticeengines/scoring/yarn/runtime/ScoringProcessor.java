@@ -77,6 +77,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Value("${scoring.processor.threadpool.timeoutmin}")
     private long threadPoolTimeoutMin = 1440;
 
+    @SuppressWarnings("unused")
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -139,7 +140,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
 
-        return "In side the rts bulk scoring processor.";
+        return "Inside the rts bulk scoring processor.";
     }
 
     public CSVPrinter initErrorCSVFilePrinter() throws IOException {
