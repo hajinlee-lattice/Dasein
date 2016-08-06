@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 
 @Component("bulkMatchPlanner")

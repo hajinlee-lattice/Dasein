@@ -5,8 +5,6 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.match.service.MetadataColumnService;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.match.service.InternalService;
+import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 

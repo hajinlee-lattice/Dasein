@@ -3,15 +3,14 @@ package com.latticeengines.propdata.match.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.propdata.workflow.match.BulkMatchWorkflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.propdata.workflow.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 public class BulkMatchWorkflowSubmitter {
 
