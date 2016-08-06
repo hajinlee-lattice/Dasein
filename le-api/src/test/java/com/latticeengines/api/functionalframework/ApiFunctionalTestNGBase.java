@@ -19,9 +19,7 @@ import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
-import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -38,12 +36,6 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private YarnClient defaultYarnClient;
-
-    @Autowired
-    private JobEntityMgr jobEntityMgr;
-
-    @Autowired
-    private ModelEntityMgr modelEntityMgr;
 
     @Autowired
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
