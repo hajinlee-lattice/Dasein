@@ -58,9 +58,6 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/le-ui</directory>
-                            <filemode>755</filemode>
-                            <username>ledp</username>
-                            <groupname>ledp</groupname>
                             <sources>
                                 <source>
                                     <location>../le-ui.tar.gz</location>

@@ -3,6 +3,7 @@ import os
 import sys
 
 PROPERTY_FILE_SUFFIX = "*.properties"
+ENV_FILE = "ENV_VARS"
 NEW_SUFFIX=".new"
 
 def main():
@@ -14,7 +15,9 @@ def replace(dir, profile):
     tokens = load_tokens(profile)
     print "\nFound tokens:", tokens
 
-    files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
+    prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
+    env_files = glob.glob(dir + '/' + ENV_FILE)
+    files = prop_files + env_files
     for f in files:
         if os.path.isfile(f + NEW_SUFFIX):
             os.remove(f + NEW_SUFFIX)
