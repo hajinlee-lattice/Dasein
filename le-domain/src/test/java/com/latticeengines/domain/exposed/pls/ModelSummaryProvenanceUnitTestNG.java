@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
