@@ -15,6 +15,7 @@ public abstract class FixedIntervalTransformationServiceTestNGBase extends Trans
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
+        confirmResultFile(progress);
         cleanupProgressTables();
     }
 
@@ -30,5 +31,10 @@ public abstract class FixedIntervalTransformationServiceTestNGBase extends Trans
         String path = hdfsPathBuilder.constructSnapshotDir(sourceFixedInterval.getBaseSources()[0], baseSourceVersion)
                 .toString();
         return path.replace("/Snapshot/", "/Raw/");
+    }
+
+    @Override
+    protected String getPathForResult() {
+        return hdfsPathBuilder.constructSnapshotRootDir(source) + "/" + baseSourceVersion;
     }
 }

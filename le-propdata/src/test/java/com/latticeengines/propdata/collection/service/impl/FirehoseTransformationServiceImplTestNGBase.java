@@ -20,6 +20,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
+        confirmResultFile(progress);
         cleanupProgressTables();
     }
 
@@ -29,6 +30,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
+        confirmResultFile(progress);
         cleanupProgressTables();
     }
 
@@ -49,4 +51,8 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
         return hdfsPathBuilder.constructIngestionDir(source.getSourceName()).toString() + "/" + baseSourceVersion;
     }
 
+    @Override
+    protected String getPathForResult() {
+        return hdfsPathBuilder.constructRawDir(source) + "/" + baseSourceVersion;
+    }
 }

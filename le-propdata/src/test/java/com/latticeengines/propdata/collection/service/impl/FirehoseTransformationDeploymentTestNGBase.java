@@ -27,6 +27,8 @@ public abstract class FirehoseTransformationDeploymentTestNGBase extends Transfo
             Assert.assertNotNull(transformationProgressList.get(0).getYarnAppId());
 
             finish(transformationProgressList.get(0));
+            confirmResultFile(transformationProgressList.get(0));
+            
         } finally {
             cleanupProgressTables();
         }
@@ -41,6 +43,11 @@ public abstract class FirehoseTransformationDeploymentTestNGBase extends Transfo
     @Override
     protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructIngestionDir(source.getSourceName()).toString() + "/" + baseSourceVersion;
+    }
+
+    @Override
+    protected String getPathForResult() {
+        return hdfsPathBuilder.constructRawDir(source) + "/" + baseSourceVersion;
     }
 
 }

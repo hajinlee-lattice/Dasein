@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 
 public abstract class TransformationServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
+    private static final String SUCCESS_FLAG = "/_SUCCESS";
     private static final int MAX_LOOPS = 100;
     TransformationService transformationService;
     TransformationProgressEntityMgr progressEntityMgr;
@@ -40,6 +42,8 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
     abstract String getPathToUploadBaseData();
 
     abstract TransformationConfiguration createTransformationConfiguration();
+
+    abstract protected String getPathForResult();
 
     @BeforeMethod(groups = { "collection", "deployment" })
     public void setUp() throws Exception {
@@ -63,7 +67,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
                 String targetPath = getPathToUploadBaseData() + "/" + fileName;
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
                 InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-                String successPath = getPathToUploadBaseData() + "/_SUCCESS";
+                String successPath = getPathToUploadBaseData() + SUCCESS_FLAG;
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
             }
         } catch (Exception e) {
@@ -112,6 +116,25 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return progressInDb;
+    }
+
+    protected void confirmResultFile(TransformationProgress progress) {
+        String path = getPathForResult();
+        System.out.println("Checking for result file: " + path);
+        List<String> files;
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Assert.assertTrue(files.size() >= 2);
+        for (String file : files) {
+            if (!file.endsWith(SUCCESS_FLAG)) {
+                Assert.assertTrue(file.endsWith(".avro"));
+                continue;
+            }
+            Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
+        }
     }
 
     protected void cleanupActiveFromProgressTables() {
