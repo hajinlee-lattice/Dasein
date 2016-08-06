@@ -2,8 +2,6 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotEquals;
 
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -17,9 +15,6 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization/csvfiles";
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
