@@ -50,7 +50,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Autowired
     private TimeStampContainer timeStampContainer;
-    
+
     @Autowired
     private FeatureImportanceParser featureImportanceParser;
 
@@ -93,6 +93,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
+        System.out.println("executing executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation");
         Tenant tenant = newTenant();
         tenantService.registerTenant(tenant);
         uploadModelSummary();
@@ -108,10 +109,14 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.executeInternal(null);
         summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1, "No new summaries should have been created");
+        System.out.println(String.format("displayName: %s, construction time: %s, id: %s, lookupId: %s",
+                summaries.get(0).getDisplayName(), summaries.get(0).getConstructionTime(), summaries.get(0).getId(),
+                summaries.get(0).getLookupId()));
     }
 
     @Test(groups = "functional")
     public void executeInternalWithTenantRegistrationLaterThanHdfsModelCreation() throws Exception {
+        System.out.println("executing executeInternalWithTenantRegistrationLaterThanHdfsModelCreation");
         uploadModelSummary();
         Thread.sleep(5000L);
         tenantService.registerTenant(newTenant());
@@ -119,11 +124,17 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.executeInternal(null);
         setupSecurityContext(newTenant());
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        if (summaries.size() > 0) {
+            System.out.println(String.format("displayName: %s, construction time: %s, id: %s, lookupId: %s", summaries
+                    .get(0).getDisplayName(), summaries.get(0).getConstructionTime(), summaries.get(0).getId(),
+                    summaries.get(0).getLookupId()));
+        }
         assertEquals(summaries.size(), 0, "No new summaries should have been created");
     }
 
     @Test(groups = "functional")
     public void downloadDetailsOnlyModelSummary() throws Exception {
+        System.out.println("executing downloadDetailsOnlyModelSummary");
         tenantService.registerTenant(newTenant());
         uploadDetailsOnlyModelSummary();
         modelSummaryDownloadService.executeInternal(null);
@@ -141,6 +152,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
             "executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation",
             "executeInternalWithTenantRegistrationLaterThanHdfsModelCreation", "downloadDetailsOnlyModelSummary" })
     public void modelDownloaderShouldSkipBadModel() throws Exception {
+        System.out.println("executing modelDownloaderShouldSkipBadModel");
         ModelSummaryParser parser = Mockito.mock(ModelSummaryParser.class);
         Mockito.when(parser.parse(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException())
                 .thenCallRealMethod();
