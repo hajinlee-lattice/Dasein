@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 
+import java.util.Date;
+
 @Component("globalAuthAuthenticationEntityMgr")
 public class GlobalAuthAuthenticationEntityMgrImpl extends
         BaseEntityMgrImpl<GlobalAuthAuthentication> implements
@@ -51,6 +53,7 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthAuthentication gaAuthentication) {
+        gaAuthentication.setLastModificationDate(new Date(System.currentTimeMillis()));
         super.update(gaAuthentication);
     }
 }
