@@ -88,6 +88,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
         for (ModelSummaryProvenanceProperty provenanceProperty : summary.getModelSummaryProvenanceProperties()) {
             provenanceProperty.setModelSummary(summary);
+            log.info(String.format("creating model summary provenance with name: %s, value: %s", provenanceProperty.getOption(), provenanceProperty.getValue()));
             modelSummaryProvenancePropertyDao.create(provenanceProperty);
         }
 

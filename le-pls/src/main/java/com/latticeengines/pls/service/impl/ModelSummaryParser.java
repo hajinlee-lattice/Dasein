@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @Component("modelSummaryParser")
-public class ModelSummaryParser {
+public class ModelSummaryParser {;
 
     private static final Log log = LogFactory.getLog(ModelSummaryParser.class);
 
@@ -71,6 +71,7 @@ public class ModelSummaryParser {
     private int defaultBiPredictorNum;
 
     public ModelSummary parse(String hdfsPath, String fileContents) {
+        log.info(String.format("The file content for model summary is: %s", fileContents));
 
         if (fileContents == null) {
             return null;
