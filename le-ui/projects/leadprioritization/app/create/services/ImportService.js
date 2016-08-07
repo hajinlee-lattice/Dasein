@@ -19,6 +19,12 @@ angular
         return this.advancedSettings[key];
     };
 
+    this.ResetAdvancedSettings = function() {
+        this.advancedSettings.oneLeadPerDomain = false;
+        this.advancedSettings.includePersonalEmailDomains = true;
+        this.advancedSettings.useLatticeAttributes = true;
+    };
+
     this.Get = function(name, root) {
         return root ? this[name] : this.files[name];
     }

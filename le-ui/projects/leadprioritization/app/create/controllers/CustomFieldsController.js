@@ -97,6 +97,11 @@ angular
         });
     }
 
+    vm.resetClicked = function() {
+        ImportStore.ResetAdvancedSettings();
+        $state.go('home.models.import');
+    };
+
     vm.clickNext = function() {
         ShowSpinner('Saving Field Mappings...');
 
