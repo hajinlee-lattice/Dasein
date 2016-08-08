@@ -2,21 +2,6 @@ import json
 import math
 import os
 
-type_def = {
-    "t2.micro":   { "core": 1, "mem_gb": 1,     "on_demand": 0.013 },
-    "t2.medium":  { "core": 2, "mem_gb": 4,     "on_demand": 0.052, "ecs_mem" : 3956 },
-    "m4.large":   { "core": 2, "mem_gb": 8,     "on_demand": 0.120 },
-    "m4.xlarge":  { "core": 4, "mem_gb": 16,    "on_demand": 0.239 },
-    "m4.2xlarge": { "core": 8, "mem_gb": 32,    "on_demand": 0.479 },
-    "m3.medium":  { "core": 1, "mem_gb": 3.75,  "on_demand": 0.067 },
-    "m3.large":   { "core": 2, "mem_gb": 7.5,   "on_demand": 0.133 },
-    "m3.xlarge":  { "core": 4, "mem_gb": 15,    "on_demand": 0.266 },
-    "m3.2xlarge": { "core": 8, "mem_gb": 30,    "on_demand": 0.532 },
-    "r3.large":   { "core": 2, "mem_gb": 15.25, "on_demand": 0.166 },
-    "r3.xlarge":  { "core": 4, "mem_gb": 30.5,  "on_demand": 0.333 },
-    "r3.2xlarge": { "core": 8, "mem_gb": 61,    "on_demand": 0.665 }
-}
-
 class KafkaProfile:
     def __init__(self, profile):
         if isinstance(profile, str):
@@ -45,10 +30,6 @@ class KafkaProfile:
 
         if self._broker_mem < 1024:
             raise ValueError("Need at least 1024 MB memory for each container")
-
-        print self._instance_type
-        if self._instance_type not in type_def:
-            raise ValueError("Unsupported instance type " + self._instance_type)
 
     def _set_broker_mem(self, mem):
         self._broker_heap = "%dm" % math.floor(mem / 1.1)

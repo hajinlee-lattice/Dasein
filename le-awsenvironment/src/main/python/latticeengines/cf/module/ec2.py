@@ -6,32 +6,11 @@ from .parameter import Parameter
 from .resource import Resource
 from .template import TEMPLATE_DIR
 
-TYPE_DEF = {
-    "t2.micro":   { "core": 1, "mem_gb": 1,     "on_demand": 0.013 },
-    "t2.medium":  { "core": 2, "mem_gb": 4,     "on_demand": 0.052,  "ecs_mem" : 3956 },
-    "m4.large":   { "core": 2, "mem_gb": 8,     "on_demand": 0.120 },
-    "m4.xlarge":  { "core": 4, "mem_gb": 16,    "on_demand": 0.239 },
-    "m4.2xlarge": { "core": 8, "mem_gb": 32,    "on_demand": 0.479 },
-    "m3.medium":  { "core": 1, "mem_gb": 3.75,  "on_demand": 0.067 },
-    "m3.large":   { "core": 2, "mem_gb": 7.5,   "on_demand": 0.133 },
-    "m3.xlarge":  { "core": 4, "mem_gb": 15,    "on_demand": 0.266 },
-    "m3.2xlarge": { "core": 8, "mem_gb": 30,    "on_demand": 0.532 },
-    "r3.large":   { "core": 2, "mem_gb": 15.25, "on_demand": 0.166 },
-    "r3.xlarge":  { "core": 4, "mem_gb": 30.5,  "on_demand": 0.333 },
-    "r3.2xlarge": { "core": 8, "mem_gb": 61,    "on_demand": 0.665 }
-}
 
-def _ec2_mappings():
-    json_file = os.path.join(TEMPLATE_DIR, 'common', 'ec2_mappings.json')
+def ec2_defn():
+    json_file = os.path.join(TEMPLATE_DIR, 'common', 'ec2_definition.json')
     with open(json_file) as f:
         return json.load(f)
-
-
-def _ec2_params():
-    json_file = os.path.join(TEMPLATE_DIR, 'common', 'ec2_params.json')
-    with open(json_file) as f:
-        return json.load(f)
-
 
 class EC2Instance(Resource):
     def __init__(self, name, subnet_ref, instance_type, ec2_key, os="AmazonLinux"):

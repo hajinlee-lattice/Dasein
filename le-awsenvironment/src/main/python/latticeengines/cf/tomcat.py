@@ -6,7 +6,7 @@ import argparse
 import boto3
 import os
 
-from .module.ec2 import TYPE_DEF
+from .module.ec2 import ec2_defn
 from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
@@ -24,6 +24,8 @@ PROFILE_VARS = {
 }
 
 _S3_CF_PATH='cloudformation/'
+
+TYPE_DEF=ec2_defn()
 
 def main():
     args = parse_args()
@@ -74,6 +76,7 @@ def tomcat_task():
 
 def provision_cli(args):
     provision(args.environment, args.app, args.stackname, args.elb, args.profile, args.type, init_cap=args.ic, max_cap=args.mc, public=args.public)
+
 
 def provision(environment, app, stackname, elb, profile, instance_type, init_cap=2, max_cap=8, public=False):
     extra_params = parse_profile(profile)
@@ -127,7 +130,6 @@ def update_xmx_by_type(catalina_opts, instance_type):
        opts = (opt + " " + catalina_opts).strip()
 
     return opts
-
 
 def s3_path(stackname):
     return os.path.join(_S3_CF_PATH, stackname)
