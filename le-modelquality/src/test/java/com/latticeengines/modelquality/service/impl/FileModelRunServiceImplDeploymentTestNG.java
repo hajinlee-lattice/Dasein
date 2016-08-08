@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class FileModelRunSerivceImplTestNG extends ModelQualityDeploymentTestNGBase {
+public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     private ModelRun modelRun1;
     private ModelRun modelRun2;

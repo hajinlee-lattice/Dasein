@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
-public class ModelingMetricsTestNG extends ModelQualityDeploymentTestNGBase {
+public class ModelingMetricsDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @Autowired
     private MetricService metricService;
