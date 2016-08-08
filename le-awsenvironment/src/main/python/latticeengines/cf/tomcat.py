@@ -6,10 +6,10 @@ import argparse
 import boto3
 import os
 
+from .module.ec2 import TYPE_DEF
 from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
-from .module.ec2 import TYPE_DEF
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
@@ -88,7 +88,7 @@ def provision(environment, app, stackname, elb, profile, instance_type, init_cap
 
     extra_params.append(PARAM_DOCKER_IMAGE.config(app))
 
-    ECSStack.provision(environment, s3_path(stackname), stackname, elb, init_cap=init_cap, max_cap=max_cap, public=public, additional_params=extra_params)
+    ECSStack.provision(environment, s3_path(stackname), stackname, elb, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
 def teardown_cli(args):
     teardown(args.stackname)
