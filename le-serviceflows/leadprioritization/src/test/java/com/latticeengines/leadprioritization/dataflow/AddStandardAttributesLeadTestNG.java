@@ -1,9 +1,9 @@
 package com.latticeengines.leadprioritization.dataflow;
 
 import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
 
 import java.util.List;
 import java.util.Map;
@@ -93,7 +93,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
 
     @Override
     protected String getFlowBeanName() {
-        return "addStandardAttributesViaJavaFunction";
+        return "addStandardAttributes";
     }
 
     @Override

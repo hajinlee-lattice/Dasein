@@ -14,10 +14,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
-@Component("addStandardAttributesViaJavaFunction")
-public class AddStandardAttributesViaJavaFunction extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
+@Component("addStandardAttributes")
+public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
 
-    private static final Log log = LogFactory.getLog(AddStandardAttributesViaJavaFunction.class);
+    private static final Log log = LogFactory.getLog(AddStandardAttributes.class);
 
     @Override
     public Node construct(AddStandardAttributesParameters parameters) {

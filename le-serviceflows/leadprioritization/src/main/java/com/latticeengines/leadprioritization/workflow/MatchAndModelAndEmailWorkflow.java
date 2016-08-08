@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
-import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesViaJavaFunction;
+import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -24,7 +24,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Autowired
-    private AddStandardAttributesViaJavaFunction addStandardAttributesViaJavaFunction;
+    private AddStandardAttributes addStandardAttributes;
 
     @Autowired
     protected ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
@@ -44,7 +44,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(dedupEventTable) //
                 .next(matchDataCloudWorkflow) //
-                .next(addStandardAttributesViaJavaFunction) //
+                .next(addStandardAttributes) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //

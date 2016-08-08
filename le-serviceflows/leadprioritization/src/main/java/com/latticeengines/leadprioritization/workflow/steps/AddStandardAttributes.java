@@ -10,8 +10,8 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
-@Component("addStandardAttributesViaJavaFunction")
-public class AddStandardAttributesViaJavaFunction extends RunDataFlow<AddStandardAttributesConfiguration> {
+@Component("addStandardAttributes")
+public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConfiguration> {
 
     @Autowired
     private MetadataProxy metadataProxy;

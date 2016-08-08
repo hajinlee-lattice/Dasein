@@ -18,7 +18,7 @@ public class AddStandardAttributesAccountTestNG extends ServiceFlowsDataFlowFunc
 
     @Override
     protected String getFlowBeanName() {
-        return "addStandardAttributesViaJavaFunction";
+        return "addStandardAttributes";
     }
 
     @Override

@@ -11,8 +11,8 @@ public class AddStandardAttributesConfiguration extends DataFlowStepConfiguratio
     private Map<String, String> runTimeParams;
 
     public AddStandardAttributesConfiguration() {
-        setTargetTableName("addStandardAttributesViaJavaFunction");
-        setBeanName("addStandardAttributesViaJavaFunction");
+        setTargetTableName("addStandardAttributes");
+        setBeanName("addStandardAttributes");
     }
 
     public TransformationGroup getTransformationGroup() {
