@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -422,6 +426,11 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary newSummary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries?raw=true",
                 data, ModelSummary.class);
         assertNotNull(newSummary);
+        ModelSummaryProvenance provenance = newSummary.getModelSummaryConfiguration();
+        assertEquals(provenance.getBag().size(), 3);
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
+        assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), originalNumModels + 1);

@@ -7,6 +7,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +54,11 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated 
         assertEquals(decompressedDetails, data);
         assertTrue(summary.getTop10PercentLift() > summary.getTop20PercentLift());
         assertTrue(summary.getTop20PercentLift() > summary.getTop30PercentLift());
+        ModelSummaryProvenance provenance = summary.getModelSummaryConfiguration();
+        assertEquals(provenance.getBag().size(), 3);
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
+        assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
     }
 
     private boolean topPredictorsAreSortedAndSet(List<Predictor> predictors) {
