@@ -14,7 +14,7 @@ public class AddStandardAttributesParameters extends DataFlowParameters {
     public TransformationGroup transformationGroup;
     
     @JsonProperty("do_sort")
-    public Boolean doSort;
+    public boolean doSort;
 
     public AddStandardAttributesParameters(String eventTable, TransformationGroup transformationGroup) {
         this.eventTable = eventTable;
