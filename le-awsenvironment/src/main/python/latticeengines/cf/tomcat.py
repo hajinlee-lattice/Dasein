@@ -12,6 +12,7 @@ from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
+PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 
 PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
@@ -45,7 +46,7 @@ def template(environment, stackname, upload=False):
 
 def create_template():
     stack = ECSStack("AWS CloudFormation template for ECS cluster.")
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_MEM, PARAM_ENV_CATALINA_OPTS])
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS])
     stack.add_params(PROFILE_VARS.values())
     task = tomcat_task()
     stack.add_resource(task)
@@ -55,7 +56,7 @@ def create_template():
 def tomcat_task():
     container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-        "/latticeengines/", PARAM_DOCKER_IMAGE.ref() ]]}) \
+        "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
@@ -75,10 +76,10 @@ def tomcat_task():
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.elb, args.profile, args.type, init_cap=args.ic, max_cap=args.mc, public=args.public)
+    provision(args.environment, args.app, args.stackname, args.elb, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
 
 
-def provision(environment, app, stackname, elb, profile, instance_type, init_cap=2, max_cap=8, public=False):
+def provision(environment, app, stackname, elb, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
     extra_params = parse_profile(profile)
 
     max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 256
@@ -90,6 +91,7 @@ def provision(environment, app, stackname, elb, profile, instance_type, init_cap
     extra_params.append(PARAM_ENV_CATALINA_OPTS.config(opts))
 
     extra_params.append(PARAM_DOCKER_IMAGE.config(app))
+    extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
 
     ECSStack.provision(environment, s3_path(stackname), stackname, elb, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
@@ -146,11 +148,12 @@ def parse_args():
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
-    parser1.add_argument('-a', dest='app', type=str, required=True, help='application name')
+    parser1.add_argument('-a', dest='app', type=str, required=True, help='application name (same as docker image name)')
+    parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
     parser1.add_argument('-b', dest='elb', type=str, required=True, help='name of the elastic load balancer')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
-    parser1.add_argument('-t', dest='type', type=str, default='t2.medium', help='EC2 instance type')
+    parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
     parser1.add_argument('--catalina-opts', dest='copts', type=str, default='', help='CATALINA_OPTS')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
