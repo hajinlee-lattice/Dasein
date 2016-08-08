@@ -41,19 +41,19 @@ public class ScoringClientCustomization extends SingleContainerClientCustomizati
         return "scoring";
     }
 
-    @Override
-    public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
-        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
-        String rtsBulkScoringConfig = containerProperties.getProperty(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG);
-        RTSBulkScoringConfiguration config = JsonUtils.deserialize(rtsBulkScoringConfig, RTSBulkScoringConfiguration.class);
-        String importErrorPath = config.getImportErrorPath();
-        if (StringUtils.isNotEmpty(importErrorPath)) {
-            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                    LocalResourceVisibility.PUBLIC, //
-                    importErrorPath, //
-                    false));
-        }
-        return hdfsEntries;
-    }
+//    @Override
+//    public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
+//        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
+//        String rtsBulkScoringConfig = containerProperties.getProperty(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG);
+//        RTSBulkScoringConfiguration config = JsonUtils.deserialize(rtsBulkScoringConfig, RTSBulkScoringConfiguration.class);
+//        String importErrorPath = config.getImportErrorPath();
+//        if (StringUtils.isNotEmpty(importErrorPath)) {
+//            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+//                    LocalResourceVisibility.PUBLIC, //
+//                    importErrorPath, //
+//                    false));
+//        }
+//        return hdfsEntries;
+//    }
 
 }

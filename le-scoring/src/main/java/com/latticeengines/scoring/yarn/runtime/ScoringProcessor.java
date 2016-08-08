@@ -130,6 +130,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
 
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, rtsBulkScoringConfig.getImportErrorPath(), ".");
         try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter()) {
             try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
                     DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
