@@ -20,8 +20,12 @@ COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 
 COPY cacerts /etc/pki/java/cacerts
+COPY server.key /etc/pki/java/server.key
+COPY server.crt /etc/pki/java/server.crt
 COPY log4j.properties /log4j.properties
+COPY conf/env/qacluster/latticeengines.properties /etc/ledp/qacluster/latticeengines.properties
+COPY conf/env/prodcluster/latticeengines.properties /etc/ledp/prodcluster/latticeengines.properties
 COPY start.sh /start.sh
 
-EXPOSE 1099
+EXPOSE 8443 1099
 CMD ["bash", "/start.sh"]

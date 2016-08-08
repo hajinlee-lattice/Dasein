@@ -46,6 +46,10 @@ class ArnParameter(Parameter):
         if 'arn:aws' != value[:7]:
             raise ValueError("Must provide an ARN number for this parameter. %s does not seem so." % value)
 
+class EnvVarParameter(Parameter):
+    def __init__(self, name, type="String", default="", allowed_values=None):
+        Parameter.__init__(self, name.replace("_", ''), "Environment Variable: " + name, type=type, default=default, allowed_values=allowed_values)
+
 class InstanceTypeParameter(Parameter):
     ALLOWED_INSTANCE_TYPES = (
         "t2.micro",

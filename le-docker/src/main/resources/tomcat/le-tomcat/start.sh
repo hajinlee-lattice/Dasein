@@ -3,6 +3,7 @@
 export CATALINA_HOME=/usr/local/tomcat
 export JAVA_HOME=/usr/lib/jvm/java-8-oracle
 
+echo LE_ENVIRONMENT=${LE_ENVIRONMENT}
 export LE_PROPDIR=/etc/ledp/${LE_ENVIRONMENT}
 
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"

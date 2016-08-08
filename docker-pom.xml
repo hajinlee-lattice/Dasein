@@ -15,6 +15,7 @@
     </parent>
 
     <modules>
+        <module>le-config</module>
         <module>le-datafabric/pom-connect-shaded.xml</module>
         <module>le-matchapi</module>
     </modules>

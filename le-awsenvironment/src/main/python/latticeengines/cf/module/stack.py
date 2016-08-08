@@ -243,7 +243,7 @@ class ECSStack(Stack):
         }
 
     @staticmethod
-    def provision(environment, s3cfpath, stackname, elb, init_cap=2, max_cap=8, public=False):
+    def provision(environment, s3cfpath, stackname, elb, init_cap=2, max_cap=8, public=False, additional_params=()):
         config = AwsEnvironment(environment)
         client = boto3.client('cloudformation')
         check_stack_not_exists(client, stackname)
@@ -259,23 +259,27 @@ class ECSStack(Stack):
             subnet3 = config.private_subnet_3()
             tomcat_sg = config.tomcat_internal_sg()
 
+        params = [
+            PARAM_VPC_ID.config(config.vpc()),
+            PARAM_SUBNET_1.config(subnet1),
+            PARAM_SUBNET_2.config(subnet2),
+            PARAM_SUBNET_3.config(subnet3),
+            PARAM_KEY_NAME.config(config.ec2_key()),
+            PARAM_SECURITY_GROUP.config(tomcat_sg),
+            PARAM_INSTANCE_TYPE.config('t2.medium'),
+            PARAM_ENVIRONMENT.config(environment),
+            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
+            PARAM_ELB_NAME.config(elb),
+            PARAM_CAPACITY.config(str(init_cap)),
+            PARAM_MAX_CAPACITY.config(str(max_cap))
+        ]
+
+        params += additional_params
+
         response = client.create_stack(
             StackName=stackname,
             TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), s3cfpath, 'template.json'),
-            Parameters=[
-                PARAM_VPC_ID.config(config.vpc()),
-                PARAM_SUBNET_1.config(subnet1),
-                PARAM_SUBNET_2.config(subnet2),
-                PARAM_SUBNET_3.config(subnet3),
-                PARAM_KEY_NAME.config(config.ec2_key()),
-                PARAM_SECURITY_GROUP.config(tomcat_sg),
-                PARAM_INSTANCE_TYPE.config('t2.medium'),
-                PARAM_ENVIRONMENT.config(environment),
-                PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
-                PARAM_ELB_NAME.config(elb),
-                PARAM_CAPACITY.config(str(init_cap)),
-                PARAM_MAX_CAPACITY.config(str(max_cap))
-            ],
+            Parameters=params,
             TimeoutInMinutes=60,
             OnFailure='ROLLBACK',
             Capabilities=[

@@ -10,6 +10,7 @@
     <properties>
         <component-name>docker</component-name>
         <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
+        <tomcat.docker.context>src/main/resources/tomcat/le-tomcat</tomcat.docker.context>
         <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
     </properties>
 
@@ -39,6 +40,12 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
                                       tofile="${project.basedir}/${matchapi.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster/latticeengines.properties"
                                       overwrite="true" />
                             </tasks>
                         </configuration>
