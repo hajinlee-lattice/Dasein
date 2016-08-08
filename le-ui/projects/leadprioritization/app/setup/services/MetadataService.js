@@ -160,7 +160,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             sourceModelSummaryId: originalModelSummaryId,
             deduplicationType: dedupType,
             excludePublicDomains: includePersonalEmailDomains ? false : true,
-            excludeLatticeAttributes: useLatticeAttributes ? false : true,
+            excludePropDataAttributes: useLatticeAttributes ? false : true,
             dataRules: dataRules
         };
 
