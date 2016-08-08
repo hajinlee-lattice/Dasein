@@ -60,14 +60,14 @@ def parse_args():
 
     subparser = commands.add_parser("push")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace latticeengines')
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['qa','prod'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace latticeengines')
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['qa','prod'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.set_defaults(func=pull)

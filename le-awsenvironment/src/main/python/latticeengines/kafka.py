@@ -46,7 +46,7 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-p', dest='profile', type=str, help='profile file')
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
@@ -58,7 +58,7 @@ def parse_args():
     parser1.set_defaults(func=describe)
 
     parser1 = commands.add_parser("teardown")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='kafka', help='stack name')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=teardown_cli)

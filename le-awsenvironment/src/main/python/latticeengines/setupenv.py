@@ -17,7 +17,7 @@ CONF_DIR = 'conf'
 def main(args):
     args = args[1:]
     parser = argparse.ArgumentParser(description="Setup AWS stack")
-    parser.add_argument('environment', help="Environment name (prod, prodstaging, qa)")
+    parser.add_argument('environment', help="Environment name (prod, prodstaging, qacluster)")
     parser.add_argument('aws_access_key', help="AWS access key tied to the account being deployed")
     parser.add_argument('aws_secret_key', help="AWS secret key tied to the account being deployed")
     namespace = parser.parse_args(args)

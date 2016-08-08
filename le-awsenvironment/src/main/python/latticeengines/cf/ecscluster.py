@@ -69,12 +69,12 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     parser1 = commands.add_parser("template")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
-    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qa','prod'], help='environment')
+    parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, default='ecscluster', help='stack name')
     parser1.add_argument('-b', dest='elb', type=str, required=True, help='name of the elastic load balancer')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')

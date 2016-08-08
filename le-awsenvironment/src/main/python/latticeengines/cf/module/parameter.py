@@ -72,7 +72,7 @@ PARAM_SUBNET_1 = Parameter("SubnetId1", "The first subnet to provision EC2 insta
 PARAM_SUBNET_2 = Parameter("SubnetId2", "The second subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_SUBNET_3 = Parameter("SubnetId3", "The third subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_KEY_NAME = Parameter("KeyName", "Name of an existing EC2 KeyPair to enable SSH access to the instance", type="AWS::EC2::KeyPair::KeyName")
-PARAM_ENVIRONMENT = Parameter("Environment", "Environment tag. For example, qa and production")
+PARAM_ENVIRONMENT = Parameter("Environment", "Environment tag. For example, qacluster and prodcluster")
 
 PARAM_SECURITY_GROUP = Parameter("SecurityGroupId", "The security group to be used by EC2", type="AWS::EC2::SecurityGroup::Id")
 PARAM_INSTANCE_TYPE = InstanceTypeParameter("InstanceType", "EC2 instance type")

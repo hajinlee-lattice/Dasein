@@ -73,6 +73,6 @@ class AwsEnvironment:
     @staticmethod
     def create_env_props_map():
         map = {}
-        for env in ('dev', 'qa', 'prod'):
+        for env in ('dev', 'qacluster', 'prodcluster'):
             map[env] = AwsEnvironment(env).to_props()
         return map
