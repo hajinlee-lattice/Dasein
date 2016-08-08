@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
+function process_error() {
+    if [ ! -z "$(cat /tmp/errors.txt)" ]
+    then
+        echo "Error!"
+        cat /tmp/errors.txt
+        exit -1
+    fi
+}
 function build_docker() {
 	IMAGE=$1
 	sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
-	docker build -t $IMAGE . || true
+	docker build -t $IMAGE . 2>/tmp/errors.txt
 	mv Dockerfile.bak Dockerfile
+	process_error
 }
 
 function create_network() {
