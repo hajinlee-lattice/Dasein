@@ -15,6 +15,9 @@ public interface EmailService {
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
+    void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
+            Collection<String> bccRecipients);
+
     void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport);
 
     void sendPlsNewExternalUserEmail(User user, String password, String hostport);

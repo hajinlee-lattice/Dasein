@@ -31,6 +31,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${security.email.enabled:true}")
     private boolean emailEnabled;
 
+    @Value("${security.email.businessops:businessops@lattice-engines.com}")
+    private String businessOpsEmail;
+
     @Override
     public void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients) {
         if (emailEnabled) {
@@ -41,7 +44,14 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients) {
         if (emailEnabled) {
-            EmailUtils.sendMultiPartEmail(subject, content, recipients, emailsettings);
+            EmailUtils.sendMultiPartEmail(subject, content, recipients, null, emailsettings);
+        }
+    }
+
+    @Override
+    public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients, Collection<String> bccRecipients) {
+        if (emailEnabled) {
+            EmailUtils.sendMultiPartEmail(subject, content, recipients, bccRecipients, emailsettings);
         }
     }
 
@@ -86,7 +96,8 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());
-            sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail("Welcome to Lattice Lead Prioritization", mp, Collections.singleton(user.getEmail()),
+                    Collections.singleton(businessOpsEmail));
             log.info("Sending new PLS external user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send new PLS external user email to " + user.getEmail() + " " + e.getMessage());
@@ -480,7 +491,7 @@ public class EmailServiceImpl implements EmailService {
             htmlPart.setContent(builder, "text/html");
             mp.addBodyPart(htmlPart);
             EmailUtils.sendMultiPartEmail("Lattice Password Reset", mp,
-                    Collections.singleton(emailAddress), settings);
+                    Collections.singleton(emailAddress), null, settings);
         } catch (Exception e) {
             log.error(String.format("Sending global auth forget credentials email to :%s failed", emailAddress));
         }

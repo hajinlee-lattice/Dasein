@@ -44,7 +44,7 @@ public final class EmailUtils {
     }
 
     public static void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-            EmailSettings emailSettings) {
+            Collection<String> bccRecipients, EmailSettings emailSettings) {
         try {
             log.info("Begining to send multi part email now.");
             Message message = new MimeMessage(applySettings(emailSettings));
@@ -52,11 +52,17 @@ public final class EmailUtils {
             for (String recipient : recipients) {
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
             }
+            if (bccRecipients != null) {
+                for (String bccRecipient : bccRecipients) {
+                    message.addRecipient(Message.RecipientType.BCC, new InternetAddress(bccRecipient));
+                }
+            }
             message.setSubject(subject);
             message.setContent(content);
 
             log.info("Begining to send multi part email before calling transport.");
             Transport.send(message);
+            log.info("Send multi part email complete.");
         } catch (MessagingException e) {
             throw new LedpException(LedpCode.LEDP_19000, "Error sending a multipart email", e);
         }
