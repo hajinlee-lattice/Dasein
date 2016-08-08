@@ -48,6 +48,12 @@
 				
 			}
 		}
+        .ico.ico-lattice-dots {
+            height: 15px;
+            width: 14px;
+            opacity: .5;
+            background: url(/assets/images/ico-lattice-dots.png) no-repeat center center;
+        }
 	}
 }
 
@@ -281,7 +287,7 @@ Model List
     color: #bfbfbf;
     font-size: 2em;
 }
-    .delete-model:hover {
-        color: #477cba;
-    }
+.delete-model:hover {
+    color: #477cba;
+}
 

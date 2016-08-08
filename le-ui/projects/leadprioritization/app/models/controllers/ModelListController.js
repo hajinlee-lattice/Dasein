@@ -1,10 +1,11 @@
 angular.module('lp.models.list', [
     'mainApp.core.services.FeatureFlagService',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.widgets.ModelListTileWidget'
+    'mainApp.appCommon.widgets.ModelListTileWidget',
+    'mainApp.models.modals.CopyModelModal'
 ])
 .controller('ModelListController', function (
-    ResourceUtility, ModelList, ModelStore, ImportModelModal, FeatureFlagService
+    ResourceUtility, ModelList, ModelStore, CopyModelModal, ImportModelModal, FeatureFlagService
 ) {
     var vm = this;
     angular.extend(vm, {  
@@ -22,6 +23,10 @@ angular.module('lp.models.list', [
             vm.processModels(vm.models);
 
             ModelStore.getModels().then(vm.processModels);
+        },
+
+        copyModel: function() {
+            CopyModelModal.show();
         },
 
         importJSON: function() {

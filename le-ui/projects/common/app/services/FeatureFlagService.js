@@ -118,7 +118,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     function UpdateFlagsBasedOnRights() {
         UpdateFlag(flags.CHANGE_MODEL_NAME, RightsUtility.currentUserMay("Edit", "Models"));
         UpdateFlag(flags.DELETE_MODEL, RightsUtility.currentUserMay("Edit", "Models"));
-        UpdateFlag(flags.REVIEW_CLONE, RightsUtility.currentUserMay("Edit", "Models"));
+        UpdateFlag(flags.REVIEW_CLONE, RightsUtility.currentUserMay("Edit", "Users"));
         UpdateFlag(flags.UPLOAD_JSON, RightsUtility.currentUserMay("Create", "Models"));
 
         UpdateFlag(flags.USER_MGMT_PAGE, RightsUtility.currentUserMay("View", "Users"));

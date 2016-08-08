@@ -25,7 +25,7 @@ angular
 })
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
-        console.log('check', response);
+        //console.log('check', response);
         return (response && response.data && (response.data.errorCode || response.data.errorMsg));
     };
 

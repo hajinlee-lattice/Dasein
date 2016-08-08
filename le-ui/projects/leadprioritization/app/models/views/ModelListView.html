@@ -40,6 +40,10 @@
                                 <a ui-sref="home.models.pmml">From PMML File</a>
                                 <i class="fa fa-file-code-o"></i>
                             </li>
+                            <li>
+                                <a href="javascript:void(0)" ng-click="vm.copyModel()">From Lattice Model</a>
+                                <i class="ico ico-lattice-dots"></i>
+                            </li>
                             <li ng-if="vm.showUploadSummaryJson">
                                 <a href="javascript:void(0)" ng-click="vm.importJSON()">Import a JSON File</a>
                                 <i class="fa fa-file-text-o"></i>

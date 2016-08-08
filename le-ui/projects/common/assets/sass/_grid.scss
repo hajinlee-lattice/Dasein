@@ -131,3 +131,6 @@ html.no-mq {
     @include column-set;
 }
 
+.columns.no-wrap {
+    white-space: nowrap;
+}
