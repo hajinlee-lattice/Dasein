@@ -154,7 +154,7 @@ public class ModelSummaryParser {;
             summary.setTrainingTableName(JsonUtils
                     .getOrDefault(eventTableProvenance.get("TrainingTableName"), String.class, ""));
             summary.setTransformationGroupName(
-                    JsonUtils.getOrDefault(eventTableProvenance.get("TransformationGroupName"),
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Transformation_Group_Name"),
                             String.class, TransformationGroup.STANDARD.getName()));
             summary.setPivotArtifactPath(JsonUtils.getOrDefault(
                     eventTableProvenance.get("Pivot_Artifact_Path"), String.class, null));
