@@ -23,13 +23,8 @@ public abstract class BaseRestApiProxy {
 
     private RestTemplate restTemplate = new RestTemplate();
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
+    private String hostport;
     private String rootpath;
-
-    @Value("${proxy.microservice.rest.endpoint.hostport}")
-    private String microserviceHostPort;
-
-    @Value("${proxy.quartz.rest.endpoint.hostport}")
-    private String quartzHostPort;
 
     @Value("${proxy.retry.initialwaitmsec:1000}")
     private long initialWaitMsec;
@@ -40,14 +35,15 @@ public abstract class BaseRestApiProxy {
     @Value("${proxy.retry.maxAttempts:10}")
     private int maxAttempts;
 
-    protected BaseRestApiProxy(String rootpath, Object... urlVariables) {
-        this.rootpath = rootpath == null ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
-        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        restTemplate.setErrorHandler(new GetResponseErrorHandler());
+    protected BaseRestApiProxy(String hostport) {
+        this(hostport, null);
     }
 
-    public BaseRestApiProxy() {
-        this(null);
+    protected BaseRestApiProxy(String hostport, String rootpath, Object... urlVariables) {
+        this.hostport = hostport;
+        this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
+        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
@@ -159,27 +155,15 @@ public abstract class BaseRestApiProxy {
     }
 
     protected String constructUrl(Object path, Object... urlVariables) {
-        if (microserviceHostPort == null || microserviceHostPort.equals("")) {
-            throw new NullPointerException("microserviceHostPort must be set");
+        if (hostport == null || hostport.equals("")) {
+            throw new NullPointerException("hostport must be set");
         }
         String end = rootpath;
         if (path != null) {
             String expandedPath = new UriTemplate(path.toString()).expand(urlVariables).toString();
             end = combine(rootpath, expandedPath);
         }
-        return combine(microserviceHostPort, end);
-    }
-
-    protected String constructQuartzUrl(Object path, Object... urlVariables) {
-        if (StringUtils.isEmpty(quartzHostPort)) {
-            throw new NullPointerException("quartzHostPort must be set");
-        }
-        String end = rootpath;
-        if (path != null) {
-            String expandedPath = new UriTemplate(path.toString()).expand(urlVariables).toString();
-            end = combine(rootpath, expandedPath);
-        }
-        return combine(quartzHostPort, end);
+        return combine(hostport, end);
     }
 
     private String combine(Object... parts) {
@@ -202,19 +186,11 @@ public abstract class BaseRestApiProxy {
         return StringUtils.join(toCombine, "/");
     }
 
-    public String getMicroserviceHostPort() {
-        return microserviceHostPort;
+    public String getHostport() {
+        return hostport;
     }
 
-    public void setMicroserviceHostPort(String microserviceHostPort) {
-        this.microserviceHostPort = microserviceHostPort;
-    }
-
-    public String getQuartzHostPort() {
-        return quartzHostPort;
-    }
-
-    public void setQuartzHostPort(String quartzHostPort) {
-        this.quartzHostPort = quartzHostPort;
+    public void setHostport(String hostport) {
+        this.hostport = hostport;
     }
 }

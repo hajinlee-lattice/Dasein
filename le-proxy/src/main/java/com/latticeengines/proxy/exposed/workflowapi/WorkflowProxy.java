@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
-public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface {
+public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowInterface {
 
     public WorkflowProxy() {
         super("workflowapi/workflows");

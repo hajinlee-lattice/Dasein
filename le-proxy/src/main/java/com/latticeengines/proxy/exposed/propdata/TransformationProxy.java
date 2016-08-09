@@ -10,10 +10,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("transformationProxy")
-public class TransformationProxy extends BaseRestApiProxy implements TransformationInterface {
+public class TransformationProxy extends MicroserviceRestApiProxy implements TransformationInterface {
 
     public TransformationProxy() {
         super("propdata/transformations");

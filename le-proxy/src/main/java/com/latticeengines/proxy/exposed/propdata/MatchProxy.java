@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.propdata;
 
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
@@ -11,7 +12,7 @@ import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component
-public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
+public class MatchProxy extends MicroserviceRestApiProxy implements MatchInterface {
 
     public MatchProxy() {
         super("propdata/matches");

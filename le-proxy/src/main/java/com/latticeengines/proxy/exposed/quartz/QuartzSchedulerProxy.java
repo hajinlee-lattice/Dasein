@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.quartz;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.PropertyUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.quartz.JobConfig;
@@ -15,24 +17,24 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
         QuartzSchedulerInterface {
 
     public QuartzSchedulerProxy() {
-        super("quartz/scheduler");
+        super(PropertyUtils.getProperty("proxy.quartz.rest.endpoint.hostport"), "quartz/scheduler");
     }
 
     @Override
     public Boolean setSchedulerStatus(String status) {
-        String url = constructQuartzUrl("/status?{status}", status);
+        String url = constructUrl("/status?{status}", status);
         return post("setSchedulerStatus", url, null, Boolean.class);
     }
 
     @Override
     public Boolean addJob(String tenantId, JobConfig jobConfig) {
-        String url = constructQuartzUrl("/jobs/{tenantId}", tenantId);
+        String url = constructUrl("/jobs/{tenantId}", tenantId);
         return post("addJob", url, jobConfig, Boolean.class);
     }
 
     @Override
     public Boolean deleteJob(String tenantId, String jobName) {
-        String url = constructQuartzUrl("/jobs/{tenantId}/{jobName}",
+        String url = constructUrl("/jobs/{tenantId}/{jobName}",
                 tenantId, jobName);
         delete("deleteJob", url);
         return true;
@@ -41,20 +43,20 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
     @Override
     @SuppressWarnings("unchecked")
     public List<JobInfo> listJobs(String tenantId) {
-        String url = constructQuartzUrl("/jobs/{tenantId}", tenantId);
+        String url = constructUrl("/jobs/{tenantId}", tenantId);
         return get("listJobs", url, List.class);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<JobInfo> listAllJobs() {
-        String url = constructQuartzUrl("/jobs");
+        String url = constructUrl("/jobs");
         return get("listJobs", url, List.class);
     }
 
     @Override
     public JobInfoDetail getJobDetail(String tenantId, String jobName) {
-        String url = constructQuartzUrl("/jobs/{tenantId}/{jobName}", tenantId, jobName);
+        String url = constructUrl("/jobs/{tenantId}/{jobName}", tenantId, jobName);
         return get("getJobDetails", url, JobInfoDetail.class);
     }
 

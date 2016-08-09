@@ -133,7 +133,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         });
         publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         try {
-            workflowProxy.setMicroserviceHostPort("http://localhost:8234");
+            workflowProxy.setHostport("http://localhost:8234");
             publicationService.scan(POD_ID);
         } catch (Exception e) {
             Assert.fail("Error from workflow proxy.", e);

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 @Component("testProxy")
-public class TestProxy extends BaseRestApiProxy implements TestInterface {
+public class TestProxy extends MicroserviceRestApiProxy implements TestInterface {
 
     public TestProxy() {
         super("foo/{bar}", "baz");
@@ -13,7 +13,7 @@ public class TestProxy extends BaseRestApiProxy implements TestInterface {
     @Override
     public void testUrlExpansion() {
         String url = constructUrl("value?customer={customer}", "test");
-        Assert.assertEquals(url, getMicroserviceHostPort() + "/foo/baz/value?customer=test");
+        Assert.assertEquals(url, getHostport() + "/foo/baz/value?customer=test");
     }
 
     @Override

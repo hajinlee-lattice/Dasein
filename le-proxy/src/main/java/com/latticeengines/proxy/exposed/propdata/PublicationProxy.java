@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed.propdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("publicationProxy")
-public class PublicationProxy extends BaseRestApiProxy implements PublicationInterface {
+public class PublicationProxy extends MicroserviceRestApiProxy implements PublicationInterface {
 
     public PublicationProxy() {
         super("propdata/publications");

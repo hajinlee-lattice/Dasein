@@ -12,11 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
-public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
-
+public class ColumnMetadataProxy extends MicroserviceRestApiProxy implements ColumnMetadataInterface {
     public ColumnMetadataProxy() {
         super("propdata/metadata");
     }

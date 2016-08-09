@@ -17,10 +17,10 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface, ArtifactInterface,
+public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
         RuleResultInterface {
 
     public MetadataProxy() {

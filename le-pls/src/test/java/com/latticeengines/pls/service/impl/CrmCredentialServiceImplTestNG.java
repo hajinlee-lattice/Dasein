@@ -86,7 +86,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
         batonService.setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfiguration);
 
         customerSpace = CustomerSpace.parse(tenantId);
-        validateCredentialProxy.setMicroserviceHostPort("http://localhost:8082");
+        validateCredentialProxy.setHostport("http://localhost:8082");
         httpServer = new StandaloneHttpServer();
         httpServer.init();
         httpServer.addServlet(new SourceCredentialValidationServlet(), "/eai/validatecredential/customerspaces/"

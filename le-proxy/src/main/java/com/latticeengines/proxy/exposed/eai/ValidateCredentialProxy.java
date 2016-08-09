@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.eai;
 
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -8,7 +9,7 @@ import com.latticeengines.network.exposed.eai.ValidateCredentialInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component
-public class ValidateCredentialProxy extends BaseRestApiProxy implements ValidateCredentialInterface {
+public class ValidateCredentialProxy extends MicroserviceRestApiProxy implements ValidateCredentialInterface {
 
     public ValidateCredentialProxy() {
         super("eai/validatecredential");

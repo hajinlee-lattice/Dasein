@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.scoring;
 
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -10,7 +11,7 @@ import com.latticeengines.network.exposed.scoring.ScoringInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("scoringProxy")
-public class ScoringProxy extends BaseRestApiProxy implements ScoringInterface {
+public class ScoringProxy extends MicroserviceRestApiProxy implements ScoringInterface {
 
     public ScoringProxy() {
         super("scoring/scoringjobs");
