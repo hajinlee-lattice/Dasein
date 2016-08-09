@@ -22,9 +22,12 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.dirtyRows = {};
     $scope.indexToOldFieldsForSingleFieldPage = {};
     $scope.indexToOldFieldsForListFieldsPage = {};
-    $scope.oneLeadPerDomain = $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain == "true";
-    $scope.includePersonalEmailDomains = $scope.data.EventTableProvenance.Exclude_Public_Domains == "false";
-    $scope.useLatticeAttributes = $scope.data.EventTableProvenance.Exclude_Propdata_Columns == "false";
+    $scope.oneLeadPerDomain = $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain == null ? false :
+        $scope.data.EventTableProvenance.Is_One_Lead_Per_Domain == "true";
+    $scope.includePersonalEmailDomains = $scope.data.EventTableProvenance.Exclude_Public_Domains == null ? true :
+        $scope.data.EventTableProvenance.Exclude_Public_Domains == "false";
+    $scope.useLatticeAttributes = $scope.data.EventTableProvenance.Exclude_Propdata_Columns == null ? true :
+        $scope.data.EventTableProvenance.Exclude_Propdata_Columns == "false";
 
     getOptionsAndFields();
 
