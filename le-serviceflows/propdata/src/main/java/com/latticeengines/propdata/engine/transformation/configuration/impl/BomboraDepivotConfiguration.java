@@ -14,7 +14,7 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
     private String serviceBeanName = "bomboraDepivotedService";
     private String rootOperationId;
     private List<SourceColumn> sourceColumns;
-    private BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig;
+    private BomboraFirehoseInputSourceConfig inputSourceConfig;
 
     @Override
     public String getSourceName() {
@@ -28,7 +28,7 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
 
     @Override
     public InputSourceConfig getInputSourceConfig() {
-        return bomboraFirehoseInputSourceConfig;
+        return inputSourceConfig;
     }
 
     @Override
@@ -61,8 +61,9 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
         this.sourceConfigurations = sourceConfigurations;
     }
 
-    public void setBomboraFirehoseInputSourceConfig(BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig) {
-        this.bomboraFirehoseInputSourceConfig = bomboraFirehoseInputSourceConfig;
+    public void setBomboraFirehoseInputSourceConfig(
+            BomboraFirehoseInputSourceConfig inputSourceConfig) {
+        this.inputSourceConfig = inputSourceConfig;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.MethodNotSupportedException;
@@ -9,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
@@ -31,13 +34,9 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     private static final Log log = LogFactory.getLog(FirehoseTransformationDataFlowService.class);
 
-    private static final String HDFS_PATH_SEPARATOR = "/";
-
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
-    private static final String CSV_EXTENSION = ".csv";
-
-    private static final String PART_FILE = "PART-0001";
+    private static final String UNCOMPRESSED_FILE = "UNCOMPRESSED-";
 
     @Autowired
     private SimpleCascadingExecutor simpleCascadingExecutor;
@@ -75,28 +74,48 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         if (source instanceof DataImportedFromHDFS) {
             String inputDir = hdfsPathBuilder
                     .constructIngestionDir(source.getSourceName(), baseVersion).toString();
-            String gzHdfsPath = null;
+            List<String> gzHdfsPaths = null;
 
             try {
-                gzHdfsPath = scanDir(inputDir, inputConfig.getExtension());
+                gzHdfsPaths = scanDir(inputDir, inputConfig.getExtension());
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
 
-            String uncompressedFilePath = workflowDir + HDFS_PATH_SEPARATOR + PART_FILE
-                    + CSV_EXTENSION;
-            String avroDirPath = workflowDir + HDFS_PATH_SEPARATOR + AVRO_DIR_FOR_CONVERSION;
+            for (int i = 0; i < gzHdfsPaths.size(); i++) {
+                String gzHdfsPath = gzHdfsPaths.get(i);
+                String uncompressedFilePath = new Path(workflowDir,
+                        UNCOMPRESSED_FILE + String.format("%04d", i) + PropDataConstants.CSV)
+                                .toString();
+                log.info("UncompressedFilePath: " + uncompressedFilePath);
+                String avroDirPath = new Path(workflowDir, new Path(AVRO_DIR_FOR_CONVERSION,
+                        UNCOMPRESSED_FILE + String.format("%04d", i))).toString();
+                log.info("AvroDirPath: " + avroDirPath);
 
-            try {
-                untarGZFile(gzHdfsPath, uncompressedFilePath);
-                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, inputConfig);
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
+                try {
+                    untarGZFile(gzHdfsPath, uncompressedFilePath);
+                    convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath,
+                            inputConfig);
+                    List<String> avroFilePaths = scanDir(avroDirPath, PropDataConstants.AVRO);
+                    for (String avroFilePath : avroFilePaths) {
+                        Path srcAvroFilePath = new Path(avroFilePath);
+                        Path dstAvroFilePath = new Path(
+                                new Path(workflowDir, AVRO_DIR_FOR_CONVERSION),
+                                UNCOMPRESSED_FILE + String.format("%04d", i) + "-"
+                                        + srcAvroFilePath.getName());
+                        HdfsUtils.moveFile(yarnConfiguration, avroFilePath,
+                                dstAvroFilePath.toString());
+                        log.info("SrcAvroFilePath: " + srcAvroFilePath.toString());
+                        log.info("DstAvroFilePath: " + dstAvroFilePath.toString());
+                    }
+                } catch (IOException e) {
+                    throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
+                }
             }
         }
     }
 
-    private String scanDir(String inputDir, final String suffix) throws IOException {
+    private List<String> scanDir(String inputDir, final String suffix) throws IOException {
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
             @Override
@@ -106,18 +125,20 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         };
 
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, inputDir, filter);
+        List<String> resultFiles = new ArrayList<String>();
 
         if (!CollectionUtils.isEmpty(files) && files.size() > 0) {
-            String fullPath = files.get(0);
-            if (fullPath.startsWith(inputDir)) {
-                return fullPath;
-            } else {
-                if (fullPath.contains(fullPath)) {
-                    return fullPath.substring(fullPath.indexOf(inputDir));
+            for (String fullPath : files) {
+                if (fullPath.startsWith(inputDir)) {
+                    resultFiles.add(fullPath);
+                } else {
+                    if (fullPath.contains(fullPath)) {
+                        resultFiles.add(fullPath.substring(fullPath.indexOf(inputDir)));
+                    }
                 }
             }
         }
-        return null;
+        return resultFiles;
     }
 
     private void untarGZFile(String gzHdfsPath, String uncompressedFilePath) throws IOException {
