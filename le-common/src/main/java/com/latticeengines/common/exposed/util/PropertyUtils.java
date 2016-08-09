@@ -3,6 +3,8 @@ package com.latticeengines.common.exposed.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -49,7 +51,23 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             propertiesMap.put(keyStr, valueStr);
         }
 
+        // Need to replace variables because there's no convenient way to get
+        // Spring to do it
+        Pattern pattern = Pattern.compile("(\\$\\{(\\w+)\\})");
+        for (Object key : props.keySet()) {
+            String value = (String) props.get(key);
+            while (true) {
+                Matcher matcher = pattern.matcher(value);
+                if (!matcher.find()) {
+                    break;
+                }
+                String placeholder = matcher.group(2);
+                value = matcher.replaceFirst(resolvePlaceholder(placeholder, props, springSystemPropertiesMode));
+            }
+        }
+
         super.processProperties(beanFactory, props);
+
     }
 
     public static String getProperty(String name) {
