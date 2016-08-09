@@ -319,8 +319,8 @@ def toggle_healtch_check(elb):
         LoadBalancerName=elb,
         HealthCheck={
             'Target': 'TCP:80',
-            'Interval': 5,
-            'Timeout': 30,
+            'Timeout': 5,
+            'Interval': 30,
             'UnhealthyThreshold': 2,
             'HealthyThreshold': 10
         }
