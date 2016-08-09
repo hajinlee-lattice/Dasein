@@ -12,8 +12,11 @@ RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2
 
 # confluent
 ADD confluent.repo /etc/yum.repos.d/confluent.repo
-RUN yum clean all; yum -y -v install confluent-platform-2.11
-RUN mkdir -p /var/lib/zookeeper; touch /var/lib/zookeeper/myid
+RUN rpm --import http://packages.confluent.io/rpm/3.0/archive.key \
+    && yum clean all \
+    && yum -y -v install confluent-platform-2.11 \
+    && mkdir -p /var/lib/zookeeper \
+    && touch /var/lib/zookeeper/myid
 
 VOLUME ["/etc/kafka"]
 
