@@ -1,7 +1,7 @@
 FROM latticeengines/tomcat
 
 # put a random value here to invalidate docker cache
-RUN echo invalidate cache {{TIMSTAMP}} > /dev/null
+RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY webapps/ROOT.war /ROOT.war
 
 RUN mkdir ROOT \

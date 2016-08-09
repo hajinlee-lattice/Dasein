@@ -13,7 +13,7 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
     && rm -rf /etc/apt/sources.list.d/webupd8team-java.list
 
 # put a random value here to invalidate docker cache
-RUN echo invalidate cache {{TIMSTAMP}} > /dev/null
+RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
