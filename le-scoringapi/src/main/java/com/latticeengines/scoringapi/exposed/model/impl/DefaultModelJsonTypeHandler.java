@@ -219,7 +219,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             }
 
             FieldSchema schema = fieldSchemas.get(fieldName);
-            setFieldTypes(mismatchedDataTypes, parsedRecord, fieldName, schema);
+            setFieldTypes(mismatchedDataTypes, parsedRecord, fieldName, schema,
+                    shouldThrowExceptionForMismatchedDataTypes());
             interpretFields(interpretedFields, fieldName, schema);
         }
         if (!extraFields.isEmpty()) {
@@ -228,16 +229,22 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                 parsedRecord.remove(extraField);
             }
         }
-        if (!mismatchedDataTypes.isEmpty() && shouldThrowExceptionForMismatchedDataTypes()) {
-            throw new ScoringApiException(LedpCode.LEDP_31105,
-                    new String[] { JsonUtils.serialize(mismatchedDataTypes) });
+        if (!mismatchedDataTypes.isEmpty()) {
+            if (shouldThrowExceptionForMismatchedDataTypes()) {
+                throw new ScoringApiException(LedpCode.LEDP_31105,
+                        new String[] { JsonUtils.serialize(mismatchedDataTypes) });
+            } else {
+                List<String> warningMessages = new ArrayList<>();
+                warningMessages.add(JsonUtils.serialize(mismatchedDataTypes));
+                addWarning(WarningCode.MISMATCHED_DATATYPE, recordId, warningMessages, modelId);
+            }
         }
 
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
 
     protected boolean shouldThrowExceptionForMismatchedDataTypes() {
-        return true;
+        return false;
     }
 
     protected void handleException(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
@@ -277,17 +284,20 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private void setFieldTypes(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
-            Map<String, Object> record, String fieldName, FieldSchema schema) {
+            Map<String, Object> record, String fieldName, FieldSchema schema,
+            boolean shouldThrowExceptionForMismatchedDataTypes) {
         Object fieldValue = record.get(fieldName);
         if (schema.source == FieldSource.REQUEST && fieldValue != null) {
             FieldType fieldType = schema.type;
 
-            parseField(mismatchedDataTypes, record, fieldName, schema, fieldValue, fieldType);
+            parseField(mismatchedDataTypes, record, fieldName, schema, fieldValue, fieldType,
+                    shouldThrowExceptionForMismatchedDataTypes);
         }
     }
 
     private void parseField(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
-            Map<String, Object> record, String fieldName, FieldSchema schema, Object fieldValue, FieldType fieldType) {
+            Map<String, Object> record, String fieldName, FieldSchema schema, Object fieldValue, FieldType fieldType,
+            boolean shouldThrowExceptionForMismatchedDataTypes) {
         try {
             if (schema.interpretation == FieldInterpretation.Date) {
                 if (!StringUtils.objectIsNullOrEmptyString(fieldValue)) {
@@ -299,6 +309,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             record.put(fieldName, fieldValue);
         } catch (Exception e) {
             handleException(mismatchedDataTypes, fieldName, fieldValue, fieldType, record);
+            if (!shouldThrowExceptionForMismatchedDataTypes) {
+                record.put(fieldName, null);
+            }
         }
     }
 

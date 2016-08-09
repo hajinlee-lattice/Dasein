@@ -10,10 +10,12 @@ import org.apache.commons.collections.SetUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
@@ -88,6 +90,21 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
+    @Test(groups = "deployment", enabled = true)
+    public void mismatchedDatatype() throws IOException {
+        String url = apiHostPort + "/score/record";
+        ScoreRequest scoreRequest = getScoreRequest();
+        scoreRequest.getRecord().put("Activity_Count_Click_Email",
+                "$200 to $1000 range ModelExpects this to be a number");
+        List<String> values = new ArrayList<>();
+        values.add("Activity_Count_Click_Email");
+        values.add("$200 to $1000 range ModelExpects this to be a number");
+        values.add(scoreRequest.getModelId());
+
+        Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
+        expectedWarningCodeAndMessageValues.put(WarningCode.MISMATCHED_DATATYPE.getExternalCode(), values);
+    }
+
     private void postAndAssert(String url, ScoreRequest scoreRequest,
             Map<String, List<String>> expectedWarningCodeAndMessageValues) {
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
@@ -100,11 +117,12 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         for (Warning warning : warnings) {
             observedWarningCodes.put(warning.getWarning(), warning.getDescription());
         }
-        Assert.assertTrue(SetUtils.isEqualSet(observedWarningCodes.keySet(), expectedWarningCodeAndMessageValues.keySet()));
+        Assert.assertTrue(
+                SetUtils.isEqualSet(observedWarningCodes.keySet(), expectedWarningCodeAndMessageValues.keySet()));
         for (String warningCode : expectedWarningCodeAndMessageValues.keySet()) {
             String observedDescription = observedWarningCodes.get(warningCode);
             for (String warningValue : expectedWarningCodeAndMessageValues.get(warningCode)) {
-               Assert.assertTrue(observedDescription.contains(warningValue));
+                Assert.assertTrue(observedDescription.contains(warningValue));
             }
         }
     }

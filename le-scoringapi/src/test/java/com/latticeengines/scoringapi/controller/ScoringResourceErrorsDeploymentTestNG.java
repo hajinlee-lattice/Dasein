@@ -55,18 +55,6 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
         Assert.assertEquals(handlerAndErrors.getValue().getError(), LedpCode.LEDP_31199.getExternalCode());
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void mismatchedDatatype() throws IOException {
-        String url = apiHostPort + "/score/record";
-        ScoreRequest scoreRequest = getScoreRequest();
-        scoreRequest.getRecord().put("Activity_Count_Click_Email", "$200 to $1000 range ModelExpects this to be a number");
-
-        AbstractMap.SimpleEntry<LedpResponseErrorHandler, ExceptionHandlerErrors> handlerAndErrors = post(url, scoreRequest);
-        Assert.assertEquals(handlerAndErrors.getKey().getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assert.assertEquals(handlerAndErrors.getValue().getError(), LedpCode.LEDP_31105.getExternalCode());
-        Assert.assertTrue(handlerAndErrors.getValue().getDescription().contains("Activity_Count_Click_Email"));
-    }
-
     private AbstractMap.SimpleEntry<LedpResponseErrorHandler, ExceptionHandlerErrors> post(String url,
             ScoreRequest scoreRequest) {
         LedpResponseErrorHandler ledpResponseErrorHandler = new LedpResponseErrorHandler();
