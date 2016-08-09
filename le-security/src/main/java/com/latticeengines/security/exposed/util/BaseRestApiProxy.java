@@ -28,13 +28,13 @@ public abstract class BaseRestApiProxy {
 
             if (i != 0) {
                 if (part.startsWith("/")) {
-                    parts[i] = part.substring(1);
+                    part = part.substring(1);
                 }
             }
 
             if (i != parts.length - 1) {
                 if (part.endsWith("/")) {
-                    parts[i] = part.substring(0, part.length() - 2);
+                    part = part.substring(0, part.length() - 2);
                 }
             }
         }
