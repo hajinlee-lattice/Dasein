@@ -283,6 +283,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     private void performFailover() {
         Configuration conf = getConfiguration();
+        log.info(String.format("RM address before fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
         Collection<String> rmIds = HAUtil.getRMHAIds(conf);
         String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
         int currentIndex = 0;
@@ -305,6 +306,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
         setConfiguration(conf);
         log.info(String.format("Fail over from %s to %s.", currentHAId, rmServiceIds[currentIndex]));
+        log.info(String.format("RM address after fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
         AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
         try {
             rmTemplate.afterPropertiesSet();
