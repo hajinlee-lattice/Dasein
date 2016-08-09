@@ -12,14 +12,18 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.userManagement.services.UserManagementService',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, AddUserModal, DeleteUserModal, EditUserModal) {
+.controller('UserManagementWidgetController', function (
+    $scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, 
+    FeatureFlagService, AddUserModal, DeleteUserModal, EditUserModal, UserList
+) {
+    console.log(UserList);
     $scope.ResourceUtility = ResourceUtility;
     $scope.deleteInProgress = false;
 
     if( Object.prototype.toString.call( $scope.data ) !== '[object Array]' ) {
         $scope.data = [$scope.data];
     }
-    $scope.users = _.sortBy(_.sortBy($scope.data, 'Email'), function(u){
+    $scope.users = _.sortBy(_.sortBy(UserList, 'Email'), function(u){
         var accessLevel = RightsUtility.getAccessLevel(u.AccessLevel);
         return accessLevel != null ? accessLevel.ordinal : 0;
     });
@@ -65,10 +69,5 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     		return false;
     	}
     	return number == 1? $scope.showEditUserButton : $scope.showDeleteUserButton;
-    };
-})
-.directive('userManagementWidget', function () {
-    return {
-        templateUrl: 'app/AppCommon/widgets/userManagementWidget/UserManagementWidgetTemplate.html'
     };
 });

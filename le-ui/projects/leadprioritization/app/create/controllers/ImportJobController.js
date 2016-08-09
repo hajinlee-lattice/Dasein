@@ -1,7 +1,7 @@
 angular.module('lp.create.import.job', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'lp.create.import',
-    'pd.jobs'
+    'lp.jobs'
 ])
 .controller('ImportJobController', function(
     $scope, $state, $stateParams, $interval, ResourceUtility, 

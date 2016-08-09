@@ -1,6 +1,6 @@
 angular
-.module('pd.jobs')
-.config(['$stateProvider', '$routeProvider', '$httpProvider', function($stateProvider, $routeProvider, $httpProvider) {
+.module('lp.jobs')
+.config(function($stateProvider, $routeProvider, $httpProvider) {
     $stateProvider
         .state('home.jobs', {
             url: '/jobs',
@@ -40,7 +40,7 @@ angular
                     controller: function($scope, IsPmml) {
                         $scope.IsPmml = IsPmml || false;
                     },
-                    templateUrl: 'app/jobs/status/StatusView.html'
+                    templateUrl: 'app/jobs/views/ListView.html'
                 }
             }
         })
@@ -61,10 +61,11 @@ angular
                     templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/jobs/status/StatusView.html'
+                    templateUrl: 'app/jobs/views/ListView.html'
                 }
             }
         })
+        /*
         .state('home.jobs.status.ready', {
             url: '/ready/:jobId',
             params: {
@@ -80,6 +81,7 @@ angular
                 }
             }
         })
+        */
         .state('home.jobs.status.csv', {
             url: '/csv/:jobId',
             params: {
@@ -113,41 +115,5 @@ angular
                     templateUrl: 'app/create/views/ValidateImportView.html'
                 }   
             }
-        })
-        .state('home.jobs.import', {
-            url: '/import'
-        })
-        .state('home.jobs.import.credentials', {
-            url: '/credentials',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/jobs/import/credentials/CredentialsView.html'
-                }
-            }
-        })
-        .state('home.jobs.import.file', {
-            url: '/file',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/jobs/import/file/FileView.html'
-                }
-            }
-        })
-        .state('home.jobs.import.processing', {
-            url: '/processing',
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/jobs/import/processing/ProcessingView.html'
-                }
-            }
         });
-}]);
+});

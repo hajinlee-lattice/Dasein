@@ -1,4 +1,4 @@
-angular.module('pd.jobs.status.cancelmodal', [
+angular.module('lp.jobs.status.cancelmodal', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .service('CancelJobModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, JobsService) {

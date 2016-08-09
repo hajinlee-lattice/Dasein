@@ -43,7 +43,7 @@ class Server {
                 https.globalAgent.maxSockets = Infinity;
                 this.httpsServer = https.createServer(credentials, this.app);
             } catch(err) {
-                console.log(err);
+                console.log(chalk.red(this.getTimestamp() + ':httpserror>'), err);
             }
         } 
 
@@ -55,16 +55,16 @@ class Server {
         this.setMiddleware();
 
         process.on('uncaughtException', err => {
-            console.log(chalk.red('uncaughtException'), err);
+            console.log(chalk.red(this.getTimestamp() + ':uncaughtException>'), err);
             //this.app.close();
         });
         
         process.on('SIGTERM', err => {
-            console.log(chalk.red('SIGTERM'), err);
+            console.log(chalk.red(this.getTimestamp() + ':SIGTERM>'), err);
         });
         
         process.on('ECONNRESET', err => { 
-            console.log(chalk.red('ECONNRESET'), err);
+            console.log(chalk.red(this.getTimestamp() + ':ECONNRESET>'), err);
         });
     }
 
@@ -121,7 +121,7 @@ class Server {
                 }
             ));
         } catch(err) {
-            console.log(err);
+            console.log(chalk.red(this.getTimestamp() + ':logging>') + err);
         }
     }
 
@@ -167,11 +167,11 @@ class Server {
 
                         req.pipe(r).pipe(res);
                     } catch(err) {
-                        console.log(err);
+                        console.log(chalk.red(this.getTimestamp() + ':apiproxy>') + err);
                     }
                 });
             } catch (err) {
-                console.log(err);
+                console.log(chalk.red(this.getTimestamp() + ':apiroute>') + err);
             }
         }
     }
@@ -192,16 +192,24 @@ class Server {
                 try {
                     let r = request(url);
 
-                    if (typeof req.query == 'object') {
+                    //if (typeof req.query == 'object') {
                         req.headers["Authorization"] = req.query.Authorization || '';
-                    }
+                    //}
 
                     req.pipe(r).pipe(res);
                 } catch(err) {
-                    console.log(err);
+
+                    console.log(chalk.red(this.getTimestamp() + ':fileproxy>') + err);
                 }
             });
         }
+    }
+
+    getTimestamp() {
+        const ts = new Date();
+        
+        return (ts.getMonth() + 1) + '/' + ts.getDate() + '/' + ts.getFullYear() + ' ' +
+                ts.getHours() + ':' + ts.getMinutes() + ':' + ts.getSeconds();
     }
 
     setAppRoutes(routes) {
@@ -270,7 +278,7 @@ class Server {
                 status: err.status,
                 message: err.message,
                 error: 'Please contact the administrator if the problem persists.',
-                env: 'Lattice Engines'
+                env: false
             });
         });
     }
@@ -279,10 +287,10 @@ class Server {
         const options = this.options;
         const line = '-------------------------------------------------------------------------------';
 
-        if (options.NODE_ENV == 'development') {
-            console.log(chalk.yellow('> TLS:') + ' Allow Unauthorized in Development Mode')
-            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-        }
+        //if (options.NODE_ENV == 'development') {
+        //    console.log(chalk.yellow('> TLS:') + ' Allow Unauthorized in Development Mode')
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        //}
 
         console.log(chalk.white('>') + ' SERVER SETTINGS:');
 

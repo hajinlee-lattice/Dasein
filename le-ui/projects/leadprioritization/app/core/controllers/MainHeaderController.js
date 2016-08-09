@@ -1,9 +1,23 @@
-angular.module('mainApp.core.controllers.MainHeaderController', [
-    'mainApp.appCommon.utilities.ResourceUtility',
+angular.module('lp.header', [
+    'mainApp.core.utilities.NavUtility',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.services.FeatureFlagService'
+    'mainApp.core.modules.ServiceErrorModule',
+    'mainApp.core.services.ResourceStringsService',
+    'mainApp.core.services.FeatureFlagService',
+    'mainApp.login.services.LoginService',
+    'mainApp.login.controllers.UpdatePasswordController',
+    'mainApp.userManagement.controllers.UserManagementController',
+    'mainApp.models.controllers.ModelCreationHistoryController',
+    'mainApp.models.controllers.ModelDetailController',
+    'mainApp.appCommon.utilities.TimestampIntervalUtility',
+    'mainApp.config.services.ConfigService',
+    'common.utilities.SessionTimeout'
 ])
-.controller('MainHeaderController', function ($scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService) {
+.controller('HeaderController', function (
+    $scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService,
+    LoginService, NavUtility
+) {
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
@@ -17,16 +31,26 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
     $scope.showProfileNav = false;
 
+    $('body.not-initialized')
+        .removeClass('not-initialized')
+        .addClass('initialized');
+
     $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
         if (toState.params) {
-            $scope.pageDisplayIcon = toState.params.pageIcon ? toState.params.pageIcon : null;
-            $scope.pageDisplayName = toState.params.pageTitle ? toState.params.pageTitle : null;
+            setPageTitle(toState.params);
         }
-        
+
         if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
             $scope.isModelDetailsPage = false;
         }
     });
+
+    function setPageTitle(params) {
+        $scope.pageDisplayIcon = params.pageIcon ? params.pageIcon : null;
+        $scope.pageDisplayName = params.pageTitle ? params.pageTitle : null;
+    }
+
+    setPageTitle($state.params);
 
     function isModelDetailState(stateName) {
         var stateNameArr = stateName.split('.');
@@ -79,5 +103,20 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             }
             angular.element("body").removeClass("open-nav");
         }
+    }
+
+    // Handle when the Update Password link is clicked
+    $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
+        if (data != null && data.Success) {
+            createUpdatePasswordSuccessView();
+        } else {
+            $state.go('home.updatepassword');
+        }
+    });
+
+    function createUpdatePasswordSuccessView() {
+        $('#mainHeaderView').hide();
+        LoginService.Logout();
+        $state.go('passwordsuccess');
     }
 });

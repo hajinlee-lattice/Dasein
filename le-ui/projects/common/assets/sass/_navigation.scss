@@ -95,13 +95,18 @@ nav.primary-nav {
     min-height: 100vh; // on page load make sure sidebar is 100% high
     width: 60px;
     min-width: 60px; // protection for IE
-    background: #222831;
-    padding-left: 10px;
-    padding-bottom: 75px;
+
     @media screen and (max-height: $max-height) {
         overflow: auto;
         width: 70px;
         overflow-x: hidden;
+    }
+    .lp-sidebar-menu {
+        background: #222831;
+        padding-left: 10px;
+        padding-bottom: 75px;
+        padding-top: 40px;
+        height: 100vh;
     }
     .label {
         font-size: 12px;
@@ -116,7 +121,6 @@ nav.primary-nav {
         text-overflow: ellipsis;
         letter-spacing: 1px;
     }
-    padding-top: 40px;
     .open-button {
         background: transparent;
         border: 0;

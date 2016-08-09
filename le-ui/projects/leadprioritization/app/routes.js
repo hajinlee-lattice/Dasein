@@ -1,25 +1,32 @@
 angular
 .module('mainApp')
 .run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
-    $rootScope.$on('$stateChangeStart', function(evt, to, params) {
+    $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
+        // when user hits browser Back button after app instantiate, send back to login
+        if (fromState.name == 'home.models' && toState.name == 'home') {
+            ev.preventDefault();
+            window.open("/login", "_self");
+        }
+
         var LoadingString = ResourceUtility.getString("");
 
-        if (to.redirectTo) {
+        if (toState.redirectTo) {
             evt.preventDefault();
-            $state.go(to.redirectTo, params)
+            $state.go(toState.redirectTo, params)
         }
 
         ShowSpinner(LoadingString);
         ServiceErrorUtility.hideBanner();
     });
+
     
-    $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
+    $rootScope.$on('$stateChangeSuccess', function(evt, toState, params) {
 
     });
     
-    $rootScope.$on('$stateChangeError', function(evt, to, params) {
-        if ($state.current.name != to.name) {
-            console.log('-!- error; could not load '+to.name);
+    $rootScope.$on('$stateChangeError', function(evt, toState, params) {
+        if ($state.current.name != toState.name) {
+            console.log('-!- error; could not load '+toState.name);
             $state.reload();
         }
     });
@@ -62,6 +69,10 @@ angular
                 }
             },
             views: {
+                "header": {
+                    controller: 'HeaderController',
+                    templateUrl: 'app/core/views/MainHeaderView.html'
+                },
                 "navigation": {
                     controller: function($rootScope, $stateParams, $state, BrowserStorageUtility) {
                         var tenantName = $stateParams.tenantName,
@@ -727,7 +738,24 @@ angular
                     templateUrl: 'app/navigation/summary/OneTabView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/userManagement/views/UserManagementView.html'
+                    resolve: {
+                        UserList: function($q, UserManagementService) {
+                            var deferred = $q.defer();
+
+                            UserManagementService.GetUsers().then(function(result) {
+                                if (result.Success) {
+                                    deferred.resolve(result.ResultObj)
+                                } else {
+                                    deferred.reject(result)
+                                }
+
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'UserManagementWidgetController',
+                    templateUrl: 'app/AppCommon/widgets/userManagementWidget/UserManagementWidgetTemplate.html'
                 }   
             }
         })
@@ -862,8 +890,27 @@ angular
 
 function ShowSpinner(LoadingString) {
     // state change spinner
-    $('#mainContentView').html(
-        '<section id="main-content" class="container">' +
-        '<div class="row twelve columns"><div class="loader"></div>' +
-        '<h2 class="text-center">' + LoadingString + '</h2></div></section>');
+    var element = $('#mainContentView');
+    
+    element
+        .scrollTop(0)
+        .children()
+            .addClass('inactive-disabled');
+    
+    element
+        .css({
+            position:'relative'
+        })
+        .prepend(
+            $(
+                '<section class="loading-spinner">' +
+                '<h2 class="text-center">' + LoadingString + '</h2></div>' +
+                '<div class="meter"><span class="indeterminate"></span></div>' +
+                '</section>'
+            )
+        );
+
+    setTimeout(function() {
+        $('section.loading-spinner').addClass('show-spinner');
+    },1)
 }

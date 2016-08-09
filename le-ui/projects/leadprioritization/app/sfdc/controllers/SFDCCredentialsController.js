@@ -1,4 +1,4 @@
-angular.module('mainApp.sfdc.sfdcCredentials', [
+angular.module('lp.sfdc.credentials', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('sfdcCredentialsController', function($scope, $q, $http, BrowserStorageUtility) {

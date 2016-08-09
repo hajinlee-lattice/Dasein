@@ -6,6 +6,17 @@
         <h1>{{status}} {{message}}</h1>
         <p>{{url}} - {{error}}</p>
         <hr>
-        <span>{{env}} {{options.STACK_ENV}} {{options.COMPRESSED}} {{options.TIMESTAMP}} {{options.API_URL}}</span>
+        {{#if env}}
+            <table>
+                <thead><tr><td>Property</td><td>Value</td></tr></thead>
+                <tbody>
+                {{#each options}}
+                    <tr><td>{{@key}}</td><td>{{this}}</td></tr>
+                {{/each}}
+                </tbody>
+            </table>
+        {{else}}
+            <span>Lattice Engines</span>
+        {{/if}}
     </body>
 </html>

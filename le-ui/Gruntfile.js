@@ -24,9 +24,8 @@ module.exports = function (grunt) {
             },
             devb: {
                 NODE_ENV: 'development',
-                API_URL: 'https://10.41.0.13:3000',
-                //API_URL: 'https://app3.lattice-engines.com',
-                APICON_URL: 'https://10.41.0.13:8073',
+                API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
+                APICON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,

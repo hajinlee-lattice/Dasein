@@ -19,7 +19,7 @@
         <!-- endbuild -->
         <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
     </head>
-    <body data-ng-controller="MainController" class="lp">
+    <body data-ng-controller="MainController" class="lp not-initialized">
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
         <div id="outer-wrap">
             <div id="inner-wrap">
@@ -31,12 +31,10 @@
                 <section id="main" role="main" class="main-content">
                     <div class="content-wrap">
                         <div id="mainView">
-                            <div id="mainHeaderView"></div>
-                            <div data-ng-controller="MainViewController">
-                                <div ui-view="summary" id="mainSummaryView"></div>
-                                <div id="mainInfoView"></div>
-                                <div ui-view="main" id="mainContentView"></div>
-                            </div>
+                            <div ui-view="header" id="mainHeaderView"></div>
+                            <div ui-view="summary" id="mainSummaryView"></div>
+                            <div id="mainInfoView"></div>
+                            <div ui-view="main" id="mainContentView"></div>
                         </div>
                     </div>
                 </section>
@@ -65,6 +63,7 @@
         <script src="/app/utilities/PasswordUtility.js"></script>
         <script src="/app/utilities/ResourceUtility.js"></script>
         <script src="/app/utilities/RightsUtility.js"></script>
+        <script src="/app/utilities/SessionTimeoutUtility.js"></script>
         <script src="/app/utilities/SortUtility.js"></script>
         <script src="/app/utilities/StringUtility.js"></script>
         <script src="/app/utilities/TenantIdParsingUtility.js"></script>
@@ -148,13 +147,12 @@
         <script src="app/navigation/pagination/PaginationController.js"></script>
         <script src="app/navigation/table/TableController.js"></script>
         <script src="app/navigation/sidebar/RootController.js"></script>
-        <script src="app/jobs/JobsController.js"></script>
+        <script src="app/jobs/controllers/ListController.js"></script>
+        <script src="app/jobs/controllers/RowController.js"></script>
+        <script src="app/jobs/services/JobsService.js"></script>
+        <script src="app/jobs/services/JobsStore.js"></script>
         <script src="app/jobs/JobsRoutes.js"></script>
-        <script src="app/jobs/status/CancelJobModal.js"></script>
-        <script src="app/jobs/status/StatusController.js"></script>
-        <script src="app/jobs/import/credentials/CredentialsController.js"></script>
-        <script src="app/jobs/import/file/FileController.js"></script>
-        <script src="app/jobs/import/ready/ImportReadyController.js"></script>
+        <script src="app/jobs/modals/CancelJobModal.js"></script>
         <script src="app/login/controllers/LoginController.js"></script>
         <script src="app/login/controllers/UpdatePasswordController.js"></script>
         <script src="app/login/modals/TenantSelectionModal.js"></script>

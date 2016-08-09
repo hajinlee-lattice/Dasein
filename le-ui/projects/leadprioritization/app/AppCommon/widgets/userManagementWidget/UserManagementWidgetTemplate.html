@@ -1,40 +1,44 @@
-<div novalidate data-ng-controller="UserManagementWidgetController" class="user-management-list">
+<div>
+    <section id="userManagementContainer" class="container row">
+        <div novalidate class="user-management-list">
 
-    <div class="row">
-        <div class="ten columns offset-one table-header">
-            <div class="pull-left number-of-items" ng-if="users.length > 0">
-                Users: <span class="badge blue-badge">{{ users.length }}</span>&nbsp;
-                Active: <span class="badge gray-badge">{{( users | filter: { Active: true }).length }}</span>
+            <div class="row">
+                <div class="ten columns offset-one table-header">
+                    <div class="pull-left number-of-items" ng-if="users.length > 0">
+                        Users: <span class="badge blue-badge">{{ users.length }}</span>&nbsp;
+                        Active: <span class="badge gray-badge">{{( users | filter: { Active: true }).length }}</span>
+                    </div>
+                    <button class="pull-right button orange-button" id="usermgmt-btn-add-user" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)">
+                        {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
+                    </button>
+                </div>
             </div>
-            <button class="pull-right button orange-button" id="usermgmt-btn-add-user" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)">
-                {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
-            </button>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="ten columns offset-one">
-            <table>
-                <thead>
-                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
-                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_LAST_NAME')}}</th>
-                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_EMAIL')}}</th>
-                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_ACCESS_LEVEL')}}</th>
-                    <th></th>
-                </thead>
-                <tbody>
-                    <tr data-ng-repeat="user in users" data-ng-class="{shaded: $index % 2}">
-                        <td>{{user.FirstName}}</td>
-                        <td>{{user.LastName}}</td>
-                        <td>{{user.Email}}</td>
-                        <td>{{manipulateAccessLevel(user.AccessLevel)}}</td>
-                        <td class="edit-icons">
-                            <a class="js-edit-user-link delete-user-link" data-ng-show="showEditButton(user, 1)" data-ng-click="editUserClicked(user)" href="javascript:void(0)"><i class="fa fa-pencil"></i></a>
-                            <a class="js-delete-user-link delete-user-link" data-ng-show="showEditButton(user, 2)" data-ng-click="deleteUserClicked(user)" href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="ten columns offset-one">
+                    <table>
+                        <thead>
+                            <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_LAST_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_EMAIL')}}</th>
+                            <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_ACCESS_LEVEL')}}</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr data-ng-repeat="user in users" data-ng-class="{shaded: $index % 2}">
+                                <td>{{user.FirstName}}</td>
+                                <td>{{user.LastName}}</td>
+                                <td>{{user.Email}}</td>
+                                <td>{{manipulateAccessLevel(user.AccessLevel)}}</td>
+                                <td class="edit-icons">
+                                    <a class="js-edit-user-link delete-user-link" data-ng-show="showEditButton(user, 1)" data-ng-click="editUserClicked(user)" href="javascript:void(0)"><i class="fa fa-pencil"></i></a>
+                                    <a class="js-delete-user-link delete-user-link" data-ng-show="showEditButton(user, 2)" data-ng-click="deleteUserClicked(user)" href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </div>

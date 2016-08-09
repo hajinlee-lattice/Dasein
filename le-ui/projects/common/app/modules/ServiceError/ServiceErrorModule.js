@@ -25,7 +25,6 @@ angular
 })
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
-        //console.log('check', response);
         return (response && response.data && (response.data.errorCode || response.data.errorMsg));
     };
 
@@ -36,7 +35,7 @@ angular
                 method = params[0],
                 state = params[1] || null, // state or elementQuery
                 stateParams = params[2] || null;
-console.log(method, state, stateParams, params, config, response)
+            
             switch (method) {
                 case 'none': break;
                 case 'popup': this.showModal(response, false, state, stateParams); break;

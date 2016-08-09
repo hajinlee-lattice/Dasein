@@ -15,8 +15,10 @@
     <body data-ng-controller="MainController" class="blue-background">
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
         <div id="mainView">
-            <div id="mainHeaderView"></div>
-            <div data-ng-view></div>
+            <div ui-view="header" id="mainHeaderView"></div>
+            <div ui-view="summary" id="mainSummaryView"></div>
+            <div ui-view="info" id="mainInfoView"></div>
+            <div ui-view="main" id="mainContentView"></div>
         </div>
         <!--[if IE]><div id="isIE"></div><![endif]-->
     </body>
@@ -29,8 +31,10 @@
     <script src="app/controllers/LoginController.js"></script>
     <script src="app/controllers/UpdatePasswordController.js"></script>
     <script src="app/modals/TenantSelectionModal.js"></script>
+    <!--
     <script src="app/navigation/NavigationController.js"></script>
     <script src="app/navigation/pagination/PaginationController.js"></script>
+    -->
     <!-- endbuild -->
 
     <!-- build:remove:dist -->
