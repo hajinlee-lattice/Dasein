@@ -20,16 +20,16 @@ shopt -s expand_aliases
 echo "Sourcing aliases file"
 source $WSHOME/le-dev/aliases
 
-# Top-level compile
-echo "Changing dir into workspace"
-cd $WSHOME
-echo "Top-level compile"
-mvn -T8 -DskipTests clean install 2> /tmp/errors.txt
-processErrors
-
-echo "Top-level playmaker compile"
-mvn -T6 -f playmaker-pom.xml -DskipTests clean install 2> /tmp/errors.txt
-processErrors
+## Top-level compile
+#echo "Changing dir into workspace"
+#cd $WSHOME
+#echo "Top-level compile"
+#mvn -T8 -DskipTests clean install 2> /tmp/errors.txt
+#processErrors
+#
+#echo "Top-level playmaker compile"
+#mvn -T6 -f playmaker-pom.xml -DskipTests clean install 2> /tmp/errors.txt
+#processErrors
 
 echo "Deploying latticeengines properties to local Hadoop"
 cfgdpl 2> /tmp/errors.txt

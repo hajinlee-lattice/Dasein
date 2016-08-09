@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.workflow.match.steps;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +28,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
@@ -46,6 +47,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private static Log log = LogFactory.getLog(ParallelBlockExecution.class);
     private static final int MAX_ERRORS = 100;
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
+    private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";
 
     @Autowired
     private InternalProxy internalProxy;
@@ -136,8 +138,17 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
             Long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
-            String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
-            HdfsUtils.writeToFile(yarnConfiguration, outputFile, JsonUtils.serialize(matchOutput));
+
+            try {
+                String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.writeValue(new File(MATCHOUTPUT_BUFFER_FILE), matchOutput);
+                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, outputFile);
+                FileUtils.deleteQuietly(new File(MATCHOUTPUT_BUFFER_FILE));
+            } catch (Exception e) {
+                log.error("Failed to save matchoutput json.", e);
+            }
+
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
             Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
