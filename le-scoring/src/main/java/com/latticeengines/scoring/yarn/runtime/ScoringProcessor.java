@@ -24,7 +24,9 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.DatumWriter;
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,8 +132,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
 
-        HdfsUtils.copyHdfsToLocal(yarnConfiguration, rtsBulkScoringConfig.getImportErrorPath(), ".");
-        try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter()) {
+        try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath())) {
             try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
                     DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
@@ -144,9 +145,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         return "Inside the rts bulk scoring processor.";
     }
 
-    public CSVPrinter initErrorCSVFilePrinter() throws IOException {
-        return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), // 
-                LECSVFormat.format.withSkipHeaderRecord());
+    public CSVPrinter initErrorCSVFilePrinter(String importErrorPath) throws IOException {
+        CSVFormat format = LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage");
+        if (StringUtils.isNotEmpty(importErrorPath) && HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, importErrorPath, ".");
+            FileUtils.deleteQuietly(new File("." + Import_Error_File_Name + ".crc"));
+            format.withSkipHeaderRecord();
+        }
+        return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), format); //
     }
 
     public String processBak(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
@@ -189,7 +195,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 List<RecordScoreResponse> scoreResponseList = bulkScore(scoreRequest, rtsBulkScoringConfig
                         .getCustomerSpace().toString());
                 appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder, leadEnrichmentAttributeMap,
-                        leadEnrichmentAttributeDisplayNameMap, initErrorCSVFilePrinter());
+                        leadEnrichmentAttributeDisplayNameMap,
+                        initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath()));
             } while (scoreRequest != null);
         }
 

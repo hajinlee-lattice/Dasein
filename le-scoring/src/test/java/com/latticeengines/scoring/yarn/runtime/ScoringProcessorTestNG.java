@@ -1,7 +1,6 @@
 package com.latticeengines.scoring.yarn.runtime;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -112,11 +111,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
             Map<String, Schema.Type> leadEnrichmentAttributeMap,
             Map<String, String> leadEnrichmentAttributeDisplayNameMap, String targetDir) throws IOException {
-        createErrorCSV();
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         Schema schema = bulkScoringProcessor.createOutputSchema(leadEnrichmentAttributeMap,
                 leadEnrichmentAttributeDisplayNameMap);
-        try (CSVPrinter csvFilePrinter = bulkScoringProcessor.initErrorCSVFilePrinter()) {
+        try (CSVPrinter csvFilePrinter = bulkScoringProcessor.initErrorCSVFilePrinter("")) {
             try (DataFileWriter<GenericRecord> dataFileWriter = bulkScoringProcessor.createDataFileWriter(schema,
                     fileName)) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
@@ -125,12 +123,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             }
         }
         bulkScoringProcessor.copyScoreOutputToHdfs(fileName, targetDir);
-        FileUtils.deleteQuietly(new File("error.csv"));
     }
 
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvro() throws IllegalArgumentException, Exception {
-        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
 
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
@@ -152,7 +148,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
-        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -178,7 +173,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap() throws IllegalArgumentException,
             Exception {
-        createErrorCSV();
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -193,13 +187,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         }
     }
 
-    private void createErrorCSV() throws IOException {
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter("error.csv"), LECSVFormat.format.withHeader(
-                "LineNumber", "Id", "ErrorMessage"))) {
-        }
-
-    }
-
     private void checkErrorCSV(String filePath) throws IOException {
         try (CSVParser parser = new CSVParser(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
                 filePath)), LECSVFormat.format)) {
@@ -209,6 +196,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(record.get("Id"), "2");
             Assert.assertEquals(record.get("ErrorMessage"), "some error occurred");
         }
+        FileUtils.deleteQuietly(new File("error.csv"));
     }
 
     private void generateCorrectEnrichmentAttributeMap(Map<String, Type> leadEnrichmentAttributeMap,
