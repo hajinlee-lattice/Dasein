@@ -37,14 +37,14 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
     private List<LatticeAccount> accounts;
     private List<AccountLookupEntry> lookups;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void beforeClass() {
         accountMgr = accountLookupService.getAccountMgr(version);
         lookupMgr = accountLookupService.getLookupMgr(version);
         initEntities();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testLookup() {
 
         batchCreateEntities();
@@ -64,7 +64,7 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
         deleteEntities();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testLookupFailure() {
 
         createEntities();
