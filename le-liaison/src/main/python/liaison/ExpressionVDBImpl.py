@@ -9,7 +9,7 @@ import re
 from tokenize import generate_tokens, TokenError
 from StringIO import StringIO
 import token
-from .exceptions import ExpressionNotImplemented, MaudeStringError, UnknownVisiDBType
+from .exceptions import ExpressionNotImplemented, MaudeStringError, UnknownVisiDBType, ExpressionSyntaxError
 from . import types_vdb
 
 

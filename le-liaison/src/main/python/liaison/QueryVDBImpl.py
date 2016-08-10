@@ -20,13 +20,19 @@ class QueryVDBImpl(Query):
     def __init__(self, name, columns, filters = [], entities = [], resultSet = None):
 
         self.initFromValues(name, columns, filters, entities, resultSet)
-    
+
 
 ## This is the pythonic way to create multiple constructors.  The call is
 ## q = QueryVDBImpl.InitFromDefn( defn )
 
     @classmethod
     def initFromDefn(cls, name, defn):
+
+        lfes = None
+        s0 = re.search( '^SpecLatticeQueryWDynamicFilters\((SpecLatticeQuery\(LatticeAddressSet.*, SpecQueryNamedFunctions\(.*\), SpecQueryResultSet.*\)), LatticeFunctionExpressions\(\((.*)\)\)\)$', defn )
+        if s0:
+            defn = s0.group(1)
+            lfes = s0.group(2)
 
         s1 = re.search( '^SpecLatticeQuery\((LatticeAddressSet.*), SpecQueryNamedFunctions\((.*)\), (SpecQueryResultSet.*)\)$', defn )
         if not s1:
@@ -104,22 +110,29 @@ class QueryVDBImpl(Query):
         if not isMatchedTopLevel:
             raise MaudeStringError( las_spec )
 
-        
+
         filters = []
         entities = []
-        
+
         if lasm != 'empty':
 
             lasm = lasm[1:-1]
 
             while True:
-                
+
                 filterspec = ''
                 remainingspec = ''
                 isMatched = False
 
                 if not isMatched:
                     s31 = re.search( '^(LatticeAddressSetFcn\(LatticeFunction.*?LatticeAddressSet.*?\))(, LatticeAddressSet.*|$)', lasm )
+                    if s31:
+                        filterspec = s31.group(1)
+                        remainingspec = s31.group(2)
+                        isMatched = True
+
+                if not isMatched:
+                    s31 = re.search( '^(LatticeAddressSetFcn\(LatticeFunction.*?LatticeAddressExpressionAtomic.*?\))(, LatticeAddressSet.*|$)', lasm )
                     if s31:
                         filterspec = s31.group(1)
                         remainingspec = s31.group(2)
@@ -173,6 +186,50 @@ class QueryVDBImpl(Query):
                     # Strip off the ', ' at the beginning
                     lae = remainingspec[2:]
 
+        if lfes is not None:
+
+            laem = 'LatticeAddressExpressionAtomic(LatticeAddressAtomicAll)'
+
+            if len(entities) == 1:
+                laem = entities[0].definition()
+            elif len(entities) > 1:
+                sep = ''
+                laem = 'LatticeAddressExpressionMeet(('
+                for e in entities:
+                    laem += sep
+                    laem += e.definition()
+                    sep = ', '
+                laem +=       '))'
+
+            while True:
+
+                filterspec = ''
+                remainingspec = ''
+                isMatched = False
+
+                i = 0
+                parencount = 0
+                readingargs = False
+                while i < len(lfes):
+                    if lfes[i] == '(':
+                        parencount += 1
+                        readingargs = True
+                    elif lfes[i] == ')':
+                        parencount -= 1
+                    i += 1
+                    if readingargs and parencount == 0:
+                        readingargs = False
+                        break
+                if readingargs:
+                    raise MaudeStringError(lfes)
+                filterspec = lfes[:i]
+                filterspec = 'LatticeAddressSetFcn({0}, {1})'.format(filterspec, laem)
+                filters.append(QueryFilterVDBImpl(filterspec))
+                if i < len(lfes):
+                    lfes = lfes[i+2:]
+                else:
+                    break
+
         resultSet = s1.group(3)
 
         columns = []
@@ -181,7 +238,7 @@ class QueryVDBImpl(Query):
         ## Iterate on the comma-separated SpecLatticeSourceTableColumn specs
         while True:
             s2 = re.search( '^(SpecQueryNamedFunction.*?)( SpecQueryNamedFunction.*|$)', sqnf )
-                
+
             if not s2:
                 raise MaudeStringError( sqnf )
 
