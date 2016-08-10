@@ -127,12 +127,15 @@ angular.module('lp.enrichment.leadenrichment', [])
             $el = angular.element(el),
             watched_el = document.querySelector('.summary .nav'),
             $watched_el = angular.element(watched_el),
-            top = watched_el.getBoundingClientRect().top + $watched_el.height();
+            top = watched_el.getBoundingClientRect().top + $watched_el.height(),
+            enrichments_list = document.querySelector('.enrichments.list');
 
         if(top < 0) {
             $el.addClass('fixed');
+            $el.css({width:enrichments_list.offsetWidth});
         } else {
             $el.removeClass('fixed');
+            $el.css({width:'auto'});
         }
     }
 
@@ -140,7 +143,15 @@ angular.module('lp.enrichment.leadenrichment', [])
         var wait = wait || 0;
         $timeout(function(){
             var container = document.querySelector('.subheader-container'),
-            height = container.offsetHeight;
+                height = container.offsetHeight;
+                enrichments_list = document.querySelector('.enrichments.list'),
+                subheader = angular.element('.subheader-container');
+
+            if(subheader.hasClass('fixed')) {
+                subheader.css({width:enrichments_list.offsetWidth});
+            } else {
+                subheader.css({width:'auto'});
+            }
 
             if(height > 70) {
                 angular.element(container).addClass('wrapped');
@@ -160,7 +171,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         _resized();
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
-        vm.premiumSelectLimit = EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source'] || 10;
+        vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);
