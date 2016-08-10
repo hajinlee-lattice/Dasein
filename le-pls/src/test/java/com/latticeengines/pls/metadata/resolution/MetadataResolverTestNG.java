@@ -5,9 +5,12 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -141,6 +144,33 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         Table table = resolver.getMetadata();
         assertEquals(table.getAttribute(InterfaceName.Industry).getDisplayName(), "Some Column");
+    }
+
+    @Test(groups = "functional")
+    public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+
+        assertFalse(resolver.isMetadataFullyDefined());
+        List<String> ignoredFields = new ArrayList<>();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                ignoredFields.add(fieldMapping.getUserField());
+            }
+        }
+        fieldMappingDocument.setIgnoredFields(ignoredFields);
+        resolver.setFieldMappingDocument(fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocument();
+
+        assertTrue(resolver.isMetadataFullyDefined());
+        Table table = resolver.getMetadata();
+        for (Attribute attribute : table.getAttributes()) {
+            if (ignoredFields.contains(attribute.getDisplayName())) {
+                log.info("The ignored field is " + attribute.getDisplayName());
+                assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
+            }
+        }
     }
 
     @Test(groups = "functional")

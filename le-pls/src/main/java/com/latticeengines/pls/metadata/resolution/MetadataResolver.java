@@ -153,7 +153,7 @@ public class MetadataResolver {
                     Attribute attribute = Iterables.find(attributes, new Predicate<Attribute>() {
                         @Override
                         public boolean apply(@Nullable Attribute input) {
-                            return ignoredField.equals(input.getName());
+                            return ignoredField.equals(input.getDisplayName());
                         }
                     }, null);
                     if (attribute != null) {
