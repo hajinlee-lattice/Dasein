@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
@@ -56,6 +57,19 @@ public class MatchStepAspect {
             tracker.set(trackId);
         }
 
+        if (signature.contains("matchBulk")) {
+            BulkMatchOutput bulkMatchOutput = getBulkMatchOutput(allObjs);
+            if (bulkMatchOutput != null) {
+                int totalRows = 0;
+                for (MatchOutput output: bulkMatchOutput.getOutputList()) {
+                    if (output.getResult() != null) {
+                        totalRows += output.getResult().size();
+                    }
+                }
+                logMsg += " TotalRows=" + totalRows;
+            }
+        }
+
         upsertAndRetrieveThreshold((MethodSignature) joinPoint.getSignature());
         Long threshold = logThreshold.get(signature);
         if (threshold <= elapsedTime) {
@@ -95,6 +109,15 @@ public class MatchStepAspect {
                 if (input.getUuid() != null) {
                     return input.getUuid().toString().toUpperCase();
                 }
+            }
+        }
+        return null;
+    }
+
+    private BulkMatchOutput getBulkMatchOutput(Object[] args) {
+        for (Object arg : args) {
+            if (arg instanceof BulkMatchOutput) {
+                return (BulkMatchOutput) arg;
             }
         }
         return null;

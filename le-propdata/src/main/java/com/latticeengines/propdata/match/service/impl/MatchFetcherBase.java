@@ -154,7 +154,7 @@ public abstract class MatchFetcherBase {
         Long beforeQuerying = System.currentTimeMillis();
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
         log.info("Retrieved " + results.size() + " results from SQL Server. Duration="
-                + (System.currentTimeMillis() - beforeQuerying));
+                + (System.currentTimeMillis() - beforeQuerying) + " Rows=" + results.size());
         return results;
     }
 
