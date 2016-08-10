@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -198,7 +199,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         List<Extract> extracts = filterExtracts(sourceTable.getName(), sourceTable.getExtracts());
 
-        Map<String, Field> allColumns = new HashMap<>();
+        Map<String, Field> allColumns = new LinkedHashMap<>();
         Schema[] allSchemas = new Schema[extracts.size()];
         int i = 0;
         for (Extract extract : extracts) {
