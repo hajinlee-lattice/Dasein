@@ -13,6 +13,8 @@
         <context:exclude-filter type="assignable" expression="com.latticeengines.matchapi.swagger.SwaggerConfig" />
     </context:component-scan>
 
+    <import resource="classpath:datacloud-match-context.xml" />
+
     <mvc:annotation-driven />
     <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
     <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
