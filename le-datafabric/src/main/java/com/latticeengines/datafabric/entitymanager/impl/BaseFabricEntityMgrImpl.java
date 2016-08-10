@@ -36,6 +36,7 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.datafabric.service.message.FabricStreamProc;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
+import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -100,6 +101,12 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         // get the reflected schema for Entity
         schema = RedisUtil.getSchema(entityClass);
 
+        String dynamoProp = DynamoUtil.constructAttributes(entityClass);
+
+        if (dynamoProp != null) {
+            schema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
+        }
+
         dataStore = dataService.constructDataStore(store, repository, recordType, schema);
 
         if (topic != null) {
@@ -120,6 +127,18 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     @Override
+    public void batchCreate(List<T> entities) {
+        if (disabled) return;
+
+        Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+        for (T entity : entities) {
+            GenericRecord record = entityToRecord(entity);
+            records.put(entity.getId(), record);
+        }
+        dataStore.createRecords(records);
+    }
+
+    @Override
     public void update(T entity) {
         if (disabled) return;
         GenericRecord record = entityToRecord(entity);
@@ -133,12 +152,33 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         dataStore.deleteRecord(entity.getId(), record);
     }
 
+    @Override
     public T findByKey(T entity) {
         if (disabled) return null;
         GenericRecord record = dataStore.findRecord(entity.getId());
         return (record == null) ? null : recordToEntity(record);
     }
 
+    @Override
+    public T findByKey(String id) {
+        if (disabled) return null;
+        GenericRecord record = dataStore.findRecord(id);
+        return (record == null) ? null : recordToEntity(record);
+    }
+
+    @Override
+    public List<T> batchFindByKey(List<String> ids) {
+        if (disabled) return null;
+        Map<String, GenericRecord> records = dataStore.batchFindRecord(ids);
+        List<T> entities = new ArrayList<T>();
+        for (String id : ids) {
+            GenericRecord record = (id == null) ? null : records.get(id);
+            entities.add((record == null) ? null : recordToEntity(record));
+        }
+        return entities;
+    }
+
+    @Override
     public List<T> findByProperties(Map<String, String> properties) {
         if (disabled) return null;
         List<GenericRecord> records = dataStore.findRecords(properties);
@@ -161,6 +201,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
     }
 
+    @Override
     public void addConsumer(String consumerGroup, FabricEntityProcessor processor, int numThreads) {
         if (disabled) return;
 
@@ -177,6 +218,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         log.info("Add consumer " + consumerGroup + " " + consumer.toString());
     }
 
+    @Override
     public void removeConsumer(String consumerGroup, int timeWaits) {
         if (disabled) return;
         FabricMessageConsumer consumer =  (FabricMessageConsumer)consumers.get(consumerGroup);
@@ -189,6 +231,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         consumers.remove(consumerGroup);
     }
 
+    @Override
     public boolean isDisabled() {
         return disabled;
     }

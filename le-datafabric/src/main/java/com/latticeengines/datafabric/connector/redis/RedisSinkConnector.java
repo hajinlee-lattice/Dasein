@@ -18,8 +18,11 @@ import org.slf4j.LoggerFactory;
  */
 public class RedisSinkConnector extends Connector {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(RedisSinkConnector.class);
     private Map<String, String> configProperties;
+
+    @SuppressWarnings("unused")
     private RedisSinkConnectorConfig config;
 
     @Override

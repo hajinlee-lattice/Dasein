@@ -20,7 +20,7 @@ public class RedisUtil {
     public static final String INDEX = "REDISINDEX";
 
 
-    public static Schema getSchema(Class entityClass) {
+    public static Schema getSchema(Class<?> entityClass) {
         Schema schema = ReflectData.get().getSchema(entityClass);
         String redisIndex = constructIndex(entityClass);
         schema.addProp(INDEX, redisIndex);
@@ -38,7 +38,7 @@ public class RedisUtil {
         return indexes;
     }
 
-    public static String constructIndex(Class entityClass) {
+    public static String constructIndex(Class<?> entityClass) {
         HashMap<String, List<String>> indexes = new HashMap<String, List<String>>();
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(RedisIndex.class)) {

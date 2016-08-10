@@ -79,7 +79,6 @@ public class RedisDataStoreImpl implements FabricDataStore {
                  " index " + redisIndex);
     }
 
-    
     public void createRecord(String id, GenericRecord record) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
@@ -110,6 +109,25 @@ public class RedisDataStoreImpl implements FabricDataStore {
         return record;
     }
 
+    public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
+        Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+        Jedis jedis = jedisPool.getResource();
+        Pipeline pipeline = jedis.pipelined();
+        for (String id : idList) {
+            pipeline.get(buildKey(id));
+        }
+        List<Object> results = pipeline.syncAndReturnAll();
+        for (int i = 0; i < results.size(); i++) {
+            String id = idList.get(i);
+            GenericRecord record = jsonToAvro((String)results.get(i));
+            if (record != null) {
+                records.put(id, record);
+            }
+        }
+        return records;
+    }
+
+
     public List<GenericRecord> findRecords(Map<String, String> properties)  {
         Jedis jedis = jedisPool.getResource();
 
@@ -124,8 +142,9 @@ public class RedisDataStoreImpl implements FabricDataStore {
         List<GenericRecord> records = new ArrayList<GenericRecord>();
         for (Object obj : results) {
              GenericRecord record = jsonToAvro((String)obj);
-             if (record != null)
-                 records.add(jsonToAvro((String)obj));
+             if (record != null) {
+                 records.add(record);
+             }
         }
         jedisPool.returnResource(jedis);
 
@@ -163,43 +182,33 @@ public class RedisDataStoreImpl implements FabricDataStore {
     private List<Object> flushPipeline(Pipeline pipeline) {
 
         List<Object> results = pipeline.syncAndReturnAll();
-       return results;
+        return results;
     }
 
     private String avroToJson(GenericRecord record) {
-        GenericDatumReader<GenericRecord> reader = null;
-        JsonEncoder encoder = null;
-        ByteArrayOutputStream output = null;
-        try {
-            output = new ByteArrayOutputStream();
-            reader = new GenericDatumReader<GenericRecord>();
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
-            encoder = EncoderFactory.get().jsonEncoder(schema, output);
+            JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output);
             writer.write(record, encoder);
             encoder.flush();
             output.flush();
             return new String(output.toByteArray());
         } catch (Exception e) {
             return null;
-        } finally {
-            try { if (output != null) output.close(); } catch (Exception e) { }
         }
     }
 
     private GenericRecord jsonToAvro(String json) {
-        InputStream input = null;
-        GenericRecord datum = null;
         try {
             DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
-            input = new ByteArrayInputStream(json.getBytes());
-            DataInputStream din = new DataInputStream(input);
-            Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
-            datum = reader.read(null, decoder);
-            return datum;
+            try (InputStream input = new ByteArrayInputStream(json.getBytes())) {
+                DataInputStream din = new DataInputStream(input);
+                Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
+                GenericRecord datum = reader.read(null, decoder);
+                return datum;
+            }
         } catch (Exception e) {
             return null;
-        } finally {
-            try { input.close(); } catch (Exception e) { }
         }
     }
 
@@ -214,7 +223,6 @@ public class RedisDataStoreImpl implements FabricDataStore {
     private String buildIndex(GenericRecord record, List<String> index) {
         StringBuilder builder = new StringBuilder();
         builder.append(REPO + repository + RECORD + recordType + INDEX);
-        Map<String, String> properties = new HashMap<String, String>();
         for (String field : index) {
             String value = record.get(field).toString();
             builder.append(FIELD + field + VALUE + value);

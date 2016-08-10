@@ -101,6 +101,7 @@ public class RedisSinkConnectorConfig extends AbstractConfig {
 
     }
 
+    @SuppressWarnings("unused")
     private static boolean classNameEquals(String className, Class<?> clazz) {
         return className.equals(clazz.getSimpleName()) || className.equals(clazz.getCanonicalName());
     }

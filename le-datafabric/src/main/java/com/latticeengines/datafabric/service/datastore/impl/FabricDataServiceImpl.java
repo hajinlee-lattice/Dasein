@@ -1,94 +1,63 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.util.Pool;
-
 
 @Component("dataService")
 public class FabricDataServiceImpl implements FabricDataService {
 
     private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
 
-    @Value("${datafabric.dataService.redisServers}")
-    private String redisServers;
+    Map<String, FabricDataServiceProvider> serviceProviders;
 
-    @Value("${datafabric.dataService.redisPort}")
-    private int redisPort;
+    @Autowired
+    DynamoDataServiceProvider dynamoService;
+    @Autowired
+    RedisDataServiceProvider redisService;
 
-    @Value("${datafabric.dataService.redisActives:128}")
-    private int maxActives;
-
-    @Value("${datafabric.dataService.redisHaEnabled:false}")
-    private boolean redisHaEnabled;
-
-    @Value("${datafabric.dataService.redisMaster:mymaster}")
-    private String redisMaster;
-
-    private Pool<Jedis> jedisPool;
-
-    private boolean initialized;
 
     public FabricDataServiceImpl() {
-    }
-
-
-    public FabricDataServiceImpl(String master, String redisServers, int redisPort, int maxActives, boolean haEnabled) {
-        this.redisMaster = master;
-        this.redisServers = redisServers;
-        this.redisPort = redisPort;
-        this.maxActives = maxActives;
-        this.redisHaEnabled = haEnabled;
-        this.jedisPool = null;
-    }
-
-    synchronized public void init() {
-        if (initialized) return;
-
-        log.info("Initialize data service with server " + redisServers + " port " + redisPort);
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(maxActives);
-
-        if (redisHaEnabled) {
-            Set<String> sentinelSet = new HashSet<String>();
-            String sentinels[] = redisServers.split(",");
-            for (String sentinel : sentinels) {
-                String hap = sentinel + ":" + redisPort;
-                sentinelSet.add(hap);
-                log.info("Add " + hap + " to sentinelSet");
-            }
-            jedisPool = new JedisSentinelPool(redisMaster, sentinelSet, poolConfig);
-        } else {
-            jedisPool = new JedisPool(poolConfig, redisServers, redisPort);
-        }
- 
-        initialized = true;
+         log.info("Initing fabric data service");
     }
 
     public FabricDataStore constructDataStore(String store, String repository, String recordType, Schema schema) {
 
-        log.info("Initialize data store " + store + " repo " + repository);
-        if (!initialized) init();
+        FabricDataStore dataStore = null;
 
-        if (!store.equals("REDIS")) {
-            return null;
+        if (serviceProviders == null) initServiceProviders();
+        FabricDataServiceProvider dsp  = serviceProviders.get(store);;
+        if (dsp != null) {
+            log.info("Initialize data store " + store + " repo " + repository);
+            dataStore = dsp.constructDataStore(repository, recordType, schema);
         }
 
-        RedisDataStoreImpl dataStore = new RedisDataStoreImpl(jedisPool, repository, recordType, schema);
         return dataStore;
+    }
+
+    synchronized public void addServiceProvider(FabricDataServiceProvider dsp) {
+        if (serviceProviders == null) initServiceProviders();
+        serviceProviders.put(dsp.getName(), dsp);
+    }
+
+    synchronized private void initServiceProviders() {
+        serviceProviders = new HashMap<String, FabricDataServiceProvider>();
+
+        // Add preconfigured data services
+        if (redisService != null) {
+            serviceProviders.put(redisService.getName(), redisService);
+        }
+        if (dynamoService != null) {
+            serviceProviders.put(dynamoService.getName(), dynamoService);
+        }
     }
 }

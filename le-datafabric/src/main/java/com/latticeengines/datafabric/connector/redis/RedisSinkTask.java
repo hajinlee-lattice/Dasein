@@ -3,7 +3,6 @@ package com.latticeengines.datafabric.connector.redis;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImpl;
+import com.latticeengines.datafabric.service.datastore.impl.RedisDataServiceProvider;
 
 import io.confluent.connect.avro.AvroData;
 
@@ -31,8 +31,6 @@ public class RedisSinkTask extends SinkTask {
     private String repository;
     private String recordType;
 
-    private String redisIndex = null;
-
     public RedisSinkTask() {
 
     }
@@ -44,7 +42,7 @@ public class RedisSinkTask extends SinkTask {
 
     @Override
     public void start(Map<String, String> props) {
-        Set<TopicPartition> assignment = context.assignment();;
+
         try {
             RedisSinkConnectorConfig connectorConfig = new RedisSinkConnectorConfig(props);
             int schemaCacheSize = connectorConfig.getInt(RedisSinkConnectorConfig.SCHEMA_CACHE_SIZE_CONFIG);
@@ -56,8 +54,9 @@ public class RedisSinkTask extends SinkTask {
             repository = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_REPO_CONFIG);
             recordType = connectorConfig.getString(RedisSinkConnectorConfig.REDIS_RECORD_CONFIG);
 
-            dataService = new FabricDataServiceImpl(master, servers, port, 4, haEnabled);
-            dataService.init();
+            dataService = new FabricDataServiceImpl();
+            RedisDataServiceProvider redis = new RedisDataServiceProvider(master, servers, port, 4, haEnabled);
+            dataService.addServiceProvider(redis);
             dataStore = null;
 
             // No recovery implemented assuming sinking to Redis is idempotent.

@@ -21,6 +21,7 @@ public class KafkaSinkConnector extends Connector {
 
     private static final Log log = LogFactory.getLog(KafkaSinkConnector.class);
     private Map<String, String> configProperties;
+    @SuppressWarnings("unused")
     private KafkaSinkConfig config;
 
     @Override

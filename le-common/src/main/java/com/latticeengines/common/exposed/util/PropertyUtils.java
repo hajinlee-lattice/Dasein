@@ -57,6 +57,7 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
         for (Object key : props.keySet()) {
             String value = (String) props.get(key);
             while (true) {
+                System.out.println("ProcessKey " + (String)key + " ProcessValue" + value);
                 Matcher matcher = pattern.matcher(value);
                 if (!matcher.find()) {
                     break;

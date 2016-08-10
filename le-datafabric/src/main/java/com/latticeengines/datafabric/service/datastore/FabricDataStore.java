@@ -14,6 +14,8 @@ public interface FabricDataStore {
 
     GenericRecord findRecord(String id);
 
+    Map<String, GenericRecord> batchFindRecord(List<String> idList);
+
     List<GenericRecord> findRecords(Map<String, String> properties);
 
     void deleteRecord(String id, GenericRecord record);
