@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -14,8 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -25,6 +29,7 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
@@ -176,6 +181,51 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         final String url = apiHostPort + "/score/records";
         if (shouldRunScoringTest()) {
             runScoringTest(url);
+        }
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void testScoreCorrectness() throws IOException {
+        String url = apiHostPort + "/score/record/debug";
+        List<ScoreRequest> scoreRequests = getScoreRequestsForScoreCorrectness();
+        List<Integer> expectedScores = getExpectedScoresForScoreCorrectness();
+        List<DebugScoreResponse> signleRecordScoreResponseList = new ArrayList<>();
+
+        for (ScoreRequest scoreRequest : scoreRequests) {
+            ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
+                    DebugScoreResponse.class);
+            signleRecordScoreResponseList.add(response.getBody());
+        }
+
+        url = apiHostPort + "/score/records/debug";
+        BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequestForScoreCorrectness();
+
+        List<?> resultObjList = null;
+        ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
+        resultObjList = response.getBody();
+
+        int idx = 0;
+        ObjectMapper om = new ObjectMapper();
+        for (Object res : resultObjList) {
+            System.out.println("Expected score = " + expectedScores.get(idx).intValue());
+            DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
+            Assert.assertEquals(result.getScores().get(0).getScore().intValue(), expectedScores.get(idx).intValue());
+            Assert.assertEquals(new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue(),
+                    expectedScores.get(idx).intValue());
+            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
+                    result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
+            idx++;
+        }
+    }
+
+    private void matchTransformedRecord(Map<String, Object> singleRecordScoreTransformedRecord,
+            Map<String, Object> batchScoreTransformedRecord) {
+        Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
+        Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
+
+        for (String key : singleRecordScoreTransformedRecord.keySet()) {
+            Assert.assertTrue(batchScoreTransformedRecord.containsKey(key));
+            Assert.assertEquals(singleRecordScoreTransformedRecord.get(key), batchScoreTransformedRecord.get(key));
         }
     }
 

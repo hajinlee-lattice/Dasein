@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -300,6 +301,35 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return scoreRequest;
     }
 
+    protected BulkRecordScoreRequest getBulkScoreRequestForScoreCorrectness() throws IOException {
+        BulkRecordScoreRequest scoreRequest = JsonUtils.deserialize(bulkRecordInputForErrorCorrectnessTest,
+                BulkRecordScoreRequest.class);
+        return scoreRequest;
+    }
+
+    protected List<ScoreRequest> getScoreRequestsForScoreCorrectness() throws IOException {
+        List<ScoreRequest> scoreRequests = new ArrayList<>();
+        ScoreRequest scoreRequest = JsonUtils.deserialize(singleRecordInput1ForErrorCorrectnessTest,
+                ScoreRequest.class);
+        scoreRequests.add(scoreRequest);
+        scoreRequest = JsonUtils.deserialize(singleRecordInput2ForErrorCorrectnessTest, ScoreRequest.class);
+        scoreRequests.add(scoreRequest);
+        scoreRequest = JsonUtils.deserialize(singleRecordInput3ForErrorCorrectnessTest, ScoreRequest.class);
+        scoreRequests.add(scoreRequest);
+        scoreRequest = JsonUtils.deserialize(singleRecordInput4ForErrorCorrectnessTest, ScoreRequest.class);
+        scoreRequests.add(scoreRequest);
+        return scoreRequests;
+    }
+
+    protected List<Integer> getExpectedScoresForScoreCorrectness() {
+        List<Integer> expectedScores = new ArrayList<>();
+        expectedScores.add(99);
+        expectedScores.add(48);
+        expectedScores.add(89);
+        expectedScores.add(88);
+        return expectedScores;
+    }
+
     protected void checkModelDetails(List<ModelDetail> models, String modelNamePrefix, String fieldDisplayNamePrefix)
             throws ParseException {
         Assert.assertNotNull(models);
@@ -343,6 +373,72 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     public TestModelSummaryParser getTestModelSummaryParser() {
         return testModelSummaryParser;
     }
+
+    private static String singleRecordInput1ForErrorCorrectnessTest = //
+            "    {\"modelId\":\"ms__TestInternal3MulesoftAllRows220160314_112802_\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\","
+                    + //
+                    "    \"record\":{" + //
+                    "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"2.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"12.0\",\"Activity_Count_Interesting_Moment_Any\":\"8.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Dowbor\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Alexandre\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Whitepaper - Financial Services Digital Transformation\",\"kickboxDisposable\":null,\"PhoneNumber\":\"6472036970\",\"Source_Detail__c\":null,\"CompanyName\":\"Bank of Montreal\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"Canada\",\"Activity_Count_Interesting_Moment_Email\":\"2.0\",\"Activity_Count_Visit_Webpage\":\"18.0\",\"Title\":\"Sr Business Technology Specialist\",\"City\":\"Toronto\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"3.0\",\"InternalId\":\"9053\",\"State\":\"ON\",\"Email\":\"alexdowbor@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1453754541000\",\"Id\":\"14091144\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"4.0\",\"Industry\":\"Financial Services\""
+                    + //
+                    "    }" + //
+                    "    }";
+
+    private static String singleRecordInput2ForErrorCorrectnessTest = //
+            "    {\"modelId\":\"ms__TestInternal3MulesoftAllRows220160314_112802_\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\","
+                    + //
+                    "    \"record\":{" + //
+                    "    \"HasCEDownload\":\"true\",\"Activity_Count_Click_Email\":\"0\",\"HasAnypointLogin\":\"true\",\"Activity_Count_Click_Link\":\"5\",\"Activity_Count_Interesting_Moment_Any\":\"0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Jobs\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Steve\",\"Unsubscribed\":null,\"kickboxStatus\":\"invalid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"1000.0\",\"Interest_tcat__c\":null,\"Event\":\"true\",\"Lead_Source_Asset__c\":\"\",\"kickboxDisposable\":null,\"PhoneNumber\":\"999 999 9999\",\"Source_Detail__c\":null,\"CompanyName\":\"solyndra\",\"Free_Email_Address__c\":\"false\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"China\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Vegas\",\"HasEEDownload\":\"true\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"steve@solyndra.com\",\"kickboxFree\":\"false\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"1111\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":\"\"}"
+                    + //
+                    "    }";
+
+    private static String singleRecordInput3ForErrorCorrectnessTest = //
+            "    {\"modelId\":\"ms__TestInternal3MulesoftAllRows220160314_112802_\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\","
+                    + //
+                    "    \"record\":{" + //
+                    "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"0.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"0.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":\"true\",\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Schoger\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"John\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Inbound Phone/Email/Chat\",\"kickboxDisposable\":null,\"PhoneNumber\":\"(212) 906-0130\",\"Source_Detail__c\":null,\"CompanyName\":\"Strategas\",\"Free_Email_Address__c\":null,\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"0.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":\"Managing Director, Head of Corporate Services\",\"City\":\"New York\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":null,\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"987\",\"State\":\"NY\",\"Email\":\"jschoger@strategasrp.com\",\"kickboxFree\":null,\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1437511481000\",\"Id\":\"1713466\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null"
+                    + //
+                    "    }" + //
+                    "    }";
+
+    private static String singleRecordInput4ForErrorCorrectnessTest = //
+            "    {\"modelId\":\"ms__TestInternal3MulesoftAllRows220160314_112802_\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\","
+                    + //
+                    "    \"record\":{" + //
+                    "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"1.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"1.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Cox\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Landon\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"eBook - Becoming a Customer Company\",\"kickboxDisposable\":null,\"PhoneNumber\":\"817 375 8606\",\"Source_Detail__c\":null,\"CompanyName\":\"VIP Villas\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Dallas\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"jhcox11@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"5878228\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
+                    + //
+                    "    }";
+
+    private static String bulkRecordInputForErrorCorrectnessTest = //
+            "    {\"source\":\"Dummy Source\",\"records\":[" + //
+                    "    {\"recordId\":\"2\",\"idType\":\"LATTICE\"," + //
+                    "    \"modelAttributeValuesMap\":" + //
+                    "    {\"ms__TestInternal3MulesoftAllRows220160314_112802_\":{" + //
+                    "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"2.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"12.0\",\"Activity_Count_Interesting_Moment_Any\":\"8.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Dowbor\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Alexandre\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Whitepaper - Financial Services Digital Transformation\",\"kickboxDisposable\":null,\"PhoneNumber\":\"6472036970\",\"Source_Detail__c\":null,\"CompanyName\":\"Bank of Montreal\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"Canada\",\"Activity_Count_Interesting_Moment_Email\":\"2.0\",\"Activity_Count_Visit_Webpage\":\"18.0\",\"Title\":\"Sr Business Technology Specialist\",\"City\":\"Toronto\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"3.0\",\"InternalId\":\"9053\",\"State\":\"ON\",\"Email\":\"alexdowbor@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1453754541000\",\"Id\":\"14091144\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"4.0\",\"Industry\":\"Financial Services\"}"
+                    + //
+                    "    }" + //
+                    "    }," + //
+                    "    {\"recordId\":\"4\",\"idType\":\"LATTICE\"," + //
+                    "    \"modelAttributeValuesMap\":" + //
+                    "    {\"ms__TestInternal3MulesoftAllRows220160314_112802_\":{\"HasCEDownload\":\"true\",\"Activity_Count_Click_Email\":\"0\",\"HasAnypointLogin\":\"true\",\"Activity_Count_Click_Link\":\"5\",\"Activity_Count_Interesting_Moment_Any\":\"0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Jobs\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Steve\",\"Unsubscribed\":null,\"kickboxStatus\":\"invalid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"1000.0\",\"Interest_tcat__c\":null,\"Event\":\"true\",\"Lead_Source_Asset__c\":\"\",\"kickboxDisposable\":null,\"PhoneNumber\":\"999 999 9999\",\"Source_Detail__c\":null,\"CompanyName\":\"solyndra\",\"Free_Email_Address__c\":\"false\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"China\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Vegas\",\"HasEEDownload\":\"true\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"steve@solyndra.com\",\"kickboxFree\":\"false\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"1111\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":\"\"}"
+                    + //
+                    "    }" + //
+                    "    }," + //
+                    "    {\"recordId\":\"3\",\"idType\":\"LATTICE\"," + //
+                    "    \"modelAttributeValuesMap\":" + //
+                    "    {\"ms__TestInternal3MulesoftAllRows220160314_112802_\":{" + //
+                    "    " + //
+                    "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"0.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"0.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":\"true\",\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Schoger\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"John\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Inbound Phone/Email/Chat\",\"kickboxDisposable\":null,\"PhoneNumber\":\"(212) 906-0130\",\"Source_Detail__c\":null,\"CompanyName\":\"Strategas\",\"Free_Email_Address__c\":null,\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"0.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":\"Managing Director, Head of Corporate Services\",\"City\":\"New York\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":null,\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"987\",\"State\":\"NY\",\"Email\":\"jschoger@strategasrp.com\",\"kickboxFree\":null,\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1437511481000\",\"Id\":\"1713466\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
+                    + //
+                    "    }" + //
+                    "    }," + //
+                    "    {\"recordId\":\"36c5c666-1eb4-4221-b5d3-93b23be72a6e\",\"idType\":\"LATTICE\"," + //
+                    "    \"modelAttributeValuesMap\":" + //
+                    "    {\"ms__TestInternal3MulesoftAllRows220160314_112802_\":{\"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"1.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"1.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Cox\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Landon\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"eBook - Becoming a Customer Company\",\"kickboxDisposable\":null,\"PhoneNumber\":\"817 375 8606\",\"Source_Detail__c\":null,\"CompanyName\":\"VIP Villas\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Dallas\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"jhcox11@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"5878228\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
+                    + //
+                    "    }" + //
+                    "    }" + //
+                    "    ]" + //
+                    "    }";
 
     private static String pmmlImputJson = //
             "{" + //
