@@ -79,19 +79,6 @@
       "NamedParameterListToInit": {},
       "ColumnTransformFilePath": "exportdfstep.py"
     },
-    "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": "7",
-        "Name": "assignconversionratetoallcategoricalvalues",
-        "MainClassName": "AssignConversionRateToAllCategoricalValues",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Categorical"],
-        "NamedParameterListToInit": {
-        	"enabled": "false",
-        	"columnsToTransform": "categoricalColumns",
-        	"targetColumn": "targetColumn"
-        },
-        "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
-    },
     "CustomProxyStep": {
       "KeyWhenSortingByAscending": "8",
       "Name": "customproxystep",
