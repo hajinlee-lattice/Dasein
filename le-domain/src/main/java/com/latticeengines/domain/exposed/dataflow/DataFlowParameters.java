@@ -7,7 +7,10 @@ import java.util.Set;
 
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -34,6 +37,9 @@ import com.latticeengines.domain.exposed.propdata.match.ParseMatchResultParamete
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
 })
 public class DataFlowParameters {
+
+    private static final Log log = LogFactory.getLog(DataFlowParameters.class);
+
     @Transient
     @JsonIgnore
     public final Set<String> getSourceTableNames() {
@@ -42,11 +48,14 @@ public class DataFlowParameters {
         Set<String> sources = new HashSet<>();
         for (Field field : fields) {
             try {
+                field.setAccessible(true);
                 Object value = field.get(this);
                 if (value != null) {
                     sources.add(value.toString());
                 }
             } catch (IllegalAccessException e) {
+                log.warn("Not able to add source for field " + field.getName());
+                log.warn(ExceptionUtils.getStackTrace(e));
                 // pass
             }
         }

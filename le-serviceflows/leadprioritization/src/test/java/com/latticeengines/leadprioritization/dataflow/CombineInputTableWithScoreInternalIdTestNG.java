@@ -21,7 +21,6 @@ public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsData
     private CombineInputTableWithScoreParameters getStandardParameters() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
                 "InputTable");
-        params.enableDebugging();
         return params;
     }
 
@@ -37,9 +36,7 @@ public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsData
 
     @Test(groups = "functional")
     public void execute() throws IOException {
-        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
-                "InputTable");
-        params.enableDebugging();
+        CombineInputTableWithScoreParameters params = getStandardParameters();
         executeDataFlow(params);
 
         List<GenericRecord> outputRecords = readOutput();

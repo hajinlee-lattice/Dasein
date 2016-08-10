@@ -21,7 +21,6 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
     private CombineInputTableWithScoreParameters getStandardParameters() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
                 "InputTable");
-        params.enableDebugging();
         return params;
     }
 
