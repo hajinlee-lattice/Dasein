@@ -261,7 +261,8 @@ public class MatcherImpl implements Matcher {
                     String modelId = partiallyOrderedParsedTupleList.get(idx).getModelId();
                     Map<String, FieldSchema> fieldSchemas = uniqueFieldSchemasMap.get(modelId);
 
-                    Map<String, Object> matchedRecordResult = new HashMap<>();
+                    Map<String, Object> matchedRecordResult = new HashMap<>(
+							partiallyOrderedParsedTupleList.get(idx).getParsedData().getKey());
                     getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput.getInputList().get(idx),
                             output);
 
