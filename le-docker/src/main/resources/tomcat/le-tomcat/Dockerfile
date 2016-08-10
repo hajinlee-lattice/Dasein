@@ -23,8 +23,8 @@ COPY cacerts /etc/pki/java/cacerts
 COPY server.key /etc/pki/java/server.key
 COPY server.crt /etc/pki/java/server.crt
 COPY log4j.properties /log4j.properties
-COPY conf/env/qacluster/latticeengines.properties /etc/ledp/qacluster/latticeengines.properties
-COPY conf/env/prodcluster/latticeengines.properties /etc/ledp/prodcluster/latticeengines.properties
+COPY conf/env/qacluster_aws/latticeengines.properties /etc/ledp/qacluster/latticeengines.properties
+COPY conf/env/prodcluster_aws/latticeengines.properties /etc/ledp/prodcluster/latticeengines.properties
 COPY start.sh /start.sh
 
 EXPOSE 8443 1099

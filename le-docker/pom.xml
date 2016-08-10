@@ -42,10 +42,10 @@
                                       tofile="${project.basedir}/${matchapi.docker.context}/webapps/ROOT.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster_aws/latticeengines.properties"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
                                       overwrite="true" />
                             </tasks>
                         </configuration>
