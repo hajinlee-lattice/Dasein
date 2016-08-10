@@ -63,6 +63,9 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         List<GenericRecord> output = readOutput();
         String lastEmail = null;
+        if (output.size() == 0) {
+            throw new RuntimeException("Record is empty");
+        }
         for (GenericRecord record : output) {
             String email = record.get("Email").toString();
             if (lastEmail != null) {
@@ -70,6 +73,12 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             }
             lastEmail = email;
         }
+
+        Schema schema = output.get(0).getSchema();
+        Assert.assertTrue(schema.getFields().get(0).name().equals("Id"));
+        Assert.assertTrue(schema.getFields().get(1).name().equals("LastName"));
+        Assert.assertTrue(schema.getFields().get(2).name().equals("FirstName"));
+        Assert.assertTrue(schema.getFields().get(schema.getFields().size() - 1).name().equals("LastModifiedDate"));
     }
 
     @Test(groups = "functional", enabled = true)
@@ -235,7 +244,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             }));
         }
 
-        for (Future<String> future: exceptions) {
+        for (Future<String> future : exceptions) {
             String exception = future.get();
             Assert.assertTrue(StringUtils.isEmpty(exception), "Error: " + exception);
         }
@@ -408,8 +417,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features, columnMappings,
-                        Integer.class, PivotType.SUM, 0);
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features,
+                        columnMappings, Integer.class, PivotType.SUM, 0);
                 return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
@@ -596,8 +605,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
-                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
+                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]},"
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
@@ -626,8 +635,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadDepivotAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
-                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
+                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Topic1\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Score1\",\"type\":[\"double\",\"null\"]},"
                 + "{\"name\":\"Topic2\",\"type\":[\"string\",\"null\"]},"
