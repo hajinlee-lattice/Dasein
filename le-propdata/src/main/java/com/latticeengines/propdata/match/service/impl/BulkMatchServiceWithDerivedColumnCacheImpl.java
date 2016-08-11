@@ -20,10 +20,12 @@ import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-@Component("bulkMatchService")
-public class BulkMatchServiceImpl implements BulkMatchService {
+@Component("bulkMatchServiceWithDerivedColumnCache")
+public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchService {
 
-    private static Log log = LogFactory.getLog(BulkMatchServiceImpl.class);
+    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
+
+    private static Log log = LogFactory.getLog(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
     @Autowired
     private MatchCommandService matchCommandService;
@@ -51,6 +53,16 @@ public class BulkMatchServiceImpl implements BulkMatchService {
 
     @Value("${propdata.match.average.block.size:2500}")
     private Integer averageBlockSize;
+
+    @Override
+    public boolean accept(String version) {
+        if (StringUtils.isEmpty(version)
+                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING)) {
+            return true;
+        }
+
+        return false;
+    }
 
     @Override
     public MatchCommand match(MatchInput input, String hdfsPodId) {

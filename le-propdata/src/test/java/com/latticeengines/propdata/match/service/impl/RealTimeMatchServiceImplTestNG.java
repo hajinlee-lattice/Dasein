@@ -1,10 +1,14 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
@@ -16,7 +20,7 @@ import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
-    private RealTimeMatchService matchService;
+    private List<RealTimeMatchService> realTimeMatchServiceList;
 
     @Autowired
     private TestMatchInputService testMatchInputService;
@@ -26,7 +30,7 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        MatchOutput output = matchService.match(input);
+        MatchOutput output = getMatchService(input).match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -39,7 +43,7 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         input.setPredefinedSelection(null);
         input.setCustomSelection(testMatchInputService.enrichmentSelection());
-        MatchOutput output = matchService.match(input);
+        MatchOutput output = getMatchService(input).match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -47,10 +51,9 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
 
     @Test(groups = "functional")
     public void testIsPublicDomain() {
-        Object[][] data = new Object[][] {
-                { 123, "my@gmail.com", null, null, null, null } };
+        Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        MatchOutput output = matchService.match(input);
+        MatchOutput output = getMatchService(input).match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
 
@@ -60,12 +63,20 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
 
     @Test(groups = "functional")
     public void testExcludePublicDomain() {
-        Object[][] data = new Object[][] {
-                { 123, "my@gmail.com", null, null, null, null } };
+        Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         input.setExcludePublicDomains(true);
-        MatchOutput output = matchService.match(input);
+        MatchOutput output = getMatchService(input).match(input);
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), 0);
+    }
+
+    private RealTimeMatchService getMatchService(MatchInput input) {
+        for (RealTimeMatchService handler : realTimeMatchServiceList) {
+            if (handler.accept(input.getDataCloudVersion())) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { input.getDataCloudVersion() });
     }
 }

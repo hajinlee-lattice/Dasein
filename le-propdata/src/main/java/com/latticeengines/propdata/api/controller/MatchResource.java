@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +36,10 @@ public class MatchResource implements MatchInterface {
     private static final Log log = LogFactory.getLog(MatchResource.class);
 
     @Autowired
-    private RealTimeMatchService realTimeMatchService;
+    private List<RealTimeMatchService> realTimeMatchServiceList;
 
     @Autowired
-    private BulkMatchService bulkMatchService;
+    private List<BulkMatchService> bulkMatchServiceList;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -51,9 +54,11 @@ public class MatchResource implements MatchInterface {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
+            String matchVersion = input.getDataCloudVersion();
+            RealTimeMatchService realTimeMatchService = getRealTimeMatchService(matchVersion);
             return realTimeMatchService.match(input);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(),  e);
+            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
     }
 
@@ -68,6 +73,11 @@ public class MatchResource implements MatchInterface {
     public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();
         try {
+            String matchVersion = null;
+            if (!CollectionUtils.isEmpty(input.getInputList())) {
+                matchVersion = input.getInputList().get(0).getDataCloudVersion();
+            }
+            RealTimeMatchService realTimeMatchService = getRealTimeMatchService(matchVersion);
             return realTimeMatchService.matchBulk(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
@@ -87,9 +97,11 @@ public class MatchResource implements MatchInterface {
     public MatchCommand matchBulk(@RequestBody MatchInput input,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
+            String matchVersion = input.getDataCloudVersion();
+            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(),  e);
+            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
     }
 
@@ -98,10 +110,30 @@ public class MatchResource implements MatchInterface {
     @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
     public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {
         try {
+            String matchVersion = null;
+            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.status(rootuid.toUpperCase());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
+    }
+
+    private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
+        for (RealTimeMatchService handler : realTimeMatchServiceList) {
+            if (handler.accept(matchVersion)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
+    }
+
+    private BulkMatchService getBulkMatchService(String matchVersion) {
+        for (BulkMatchService handler : bulkMatchServiceList) {
+            if (handler.accept(matchVersion)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
     }
 
 }

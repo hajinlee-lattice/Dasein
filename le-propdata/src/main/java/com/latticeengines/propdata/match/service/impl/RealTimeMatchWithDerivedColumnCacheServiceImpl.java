@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,10 @@ import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
 
-@Component("realTimeMatchService")
-public class RealTimeMatchServiceImpl implements RealTimeMatchService {
+@Component("realTimeMatchWithDerivedColumnCacheService")
+public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeMatchService {
+
+    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 
     @Autowired
     @Qualifier("realTimeMatchPlanner")
@@ -27,6 +30,16 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     @Autowired
     @Qualifier("realTimeMatchExecutor")
     private MatchExecutor matchExecutor;
+
+    @Override
+    public boolean accept(String version) {
+        if (StringUtils.isEmpty(version)
+                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING)) {
+            return true;
+        }
+
+        return false;
+    }
 
     @Override
     @MatchStep(threshold = 0L)
