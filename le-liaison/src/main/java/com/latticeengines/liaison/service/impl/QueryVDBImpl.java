@@ -23,6 +23,8 @@ public class QueryVDBImpl extends Query {
 
     private static final Pattern pattern_slq = Pattern
             .compile("^SpecLatticeQuery\\((LatticeAddressSet.*), SpecQueryNamedFunctions\\((.*)\\), (SpecQueryResultSet.*)\\)$");
+    private static final Pattern pattern_slqw = Pattern
+            .compile("^SpecLatticeQueryWDynamicFilters\\((SpecLatticeQuery\\(LatticeAddressSet.*, SpecQueryNamedFunctions\\(.*\\), SpecQueryResultSet.*\\)), LatticeFunctionExpressions\\(\\((.*)\\)\\)\\)$");
 
     private static final Pattern pattern_las_meet = Pattern
             .compile("^LatticeAddressSetPushforward\\(LatticeAddressExpressionFromLAS\\(LatticeAddressSetMeet\\((.*?)\\)\\), LatticeAddressSetMeet\\((.*?)\\), LatticeAddressExpressionMeet\\((.*)\\)\\)$");
@@ -45,6 +47,8 @@ public class QueryVDBImpl extends Query {
 
     private static final Pattern pattern_filter_fcn = Pattern
             .compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressSet.*?\\))(, LatticeAddressSet.*|$)");
+    private static final Pattern pattern_filter_fcn_atomic = Pattern
+            .compile("^(LatticeAddressSetFcn\\(LatticeFunction.*?LatticeAddressExpressionAtomic.*?\\))(, LatticeAddressSet.*|$)");
     private static final Pattern pattern_filter_las = Pattern
             .compile("^(LatticeAddressSet(.*?)\\((.*?)\\))(, LatticeAddressSet.*|$)");
 
@@ -79,9 +83,16 @@ public class QueryVDBImpl extends Query {
 
         String las_spec;
         String sqnf;
+        String lfes = "NOT SET";
         String lasm = "NOT SET";
         String lae = "NOT SET";
         boolean isMatchedTopLevel = Boolean.FALSE;
+
+        Matcher m_slqw = pattern_slqw.matcher(defn);
+        if (m_slqw.matches()) {
+            defn = m_slqw.group(1);
+            lfes = m_slqw.group(2);
+        }
 
         Matcher m_slq = pattern_slq.matcher(defn);
         if (!m_slq.matches()) {
@@ -208,6 +219,15 @@ public class QueryVDBImpl extends Query {
                 }
 
                 if (!isMatched) {
+                    Matcher m_filter_fcn_atomic = pattern_filter_fcn_atomic.matcher(lasm);
+                    if (m_filter_fcn_atomic.matches()) {
+                        filterspec = m_filter_fcn_atomic.group(1);
+                        remainingspec = m_filter_fcn_atomic.group(2);
+                        isMatched = Boolean.TRUE;
+                    }
+                }
+
+                if (!isMatched) {
                     Matcher m_filter_las = pattern_filter_las.matcher(lasm);
                     if (m_filter_las.matches()) {
                         if (lasNotImpl.contains(m_filter_las.group(2))) {
@@ -271,6 +291,58 @@ public class QueryVDBImpl extends Query {
                     break;
                 } else {
                     lae = remainingspec.substring(2);
+                }
+            }
+        }
+
+        if (!lfes.equals("NOT SET")) {
+            String laem = "LatticeAddressExpressionAtomic(LatticeAddressAtomicAll)";
+            if (entityDefns.size() == 1) {
+                laem = entityDefns.get(0);
+            } else if (entityDefns.size() > 1) {
+                StringBuilder laembuilder = new StringBuilder(10000);
+                String sep = "";
+                laembuilder.append("LatticeAddressExpressionMeet((");
+                for (String e : entityDefns) {
+                    laembuilder.append(sep);
+                    laembuilder.append(e);
+                    sep = ", ";
+                }
+                laembuilder.append("))");
+                laem = laembuilder.toString();
+            }
+            while (Boolean.TRUE) {
+                String filterspec = "";
+                String remainingspec = "";
+                boolean isMatched = Boolean.FALSE;
+                int i = 0;
+                int parencount = 0;
+                boolean readingargs = Boolean.FALSE;
+                while (i < lfes.length()) {
+                    if (lfes.charAt(i) == '(') {
+                        parencount += 1;
+                        readingargs = Boolean.TRUE;
+                    } else if (lfes.charAt(i) == ')') {
+                        parencount -= 1;
+                    }
+                    i += 1;
+                    if (readingargs && parencount == 0) {
+                        readingargs = Boolean.FALSE;
+                        break;
+                    }
+                }
+                if (readingargs) {
+                    throw new DefinitionException(String.format(
+                        "Maude definition (LatticeFunctionExpressions) cannot be interpretted: %s",
+                        lfes));
+                }
+                filterspec = lfes.substring(0,i);
+                filterspec = String.format("LatticeAddressSetFcn(%s, %s)", filterspec, laem);
+                filterDefns.add(filterspec);
+                if (i < lfes.length()) {
+                    lfes = lfes.substring(i+2);
+                } else {
+                    break;
                 }
             }
         }
