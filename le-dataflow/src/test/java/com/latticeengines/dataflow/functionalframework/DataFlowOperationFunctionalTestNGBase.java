@@ -125,7 +125,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
-        ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        ctx.setProperty(DataFlowProperty.ENGINE, "MR");
         dataTransformationService.executeNamedTransformation(ctx, builder);
     }
 
