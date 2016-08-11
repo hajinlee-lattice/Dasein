@@ -118,7 +118,7 @@ def parse_profile(profile, profile_vars):
                     value = line[len(key) + 1:]
                     if key in profile_vars:
                         print "set %s to %s" % (key, value)
-                        params.append(PROFILE_VARS[key].config(value))
+                        params.append(profile_vars[key].config(value))
 
     return params
 
