@@ -4,7 +4,8 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.services.SessionService',
-    'mainApp.appCommon.services.ModelSummaryValidationService'
+    'mainApp.appCommon.services.ModelSummaryValidationService',
+    'mainApp.core.modules.ServiceErrorModule'
 ])
 .service('ModelStore', function($q, ModelService, $timeout) {
     var ModelStore = this;
@@ -42,6 +43,11 @@ angular.module('mainApp.models.services.ModelService', [
         } else if (this.stale) {
             ModelService.GetAllModels().then(function(response) {
                 var models = response.resultObj;
+
+                if (!models) {
+                    ServiceErrorUtility.process(response);
+                    return;
+                }
 
                 ModelStore.models.length = 0;
 

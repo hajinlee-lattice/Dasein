@@ -16,7 +16,6 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     $scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, 
     FeatureFlagService, AddUserModal, DeleteUserModal, EditUserModal, UserList
 ) {
-    console.log(UserList);
     $scope.ResourceUtility = ResourceUtility;
     $scope.deleteInProgress = false;
 

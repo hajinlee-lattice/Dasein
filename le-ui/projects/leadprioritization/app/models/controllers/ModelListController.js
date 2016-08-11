@@ -36,6 +36,10 @@ angular.module('lp.models.list', [
         processModels: function(models) {
             vm.models = models;
             vm.totalLength = models.length;
+
+            for (var i=0; i<models.length; i++) {
+                models[i].TimeStamp = Date.parse(models[i].CreatedDate);
+            }
             
             var active = models.filter(function(item) {
                 return item.Status == 'Active';

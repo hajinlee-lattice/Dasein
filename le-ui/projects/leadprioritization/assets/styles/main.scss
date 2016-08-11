@@ -39,33 +39,34 @@ body {
     opacity: 1;
   }
   .inactive-disabled {
-    opacity: .666;
+    opacity: .5;
     pointer-events: none;
-    -webkit-transition: opacity 250ms ease-out, filter 5s ease-out, -webkit-filter 5s ease-out;
-    transition: opacity 250ms ease-out, filter 5s ease-out, -webkit-filter 5s ease-out;
+    -webkit-transition: opacity 333ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
+    transition: opacity 333ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
     -webkit-filter: blur(10px) opacity(0%) grayscale(100%);
     filter: blur(10px) opacity(0%) grayscale(100%);
   }
   .loading-spinner {
     position: absolute;
-    top: 5em;
-    left: 25%;
-    right: 25%;
+    top: 10em;
+    left: 20%;
+    right: 20%;
     margin: -2.5em 0 0;
-    padding: 1.5em 3em;
+    padding: 1.5em 2em;
     background: white;
-    border: 1px solid #aaa;
-    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
     z-index: 100;
     opacity: 0;
-    transition: opacity 333ms ease 2s;
+    transition: opacity 500ms ease 333ms;
     
     &.show-spinner {
       opacity: 1;
     }
     
     div.meter {
-      height: 2em;
+      height: 1.5em;
       overflow: hidden;
     }
 
@@ -76,7 +77,7 @@ body {
     h2 {
       display: inline-block;
       position: absolute;
-      top: 1.4em;
+      top: 1.32em;
       left: 0;
       right: 0;
       margin: 0 auto;
@@ -366,12 +367,7 @@ Model list title
   }
 
   span, span:after, span:before {
-    animation: none;
-    animation-duration: 0s;
-    animation-delay: 0s;
-    transition: all 0s linear !important;
-    transition-delay: 0s;
-    transition-duration: 0s;
+    transition: background 0s linear, color 0s linear;
   }
 }
 
@@ -379,12 +375,9 @@ Model list title
     background: #222;
     color: #fff;
     border-radius: 2px;
-    border-bottom-color: #aaa;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
 
     &:hover * {
       color: #fff;

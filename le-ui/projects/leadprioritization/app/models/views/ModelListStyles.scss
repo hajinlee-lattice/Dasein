@@ -15,46 +15,113 @@
 		}
 	}
 
-	.create-model-menu {
-		position: relative;
-		margin: 0;
-		float: right;
-		z-index: 10;
-		border-bottom-color: transparent;
-		border-bottom-width: 2px;
-		border-style: solid;
-						
-		button {
-			vertical-align: top;
-			margin-left: .45em;
-			
-			&.open {
-				background-color: #222;
-				border-bottom-color: #aaa;
-				border-bottom-right-radius: 0;
-				border-bottom-left-radius: 0;
-			}
+	.select-menu {
+        position: relative;
+        display: inline-block;
+        vertical-align: top;
+        z-index: 10;
+        
+        button {
+            vertical-align: top;
+            margin-left: .45em;
+            padding: 0.75em 1em;
+                            
+            &.select-label {
+                border-top-right-radius: 1px;
+                border-bottom-right-radius: 1px;
+                margin: 0;
+                padding-right: 1em;
 
-			span {
-				margin-left: 0.75em;
-			}
-		}
+                &.open {
+                    border-bottom-left-radius: 1px;
+                    border-bottom-color: #fff;
+                }
 
-		ul {
-			border-radius: 6px;
-			border-top-right-radius: 0;
-			
-			li {
-				
-			}
-		}
+                span {
+                    margin-left: 0.75em;
+                }
+            }
+
+            &.select-more {
+                border-top-left-radius: 1px;
+                border-bottom-left-radius: 1px;
+                margin-left: 1px;
+                margin-right: 0;
+                
+                &.open {
+                    background-color: #222;
+                    border-bottom-right-radius: 1px;
+                    border-bottom-left-radius: 1px;
+                }
+            }
+        }
+
+        ul {
+            border-radius: 6px;
+            border-top-right-radius: 1px;
+            border-top-left-radius: 1px;
+            
+            li {
+                
+            }
+        }
+
         .ico.ico-lattice-dots {
             height: 15px;
             width: 14px;
             opacity: .5;
             background: url(/assets/images/ico-lattice-dots.png) no-repeat center center;
         }
-	}
+        
+        &.white-select-menu {
+            margin-right: .5em;
+
+            button {
+                border-radius: 0;
+                
+                &.select-label {
+                    border-top-left-radius: 6px;
+                    border-bottom-left-radius: 6px;
+                    border-right: none;
+                    
+                    &.open {
+                        background-color: #222;
+                        border-color: #222;
+                        color: #fff;
+                        border-bottom-left-radius: 1px;
+                    }
+                }
+                
+                &.select-more {
+                    border-top-right-radius: 6px;
+                    border-bottom-right-radius: 6px;
+                    margin-left: 0;
+                    
+                    &.open {
+                        color: initial;
+                        background-color: initial;
+                        border-bottom-right-radius: 1px;
+                    }
+                }
+            }
+
+            ul {
+                border-top-left-radius: 0;
+                left: 0;
+                right: initial;
+                border-left: 1px solid #222;
+                
+                li {
+                    text-align: left;
+                    
+                    i {
+                        margin-right: .5em;
+                        margin-left: 0;
+                    }
+                }
+            }
+        }
+    }
 }
 
 /*
@@ -69,7 +136,7 @@ Model List
     margin-top: 20px;
 }
 
-.create-model {
+.select-more {
     margin-right: 1%;
 }
 

@@ -9,8 +9,8 @@
                     <li ng-if="vm.pmmlLength > 0"><span>PMML:</span> <i class="badge grey-badge">{{vm.pmmlLength}}</i></li>
                 </ul>
                 
-                <div class="create-model-menu">
-                    <div class="ng-search">
+                <div class="create-model-menu pull-right">
+                    <div class="select-menu ng-search">
                         <input type="text" class="form-control" placeholder="Search" ng-model="query" ng-show="ShowSearch" />
                         <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
                             <span class="fa fa-search" ng-show="!ShowSearch"></span>
@@ -18,17 +18,67 @@
                         </a>
                     </div>
                     
-                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == '' ? '-' : '')" ng-init="SortOrder = '-'">
-                        <span class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
-                    </a>
-
-                    <div class="create-model-menu">
+                    <div class="select-menu white-select-menu">
                         <button 
                                 type="button"
-                                class="button icon-button orange-button create-model"
-                                ng-click="showCustomMenu = !showCustomMenu" 
+                                class="button icon-button white-button select-label"
+                                ng-click="showFilterMenu = !showFilterMenu" 
+                                ng-init="SortOrder = '-';SortLabel = 'Creation Date';SortIcon = 'numeric';SortProperty = 'TimeStamp'"
+                                ng-class="{ 'open': showFilterMenu }">
+                            {{SortLabel}}
+                        </button
+                        ><button 
+                                type="button"
+                                class="button icon-button white-button select-more"
+                                ng-click="SortOrder = (SortOrder == '' ? '-' : '')" 
+                                ng-class="{ 'open': showFilterMenu }">
+                            <span class="fa fa-sort-{{SortIcon}}-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
+                        </button>
+                        <ul class="model-menu" ng-show="showFilterMenu" ng-click="showFilterMenu = !showFilterMenu">
+                            <li>
+                                <i class="fa fa-sort-numeric-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
+                                <a  href="javascript:void(0)"
+                                    ng-click="SortLabel = 'Creation Date'; SortIcon = 'numeric'; SortProperty = 'TimeStamp'">
+                                    Creation Date
+                                </a>
+                            </li>
+                            <li>
+                                <i class="fa fa-sort-alpha-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
+                                <a  href="javascript:void(0)"
+                                    ng-click="SortLabel = 'Model Name'; SortIcon = 'alpha'; SortProperty = 'DisplayName'">
+                                    Model Name
+                                </a>
+                            </li>
+                            <li>
+                                <i class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
+                                <a  href="javascript:void(0)"
+                                    ng-click="SortLabel = 'Active Status'; SortIcon = 'amount'; SortProperty = 'Status'">
+                                    Active Status
+                                </a>
+                            </li>
+                            <li>
+                                <i class="fa fa-sort-alpha-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
+                                <a  href="javascript:void(0)"
+                                    ng-click="SortLabel = 'Model Type'; SortIcon = 'alpha'; SortProperty = 'ModelType'">
+                                    Model Type
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="select-menu">
+                        <button 
+                                type="button"
+                                class="button icon-button orange-button select-label"
+                                ui-sref="home.models.import"
                                 ng-class="{ 'open': showCustomMenu }">
                             Create Model
+                        </button
+                        ><button 
+                                type="button"
+                                class="button icon-button orange-button select-more"
+                                ng-click="showCustomMenu = !showCustomMenu" 
+                                ng-class="{ 'open': showCustomMenu }">
                             <span class="fa fa-chevron-down" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
                         </button>
                         <ul class="model-menu" ng-show="showCustomMenu">
@@ -75,7 +125,7 @@
                         ng-repeat="
                             model in vm.models |
                             filter: query | 
-                            orderBy: SortOrder+'CreatedDate' |
+                            orderBy: SortOrder+SortProperty |
                             startFrom: (current - 1) * pagesize |
                             limitTo: pagesize" 
                         data="model">
