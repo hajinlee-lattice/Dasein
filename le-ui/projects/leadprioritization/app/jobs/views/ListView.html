@@ -35,22 +35,14 @@
                     Completed: <span class="badge gray-badge">{{(jobs | filter: { jobStatus: 'Completed' }).length}}</span>
                 </div>
             </div>
-            <div class="eight columns text-right no-wrap">
-                
-
-
-
-                <div class="ng-search">
+            <div class="eight columns text-right">
+                <div class="ng-search open-absolute">
                     <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
                     <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
                         <span class="fa fa-search" ng-show="!ShowSearch"></span>
                         <span class="fa fa-times" ng-show="ShowSearch"></span>
                     </a>
                 </div>
-                
-
-
-
                 <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == '' ? '-' : '')" ng-init="SortOrder = '-'">
                     <span class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
                 </a>

@@ -335,6 +335,7 @@ input[type="search"] {
     z-index: 20;
   }
   &.open-absolute {
+    position: relative;
     .form-control {
       position: absolute;
       top: -1px;
