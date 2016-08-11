@@ -239,13 +239,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Fields declaredFields = new Fields(sortedAllColumns);
         Pipe[] pipes = new Pipe[extracts.size()];
 
+
+        Set<String> existing = new HashSet<>();
         for (Extract extract : extracts) {
             Set<String> allColumnsClone = new HashSet<>(allColumns.keySet());
             for (Field field : allSchemas[i].getFields()) {
                 allColumnsClone.remove(field.name());
             }
             String sourceName = String.format("%s-%s", sourceTableName, extract.getName());
-            if (taps.containsKey(sourceName)) {
+            if (existing.contains(sourceName)) {
                 String newName = sourceName + "_" + UUID.randomUUID();
                 log.warn(String.format("Changing source %s to %s to avoid collision with existing source", sourceName,
                         newName));
@@ -263,6 +265,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         declaredFields);
             }
             i++;
+            existing.add(sourceName);
         }
 
         for (Pipe pipe : pipes) {
