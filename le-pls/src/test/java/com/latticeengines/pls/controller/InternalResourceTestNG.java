@@ -104,21 +104,4 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Assert.assertFalse((boolean) result.get("Exists"));
     }
 
-    @Test(groups = "functional")
-    public void testRetrieveSvnRevision() {
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
-        Map response = restTemplate.getForObject(String.format("%s/pls/internal/currentstack", getRestAPIHostPort()),
-                Map.class);
-        String revision = null;
-        for (Object key : response.keySet()) {
-            if (key.equals("SvnRevision")) {
-                revision = (String) response.get("SvnRevision");
-            }
-        }
-        assertNotNull(revision);
-        int irevision = Integer.parseInt(revision);
-        assertTrue(irevision > 0);
-    }
 }

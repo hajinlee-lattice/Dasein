@@ -1,10 +1,17 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+
+import java.util.Arrays;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.security.exposed.Constants;
 
 public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
@@ -69,5 +77,23 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         CRMTopology topology = tenantConfigService.getTopology(tenantId);
         Assert.assertNotNull(topology);
         Assert.assertEquals(topology, CRMTopology.ELOQUA);
+    }
+
+    @Test(groups = "deployment")
+    public void testRetrieveSvnRevision() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
+        Map response = restTemplate.getForObject(
+                String.format("%s/pls/internal/currentstack", getDeployedRestAPIHostPort()), Map.class);
+        String revision = null;
+        for (Object key : response.keySet()) {
+            if (key.equals("SvnRevision")) {
+                revision = (String) response.get("SvnRevision");
+            }
+        }
+        assertNotNull(revision);
+        int irevision = Integer.parseInt(revision);
+        assertTrue(irevision > 0);
     }
 }
