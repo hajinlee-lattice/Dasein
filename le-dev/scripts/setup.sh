@@ -85,6 +85,10 @@ echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
+if [ "${USE_QA_RTS}"="true" ]; then
+    echo "propdata.source.db.json=source_dbs_qa.json" >> le-config/conf/env/dev/latticeengines.com
+fi
+
 echo "Rebuild admin war"
 pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
 processErrors
