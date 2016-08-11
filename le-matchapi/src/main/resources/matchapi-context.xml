@@ -12,8 +12,12 @@
              since the servlet container instances are not available when running tests. -->
         <context:exclude-filter type="assignable" expression="com.latticeengines.matchapi.swagger.SwaggerConfig" />
     </context:component-scan>
+    <context:component-scan base-package="com.latticeengines.propdata.api.controller"/>
 
-    <import resource="classpath:datacloud-match-context.xml" />
+    <mvc:annotation-driven/>
+
+    <import resource="classpath:propdata-api-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
 
     <mvc:annotation-driven />
     <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />

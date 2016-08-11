@@ -34,7 +34,9 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
-                .apis(SwaggerUtils.getApiSelector("com.latticeengines.matchapi.controller.*")) //
+                .apis(SwaggerUtils.getApiSelector(
+                        "com.latticeengines.matchapi.controller.*",
+                        "com.latticeengines.propdata.api.controller.*")) //
                 .paths(PathSelectors.any()) //
                 .build() //
                 .pathMapping("/match") //

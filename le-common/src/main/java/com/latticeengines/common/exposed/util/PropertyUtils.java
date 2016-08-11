@@ -57,13 +57,13 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
         for (Object key : props.keySet()) {
             String value = (String) props.get(key);
             while (true) {
-                System.out.println("ProcessKey " + (String)key + " ProcessValue" + value);
                 Matcher matcher = pattern.matcher(value);
                 if (!matcher.find()) {
                     break;
                 }
                 String placeholder = matcher.group(2);
                 value = matcher.replaceFirst(resolvePlaceholder(placeholder, props, springSystemPropertiesMode));
+                log.info("Replacing " + placeholder + " in " + key + ", final value=" + value);
             }
         }
 

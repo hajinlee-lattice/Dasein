@@ -63,8 +63,15 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datacloud-match</artifactId>
+            <artifactId>le-propdata</artifactId>
             <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-propdata</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
