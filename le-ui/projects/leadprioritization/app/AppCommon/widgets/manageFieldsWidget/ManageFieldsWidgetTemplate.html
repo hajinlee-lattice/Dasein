@@ -28,7 +28,7 @@
         <div>
             <div class="form-group">
                 <input data-ng-model="field" data-ng-keypress="keyEnterFilter($event)" class="form-control" placeholder="{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SEARCH_FEILD_PLACEHOLDER')}}"/>
-                <button id="manage-fields-search" data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
+                <button id="manage-fields-search" data-ng-click="filterFields($event)" class="button white-button">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
             </div>
             <div class="form-group">
                 <select data-ng-options="c for c in categoriesToSelect" data-ng-model="category" data-ng-change="selectChanged($event, 'category')" class="form-control">

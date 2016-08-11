@@ -54,7 +54,7 @@ html {
     height: 100%;
 }
 body {
-	color: $gun-metal;
+	color: $jet;
 	font-size: 14px;
 	font-family: 'ProximaNova-Regular',Arial,sans-serif;
 	font-weight: normal;
@@ -106,6 +106,16 @@ h3 {
 h4 { font-size: 180%; }
 h5 { font-size: 130%; }
 
+
+h2 {
+    font-size:1.6em;
+}
+.h3-sub {
+    font-size:1.1em;
+    font-style: italic;
+    color:#aaa;
+    text-transform: none;
+}
 
 
 /* 

@@ -4,8 +4,9 @@
 	}
 }
 
-
-/* Spinner ball */
+/* 
+Spinner Balls 
+============================================================ */
 .loading {
 	width: 18px;
 	height: 18px;
@@ -13,8 +14,6 @@
 	background: url("../img/spin.svg") no-repeat center;
 	background-size: 18px 18px;
 }
-
-/* Spinner ball */
 .loading-small {
 	width: 18px;
 	height: 18px;
@@ -23,7 +22,10 @@
 	background-size: 18px 18px;
 }
 
-/* Bar */
+
+/* 
+Progress Bar 
+============================================================ */
 .meter {
 	height: 36px; 
 	position: relative;
@@ -83,11 +85,9 @@
 	        border-radius: 8px;
 	overflow: hidden;
 }
-
 .animate > span:after {
 	display: none;
 }
-
 @-webkit-keyframes move {
     0% {
        background-position: 0 0;
@@ -105,24 +105,169 @@
        background-position: 50px 50px;
     }
 }
- 
 .orange > span {
 	background-color: #f1a165;
 	background-image: -moz-linear-gradient(top, #f1a165, #f36d0a);
 	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f1a165),color-stop(1, #f36d0a));
 	background-image: -webkit-linear-gradient(#f1a165, #f36d0a);
 }
-
 .red > span {
 	background-color: #f0a3a3;
 	background-image: -moz-linear-gradient(top, #f0a3a3, #f42323);
 	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f0a3a3),color-stop(1, #f42323));
 	background-image: -webkit-linear-gradient(#f0a3a3, #f42323);
 }
-
 .nostripes > span > span, .nostripes > span:after {
 	-webkit-animation: none;
 	-moz-animation: none;
 	animation: none;
 	background-image: none;
 }
+
+
+/* 
+Wizard Steps 
+============================================================ */
+
+/* Sliding Doors
+1. Using CSS and Image Sliding Door Technique from 2001 or whenever. 
+2. Borders and hovers. 
+3. Most scalable. 
+4. Most flexible in terms of design.  
+==================================== */
+.wizard {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	&:after {
+		display: table;
+		content: "";
+		clear: both;
+	}
+	a, span {
+		background-image: url("/assets/images/bkg-wizard.png");
+		background-repeat: no-repeat;
+		display: block;
+	}
+	&.job-status {
+		li {
+			float: left;
+			margin: 0;
+			padding: 0;
+			& > span {
+  				background-position: -3px -92px;
+  				width: 27px;
+	    		span {
+  					background-position: -48px -92px;
+	    			padding:20px 60px;
+	    		}
+			}
+			&:first-of-type > span {
+  				background-position: -34px -92px;
+			}
+			&:last-of-type > span span {
+  				background-position: -389px -92px;
+			}
+			&.success {
+				& > span {
+	  				background-position-y: -3px;
+	  				width: 27px;
+		    		span {
+	  					background-position-y: -3px;
+		    			padding:5px 15px;
+		    		}
+				}
+				&:first-of-type > span {
+	  				background-position-y: -3px;
+				}
+				&:last-of-type > span span {
+	  				background-position-y: -3px;
+				}
+			}
+			&.error {
+				& > span {
+	  				background-position-y: -184px;
+	  				width: 27px;
+		    		span {
+	  					background-position-y: -184px;
+		    			padding:5px 15px;
+		    		}
+				}
+				&:first-of-type > span {
+	  				background-position-y: -184px;
+				}
+				&:last-of-type > span span {
+	  				background-position-y: -184px;
+				}
+			}
+		}
+	}
+	&.summary {
+		a, span {
+			height: 130px;
+		}
+		li {
+			float: left;
+			margin: 0;
+			padding: 0;
+			a {
+				background-position: -5px -5px;
+	    		padding:5px 15px;
+				span {
+					background-position: -5px -5px;
+				}
+			}
+			&.active {
+				& > span {
+					background-position: -5px -5px;
+					span {
+						background-position: -5px -5px;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+/* Pure CSS
+1. Using pure CSS. 
+2. No border support. 
+3. Transparent space in between supported, but with pixelized diagonals. 
+4. This example is unstyled. 
+================================= */
+// .wizard {
+//   display:table;
+//   overflow:hidden;
+//   white-space:nowrap;
+//   font-size: 18px;
+// }
+// .wizard li {
+//   display:inline-block;
+//   margin-right: -18px;
+//   line-height: 1.2em;
+//   padding: 20px 60px;
+//   background:linear-gradient(70deg, transparent  1em, lightgray 1em, lightgray 50%, transparent 50%) top  left no-repeat,
+//     linear-gradient(-110deg, transparent 1em, lightgray 1em, lightgray 55%, transparent 55%) top   no-repeat,
+//     linear-gradient(-70deg, transparent  1em, lightgray 1em, lightgray 50%, transparent 50%) bottom  left no-repeat,
+//     linear-gradient(110deg, transparent 1em, lightgray 1em, lightgray 55%, transparent 55%) bottom   no-repeat;
+//   background-size:100% 51.5% ;
+  
+// }
+// .wizard li.active, .wizard li:hover {
+//    background:linear-gradient(70deg, transparent  1em, #FF0000 1em, #FF0000 50%, transparent 50%) top  left no-repeat,
+//     linear-gradient(-110deg, transparent 1em, #FF0000 1em, #FF0000 55%, transparent 55%) top   no-repeat,
+//     linear-gradient(-70deg, transparent  1em, #FF0000 1em, #FF0000 50%, transparent 50%) bottom  left no-repeat,
+//     linear-gradient(110deg, transparent 1em, #FF0000 1em, #FF0000 55%, transparent 55%) bottom   no-repeat;
+//   background-size:100% 51.5% ;
+//   }
+// .wizard li.active a {
+//   text-decoration:none;
+//   transition:0.2s;
+// }
+// .wizard li.active a, .wizard li:hover a {  
+//   color:white;  
+// }

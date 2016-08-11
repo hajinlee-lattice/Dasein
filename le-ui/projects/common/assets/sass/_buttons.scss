@@ -18,7 +18,8 @@ Search
 /*
 Buttons
 ============================================================ */
-button.button, a.button, .button {
+.button, button.button,
+a.button, .button a:link, .button a:focus, .button a:visited {
 	display: inline-block;
 	padding: 0.8em;
 	margin-bottom: 0;
@@ -48,12 +49,14 @@ button.button, a.button, .button {
 		transition: none;
 	}
  
-	&.link-button {
+	&.link-button, &.link-button a:link,
+  &.link-button a:visited, &.link-button a:focus {
 		display: inline;
 		padding: 0;
 		margin: 0;
 		border: none;
 		background: none;
+    color: $saphire;
 	}
 	&.close-button {
 		float: right;
@@ -123,7 +126,7 @@ button.button, a.button, .button {
 	} 
 	@include media(">medium") {
 		display: inline-block;
-		padding: 0.85em 3em 0.8em;
+		padding: 9px 15px;
 		&.icon-button {
 			padding: 0.75em 1.5em;
 		}
