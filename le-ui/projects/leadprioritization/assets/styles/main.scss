@@ -39,34 +39,34 @@ body {
     opacity: 1;
   }
   .inactive-disabled {
-    opacity: .5;
+    opacity: .666;
     pointer-events: none;
-    -webkit-transition: opacity 333ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
-    transition: opacity 333ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
-    -webkit-filter: blur(10px) opacity(0%) grayscale(100%);
-    filter: blur(10px) opacity(0%) grayscale(100%);
+    -webkit-transition: opacity 500ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
+    transition: opacity 500ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;
+    -webkit-filter: blur(15px) opacity(0%) grayscale(100%);
+    filter: blur(15px) opacity(0%) grayscale(100%);
   }
   .loading-spinner {
     position: absolute;
     top: 10em;
-    left: 20%;
-    right: 20%;
+    left: 30%;
+    right: 30%;
     margin: -2.5em 0 0;
-    padding: 1.5em 2em;
+    padding: 1.25em;
     background: white;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: none;
     border-radius: 6px;
-    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0px 75px 50px rgba(255,255,255,.9);
     z-index: 100;
     opacity: 0;
-    transition: opacity 500ms ease 333ms;
+    transition: opacity 500ms ease-out 250ms;
     
     &.show-spinner {
       opacity: 1;
     }
     
     div.meter {
-      height: 1.5em;
+      height: 2em;
       overflow: hidden;
     }
 
@@ -77,15 +77,18 @@ body {
     h2 {
       display: inline-block;
       position: absolute;
-      top: 1.32em;
+      top: 1.3em;
       left: 0;
       right: 0;
       margin: 0 auto;
       font-size: 125%;
-      font-weight: bold;
       text-align: center;
       z-index: 1;
-      text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, -1px 1px 0px #fff, 1px -1px 0px #fff;
+      text-shadow: 1px 1px 0px #aaa, -1px -1px 0px #aaa, -1px 1px 0px #aaa, 1px -1px 0px #aaa;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #fff;
+      font-weight: bold;
     }
   }
 }
