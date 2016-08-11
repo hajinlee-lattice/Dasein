@@ -26,7 +26,7 @@ var Login = function() {
             tenants.tenantSelectionIsPresent().then(function(present){
                 if (present) {
                     browser.driver.sleep(500);
-                    element(by.id('tenantSelectionInput')).click();
+                    //element(by.id('tenantSelectionInput')).click();
                     tenants.selectTenantByName(tenantId);
                 }
             });
@@ -37,7 +37,7 @@ var Login = function() {
         var width = 1250;
         var height = 768;
         browser.driver.manage().window().setSize(width, height);
-        browser.get('/', 30000);
+        browser.get(browser.params.appUrl, 30000);
     }
 
     function isLoginPage() {
@@ -55,7 +55,7 @@ var Login = function() {
     function logout() {
         //getWebApp();
         browser.driver.manage().window().setSize(1250, 768);
-        browser.get('/lp/', 30000);
+        browser.get(browser.params.appUrl + '/lp/', 30000);
         isLoginPage().then(function(ispresent){
             if (!ispresent) {
                 browser.driver.sleep(10000);

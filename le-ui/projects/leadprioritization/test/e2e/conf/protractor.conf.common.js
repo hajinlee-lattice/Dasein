@@ -46,7 +46,8 @@ var Config = function() {
                 externalUserUsername:   'pls-external-user-tester@test.lattice-engines.ext',
                 testingUserPassword:    'admin',
                 downloadRoot:           chromeDownloadPath,
-                isProd:                 false
+                isProd:                 false,
+                appUrl:                'https://app.lattice-engines.com',
             },
 
             allScriptsTimeout: 200000,

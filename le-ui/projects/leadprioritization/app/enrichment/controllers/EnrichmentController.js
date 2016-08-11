@@ -128,7 +128,7 @@ angular.module('lp.enrichment.leadenrichment', [])
             watched_el = document.querySelector('.summary .nav'),
             $watched_el = angular.element(watched_el),
             top = watched_el.getBoundingClientRect().top + $watched_el.height(),
-            enrichments_list = document.querySelector('.enrichments.list');
+            enrichments_list = document.querySelector('.enrichments');
 
         if(top < 0) {
             $el.addClass('fixed');
@@ -144,7 +144,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         $timeout(function(){
             var container = document.querySelector('.subheader-container'),
                 height = container.offsetHeight;
-                enrichments_list = document.querySelector('.enrichments.list'),
+                enrichments_list = document.querySelector('.enrichments'),
                 subheader = angular.element('.subheader-container');
 
             if(subheader.hasClass('fixed')) {

@@ -1,5 +1,5 @@
 <div 
-        class="model-tile {{isActive ? '' : 'inactive'}}" 
+        class="model-tile model-type-{{data.ModelFileType}} {{isActive ? '' : 'inactive'}}" 
         ng-click="tileClick($event)" 
         ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
         ui-sref="{{data.ModelFileType != 'PmmlModel'?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">

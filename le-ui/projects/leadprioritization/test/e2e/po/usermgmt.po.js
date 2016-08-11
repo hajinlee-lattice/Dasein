@@ -22,13 +22,19 @@ var UserManagement = function() {
         return text;
     };
 
+    this.canSeeEnrichmentLink = function (expected) {
+        helper.elementExists(siderbar.EnrichmentLink, expected,
+            expected ? "should see Enrichment" : "should not see Enrichment");
+    };
+
     this.canSeePredictionModelsLink = function (expected) {
         helper.elementExists(siderbar.PredictionModelsLink, expected,
             expected ? "should see Prediction Models" : "should not see Prediction Models");
     };
 
     this.canSeeCreateModelLink = function (expected) {
-        helper.elementExists(siderbar.CreateModelLink, expected,
+        var CreateModelLink = element(by.css('[ui-sref="home.models.import"]'));
+        helper.elementExists(CreateModelLink, expected,
             expected ? "should see Create a Model" : "should not see Create a Model");
     };
 
@@ -38,7 +44,8 @@ var UserManagement = function() {
     };
 
     this.canSeeModelCreationHistoryLink = function (expected) {
-        helper.elementExists(siderbar.ModelCreationHistoryLink, expected,
+        var ModelCreationHistoryLink = element(by.css('[ui-sref="home.models.history"]'));
+        helper.elementExists(ModelCreationHistoryLink, expected,
             expected ? "should see Model Creation History" : "should not see Model Creation History");
     };
 
@@ -89,9 +96,9 @@ var UserManagement = function() {
     };
 
     this.clickFirstModel = function() {
-        element.all(by.css('div.model')).first().click();
+        element.all(by.css('div.model-tile.model-type-PythonScriptModel')).first().click();
         browser.waitForAngular();
-        browser.driver.wait(element(by.css('div.menu-header')).isPresent(),
+        browser.driver.wait(element(by.id('ModelDetailsArea')).isPresent(),
             10000, 'model page should appear with in 10 sec.');
     }
 

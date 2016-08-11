@@ -5,7 +5,7 @@ describe('user management', function() {
     var internalUser = require('./po/internaluser.po');
     var internalAdmin = require('./po/internaladmin.po');
     var superAdmin = require('./po/superadmin.po');
-
+    
     //=======================================================
     // All user management tests are distributed to each role
     //=======================================================

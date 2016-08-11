@@ -37,6 +37,8 @@ angular.module('mainApp.models.modals.CopyModelModal', [
     vm.current_tenant = {};
     vm.models = [];
     vm.current_model = {};
+    vm.model_copied = false;
+    vm.model_selected = false;
 
     vm.selectTenant = function($event, tenant){
         var target = angular.element($event.currentTarget);
@@ -61,26 +63,31 @@ angular.module('mainApp.models.modals.CopyModelModal', [
     var deselectAll = function(target) {
         var target_type = target[0].tagName,
             targets = target.parent().find(target_type);
+        vm.model_selected = false;
+        vm.current_model = {};
         targets.removeClass('selected');
     }
 
     vm.selectModel = function($event, model){
         var target = angular.element($event.currentTarget);
-
-        deselectAll(target);
-
-        target.addClass('selected');
-
-        vm.current_model = model;
+        if(model) {
+            deselectAll(target);
+            target.addClass('selected');
+            vm.current_model = model;
+            vm.model_selected = true;
+        }
     }
     vm.copyModel = function() {
         if(vm.current_model && vm.current_tenant) {
-            var modelName = vm.current_model.Name;
-            var tenantId = vm.current_tenant.Identifier;
-            //move to ModelService.js
+            var modelName = vm.current_model.Name,
+                tenantId = vm.current_tenant.Identifier;
+
+            /* move to ModelService.js
             $http.get('/pls/models/copymodel/' + modelName, {params: {targetTenantId: tenantId}}).success(function (data) {
                 console.log(data);
             });
+            */
+            vm.model_copied = true;
         }
     }
 });

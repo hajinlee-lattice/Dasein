@@ -5,10 +5,6 @@ var Tenants = function() {
         return element(by.repeater('tenant in tenantList').row(index));
     };
 
-    function selectTenantByName(name) {
-        element(by.css('select option[value="'+ name + '"]')).click();
-    }
-
     this.selectTenantByIndex = function(index) {
         browser.wait(function(){
             return element(by.css('select#tenantSelectionInput')).isPresent();
@@ -20,7 +16,7 @@ var Tenants = function() {
         browser.wait(function(){
             return element(by.css('select#tenantSelectionInput')).isPresent();
         }, 10000, 'tenant list should appear with in 10 sec.');
-        selectTenantByName(name);
+        element(by.css('select option[value="'+ name + '"]')).click();
     };
 
     this.tenantSelectionIsPresent = function(){
