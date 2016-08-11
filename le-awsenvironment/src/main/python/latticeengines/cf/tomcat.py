@@ -14,15 +14,7 @@ from .module.stack import ECSStack, teardown_stack
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
-
 PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
-
-PARAM_ENV_LE_ENVIRONMENT=EnvVarParameter("LE_ENVIRONMENT")
-PARAM_ENV_LE_STACK=EnvVarParameter("LE_STACK")
-PROFILE_VARS = {
-    "LE_ENVIRONMENT": PARAM_ENV_LE_ENVIRONMENT,
-    "LE_STACK": PARAM_ENV_LE_STACK
-}
 
 _S3_CF_PATH='cloudformation/'
 
@@ -33,10 +25,10 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.upload)
+    template(args.environment, args.stackname, args.profile, args.upload)
 
-def template(environment, stackname, upload=False):
-    stack = create_template()
+def template(environment, stackname, profile, upload=False):
+    stack = create_template(profile)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -44,16 +36,17 @@ def template(environment, stackname, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template():
+def create_template(profile):
     stack = ECSStack("AWS CloudFormation template for ECS cluster.")
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS])
-    stack.add_params(PROFILE_VARS.values())
-    task = tomcat_task()
+    profile_vars = get_profile_vars(profile)
+    stack.add_params(profile_vars.values())
+    task = tomcat_task(profile_vars)
     stack.add_resource(task)
     stack.add_service("tomcat", task)
     return stack
 
-def tomcat_task():
+def tomcat_task(profile_vars):
     container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
@@ -68,7 +61,7 @@ def tomcat_task():
             "awslogs-region": { "Ref": "AWS::Region" }
         }})
 
-    for k, p in PROFILE_VARS.items():
+    for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
 
     task = TaskDefinition("tomcattask")
@@ -102,7 +95,18 @@ def teardown(stackname):
     client = boto3.client('cloudformation')
     teardown_stack(client, stackname)
 
-def parse_profile(profile):
+def get_profile_vars(profile):
+    params = {}
+    if profile is not None:
+        with open(profile, 'r') as file:
+            for line in file:
+                line = line.strip().replace('\n', '')
+                if len(line) > 0 and ('#' != line[0]):
+                    key = line.split('=')[0]
+                    params[key] = EnvVarParameter(key)
+    return params
+
+def parse_profile(profile, profile_vars):
     params = []
     if profile is not None:
         with open(profile, 'r') as file:
@@ -111,7 +115,7 @@ def parse_profile(profile):
                 if len(line) > 0 and ('#' != line[0]):
                     key = line.split('=')[0]
                     value = line[len(key) + 1:]
-                    if key in PROFILE_VARS:
+                    if key in profile_vars:
                         print "set %s to %s" % (key, value)
                         params.append(PROFILE_VARS[key].config(value))
 
@@ -144,6 +148,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
+    parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
