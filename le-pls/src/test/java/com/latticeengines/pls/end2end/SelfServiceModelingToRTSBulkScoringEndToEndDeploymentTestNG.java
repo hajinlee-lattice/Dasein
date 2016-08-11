@@ -1,6 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -52,8 +53,13 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
-    // expected lines in data set to output to csv after bulk scoring
-    private static final int TOTAL_QUALIFIED_LINES = 1126;
+    private static final int TOTAL_TRAINING_LINES = 1126;
+
+    private static final int TOTAL_TESTING_LINES = 400;
+
+    private static final String TRAINING_CSV_FILE = "Lattice_Relaunch_Small.csv";
+
+    private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small_Testing.csv";
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -62,15 +68,17 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     private String applicationId;
     private Long jobId;
 
-    private String fileName;
+    private String trainingFileName;
+    private String testingFileName;
 
     private SourceFile sourceFile;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        fileName = "Lattice_Relaunch_Small.csv";
-        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
+        trainingFileName = TRAINING_CSV_FILE;
+        testingFileName = TESTING_CSV_FILE;
+        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, trainingFileName);
     }
 
     @Test(groups = "deployment.lp")
@@ -134,39 +142,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp", dependsOnMethods = "poll")
     public void downloadCsv() throws IOException {
-        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.ALL));
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
-                byte[].class);
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
-        String results = new String(response.getBody());
-        assertTrue(results.length() > 0);
-        CSVParser parser = null;
-        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
-        InputStreamReader reader = new InputStreamReader(is);
-        CSVFormat format = LECSVFormat.format;
-        try {
-            parser = new CSVParser(reader, format);
-            Set<String> csvHeaders = parser.getHeaderMap().keySet();
-            assertTrue(csvHeaders.contains("Activity_Count_Click_Email"));
-            assertTrue(csvHeaders.contains("Industry"));
-            assertTrue(csvHeaders.contains("PhoneNumber"));
-            assertTrue(csvHeaders.contains("Score"));
-            int line = 1;
-            for (CSVRecord record : parser.getRecords()) {
-                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
-                line++;
-            }
-            assertEquals(line, TOTAL_QUALIFIED_LINES);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            parser.close();
-        }
+        downloadCsv(TOTAL_TRAINING_LINES);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "downloadCsv")
@@ -188,7 +164,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
     @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv")
     public void uploadTestingDataFile() {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + testingFileName));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -226,7 +202,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
 
     @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = true)
     public void downloadTestingDataScoreResultCsv() throws IOException {
-        downloadCsv();
+        downloadCsv(TOTAL_TESTING_LINES);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "downloadTestingDataScoreResultCsv", enabled = true)
@@ -241,4 +217,43 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
             throw new RuntimeException(e);
         }
     }
+
+    private void downloadCsv(int totalRowNumber) throws IOException {
+        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
+                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String results = new String(response.getBody());
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
+        assertTrue(results.length() > 0);
+        CSVParser parser = null;
+        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStreamReader reader = new InputStreamReader(is);
+        CSVFormat format = LECSVFormat.format;
+        try {
+            parser = new CSVParser(reader, format);
+            Set<String> csvHeaders = parser.getHeaderMap().keySet();
+            assertTrue(csvHeaders.contains("Activity_Count_Click_Email"));
+            assertTrue(csvHeaders.contains("Industry"));
+            assertTrue(csvHeaders.contains("PhoneNumber"));
+            assertTrue(csvHeaders.contains("Score"));
+            assertFalse(csvHeaders.contains("RawScore"));
+
+            int line = 1;
+            for (CSVRecord record : parser.getRecords()) {
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
+                line++;
+            }
+            assertEquals(line, totalRowNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            parser.close();
+        }
+    }
+
 }
