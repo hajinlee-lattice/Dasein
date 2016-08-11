@@ -73,7 +73,8 @@ def provision_cli(args):
 
 
 def provision(environment, app, stackname, elb, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
-    extra_params = parse_profile(profile)
+    profile_vars = get_profile_vars(profile)
+    extra_params = parse_profile(profile, profile_vars)
 
     max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 256
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
