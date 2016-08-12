@@ -9,7 +9,6 @@
     <import resource="classpath:propdata-madison-quartz-${PROPDATA_MADISON_QUARTZ_ENABLED:disabled}-context.xml"/>
     <import resource="classpath:propdata-madison-persistence-context.xml"/>
     <import resource="classpath:serviceflows-propdata-dataflow-context.xml"/>
-    <import resource="classpath:propdata-zk-runtime-context.xml" />
     <import resource="classpath:dataplatform-context.xml"/>
 
 </beans>

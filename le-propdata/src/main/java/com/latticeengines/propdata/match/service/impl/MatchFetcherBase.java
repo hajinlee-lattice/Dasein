@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -153,8 +154,16 @@ public abstract class MatchFetcherBase {
     public List<Map<String, Object>> query(JdbcTemplate jdbcTemplate, String sql) {
         Long beforeQuerying = System.currentTimeMillis();
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
+        String url = "";
+        try {
+            DriverManagerDataSource dataSource = (DriverManagerDataSource) jdbcTemplate.getDataSource();
+            url = dataSource.getUrl();
+            url = url.substring(0, url.indexOf(";"));
+        } catch (Exception e) {
+            log.warn("Failed to get url from jdbctemplate", e);
+        }
         log.info("Retrieved " + results.size() + " results from SQL Server. Duration="
-                + (System.currentTimeMillis() - beforeQuerying) + " Rows=" + results.size());
+                + (System.currentTimeMillis() - beforeQuerying) + " Rows=" + results.size() + " URL=" + url);
         return results;
     }
 

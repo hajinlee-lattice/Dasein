@@ -10,6 +10,5 @@
     <context:component-scan base-package="com.latticeengines.propdata.yarn" />
 
     <import resource="classpath:propdata-match-context.xml" />
-    <import resource="classpath:propdata-zk-runtime-context.xml" />
 
 </beans>

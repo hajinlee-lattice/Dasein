@@ -10,9 +10,13 @@ function processErrors
   fi
 }
 
+
+PYTHON=${PYTHON:python}
+
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
+echo "You are using this python: ${PYTHON}"
 
 # Expand aliases
 echo "Expanding aliases."
@@ -86,7 +90,9 @@ cfgdpl 2> /tmp/errors.txt
 processErrors
 
 if [ "${USE_QA_RTS}" == "true" ]; then
-    echo "propdata.source.db.json=source_dbs_qa.json" >> ${WSHOME}/le-config/conf/env/dev/latticeengines.com
+    ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py --qa-source-dbs
+else
+    ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
 fi
 
 echo "Rebuild admin war"
