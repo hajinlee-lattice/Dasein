@@ -182,7 +182,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty
-    public String dataCloudVersion() {
+    public String getDataCloudVersion() {
         return dataCloudVersion;
     }
 

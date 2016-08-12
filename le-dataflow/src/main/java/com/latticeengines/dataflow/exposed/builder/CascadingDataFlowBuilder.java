@@ -21,9 +21,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
+import org.springframework.data.hadoop.fs.HdfsResourceLoader;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -536,14 +538,32 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     public Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
         String taregetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
         if (taregetSchemaPath != null) {
-            Configuration config = getConfig();
-            try {
-                return AvroUtils.getSchema(config, new Path(getSchemaPath(config, taregetSchemaPath)));
-            } catch (Exception ex) {
-                throw new LedpException(LedpCode.LEDP_26005, ex);
-            }
+            return getSchemaFromFilePath(taregetSchemaPath);
         }
         return null;
+    }
+
+    protected Schema getSchemaFromFilePath(String schemaPath) {
+        Configuration config = getConfig();
+        try {
+            return AvroUtils.getSchema(config, new Path(getSchemaPath(config, schemaPath)));
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_26005, ex);
+        }
+    }
+
+    protected FieldList buildFieldListFromSchema(String schemaPath) {
+        try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(getConfig()))) {
+            Schema schema = AvroUtils.readSchemaFromResource(resourceLoader, schemaPath);
+            List<String> fieldNames = new ArrayList<>();
+            for (Field field : schema.getFields()) {
+                fieldNames.add(field.name());
+            }
+            return new FieldList(fieldNames.toArray(new String[0]));
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_26005, ex);
+        }
+
     }
 
     public String addGroupBy(String prior, FieldList groupByFieldList, List<Aggregation> aggregation) {

@@ -258,6 +258,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setColumnName(getAmColumnId());
         metadata.setDescription(getDescription());
         metadata.setJavaClass(getJavaClass());
+        metadata.setDataType(getJavaClass());
         metadata.setDisplayName(getDisplayName());
         metadata.setCategory(getCategory());
         metadata.setStatisticalType(getStatisticalType());

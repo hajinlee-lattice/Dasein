@@ -3,6 +3,8 @@ package com.latticeengines.propdata.match.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 
@@ -34,6 +36,10 @@ public class MatchUtils {
             avroGlobs += "/*.avro";
         }
         return avroGlobs;
+    }
+    
+    public static boolean isAccountMaster(String dataCloudVersion) {
+        return StringUtils.isNotBlank(dataCloudVersion) && dataCloudVersion.startsWith("2.");
     }
 
 }

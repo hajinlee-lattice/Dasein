@@ -1,6 +1,9 @@
 package com.latticeengines.propdata.api.testframework;
 
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +11,11 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +62,50 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fullPath, records);
         } catch (Exception e) {
             Assert.fail("Failed to upload " + fileName, e);
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void uploadDataCsv(String avroDir, String fileName, String csvFile, List<Class<?>> fieldTypes) {
+        try {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(csvFile);
+            if (url == null) {
+                throw new RuntimeException("Cannot find resource file=" + csvFile);
+            }
+            CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
+            List<List<Object>> data = new ArrayList<>();
+            List<String> fieldNames = new ArrayList<>(Collections.singleton("ID"));
+            int rowNum = 0;
+            for (CSVRecord record : parser.getRecords()) {
+                if (rowNum == 0) {
+                    fieldNames.addAll(IteratorUtils.toList(record.iterator()));
+                } else if (record.size() > 0) {
+                    List<Object> row = new ArrayList<>();
+                    row.add((int) record.getRecordNumber());
+                    for (String field : record) {
+                        if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
+                            row.add(null);
+                        } else {
+                            row.add(field);
+                        }
+                    }
+                    data.add(row);
+                }
+                rowNum++;
+            }
+            uploadAvroData(data, fieldNames, fieldTypes, avroDir, fileName);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload test avro.", e);
+        }
+    }
+    
+    protected void cleanupAvroDir(String avroDir) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, avroDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, avroDir);
+            }
+        } catch (Exception e) {
+            Assert.fail("Failed to clean up " + avroDir, e);
         }
     }
 

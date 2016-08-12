@@ -55,6 +55,8 @@ public class MatchInput implements Fact, Dimension {
 
     private UUID uuid;
 
+    private String tableName;
+
 
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
@@ -246,6 +248,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("YarnQueue")
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
+    }
+
+    @JsonProperty("TableName")
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+    
+    @JsonProperty("TableName")
+    public String getTableName() {
+        return tableName;
     }
 
     @Override

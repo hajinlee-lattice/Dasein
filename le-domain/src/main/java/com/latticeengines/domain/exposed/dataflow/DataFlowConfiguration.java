@@ -11,6 +11,7 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     private List<DataFlowSource> dataSources;
     private DataFlowParameters dataFlowParameters;
     private String targetTableName;
+    private String targetPath;
 
     @JsonProperty("bean_name")
     public String getDataFlowBeanName() {
@@ -50,5 +51,15 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("target_table_name")
     public void setTargetTableName(String targetTableName) {
         this.targetTableName = targetTableName;
+    }
+
+    @JsonProperty("target_path")
+    public String getTargetPath() {
+        return this.targetPath;
+    }
+
+    @JsonProperty("target_path")
+    public void setTargetPath(String targetPath) {
+        this.targetPath = targetPath;
     }
 }

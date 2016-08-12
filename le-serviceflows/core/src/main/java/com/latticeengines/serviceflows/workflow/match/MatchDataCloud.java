@@ -71,7 +71,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
         MatchInput matchInput = new MatchInput();
         matchInput.setYarnQueue(getConfiguration().getMatchQueue());
-
+        matchInput.setTableName(preMatchEventTable.getName());
+        
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
             throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
@@ -137,7 +138,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } catch (Exception e) {
             throw new RuntimeException("Failed to extract avro schema from input avro.", e);
         }
-
+        
         Schema schema = AvroUtils.alignFields(providedSchema, extractedSchema);
 
         inputBuffer.setSchema(schema);

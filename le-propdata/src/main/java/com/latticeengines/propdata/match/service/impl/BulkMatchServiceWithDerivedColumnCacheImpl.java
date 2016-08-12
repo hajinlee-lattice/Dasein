@@ -28,16 +28,16 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     private static Log log = LogFactory.getLog(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
     @Autowired
-    private MatchCommandService matchCommandService;
+    protected MatchCommandService matchCommandService;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Autowired
-    private WorkflowProxy workflowProxy;
+    protected WorkflowProxy workflowProxy;
 
     @Autowired
-    private PropDataTenantService propDataTenantService;
+    protected PropDataTenantService propDataTenantService;
 
     @Value("${propdata.match.max.num.blocks:4}")
     private Integer maxNumBlocks;
@@ -49,7 +49,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     private Integer groupSize;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
-    private String microserviceHostport;
+    protected String microserviceHostport;
 
     @Value("${propdata.match.average.block.size:2500}")
     private Integer averageBlockSize;
@@ -69,14 +69,15 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
         MatchInputValidator.validateBulkInput(input, yarnConfiguration);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
 
-        String uuid = UUID.randomUUID().toString().toUpperCase();
+        String rootOperationUid = UUID.randomUUID().toString().toUpperCase();
 
         if (StringUtils.isEmpty(hdfsPodId)) {
             hdfsPodId = CamilleEnvironment.getPodId();
         }
         log.info("PodId = " + hdfsPodId);
         HdfsPodContext.changeHdfsPodId(hdfsPodId);
-        return submitMultipleBlockToWorkflow(input, hdfsPodId, uuid);
+
+        return submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
     }
 
     @Override
@@ -84,20 +85,20 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
         return matchCommandService.getByRootOperationUid(rootOperationUid);
     }
 
-    private MatchCommand submitMultipleBlockToWorkflow(MatchInput input, String hdfsPodId, String uuid) {
+    protected MatchCommand submitBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
         propDataTenantService.bootstrapServiceTenant();
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         ApplicationId appId = submitter //
                 .matchInput(input) //
                 .returnUnmatched(input.getReturnUnmatched()) //
                 .hdfsPodId(hdfsPodId) //
-                .rootOperationUid(uuid) //
+                .rootOperationUid(rootOperationUid) //
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
                 .excludePublicDomains(input.getExcludePublicDomains()) //
                 .submit();
-        return matchCommandService.start(input, appId, uuid);
+        return matchCommandService.start(input, appId, rootOperationUid);
     }
 
 }

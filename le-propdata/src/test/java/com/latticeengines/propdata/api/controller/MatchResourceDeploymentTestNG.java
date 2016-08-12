@@ -1,17 +1,9 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.Schema;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -87,7 +79,14 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     public void testBulkMatchWithSchema() throws Exception {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
-        uploadDataCsv(avroDir, fileName);
+        List<Class<?>> fieldTypes = new ArrayList<>();
+        fieldTypes.add(Integer.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        uploadDataCsv(avroDir, fileName, "com/latticeengines/propdata/match/BulkMatchInput.csv", fieldTypes);
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
 
@@ -176,48 +175,6 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         return matchInput;
     }
 
-    @SuppressWarnings("unchecked")
-    protected void uploadDataCsv(String avroDir, String fileName) {
-        try {
-            URL url = Thread.currentThread().getContextClassLoader()
-                    .getResource("com/latticeengines/propdata/match/BulkMatchInput.csv");
-            if (url == null) {
-                throw new RuntimeException("Cannot find resource BulkMatchInput.csv");
-            }
-            CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
-            List<List<Object>> data = new ArrayList<>();
-            List<String> fieldNames = new ArrayList<>(Collections.singleton("ID"));
-            int rowNum = 0;
-            for (CSVRecord record : parser.getRecords()) {
-                if (rowNum == 0) {
-                    fieldNames.addAll(IteratorUtils.toList(record.iterator()));
-                } else if (record.size() > 0 ){
-                    List<Object> row = new ArrayList<>();
-                    row.add((int) record.getRecordNumber());
-                    for (String field: record) {
-                        if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
-                            row.add(null);
-                        } else {
-                            row.add(field);
-                        }
-                    }
-                    data.add(row);
-                }
-                rowNum++;
-            }
-            List<Class<?>> fieldTypes = new ArrayList<>();
-            fieldTypes.add(Integer.class);
-            fieldTypes.add(String.class);
-            fieldTypes.add(String.class);
-            fieldTypes.add(String.class);
-            fieldTypes.add(String.class);
-            fieldTypes.add(String.class);
-            uploadAvroData(data, fieldNames, fieldTypes, avroDir, fileName);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload test avro.", e);
-        }
-    }
-
     private void uploadTestAVro(String avroDir, String fileName) {
         try {
             HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration,
@@ -226,15 +183,4 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
             throw new RuntimeException("Failed to upload test avro.", e);
         }
     }
-
-    private void cleanupAvroDir(String avroDir) {
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, avroDir)) {
-                HdfsUtils.rmdir(yarnConfiguration, avroDir);
-            }
-        } catch (Exception e) {
-            Assert.fail("Failed to clean up " + avroDir, e);
-        }
-    }
-
 }

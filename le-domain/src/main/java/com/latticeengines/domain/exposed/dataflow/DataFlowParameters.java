@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.propdata.match.ParseMatchResultParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.propdata.match.ParseMatchResultParamete
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //
         @JsonSubTypes.Type(value = CreateReportParameters.class, name = "createReportParameters"), //
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
+        @JsonSubTypes.Type(value = CascadingBulkMatchDataflowParameters.class, name = "cascadingBulkMatchDataflowParameters"), //
 })
 public class DataFlowParameters {
 

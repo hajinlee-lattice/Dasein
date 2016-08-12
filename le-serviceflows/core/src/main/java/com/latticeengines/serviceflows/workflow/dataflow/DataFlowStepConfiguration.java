@@ -21,7 +21,10 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String targetTableName;
 
+    private String targetPath;
+
     private DataFlowParameters dataFlowParams;
+
 
     @JsonProperty("extra_sources")
     public Map<String, String> getExtraSources() {
@@ -51,6 +54,16 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("target_table_name")
     public void setTargetTableName(String targetTableName) {
         this.targetTableName = targetTableName;
+    }
+
+    @JsonProperty("target_path")
+    public String getTargetPath() {
+        return targetPath;
+    }
+
+    @JsonProperty("target_path")
+    public void setTargetPath(String targetPath) {
+        this.targetPath = targetPath;
     }
 
     @JsonProperty("data_flow_params")

@@ -125,57 +125,14 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
             }
             fieldBuilder = fieldBuilder.prop("Nullable", "true");
             String dataType = columnMetadata.getDataType();
-            Schema.Type type = getAvroTypeFromSqlServerDataType(dataType);
+            Schema.Type type = getAvroTypeDataType(dataType);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);
         }
         return fieldAssembler.endRecord();
     }
 
-    private static Schema.Type getAvroTypeFromSqlServerDataType(String dataType) {
-        if (StringUtils.isEmpty(dataType)) {
-            return null;
-        }
-
-        if (dataType.toLowerCase().contains("varchar")) {
-            return AvroUtils.getAvroType(String.class);
-        }
-
-        if ("INT".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Integer.class);
-        }
-
-        if ("BIGINT".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Long.class);
-        }
-
-        if ("REAL".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Float.class);
-        }
-
-        if ("FLOAT".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Double.class);
-        }
-
-        if ("BIT".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Boolean.class);
-        }
-
-        if ("DATETIME".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Long.class);
-        }
-
-        if ("DATETIME2".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Long.class);
-        }
-
-        if ("DATE".equalsIgnoreCase(dataType)) {
-            return AvroUtils.getAvroType(Long.class);
-        }
-
-        throw new RuntimeException("Unknown avro type for sql server data type " + dataType);
-
-    }
-
+    abstract protected Schema.Type getAvroTypeDataType(String dataType);
+    
     private void loadCache() {
         for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.values()) {
             try {

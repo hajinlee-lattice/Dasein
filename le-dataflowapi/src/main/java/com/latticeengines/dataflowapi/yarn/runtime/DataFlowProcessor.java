@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -90,9 +91,13 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty(DataFlowProperty.CUSTOMER, dataFlowConfig.getCustomerSpace().toString());
 
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sourceTables);
-        Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                dataFlowConfig.getCustomerSpace());
-        String targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
+        String targetPath = dataFlowConfig.getTargetPath();
+        if (StringUtils.isBlank(targetPath)) {
+            Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                    dataFlowConfig.getCustomerSpace());
+            targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
+        }
+
         log.info(String.format("Target path is %s", targetPath));
         ctx.setProperty(DataFlowProperty.EXTRACTFILTERS, getExtractFilters(dataFlowConfig));
         ctx.setProperty(DataFlowProperty.TARGETPATH, targetPath);

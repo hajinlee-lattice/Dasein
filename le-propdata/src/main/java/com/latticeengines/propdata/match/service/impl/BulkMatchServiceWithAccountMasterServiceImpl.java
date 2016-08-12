@@ -1,18 +1,33 @@
 package com.latticeengines.propdata.match.service.impl;
 
-import org.apache.commons.lang.NotImplementedException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.propdata.core.service.PropDataTenantService;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("bulkMatchServiceWithAccountMaster")
@@ -22,32 +37,31 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
-    @Autowired
-    private MatchCommandService matchCommandService;
+    private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
+    private static final String DUNS_INDEX_KEY = "DunsIndex";
+    private static final String DOMAIN_INDEX_KEY = "DomainIndex";
+    private static final String INPUT_AVRO_KEY = "InputAvro";
 
-    @Autowired
-    private Configuration yarnConfiguration;
+    @Value("${propdata.match.domain.index.path}")
+    private String domainIndexPath;
 
-    @Autowired
-    private WorkflowProxy workflowProxy;
+    @Value("${propdata.match.duns.index.path}")
+    private String dunsIndexPath;
 
-    @Autowired
-    private PropDataTenantService propDataTenantService;
+    @Value("${propdata.match.account.master.path}")
+    private String accountMasterPath;
 
-    @Value("${propdata.match.max.num.blocks:4}")
-    private Integer maxNumBlocks;
-
-    @Value("${propdata.match.num.threads:4}")
-    private Integer threadPoolSize;
-
-    @Value("${propdata.match.bulk.group.size:20}")
-    private Integer groupSize;
+    @Resource(name = "columnMetadataServiceDispatch")
+    private ColumnMetadataService columnMetadataService;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
-    private String microserviceHostport;
+    protected String microServiceHostPort;
 
-    @Value("${propdata.match.average.block.size:2500}")
-    private Integer averageBlockSize;
+    @Autowired
+    protected WorkflowProxy workflowProxy;
+
+    @Autowired
+    private HdfsPathBuilder hdfsPathBuilder;
 
     @Override
     public boolean accept(String version) {
@@ -60,15 +74,108 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     }
 
     @Override
-    public MatchCommand match(MatchInput input, String hdfsPodId) {
-        // TODO - need to be implemented by Lei
-        throw new NotImplementedException("Impl of account master based match is yet to be implemented");
+    protected MatchCommand submitBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
+        propDataTenantService.bootstrapServiceTenant();
+        String targetPath = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+        CascadingBulkMatchWorkflowConfiguration.Builder builder = new CascadingBulkMatchWorkflowConfiguration.Builder();
+        builder = builder //
+                .matchInput(input) //
+                .hdfsPodId(hdfsPodId) //
+                .rootOperationUid(rootOperationUid) //
+                .microServiceHostPort(microServiceHostPort) //
+                .inputProperties() //
+                .targetTableName(input.getTableName() + "_match_target") //
+                .targetPath(targetPath) //
+                .setBeanName("cascadingBulkMatchDataflow");
+
+        Schema outputSchema = constructOutputSchema(input, rootOperationUid);
+        String outputSchemaPath = writeOutputSchemaAvsc(input, outputSchema, rootOperationUid);
+        builder.dataflowParameter(getDataflowParameters(input, hdfsPodId, outputSchemaPath)) //
+                .dataflowExtraSources(getDataflowExtraSources(input));
+
+        CascadingBulkMatchWorkflowSubmitter submitter = new CascadingBulkMatchWorkflowSubmitter();
+        submitter.setWorkflowProxy(workflowProxy);
+        ApplicationId appId = submitter.submit(builder.build());
+        return matchCommandService.start(input, appId, rootOperationUid);
     }
 
-    @Override
-    public MatchCommand status(String rootOperationUid) {
-        // TODO - need to be implemented by Lei
-        throw new NotImplementedException("Impl of account master based match is yet to be implemented");
+    private String writeOutputSchemaAvsc(MatchInput input, Schema outputSchema, String rootOperationUid) {
+        try {
+            String matchAvscPath = hdfsPathBuilder.constructMatchSchemaFile(rootOperationUid).toString();
+            if (!HdfsUtils.fileExists(yarnConfiguration, matchAvscPath)) {
+                HdfsUtils.writeToFile(yarnConfiguration, matchAvscPath, outputSchema.toString());
+            }
+            return matchAvscPath;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write schema file: " + e.getMessage(), e);
+        }
+    }
+
+    private Map<String, String> getDataflowExtraSources(MatchInput input) {
+        Map<String, String> extraSources = new HashMap<>();
+        extraSources.put(DOMAIN_INDEX_KEY, domainIndexPath);
+        extraSources.put(DUNS_INDEX_KEY, dunsIndexPath);
+        extraSources.put(ACCOUNT_MASTER_KEY, accountMasterPath);
+        InputBuffer inputBuffer = input.getInputBuffer();
+        AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
+        String avroPath = avroInputBuffer.getAvroDir();
+        extraSources.put(INPUT_AVRO_KEY, avroPath);
+
+        return extraSources;
+    }
+
+    private CascadingBulkMatchDataflowParameters getDataflowParameters(MatchInput input, String hdfsPodId,
+            String outputSchemaPath) {
+        CascadingBulkMatchDataflowParameters parameters = new CascadingBulkMatchDataflowParameters();
+        parameters.setDomainIndex(DOMAIN_INDEX_KEY);
+        parameters.setDunsIndex(DUNS_INDEX_KEY);
+        parameters.setAccountMaster(ACCOUNT_MASTER_KEY);
+        parameters.setInputAvro(INPUT_AVRO_KEY);
+        parameters.setExcludePublicDomains(input.getExcludePublicDomains());
+        parameters.setReturnUnmatched(input.getReturnUnmatched());
+        parameters.setOutputSchemaPath(outputSchemaPath);
+        parameters.setKeyMap(input.getKeyMap());
+
+        return parameters;
+    }
+
+    private Schema constructOutputSchema(MatchInput input, String rootOperationUid) {
+        Schema outputSchema = columnMetadataService.getAvroSchema(input.getPredefinedSelection(),
+                "PropDataMatchOutput", input.getDataCloudVersion());
+
+        InputBuffer inputBuffer = input.getInputBuffer();
+        AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
+        String avroPath = avroInputBuffer.getAvroDir();
+        Schema inputSchema = avroInputBuffer.getSchema();
+        if (inputSchema == null) {
+            inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+            log.info("Using extracted input schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        } else {
+            log.info("Using provited input schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+        }
+        // inputSchema = prefixFieldName(inputSchema, "Source_");
+        // Schema combinedSchema = (Schema)
+        // AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
+        // return combinedSchema;
+        return outputSchema;
+    }
+
+    private Schema prefixFieldName(Schema schema, String prefix) {
+        SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(schema.getName());
+        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
+        SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
+        for (Schema.Field field : schema.getFields()) {
+            fieldBuilder = fieldAssembler.name(prefix + field.name());
+            @SuppressWarnings("deprecation")
+            Map<String, String> props = field.props();
+            for (Map.Entry<String, String> entry : props.entrySet()) {
+                fieldBuilder = fieldBuilder.prop(entry.getKey(), entry.getValue());
+            }
+            fieldAssembler = AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, AvroUtils.getType(field));
+        }
+        return fieldAssembler.endRecord();
     }
 
 }
