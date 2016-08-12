@@ -53,8 +53,13 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
-    // expected lines in data set to output to csv after bulk scoring
-    private static final int TOTAL_QUALIFIED_LINES = 4162;
+    private static final int TOTAL_TRAINING_LINES = 1126;
+
+    private static final int TOTAL_TESTING_LINES = 400;
+
+    private static final String TRAINING_CSV_FILE = "Lattice_Relaunch_Small.csv";
+
+    private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small_Testing.csv";
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -63,7 +68,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     private String applicationId;
     private Long jobId;
 
-    private String fileName;
+    private String trainingFileName;
+    private String testingFileName;
 
     private SourceFile sourceFile;
 
@@ -72,12 +78,13 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
+        trainingFileName = TRAINING_CSV_FILE;
+        testingFileName = TESTING_CSV_FILE;
+        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, trainingFileName);
     }
 
-    @Test(groups = "deployment.lp")
-    public void testScoreTrainingData() throws Exception {
+    @Test(groups = "deployment.lp", enabled = true, timeOut = 600000)
+    public void testScoreTrainingDataUsingMR() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId), //
@@ -86,10 +93,162 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
         assertNotNull(applicationId);
         jobType = "scoreWorkflow";
+        testScoreMRTrainingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingData", timeOut = 120000)
-    public void testJobIsListed() {
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 600000)
+    public void testScoreTestingDataUsingMR() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
+                sourceFile.getName()));
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        jobType = "importMatchAndScoreWorkflow";
+        testScoreTestingDatea();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 600000)
+    public void testScoreTrainingDataUsingRTS() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), modelId));
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE", getRestAPIHostPort(),
+                        modelId), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score training data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        jobType = "rtsBulkScoreWorkflow";
+        testScoreRTSTrainingData();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingRTS", enabled = true, timeOut = 600000)
+    public void testScoreTestingDataUsingRTS() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), modelId, sourceFile.getName()));
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                        getRestAPIHostPort(), modelId, sourceFile.getName()), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        jobType = "importAndRTSBulkScoreWorkflow";
+        testScoreTestingDatea();
+    }
+
+    private void testScoreMRTrainingData() throws IOException {
+        testJobIsListed(jobType);
+        poll();
+        downloadCsv(TOTAL_TRAINING_LINES);
+
+        uploadTestingDataFile();
+    }
+
+    private void testScoreRTSTrainingData() throws IOException {
+        testJobIsListed(jobType);
+        poll();
+        downloadCsv(TOTAL_TRAINING_LINES);
+        retrieveErrorsFile();
+        uploadTestingDataFile();
+    }
+
+    private void testScoreTestingDatea() throws IOException {
+        testJobIsListed(jobType);
+        poll();
+        downloadCsv(TOTAL_TESTING_LINES);
+        retrieveErrorsFile();
+    }
+
+    private void retrieveErrorsFile() {
+        // Relies on error in Account.csv
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                String.format("%s/pls/scores/jobs/%s/errors", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String errors = new String(response.getBody());
+        assertTrue(errors.length() > 0);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void uploadTestingDataFile() {
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + testingFileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+        ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
+                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
+                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
+        assertTrue(response.isSuccess());
+        sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+        log.info(sourceFile.getName());
+    }
+
+    private void downloadCsv(int totalRowNumber) throws IOException {
+        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
+                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String results = new String(response.getBody());
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
+        assertTrue(results.length() > 0);
+        CSVParser parser = null;
+        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStreamReader reader = new InputStreamReader(is);
+        CSVFormat format = LECSVFormat.format;
+        try {
+            parser = new CSVParser(reader, format);
+            Set<String> csvHeaders = parser.getHeaderMap().keySet();
+            assertTrue(csvHeaders.contains("Activity_Count_Click_Email"));
+            assertTrue(csvHeaders.contains("Industry"));
+            assertTrue(csvHeaders.contains("PhoneNumber"));
+            assertTrue(csvHeaders.contains("Score"));
+            assertFalse(csvHeaders.contains("RawScore"));
+
+            int line = 1;
+            for (CSVRecord record : parser.getRecords()) {
+                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
+                line++;
+            }
+            assertEquals(line, totalRowNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            parser.close();
+        }
+    }
+
+    private void poll() {
+        JobStatus terminal;
+        while (true) {
+            Job job = selfServiceModeling.getRestTemplate().getForObject(
+                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
+            assertNotNull(job);
+            jobId = job.getId();
+            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
+                terminal = job.getJobStatus();
+                break;
+            }
+            sleep(1000);
+        }
+
+        assertEquals(terminal, JobStatus.COMPLETED);
+    }
+
+    private void testJobIsListed(final String jobType) {
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
@@ -112,123 +271,6 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         }
 
         assertTrue(any);
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "testJobIsListed", timeOut = 1800000)
-    public void poll() {
-        JobStatus terminal;
-        while (true) {
-            Job job = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
-            assertNotNull(job);
-            jobId = job.getId();
-            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
-                terminal = job.getJobStatus();
-                break;
-            }
-            sleep(1000);
-        }
-
-        assertEquals(terminal, JobStatus.COMPLETED);
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "poll")
-    public void downloadCsv() throws IOException {
-        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.ALL));
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
-                byte[].class);
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-        String results = new String(response.getBody());
-        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
-        assertTrue(results.length() > 0);
-        CSVParser parser = null;
-        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
-        InputStreamReader reader = new InputStreamReader(is);
-        CSVFormat format = LECSVFormat.format;
-        try {
-            parser = new CSVParser(reader, format);
-            Set<String> csvHeaders = parser.getHeaderMap().keySet();
-            assertTrue(csvHeaders.contains("LEAD"));
-            assertTrue(csvHeaders.contains("Phone"));
-            assertTrue(csvHeaders.contains("Some Column"));
-            assertTrue(csvHeaders.contains("Score"));
-            assertTrue(csvHeaders.contains("BusinessCountry"));
-            assertFalse(csvHeaders.contains("RawScore"));
-
-            int line = 1;
-            for (CSVRecord record : parser.getRecords()) {
-                assertTrue(StringUtils.isNotEmpty(record.get("Score")));
-                line++;
-            }
-            assertEquals(line, TOTAL_QUALIFIED_LINES);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            parser.close();
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv")
-    public void uploadTestingDataFile() {
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
-                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
-                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
-        assertTrue(response.isSuccess());
-        sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
-        log.info(sourceFile.getName());
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
-    public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
-                sourceFile.getName()));
-        applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
-                null, String.class);
-        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
-        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
-        assertNotNull(applicationId);
-        jobType = "importMatchAndScoreWorkflow";
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 120000, enabled = true)
-    public void testScoringTestDataJobIsListed() {
-        testJobIsListed();
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 1800000, enabled = true)
-    public void pollScoringTestDataJob() {
-        poll();
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = true)
-    public void downloadTestingDataScoreResultCsv() throws IOException {
-        downloadCsv();
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "downloadTestingDataScoreResultCsv", enabled = true)
-    public void downloadTestingDataErrorsFile() throws IOException {
-        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.ALL));
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = restTemplate.exchange(
-                String.format("%s/pls/scores/jobs/%s/errors", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
-                byte[].class);
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-        String errors = new String(response.getBody());
-        assertTrue(errors.length() > 0);
     }
 
     private void sleep(long msec) {
