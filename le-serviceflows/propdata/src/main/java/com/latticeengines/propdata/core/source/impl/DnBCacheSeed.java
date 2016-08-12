@@ -44,7 +44,7 @@ public class DnBCacheSeed implements TransformedToAvroSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "SeedID", "LE_Last_Upload_Date" };
+        return new String[] { "LE_PRIMARY_DUNS", "LE_DOMAIN" };
     }
 
     @Override
