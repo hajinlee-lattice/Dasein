@@ -20,9 +20,9 @@ import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfig
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.engine.common.service.SourceColumnService;
 import com.latticeengines.propdata.engine.publication.service.PublishConfigurationParser;
-import com.latticeengines.propdata.workflow.engine.steps.EngineConstants;
 
 @Component("publishConfigurationParser")
 public class PublishConfigurationParserImpl implements PublishConfigurationParser {

@@ -22,10 +22,10 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.engine.transformation.configuration.FileInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
@@ -85,7 +85,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
             for (int i = 0; i < gzHdfsPaths.size(); i++) {
                 String gzHdfsPath = gzHdfsPaths.get(i);
                 String uncompressedFilePath = new Path(workflowDir,
-                        UNCOMPRESSED_FILE + String.format("%04d", i) + PropDataConstants.CSV)
+                        UNCOMPRESSED_FILE + String.format("%04d", i) + EngineConstants.CSV)
                                 .toString();
                 log.info("UncompressedFilePath: " + uncompressedFilePath);
                 String avroDirPath = new Path(workflowDir, new Path(AVRO_DIR_FOR_CONVERSION,
@@ -96,7 +96,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                     untarGZFile(gzHdfsPath, uncompressedFilePath);
                     convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath,
                             inputConfig);
-                    List<String> avroFilePaths = scanDir(avroDirPath, PropDataConstants.AVRO);
+                    List<String> avroFilePaths = scanDir(avroDirPath, EngineConstants.AVRO);
                     for (String avroFilePath : avroFilePaths) {
                         Path srcAvroFilePath = new Path(avroFilePath);
                         Path dstAvroFilePath = new Path(
@@ -132,7 +132,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                 if (fullPath.startsWith(inputDir)) {
                     resultFiles.add(fullPath);
                 } else {
-                    if (fullPath.contains(fullPath)) {
+                    if (fullPath.contains(inputDir)) {
                         resultFiles.add(fullPath.substring(fullPath.indexOf(inputDir)));
                     }
                 }

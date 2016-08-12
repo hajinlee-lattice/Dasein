@@ -8,8 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.fs.Path;
+import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +23,6 @@ import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfigurati
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.propdata.core.IngestionNames;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionProgressEntityMgr;
@@ -86,46 +88,36 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     public String constructDestination(Ingestion ingestion, String fileName) {
         com.latticeengines.domain.exposed.camille.Path fileDest = hdfsPathBuilder
                 .constructIngestionDir(ingestion.getIngestionName());
-        if (ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)) {
-            try {
-                DateFormat format = new SimpleDateFormat("yyyyMMdd");
-                TimeZone timezone = TimeZone.getTimeZone("UTC");
-                format.setTimeZone(timezone);
-                String fileVersion = HdfsPathBuilder.dateFormat
-                        .format(format.parse(fileName.substring(17, 25)));
-                fileDest = fileDest.append(fileVersion).append(fileName);
-            } catch (ParseException e) {
-                throw new RuntimeException("Failed to parse source file version");
-            }
-
-        } else if (ingestion.getIngestionName().equals(IngestionNames.CACHESEED_CSVGZ)) {
-            try {
-                DateFormat format = new SimpleDateFormat("yyyyMMdd");
-                TimeZone timezone = TimeZone.getTimeZone("UTC");
-                format.setTimeZone(timezone);
-                String fileVersion = HdfsPathBuilder.dateFormat
-                        .format(format.parse(format.format(new Date())));
-                fileDest = fileDest.append(fileVersion).append(fileName);
-            } catch (ParseException e) {
-                throw new RuntimeException("Failed to parse source file version");
-            }
-        } else if (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)) {
-            try {
-                DateFormat format = new SimpleDateFormat("yyyy_MM");
-                TimeZone timezone = TimeZone.getTimeZone("UTC");
-                format.setTimeZone(timezone);
-                String fileVersion = HdfsPathBuilder.dateFormat
-                        .format(format.parse(fileName.substring(15, 22)));
-                fileDest = fileDest.append(fileVersion).append(fileName);
-            } catch (ParseException e) {
-                throw new RuntimeException("Failed to parse source file version");
-            }
-        } else {
-            String fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
-            fileDest = fileDest.append(fileVersion).append(fileName);
+        String fileVersion = null;
+        switch (ingestion.getIngestionType()) {
+            case SFTP:
+                SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+                String timestampPattern = config.getFileTimestamp().replace("d", "\\d")
+                        .replace("y", "\\d").replace("M", "\\d");
+                Log.info("TimestampPattern: " + timestampPattern);
+                Pattern pattern = Pattern.compile(timestampPattern);
+                Matcher matcher = pattern.matcher(fileName);
+                if (matcher.find()) {
+                    String timestampStr = matcher.group();
+                    DateFormat df = new SimpleDateFormat(config.getFileTimestamp());
+                    TimeZone timezone = TimeZone.getTimeZone("UTC");
+                    df.setTimeZone(timezone);
+                    try {
+                        fileVersion = HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
+                    } catch (ParseException e) {
+                        throw new RuntimeException("Failed to parse timestamp " + timestampStr);
+                    }
+                } else {
+                    throw new RuntimeException("Failed to parse filename " + fileName);
+                }
+                break;
+            default:
+                fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
+                break;
         }
-
+        fileDest = fileDest.append(fileVersion).append(fileName);
         return fileDest.toString();
+
     }
 
     @Override
@@ -138,6 +130,13 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     @Override
     public List<IngestionProgress> getRetryFailedProgresses() {
         return ingestionProgressEntityMgr.getRetryFailedProgresses();
+    }
+
+    @Override
+    public List<IngestionProgress> getProcessingProgresses() {
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put("Status", ProgressStatus.PROCESSING);
+        return getProgressesByField(fields);
     }
 
     @Override

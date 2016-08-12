@@ -1,23 +1,20 @@
 package com.latticeengines.propdata.engine.ingestion.service.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -26,40 +23,35 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.propdata.core.IngestionNames;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
+import com.latticeengines.propdata.engine.common.EngineConstants;
+import com.latticeengines.propdata.engine.common.SftpUtils;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionNewProgressValidator;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionProgressService;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
+import com.latticeengines.propdata.engine.ingestion.service.IngestionVersionService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
 public class IngestionServiceImpl implements IngestionService {
     private static Log log = LogFactory.getLog(IngestionServiceImpl.class);
-
-    private static final String BOMBORA_FIREHOSE = "Bombora_Firehose_";
 
     @Autowired
     IngestionEntityMgr ingestionEntityMgr;
@@ -69,6 +61,9 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Autowired
     private IngestionNewProgressValidator ingestionNewProgressValidator;
+
+    @Autowired
+    private IngestionVersionService ingestionVersionService;
 
     @Autowired
     private PropDataTenantService propDataTenantService;
@@ -88,6 +83,7 @@ public class IngestionServiceImpl implements IngestionService {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         killFailedProgresses();
+        checkCompleteIngestions();
         ingestAll();
         return kickoffAll();
     }
@@ -102,7 +98,7 @@ public class IngestionServiceImpl implements IngestionService {
         IngestionProgress progress = ingestionProgressService.createPreprocessProgress(ingestion,
                 ingestionRequest.getSubmitter(), ingestionRequest.getFileName());
         if (ingestion.getIngestionType() == IngestionType.SFTP
-                && !ifSftpFileExists((SftpConfiguration) ingestion.getProviderConfiguration(),
+                && !SftpUtils.ifFileExists((SftpConfiguration) ingestion.getProviderConfiguration(),
                         ingestionRequest.getFileName())) {
             return ingestionProgressService.updateInvalidProgress(progress,
                     ingestionRequest.getFileName() + " does not exist in source SFTP");
@@ -158,7 +154,78 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
-    public void ingestAll() {
+    @Override
+    public void checkCompleteIngestions() {
+        List<Ingestion> ingestions = ingestionEntityMgr.findAll();
+        for (Ingestion ingestion : ingestions) {
+            if (ingestion.getProviderConfiguration() instanceof SftpConfiguration) {
+                SftpConfiguration sftpConfig = (SftpConfiguration) ingestion
+                        .getProviderConfiguration();
+                List<String> mostRecentVersions = ingestionVersionService
+                        .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(),
+                                sftpConfig.getCheckVersion());
+                for (String version : mostRecentVersions) {
+                    checkCompleteVersionFromSftp(ingestion.getIngestionName(), version, sftpConfig);
+                }
+            }
+        }
+    }
+
+    private void checkCompleteVersionFromSftp(String ingestionName, String version,
+            SftpConfiguration sftpConfig) {
+        String fileNamePattern = ingestionVersionService.getFileNamePattern(version,
+                sftpConfig.getFileNamePrefix(), sftpConfig.getFileNamePostfix(),
+                sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
+        List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
+        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
+                .constructIngestionDir(ingestionName, version);
+        List<String> hdfsFiles = getHdfsFileNames(hdfsDir.toString(),
+                sftpConfig.getFileExtension());
+        if (sftpFiles.size() > hdfsFiles.size()) {
+            return;
+        }
+        Set<String> hdfsFileSet = new HashSet<String>(hdfsFiles);
+        for (String sftpFile : sftpFiles) {
+            if (!hdfsFileSet.contains(sftpFile)) {
+                return;
+            }
+        }
+        Path success = new Path(hdfsDir.toString(), EngineConstants.INGESTION_SUCCESS);
+        try {
+            if (!HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Failed to create " + EngineConstants.INGESTION_SUCCESS + " in HDFS");
+        }
+    }
+
+    private List<String> getHdfsFileNames(String hdfsDir, final String fileExtension) {
+        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String filename) {
+                return filename.endsWith(fileExtension);
+            }
+        };
+        List<String> result = new ArrayList<String>();
+        try {
+            if (HdfsUtils.isDirectory(yarnConfiguration, hdfsDir.toString())) {
+                List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir,
+                        filter);
+                if (!CollectionUtils.isEmpty(hdfsFiles)) {
+                    for (String fullName : hdfsFiles) {
+                        result.add(new Path(fullName).getName());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to scan hdfs directory " + hdfsDir.toString());
+        }
+        return result;
+    }
+
+    private void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
         for (Ingestion ingestion : ingestions) {
@@ -171,14 +238,7 @@ public class IngestionServiceImpl implements IngestionService {
         ingestionProgressService.saveProgresses(progresses);
     }
 
-    public List<IngestionProgress> kickoffAll() {
-        List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
-        progresses.addAll(ingestionProgressService.getNewIngestionProgresses());
-        progresses.addAll(ingestionProgressService.getRetryFailedProgresses());
-        return submitAll(progresses);
-    }
-
-    public List<IngestionProgress> getPreprocessProgresses(Ingestion ingestion) {
+    private List<IngestionProgress> getPreprocessProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
         switch (ingestion.getIngestionCriteria()) {
             case ANY_MISSING_FILE:
@@ -190,8 +250,6 @@ public class IngestionServiceImpl implements IngestionService {
                 }
                 break;
             case ALL_DATA:
-                SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) ingestion
-                        .getProviderConfiguration();
                 SimpleDateFormat format = new SimpleDateFormat("_yyyy_MM");
                 String fileName = format.format(new Date());
                 IngestionProgress progress = ingestionProgressService.createPreprocessProgress(
@@ -208,47 +266,99 @@ public class IngestionServiceImpl implements IngestionService {
     @Override
     public List<String> getMissingFiles(Ingestion ingestion) {
         List<String> targetFiles = getTargetFiles(ingestion);
-        if (ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)) {
-            targetFiles = filterBomboraFiles(targetFiles);
-        } else if (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)) {
-            targetFiles = filterDnBFiles(targetFiles, "OUTPUT");
-        }
-        com.latticeengines.domain.exposed.camille.Path hdfsDest = hdfsPathBuilder
-                .constructIngestionDir(ingestion.getIngestionName());
-        Set<String> existingFiles = new HashSet<String>();
-        try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, hdfsDest.toString())) {
-                List<String> hdfsFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
-                        hdfsDest.toString(), null);
-                for (String file : hdfsFiles) {
-                    if (!HdfsUtils.isDirectory(yarnConfiguration, file)
-                    && ((ingestion.getIngestionName().equals(IngestionNames.BOMBORA_FIREHOSE)
-                        && file.endsWith(PropDataConstants.CSV_GZ))
-                     || (ingestion.getIngestionName().equals(IngestionNames.DNB_CASHESEED)
-                        && file.endsWith(PropDataConstants.OUT_GZ)))) {
-                        Path path = new Path(file);
-                        existingFiles.add(path.getName());
-                    }
-                }
-
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to scan hdfs directory " + hdfsDest.toString());
-        }
-        Iterator<String> iter = targetFiles.iterator();
-        while (iter.hasNext()) {
-            String file = iter.next();
-            if (existingFiles.contains(file)) {
-                iter.remove();
-            } else {
-                log.info("Found missing file to download: " + file);
+        List<String> existingFiles = getExistingFiles(ingestion);
+        Set<String> existingFilesSet = new HashSet<String>(existingFiles);
+        List<String> result = new ArrayList<String>();
+        for (String targetFile : targetFiles) {
+            if (!existingFilesSet.contains(targetFile)) {
+                result.add(targetFile);
+                log.info("Found missing file to download: " + targetFile);
             }
         }
-
-        return targetFiles;
+        return result;
     }
 
-    public List<IngestionProgress> submitAll(List<IngestionProgress> progresses) {
+    @Override
+    public List<String> getTargetFiles(Ingestion ingestion) {
+        switch (ingestion.getIngestionType()) {
+            case SFTP:
+                SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+                String fileNamePattern = config.getFileNamePrefix() + "(.*)"
+                        + config.getFileNamePostfix() + config.getFileExtension();
+                List<String> fileNames = SftpUtils.getFileNames(config, fileNamePattern);
+                return ingestionVersionService.getFileNamesOfMostRecentVersions(fileNames,
+                        config.getCheckVersion(), config.getCheckStrategy(),
+                        config.getFileTimestamp());
+            default:
+                throw new RuntimeException(
+                        "Ingestion type " + ingestion.getIngestionType() + " is not supported");
+        }
+    }
+
+    @Override
+    public List<String> getExistingFiles(Ingestion ingestion) {
+        com.latticeengines.domain.exposed.camille.Path ingestionDir = hdfsPathBuilder
+                .constructIngestionDir(ingestion.getIngestionName());
+        List<String> result = new ArrayList<String>();
+        switch (ingestion.getIngestionType()) {
+            case SFTP:
+                SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+                final String fileExtension = config.getFileExtension();
+                HdfsFileFilter filter = new HdfsFileFilter() {
+                    @Override
+                    public boolean accept(FileStatus file) {
+                        return file.getPath().getName().endsWith(fileExtension);
+                    }
+                };
+                try {
+                    if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
+                        List<String> hdfsFiles = HdfsUtils.getFilesForDirRecursive(
+                                yarnConfiguration, ingestionDir.toString(), filter);
+                        if (!CollectionUtils.isEmpty(hdfsFiles)) {
+                            for (String fullName : hdfsFiles) {
+                                result.add(new Path(fullName).getName());
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            "Failed to scan hdfs directory " + ingestionDir.toString());
+                }
+                return result;
+            default:
+                throw new RuntimeException(
+                        "Ingestion type " + ingestion.getIngestionType() + " is not supported");
+        }
+    }
+
+    private List<IngestionProgress> kickoffAll() {
+        List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
+        List<IngestionProgress> newProgresses = ingestionProgressService
+                .getNewIngestionProgresses();
+        List<IngestionProgress> retryFailedProgresses = ingestionProgressService
+                .getRetryFailedProgresses();
+        List<IngestionProgress> processingProgresses = ingestionProgressService
+                .getProcessingProgresses();
+        Set<String> processingIngestion = new HashSet<String>();
+        for (IngestionProgress progress : processingProgresses) {
+            processingIngestion.add(progress.getIngestionName());
+        }
+        for (IngestionProgress progress : retryFailedProgresses) {
+            if (!processingIngestion.contains(progress.getIngestionName())) {
+                progresses.add(progress);
+                processingIngestion.add(progress.getIngestionName());
+            }
+        }
+        for (IngestionProgress progress : newProgresses) {
+            if (!processingIngestion.contains(progress.getIngestionName())) {
+                progresses.add(progress);
+                processingIngestion.add(progress.getIngestionName());
+            }
+        }
+        return submitAll(progresses);
+    }
+
+    private List<IngestionProgress> submitAll(List<IngestionProgress> progresses) {
         List<IngestionProgress> submittedProgresses = new ArrayList<IngestionProgress>();
         Boolean serviceTenantBootstrapped = false;
         for (IngestionProgress progress : progresses) {
@@ -281,98 +391,5 @@ public class IngestionServiceImpl implements IngestionService {
                 .submit();
     }
 
-    @Override
-    public List<String> getTargetFiles(Ingestion ingestion) {
-        switch (ingestion.getIngestionType()) {
-            case SFTP:
-            return getSftpFiles((SftpConfiguration) ingestion.getProviderConfiguration());
-        default:
-            throw new RuntimeException(
-                    "Ingestion type " + ingestion.getIngestionType() + " is not supported");
-        }
-
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> getSftpFiles(SftpConfiguration config) {
-        try {
-            JSch jsch = new JSch();
-            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
-                    config.getSftpPort());
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
-            session.connect();
-            Channel channel = session.openChannel("sftp");
-            channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
-            sftpChannel.cd("." + config.getSftpDir());
-            Vector<ChannelSftp.LsEntry> files = sftpChannel.ls(".");
-            List<String> fileSources = new ArrayList<String>();
-            for (int i = 0; i < files.size(); i++) {
-                ChannelSftp.LsEntry file = files.get(i);
-                if (!file.getAttrs().isDir()) {
-                    fileSources.add(file.getFilename());
-                }
-            }
-            sftpChannel.exit();
-            session.disconnect();
-            return fileSources;
-        } catch (JSchException | SftpException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean ifSftpFileExists(SftpConfiguration config, String fileName) {
-        boolean res = false;
-        try {
-            JSch jsch = new JSch();
-            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
-                    config.getSftpPort());
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
-            session.connect();
-            Channel channel = session.openChannel("sftp");
-            channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
-            sftpChannel.cd("." + config.getSftpDir());
-            InputStream is = sftpChannel.get(fileName);
-            res = is != null;
-            sftpChannel.exit();
-            session.disconnect();
-        } catch (JSchException | SftpException e) {
-            res = false;
-        }
-        return res;
-    }
-
-    private List<String> filterBomboraFiles(List<String> files) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
-        String cutoffDate = format.format(cal.getTime());
-        Iterator<String> iter = files.iterator();
-        while (iter.hasNext()) {
-            String file = iter.next();
-            if (file.startsWith(BOMBORA_FIREHOSE) && file.endsWith(PropDataConstants.CSV_GZ) && file
-                    .compareTo(BOMBORA_FIREHOSE + cutoffDate + PropDataConstants.CSV_GZ) >= 0) {
-                continue;
-            }
-            iter.remove();
-        }
-        return files;
-    }
-
-    private List<String> filterDnBFiles(List<String> files, String fileType) {
-        Iterator<String> iter = files.iterator();
-        while (iter.hasNext()) {
-            String file = iter.next();
-            if (file.startsWith("LE_SEED_" + fileType) && file.endsWith(PropDataConstants.OUT_GZ)) {
-                continue;
-            }
-            iter.remove();
-        }
-        return files;
-    }
 
 }

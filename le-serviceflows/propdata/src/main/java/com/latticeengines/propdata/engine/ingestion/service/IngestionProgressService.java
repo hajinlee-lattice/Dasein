@@ -24,6 +24,8 @@ public interface IngestionProgressService {
 
     public List<IngestionProgress> getRetryFailedProgresses();
 
+    public List<IngestionProgress> getProcessingProgresses();
+
     public CamelRouteConfiguration createCamelRouteConfiguration(IngestionProgress progress);
 
     public IngestionProgress saveProgress(IngestionProgress progress);

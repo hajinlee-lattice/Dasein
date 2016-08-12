@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.engine.transformation.configuration.impl;
 
-import com.latticeengines.propdata.core.PropDataConstants;
+import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.engine.transformation.configuration.FileInputSourceConfig;
 
 public class DnBCacheSeedInputSourceConfig extends FileInputSourceConfig {
@@ -17,7 +17,7 @@ public class DnBCacheSeedInputSourceConfig extends FileInputSourceConfig {
 
     @Override
     public String getExtension() {
-        return PropDataConstants.OUT_GZ;
+        return EngineConstants.OUT_GZ;
     }
 
     @Override

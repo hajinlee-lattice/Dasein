@@ -3,6 +3,7 @@ package com.latticeengines.propdata.workflow.engine.steps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -31,8 +32,8 @@ import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfigurati
 import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
+import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionProgressService;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
@@ -98,37 +99,30 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     }
 
     private void ingestionFromSftp() throws Exception {
+        String destFile = progress.getDestination();
+        Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
+                "TMP_" + UUID.randomUUID().toString());
+        Path tmpDestFile = new Path(tmpDestDir, new Path(progress.getDestination()).getName());
+        progress.setDestination(tmpDestFile.toString());
         CamelRouteConfiguration camelRouteConfig = ingestionProgressService
                 .createCamelRouteConfiguration(progress);
         ImportConfiguration importConfig = ImportConfiguration
                 .createForCamelRouteConfiguration(camelRouteConfig);
-        Path hdfsDir = new Path(progress.getDestination()).getParent();
-        if (HdfsUtils.fileExists(yarnConfiguration, progress.getDestination())) {
-            HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
-        }
-        Path downloadFlag = new Path(hdfsDir, EngineConstants.INGESTION_DOWNLOADING);
-        if (HdfsUtils.fileExists(yarnConfiguration, downloadFlag.toString())) {
-            HdfsUtils.rmdir(yarnConfiguration, downloadFlag.toString());
-        }
-        Path successFlag = new Path(hdfsDir, EngineConstants.INGESTION_SUCCESS);
-        if (HdfsUtils.fileExists(yarnConfiguration, successFlag.toString())) {
-            HdfsUtils.rmdir(yarnConfiguration, successFlag.toString());
-        }
+        progress.setDestination(destFile);
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         String eaiAppId = submission.getApplicationIds().get(0);
         log.info("EAI Service ApplicationId: " + eaiAppId);
         FinalApplicationStatus status = waitForStatus(eaiAppId, WORKFLOW_WAIT_TIME_IN_MILLIS,
                 FinalApplicationStatus.SUCCEEDED);
+
         if (status == FinalApplicationStatus.SUCCEEDED
-                && waitForFileToBeDownloaded(progress.getDestination())) {
+                && waitForFileToBeDownloaded(tmpDestFile.toString())) {
+            HdfsUtils.moveFile(yarnConfiguration, tmpDestFile.toString(),
+                    progress.getDestination());
             Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
             progress = ingestionProgressService.updateProgress(progress).size(size)
                     .status(ProgressStatus.FINISHED).commit(true);
-            if (HdfsUtils.fileExists(yarnConfiguration, downloadFlag.toString())) {
-                try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
-                    fs.rename(downloadFlag, successFlag);
-                }
-            }
+            HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
             log.info("Ingestion finished. Progress: " + progress.toString());
         } else {
             progress = ingestionProgressService.updateProgress(progress)
@@ -230,7 +224,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                                     : "")
                             + (sqlToTextConfig.getFileExtension() == null ? ""
                                     : sqlToTextConfig.getFileExtension())
-                            + PropDataConstants.GZ);
+                            + EngineConstants.GZ);
             Path uncompressedFilePath = new Path(hdfsDir,
                     destFile.getName()
                             + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i)

@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.workflow.engine.steps.EngineConstants;
+import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.workflow.engine.steps.IngestionStepConfiguration;
 
 public class IngestionWorkflowConfiguration extends WorkflowConfiguration {

@@ -9,6 +9,12 @@ public class SftpConfiguration extends ProviderConfiguration {
     protected String sftpUserName;
     protected String sftpPasswordEncrypted;
     protected String sftpDir;
+    protected Integer checkVersion;
+    protected FileCheckStrategy checkStrategy;
+    protected String fileExtension;
+    protected String fileNamePrefix;
+    protected String fileNamePostfix;
+    protected String fileTimestamp;
 
     @JsonProperty("SftpHost")
     public String getSftpHost() {
@@ -59,4 +65,65 @@ public class SftpConfiguration extends ProviderConfiguration {
     public void setSftpDir(String sftpDir) {
         this.sftpDir = sftpDir;
     }
+
+    @JsonProperty("CheckVersion")
+    public Integer getCheckVersion() {
+        return checkVersion;
+    }
+
+    @JsonProperty("CheckVersion")
+    public void setCheckVersion(Integer checkVersion) {
+        this.checkVersion = checkVersion;
+    }
+
+    @JsonProperty("CheckStrategy")
+    public FileCheckStrategy getCheckStrategy() {
+        return checkStrategy;
+    }
+
+    @JsonProperty("CheckStrategy")
+    public void setCheckStrategy(FileCheckStrategy checkStrategy) {
+        this.checkStrategy = checkStrategy;
+    }
+
+    @JsonProperty("FileExtension")
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+    @JsonProperty("FileExtension")
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
+    }
+
+    @JsonProperty("FileNamePrefix")
+    public String getFileNamePrefix() {
+        return fileNamePrefix;
+    }
+
+    @JsonProperty("FileNamePrefix")
+    public void setFileNamePrefix(String fileNamePrefix) {
+        this.fileNamePrefix = fileNamePrefix;
+    }
+
+    @JsonProperty("FileNamePostfix")
+    public String getFileNamePostfix() {
+        return fileNamePostfix;
+    }
+
+    @JsonProperty("FileNamePostfix")
+    public void setFileNamePostfix(String fileNamePostfix) {
+        this.fileNamePostfix = fileNamePostfix;
+    }
+
+    @JsonProperty("FileTimestamp")
+    public String getFileTimestamp() {
+        return fileTimestamp;
+    }
+
+    @JsonProperty("FileTimestamp")
+    public void setFileTimestamp(String fileTimestamp) {
+        this.fileTimestamp = fileTimestamp;
+    }
+
 }
