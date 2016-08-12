@@ -85,15 +85,6 @@
 .selected-icon {
     background-color: rgb(81, 135, 192) !important;
 }
-
-.chevron-row {
-    text-align: center;
-    
-    .completion-times span {
-        display: inline-block;
-        width: 191px;
-    }
-}
 .breadcrumb {
     /*centering*/
     display: inline-block;
@@ -120,13 +111,27 @@
 .breadcrumb div:first-child:before {
     left: 14px;
 }
-.chevron-content {
-    display: table-cell;
-    vertical-align: middle;
+.chevron-row {
+    padding-bottom: 1px;
+    border-bottom: #e7e7e7 solid 1px;
+    &:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
 }
-span.chevron-content.chevron-content-text {
-    padding-left: 30px !important;
-    font-size: 14px;
+.download-error-report {
+    border: rgba(0,0,0,0.3) solid 1px;
+    background: #fff;
+    margin: 10px 0;
+    padding: 10px;
+    float: left;
+    strong {
+        font-weight: bold;
+    }
+    p {
+        margin-bottom: 6px;
+    }
 }
 .jobs-table {
     min-width: 860px;
