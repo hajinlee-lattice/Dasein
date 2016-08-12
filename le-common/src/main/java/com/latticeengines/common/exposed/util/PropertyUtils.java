@@ -62,9 +62,16 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
                     break;
                 }
                 String placeholder = matcher.group(2);
-                value = matcher.replaceFirst(resolvePlaceholder(placeholder, props, springSystemPropertiesMode));
-                log.info("Replacing " + placeholder + " in " + key + ", final value=" + value);
+                String replacement = resolvePlaceholder(placeholder, props, springSystemPropertiesMode);
+                if (replacement != null) {
+                    value = matcher.replaceFirst(replacement);
+                } else {
+                    log.warn(String.format("Replacement for placeholder with key %s is null!", placeholder));
+                }
+                log.debug(String.format("%s: %s", key, value));
             }
+            props.put(key, value);
+            propertiesMap.put((String) key, value);
         }
 
         super.processProperties(beanFactory, props);
