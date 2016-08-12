@@ -4,7 +4,8 @@ import os
 PROPERTY_DIR = "/conf/env/"
 PROPERTY_FILE_SUFFIX = "*.properties"
 LINE_SEPERATOR = "\n=============================\n"
-ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster', 'qacluster_aws','prodcluster_aws')
+ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster')
+ENV_WITH_AWS=('qacluster','prodcluster')
 
 WSHOME=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
@@ -36,7 +37,35 @@ def main():
             print 'Writing to ' + target_path
             f.write(aggregated)
 
-def aggregate_props(dir, keys):
+    for environment in ENV_WITH_AWS:
+        aggregated=""
+        keys={}
+        for dir_name, _, _ in os.walk(WSHOME):
+            end_with = PROPERTY_DIR + environment + "_aws"
+            if dir_name[-len(end_with):] == end_with \
+                    and 'le-config' not in dir_name \
+                    and 'le-docker' not in dir_name \
+                    and 'le-awsenvironment' not in dir_name:
+                aggregated += aggregate_props(dir_name, keys)
+
+        for dir_name, _, _ in os.walk(WSHOME):
+            end_with = PROPERTY_DIR + environment
+            if dir_name[-len(end_with):] == end_with \
+                    and 'le-config' not in dir_name \
+                    and 'le-docker' not in dir_name \
+                    and 'le-awsenvironment' not in dir_name:
+                aggregated += aggregate_props(dir_name, keys, quiet=True)
+
+        target_path=os.path.join(confdir(environment + "_aws"), 'latticeengines.properties')
+        if os.path.isfile(target_path):
+            os.remove(target_path)
+        with open(target_path, 'w') as f:
+            print 'Writing to ' + target_path
+            f.write(aggregated)
+
+
+
+def aggregate_props(dir, keys, quiet=False):
     prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
     aggregated = ""
     for prop_file in prop_files:
@@ -49,9 +78,11 @@ def aggregate_props(dir, keys):
                     if len(line.strip()) > 0 and ('#' != line.strip()[0]):
                         key = line.strip().replace('\n', '').split('=')[0]
                         if key in keys:
-                            raise ValueError("Found duplicated key %s in %s and %s" % (key, keys[key], prop_file))
-                        else:
-                            keys[key] = prop_file
+                            if not quiet:
+                                raise ValueError("Found duplicated key %s in %s and %s" % (key, keys[key], prop_file))
+                            else:
+                                continue
+                        keys[key] = prop_file
                     aggregated += line
     return aggregated + "\n"
 
