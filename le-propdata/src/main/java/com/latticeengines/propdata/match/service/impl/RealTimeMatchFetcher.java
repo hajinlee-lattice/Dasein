@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
@@ -26,8 +25,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
-import com.latticeengines.monitor.exposed.metric.service.StatsService;
-import com.latticeengines.monitor.exposed.metric.stats.impl.CollectionSizeInspection;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.MatchFetcher;
 
@@ -37,7 +34,6 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
     private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE = 10;
-    private static AtomicBoolean inspectionRegistered = new AtomicBoolean(false);
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -53,13 +49,6 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @Autowired
     @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
-
-    @Autowired
-    @Qualifier("monitorScheduler")
-    private ThreadPoolTaskScheduler monitorScheduler;
-
-    @Autowired
-    private StatsService statsService;
 
     @PostConstruct
     private void postConstruct() {
@@ -79,12 +68,6 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @MatchStep
     public MatchContext fetch(MatchContext matchContext) {
         queue.add(matchContext);
-
-        if (!inspectionRegistered.get()) {
-            inspectionRegistered.set(true);
-            statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
-        }
-
         return waitForResult(matchContext.getOutput().getRootOperationUID());
     }
 
@@ -223,10 +206,6 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @Override
     public List<String> enqueue(List<MatchContext> matchContexts) {
         queue.addAll(matchContexts);
-        if (!inspectionRegistered.get()) {
-            inspectionRegistered.set(true);
-            statsService.register(new CollectionSizeInspection(monitorScheduler, queue, "propdata-fetch-queue"));
-        }
 
         List<String> rootUids = new ArrayList<>(matchContexts.size());
 
