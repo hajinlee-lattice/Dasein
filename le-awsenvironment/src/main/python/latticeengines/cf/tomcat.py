@@ -57,7 +57,7 @@ def tomcat_task(profile_vars):
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": { "Fn::Join" : ["", ["docker-", PARAM_DOCKER_IMAGE.ref()]]},
+            "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
             "awslogs-region": { "Ref": "AWS::Region" }
         }})
 
