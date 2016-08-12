@@ -178,7 +178,7 @@ angular
                         user: job.user,
                         jobStatus: job.jobStatus,
                         modelName: job.inputs.MODEL_NAME,
-                        modelId: modelId ? job.inputs.MODEL_ID : job.outputs.MODEL_ID,
+                        modelId: modelId ? (job.inputs ? job.inputs.MODEL_ID : '') : (job.outputs ? job.outputs.MODEL_ID : ''),
                         startTimestamp: job.startTimestamp,
                         stepRunning: stepRunning,
                         stepsCompleted: stepsCompleted,

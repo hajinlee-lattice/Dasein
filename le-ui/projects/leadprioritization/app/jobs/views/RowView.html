@@ -2,6 +2,15 @@
     <div class="clearfix">
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span class="columns two" ng-if="state != 'model'">
+            <span ng-show="job.modelName"
+                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
+                {{job.modelName}}
+            </span>
+            <span ng-show="!job.modelName">
+                --
+            </span>
+        </span>
         <span class="columns two" ng-if="state == 'model'">
             <span
                 tooltips 
@@ -57,7 +66,9 @@
             </span>
             &nbsp
         </span>
+        <!--
         <span class="columns three job-status-username">{{job.user || 'Unknown'}}</span>
+        -->
     </div>
     <div class="chevron-row" data-ng-if="jobRowExpanded">
 
