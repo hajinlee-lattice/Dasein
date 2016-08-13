@@ -146,7 +146,7 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
     private void loadAccountFromCsv() {
 
         URL url = Thread.currentThread().getContextClassLoader()
-                  .getResource("com/latticeengines/propdata/match/AccountMaster.csv");
+                  .getResource("com/latticeengines/propdata/match/AccountMasterSample.csv");
         Assert.assertNotNull(url, "Cannot find AccountMaster.csv");
 
         try {
