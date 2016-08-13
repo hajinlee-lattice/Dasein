@@ -17,6 +17,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -28,7 +29,8 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 @Component("pivotMappingFileValidationService")
 public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
 
-    private Configuration yarnConfiguration = new Configuration();
+    @Autowired
+    private Configuration yarnConfiguration;
 
     private String[] expectedHeaders = new String[] { "SourceColumn", "TargetColumn", "SourceColumnType", "Value" };
 

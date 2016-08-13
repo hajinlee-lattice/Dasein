@@ -19,4 +19,5 @@
     <import resource="classpath:metadata-camille-context.xml"/>
     <import resource="classpath:security-context.xml"/>
     <import resource="classpath:db-context.xml"/>
+    <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 </beans>

@@ -25,7 +25,8 @@ public class HiveTableDaoImpl implements HiveTableDao {
     @Autowired
     private DataSource hiveDataSource;
 
-    private Configuration yarnConfiguration = new Configuration();
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Override
     public void create(Table table) {

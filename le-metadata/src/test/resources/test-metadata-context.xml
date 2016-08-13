@@ -10,5 +10,6 @@
 
     <import resource="classpath:metadata-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:dataplatform-yarn-config-context.xml" />
 
 </beans>

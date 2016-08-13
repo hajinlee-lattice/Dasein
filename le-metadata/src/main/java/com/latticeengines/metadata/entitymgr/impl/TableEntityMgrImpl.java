@@ -79,7 +79,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    private Configuration yarnConfiguration = new Configuration();
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

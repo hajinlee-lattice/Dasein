@@ -58,7 +58,8 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected Path tableLocation1;
     protected Path tableLocation2;
 
-    protected Configuration yarnConfiguration = new Configuration();
+    @Autowired
+    protected Configuration yarnConfiguration;
 
     protected RestTemplate restTemplate = new RestTemplate();
 
