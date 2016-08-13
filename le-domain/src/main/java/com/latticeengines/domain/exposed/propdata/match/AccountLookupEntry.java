@@ -11,7 +11,7 @@ public class AccountLookupEntry implements HasId<String> {
     public static final String DOMAIN = "_DOMAIN_";
     public static final String DUNS = "_DUNS_";
 
-    public static final String UNKNOWN = "Unknown";
+    public static final String UNKNOWN = "NULL";
 
     @Id
     String id = null;

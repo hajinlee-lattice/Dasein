@@ -1,5 +1,9 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,22 +11,25 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.propdata.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.propdata.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.propdata.match.LatticeAccount;
-import com.latticeengines.propdata.match.entitymanager.LatticeAccountMgr;
 import com.latticeengines.propdata.match.entitymanager.AccountLookupEntryMgr;
+import com.latticeengines.propdata.match.entitymanager.LatticeAccountMgr;
 import com.latticeengines.propdata.match.service.AccountLookupService;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
 public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(AccountLookupServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AccountLookupServiceImplTestNG.class);
 
     public static final String version = "1.0";
     public static final int NumOfEntities = 8;
@@ -42,6 +49,9 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
         accountMgr = accountLookupService.getAccountMgr(version);
         lookupMgr = accountLookupService.getLookupMgr(version);
         initEntities();
+        log.info("Loading objects from csv file");
+        loadIndexFromCsv();
+        loadAccountFromCsv();
     }
 
     @Test(groups = "functional", enabled = false)
@@ -110,6 +120,46 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
             lookupEntry.setDuns(duns);
             lookupEntry.setLatticeAccountId(accountId);
             lookups.add(lookupEntry);
+        }
+    }
+
+    private void loadIndexFromCsv() {
+
+        URL url = Thread.currentThread().getContextClassLoader()
+                  .getResource("com/latticeengines/propdata/match/AccountMaster.csv");
+        Assert.assertNotNull(url, "Cannot find AccountMaster.csv");
+
+        try {
+            CSVParser parser = CSVParser.parse(new File(url.getFile()), Charset.forName("UTF-8"), LECSVFormat.format);
+            for (CSVRecord csvRecord : parser) {
+                AccountLookupEntry lookupEntry = new AccountLookupEntry();
+                lookupEntry.setLatticeAccountId(csvRecord.get(0));
+                lookupEntry.setDomain(csvRecord.get(1));
+                lookupEntry.setDuns(csvRecord.get(2));
+                lookupMgr.create(lookupEntry);
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to load AccountMasterIndex from csv. ", e);
+        }
+    }
+
+    private void loadAccountFromCsv() {
+
+        URL url = Thread.currentThread().getContextClassLoader()
+                  .getResource("com/latticeengines/propdata/match/AccountMaster.csv");
+        Assert.assertNotNull(url, "Cannot find AccountMaster.csv");
+
+        try {
+            CSVParser parser = CSVParser.parse(new File(url.getFile()), Charset.forName("UTF-8"), LECSVFormat.format);
+            for (CSVRecord csvRecord : parser) {
+                Map<String, String> attributes = csvRecord.toMap();
+                LatticeAccount account = new LatticeAccount();
+                account.setId(csvRecord.get(0));
+                account.setAttributes(attributes);
+                accountMgr.create(account);
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to load account pool from Acco", e);
         }
     }
 
