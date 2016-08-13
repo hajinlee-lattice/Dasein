@@ -30,7 +30,7 @@ public class HealthCheck extends BaseMeasurement<HealthCheck.HealthFact, Inspect
 
     @Override
     public RetentionPolicy getRetentionPolicy() {
-        return RetentionPolicyImpl.ONE_HOUR;
+        return RetentionPolicyImpl.ONE_DAY;
     }
 
     public static class HealthFact implements Fact {
