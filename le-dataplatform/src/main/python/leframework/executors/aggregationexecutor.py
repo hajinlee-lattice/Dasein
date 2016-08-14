@@ -1,7 +1,8 @@
 import logging
 import os
-from pandas import Series
 import shutil
+
+from pandas import Series
 
 from leframework.codestyle import overrides
 from leframework.executor import Executor
@@ -10,6 +11,7 @@ from leframework.model.states.averageprobabilitygenerator import AverageProbabil
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationwidthgenerator import CalibrationWithWidthGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
+from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 from leframework.model.states.finalize import Finalize
@@ -23,13 +25,13 @@ from leframework.model.states.percentilebucketgenerator import PercentileBucketG
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
 from leframework.model.states.provenancegenerator import ProvenanceGenerator
+from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
+from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.rocgenerator import ROCGenerator
 from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.revenuestatistics import RevenueStatistics
-from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -72,7 +74,8 @@ class AggregationExecutor(Executor):
         stateMachine.addState(DataCompositionGenerator(), 18)
         stateMachine.addState(ScoreDerivationGenerator(), 19)
         stateMachine.addState(CrossValidationGenerator(), 20)
-        stateMachine.addState(EnhancedSummaryGenerator(), 21)
+        stateMachine.addState(RevenueModelQualityGenerator(), 21)
+        stateMachine.addState(EnhancedSummaryGenerator(), 22)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 
