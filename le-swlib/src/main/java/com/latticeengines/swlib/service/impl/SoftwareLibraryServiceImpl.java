@@ -16,11 +16,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
@@ -32,6 +33,9 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Value("${swlib.enabled:true}")
+    private boolean swlibEnabled;
 
     private String topLevelPath = "/app/swlib";
 
@@ -79,8 +83,10 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        createSoftwareLibDir(topLevelPath);
-        yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        if (swlibEnabled) {
+            createSoftwareLibDir(topLevelPath);
+            yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        }
     }
 
     protected void createSoftwareLibDir(String dir) {

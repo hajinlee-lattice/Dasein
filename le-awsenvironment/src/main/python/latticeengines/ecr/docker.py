@@ -7,6 +7,7 @@ from ..conf import AwsEnvironment
 
 NEXUS_DOCKER_REGISTRY="bodcdevnexus75.dev.lattice.local:18555"
 NAMESPACE="latticeengines"
+REVISIONS_TO_KEEP=10
 
 def main():
     args = parse_args()
@@ -28,6 +29,13 @@ def pull(args):
     print "pulling image %s:%s from repo to local ..." % (args.image, args.remotetag)
     pull_internal(args.environment, args.image, args.remotetag, args.localtag)
 
+def purge(args):
+    if args.environment == 'dev':
+        return
+
+    print "purging old tags of image %s from repo ..." % args.image
+    purge_internal(args.environment, args.image)
+
 def pull_internal(environment, image, remotetag, localtag):
     registry = AwsEnvironment(environment).ecr_registry()
     if environment == 'dev':
@@ -37,6 +45,45 @@ def pull_internal(environment, image, remotetag, localtag):
     subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
     tag_for_local(registry, image, remotetag, localtag)
     subprocess.call("docker rmi " + source, shell=True)
+
+def purge_internal(environment, image):
+    config = AwsEnvironment(environment)
+    id = config.aws_account_id()
+
+    client = boto3.client('ecr')
+    response = client.list_images(
+        registryId=id,
+        repositoryName=NAMESPACE + '/' + image
+    )
+
+    to_delete = []
+    revisions = []
+
+    for imageId in response['imageIds']:
+        if 'imageTag' not in imageId.keys():
+            to_delete.append(imageId)
+            continue
+
+        tag = imageId['imageTag']
+        if '.' in tag or 'latest' == tag:
+            # if is a release tag or latest, do not delete
+            continue
+
+        revisions.append(tag)
+
+    revisions.sort(key=lambda x: x['imageTag'])
+
+    for i in xrange(len(revisions) - REVISIONS_TO_KEEP):
+        to_delete.append(revisions[i])
+
+    print to_delete
+
+    client.batch_delete_image(
+        registryId=id,
+        repositoryName=NAMESPACE + '/' + image,
+        imageIds=to_delete
+    )
+
 
 def tag_for_remote(args):
     config = AwsEnvironment(args.environment)
@@ -92,6 +139,11 @@ def parse_args():
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.set_defaults(func=pull)
+
+    subparser = commands.add_parser("purge")
+    subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.set_defaults(func=purge)
 
     args = parser.parse_args()
     return args
