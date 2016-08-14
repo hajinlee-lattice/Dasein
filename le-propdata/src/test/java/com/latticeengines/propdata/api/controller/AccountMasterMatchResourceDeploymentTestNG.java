@@ -1,9 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -13,7 +11,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -21,6 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
@@ -29,9 +27,13 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.PropDataConstants;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
+import com.latticeengines.propdata.core.source.impl.AccountMaster;
+import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
 import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
@@ -40,14 +42,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 @Component
 public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
-    @Value("${propdata.match.domain.index.path}")
-    private String domainIndexPath;
-
-    @Value("${propdata.match.duns.index.path}")
-    private String dunsIndexPath;
-
-    @Value("${propdata.match.account.master.path}")
-    private String accountMasterPath;
+    private static final String DATA_CLOUD_VERSION = "2.0.000000001";
 
     @Autowired
     private MatchProxy matchProxy;
@@ -55,6 +50,15 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private static final String avroDir = "/tmp/AccountMasterMatchResourceDeploymentTestNG";
     private static final String avroFileName = "AccountMaster_SourceFile_csv.avro";
     private static final String podId = "AccountMasterMatchResourceDeploymentTestNG";
+
+    @Autowired
+    private AccountMaster accountMaster;
+
+    @Autowired
+    private AccountMasterIndex accountMasterIndex;
+
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -66,14 +70,15 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
     @Test(groups = "deployment")
     public void testBulkMatchWithSchema() throws Exception {
+
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
 
-        setupAllFiles();
-
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + avroFileName));
         MatchCommand finalStatus = null;
         try {
+            setupAllFiles();
+
+            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + avroFileName));
             MatchInput input = createAvroBulkMatchInput(true, schema);
             MatchCommand command = matchProxy.matchBulk(input, podId);
             ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
@@ -110,16 +115,12 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 3);
+        Assert.assertEquals(fields.size(), 5);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
-        Assert.assertEquals(records.size(), 14);
+        Assert.assertEquals(records.size(), 11);
 
-        Set<String> employeeCountSet = new HashSet<>();
-        for (GenericRecord record : records) {
-            employeeCountSet.add((String) record.get("EmployeesTotal").toString());
-        }
-        Assert.assertEquals(employeeCountSet.size(), 14);
+        Assert.assertNotNull(records.get(0).get("EmployeesTotal").toString());
 
     }
 
@@ -127,14 +128,15 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         List<Class<?>> fieldTypes = getInputAvroTypes();
         uploadDataCsv(avroDir, avroFileName, "com/latticeengines/propdata/match/AccountMasterBulkMatchInput.csv",
                 fieldTypes);
-        fieldTypes = getDomainIndexAvroTypes();
-        uploadDataCsv(getAvroPath(domainIndexPath), "AccountMasterDomainIndex.avro",
-                "com/latticeengines/propdata/match/AccountMasterDomainIndex.csv", fieldTypes);
-        fieldTypes = getDunsIndexAvroTypes();
-        uploadDataCsv(getAvroPath(dunsIndexPath), "AccountMasterDunsIndex.avro",
-                "com/latticeengines/propdata/match/AccountMasterDunsIndex.csv", fieldTypes);
+        fieldTypes = getAccountMasterIndexAvroTypes();
+        String dataVersion = MatchUtils.getDataVersion(DATA_CLOUD_VERSION);
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterIndex, dataVersion);
+        uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMasterIndex.avro",
+                "com/latticeengines/propdata/match/AccountMasterIndex.csv", fieldTypes);
+
         fieldTypes = getDunsAccountMasterAvroTypes();
-        uploadDataCsv(getAvroPath(accountMasterPath), "AccountMaster.avro",
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
+        uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMaster.avro",
                 "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes);
     }
 
@@ -154,16 +156,9 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     }
 
     @SuppressWarnings("unchecked")
-    private List<Class<?>> getDomainIndexAvroTypes() {
+    private List<Class<?>> getAccountMasterIndexAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
-        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class }));
-        return fieldTypes;
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Class<?>> getDunsIndexAvroTypes() {
-        List<Class<?>> fieldTypes = new ArrayList<>();
-        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class }));
+        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class }));
         return fieldTypes;
     }
 
@@ -171,7 +166,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private List<Class<?>> getDunsAccountMasterAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
-                String.class, String.class, String.class, String.class }));
+                String.class, String.class, String.class, String.class, String.class, String.class }));
         return fieldTypes;
     }
 
@@ -179,7 +174,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
-        matchInput.setDataCloudVersion("2.0.000000001");
+        matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

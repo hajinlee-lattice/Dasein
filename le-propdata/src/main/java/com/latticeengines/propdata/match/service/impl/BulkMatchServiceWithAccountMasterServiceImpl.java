@@ -20,13 +20,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.impl.AccountMaster;
+import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -38,24 +43,23 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
-    private static final String DUNS_INDEX_KEY = "DunsIndex";
-    private static final String DOMAIN_INDEX_KEY = "DomainIndex";
+    private static final String ACCOUNT_MASTER_INDEX_KEY = "AccountMasterIndex";
     private static final String INPUT_AVRO_KEY = "InputAvro";
-
-    @Value("${propdata.match.domain.index.path}")
-    private String domainIndexPath;
-
-    @Value("${propdata.match.duns.index.path}")
-    private String dunsIndexPath;
-
-    @Value("${propdata.match.account.master.path}")
-    private String accountMasterPath;
 
     @Resource(name = "columnMetadataServiceDispatch")
     private ColumnMetadataService columnMetadataService;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
     protected String microServiceHostPort;
+
+    @Autowired
+    private AccountMaster accountMaster;
+
+    @Autowired
+    private AccountMasterIndex accountMasterIndex;
+
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     protected WorkflowProxy workflowProxy;
@@ -113,9 +117,13 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private Map<String, String> getDataflowExtraSources(MatchInput input) {
         Map<String, String> extraSources = new HashMap<>();
-        extraSources.put(DOMAIN_INDEX_KEY, domainIndexPath);
-        extraSources.put(DUNS_INDEX_KEY, dunsIndexPath);
-        extraSources.put(ACCOUNT_MASTER_KEY, accountMasterPath);
+        String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterIndex, dataVersion);
+        extraSources.put(ACCOUNT_MASTER_INDEX_KEY, sourceTable.getExtracts().get(0).getPath());
+
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
+        extraSources.put(ACCOUNT_MASTER_KEY, sourceTable.getExtracts().get(0).getPath());
+
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
         String avroPath = avroInputBuffer.getAvroDir();
@@ -127,8 +135,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private CascadingBulkMatchDataflowParameters getDataflowParameters(MatchInput input, String hdfsPodId,
             String outputSchemaPath) {
         CascadingBulkMatchDataflowParameters parameters = new CascadingBulkMatchDataflowParameters();
-        parameters.setDomainIndex(DOMAIN_INDEX_KEY);
-        parameters.setDunsIndex(DUNS_INDEX_KEY);
+        parameters.setAccountMasterIndex(ACCOUNT_MASTER_INDEX_KEY);
         parameters.setAccountMaster(ACCOUNT_MASTER_KEY);
         parameters.setInputAvro(INPUT_AVRO_KEY);
         parameters.setExcludePublicDomains(input.getExcludePublicDomains());
@@ -158,6 +165,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         // inputSchema = prefixFieldName(inputSchema, "Source_");
         // Schema combinedSchema = (Schema)
         // AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
+
         // return combinedSchema;
         return outputSchema;
     }

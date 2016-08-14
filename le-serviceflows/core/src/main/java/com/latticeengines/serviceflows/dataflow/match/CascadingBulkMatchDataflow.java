@@ -1,6 +1,12 @@
 package com.latticeengines.serviceflows.dataflow.match;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -15,60 +21,95 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {
 
-    private String domainFieldName = MatchKey.Domain.name();
-    private String dunsFieldName = MatchKey.DUNS.name();
-    private String latticeIdFieldName = MatchKey.LatticeAccountID.name();
+    private static final Log log = LogFactory.getLog(CascadingBulkMatchDataflow.class);
+
+    private String domainIndexFieldName = MatchKey.Domain.name();
+    private String dunsIndexFieldName = MatchKey.DUNS.name();
+    private String latticeIdFieldName = "LatticeID";
 
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {
         FieldList latticeIdField = new FieldList(latticeIdFieldName);
 
-        Node source = cleanSource(parameters);
-        Node matchedNode = matchDomainIndex(parameters, source, latticeIdField);
-        matchedNode = matchDunsIndex(parameters, source, matchedNode, latticeIdField);
+        Node inputSource = addSource(parameters.getInputAvro());
+        Node accountMasterIndexSource = addSource(parameters.getAccountMasterIndex());
+        Node matchedNode = matchDomainField(parameters, inputSource, accountMasterIndexSource, latticeIdField);
+        matchedNode = matchDunsField(parameters, inputSource, accountMasterIndexSource, matchedNode, latticeIdField);
 
         Node accountMasterSource = addSource(parameters.getAccountMaster());
         matchedNode = matchedNode.join(latticeIdField, accountMasterSource, latticeIdField, JoinType.INNER);
-        matchedNode = matchedNode.retain(buildFieldListFromSchema(parameters.getOutputSchemaPath()));
+
+        FieldList fieldList = buildOutputFieldList(parameters);
+        log.info("output fields=" + fieldList.getFieldsAsList());
+        matchedNode = matchedNode.retain(fieldList);
 
         return matchedNode;
     }
 
-    private Node cleanSource(CascadingBulkMatchDataflowParameters parameters) {
-        if (parameters.getKeyMap() != null && parameters.getKeyMap().containsKey(MatchKey.Domain)) {
-            domainFieldName = parameters.getKeyMap().get(MatchKey.Domain).get(0);
+    private FieldList buildOutputFieldList(CascadingBulkMatchDataflowParameters parameters) {
+        FieldList fieldList = buildFieldListFromSchema(parameters.getOutputSchemaPath());
+        Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
+        if (keyMap != null) {
+            List<String> newFields = new ArrayList<>();
+            if (keyMap.containsKey(MatchKey.Domain) && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.Domain))) {
+                newFields.add(domainIndexFieldName);
+            }
+            if (keyMap.containsKey(MatchKey.DUNS) && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.DUNS))) {
+                newFields.add(dunsIndexFieldName);
+            }
+            fieldList = fieldList.addAll(newFields);
         }
-        Node source = addSource(parameters.getInputAvro());
-        source = source.apply(new DomainCleanupFunction(domainFieldName), new FieldList(domainFieldName),
-                new FieldMetadata(domainFieldName, String.class));
-        return source;
+        return fieldList;
     }
 
-    private Node matchDomainIndex(CascadingBulkMatchDataflowParameters parameters, Node source, FieldList latticeIdField) {
-        FieldList domainJoinFields = new FieldList(domainFieldName);
-        Node domainIndexSource = addSource(parameters.getDomainIndex());
-        Node matchedNode = source.join(domainJoinFields, domainIndexSource, domainJoinFields, JoinType.INNER);
-        matchedNode = matchedNode.retain(latticeIdField);
-        return matchedNode;
+    private Node matchDomainField(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
+            Node accountMasterIndexSource, FieldList latticeIdField) {
+        Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
+        Node resultNode = null;
+        if (keyMap == null || !keyMap.containsKey(MatchKey.Domain)
+                || CollectionUtils.isEmpty(keyMap.get(MatchKey.Domain))) {
+            return resultNode;
+        }
+        List<String> domainNames = keyMap.get(MatchKey.Domain);
+        FieldList domainIndexField = new FieldList(domainIndexFieldName);
+        for (String inputDomainFieldName : domainNames) {
+            FieldList inputDomainField = new FieldList(inputDomainFieldName);
+            inputSource = inputSource.apply(new DomainCleanupFunction(inputDomainFieldName), inputDomainField,
+                    new FieldMetadata(inputDomainFieldName, String.class));
+            Node matchedNode = inputSource.join(inputDomainField, accountMasterIndexSource, domainIndexField,
+                    JoinType.INNER);
+            matchedNode = matchedNode.retain(latticeIdField);
+            if (resultNode == null) {
+                resultNode = matchedNode;
+            } else {
+                resultNode = resultNode.merge(matchedNode);
+            }
+        }
+        if (resultNode != null) {
+            resultNode = resultNode.groupByAndLimit(latticeIdField, 1);
+        }
+        return resultNode;
     }
 
-    private Node matchDunsIndex(CascadingBulkMatchDataflowParameters parameters, Node source, Node matchedNode,
-            FieldList latticeIdField) {
-        if (parameters.getKeyMap() != null && parameters.getKeyMap().containsKey(MatchKey.DUNS)) {
-            dunsFieldName = parameters.getKeyMap().get(MatchKey.DUNS).get(0);
+    private Node matchDunsField(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
+            Node accountMasterIndexSource, Node matchedNode, FieldList latticeIdField) {
+        Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
+        if (keyMap == null || !keyMap.containsKey(MatchKey.DUNS) || CollectionUtils.isEmpty(keyMap.get(MatchKey.DUNS))) {
+            return matchedNode;
         }
-        Node dunsIndexSource = null;
-        if (StringUtils.isNotBlank(parameters.getDunsIndex())) {
-            dunsIndexSource = addSource(parameters.getDunsIndex());
-        }
-        if (dunsIndexSource != null) {
-            FieldList dunsField = new FieldList(dunsFieldName);
-            Node matchedDunsNode = source.join(dunsField, dunsIndexSource, dunsField, JoinType.INNER);
-            matchedDunsNode = matchedDunsNode.retain(latticeIdField);
+        String inputDunsFieldName = keyMap.get(MatchKey.DUNS).get(0);
+        FieldList inputDunsField = new FieldList(inputDunsFieldName);
+        FieldList dunsIndexField = new FieldList(dunsIndexFieldName);
+        Node matchedDunsNode = inputSource.join(inputDunsField, accountMasterIndexSource, dunsIndexField,
+                JoinType.INNER);
+        matchedDunsNode = matchedDunsNode.retain(latticeIdField);
+        if (matchedNode != null) {
             matchedNode = matchedNode.merge(matchedDunsNode);
             matchedNode = matchedNode.groupByAndLimit(latticeIdField, 1);
+            return matchedNode;
+        } else {
+            return matchedDunsNode;
         }
-        return matchedNode;
-    }
 
+    }
 }
