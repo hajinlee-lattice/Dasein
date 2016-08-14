@@ -2,4 +2,4 @@
 
 export PYTHONPATH=$WSHOME/le-awsenvironment/src/main/python:$PYTHONPATH
 
-python -m latticeengines.ecr.docker push $1
+python -m latticeengines.ecr.docker push $@
