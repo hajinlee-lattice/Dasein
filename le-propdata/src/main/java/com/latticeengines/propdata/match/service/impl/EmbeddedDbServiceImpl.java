@@ -24,14 +24,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.propdata.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.match.service.EmbeddedDbService;
 
-@Component("embeddedDbService")
 public class EmbeddedDbServiceImpl implements EmbeddedDbService {
 
     private static final Log log = LogFactory.getLog(EmbeddedDbServiceImpl.class);
