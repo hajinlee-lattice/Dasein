@@ -1,7 +1,9 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
@@ -103,19 +105,19 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     private void overwriteAMQueueAssignment(Properties appMasterProperties) {
         String queue = (String)appMasterProperties.get(AppMasterProperty.QUEUE.name());
         if (queue != null)
-            appMasterProperties.put(AppMasterProperty.QUEUE.name(), overwriteQueueInternal(queue)); 
+            appMasterProperties.put(AppMasterProperty.QUEUE.name(), overwriteQueueInternal(queue));
     }
 
     private void overwriteContainerQueueAssignment(Properties containerProperties) {
         String queue = (String)containerProperties.get("QUEUE");
         if (queue != null)
-            containerProperties.put("QUEUE", overwriteQueueInternal(queue)); 
+            containerProperties.put("QUEUE", overwriteQueueInternal(queue));
     }
 
     private void overwriteMRQueueAssignment(Properties mRProperties) {
         String queue = (String)mRProperties.get(MapReduceProperty.QUEUE.name());
         if (queue != null)
-            mRProperties.put(MapReduceProperty.QUEUE.name(), overwriteQueueInternal(queue)); 
+            mRProperties.put(MapReduceProperty.QUEUE.name(), overwriteQueueInternal(queue));
     }
 
     @Override
@@ -176,6 +178,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             for (Object key : properties.keySet()) {
                 config.set(key.toString(), properties.getProperty((String) key));
             }
+        }
+
+        Configuration config = job.getConfiguration();
+        Iterator<Map.Entry<String,String>> iter = config.iterator();
+        log.info(String.format("Job %s Properties:", mrJobName));
+        while (iter.hasNext()) {
+            Map.Entry<String,String> next = iter.next();
+            log.info(String.format("%s: %s", next.getKey(), next.getValue()));
         }
 
         JobRunner runner = new JobRunner();
