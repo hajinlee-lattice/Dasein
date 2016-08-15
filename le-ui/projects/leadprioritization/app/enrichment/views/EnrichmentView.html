@@ -1,5 +1,11 @@
 <div class="enrichment-container">
     <section id="main-content" class="container">
+        <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
+            <div class="icon"></div>
+            <div class="message" ng-bind-html="vm.status_alert.message">
+            </div>
+            <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
+        </div>
         <div class="subheader-container">
             <ul class="subheader">
                 <li class="categories">

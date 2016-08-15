@@ -1,4 +1,5 @@
 // green msg after save, 3s
+// grid view multple of 12, dynamic across
 angular.module('lp.enrichment.leadenrichment', [])
 .controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this,
@@ -11,14 +12,18 @@ angular.module('lp.enrichment.leadenrichment', [])
             total: 'Total',
             premium: 'Premium',
             button_save: 'Save',
-            button_select: 'Turn On',
-            button_selected: 'On',
-            button_deselect: 'Turn Off',
+            button_select: 'Enable',
+            button_selected: 'Enabled',
+            button_deselect: 'Disable',
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
             premiumSelectError: 'Premium attribute limit reached',
             no_results: 'No attributes were found',
+            saved_alert: 'Your changes have been saved.',
+            saving_alert: 'Your changes are being saved. <i class="fa fa-cog fa-spin fa-fw"></i>',
+            changed_alert: 'No changes will be saved until you press the \'Save\' button.',
+            disabled_alert: 'You have disabled an attribute.'
         },
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
@@ -30,6 +35,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         pagesize: pagesize,
         across: across,
         initialized: false,
+        status_alert: {},
         enrichments: [],
         enable_grid: true,
         view: 'list'
@@ -62,21 +68,45 @@ angular.module('lp.enrichment.leadenrichment', [])
         }
         if (enrichment.IsSelected){
             vm.userSelectedCount++;
+            vm.statusMessage(vm.label.changed_alert);
         } else {
             vm.userSelectedCount--;
             if(!enrichment.WasDirty) {
-                enrichment.button_select = vm.label.deselected_messsage;
                 enrichment.WasDirty = true;
-                enrichment.button_msg = true;
-                $timeout(function(){
-                    enrichment.button_select = vm.label.button_select;
-                    enrichment.button_msg = false;
-                }, 3000);
+                vm.disabled_count = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': false}).length;
+                vm.label.disabled_alert = '<p><strong>You have disabled ' + vm.disabled_count + ' attribute' + (vm.disabled_count > 1 ? 's' : '') + '</strong>. If you are using any of these attributes for real-time scoring, these attributes will no longer be updated in your system.</p>';
+                vm.label.disabled_alert += '<p>No changes will be saved until you press the \'Save\' button.</p>';
+                vm.statusMessage(vm.label.disabled_alert);
             }
         }
         if(vm.userSelectedCount < 1) {
             vm.selectDisabled = 1;
         }
+    }
+    var status_timer;
+    vm.statusMessage = function(message, opts, callback) {
+        var opts = opts || {},
+            wait = (opts.wait || opts.wait === 0 ? opts.wait : 3000),
+            type = opts.type || 'alert';
+        vm.status_alert.type = type;
+        vm.status_alert.show = true;
+        vm.status_alert.message = message;
+        $timeout.cancel(status_timer);
+
+        if(wait) {
+            status_timer = $timeout(function(){
+                vm.status_alert.show = false;
+                vm.status_alert.message = '';
+                if(typeof callback === 'function') {
+                    callback();
+                }
+            }, wait);
+        }
+    }
+    vm.closeStatusMessage = function() {
+        $timeout.cancel(status_timer);
+        vm.status_alert.show = false;
+        vm.status_alert.message = '';
     }
 
     vm.saveSelected = function(){
@@ -99,8 +129,10 @@ angular.module('lp.enrichment.leadenrichment', [])
             selectedAttributes: selected,
             deselectedAttributes: deselected
         }
+        vm.statusMessage(vm.label.saving_alert, {wait: 0});
         EnrichmentService.setEnrichments(data).then(function(result){
             vm.saveDisabled = true;
+            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
             if(selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
                 for(i in dirtyObj){
@@ -172,32 +204,10 @@ angular.module('lp.enrichment.leadenrichment', [])
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
+        vm.statusMessageBox = angular.element('.status-alert');
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);
-
-        /*
-        $timeout(function() {
-            vm.initialized = true;
-
-            for (var i=0; i < EnrichmentData.data.length; i++) {
-                vm.enrichments.push(EnrichmentData.data[i]);
-            }
-
-            vm.selectedCount = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
-            vm.userSelectedCount = vm.selectedCount;
-            vm.selectDisabled = (vm.selectedCount ? 0 : 1);
-        }, 150);
-        */
-    }
-
-    vm.clickPaginate = function() {
-        /*
-        vm.initialized = false;
-        $timeout(function() {
-            vm.initialized = true;
-        }, 1000)
-        */
     }
 
     vm.init();
