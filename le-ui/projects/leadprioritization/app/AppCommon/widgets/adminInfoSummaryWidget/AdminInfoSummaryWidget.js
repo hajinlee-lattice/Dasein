@@ -4,8 +4,13 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.core.services.SessionService'
 ])
 .controller('AdminInfoSummaryWidgetController', function (
-    $scope, ResourceUtility, ThresholdExplorerService, BrowserStorageUtility
+    $scope, ResourceUtility, ThresholdExplorerService, BrowserStorageUtility, FeatureFlagService
 ) {
+	FeatureFlagService.GetAllFlags().then(function(result) {
+		var flags = FeatureFlagService.Flags();
+		$scope.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.ALLOW_PIVOT_FILE);
+	});
+
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 

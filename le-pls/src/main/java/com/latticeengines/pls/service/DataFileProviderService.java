@@ -10,6 +10,15 @@ public interface DataFileProviderService {
     void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
             String filter) throws IOException;
 
+    void downloadPivotFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType)
+            throws IOException;
+
+    void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId, String
+            mimeType) throws IOException;
+
+    void downloadFileByPath(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String filePath) throws IOException;
+
     String getFileContents(String modelId, String mimeType, String filter) throws Exception;
 
 }

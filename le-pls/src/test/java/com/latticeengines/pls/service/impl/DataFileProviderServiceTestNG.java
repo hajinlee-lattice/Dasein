@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.List;
 
@@ -67,6 +68,10 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
 
     private String fileContents;
 
+    private static String fileFolder;
+
+    private static String tableFileFolder;
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
 
@@ -87,6 +92,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         ModelSummary summary = summaries.get(0);
         modelId = summary.getId();
         String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
+        fileFolder = dir;
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         fileContents = IOUtils.toString(modelSummaryUrl);
@@ -103,6 +109,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
 
         dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID) + "/data/ANY_TABLE/csv_files";
+        tableFileFolder = dir;
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
                 + "/postMatchEventTable_allTraining-r-00000.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
@@ -131,6 +138,40 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
             ex.printStackTrace();
             Assert.fail(ex.getMessage());
         }
+    }
+
+    @Test(groups = {"functional"}, dataProvider = "dataFilePathProvider")
+    public void downloadFileByPath(final String mimeType, final String filePath) {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream os = mock(ServletOutputStream.class);
+        try {
+            when(response.getOutputStream()).thenReturn(os);
+            dataFileProviderService.downloadFileByPath(request, response, mimeType, filePath);
+            verify(response).setHeader(eq("Content-Disposition"), anyString());
+            verify(response).setContentType(mimeType);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Assert.fail(ex.getMessage());
+        }
+    }
+
+    @Test(groups = {"functional"}, dataProvider = "dataFilePathProviderNotFound")
+    public void downloadFileByPathNotFound(final String mimeType, final String filePath) {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream os = mock(ServletOutputStream.class);
+        try {
+            when(response.getOutputStream()).thenReturn(os);
+            dataFileProviderService.downloadFileByPath(request, response, mimeType, filePath);
+
+        } catch (Exception ex) {
+            Assert.assertTrue(ex instanceof LedpException);
+            return;
+        }
+
+        Assert.fail("Should not find file to download.");
     }
 
     @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
@@ -179,6 +220,23 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
     @DataProvider(name = "dataFileProviderNotFound")
     public static Object[][] getDataFileProvierNotFound() {
         return new Object[][] { { "application/json", "modelsummaryNotFound.json" }, //
+
+        };
+    }
+
+    @DataProvider(name = "dataFilePathProvider")
+    public static Object[][] getDataFilePathProvier() {
+        String csvFilePath = fileFolder + "/test_readoutsample.csv";
+        String tainingFilePath = tableFileFolder + "/postMatchEventTable_allTraining-r-00000.csv";
+        return new Object[][] { { MediaType.TEXT_PLAIN, csvFilePath }, //
+                { MediaType.APPLICATION_OCTET_STREAM, tainingFilePath } };
+    }
+
+    @DataProvider(name = "dataFilePathProviderNotFound")
+    public static Object[][] getDataFilePathProvierNotFound() {
+
+        return new Object[][] { { "application/json", "modelsummaryNotFound.json" },
+                {MediaType.APPLICATION_OCTET_STREAM, "/postMatchEventTable_allTraining-r-00000.csv"}, //
 
         };
     }

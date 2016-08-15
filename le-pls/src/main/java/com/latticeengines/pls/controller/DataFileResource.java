@@ -116,4 +116,21 @@ public class DataFileResource {
                     "postMatchEventTable.*Test.*.csv");
         }
     }
+
+    @RequestMapping(value = "/pivotmappingcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get pivot file for download")
+    public void getPivotMappingCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
+                             HttpServletResponse response) throws IOException {
+        dataFileProviderService.downloadPivotFile(request, response, modelId, MediaType.TEXT_PLAIN);
+    }
+
+    @RequestMapping(value = "/trainingfilecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get training set used for modeling")
+    public void getTrainingSetCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
+                             HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Encoding", "gzip");
+        dataFileProviderService.downloadTrainingSet(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
+    }
 }
