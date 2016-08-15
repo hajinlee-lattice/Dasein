@@ -35,7 +35,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     private Configuration yarnConfiguration;
 
     @Value("${swlib.enabled:true}")
-    private boolean swlibEnabled;
+    private Boolean swlibEnabled;
 
     private String topLevelPath = "/app/swlib";
 
@@ -86,6 +86,8 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         if (swlibEnabled) {
             createSoftwareLibDir(topLevelPath);
             yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        } else {
+            log.warn("Software Library is disabled.");
         }
     }
 
