@@ -9,6 +9,4 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.swlib.controller.*" />
     </context:component-scan>
 
-    <import resource="classpath:common-properties-context.xml" />
-
 </beans> 
