@@ -5,7 +5,7 @@ import subprocess
 
 from ..conf import AwsEnvironment
 
-NEXUS_DOCKER_REGISTRY="bodcdevnexus75.dev.lattice.local:18555"
+NEXUS_DOCKER_REGISTRY="bodcdevnexus75.dev.lattice.local:18666"
 NAMESPACE="latticeengines"
 REVISIONS_TO_KEEP=10
 
@@ -108,7 +108,7 @@ def login(environment):
         return login_aws(environment)
 
 def login_nexus():
-    username, password, url = 'ysong', 'welcome', 'bodcdevnexus75.dev.lattice.local:18555'
+    username, password, url = 'deploy', 'welcome', NEXUS_DOCKER_REGISTRY
     print "logging in docker registry %s ..." % url
     return 'docker login -u %s -p %s %s' % (username, password, url)
 
