@@ -184,6 +184,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
     public void testScoreCorrectness() throws IOException {
         String url = apiHostPort + "/score/record/debug";
