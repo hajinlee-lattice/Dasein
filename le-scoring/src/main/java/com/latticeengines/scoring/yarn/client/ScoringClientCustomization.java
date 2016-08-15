@@ -1,25 +1,14 @@
 package com.latticeengines.scoring.yarn.client;
 
-import java.util.Collection;
-import java.util.Properties;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.LocalResourceType;
-import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.yarn.fs.LocalResourcesFactoryBean;
-import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
-import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
-import com.latticeengines.domain.exposed.scoring.RTSBulkScoringProperty;
 
 @Component("scoringClientCustomization")
 public class ScoringClientCustomization extends SingleContainerClientCustomization {
