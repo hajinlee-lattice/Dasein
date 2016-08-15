@@ -2,7 +2,6 @@ package com.latticeengines.proxy.exposed.propdata;
 
 import java.util.Date;
 
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -10,7 +9,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
 public class InternalProxy extends MicroserviceRestApiProxy implements InternalInterface {

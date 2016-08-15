@@ -1,12 +1,11 @@
 package com.latticeengines.proxy.exposed.dataplatform;
 
-import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.network.exposed.dataplatform.JobInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("jobProxy")
 public class JobProxy extends MicroserviceRestApiProxy implements JobInterface {

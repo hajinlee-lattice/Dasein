@@ -3,7 +3,6 @@ package com.latticeengines.proxy.exposed.propdata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +10,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.network.exposed.propdata.IngestionInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("ingestionProxy")
 public class IngestionProxy extends MicroserviceRestApiProxy implements IngestionInterface {

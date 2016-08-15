@@ -1,8 +1,9 @@
 package com.latticeengines.proxy.exposed;
 
-import com.latticeengines.common.exposed.util.PropertyUtils;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+
+import com.latticeengines.common.exposed.util.PropertyUtils;
 
 @Component("testProxy")
 public class TestProxy extends BaseRestApiProxy implements TestInterface {

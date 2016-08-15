@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.dataplatform;
 
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -13,7 +12,7 @@ import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("modelProxy")
 public class ModelProxy extends MicroserviceRestApiProxy implements ModelInterface {

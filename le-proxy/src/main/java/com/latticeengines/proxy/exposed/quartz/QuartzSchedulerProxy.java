@@ -2,10 +2,9 @@ package com.latticeengines.proxy.exposed.quartz;
 
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.PropertyUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.quartz.JobConfig;
 import com.latticeengines.domain.exposed.quartz.JobInfo;
 import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
