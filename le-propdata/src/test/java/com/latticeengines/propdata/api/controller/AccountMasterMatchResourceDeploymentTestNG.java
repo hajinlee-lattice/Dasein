@@ -32,6 +32,7 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
+import com.latticeengines.propdata.core.source.impl.PublicDomain;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -56,6 +57,9 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
     @Autowired
     private AccountMasterIndex accountMasterIndex;
+
+    @Autowired
+    private PublicDomain publicDomain;
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -138,6 +142,11 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMaster.avro",
                 "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes);
+
+        fieldTypes = getPublicDomainAvroTypes();
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(publicDomain, "0");
+        uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "PublicDomain.avro",
+                "com/latticeengines/propdata/match/PublicDomain.csv", fieldTypes);
     }
 
     private String getAvroPath(String avroPath) {
@@ -170,11 +179,19 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         return fieldTypes;
     }
 
+    @SuppressWarnings("unchecked")
+    private List<Class<?>> getPublicDomainAvroTypes() {
+        List<Class<?>> fieldTypes = new ArrayList<>();
+        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class }));
+        return fieldTypes;
+    }
+
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
+//        matchInput.setExcludePublicDomains(true);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

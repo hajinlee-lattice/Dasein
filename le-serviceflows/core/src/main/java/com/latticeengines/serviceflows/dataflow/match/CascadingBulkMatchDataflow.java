@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     private String domainIndexFieldName = MatchKey.Domain.name();
     private String dunsIndexFieldName = MatchKey.DUNS.name();
     private String latticeIdFieldName = "LatticeID";
+    private String publicDomainFieldName = "PublicDomain";
 
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {
@@ -74,8 +76,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         FieldList domainIndexField = new FieldList(domainIndexFieldName);
         for (String inputDomainFieldName : domainNames) {
             FieldList inputDomainField = new FieldList(inputDomainFieldName);
-            inputSource = inputSource.apply(new DomainCleanupFunction(inputDomainFieldName), inputDomainField,
-                    new FieldMetadata(inputDomainFieldName, String.class));
+            inputSource = cleanDomain(parameters, inputSource, inputDomainFieldName, inputDomainField);
             Node matchedNode = inputSource.join(inputDomainField, accountMasterIndexSource, domainIndexField,
                     JoinType.INNER);
             matchedNode = matchedNode.retain(latticeIdField);
@@ -89,6 +90,19 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
             resultNode = resultNode.groupByAndLimit(latticeIdField, 1);
         }
         return resultNode;
+    }
+
+    private Node cleanDomain(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
+            String inputDomainFieldName, FieldList inputDomainField) {
+        inputSource = inputSource.apply(new DomainCleanupFunction(inputDomainFieldName), inputDomainField,
+                new FieldMetadata(inputDomainFieldName, String.class));
+        if (parameters.getExcludePublicDomains() && StringUtils.isNotBlank(parameters.getPublicDomainPath())) {
+            log.info("Starting to exclude public domain. inputDomainFieldName=" + inputDomainFieldName
+                    + " Public Domain Field=" + publicDomainFieldName);
+            Node publicDomainSource = addSource(parameters.getPublicDomainPath());
+            inputSource = inputSource.stopList(publicDomainSource, inputDomainFieldName, publicDomainFieldName);
+        }
+        return inputSource;
     }
 
     private Node matchDunsField(CascadingBulkMatchDataflowParameters parameters, Node inputSource,

@@ -30,6 +30,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
+import com.latticeengines.propdata.core.source.impl.PublicDomain;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
@@ -45,6 +46,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
     private static final String ACCOUNT_MASTER_INDEX_KEY = "AccountMasterIndex";
     private static final String INPUT_AVRO_KEY = "InputAvro";
+    private static final String PUBLIC_DOMAIN_KEY = "PublicDomain";
 
     @Resource(name = "columnMetadataServiceDispatch")
     private ColumnMetadataService columnMetadataService;
@@ -54,6 +56,9 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Autowired
     private AccountMaster accountMaster;
+
+    @Autowired
+    private PublicDomain publicDomain;
 
     @Autowired
     private AccountMasterIndex accountMasterIndex;
@@ -120,9 +125,10 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
         Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterIndex, dataVersion);
         extraSources.put(ACCOUNT_MASTER_INDEX_KEY, sourceTable.getExtracts().get(0).getPath());
-
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
         extraSources.put(ACCOUNT_MASTER_KEY, sourceTable.getExtracts().get(0).getPath());
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(publicDomain, "0");
+        extraSources.put(PUBLIC_DOMAIN_KEY, sourceTable.getExtracts().get(0).getPath());
 
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
@@ -138,6 +144,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         parameters.setAccountMasterIndex(ACCOUNT_MASTER_INDEX_KEY);
         parameters.setAccountMaster(ACCOUNT_MASTER_KEY);
         parameters.setInputAvro(INPUT_AVRO_KEY);
+        parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
         parameters.setExcludePublicDomains(input.getExcludePublicDomains());
         parameters.setReturnUnmatched(input.getReturnUnmatched());
         parameters.setOutputSchemaPath(outputSchemaPath);

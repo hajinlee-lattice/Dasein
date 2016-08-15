@@ -27,6 +27,9 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     @NotNull
     private String accountMaster;
 
+    @SourceTableName
+    public String publicDomainPath;
+
     @NotNull
     private String outputSchemaPath;
 
@@ -110,6 +113,16 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
         return this.outputSchemaPath;
     }
 
+    @JsonProperty("public_domain")
+    public void setPublicDomainPath(String publicDomainPath) {
+        this.publicDomainPath = publicDomainPath;
+    }
+
+    @JsonProperty("public_domain")
+    public String getPublicDomainPath() {
+        return this.publicDomainPath;
+    }
+
     @JsonProperty("key_map")
     public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
         this.keyMap = keyMap;
@@ -119,6 +132,5 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }
-    
 
 }
