@@ -150,7 +150,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         if (StringUtils.isNotEmpty(importErrorPath) && HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, importErrorPath, ".");
             FileUtils.deleteQuietly(new File("." + Import_Error_File_Name + ".crc"));
-            format.withSkipHeaderRecord();
+            format = format.withSkipHeaderRecord();
         }
         return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), format); //
     }
