@@ -11,7 +11,6 @@
 
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:security-context.xml"/>
-    <import resource="classpath:workflow-deadlock-retry-context.xml"/>
 
     <bean id="jobRegistryBeanPostProcessor" class="com.latticeengines.workflow.core.CustomJobRegistryBeanPostProcessor">
         <property name="jobRegistry" ref="jobRegistry"/>
