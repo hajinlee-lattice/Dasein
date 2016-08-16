@@ -15,23 +15,36 @@ from ..conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/zookeeper'
 
+SUBNETS = [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3]
+
 def main():
     args = parse_args()
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.nodes, upload=args.upload)
+    template(args.environment, args.nodes, upload=args.upload, observers=args.observers)
 
-def template(environment, nodes, upload=False):
+def template(environment, nodes, upload=False, observers=False):
     stack = Stack("AWS CloudFormation template for Zookeeper Quorum.")
     stack.add_params([PARAM_INSTANCE_TYPE, PARAM_SECURITY_GROUP])
+    config = AwsEnvironment(environment)
+
+    if observers:
+        nodes = len(config.zk_observer_ips())
+
     for n in xrange(nodes):
         name = "EC2Instance%d" % (n + 1)
-        subnet_ref = "SubnetId%d" % ( (n % 3) + 1 )
-        ec2 = EC2Instance(name, subnet_ref, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME) \
+        subnet = SUBNETS[n % 3]
+        ec2 = EC2Instance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME) \
             .set_metadata(ec2_metadata(n)) \
             .mount("/dev/xvdb", 10) \
-            .add_sg(PARAM_SECURITY_GROUP)
+            .add_sg(PARAM_SECURITY_GROUP) \
+            .set_subnet(subnet)
+
+        if observers:
+            ip = config.zk_observer_ips()[n % 3]
+            ec2.set_private_ip(ip)
+
         stack.add_resource(ec2)
     if upload:
         stack.validate()
@@ -237,6 +250,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='qacluster', choices=['qacluster','prodcluster'], help='environment')
     parser1.add_argument('-n', dest='nodes', type=int, default=3, help='number of nodes')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
+    parser1.add_argument('--observers', dest='observers', action='store_true', help='fixed ip observers attached to BPDC zk')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
@@ -249,6 +263,7 @@ def parse_args():
     parser1.add_argument('-k', dest='keyfile', type=str, default='~/aws.pem', help='the pem key file used to ssh ec2')
     parser1.add_argument('-s', dest='stackname', type=str, default='zookeeper', help='stack name')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
+    parser1.add_argument('--observers', dest='observers', action='store_true', help='fixed ip observers attached to BPDC zk')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("info")

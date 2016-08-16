@@ -13,7 +13,7 @@ def ec2_defn():
         return json.load(f)
 
 class EC2Instance(Resource):
-    def __init__(self, name, subnet_ref, instance_type, ec2_key, os="AmazonLinux"):
+    def __init__(self, name, instance_type, ec2_key, os="AmazonLinux"):
         assert isinstance(instance_type, Parameter)
         assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
@@ -23,7 +23,6 @@ class EC2Instance(Resource):
                 "ImageId": EC2Instance.__image_id(os),
                 "InstanceType": instance_type.ref(),
                 "SecurityGroupIds": [ ],
-                "SubnetId": { "Ref": subnet_ref },
                 "Monitoring": "true",
                 "KeyName": ec2_key.ref(),
                 "UserData": EC2Instance.__userdata(name),
@@ -35,6 +34,15 @@ class EC2Instance(Resource):
                 }
             }
         }
+
+    def set_subnet(self, subnet):
+        assert isinstance(subnet, Parameter)
+        self._template["Properties"]["SubnetId"] = subnet.ref()
+        return self
+
+    def set_private_ip(self, private_ip):
+        self._template["Properties"]["PrivateIpAddress"] = private_ip
+        return self
 
     def set_instanceprofile(self, instanceprofile):
         assert isinstance(instanceprofile, InstanceProfile)
