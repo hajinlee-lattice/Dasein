@@ -68,8 +68,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private CSVPrinter csvFilePrinter;
 
-    private int errorLineNumber;
-
     private long lineNum = 1;
 
     private String avroFileName;
@@ -90,8 +88,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber", "Id",
                 "ErrorMessage"));
-
-        errorLineNumber = conf.getInt("errorLineNumber", 1000);
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";
@@ -153,12 +149,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
                             }
                             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-                            if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() <= errorLineNumber) {
-                                id = id != null ? id : "";
-                                csvFilePrinter.printRecord(parser.getRecordNumber() + 1, id, errorMap.values()
-                                        .toString());
-                                csvFilePrinter.flush();
-                            }
+
+                            id = id != null ? id : "";
+                            csvFilePrinter.printRecord(parser.getRecordNumber() + 1, id, errorMap.values().toString());
+                            csvFilePrinter.flush();
+
                             errorMap.clear();
                         }
                     }
