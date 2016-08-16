@@ -6,6 +6,5 @@
     <bean id="yarnConfiguration" class="org.apache.hadoop.conf.Configuration" />
     
     <import resource="classpath:swlib-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
 
 </beans>  
