@@ -598,6 +598,7 @@
                     <doCheck>false</doCheck>
                     <doUpdate>false</doUpdate>
                 </configuration>
+                <version>1.4</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -609,6 +610,7 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
+                <version>${maven.jar.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -620,6 +622,7 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
+                <version>2.1.1</version>
             </plugin>
         </plugins>
 
