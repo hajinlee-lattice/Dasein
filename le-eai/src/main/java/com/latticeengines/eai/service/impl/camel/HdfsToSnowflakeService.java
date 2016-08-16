@@ -25,7 +25,7 @@ public class HdfsToSnowflakeService {
     @Autowired
     private SnowflakeService snowflakeService;
 
-    @Value("${aws.test.s3.bucket}")
+    @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
     @Autowired
@@ -49,10 +49,16 @@ public class HdfsToSnowflakeService {
 
     public void copyToSnowflake(HdfsToSnowflakeConfiguration configuration) {
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getHdfsGlob());
+        snowflakeService.createDatabase(configuration.getDb(), s3Bucket);
         snowflakeService.createAvroTable(configuration.getDb(), configuration.getTableName(), schema,
                 !configuration.isAppend(), null);
         snowflakeService.loadAvroTableFromS3(configuration.getDb(), configuration.getTableName(),
                 configuration.getTableName());
+    }
+
+    // should only be used for testing purpose
+    public void setS3Bucket(String bucket) {
+        s3Bucket = bucket;
     }
 
     public void cleanupS3(HdfsToSnowflakeConfiguration configuration) {

@@ -59,6 +59,7 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
     public void setup() throws Exception {
         testDB = leEnvironment + "_" + leStack + "_" + TEST_DB;
         testTable = leStack + "_" + TEST_TABLE;
+        routeService.setS3Bucket(s3Bucket);
         snowflakeService.createDatabase(testDB, s3Bucket);
         cleanup();
         InputStream avroStream = ClassLoader
