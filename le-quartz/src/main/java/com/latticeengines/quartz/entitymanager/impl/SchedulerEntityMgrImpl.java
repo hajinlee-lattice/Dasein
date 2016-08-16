@@ -77,7 +77,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                                 tenantId)
                         .withSchedule(
                                 CronScheduleBuilder.cronSchedule(jobConfig
-                                        .getCronTrigger())).build();
+                                        .getCronTrigger()).withMisfireHandlingInstructionDoNothing()).build();
                 scheduler.scheduleJob(jobDetail, trigger);
                 added = true;
             }
@@ -241,7 +241,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                                 "PredefinedJobs")
                         .withSchedule(
                                 CronScheduleBuilder.cronSchedule(jobConfig
-                                        .getCronTrigger())).build();
+                                        .getCronTrigger()).withMisfireHandlingInstructionDoNothing()).build();
                 scheduler.scheduleJob(jobDetail, trigger);
             }
         } catch (SchedulerException e) {
