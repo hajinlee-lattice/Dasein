@@ -1,12 +1,12 @@
-angular.module('mainApp.models.modals.CopyModelModal', [
+angular.module('mainApp.models.modals.CopyModelFromTenantModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
     'mainApp.core.utilities.NavUtility'
 ])
-.service('CopyModelModal', function ($compile, $templateCache, $rootScope, $http, NavUtility) {
+.service('CopyModelFromTenantModal', function ($compile, $templateCache, $rootScope, $http, NavUtility) {
     this.show = function () {
-        $http.get('app/models/views/CopyModelModalView.html', { cache: $templateCache }).success(function (html) {
+        $http.get('app/models/views/CopyModelFromTenantModalView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
 
@@ -26,7 +26,7 @@ angular.module('mainApp.models.modals.CopyModelModal', [
         });
     };
 })
-.controller('CopyModelModalController', function ($scope, $rootScope, ResourceUtility, NavUtility, ModelService) {
+.controller('CopyModelFromTenantModalController', function ($scope, $rootScope, ResourceUtility, NavUtility, ModelService) {
     var vm = this;
     //angular.extend(vm, {});
     $scope.vm = vm;
