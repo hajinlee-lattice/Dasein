@@ -48,8 +48,8 @@ module.exports = function (grunt) {
             },
             qa: {
                 NODE_ENV: 'qa',
-                API_URL: 'https://testapp.lattice-engines',
-                APICON_URL: 'https://testapi.lattice-engines',
+                API_URL: 'https://testapp.lattice-engines.com',
+                APICON_URL: 'https://testapi.lattice-engines.com',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
