@@ -90,7 +90,7 @@ public class SnowflakeServiceImpl implements SnowflakeService {
         String region = awsRegion.replace("-", "_").toUpperCase();
         String url = String.format("s3://%s/%s/", s3Bucket, SnowflakeUtils.AVRO_STAGE);
 
-        String sql = String.format("CREATE OR REPLACE STAGE %s\n" + "  URL = '%s'\n"
+        String sql = String.format("CREATE STAGE IF NOT EXISTS %s\n" + "  URL = '%s'\n"
                 + "  CREDENTIALS = (AWS_KEY_ID='%s' AWS_SECRET_KEY='%s') \n" + "  REGION = '%s' \n"
                 + "  FILE_FORMAT = ( TYPE='AVRO') \n", stageName, url, awsAccessKey, awsSecretKey, region);
 
