@@ -27,7 +27,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     private String domainIndexFieldName = MatchKey.Domain.name();
     private String dunsIndexFieldName = MatchKey.DUNS.name();
     private String latticeIdFieldName = "LatticeID";
-    private String publicDomainFieldName = "PublicDomain";
+    private String publicDomainFieldName = "Domain";
 
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {

@@ -30,7 +30,6 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
-import com.latticeengines.propdata.core.source.impl.PublicDomain;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
@@ -54,11 +53,11 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Value("${proxy.microservice.rest.endpoint.hostport}")
     protected String microServiceHostPort;
 
-    @Autowired
-    private AccountMaster accountMaster;
+    @Value("${propdata.match.public_domain.path}")
+    protected String publicDomainPath;
 
     @Autowired
-    private PublicDomain publicDomain;
+    private AccountMaster accountMaster;
 
     @Autowired
     private AccountMasterIndex accountMasterIndex;
@@ -127,8 +126,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         extraSources.put(ACCOUNT_MASTER_INDEX_KEY, sourceTable.getExtracts().get(0).getPath());
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
         extraSources.put(ACCOUNT_MASTER_KEY, sourceTable.getExtracts().get(0).getPath());
-        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(publicDomain, "0");
-        extraSources.put(PUBLIC_DOMAIN_KEY, sourceTable.getExtracts().get(0).getPath());
+        extraSources.put(PUBLIC_DOMAIN_KEY, publicDomainPath);
 
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
