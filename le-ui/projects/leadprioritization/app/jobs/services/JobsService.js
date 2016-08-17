@@ -165,7 +165,6 @@ angular
                     var stepRunning = getStepRunning(job);
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
-                    
                     return {
                         id: job.id,
                         applicationId: job.applicationId,

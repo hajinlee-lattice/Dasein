@@ -850,5 +850,49 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
+    this.CopyModel = function (modelName, tenantId) {
+        var deferred = $q.defer();
+        var result;
 
+        $http({
+            method: 'POST',
+            url: '/pls/models/copymodel/' + modelName,
+            params: {
+                targetTenantId: tenantId
+            },
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: true,
+                    resultObj: data,
+                    resultErrors: null
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 });

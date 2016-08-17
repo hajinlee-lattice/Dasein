@@ -34,7 +34,7 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
     $scope.vm = vm;
 
     vm.ResourceUtility = ResourceUtility;
-    
+
     _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
     vm.tenants = _tenants.filter(function(o) { 
         return o.DisplayName !== 'A_ForTest_0708'; 
@@ -43,13 +43,16 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
     vm.asTenantName = $stateParams.tenantName;
     vm.current_tenant = {};
     vm.current_model = $scope.model;
+    vm.copying = false;
     vm.modal_state = {
         choosing: true,
         copying: false,
-        copied: false
+        copied: false,
+        error: false
     }
 
     vm.modal_change_state = function(key){
+        vm.copying = false;
         _.each(vm.modal_state, function(_value,_key){
             vm.modal_state[_key] = false;
         });
@@ -77,20 +80,22 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
             vm.modal_change_state('copying');
             var modelName = vm.current_model.Name,
                 tenantId = vm.current_tenant.Identifier;
-            /* move to ModelService.js
-            $http.get('/pls/models/copymodel/' + modelName, {params: {targetTenantId: tenantId}}).success(function (data) {
-                console.log(data);
-            });
-            */
         }
     }
 
     vm.copyModel = function() {
         if(vm.current_model && vm.current_tenant) {
-            vm.modal_change_state('copied');
-            var modelName = vm.current_model.Name,
+            var modelName = vm.current_model.Id,
                 tenantId = vm.current_tenant.Identifier;
-
+            vm.copying = true;
+            ModelService.CopyModel(modelName, tenantId).then(function(result){
+                if (result != null && result.success === true) {
+                    vm.modal_change_state('copied');
+                } else {
+                    vm.modal_change_state('error');
+                    vm.copying_error = result.resultErrors;
+                }
+            });
         }
     }
 });

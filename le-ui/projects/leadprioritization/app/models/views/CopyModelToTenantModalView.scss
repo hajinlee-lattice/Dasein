@@ -27,6 +27,11 @@
         .lists-container {
             h4 {
                 border-bottom: 1px solid #e5e5e5;
+                sup {
+                    display: block;
+                    padding-left: 2px;
+                    font-size: 14px;
+                }
             }
             .list-container, h4, .confirm {
                 padding: 20px 30px;
@@ -42,9 +47,11 @@
                 ul.filters {
                     @include flex-item(0 1 auto);
                     text-align: right;
+                    margin-top: 20px;
+                    margin-bottom: 10px;
                     li {
-                        display: inline-block;
                         &.query {
+                            float: left;
                             padding-bottom: 5px;
                             .ng-search {
                                 .form-control {
@@ -93,10 +100,11 @@
                 }
             }
             .confirm {
+                min-width: 500px;
                 strong {
                     font-weight: bold;
                 }
-                & > ul {
+                & > div > ul {
                     @include flex-container();
                     margin: 0;
                     margin-bottom: 10px;
@@ -136,12 +144,15 @@
                             &:after {
                                 @include font-awesome-inline("\f061");
                                 position: absolute;
-                                bottom: 10px;
                                 right: -30px;
+                                bottom: 10px;
                                 font-size: 26px;
                             }
                         }
                     }
+                }
+                .loader {
+                    font-size: 50px;
                 }
             }
         }
@@ -158,6 +169,24 @@
             }
             .confirm {
                 width: 550px;
+            }
+        }
+        &.error {
+            h4 {
+                position: relative;
+                padding-left: 45px;
+                &:after {
+                    @include font-awesome-inline("\f00d");
+                    position: absolute;
+                    top: 50%;
+                    left: 20px;
+                    margin-top: -1px;
+                    transform: translateY(-50%);
+                    font-size: 12px;
+                    color: white;
+                    background: #f16a22;
+                    padding: 2px 5px;
+                }
             }
         }
     }

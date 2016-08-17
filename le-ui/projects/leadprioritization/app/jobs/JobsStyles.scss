@@ -139,6 +139,11 @@
 .jobs-table-content {
     color: black;
     font-size: 15px;
+    .model-name {
+        @include text-ellipsis();
+        display: inline-block;
+        max-width: 100%;
+    }
     tooltip {
         tip {
             font-size: 14px;
