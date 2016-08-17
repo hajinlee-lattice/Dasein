@@ -14,10 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.impl.ModelCopyServiceImpl;
@@ -33,29 +35,34 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
 
+    private Tenant modelCopySourceTenant = new Tenant();
+
+    private Tenant modelCopyTargetTenant = new Tenant();
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        modelCopySourceTenant.setId("modelCopySourceTenant");
+        modelCopyTargetTenant.setId("modelCopyTargetTenant");
 
-        setupMarketoEloquaTestEnvironment();
         String localPathBase = ClassLoader
                 .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
-        HdfsUtils.mkdir(yarnConfiguration, customerBase + eloquaTenant.getId());
+        HdfsUtils.mkdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils
-                .copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + eloquaTenant.getId());
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + eloquaTenant.getId());
+                .copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + modelCopySourceTenant.getId());
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + modelCopySourceTenant.getId());
     }
 
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + eloquaTenant.getId());
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + marketoTenant.getId());
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
     }
 
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
-        ((ModelCopyServiceImpl) modelCopyService).processHdfsData(eloquaTenant.getId(), marketoTenant.getId(),
+        ((ModelCopyServiceImpl) modelCopyService).processHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
                 "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel", "cpTrainingTable", "cpEventTable");
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + marketoTenant.getId()
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + modelCopyTargetTenant.getId()
                 + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
 
             @Override
@@ -77,11 +84,13 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         JsonNode json = objectMapper.readTree(contents);
         JsonNode detail = json.get("ModelDetails");
         assertEquals(detail.get("ModelID").asText(), "ms__" + uuid + "-PLSModel");
-        assertEquals(detail.get("LookupID").asText(), String.format("%s|%s|%s", marketoTenant.getId(), "cpEventTable", uuid));
+        assertEquals(detail.get("LookupID").asText(),
+                String.format("%s|%s|%s", modelCopyTargetTenant.getId(), "cpEventTable", uuid));
         JsonNode provenance = json.get("EventTableProvenance");
         assertEquals(provenance.get("TrainingTableName").asText(), "cpTrainingTable");
         assertEquals(provenance.get("EventTableName").asText(), "cpEventTable");
 
+        System.out.println(new Path(modelSummaryPath).getParent().getParent().toString());
         paths = HdfsUtils.getFilesForDir(yarnConfiguration, new Path(modelSummaryPath).getParent().getParent()
                 .toString(), ".*.model.json");
         assertTrue(paths.size() == 1);

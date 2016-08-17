@@ -101,6 +101,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + modelName + ".crc"));
         FileUtils.write(new File(sourceModelLocalRoot + "/" + modelName), newModel.toString(), "UTF-8", false);
 
+        HdfsUtils.mkdir(yarnConfiguration, targetModelRoot);
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
         FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
     }
