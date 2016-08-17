@@ -22,6 +22,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.TenantName = clientSession.Tenant.DisplayName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
+    $scope.PivotArtifactPath = data.ModelDetails.PivotArtifactPath;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
 
     $scope.exportThresholdClicked = function () {
