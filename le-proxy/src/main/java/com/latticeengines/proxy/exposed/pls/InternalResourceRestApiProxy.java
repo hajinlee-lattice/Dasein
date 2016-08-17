@@ -1,15 +1,20 @@
 package com.latticeengines.proxy.exposed.pls;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -148,32 +153,80 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes) {
-        String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
-        url += "?" + "onlySelectedAttributes" + "=" + ((onlySelectedAttributes == true) ? true : false);
-        if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
-            url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
-        }
-        if (category != null) {
-            url += "&" + "category" + "=" + category.toString();
-        }
-
-        log.debug("Get from " + url);
-        List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
-        List<LeadEnrichmentAttribute> attributeList = new ArrayList<>();
-
-        if (!CollectionUtils.isEmpty(combinedAttributeObjList)) {
-            for (Object obj : combinedAttributeObjList) {
-                String json = JsonUtils.serialize(obj);
-                LeadEnrichmentAttribute attr = JsonUtils.deserialize(json, LeadEnrichmentAttribute.class);
-                attributeList.add(attr);
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
+            url += "?" + "onlySelectedAttributes" + "="
+                    + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true : false);
+            if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
+                url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
             }
+            if (category != null) {
+                url += "&" + "category" + "=" + category.toString();
+            }
+
+            log.debug("Get from " + url);
+            List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
+            List<LeadEnrichmentAttribute> attributeList = new ArrayList<>();
+
+            if (!CollectionUtils.isEmpty(combinedAttributeObjList)) {
+                for (Object obj : combinedAttributeObjList) {
+                    String json = JsonUtils.serialize(obj);
+                    LeadEnrichmentAttribute attr = JsonUtils.deserialize(json, LeadEnrichmentAttribute.class);
+                    attributeList.add(attr);
+                }
+            }
+            return attributeList;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
         }
-        return attributeList;
     }
 
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-           LeadEnrichmentAttributesOperationMap attributes) {
-        String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
-        restTemplate.put(url, attributes);
+            LeadEnrichmentAttributesOperationMap attributes) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
+            restTemplate.put(url, attributes);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead/premiumattributeslimitation",
+                    customerSpace.toString());
+
+            Map<?, ?> limitationMap = restTemplate.getForObject(url, Map.class);
+
+            Map<String, Integer> premiumAttributesLimitationMap = new HashMap<>();
+
+            if (!MapUtils.isEmpty(limitationMap)) {
+                premiumAttributesLimitationMap = JsonUtils.convertMap(limitationMap, String.class, Integer.class);
+            }
+
+            return premiumAttributesLimitationMap;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public Integer getSelectedAttributeCount(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead/selectedattributes/count",
+                    customerSpace.toString());
+            return restTemplate.getForObject(url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead/selectedpremiumattributes/count",
+                    customerSpace.toString());
+            return restTemplate.getForObject(url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
     }
 }
