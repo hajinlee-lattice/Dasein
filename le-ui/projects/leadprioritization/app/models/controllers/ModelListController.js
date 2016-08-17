@@ -59,6 +59,7 @@ angular.module('lp.models.list', [
                     label: 'From PMML File',
                     icon: 'fa fa-file-code-o' 
                 },{
+                    if: 0,
                     click: vm.showCopyModelFromTenant,
                     label: 'From Another Tenant',
                     icon: 'ico ico-lattice-dots' 
