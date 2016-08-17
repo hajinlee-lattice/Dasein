@@ -30,6 +30,8 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, InitializingBean {
     private static final Log log = LogFactory.getLog(SoftwareLibraryServiceImpl.class);
 
+    private static final String SWLIB_DISABLED = "LE_SWLIB_DISABLED";
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -79,8 +81,11 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        createSoftwareLibDir(topLevelPath);
-        yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        Boolean disabled = Boolean.parseBoolean(System.getenv(SWLIB_DISABLED));
+        if (!disabled) {
+            createSoftwareLibDir(topLevelPath);
+            yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        }
     }
 
     protected void createSoftwareLibDir(String dir) {
