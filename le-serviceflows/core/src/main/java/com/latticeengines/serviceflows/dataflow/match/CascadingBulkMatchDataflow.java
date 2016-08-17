@@ -1,8 +1,10 @@
 package com.latticeengines.serviceflows.dataflow.match;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -14,116 +16,130 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {
-
     private static final Log log = LogFactory.getLog(CascadingBulkMatchDataflow.class);
 
-    private String domainIndexFieldName = MatchKey.Domain.name();
-    private String dunsIndexFieldName = MatchKey.DUNS.name();
-    private String latticeIdFieldName = "LatticeID";
-    private String publicDomainFieldName = "Domain";
+    public static final String MATCH_ID_KEY = "__MATCH_ID__";
+    public static final String PARSED_DOMAIN = "__PARSED_DOMAIN__";
+    public static final String PARSED_DUNS = "__PARSED_DUNS__";
+
+    private String LOOKUP_KEY_FIELDNAME = "ID";
+    private String LATTICE_ID_FIELDNAME = "LatticeID";
+    private String PUBLIC_DOMAIN_FIELDNAME = "Domain";
+    private String PUBLIC_DOMAIN_NEW_FIELDNAME = "__Public_Domain__";
 
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {
-        FieldList latticeIdField = new FieldList(latticeIdFieldName);
+        FieldList latticeIdField = new FieldList(LATTICE_ID_FIELDNAME);
 
         Node inputSource = addSource(parameters.getInputAvro());
-        Node accountMasterIndexSource = addSource(parameters.getAccountMasterIndex());
-        Node matchedNode = matchDomainField(parameters, inputSource, accountMasterIndexSource, latticeIdField);
-        matchedNode = matchDunsField(parameters, inputSource, accountMasterIndexSource, matchedNode, latticeIdField);
+        List<FieldMetadata> inputMetadata = inputSource.getSchema();
+
+        Node accountMasterLookupSource = addSource(parameters.getAccountMasterLookup());
+        Node matchedLookupNode = matchLookup(parameters, inputSource, accountMasterLookupSource);
 
         Node accountMasterSource = addSource(parameters.getAccountMaster());
-        matchedNode = matchedNode.join(latticeIdField, accountMasterSource, latticeIdField, JoinType.INNER);
+        List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters);
+        List<String> predefinedFields = outputList.get(1);
+        accountMasterSource = accountMasterSource.retain(new FieldList(predefinedFields));
 
-        FieldList fieldList = buildOutputFieldList(parameters);
-        log.info("output fields=" + fieldList.getFieldsAsList());
-        matchedNode = matchedNode.retain(fieldList);
+        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
+        Node matchedNode = matchedLookupNode.join(latticeIdField, accountMasterSource, latticeIdField, joinType);
+
+        List<String> resultFields = outputList.get(0);
+        log.info("output fields=" + resultFields);
+        matchedNode = matchedNode.retain(new FieldList(resultFields.toArray(new String[0])));
 
         return matchedNode;
+
     }
 
-    private FieldList buildOutputFieldList(CascadingBulkMatchDataflowParameters parameters) {
-        FieldList fieldList = buildFieldListFromSchema(parameters.getOutputSchemaPath());
-        Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
-        if (keyMap != null) {
-            List<String> newFields = new ArrayList<>();
-            if (keyMap.containsKey(MatchKey.Domain) && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.Domain))) {
-                newFields.add(domainIndexFieldName);
-            }
-            if (keyMap.containsKey(MatchKey.DUNS) && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.DUNS))) {
-                newFields.add(dunsIndexFieldName);
-            }
-            fieldList = fieldList.addAll(newFields);
+    private List<List<String>> buildOutputFieldList(List<FieldMetadata> inputMetadata,
+            CascadingBulkMatchDataflowParameters parameters) {
+        List<String> outputFields = new ArrayList<>();
+        Set<String> outputFieldSet = new HashSet<>();
+        for (FieldMetadata fieldMetadata : inputMetadata) {
+            outputFields.add(fieldMetadata.getFieldName());
+            outputFieldSet.add(fieldMetadata.getFieldName().toLowerCase());
         }
-        return fieldList;
+
+        FieldList predefinedFieldList = buildFieldListFromSchema(parameters.getOutputSchemaPath());
+        List<String> predefinedFields = new ArrayList<>();
+        predefinedFields.add(LATTICE_ID_FIELDNAME);
+        for (String predefinedField : predefinedFieldList.getFields()) {
+            if (!outputFieldSet.contains(predefinedField.toLowerCase())) {
+                predefinedFields.add(predefinedField);
+                outputFields.add(predefinedField);
+            }
+        }
+        List<List<String>> outputList = new ArrayList<List<String>>();
+        outputList.add(outputFields);
+        outputList.add(predefinedFields);
+        return outputList;
     }
 
-    private Node matchDomainField(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
-            Node accountMasterIndexSource, FieldList latticeIdField) {
+    private Node matchLookup(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
+            Node accountMasterLookupSource) {
+
         Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
-        Node resultNode = null;
-        if (keyMap == null || !keyMap.containsKey(MatchKey.Domain)
-                || CollectionUtils.isEmpty(keyMap.get(MatchKey.Domain))) {
-            return resultNode;
+        Node matchedLookupNode = processDomain(parameters, inputSource, keyMap);
+        matchedLookupNode = generateMatchKey(keyMap, matchedLookupNode);
+
+        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
+        matchedLookupNode = matchedLookupNode.join(new FieldList(MATCH_ID_KEY), accountMasterLookupSource,
+                new FieldList(LOOKUP_KEY_FIELDNAME), joinType);
+        return matchedLookupNode;
+    }
+
+    private Node generateMatchKey(Map<MatchKey, List<String>> keyMap, Node matchedLookupNode) {
+        List<String> keyFields = new ArrayList<>();
+        if (keyMap != null && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.Domain))) {
+            keyFields.add(PARSED_DOMAIN);
         }
-        List<String> domainNames = keyMap.get(MatchKey.Domain);
-        FieldList domainIndexField = new FieldList(domainIndexFieldName);
-        for (String inputDomainFieldName : domainNames) {
-            FieldList inputDomainField = new FieldList(inputDomainFieldName);
-            inputSource = cleanDomain(parameters, inputSource, inputDomainFieldName, inputDomainField);
-            Node matchedNode = inputSource.join(inputDomainField, accountMasterIndexSource, domainIndexField,
-                    JoinType.INNER);
-            matchedNode = matchedNode.retain(latticeIdField);
-            if (resultNode == null) {
-                resultNode = matchedNode;
+        List<String> dunsFieldNames = keyMap.get(MatchKey.DUNS);
+        if (CollectionUtils.isNotEmpty(dunsFieldNames)) {
+            if (dunsFieldNames.size() > 1) {
+                matchedLookupNode = matchedLookupNode.apply(new DunsMergeFunction(dunsFieldNames, PARSED_DUNS),
+                        new FieldList(dunsFieldNames), new FieldMetadata(PARSED_DUNS, String.class));
+                keyFields.add(PARSED_DUNS);
             } else {
-                resultNode = resultNode.merge(matchedNode);
+                keyFields.add(dunsFieldNames.get(0));
             }
         }
-        if (resultNode != null) {
-            resultNode = resultNode.groupByAndLimit(latticeIdField, 1);
+        if (keyFields.size() == 0) {
+            throw new RuntimeException("There's no Domain or Duns field in input file!");
         }
-        return resultNode;
+        matchedLookupNode = matchedLookupNode.apply(new MatchIDGenerationFunction(keyFields, MATCH_ID_KEY),
+                new FieldList(keyFields), new FieldMetadata(MATCH_ID_KEY, String.class));
+        return matchedLookupNode;
     }
 
-    private Node cleanDomain(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
-            String inputDomainFieldName, FieldList inputDomainField) {
-        inputSource = inputSource.apply(new DomainCleanupFunction(inputDomainFieldName), inputDomainField,
-                new FieldMetadata(inputDomainFieldName, String.class));
-        if (parameters.getExcludePublicDomains() && StringUtils.isNotBlank(parameters.getPublicDomainPath())) {
-            log.info("Starting to exclude public domain. inputDomainFieldName=" + inputDomainFieldName
-                    + " Public Domain Field=" + publicDomainFieldName);
-            Node publicDomainSource = addSource(parameters.getPublicDomainPath());
-            inputSource = inputSource.stopList(publicDomainSource, inputDomainFieldName, publicDomainFieldName);
-        }
-        return inputSource;
-    }
+    private Node processDomain(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
+            Map<MatchKey, List<String>> keyMap) {
 
-    private Node matchDunsField(CascadingBulkMatchDataflowParameters parameters, Node inputSource,
-            Node accountMasterIndexSource, Node matchedNode, FieldList latticeIdField) {
-        Map<MatchKey, List<String>> keyMap = parameters.getKeyMap();
-        if (keyMap == null || !keyMap.containsKey(MatchKey.DUNS) || CollectionUtils.isEmpty(keyMap.get(MatchKey.DUNS))) {
-            return matchedNode;
-        }
-        String inputDunsFieldName = keyMap.get(MatchKey.DUNS).get(0);
-        FieldList inputDunsField = new FieldList(inputDunsFieldName);
-        FieldList dunsIndexField = new FieldList(dunsIndexFieldName);
-        Node matchedDunsNode = inputSource.join(inputDunsField, accountMasterIndexSource, dunsIndexField,
-                JoinType.INNER);
-        matchedDunsNode = matchedDunsNode.retain(latticeIdField);
-        if (matchedNode != null) {
-            matchedNode = matchedNode.merge(matchedDunsNode);
-            matchedNode = matchedNode.groupByAndLimit(latticeIdField, 1);
-            return matchedNode;
-        } else {
-            return matchedDunsNode;
-        }
+        Node parsedDomainNode = inputSource;
+        if (keyMap != null && CollectionUtils.isNotEmpty(keyMap.get(MatchKey.Domain))) {
+            List<String> domainFieldNames = keyMap.get(MatchKey.Domain);
+            parsedDomainNode = parsedDomainNode.apply(new DomainMergeAndCleanFunction(domainFieldNames, PARSED_DOMAIN),
+                    new FieldList(domainFieldNames), new FieldMetadata(PARSED_DOMAIN, String.class));
 
+            if (parameters.getExcludePublicDomains() && StringUtils.isNotBlank(parameters.getPublicDomainPath())) {
+                log.info("Starting to exclude public domain. file =" + parameters.getPublicDomainPath());
+                Node publicDomainSource = addSource(parameters.getPublicDomainPath());
+                publicDomainSource = publicDomainSource.rename(new FieldList(PUBLIC_DOMAIN_FIELDNAME), new FieldList(
+                        PUBLIC_DOMAIN_NEW_FIELDNAME));
+                parsedDomainNode = parsedDomainNode.stopList(publicDomainSource, PARSED_DOMAIN,
+                        PUBLIC_DOMAIN_NEW_FIELDNAME);
+            }
+        }
+        return parsedDomainNode;
     }
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +28,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
-import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
+import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
@@ -43,7 +42,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
-    private static final String ACCOUNT_MASTER_INDEX_KEY = "AccountMasterIndex";
+    private static final String ACCOUNT_MASTER_LOOKUP_KEY = "AccountMasterLookup";
     private static final String INPUT_AVRO_KEY = "InputAvro";
     private static final String PUBLIC_DOMAIN_KEY = "PublicDomain";
 
@@ -60,7 +59,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private AccountMaster accountMaster;
 
     @Autowired
-    private AccountMasterIndex accountMasterIndex;
+    private AccountMasterLookup accountMasterLookup;
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -122,8 +121,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private Map<String, String> getDataflowExtraSources(MatchInput input) {
         Map<String, String> extraSources = new HashMap<>();
         String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
-        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterIndex, dataVersion);
-        extraSources.put(ACCOUNT_MASTER_INDEX_KEY, sourceTable.getExtracts().get(0).getPath());
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion);
+        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY, sourceTable.getExtracts().get(0).getPath());
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
         extraSources.put(ACCOUNT_MASTER_KEY, sourceTable.getExtracts().get(0).getPath());
         extraSources.put(PUBLIC_DOMAIN_KEY, publicDomainPath);
@@ -139,7 +138,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private CascadingBulkMatchDataflowParameters getDataflowParameters(MatchInput input, String hdfsPodId,
             String outputSchemaPath) {
         CascadingBulkMatchDataflowParameters parameters = new CascadingBulkMatchDataflowParameters();
-        parameters.setAccountMasterIndex(ACCOUNT_MASTER_INDEX_KEY);
+        parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY);
         parameters.setAccountMaster(ACCOUNT_MASTER_KEY);
         parameters.setInputAvro(INPUT_AVRO_KEY);
         parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
@@ -167,28 +166,6 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
             log.info("Using provited input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         }
-        // inputSchema = prefixFieldName(inputSchema, "Source_");
-        // Schema combinedSchema = (Schema)
-        // AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
-
-        // return combinedSchema;
         return outputSchema;
     }
-
-    private Schema prefixFieldName(Schema schema, String prefix) {
-        SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(schema.getName());
-        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
-        SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
-        for (Schema.Field field : schema.getFields()) {
-            fieldBuilder = fieldAssembler.name(prefix + field.name());
-            @SuppressWarnings("deprecation")
-            Map<String, String> props = field.props();
-            for (Map.Entry<String, String> entry : props.entrySet()) {
-                fieldBuilder = fieldBuilder.prop(entry.getKey(), entry.getValue());
-            }
-            fieldAssembler = AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, AvroUtils.getType(field));
-        }
-        return fieldAssembler.endRecord();
-    }
-
 }

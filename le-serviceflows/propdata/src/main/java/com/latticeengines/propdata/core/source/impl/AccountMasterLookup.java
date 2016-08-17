@@ -7,8 +7,8 @@ import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("accountMasterIndex")
-public class AccountMasterIndex implements FixedIntervalSource {
+@Component("accountMasterLookup")
+public class AccountMasterLookup implements FixedIntervalSource {
     @Autowired
     AccountMasterSeed baseSource;
 
@@ -18,7 +18,7 @@ public class AccountMasterIndex implements FixedIntervalSource {
 
     @Override
     public String getSourceName() {
-        return "AccountMasterIndex";
+        return "AccountMasterLookup";
     }
 
     @Override
@@ -33,7 +33,7 @@ public class AccountMasterIndex implements FixedIntervalSource {
 
     @Override
     public String getTransformationServiceBeanName() {
-        return "accountMasterIndexRefreshService";
+        return "accountMasterLookupRefreshService";
     }
 
     @Override

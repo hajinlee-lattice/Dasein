@@ -20,7 +20,7 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     @SourceTableName
     @NotEmptyString
     @NotNull
-    public String accountMasterIndex;
+    public String accountMasterLookup;
 
     @SourceTableName
     @NotEmptyString
@@ -53,14 +53,14 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
         this.inputAvro = inputAvro;
     }
 
-    @JsonProperty("account_master_index")
-    public String getAccountMasterIndex() {
-        return accountMasterIndex;
+    @JsonProperty("account_master_lookup")
+    public String getAccountMasterLookup() {
+        return accountMasterLookup;
     }
 
-    @JsonProperty("account_master_index")
-    public void setAccountMasterIndex(String accountMasterIndex) {
-        this.accountMasterIndex = accountMasterIndex;
+    @JsonProperty("account_master_lookup")
+    public void setAccountMasterLookup(String accountMasterLookup) {
+        this.accountMasterLookup = accountMasterLookup;
     }
 
     @JsonProperty("account_master")

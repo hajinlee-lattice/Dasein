@@ -31,7 +31,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
-import com.latticeengines.propdata.core.source.impl.AccountMasterIndex;
+import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -55,7 +55,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private AccountMaster accountMaster;
 
     @Autowired
-    private AccountMasterIndex accountMasterIndex;
+    private AccountMasterLookup accountMasterLookup;
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -95,14 +95,12 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
             Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
             Assert.assertEquals(finalStatus.getResultLocation(),
                     hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
-            // Assert.assertEquals(finalStatus.getRowsMatched(), new
-            // Integer(100));
 
             assertOutput(finalStatus);
 
         } finally {
             if (finalStatus != null && HdfsUtils.fileExists(yarnConfiguration, finalStatus.getResultLocation())) {
-                cleanupAvroDir(finalStatus.getResultLocation() + "/..");
+//                cleanupAvroDir(finalStatus.getResultLocation() + "/..");
             }
         }
     }
@@ -115,29 +113,35 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 5);
+        Assert.assertEquals(fields.size(), 9);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
-        Assert.assertEquals(records.size(), 11);
-
-        Assert.assertNotNull(records.get(0).get("EmployeesTotal").toString());
+        Assert.assertEquals(records.size(), 14);
+        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(14));
+        int totalEmployees = 0;
+        for (GenericRecord record : records) {
+            if (record.get("EmployeesTotal") != null) {
+                totalEmployees += totalEmployees + Integer.parseInt(record.get("EmployeesTotal").toString());
+            }
+        }
+        Assert.assertTrue(totalEmployees > 0);
 
     }
 
     private void setupAllFiles() {
         List<Class<?>> fieldTypes = getInputAvroTypes();
         uploadDataCsv(avroDir, avroFileName, "com/latticeengines/propdata/match/AccountMasterBulkMatchInput.csv",
-                fieldTypes);
-        fieldTypes = getAccountMasterIndexAvroTypes();
+                fieldTypes, "ID__");
+        fieldTypes = getAccountMasterLookupAvroTypes();
         String dataVersion = MatchUtils.getDataVersion(DATA_CLOUD_VERSION);
-        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterIndex, dataVersion);
-        uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMasterIndex.avro",
-                "com/latticeengines/propdata/match/AccountMasterIndex.csv", fieldTypes);
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion);
+        uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMasterLookup.avro",
+                "com/latticeengines/propdata/match/AccountMasterLookup.csv", fieldTypes, "ID__");
 
         fieldTypes = getDunsAccountMasterAvroTypes();
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMaster.avro",
-                "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes);
+                "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes, "ID__");
 
     }
 
@@ -157,9 +161,9 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     }
 
     @SuppressWarnings("unchecked")
-    private List<Class<?>> getAccountMasterIndexAvroTypes() {
+    private List<Class<?>> getAccountMasterLookupAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
-        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class }));
+        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class }));
         return fieldTypes;
     }
 
@@ -176,7 +180,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
-        matchInput.setExcludePublicDomains(true);
+        matchInput.setExcludePublicDomains(false);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);
@@ -187,6 +191,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
             inputBuffer.setSchema(inputSchema);
         }
         matchInput.setInputBuffer(inputBuffer);
+        matchInput.setReturnUnmatched(true);
         return matchInput;
     }
 }

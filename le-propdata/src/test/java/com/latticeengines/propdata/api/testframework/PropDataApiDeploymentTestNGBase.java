@@ -64,9 +64,10 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             Assert.fail("Failed to upload " + fileName, e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
-    protected void uploadDataCsv(String avroDir, String fileName, String csvFile, List<Class<?>> fieldTypes) {
+    protected void uploadDataCsv(String avroDir, String fileName, String csvFile, List<Class<?>> fieldTypes,
+            String IdKey) {
         try {
             URL url = Thread.currentThread().getContextClassLoader().getResource(csvFile);
             if (url == null) {
@@ -74,7 +75,7 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             }
             CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
             List<List<Object>> data = new ArrayList<>();
-            List<String> fieldNames = new ArrayList<>(Collections.singleton("ID"));
+            List<String> fieldNames = new ArrayList<>(Collections.singleton(IdKey));
             int rowNum = 0;
             for (CSVRecord record : parser.getRecords()) {
                 if (rowNum == 0) {
@@ -98,7 +99,7 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             throw new RuntimeException("Failed to upload test avro.", e);
         }
     }
-    
+
     protected void cleanupAvroDir(String avroDir) {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, avroDir)) {

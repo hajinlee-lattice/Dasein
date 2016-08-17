@@ -2,10 +2,12 @@ package com.latticeengines.propdata.workflow.match.steps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
@@ -15,6 +17,9 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 public class CascadingBulkMatchStep extends RunDataFlow<CascadingBulkMatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CascadingBulkMatchStep.class);
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Autowired
     private MatchCommandService matchCommandService;
@@ -34,10 +39,12 @@ public class CascadingBulkMatchStep extends RunDataFlow<CascadingBulkMatchStepCo
 
     private void writeSuccessMatchCommand() {
         String rootOperationUid = configuration.getRootOperationUid();
+        Long count = AvroUtils.count(yarnConfiguration, configuration.getTargetPath() + "/*.avro");
         matchCommandService.update(rootOperationUid) //
                 .resultLocation(configuration.getTargetPath()) //
                 .status(MatchStatus.FINISHED) //
                 .progress(1f) //
+                .rowsMatched(count.intValue()) //
                 .commit();
     }
 
