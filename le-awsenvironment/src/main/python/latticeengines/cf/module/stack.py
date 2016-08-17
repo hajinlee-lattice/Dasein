@@ -290,13 +290,17 @@ class ECSStack(Stack):
             ],
             Tags=[
                 {
-                    'Key': 'com.lattice-engines.cluster.name',
+                    'Key': 'latticeengies.cluster.name',
                     'Value': stackname
                 },
                 {
-                    'Key': 'com.lattice-engines.cluster.type',
+                    'Key': 'latticeengies.cluster.type',
                     'Value': 'ecs'
                 },
+                {
+                    'Key': 'latticeengines.product',
+                    'Value': 'LPI'
+                }
             ]
         )
         print 'Got StackId: %s' % response['StackId']

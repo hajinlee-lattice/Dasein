@@ -114,9 +114,15 @@ else
     echo $MY_ID > /usr/zookeeper/data/myid
 fi
 
-while [ 1 = 1 ];
-do
-	/usr/zookeeper/bin/zkServer.sh start-foreground || true
-	sleep 3
-done
+#if [ "${WITH_OBSERVERS}" = "true" ]; then
+#
+#    echo "server.4=ob1:2181:3181:observer" >> $ZK_CONF
+#    echo "server.5=ob2:2181:3181:observer" >> $ZK_CONF
+#
+#fi
+
+echo "" >> $ZK_CONF
+
+/usr/zookeeper/bin/zkServer.sh start-foreground || true
+sleep 3
 
