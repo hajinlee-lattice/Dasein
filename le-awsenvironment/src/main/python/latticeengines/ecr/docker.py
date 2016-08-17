@@ -71,18 +71,19 @@ def purge_internal(environment, image):
 
         revisions.append(tag)
 
-    revisions.sort()
-
-    for i in xrange(len(revisions) - REVISIONS_TO_KEEP):
-        to_delete.append(revisions[i])
+    if len(revisions) > 0:
+        revisions.sort()
+        for i in xrange(len(revisions) - REVISIONS_TO_KEEP):
+            to_delete.append(revisions[i])
 
     print to_delete
 
-    client.batch_delete_image(
-        registryId=id,
-        repositoryName=NAMESPACE + '/' + image,
-        imageIds=to_delete
-    )
+    if len(to_delete) > 0:
+        client.batch_delete_image(
+            registryId=id,
+            repositoryName=NAMESPACE + '/' + image,
+            imageIds=to_delete
+        )
 
 
 def tag_for_remote(args):
