@@ -59,7 +59,8 @@ def tomcat_task(profile_vars):
         "Options": {
             "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
             "awslogs-region": { "Ref": "AWS::Region" }
-        }})
+        }}) \
+        .set_env("LE_SWLIB_DISABLED", "true")
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
