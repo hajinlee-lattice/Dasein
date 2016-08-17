@@ -100,7 +100,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
         } finally {
             if (finalStatus != null && HdfsUtils.fileExists(yarnConfiguration, finalStatus.getResultLocation())) {
-//                cleanupAvroDir(finalStatus.getResultLocation() + "/..");
+                cleanupAvroDir(finalStatus.getResultLocation() + "/..");
             }
         }
     }
