@@ -218,6 +218,12 @@ Icons
 		-webkit-mask-image: url("/assets/images/enrichments/ico-attr-website-profile.svg");
 		mask: url("/assets/images/enrichments/ico-attr-website-profile.svg");
     }
+    &.ico-lattice-dots {
+    	height: 15px;
+    	width: 14px;
+    	opacity: .5;
+    	background: url(/assets/images/ico-lattice-dots.png) no-repeat center center;
+    }
 	&.ico-light-grey,
 	&.ico-light-gray {
 		background-color: #b3b5b8;

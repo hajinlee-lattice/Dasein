@@ -51,6 +51,11 @@
                     <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
                 </li>
 
+                <li data-ng-click="showCopyModelToTenantModal($event, data)">
+                    <a href="javascript:void(0)">Copy To Tenant</a>
+                    <i class="ico ico-lattice-dots"></i>
+                </li>
+
                 <li 
                         data-ng-if="mayDeleteModels && !isActive" 
                         data-ng-click="deleteModelClick($event)">

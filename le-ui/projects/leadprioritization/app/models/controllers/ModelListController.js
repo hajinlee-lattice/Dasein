@@ -25,7 +25,7 @@ angular.module('lp.models.list', [
             ModelStore.getModels().then(vm.processModels);
         },
 
-        copyModel: function() {
+        showCopyModelFromTenant: function() {
             CopyModelFromTenantModal.show();
         },
 

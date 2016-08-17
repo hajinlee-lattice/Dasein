@@ -5,7 +5,8 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.DeleteModelModal',
     'mainApp.models.modals.StaleModelModal',
-    'mainApp.models.modals.DeactivateModelModal'
+    'mainApp.models.modals.DeactivateModelModal',
+    'mainApp.models.modals.CopyModelToTenantModal'
 ])
 .directive('modelListTileWidget', function () {
     return {
@@ -17,7 +18,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         controller: function(
             $scope, $state, $rootScope, $document, $element, ResourceUtility, 
             NavUtility, DeleteModelModal, StaleModelModal, DeactivateModelModal, 
-            FeatureFlagService, ModelService
+            FeatureFlagService, ModelService, CopyModelToTenantModal
         ) {
             $scope.ResourceUtility = ResourceUtility;
             $scope.nameStatus = {
@@ -135,6 +136,14 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     StaleModelModal.show($scope.data.Id);
                 }
             };
+            
+            $scope.showCopyModelToTenantModal = function($event, model){
+                if ($event != null) {
+                    $event.stopPropagation();
+                }
+                CopyModelToTenantModal.show(model);
+            }
+
         }
     };
 })
