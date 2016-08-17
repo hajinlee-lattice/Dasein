@@ -29,7 +29,9 @@
     display: inline-block;
     vertical-align: top;
     z-index: 10;
-    
+    &.ng-search {
+        z-index: 11;
+    }
     button {
         vertical-align: top;
         margin-left: .45em;

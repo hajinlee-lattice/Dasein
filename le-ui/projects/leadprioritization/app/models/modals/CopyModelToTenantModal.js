@@ -35,11 +35,6 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
 
     vm.ResourceUtility = ResourceUtility;
 
-    _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
-    vm.tenants = _tenants.filter(function(o) { 
-        return o.DisplayName !== 'A_ForTest_0708'; 
-    });
-
     vm.asTenantName = $stateParams.tenantName;
     vm.current_tenant = {};
     vm.current_model = $scope.model;
@@ -50,6 +45,12 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
         copied: false,
         error: false
     }
+
+    _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
+    vm.tenants = _tenants.filter(function(o) { 
+        return o.DisplayName !== vm.asTenantName; 
+    });
+
 
     vm.modal_change_state = function(key){
         vm.copying = false;
