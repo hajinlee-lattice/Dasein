@@ -10,7 +10,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(SourceColumnID, Arguments, BaseSource, Calculation, ColumnName, ColumnType, GroupBy, Groups, Preparation, Priority, SourceName);
+(SourceColumnID,SourceName,ColumnName,ColumnType,BaseSource,Preparation,Priority,GroupBy,JoinBy,Calculation,Arguments,Groups);
 
 LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ExternalColumn.csv' INTO TABLE `ExternalColumn`
 FIELDS TERMINATED BY ','

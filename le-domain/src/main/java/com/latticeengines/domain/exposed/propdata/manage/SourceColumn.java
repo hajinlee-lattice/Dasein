@@ -44,6 +44,9 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "GroupBy", length = 100)
     private String groupBy;
 
+    @Column(name = "JoinBy", length = 100)
+    private String joinBy;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Calculation", nullable = false, length = 50)
     private Calculation calculation;
@@ -115,6 +118,14 @@ public class SourceColumn implements HasPid, Serializable {
 
     public void setGroupBy(String groupBy) {
         this.groupBy = groupBy;
+    }
+
+    public String getJoinBy() {
+        return joinBy;
+    }
+
+    public void setJoinBy(String joinBy) {
+        this.joinBy = joinBy;
     }
 
     public Calculation getCalculation() {
