@@ -68,7 +68,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "modelAndEmailWorkflow");
-        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_NAME, parameters.getName());
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);

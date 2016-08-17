@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -38,6 +41,9 @@ public class JobResource {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
@@ -50,8 +56,10 @@ public class JobResource {
     @ApiOperation(value = "Retrieve all jobs")
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
+        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid "
+                + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
+        populateJobsWithModelDisplayNames(jobs);
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
@@ -63,7 +71,8 @@ public class JobResource {
     @ApiOperation(value = "Retrieve job from yarn application id")
     public Job findByApplicationId(@PathVariable String applicationId) {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding job for application Id " + applicationId + " with pid " + tenantWithPid.getPid());
+        log.info("Finding job for application Id " + applicationId + " with pid "
+                + tenantWithPid.getPid());
 
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
         return job;
@@ -74,7 +83,8 @@ public class JobResource {
     @ApiOperation(value = "Find jobs with the provided job type")
     public List<Job> findAllWithType(@RequestParam("type") String type) {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
+        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid "
+                + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid(), type);
         if (jobs == null) {
             jobs = Collections.emptyList();
@@ -101,5 +111,22 @@ public class JobResource {
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public AppSubmission restart(@PathVariable String jobId) {
         return workflowProxy.restartWorkflowExecution(jobId);
+    }
+
+    private void populateJobsWithModelDisplayNames(List<Job> jobs) {
+        for (Job job : jobs) {
+            String modelId = null;
+            if (job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
+                modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            } else if (job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
+                modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            }
+
+            if (modelId != null) {
+                ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                        modelSummary.getDisplayName());
+            }
+        }
     }
 }

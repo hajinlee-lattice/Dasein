@@ -45,7 +45,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
         for (String modelId : eventToModelId.values()) {
             proxy.updateModelSummary(modelId, attrMap);
-            putOutputValue(WorkflowContextConstants.Outputs.MODEL_ID, modelId);
+            putOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);

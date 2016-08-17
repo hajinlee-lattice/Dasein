@@ -98,7 +98,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
                 "importMatchAndModelWorkflow");
-        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_NAME, parameters.getName());
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
