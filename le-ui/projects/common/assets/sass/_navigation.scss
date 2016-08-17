@@ -95,7 +95,6 @@ nav.primary-nav {
     min-height: 100vh; // on page load make sure sidebar is 100% high
     width: 60px;
     min-width: 60px; // protection for IE
-
     @media screen and (max-height: $max-height) {
         overflow: auto;
         width: 70px;
@@ -105,12 +104,12 @@ nav.primary-nav {
         background: #222831;
         padding-left: 10px;
         padding-bottom: 75px;
-        padding-top: 40px;
+        padding-top: 70px;
         height: 100vh;
     }
     .label {
         font-size: 12px;
-        display: none;
+        opacity: 0;
         position: relative;
         padding: 0 10px;
         vertical-align: middle;
@@ -122,38 +121,52 @@ nav.primary-nav {
         letter-spacing: 1px;
     }
     .open-button {
-        background: transparent;
+        background: rgba(255,255,255,.05);
         border: 0;
+        border-top: 1px solid rgba(255,255,255,.05);
         width: 38px;
         text-align: center;
         font-size: 20px;
         padding: 10px 0;
         position: absolute;
-        top: 8px;
-        left: 10px;
-        overflow: hidden;
-        width: 50px;
-        height: 25px;
-        opacity: .5;
-        .ico-arrow-open {
-            position: absolute;
-            left: -9px;
-            height: 50px;
-            width: 50px;
-            color: white;
-            top: -9px;
-            transform: rotate(0deg);
-        }
-    }
-    .logo-container {
-        display: none;
-        position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
+        z-index: 100;
+        overflow: hidden;
+        height: 40px;
+        width: 100%;
+        &:after {
+            content: 'collapse';
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+            position: relative;
+            top: -3px;
+            opacity: 0;
+        }
+        .ico-arrow-open {
+            position: absolute;
+            left: 0;
+            height: 50px;
+            width: 50px;
+            color: white;
+            top: -2px;
+        }
+    }
+    .logo-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 20px;
         text-align: center;
-        @media screen and (max-height: $max-height) {
-            position: static;
+        .logo {
+            margin: 0;
+            overflow: hidden;
+            width: 23px;
+            img {
+                width: auto;
+            }
         }
     }
     .menu {
@@ -275,7 +288,7 @@ nav.primary-nav {
         }
         h3 {
             @include text-ellipsis;
-            display: none;
+            opacity: 0;
             width: calc(100% - 50px);
             color: #65696f;
             font-size: 12px;
@@ -324,28 +337,28 @@ html.no-cssmask {
     nav.primary-nav {
         width: 250px;
         .menu-header h3 {
-            display: block;
+            opacity: 1;
         }
         .label {
-            display: inline-block;
-            -webkit-transition: none;
-            -moz-transition: none;
-            -ms-transition: none;
-            transition: none;
-
+            opacity: 1;
             .badge {
                 position: absolute;
                 right: 0.5em;
             }
         }
         .open-button {
+            &:after {
+                opacity: .5;
+            }
             .ico-arrow-open {
-                top: -15px;
+                top: -9px;
                 transform: rotate(180deg);
             }
         }
         .logo-container {
-            display: block;
+            .logo {
+                width: 100%;
+            }
         }
     }
     section.main-content {
