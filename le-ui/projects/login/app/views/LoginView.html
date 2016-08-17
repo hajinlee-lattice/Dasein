@@ -27,7 +27,9 @@
 
                     <div class="form-group">
                         <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
-                        <input type="text" id="username" autocomplete="on" 
+                        <input  type="text" 
+                                id="username" 
+                                autocomplete="on" 
                                 name="le-login_username"
                                 data-ng-model="username" data-ng-enter="loginClick()" 
                                 title="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
@@ -39,7 +41,7 @@
                         <input  type="password"  
                                 id="password"
                                 name="le-login_password"
-                                autocomplete="off" 
+                                autocomplete="on" 
                                 data-ng-model="password" 
                                 data-ng-enter="loginClick()" 
                                 title="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 

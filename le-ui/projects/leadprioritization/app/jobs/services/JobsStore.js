@@ -5,7 +5,7 @@ angular
 
     $interval(function() {
         JobsStore.getJobs();
-    }, 30 * 1000);
+    }, 15 * 1000); // 15 minutes
 })
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;

@@ -1,5 +1,5 @@
 .table-header {
-    padding: 3em 0 1em;
+    padding: 3em 0 0em;
     h2 {
         font-size: 110%;
         margin-bottom: 0.25em;
@@ -9,7 +9,7 @@
         @include media(">medium") {
             font-size: 150%;
         }
-        @include media(">large") {
+        @include media(">large") { 
             font-size: 180%;
         }
     }

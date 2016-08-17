@@ -1,5 +1,4 @@
 angular.module('mainApp.login.controllers.LoginController', [
-    'ngRoute',
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
@@ -10,16 +9,12 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.core.services.FeatureFlagService',
     'mainApp.login.modals.TenantSelectionModal',
     'mainApp.core.services.ResourceStringsService',
-    'mainApp.config.services.ConfigService',
-    'mainApp.core.controllers.MainViewController'
+    'mainApp.config.services.ConfigService'
 ])
 .controller('LoginController', function (
     $scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, BrowserStorageUtility, 
     HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService
 ) {
-    $("body").addClass("login-body");
-    $('[autofocus]').focus();
-
     // Property bindings
     $scope.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;

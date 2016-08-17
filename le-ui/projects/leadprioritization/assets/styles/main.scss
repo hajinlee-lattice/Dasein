@@ -1,14 +1,5 @@
 @import "../../../common/assets/sass/mixins.scss";
-@import "../../app/models/views/ModelListStyles.scss";
-@import "../../app/models/views/ModelDetailStyles.scss";
-@import "../../app/models/views/RefineModelStyles.scss";
-@import "../../app/models/views/CopyModelFromTenantModalView.scss";
-@import "../../app/models/views/CopyModelToTenantModalView.scss";
-@import "../../app/create/views/CSVImportStyles.scss";
-@import "../../app/jobs/JobsStyles.scss";
-@import "../../app/navigation/pagination/PaginationStyles";
-@import "../../app/apiConsole/views/APIConsoleStyle.scss";
-@import "../../app/enrichment/views/EnrichmentView.scss";
+@import "../../app/app.scss";
 
 @import "StylesCommon/bourbon/_bourbon";
 // START: Base styles from UX -- Do not edit these files, UX will update them for us

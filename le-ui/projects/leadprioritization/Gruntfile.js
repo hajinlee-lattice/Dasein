@@ -131,7 +131,9 @@ module.exports = function (grunt) {
             },
             dev:     {
                 files: {
-                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
+                    '<%= pls.app %>/assets/styles/production.css': [
+                        '<%= pls.app %>/assets/styles/main.scss'
+                    ]
                 }
             }
         },

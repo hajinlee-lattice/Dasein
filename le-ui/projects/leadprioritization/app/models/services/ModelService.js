@@ -7,7 +7,7 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.services.ModelSummaryValidationService',
     'mainApp.core.modules.ServiceErrorModule'
 ])
-.service('ModelStore', function($q, ModelService, $timeout) {
+.service('ModelStore', function($q, ModelService, $timeout, ServiceErrorUtility) {
     var ModelStore = this;
 
     this.models = [];
@@ -356,6 +356,7 @@ angular.module('mainApp.models.services.ModelService', [
                 modelSummary.ModelDetails.Status = data.Status;
                 modelSummary.ModelDetails.DisplayName = data.DisplayName;
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
+                modelSummary.ModelDetails.PivotArtifactPath = data.PivotArtifactPath;
                 modelSummary.ModelDetails.SourceSchemaInterpretation = data.SourceSchemaInterpretation;
                 modelSummary.ModelDetails.PivotArtifactPath = data.PivotArtifactPath;
 

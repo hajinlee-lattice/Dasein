@@ -1,7 +1,6 @@
 angular.module('lp.jobs', [
     'lp.jobs.status',
     'pd.navigation.pagination',
-    'mainApp.models.leadenrichment',
     'mainApp.core.utilities.BrowserStorageUtility',
     '720kb.tooltips'
 ])
@@ -13,7 +12,7 @@ angular.module('lp.jobs', [
     $scope.hideCreationMessage = true;
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     $scope.jobs = [];
-    
+
     var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 
     if (modelId) {
@@ -25,6 +24,43 @@ angular.module('lp.jobs', [
     } else {
         $scope.jobs = JobsStore.data.jobs;
     }
+
+    console.log($scope.jobs);
+    
+    $scope.header = {
+        filter: { 
+            label: 'Filter By',
+            unfiltered: $scope.jobs,
+            filtered: $scope.jobs,
+            items: [
+                { label: "All", action: { } },
+                { label: "Completed", action: { jobStatus: 'Completed' } },
+                { label: "Pending", action: { jobStatus: 'Pending' } },
+                { label: "Running", action: { jobStatus: 'Running' } },
+                { label: "Failed", action: { jobStatus: "Failed" } }
+            ]
+        },
+        sort: {
+            label: 'Sort By',
+            icon: 'numeric',
+            order: '-',
+            property: 'timestamp',
+            items: [
+                { label: 'Timestamp',   icon: 'numeric', property: 'timestamp' },
+                { label: 'Model Name',  icon: 'alpha',   property: 'modelName' },
+                { label: 'Job Type',    icon: 'alpha',   property: 'jobType' },
+                { label: 'Job Status',  icon: 'alpha',   property: 'status' }
+            ]
+        },
+        create: {
+            label: 'Create Model',
+            sref: 'home.models.import',
+            class: 'orange-button select-label',
+            icon: 'fa fa-chevron-down',
+            iconclass: 'orange-button select-more',
+            iconrotate: true
+        }
+    };
 
     function getAllJobs(use_cache) {
         JobsStore.getJobs(use_cache, modelId).then(function(result) {

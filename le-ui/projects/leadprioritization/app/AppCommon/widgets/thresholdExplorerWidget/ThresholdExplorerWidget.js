@@ -1,9 +1,8 @@
 angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService'
+    'mainApp.appCommon.utilities.ResourceUtility'
 ])
 
-.controller('ThresholdExplorerWidgetController', function ($scope, ResourceUtility, WidgetFrameworkService) {
+.controller('ThresholdExplorerWidgetController', function ($scope, ResourceUtility) {
     var widgetConfig = $scope.widgetConfig;
     var modelSummary = $scope.data;
 

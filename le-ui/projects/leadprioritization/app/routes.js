@@ -71,7 +71,7 @@ angular
             views: {
                 "header": {
                     controller: 'HeaderController',
-                    templateUrl: 'app/core/views/MainHeaderView.html'
+                    templateUrl: 'app/navigation/header/views/MainHeaderView.html'
                 },
                 "navigation": {
                     controller: function($rootScope, $stateParams, $state, BrowserStorageUtility) {
@@ -798,26 +798,6 @@ angular
                     controller: 'SetupController',
                     templateUrl: 'app/setup/views/SetupView.html'
                 }   
-            }
-        })
-        .state('home.dashboard', {
-            url: '/dashboard',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'UNDER CONSTRUCTION';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    template: 'dashboard'
-                }
             }
         })
         .state('home.enrichment', {

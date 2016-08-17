@@ -1,0 +1,199 @@
+.list-header {
+    margin: 0em 0 0.75em;
+    height: 3.1em;
+    
+    .ng-search.open-absolute .form-control {
+        left: 2em;
+    }
+
+    .number-of-items {
+        li {
+          margin-right: 1em;
+          float: left;
+        }
+        > * {
+          margin-right: .333em;
+        }
+    }
+    /*
+    cursor: pointer;
+    
+    &:hover span {
+        text-decoration: underline;
+    }
+    */
+}
+
+.select-menu {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    z-index: 10;
+    
+    button {
+        vertical-align: top;
+        margin-left: .45em;
+        padding: 0.75em 1em;
+                        
+        &.select-label {
+            border-top-right-radius: 1px;
+            border-bottom-right-radius: 1px;
+            margin: 0;
+            padding-right: 1em;
+
+            &.open {
+                border-bottom-left-radius: 0;
+            }
+
+            span {
+                margin-left: 0.75em;
+            }
+        }
+
+        &.select-more {
+            border-top-left-radius: 1px;
+            border-bottom-left-radius: 1px;
+            margin-left: 1px;
+            margin-right: 0;
+            margin-bottom: 1px;
+
+            &.open {
+                background-color: #222;
+                color: #fff;
+                border-color: #222;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+        }
+    }
+
+    ul {
+        border-radius: 6px;
+        border-top-right-radius: 1px;
+        border-top-left-radius: 1px;
+        
+        li {
+            
+        }
+    }
+
+    &.white-select-menu.sort-select {
+        button {
+            border-radius: 0;
+            
+            &.select-label {
+                border-top-left-radius: 6px;
+                border-bottom-left-radius: 6px;
+                border-right: none;
+                
+                &.open {
+                    background-color: #222;
+                    border-color: #222;
+                    border-bottom-color: #222;
+                    color: #fff;
+                    border-bottom-left-radius: 0px;
+                }
+            }
+            
+            &.select-more {
+                border-top-right-radius: 6px;
+                border-bottom-right-radius: 6px;
+                margin-left: 0;
+                
+                &.open {
+                    color: initial;
+                    background-color: initial;
+                    border-color: #ccc;
+                    border-bottom-right-radius: 0;
+                }
+            }
+        }
+
+        ul {
+            border-top-left-radius: 0;
+            left: 0;
+            right: initial;
+            border-left: 1px solid #222;
+            
+            li {
+                text-align: left;
+                width: 10em;
+                margin: 0;
+                
+                i {
+                    margin-top: 5px;
+                    margin-right: 0;
+                    margin-left: 0;
+                    float: right;
+                }
+            }
+        }
+    }
+
+    &.white-select-menu.filter-select {
+        button,
+        button span,
+        button span:after, 
+        button span:before {
+            animation: none;
+            transition: none;
+        }
+
+        &:hover button {
+            background-color: #f1f1f1;
+        }
+
+        button.select-label {
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            margin-right: 0;
+            
+            &.open {
+                background-color: #222;
+                color: #fff;
+                border-color: #222;
+                border-bottom-left-radius: 0;
+            }
+        }
+
+        button.select-more {
+            border-top-left-radius: 0;
+            border-bottoim-left-radius: 0;
+            margin-left: 0;
+            
+            &.open {
+                background-color: #222;
+                color: #fff;
+                border-color: #222;
+                border-left-color: #fff;
+                border-bottom-left-radius: 0;
+            }
+        }
+
+        span {
+            margin-right: 0em;
+            margin-left: 0em;
+        }
+
+        ul {
+            border-top-left-radius: 0;
+            left: 0;
+            right: initial;
+            border-left: 1px solid #222;
+            
+            li {
+                text-align: left;
+                width: 10em;
+                margin: 0;
+                vertical-align: baseline;
+
+                span {
+                    display: inline-block;
+                    float: right;
+                    margin-top: 3px;
+                }
+            }
+        }
+    }
+}

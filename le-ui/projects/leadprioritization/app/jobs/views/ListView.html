@@ -25,27 +25,13 @@
             </div>
         </div>
         -->
-        <div class="row">
-            <div class="four columns meta">
-                <div data-ng-if="!showEmptyJobsMessage && jobs.length == 0">
-                    Loading... <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                </div>
-                <div class="pull-left number-of-items" ng-if="jobs.length > 0">
-                    Total: <span class="badge blue-badge">{{jobs.length}}</span>&nbsp;
-                    Completed: <span class="badge gray-badge">{{(jobs | filter: { jobStatus: 'Completed' }).length}}</span>
-                </div>
+        <div class="row list-header">
+            <div class="pull-left">
+                <menu-filter-by config="header.filter"></menu-filter-by>
+                <menu-sort-by config="header.sort"></menu-sort-by>
+                <search-filter query="query"></search-filter>
             </div>
-            <div class="eight columns text-right">
-                <div class="ng-search open-absolute">
-                    <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
-                    <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch; query.length ? query = '' : ''" ng-init="ShowSearch = false;">
-                        <span class="fa fa-search" ng-show="!ShowSearch"></span>
-                        <span class="fa fa-times" ng-show="ShowSearch"></span>
-                    </a>
-                </div>
-                <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == '' ? '-' : '')" ng-init="SortOrder = '-'">
-                    <span class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
-                </a>
+            <div class="pull-right">
                 <!--
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
@@ -58,7 +44,7 @@
 
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
         <div class="twelve columns">
-            <pd-pagination-controls current="current" max="max = jobs.length / pagesize">
+            <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
             </pd-pagination-controls>
         </div>
     </div>
@@ -77,9 +63,9 @@
             <div class="jobs-table-content">
                 <div 
                     data-job-status-row 
-                    data-ng-repeat="job in jobs | 
+                    data-ng-repeat="job in header.filter.filtered | 
                         filter: query | 
-                        orderBy: SortOrder + SortProperty | 
+                        orderBy: header.sort.order + header.sort.property | 
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize" 
                     job="job"
@@ -89,7 +75,7 @@
                     cancelling="cancelling"
                     class="job-td-row ngAnimate">
                 </div>
-                <div data-ng-show="jobs.length == 0">
+                <div data-ng-show="(header.filter.filtered | filter: query).length == 0">
                     There are no jobs to show at the moment
                 </div>
             </div>
@@ -98,7 +84,7 @@
 
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
         <div class="twelve columns">
-            <pd-pagination-controls current="current" max="max = jobs.length / pagesize">
+            <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
             </pd-pagination-controls>
         </div>
     </div>

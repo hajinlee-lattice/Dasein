@@ -71,6 +71,19 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
                 WHITELIST: '10.51.12.109, 10.51.51.109'
+            },
+            proddev: {
+                NODE_ENV: 'production',
+                API_URL: 'https://app.lattice-engines.com',
+                APICON_URL: 'https://api.lattice-engines.com',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false,
+                WHITELIST: '10.51.12.109, 10.51.51.109'
             }
         },
         run: {
@@ -107,6 +120,11 @@ module.exports = function (grunt) {
 
     grunt.registerTask('prod', defaultText, [
         'env:production',
+        'run:node'
+    ]);
+
+    grunt.registerTask('proddev', defaultText, [
+        'env:proddev',
         'run:node'
     ]);
 

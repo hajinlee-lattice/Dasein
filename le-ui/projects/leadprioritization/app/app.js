@@ -7,9 +7,10 @@ var mainApp = angular.module('mainApp', [
     'ui.bootstrap',
     'oc.lazyLoad',
 
-    'lp.header',
+    //'lp.header',
+    'common.modules',
     'pd.navigation',
-    //'lp.jobs',
+    'lp.jobs',
     'lp.apiconsole',
     'lp.models.list',
     'lp.models.review',

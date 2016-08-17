@@ -3,7 +3,7 @@
 	<div class="row">
 		<div class="ten columns offset-one">
 			<hgroup ng-if="vm.RequiredFields.length > 0">
-				<h3>{{::ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
+				<h3>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
 					<span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span>
 				</h3>
 			</hgroup>
@@ -15,10 +15,10 @@
 			<table class="unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
-						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
-						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
-						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
-						<th>{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 					</tr>
 				</thead>
 
@@ -111,7 +111,7 @@
 		<div class="ten columns offset-one field-mapping-actions">
 			<div class="pull-left">
 				<button data-ng-click="vm.resetClicked()" class="button white-button" type="button">
-					{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
+					{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
 				</button>
 			</div>
 			<div class="pull-right">
@@ -120,7 +120,7 @@
 						ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
 						class="button orange-button" 
 						type="button">
-					{{::ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
+					{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
 				</button>
 			</div>
 		</div>

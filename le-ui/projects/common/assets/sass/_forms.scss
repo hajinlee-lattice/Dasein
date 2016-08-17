@@ -340,7 +340,7 @@ input[type="search"] {
       position: absolute;
       top: -1px;
       bottom: -1px;
-      left: -250px;
+      left: -250px; 
       border: 1px solid #d0d0d0;
       z-index: 10;
       height: calc(100% + 2px); // fixes ff and ie, doesn't break chrome

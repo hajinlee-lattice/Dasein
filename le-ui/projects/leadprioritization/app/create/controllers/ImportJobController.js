@@ -7,6 +7,7 @@ angular.module('lp.create.import.job', [
     $scope, $state, $stateParams, $interval, ResourceUtility, 
     JobsStore, JobsService, ImportStore, ServiceErrorUtility
 ) {
+    $scope.ResourceUtility = ResourceUtility;
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
     var REFRESH_PERFORM_CALC_ID; 

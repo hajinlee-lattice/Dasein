@@ -8,7 +8,7 @@ angular
 
     angular.extend(vm, {
         FormValidated: true,
-        ResourceUtility : ResourceUtility,
+        ResourceUtility: ResourceUtility,
         csvFileName: $stateParams.csvFileName,
         mappingOptions: [
             { id: 0, name: "Use as Custom Predictor" },

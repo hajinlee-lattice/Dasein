@@ -3,103 +3,13 @@
 
         <div class="row">
             <div class="list-header">
-                <ul class="pull-left number-of-items" ng-if="vm.totalLength > 0">
-                    <li><span>Total:</span> <i class="badge blue-badge">{{vm.totalLength}}</i></li>
-                    <li><span>Active:</span> <i class="badge grey-badge">{{vm.activeLength}}</i></li>
-                    <li ng-if="vm.pmmlLength > 0"><span>PMML:</span> <i class="badge grey-badge">{{vm.pmmlLength}}</i></li>
-                </ul>
-                
+                <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                    <menu-filter-by config="vm.header.filter"></menu-filter-by>
+                    <menu-sort-by config="vm.header.sort"></menu-sort-by>
+                    <search-filter query="vm.query"></search-filter>
+                </div>
                 <div class="create-model-menu pull-right">
-                    <div class="select-menu ng-search open-absolute">
-                        <input type="text" class="form-control" placeholder="Search" ng-model="query" ng-show="ShowSearch" />
-                        <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch; query.length ? query = '' : ''" ng-init="ShowSearch = false;">
-                            <span class="fa fa-search" ng-show="!ShowSearch"></span>
-                            <span class="fa fa-times" ng-show="ShowSearch"></span>
-                        </a>
-                    </div>
-                    
-                    <div class="select-menu white-select-menu">
-                        <button 
-                                type="button"
-                                class="button icon-button white-button select-label"
-                                ng-click="showFilterMenu = !showFilterMenu" 
-                                ng-init="SortOrder = '-';SortLabel = 'Creation Date';SortIcon = 'numeric';SortProperty = 'TimeStamp'"
-                                ng-class="{ 'open': showFilterMenu }">
-                            {{SortLabel}}
-                        </button
-                        ><button 
-                                type="button"
-                                class="button icon-button white-button select-more"
-                                ng-click="SortOrder = (SortOrder == '' ? '-' : '')" 
-                                ng-class="{ 'open': showFilterMenu }">
-                            <span class="fa fa-sort-{{SortIcon}}-{{ SortOrder == '' ? 'asc' : 'desc' }}"></span>
-                        </button>
-                        <ul class="model-menu" ng-show="showFilterMenu" ng-click="showFilterMenu = !showFilterMenu">
-                            <li>
-                                <i class="fa fa-sort-numeric-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
-                                <a  href="javascript:void(0)"
-                                    ng-click="SortLabel = 'Creation Date'; SortIcon = 'numeric'; SortProperty = 'TimeStamp'">
-                                    Creation Date
-                                </a>
-                            </li>
-                            <li>
-                                <i class="fa fa-sort-alpha-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
-                                <a  href="javascript:void(0)"
-                                    ng-click="SortLabel = 'Model Name'; SortIcon = 'alpha'; SortProperty = 'DisplayName'">
-                                    Model Name
-                                </a>
-                            </li>
-                            <li>
-                                <i class="fa fa-sort-amount-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
-                                <a  href="javascript:void(0)"
-                                    ng-click="SortLabel = 'Active Status'; SortIcon = 'amount'; SortProperty = 'Status'">
-                                    Active Status
-                                </a>
-                            </li>
-                            <li>
-                                <i class="fa fa-sort-alpha-{{ SortOrder == '' ? 'asc' : 'desc' }}"></i>
-                                <a  href="javascript:void(0)"
-                                    ng-click="SortLabel = 'Model Type'; SortIcon = 'alpha'; SortProperty = 'ModelType'">
-                                    Model Type
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="select-menu">
-                        <button 
-                                type="button"
-                                class="button icon-button orange-button select-label"
-                                ui-sref="home.models.import"
-                                ng-class="{ 'open': showCustomMenu }">
-                            Create Model
-                        </button
-                        ><button 
-                                type="button"
-                                class="button icon-button orange-button select-more"
-                                ng-click="showCustomMenu = !showCustomMenu" 
-                                ng-class="{ 'open': showCustomMenu }">
-                            <span class="fa fa-chevron-down" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
-                        </button>
-                        <ul class="model-menu" ng-show="showCustomMenu">
-                            <li>
-                                <a ui-sref="home.models.import">From Training Set</a>
-                                <i class="fa fa-file-excel-o"></i>
-                            </li>
-                            <li>
-                                <a ui-sref="home.models.pmml">From PMML File</a>
-                                <i class="fa fa-file-code-o"></i>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)" ng-click="vm.showCopyModelFromTenant(); showCustomMenu = false;">From Other Tenant</a>
-                                <i class="ico ico-lattice-dots"></i>
-                            </li>
-                            <li ng-if="vm.showUploadSummaryJson">
-                                <a href="javascript:void(0)" ng-click="vm.importJSON()">Import a JSON File</a>
-                                <i class="fa fa-file-text-o"></i>
-                            </li>
-                        </ul>
-                    </div> 
+                    <menu-dropdown config="vm.header.create"></menu-dropdown>
                 </div> 
             </div>
         </div>
@@ -112,7 +22,7 @@
 
         <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
             <div class="twelve columns">
-                <pd-pagination-controls current="current" max="max = vm.models.length / pagesize">
+                <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
                 </pd-pagination-controls>
             </div>
         </div>
@@ -123,9 +33,9 @@
                         data-model-list-tile-widget
                         class="model"
                         ng-repeat="
-                            model in vm.models |
-                            filter: query | 
-                            orderBy: SortOrder+SortProperty |
+                            model in vm.header.filter.filtered |
+                            filter: vm.query |
+                            orderBy: vm.header.sort.order + vm.header.sort.property |
                             startFrom: (current - 1) * pagesize |
                             limitTo: pagesize" 
                         data="model">
@@ -135,7 +45,7 @@
 
         <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
             <div class="twelve columns">
-                <pd-pagination-controls current="current" max="max = vm.models.length / pagesize">
+                <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
                 </pd-pagination-controls>
             </div>
         </div>
