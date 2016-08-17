@@ -89,6 +89,7 @@ public class JobResource {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
+        populateJobsWithModelDisplayNames(jobs);
         return jobs;
     }
 
