@@ -86,7 +86,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
-        uploadDataCsv(avroDir, fileName, "com/latticeengines/propdata/match/BulkMatchInput.csv", fieldTypes);
+        uploadDataCsv(avroDir, fileName, "com/latticeengines/propdata/match/BulkMatchInput.csv", fieldTypes, "ID");
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
 
