@@ -10,6 +10,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("latticeCacheSeed")
 public class LatticeCacheSeed implements DerivedSource {
 
+    private static final long serialVersionUID = -198684822043409093L;
+
     private String cronExpression;
 
     @Autowired

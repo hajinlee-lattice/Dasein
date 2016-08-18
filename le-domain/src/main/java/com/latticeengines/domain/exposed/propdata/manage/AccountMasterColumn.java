@@ -37,6 +37,8 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
+    private static final long serialVersionUID = -7516382374246940122L;
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;

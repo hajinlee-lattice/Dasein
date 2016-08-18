@@ -188,6 +188,9 @@ public class SourceColumn implements HasPid, Serializable {
         DEPIVOT, //
         COLUMN_NAME_MAPPING, //
         SEED_MERGE, //
-        UUID;
+        UUID, //
+        TIMESTAMP, //
+        STANDARD_DOMAIN, //
+        TYPE_CONVERT;
     }
 }

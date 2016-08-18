@@ -16,6 +16,8 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class CopyValueBetweenColumnFunction extends BaseOperation implements Function {
 
+    private static final long serialVersionUID = 704139437526099546L;
+
     private static Logger LOG = LogManager.getLogger(CopyValueBetweenColumnFunction.class);
 
     private Map<String, String> inputColumnMapping; // input - > output

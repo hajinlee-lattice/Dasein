@@ -7,6 +7,7 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 @Component("semrush")
 public class Semrush implements CollectedSource {
 
+    private static final long serialVersionUID = -437395685948895897L;
     private String cronExpression;
 
     @Override

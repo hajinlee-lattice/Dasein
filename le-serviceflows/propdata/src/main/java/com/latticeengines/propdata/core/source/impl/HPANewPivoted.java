@@ -12,6 +12,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("hpaNewPivoted")
 public class HPANewPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
+    private static final long serialVersionUID = -6154293757323120037L;
+
     private String cronExpression;
 
     @Autowired

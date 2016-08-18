@@ -12,6 +12,8 @@ import com.latticeengines.propdata.core.source.TransformedToAvroSource;
 @Component("dnbCacheSeedRaw")
 public class DnBCacheSeedRaw implements TransformedToAvroSource {
 
+    private static final long serialVersionUID = -1260037352937689384L;
+
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 

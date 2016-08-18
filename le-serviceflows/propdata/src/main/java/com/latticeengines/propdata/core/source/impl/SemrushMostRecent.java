@@ -14,6 +14,8 @@ import com.latticeengines.propdata.core.source.PurgeStrategy;
 @Component("semrushMostRecent")
 public class SemrushMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
 
+    private static final long serialVersionUID = 8134813954744155607L;
+
     private String cronExpression;
 
     @Autowired

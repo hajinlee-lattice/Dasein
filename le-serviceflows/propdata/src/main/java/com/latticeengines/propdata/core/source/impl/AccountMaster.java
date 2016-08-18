@@ -10,6 +10,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("accountMaster")
 public class AccountMaster implements DerivedSource {
 
+    private static final long serialVersionUID = 5343511350388581523L;
+
     @Autowired
     AccountMasterSeed baseSource;
 

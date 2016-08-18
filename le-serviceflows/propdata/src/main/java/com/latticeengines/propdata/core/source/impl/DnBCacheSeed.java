@@ -10,6 +10,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("dnBCacheSeed")
 public class DnBCacheSeed implements FixedIntervalSource {
 
+    private static final long serialVersionUID = -6280748201445659077L;
+
     // 2 year duration in seconds
     private static final long DEFAULT_CUTOFF_LIMIT_IN_SECONDS = 2 * 366 * 24 * 60 * 60L;
 

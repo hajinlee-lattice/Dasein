@@ -50,6 +50,8 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
         Node mainBaseSource = addSource(parameters.getBaseTables().get(0));
         mainBaseSource = addRetainNode(mainBaseSource, mainBaseSourceColumnMapping);
         mainBaseSource = addRenameNode(mainBaseSource, mainBaseSourceColumnMapping);
+        mainBaseSource = addColumnNode(mainBaseSource, parameters.getColumns());
+
         /*
         Node mergedBaseSource = addSource(parameters.getBaseTables().get(1));
         mergedBaseSource = addRetainNode(mergedBaseSource, mergedBaseSourceColumnMapping);
@@ -149,6 +151,22 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
                 new CopyValueBetweenColumnFunction(mergedBaseSourceColumnMapping, outputColumnArr),
                 new FieldList(inputColumnNames), outputColumnMetaDatas,
                 new FieldList(outputColumnNames));
+    }
+
+    private Node addColumnNode(Node node, List<SourceColumn> sourceColumns) {
+        for (SourceColumn sourceColumn : sourceColumns) {
+            switch (sourceColumn.getCalculation()) {
+                case UUID:
+                    node = node.addUUID(sourceColumn.getColumnName());
+                    break;
+                case TIMESTAMP:
+                    node = node.addTimestamp(sourceColumn.getColumnName());
+                    break;
+                default:
+                    break;
+            }
+        }
+        return node;
     }
 
     private void getColumnMapping(List<SourceColumn> sourceColumns)

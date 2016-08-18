@@ -13,6 +13,8 @@ import com.latticeengines.propdata.core.source.PurgeStrategy;
 @Component("hpaNewMostRecent")
 public class HPANewMostRecent implements MostRecentSource, DomainBased {
 
+    private static final long serialVersionUID = -3365167049951638958L;
+
     private String cronExpression;
 
     @Autowired

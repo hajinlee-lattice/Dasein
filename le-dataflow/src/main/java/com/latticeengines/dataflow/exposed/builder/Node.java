@@ -5,11 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-import cascading.operation.buffer.FirstNBuffer;
-import cascading.pipe.Pipe;
-
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -31,12 +26,18 @@ import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+
+import cascading.operation.Buffer;
+import cascading.operation.Function;
+import cascading.operation.buffer.FirstNBuffer;
+import cascading.pipe.Pipe;
 
 public class Node {
     private String identifier;
@@ -295,6 +296,11 @@ public class Node {
     public Node addTimestamp(String timestampField, Date timestamp) {
         return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
                 timestampField, timestamp))), builder);
+    }
+
+    public Node addUUID(String uuidField) {
+        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddUUIDStrategy(uuidField))),
+                builder);
     }
 
     public Table getSourceSchema() {

@@ -12,6 +12,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("bombora30DayAgg")
 public class Bombora30DayAgg implements DomainBased, DerivedSource, HasSqlPresence {
 
+    private static final long serialVersionUID = -7716662820798495246L;
+
     private String cronExpression;
 
     @Autowired

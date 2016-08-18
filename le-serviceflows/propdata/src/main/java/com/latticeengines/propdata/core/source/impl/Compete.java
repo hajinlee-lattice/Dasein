@@ -7,6 +7,7 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 @Component("compete")
 public class Compete implements CollectedSource {
 
+    private static final long serialVersionUID = 1656423386846596128L;
     private String cronExpression;
 
     @Override

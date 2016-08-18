@@ -7,6 +7,8 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 @Component("hpaNew")
 public class HPANew implements CollectedSource {
 
+    private static final long serialVersionUID = -3425546227797626316L;
+
     private String cronExpression;
 
     @Override

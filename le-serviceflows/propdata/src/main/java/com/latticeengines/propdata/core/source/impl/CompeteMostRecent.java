@@ -14,6 +14,8 @@ import com.latticeengines.propdata.core.source.PurgeStrategy;
 @Component("competeMostRecent")
 public class CompeteMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
 
+    private static final long serialVersionUID = 7478351998358016335L;
+
     private String cronExpression;
 
     @Autowired

@@ -9,6 +9,9 @@ import com.latticeengines.propdata.core.source.Source;
 
 @Component("accountMasterLookup")
 public class AccountMasterLookup implements FixedIntervalSource {
+
+    private static final long serialVersionUID = 3706653802200619595L;
+
     @Autowired
     AccountMasterSeed baseSource;
 
