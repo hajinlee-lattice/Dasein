@@ -20,9 +20,9 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
-import com.latticeengines.propdata.core.source.impl.DnBCacheSeed;
+import com.latticeengines.propdata.core.source.impl.DnBCacheSeedRaw;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedRawConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
@@ -47,7 +47,7 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     private TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    private DnBCacheSeed source;
+    private DnBCacheSeedRaw source;
 
     @Autowired
     private FirehoseTransformationDataFlowService transformationDataFlowService;
@@ -86,7 +86,7 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     Date checkTransformationConfigurationValidity(
             TransformationConfiguration transformationConfiguration) {
-        DnBCacheSeedConfiguration conf = (DnBCacheSeedConfiguration) transformationConfiguration;
+        DnBCacheSeedRawConfiguration conf = (DnBCacheSeedRawConfiguration) transformationConfiguration;
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -98,7 +98,7 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     protected TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
             String newLatestVersion, List<SourceColumn> sourceColumns) {
-        DnBCacheSeedConfiguration configuration = new DnBCacheSeedConfiguration();
+        DnBCacheSeedRawConfiguration configuration = new DnBCacheSeedRawConfiguration();
         configuration.setInputFirehoseVersion(latestBaseVersion.get(0));
         DnBCacheSeedInputSourceConfig inputSourceConfig = new DnBCacheSeedInputSourceConfig();
         inputSourceConfig.setVersion(latestBaseVersion.get(0));
@@ -120,12 +120,12 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     TransformationConfiguration readTransformationConfigurationObject(String confStr)
             throws IOException {
-        return JsonUtils.deserialize(confStr, DnBCacheSeedConfiguration.class);
+        return JsonUtils.deserialize(confStr, DnBCacheSeedRawConfiguration.class);
     }
 
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
-        return DnBCacheSeedConfiguration.class;
+        return DnBCacheSeedRawConfiguration.class;
     }
 
 }

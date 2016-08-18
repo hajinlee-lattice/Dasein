@@ -35,11 +35,11 @@ public class SimpleCascadingExecutor {
 
     private static final String CSV_TO_AVRO_PIPE = "pipe";
 
-    private static final String QUOTE = "\"";
-
     private static final String CSV_DELIMITER = ",";
 
     private static final String MAPREDUCE_JOB_QUEUENAME = "mapreduce.job.queuename";
+
+    private static final String TEZ_JOB_QUEUENAME = "tez.queue.name";
 
     private final Configuration yarnConfiguration;
 
@@ -60,7 +60,6 @@ public class SimpleCascadingExecutor {
             String avroDirPath, String delimiter, String qualifier, String charset)
             throws IOException {
         delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
-        qualifier = qualifier == null ? QUOTE : qualifier;
 
         Schema schema = fieldMapping.getAvroSchema();
         Properties properties = new Properties();
@@ -71,12 +70,21 @@ public class SimpleCascadingExecutor {
         String translatedQueue = LedpQueueAssigner
                 .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
         properties.put(MAPREDUCE_JOB_QUEUENAME, translatedQueue);
+        /*
+        properties.put(TEZ_JOB_QUEUENAME, translatedQueue);
+        properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(1)
+                .buildProperties(properties);
+        Hadoop2TezFlowConnector flowConnector = new Hadoop2TezFlowConnector(properties);
+        */
 
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
-        DelimitedParser delimitedParser = new CustomDelimitedParser(fieldMapping, delimiter,
-                qualifier, false, true, fieldTypeResolver);
+        DelimitedParser delimitedParser = qualifier == null
+                ? new CustomDelimitedParserWithoutQuote(fieldMapping, delimiter, false, true,
+                        fieldTypeResolver)
+                : new CustomDelimitedParser(fieldMapping, delimiter, qualifier, false, true,
+                        fieldTypeResolver);
         TextDelimited textDelimited = charset == null ? new TextDelimited(true, delimitedParser)
                 : new TextDelimited(Fields.ALL, null, true, true, charset, delimitedParser);
 

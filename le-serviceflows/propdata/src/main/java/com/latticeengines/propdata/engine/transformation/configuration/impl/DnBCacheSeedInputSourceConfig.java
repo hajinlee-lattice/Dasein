@@ -7,7 +7,7 @@ public class DnBCacheSeedInputSourceConfig extends FileInputSourceConfig {
 
     @Override
     public String getQualifier() {
-        return "\"";
+        return null;
     }
 
     @Override

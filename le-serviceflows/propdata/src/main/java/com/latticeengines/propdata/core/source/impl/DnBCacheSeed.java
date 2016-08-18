@@ -3,38 +3,31 @@ package com.latticeengines.propdata.core.source.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.propdata.core.IngestionNames;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.source.RawTransformationType;
-import com.latticeengines.propdata.core.source.TransformedToAvroSource;
+import com.latticeengines.propdata.core.source.FixedIntervalSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
+import com.latticeengines.propdata.core.source.Source;
 
-@Component("dnbCacheSeed")
-public class DnBCacheSeed implements TransformedToAvroSource {
+@Component("dnBCacheSeed")
+public class DnBCacheSeed implements FixedIntervalSource {
 
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
+    // 2 year duration in seconds
+    private static final long DEFAULT_CUTOFF_LIMIT_IN_SECONDS = 2 * 366 * 24 * 60 * 60L;
 
     private String cronExpression;
 
+    private long cutoffLimitInSeconds = DEFAULT_CUTOFF_LIMIT_IN_SECONDS;
+
+    @Autowired
+    private DnBCacheSeedRaw baseSource;
+
     @Override
-    public Path getHDFSPathToImportFrom() {
-        return hdfsPathBuilder.constructIngestionDir(IngestionNames.DNB_CASHESEED);
+    public Source[] getBaseSources() {
+        return new Source[] { baseSource };
     }
 
     @Override
     public String getSourceName() {
-        return IngestionNames.DNB_CASHESEED;
-    }
-
-    @Override
-    public String getDefaultCronExpression() {
-        return cronExpression;
-    }
-
-    @Override
-    public RawTransformationType getTransformationType() {
-        return RawTransformationType.CSV_TARGZ_TO_AVRO;
+        return "DnBCacheSeed";
     }
 
     @Override
@@ -44,11 +37,41 @@ public class DnBCacheSeed implements TransformedToAvroSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "LE_PRIMARY_DUNS", "LE_DOMAIN" };
+        return new String[] { "DUNS_NUMBER", "LE_DOMAIN" };
+    }
+
+    @Override
+    public String getDefaultCronExpression() {
+        return cronExpression;
+    }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {
+        return PurgeStrategy.NUM_VERSIONS;
+    }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() {
+        return 3;
+    }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() {
+        return 7;
+    }
+
+    @Override
+    public String getDirForBaseVersionLookup() {
+        return "Raw";
     }
 
     @Override
     public String getTransformationServiceBeanName() {
-        return "dnbCacheSeedIngestionService";
+        return "dnbCacheSeedCleanService";
+    }
+
+    @Override
+    public Long getCutoffDuration() {
+        return cutoffLimitInSeconds;
     }
 }

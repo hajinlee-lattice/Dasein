@@ -22,7 +22,6 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.common.EngineConstants;
@@ -43,9 +42,6 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
 
     @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;
@@ -72,8 +68,9 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         }
 
         if (source instanceof DataImportedFromHDFS) {
-            String inputDir = hdfsPathBuilder
-                    .constructIngestionDir(source.getSourceName(), baseVersion).toString();
+            String inputDir = ((DataImportedFromHDFS) source).getHDFSPathToImportFrom()
+                    .append(baseVersion).toString();
+            log.info("Ingestion DIR: " + inputDir);
             List<String> gzHdfsPaths = null;
 
             try {
@@ -82,6 +79,28 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
 
+            try {
+                for (int i = 0; i < gzHdfsPaths.size(); i++) {
+                    String gzHdfsPath = gzHdfsPaths.get(i);
+                    String uncompressedFilePath = new Path(workflowDir,
+                            UNCOMPRESSED_FILE + String.format("%04d", i) + EngineConstants.CSV)
+                                    .toString();
+                    log.info("UncompressedFilePath: " + uncompressedFilePath);
+                    untarGZFile(gzHdfsPath, uncompressedFilePath);
+                }
+
+                String avroDirPath = new Path(workflowDir, AVRO_DIR_FOR_CONVERSION).toString();
+                log.info("AvroDirPath: " + avroDirPath);
+                String uncompressedFilePathWildcard = new Path(workflowDir,
+                        UNCOMPRESSED_FILE + "*" + EngineConstants.CSV).toString();
+                log.info("uncompressedFilePathWildcard: " + uncompressedFilePathWildcard);
+                convertCsvToAvro(fieldTypeMapping, uncompressedFilePathWildcard, avroDirPath,
+                        inputConfig);
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
+            }
+
+            /*
             for (int i = 0; i < gzHdfsPaths.size(); i++) {
                 String gzHdfsPath = gzHdfsPaths.get(i);
                 String uncompressedFilePath = new Path(workflowDir,
@@ -112,6 +131,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                     throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
                 }
             }
+            */
         }
     }
 

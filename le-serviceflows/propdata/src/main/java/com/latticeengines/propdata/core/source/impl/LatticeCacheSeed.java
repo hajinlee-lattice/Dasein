@@ -22,7 +22,7 @@ public class LatticeCacheSeed implements DerivedSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "Domain", "Name", "State", "Country" };
+        return new String[] { "Domain" };
     }
 
     @Override

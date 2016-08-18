@@ -1,8 +1,5 @@
 package com.latticeengines.propdata.engine.transformation.configuration;
 
-import org.springframework.stereotype.Component;
-
-@Component("fileInputSourceConfig")
 public abstract class FileInputSourceConfig implements InputSourceConfig {
     protected String version;
 

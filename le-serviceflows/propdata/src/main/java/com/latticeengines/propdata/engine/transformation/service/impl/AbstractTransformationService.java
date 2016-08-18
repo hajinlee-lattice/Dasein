@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -55,6 +56,7 @@ public abstract class AbstractTransformationService extends TransformationServic
     @Autowired
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
+    @Override
     abstract TransformationProgressEntityMgr getProgressEntityMgr();
 
     abstract void executeDataFlow(TransformationProgress progress, String workflowDir,
@@ -142,7 +144,7 @@ public abstract class AbstractTransformationService extends TransformationServic
     protected String sourceVersionDirInHdfs(TransformationProgress progress) {
         String sourceDirInHdfs = getHdfsPathBuilder()
                 .constructTransformationSourceDir(getSource(), progress.getVersion()).toString();
-        LOG.info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        LOG.info("sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
         return sourceDirInHdfs;
     }
 

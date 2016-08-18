@@ -7,11 +7,12 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public class DnBCacheSeedConfiguration implements TransformationConfiguration {
-    private String sourceName;
+public class DnBCacheSeedRawConfiguration implements TransformationConfiguration {
     private String version;
+    private String sourceName;
     private Map<String, String> sourceConfigurations;
-    private String serviceBeanName = "dnbCacheSeedCleanService";
+    private String inputFirehoseVersion;
+    private String serviceBeanName = "dnbCacheSeedIngestionService";
     private String rootOperationId;
     private List<SourceColumn> sourceColumns;
     private DnBCacheSeedInputSourceConfig inputSourceConfig;
@@ -31,6 +32,10 @@ public class DnBCacheSeedConfiguration implements TransformationConfiguration {
         return inputSourceConfig;
     }
 
+    public void setDnbCacheSeedInputSourceConfig(DnBCacheSeedInputSourceConfig inputSourceConfig) {
+        this.inputSourceConfig = inputSourceConfig;
+    }
+
     @Override
     public String getVersion() {
         return version;
@@ -47,8 +52,8 @@ public class DnBCacheSeedConfiguration implements TransformationConfiguration {
     }
 
     @Override
-    public String getRootOperationId() {
-        return rootOperationId;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override
@@ -61,13 +66,17 @@ public class DnBCacheSeedConfiguration implements TransformationConfiguration {
         this.sourceConfigurations = sourceConfigurations;
     }
 
-    public void setDnBCacheSeedInputSourceConfig(DnBCacheSeedInputSourceConfig inputSourceConfig) {
-        this.inputSourceConfig = inputSourceConfig;
+    public String getInputFirehoseVersion() {
+        return inputFirehoseVersion;
+    }
+
+    public void setInputFirehoseVersion(String inputFirehoseVersion) {
+        this.inputFirehoseVersion = inputFirehoseVersion;
     }
 
     @Override
-    public void setVersion(String version) {
-        this.version = version;
+    public String getRootOperationId() {
+        return rootOperationId;
     }
 
     @Override

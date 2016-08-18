@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.python.jline.internal.Log;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -51,6 +52,9 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
     @Override
     protected String getRootBaseSourceDirPath() {
         FixedIntervalSource source = (FixedIntervalSource) getSource();
+        Log.info("Source Name: " + source.getSourceName() + " Base Source Name: "
+                + source.getBaseSources()[0].getSourceName() + " RootBaseSourceDirPath: "
+                + getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
         return getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString();
     }
 
@@ -63,6 +67,11 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
                 + ((FixedIntervalSource) source).getDirForBaseVersionLookup();
         Date cutoffDate = getCutoffDate(null);
         String cutoffDateVersion = HdfsPathBuilder.dateFormat.format(cutoffDate);
+        Log.info("findUnprocessedVersions() source = " + source);
+        Log.info("findUnprocessedVersions() rootSourceDir = " + rootSourceDir);
+        Log.info("findUnprocessedVersions() rootBaseSourceDir = " + rootBaseSourceDir);
+        Log.info("findUnprocessedVersions() rootDirForVersionLookup = " + rootDirForVersionLookup);
+        Log.info("findUnprocessedVersions() cutoffDateVersion = " + cutoffDateVersion);
 
         List<String> latestVersions = null;
         List<String> latestBaseVersions = null;
@@ -71,7 +80,7 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
             latestBaseVersions = findSortedVersionsInDir(rootDirForVersionLookup, cutoffDateVersion);
 
             if (latestBaseVersions.isEmpty()) {
-                LOG.info("No version if found in base source");
+                LOG.info("No version is found in base source");
                 return null;
             }
 

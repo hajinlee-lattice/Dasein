@@ -27,7 +27,7 @@ public class AccountMasterSeed implements FixedIntervalSource {
 
     @Override
     public Source[] getBaseSources() {
-        return new Source[] { baseSourceLattice, baseSourceDnB };
+        return new Source[] { baseSourceDnB, baseSourceLattice };
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AccountMasterSeed implements FixedIntervalSource {
 
     @Override
     public String getTransformationServiceBeanName() {
-        return "accountMasterSeedRefreshService";
+        return "accountMasterSeedRebuildService";
     }
 
     @Override

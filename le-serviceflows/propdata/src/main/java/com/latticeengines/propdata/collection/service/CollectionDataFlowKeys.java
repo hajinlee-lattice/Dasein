@@ -7,5 +7,6 @@ final public class CollectionDataFlowKeys {
     public static final String TRANSFORM_FLOW = "TransformFlow";
     public static final String READ_FORM_FIREHOSE_FLOW = "ReadFromFirehoseFlow";
     public static final String DEPIVOT_FLOW = "DepivotFlow";
-
+    public static final String CLEAN_FLOW = "CleanFlow";
+    public static final String REBUILD_FLOW = "RebuildFlow";
 }

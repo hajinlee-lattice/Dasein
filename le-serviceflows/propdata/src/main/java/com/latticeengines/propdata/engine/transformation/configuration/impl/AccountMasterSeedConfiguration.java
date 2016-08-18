@@ -7,14 +7,14 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public class DnBCacheSeedConfiguration implements TransformationConfiguration {
+public class AccountMasterSeedConfiguration implements TransformationConfiguration {
     private String sourceName;
     private String version;
     private Map<String, String> sourceConfigurations;
-    private String serviceBeanName = "dnbCacheSeedCleanService";
+    private String serviceBeanName = "accountMasterSeedRebuildService";
     private String rootOperationId;
     private List<SourceColumn> sourceColumns;
-    private DnBCacheSeedInputSourceConfig inputSourceConfig;
+    private AccountMasterSeedInputSourceConfig inputSourceConfig;
 
     @Override
     public String getSourceName() {
@@ -61,7 +61,8 @@ public class DnBCacheSeedConfiguration implements TransformationConfiguration {
         this.sourceConfigurations = sourceConfigurations;
     }
 
-    public void setDnBCacheSeedInputSourceConfig(DnBCacheSeedInputSourceConfig inputSourceConfig) {
+    public void setAccountMasterSeedInputSourceConfig(
+            AccountMasterSeedInputSourceConfig inputSourceConfig) {
         this.inputSourceConfig = inputSourceConfig;
     }
 

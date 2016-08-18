@@ -186,6 +186,8 @@ public class SourceColumn implements HasPid, Serializable {
         BUILTWITH_TOPATTR, //
         HGDATA_NEWTECH, //
         DEPIVOT, //
-        COLUMN_NAME_MAPPING;
+        COLUMN_NAME_MAPPING, //
+        SEED_MERGE, //
+        UUID;
     }
 }

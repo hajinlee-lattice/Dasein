@@ -53,7 +53,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
                     .getConfigurationClass();
 
             String transformationConfigurationStr = prepareTransformationConfiguration.getTransformationConfiguration();
-            TransformationConfiguration transformationConfiguration = (TransformationConfiguration) JsonUtils
+            TransformationConfiguration transformationConfiguration = JsonUtils
                     .deserialize(transformationConfigurationStr, configurationClass);
             if (transformationService.isNewDataAvailable(transformationConfiguration)) {
                 String podId = prepareTransformationConfiguration.getHdfsPodId();
