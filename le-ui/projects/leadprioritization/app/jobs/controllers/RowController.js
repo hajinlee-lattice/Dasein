@@ -94,6 +94,14 @@ angular
                 }
             };
 
+
+            $scope.cancelJobClick = function ($event) {
+                if ($event != null) {
+                    $event.stopPropagation();
+                }
+                CancelJobModal.show(job.id);
+            };
+
             // Use this in JobStatusRow.html
             // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
             $scope.rescoreFailedJob = function() {
