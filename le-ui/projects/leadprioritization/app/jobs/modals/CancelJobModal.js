@@ -1,10 +1,10 @@
-angular.module('lp.jobs.status.cancelmodal', [
+angular.module('lp.jobs.modals.cancelmodal', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .service('CancelJobModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, JobsService) {
     var self = this;
     this.show = function (jobId) {
-        $http.get('app/jobs/status/CancelJobModalView.html', { cache: $templateCache }).success(function (html) {
+        $http.get('app/jobs/modals/CancelJobModalView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.jobId = jobId;

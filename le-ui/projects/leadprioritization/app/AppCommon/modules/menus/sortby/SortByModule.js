@@ -8,8 +8,6 @@ angular
         },
         templateUrl: 'app/AppCommon/modules/menus/sortby/SortByView.html',
         controller: function ($scope) {
-            console.log('sortby', $scope);
-
             angular.extend($scope, $scope.config, {
                 visible: false
             }, {

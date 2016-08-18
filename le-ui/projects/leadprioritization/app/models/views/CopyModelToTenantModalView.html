@@ -82,6 +82,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <p>
+                        It may take up to 10 minutes for the model to appear in another tenant.
+                    </p>
                     <button class="button gray-button" ng-disabled="vm.copying" ng-click="vm.modal_change_state('choosing')">Back</button>
                     <button class="button orange-button" ng-disabled="!vm.tenant_selected || vm.copying" ng-click="vm.copyModel()">Copy Model</button>
                 </div>

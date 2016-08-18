@@ -24,8 +24,6 @@ angular.module('lp.jobs', [
     } else {
         $scope.jobs = JobsStore.data.jobs;
     }
-
-    console.log($scope.jobs);
     
     $scope.header = {
         filter: { 

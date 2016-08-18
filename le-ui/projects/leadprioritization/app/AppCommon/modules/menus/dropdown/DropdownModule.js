@@ -12,7 +12,6 @@ angular
                 visible: false
             }, {
                 init: function() {
-                    console.log('dropdown', $scope);
                 }
             });
 

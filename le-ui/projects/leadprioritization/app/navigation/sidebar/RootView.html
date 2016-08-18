@@ -18,7 +18,7 @@
             <a 
                     title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}} [{{RunningJobs.length}}/{{jobs.length}}]"
                     ui-sref="home.jobs.status" 
-                    ui-sref-opts="{reload: true}">
+                    ui-sref-opts="{reload: false}">
                 <span class="ico-container" ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}">
                     <span class="ico ico-cog ico-light-gray"></span>
                 </span>

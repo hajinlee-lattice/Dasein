@@ -157,9 +157,16 @@
             }
         }
         .modal-footer {
-            text-align: right;
+            @include flex-container();
+            -webkit-justify-content: flex-end;
+            -ms-flex-pack: end;
+            justify-content: flex-end;
+            p {
+                @include flex-item(1 1 auto);
+                width: 300px;
+            }
             button {
-                display: inline-block;
+                @include flex-item(0 1 auto);
                 margin-left: 10px;
             }
         }

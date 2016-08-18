@@ -13,8 +13,6 @@ angular
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
         controller: function ($scope, $filter) {
-            console.log('filterby', $scope);
-
             angular.extend($scope, $scope.config, {
                 visible: false
             }, {

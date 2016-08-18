@@ -1,6 +1,6 @@
 angular
 .module('lp.jobs.status', [
-    'lp.jobs.status.cancelmodal'
+    'lp.jobs.modals.cancelmodal'
 ])
 .directive('jobStatusRow', function() {
     return {
