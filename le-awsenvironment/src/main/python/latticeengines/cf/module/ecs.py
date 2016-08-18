@@ -1,8 +1,14 @@
+from .autoscaling import LaunchConfiguration
+from .ec2 import EC2Instance
 from .elb import ElasticLoadBalancer
 from .iam import Role
 from .parameter import Parameter
 from .resource import Resource
 from .template import Template
+
+
+
+
 
 
 class ECSCluster(Resource):

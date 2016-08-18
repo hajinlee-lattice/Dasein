@@ -33,14 +33,14 @@ services:
       - "2080:2181"
     environment:
       MY_ID: "4"
-      LE_ENVIRONMENT: "dev"
+      LE_ENVIRONMENT: "qacluster"
     labels:
       cluster: ${CLUSTER}
   ob2:
     image: latticeengines/observer
     hostname: ob2
     environment:
-      MY_ID: "5"
-      LE_ENVIRONMENT: "dev"
+      MY_ID: "4"
+      LE_ENVIRONMENT: "qacluster"
     labels:
       cluster: ${CLUSTER}

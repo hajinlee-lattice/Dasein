@@ -1,5 +1,6 @@
 {
   "t2.micro":   { "core": 1, "mem_gb": 1,     "on_demand": 0.013 },
+  "t2.small":   { "core": 1, "mem_gb": 2,     "on_demand": 0.026 },
   "t2.medium":  { "core": 2, "mem_gb": 4,     "on_demand": 0.052 },
   "m4.large":   { "core": 2, "mem_gb": 8,     "on_demand": 0.120 },
   "m4.xlarge":  { "core": 4, "mem_gb": 16,    "on_demand": 0.239 },

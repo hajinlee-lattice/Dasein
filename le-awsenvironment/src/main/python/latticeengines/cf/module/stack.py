@@ -7,7 +7,7 @@ from boto3.s3.transfer import S3Transfer
 
 from .autoscaling import AutoScalingGroup, LaunchConfiguration
 from .condition import Condition
-from .ec2 import EC2Instance
+from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
 from .iam import InstanceProfile
 from .parameter import *
@@ -15,6 +15,7 @@ from .resource import Resource
 from .template import Template, TEMPLATE_DIR
 from ...conf import AwsEnvironment
 
+SUBNETS = [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3]
 
 class Stack(Template):
     def __init__(self, description):
@@ -121,21 +122,49 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, extra_elbs=(), use_external_elb=True):
+    def __init__(self, description, extra_elbs=(), use_external_elb=True, use_asgroup=True, instances=1):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
         self._elbs = [ PARAM_ELB_NAME ] if use_external_elb else []
         self._elbs += list(extra_elbs)
-        self._ecscluster, self._asgroup = self._construct(self._elbs)
+
+        if use_asgroup:
+            self._ecscluster, self._asgroup = self._construct(self._elbs)
+        else:
+            self._asgroup = None
+            self._ecscluster, self._ec2s = self._construct_by_ec2(instances)
 
     def add_service(self, service_name, task, capacity=None):
         if capacity is None:
             capacity = PARAM_CAPACITY
 
         service = ECSService(service_name, self._ecscluster, task, capacity) \
-            .set_min_max_percent(50, 200) \
-            .depends_on(self._asgroup)
+            .set_min_max_percent(50, 200)
+
+        if self._asgroup is not None:
+            service.depends_on(self._asgroup)
+        else:
+            for ec2 in self._ec2s:
+                service.depends_on(ec2)
+
         self.add_resource(service)
+
+    def _construct_by_ec2(self, instances):
+        ecscluster = ECSCluster("ecscluster")
+        self.add_resource(ecscluster)
+        ec2s = self._create_ec2_instances(ecscluster, instances)
+        return ecscluster, ec2s
+
+    def _create_ec2_instances(self, ecscluster, instances):
+        ec2s = []
+        for n in xrange(instances):
+            name = "EC2Instance%d" % (n + 1)
+            subnet = SUBNETS[n % 3]
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster) \
+                .add_sg(PARAM_SECURITY_GROUP) \
+                .set_subnet(subnet)
+            self.add_resource(ec2)
+        return ec2s
 
     def _construct(self, elbs):
         ecscluster = ECSCluster("ecscluster")
@@ -148,7 +177,7 @@ class ECSStack(Stack):
 
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(instance_profile)
-        launchconfig.set_metadata(ECSStack._metadata(launchconfig, ecscluster))
+        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)

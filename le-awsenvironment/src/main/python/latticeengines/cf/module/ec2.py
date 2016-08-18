@@ -12,6 +12,70 @@ def ec2_defn():
     with open(json_file) as f:
         return json.load(f)
 
+def ecs_metadata(ec2, ecscluster):
+    return {
+        "AWS::CloudFormation::Init" : {
+            "configSets": {
+                "bootstrap": [ "install" ],
+                "reload": [ "install" ]
+            },
+            "install" : {
+                "files" : {
+                    "/etc/cfn/cfn-hup.conf" : {
+                        "content" : { "Fn::Join" : ["", [
+                            "[main]\n",
+                            "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                            "region=", { "Ref" : "AWS::Region" }, "\n"
+                        ]]},
+                        "mode"    : "000400",
+                        "owner"   : "root",
+                        "group"   : "root"
+                    },
+                    "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                        "content": { "Fn::Join" : ["", [
+                            "[cfn-auto-reloader-hook]\n",
+                            "triggers=post.update\n",
+                            "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
+                            "action=/opt/aws/bin/cfn-init -v",
+                            "         -c reload",
+                            "         --stack ", { "Ref" : "AWS::StackName" },
+                            "         --resource %s " % ec2.logical_id(),
+                            "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                            "runas=root\n"
+                        ]]}
+                    }
+                },
+                "commands" : {
+                    "01_save_ip" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
+                            "echo $ADDR >> /etc/internaladdr.txt",
+                            "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
+                            "echo $PUBADDR >> /etc/externaladdr.txt"
+                        ] ] }
+                    },
+                    "02_add_instance_to_cluster" : {
+                        "command" : { "Fn::Join": [ "", [
+                            "#!/bin/bash\n",
+                            "rm -rf /etc/ecs/ecs.config\n",
+                            "touch /etc/ecs/ecs.config\n",
+                            "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
+                            "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
+                            "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
+                        ] ] }
+                    }
+                },
+                "services" : {
+                    "sysvinit" : {
+                        "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
+                    }
+                }
+            }
+        }
+    }
+
+
 class EC2Instance(Resource):
     def __init__(self, name, instance_type, ec2_key, os="AmazonLinux"):
         assert isinstance(instance_type, Parameter)
@@ -20,7 +84,7 @@ class EC2Instance(Resource):
         self._template = {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "ImageId": EC2Instance.__image_id(os),
+                "ImageId": EC2Instance._image_id(os),
                 "InstanceType": instance_type.ref(),
                 "SecurityGroupIds": [ ],
                 "Monitoring": "true",
@@ -45,7 +109,7 @@ class EC2Instance(Resource):
         return self
 
     def set_instanceprofile(self, instanceprofile):
-        assert isinstance(instanceprofile, InstanceProfile)
+        assert isinstance(instanceprofile, InstanceProfile) or isinstance(instanceprofile, Parameter)
         self._template["Properties"]["IamInstanceProfile"] = instanceprofile.ref()
         return self
 
@@ -84,10 +148,53 @@ class EC2Instance(Resource):
             return json.loads(text)
 
     @classmethod
-    def __image_id(cls, os):
+    def _image_id(cls, os):
         return {
             "Fn::FindInMap": [ "AWSRegion2AMI", {"Ref": "AWS::Region"}, os ]
         }
+
+
+class ECSInstance(EC2Instance):
+    def __init__(self, name, instance_type, ec2_key, instance_profile, ecscluster):
+        assert isinstance(instance_type, Parameter)
+        assert isinstance(ec2_key, Parameter)
+        Resource.__init__(self, name)
+        self._template = {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": EC2Instance._image_id("AmazonECSLinux"),
+                "InstanceType": instance_type.ref(),
+                "SecurityGroupIds": [ ],
+                "Monitoring": "true",
+                "KeyName": ec2_key.ref(),
+                "UserData": self.__ecs_userdata(),
+                "Tags": []
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Timeout": "PT20M"
+                }
+            }
+        }
+        self.set_metadata(ecs_metadata(self, ecscluster))
+        self.set_instanceprofile(instance_profile)
+
+    def __ecs_userdata(self):
+        return { "Fn::Base64" : { "Fn::Join" : ["", [
+            "#!/bin/bash -xe\n",
+            "yum install -y aws-cfn-bootstrap\n",
+
+            "/opt/aws/bin/cfn-init -v",
+            "         -c bootstrap"
+            "         --stack ", { "Ref" : "AWS::StackName" },
+            "         --resource %s " % self.logical_id(),
+            "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+            "/opt/aws/bin/cfn-signal -e $? ",
+            "         --stack ", { "Ref" : "AWS::StackName" },
+            "         --resource %s " % self.logical_id(),
+            "         --region ", { "Ref" : "AWS::Region" }, "\n"
+        ]]}}
 
 class Volume(Resource):
     def __init__(self, logicalId, size, type):
