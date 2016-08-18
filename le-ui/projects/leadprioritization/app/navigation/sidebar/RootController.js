@@ -12,13 +12,17 @@ angular
         $scope.jobs = JobsStore.data.jobs;
 
         $scope.handleSidebarToggle = function ($event) {
-            $('body').toggleClass('open-nav');
-            $('body').addClass('controlled-nav');  // indicate the user toggled the nav
+            var target = angular.element($event.target),
+                collapsable_click = !target.parents('.menu').length;
+            if(collapsable_click) {
+                $('body').toggleClass('open-nav');
+                $('body').addClass('controlled-nav');  // indicate the user toggled the nav
 
-            if (typeof(sessionStorage) !== 'undefined'){
-                sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
+                if (typeof(sessionStorage) !== 'undefined'){
+                    sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
+                }
+                $rootScope.$broadcast('sidebar:toggle');
             }
-            $rootScope.$broadcast('sidebar:toggle');
         }
 
         

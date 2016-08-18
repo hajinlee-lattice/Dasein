@@ -1,8 +1,9 @@
-<section ng-controller="SidebarRootController" class="lp-sidebar-menu">
-
-    <button class="open-button open" data-ng-click="handleSidebarToggle($event)">
-        <span class="ico ico-arrow-open"></span>
-    </button>
+<section ng-controller="SidebarRootController" class="lp-sidebar-menu" ng-click="handleSidebarToggle($event)">
+    <div class="logo-container">
+        <a href="#/" class="logo" style="float: none;padding: 0;">
+            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+        </a>
+    </div>
     <ul class="menu model-view">
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.models"><span class="ico-container"><span class="ico ico-model ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
@@ -32,9 +33,7 @@
             <a ui-sref="home.model.refine"><span class="ico-container"><span class="ico ico-refine ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
         </li>
     </ul>
-    <div class="logo-container">
-        <a href="#/" class="logo" style="float: none;padding: 0;">
-            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
-        </a>
-    </div>
+    <button class="open-button open">
+        <span class="ico ico-arrow-open"></span>
+    </button>
 </section>
