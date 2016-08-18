@@ -108,6 +108,7 @@ nav.primary-nav {
         height: 100vh;
     }
     .label {
+        display: inline-block;
         font-size: 12px;
         opacity: 0;
         position: relative;
@@ -119,6 +120,9 @@ nav.primary-nav {
         white-space: nowrap;
         text-overflow: ellipsis;
         letter-spacing: 1px;
+        .badge {
+            display: none;
+        }
     }
     .open-button {
         background: rgba(255,255,255,.05);
@@ -342,6 +346,7 @@ html.no-cssmask {
         .label {
             opacity: 1;
             .badge {
+                display: inline;
                 position: absolute;
                 right: 0.5em;
             }

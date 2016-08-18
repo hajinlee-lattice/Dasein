@@ -63,6 +63,7 @@ angular.module('pd.navigation.header', [
         $scope.modelDisplayName = args.displayName;
     });
     
+    checkBrowserWidth();
     var _checkBrowserWidth = _.debounce(checkBrowserWidth, 250);
 
     angular.element(window).resize(_checkBrowserWidth);
