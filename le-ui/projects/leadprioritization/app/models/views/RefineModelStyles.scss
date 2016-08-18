@@ -1,7 +1,10 @@
-.review-model {
+.review-model {	
 	table {
 		th:nth-child(1), td:nth-child(1) {
 			width: 72px;
+			input[type="checkbox"] {
+				margin-top: 0;
+			}
 		}
 		th:nth-child(2), td:nth-child(2) {
 			& > div {
