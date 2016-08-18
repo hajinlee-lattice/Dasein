@@ -25,7 +25,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelMetadataServiceImpl.class);
 
     @Autowired
@@ -33,7 +32,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     private RequiredColumnsExtractor getRequiredColumnsExtractor(String modelId) {
         return GetRequiredColumns.getRequiredColumnsExtractor(modelId, modelSummaryEntityMgr);
     }
@@ -84,6 +83,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
                     break;
                 }
             }
+            log.info(String.format("Not found field %s n in Attribute List.", field.getColumnName()));
             if (!found) {
                 Attribute newAttribute = new Attribute();
                 newAttribute.setName(field.getColumnName());
@@ -182,5 +182,5 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         }
         return table;
     }
-    
+
 }

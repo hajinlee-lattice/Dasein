@@ -101,10 +101,12 @@ public class ModelResource {
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
                 parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
-        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(clone.getAttributes(),
-                parameters.getAttributes());
+
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(parameters
                 .getSourceModelSummaryId());
+        Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(), modelSummary.getEventTableName());
+        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(parentModelEventTable.getAttributes(),
+                parameters.getAttributes());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
