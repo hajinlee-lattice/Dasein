@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -33,8 +32,8 @@ public class BISAccessTokenResource {
     @Autowired
     private UserService userService;
 
-    @Value("${pls.sureshot.playmaker.endpoint}")
-    private String playmakerEndpoint;
+    @Autowired
+    private Oauth2RestApiProxy oauth2RestApiProxy;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -44,24 +43,14 @@ public class BISAccessTokenResource {
     @ApiOperation(value = "Get a one-time bis access token and email it to user")
     public ResponseDocument<Boolean> getOneTimeTokenAndEmail(@RequestParam String username,
             @RequestParam String tenantId) {
-        PlaymakerTenant playmakerTenant = new PlaymakerTenant();
-        playmakerTenant.setTenantName(tenantId);
-        playmakerTenant.setTenantPassword("null");
-        playmakerTenant.setExternalId("null");
-        playmakerTenant.setJdbcDriver("null");
-        playmakerTenant.setJdbcUrl("null");
-
         try {
             User user = userService.findByUsername(username);
-            playmakerTenant = restTemplate.postForObject(
-                    String.format("%s/tenants", playmakerEndpoint), playmakerTenant,
-                    PlaymakerTenant.class);
+            String apiToken = oauth2RestApiProxy.createAPIToken(tenantId);
 
-            log.info(String.format("The user is: %s", user.toString()));
-            log.info(playmakerTenant);
+            log.info(
+                    String.format("The user is: %s with api token: %s", user.toString(), apiToken));
 
-            emailService.sendPlsOnetimeSfdcAccessTokenEmail(user, tenantId,
-                    playmakerTenant.getTenantPassword());
+            emailService.sendPlsOnetimeSfdcAccessTokenEmail(user, tenantId, apiToken);
         } catch (Exception e) {
             log.warn(String.format("Generate bis access token failed for user: %s and tenant: %s",
                     username, tenantId), e);
