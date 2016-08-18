@@ -20,6 +20,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.file.FileReader;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -109,6 +110,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
+        log.info(String.format("The extract path is: %s", path));
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
 
@@ -131,6 +133,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         checkForInternalId(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+        log.info("schema is " + schema);
 
         try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath())) {
             try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
@@ -153,6 +156,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             format = format.withSkipHeaderRecord();
         }
         return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), format); //
+
     }
 
     public String processBak(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
@@ -299,7 +303,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             } else {
                 idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
             }
-            log.info("idStr is " + idStr);
 
             Map<String, Object> attributeValues = new HashMap<>();
             for (Schema.Field field : fields) {
@@ -435,7 +438,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         builder.set(entry.getKey(), entry.getValue());
                     }
                 }
-                dataFileWriter.append(builder.build());
+                GenericData.Record record = builder.build();
+                dataFileWriter.append(record);
             }
         }
     }

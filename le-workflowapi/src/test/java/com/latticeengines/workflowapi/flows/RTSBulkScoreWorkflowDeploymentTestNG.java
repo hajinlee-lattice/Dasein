@@ -3,10 +3,12 @@ package com.latticeengines.workflowapi.flows;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +17,15 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import au.com.bytecode.opencsv.CSVReader;
+
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -35,6 +43,8 @@ import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
 
@@ -55,9 +65,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private static String TEST_INPUT_DATA_DIR;
 
+    private static String SCORED_FILE_DIR;
+
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
 
-    private static final String AVRO_FILE = "part-m-00000.avro";
+    private static final String AVRO_FILE = "part-m-00000_small.avro";
 
     private static final String TEST_MODEL_NAME_PREFIX = "c8684c37-a3b9-452f-b7e3-af440e4365b8";
 
@@ -81,8 +93,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     public void setup() throws Exception {
         TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
         customerSpace = CustomerSpace.parse(TENANT_ID);
-        TEST_INPUT_DATA_DIR = String.format("/Pods/QA/Contracts/%s/Tenants/%s/Spaces/Production/Data/Tables/",
-                TENANT_ID, TENANT_ID);
+        TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), customerSpace)
+                .toString();
+        SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId().toString(), customerSpace)
+                .toString() + "/Exports";
+        System.out.println("SCORED_FILE_DIR is " + SCORED_FILE_DIR);
 
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
@@ -99,6 +114,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
                 plsApiHostPort);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        System.out.println(selectedAttributeMap.getDeselectedAttributes());
+        System.out.println(selectedAttributeMap.getSelectedAttributes());
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
@@ -137,12 +154,30 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
+        HdfsUtils.rmdir(yarnConfiguration, SCORED_FILE_DIR);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testScoreAccount() throws Exception {
         Assert.assertNotNull(summary);
         score(summary.getId(), summary.getTrainingTableName());
+        testCsvFile();
+    }
+
+    private void testCsvFile() throws IOException {
+        // find the csv file
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, SCORED_FILE_DIR);
+        Assert.assertEquals(files.size(), 1);
+        Assert.assertNotNull(HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0)));
+        // assert the ordering of the header
+        CSVReader reader = new CSVReader(new InputStreamReader(
+                HdfsUtils.getInputStream(yarnConfiguration, files.get(0))));
+        String[] header = reader.readNext();
+        System.out.println(Arrays.toString(header));
+        Assert.assertEquals(header[header.length - 4], "Score");
+        Assert.assertTrue(header[header.length - 1].contains("Has"));
+        Assert.assertTrue(header[header.length - 2].contains("Has"));
+        Assert.assertTrue(header[header.length - 3].contains("Has"));
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
@@ -183,6 +218,12 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         extract.setPath(TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX + AVRO_FILE);
         extract.setExtractionTimestamp(12345L);
         extract.setTable(metadataTable);
+        Attribute idAttr = new Attribute();
+        idAttr.setName(InterfaceName.Id.name());
+        idAttr.setDisplayName(InterfaceName.Id.name());
+        idAttr.setSourceLogicalDataType("");
+        idAttr.setPhysicalDataType(Type.STRING.name());
+        metadataTable.addAttribute(idAttr);
         metadataTable.setName("MetadataTable");
         metadataTable.setTableType(TableType.DATATABLE);
         metadataTable.addExtract(extract);

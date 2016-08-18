@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -136,14 +137,35 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 2);
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
-        Assert.assertNotNull(contents);
-        List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(files.get(0)));
+        checkScoreAvro(files.get(0), false);
+        checkErrorCSV(files.get(1));
+    }
+
+    private void checkScoreAvro(String path, boolean withAttributes) throws IllegalArgumentException, Exception {
+        String scoreContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+        Assert.assertNotNull(scoreContents);
+        List<GenericRecord> list = AvroUtils.getData(new Configuration(), new Path(path));
         Assert.assertEquals(list.size(), 4);
         for (GenericRecord ele : list) {
             System.out.println(ele.toString());
         }
-        checkErrorCSV(files.get(1));
+        if (withAttributes) {
+            GenericRecord record = list.get(0);
+            Schema schema = record.getSchema();
+            List<Schema.Field> fields = schema.getFields();
+            Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
+            Assert.assertEquals(fields.get(1).name(), "ModelId");
+            Assert.assertEquals(fields.get(2).name(), "Score");
+            System.out.println(record.get(0));
+            System.out.println(record.get(1));
+            System.out.println(record.get(2));
+            System.out.println(record.get(3));
+            System.out.println(record.get(4));
+            for (GenericRecord ele : list) {
+                Assert.assertNotNull(ele.get("attr1"));
+                Assert.assertNotNull(ele.get("attr2"));
+            }
+        }
     }
 
     @Test(groups = "functional")
@@ -157,16 +179,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
         Assert.assertNotNull(files);
         Assert.assertEquals(files.size(), 2);
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0));
-        Assert.assertNotNull(contents);
-        contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(1));
-        Assert.assertNotNull(contents);
-        List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(files.get(0)));
-        Assert.assertEquals(list.size(), 4);
-        for (GenericRecord ele : list) {
-            Assert.assertNotNull(ele.get("attr1"));
-            Assert.assertNotNull(ele.get("attr2"));
-        }
+        checkScoreAvro(files.get(0), true);
         checkErrorCSV(files.get(1));
     }
 
