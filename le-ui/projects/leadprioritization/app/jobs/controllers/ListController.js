@@ -70,8 +70,8 @@ angular.module('lp.jobs', [
         BULK_SCORING_ID;
 
     // this stuff happens only on Model Bulk Scoring page
+    getAllJobs();
     if (modelId) {
-        getAllJobs();
         BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
     }
 
