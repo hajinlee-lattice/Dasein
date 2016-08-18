@@ -16,7 +16,8 @@ var mainApp = angular.module('mainApp', [
     'lp.models.review',
     'lp.create.import',
     'lp.enrichment.leadenrichment',
-    'lp.sfdc.credentials'
+    'lp.sfdc.credentials',
+    'lp.managefields'
 ])
 .controller('MainController', function (
     $scope, $state, $rootScope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
