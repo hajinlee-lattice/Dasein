@@ -95,9 +95,9 @@ public class JobServiceImpl implements JobService {
 
     private void populateJobWithModelDisplayNames(Job job) {
         String modelId = null;
-        if (job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
+        if (job.getOutputs() != null && job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
             modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-        } else if (job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
+        } else if (job.getInputs() != null && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
             modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
         }
 
