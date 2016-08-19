@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.propdata.match;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class AccountLookupEntry implements HasId<String> {
 
@@ -61,8 +61,8 @@ public class AccountLookupEntry implements HasId<String> {
     }
 
     public static String buildId(String domain, String duns) {
+        domain = domain != null ? domain : "NULL";
+        duns = duns != null ? duns : "NULL";
         return DOMAIN + domain + DUNS + duns;
     }
 }
-
-
