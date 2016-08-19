@@ -1,9 +1,13 @@
-import fastavro as avro
 import glob
 import os
-import pwd
+try:
+    import pwd
+    pwdImported = True
+except:
+    pwdImported = False
 from urlparse import urlparse
 
+import fastavro as avro
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
 from webhdfs import WebHDFS
@@ -17,6 +21,10 @@ class RemediateDataRulesStep(PipelineStep):
         self.params = params
         self.columnRules = {}
         self.rowRules = {}
+
+        if pwdImported is False:
+            logger.info("Can't invoke RemediateDataRuleStep init because pwd package could not be imported ")
+            return
 
         logger.info('Enabled rules: %s' % str(self.enabledRules))
         if params:
