@@ -56,6 +56,6 @@ WHERE DataType = '';
 
 UPDATE LDC_ManageDB.SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')
-WHERE BaseSource = 'DnBCacheSeed';
+WHERE SourceName = 'DnBCacheSeedRaw';
 
 SET SQL_SAFE_UPDATES = 1;
