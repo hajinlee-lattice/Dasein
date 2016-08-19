@@ -192,13 +192,15 @@ class Server {
                 try {
                     let r = request(url);
 
-                    //if (typeof req.query == 'object') {
-                        req.headers["Authorization"] = req.query.Authorization || '';
-                    //}
+                    if (req.query && req.query.Authorization) {
+                        // Since the token was in the URL, +'s got converted to spaces
+                        let token = req.query.Authorization.replace(/ /g,'+');
+
+                        req.headers["Authorization"] = token || '';
+                    }
 
                     req.pipe(r).pipe(res);
                 } catch(err) {
-
                     console.log(chalk.red(this.getTimestamp() + ':fileproxy>') + err);
                 }
             });
