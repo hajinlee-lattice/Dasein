@@ -3,14 +3,21 @@ Description:
 
     This step will serve as proxy to run a custom target step dynamically
 '''
+import imp
 import os
 import shutil
-import pwd
-import imp
-from webhdfs import WebHDFS
 from urlparse import urlparse
+
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
+from webhdfs import WebHDFS
+
+
+try:
+    import pwd
+    pwdImported = True
+except:
+    pwdImported = False
 
 
 logger = get_logger("pipeline")
@@ -23,6 +30,11 @@ class CustomProxyStep(PipelineStep):
         self.targetMainClassName = targetMainClassName
         self.targetFilePath = targetFilePath
         self.targetObject = None
+
+        if pwdImported is False:
+            logger.info("Can't invoke CustomProxyStep init because pwd package could not be imported ")
+            return
+
         if params:
             try:
                 if self.__isBlank(self.targetName) or self.__isBlank(self.targetMainClassName) or self.__isBlank(self.targetFilePath):
@@ -51,7 +63,7 @@ class CustomProxyStep(PipelineStep):
                 kwargs = {'params' : params}
                 self.targetObject = getattr(loadedModule, targetMainClassName)(**kwargs)
                 logger.info('Successfully loaded CustomTargetStep for ' + self.targetFilePath)
-                
+
             except Exception as e:
                 self.targetObject = None
                 logger.warn("Failed to load the custom target object in file %s, error: %s" % (targetFilePath, str(e)))
@@ -66,9 +78,9 @@ class CustomProxyStep(PipelineStep):
             logger.info('Successfully run CustomProxyStep for ' + self.targetFilePath)
         except Exception as e:
             logger.error("Failed to run custom target class in file %s, error: %s" % (self.targetFilePath, str(e)))
-            
+
         return dataFrame
-    
+
     def __isBlank(self, str):
         if str == None or str.strip() == '':
             return True
