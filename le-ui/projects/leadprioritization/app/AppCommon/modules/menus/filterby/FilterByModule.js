@@ -28,7 +28,6 @@ angular
                         $scope.items.forEach(function(item, i) {
                             item.filtered = $filter('filter')($scope.config.unfiltered, item.action, true);
                             item.total = item.filtered.length;
-                            console.log(i, item.filtered);
                         });
                     }
                 },

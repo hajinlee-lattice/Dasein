@@ -38,7 +38,7 @@
 
                 <li
                         ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })" 
-                        data-ng-if="data.ModelType && data.ModelFileType != 'PmmlModel'"
+                        data-ng-if="data.ModelType && showReviewAndClone && data.ModelFileType != 'PmmlModel'"
                         data-ng-click="reviewClick($event)">
                     <a href="javascript:void(0)">Review Model</a>
                     <i class="fa fa-eye"></i>
