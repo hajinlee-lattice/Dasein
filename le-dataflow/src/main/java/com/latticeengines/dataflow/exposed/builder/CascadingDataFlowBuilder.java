@@ -569,7 +569,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
     }
 
-    protected List<FieldMetadata> getMetadataFromSchemaPath(String identifier, String schemaPath) {
+    protected List<FieldMetadata> getMetadataFromSchemaPath(String schemaPath) {
         try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(getConfig()))) {
             Schema schema = AvroUtils.readSchemaFromResource(resourceLoader, schemaPath);
             return getMetadataFromSchema(schema);

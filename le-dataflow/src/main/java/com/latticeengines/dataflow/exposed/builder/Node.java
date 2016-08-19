@@ -5,6 +5,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import cascading.operation.Buffer;
+import cascading.operation.Function;
+import cascading.operation.buffer.FirstNBuffer;
+import cascading.pipe.Pipe;
+
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -33,11 +38,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-import cascading.operation.buffer.FirstNBuffer;
-import cascading.pipe.Pipe;
 
 public class Node {
     private String identifier;
@@ -321,10 +321,6 @@ public class Node {
 
     public void setSchema(List<FieldMetadata> fms) {
         builder.setMetadata(identifier, fms);
-    }
-
-    public List<FieldMetadata> getMetadataFromSchemaPath(String schemaPath) {
-        return builder.getMetadataFromSchemaPath(identifier, schemaPath);
     }
 
     public String getPipeName() {

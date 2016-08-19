@@ -56,7 +56,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         Node accountMasterSource = addSource(parameters.getAccountMaster());
         List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters);
         List<String> predefinedFields = outputList.get(1);
-        List<FieldMetadata> fieldMetadata = accountMasterSource.getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
+        List<FieldMetadata> fieldMetadata = getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
         FieldMetadata latticeIdMetadata = new FieldMetadata(LATTICE_ID_FIELDNAME, String.class);
         fieldMetadata.add(0, latticeIdMetadata);
         accountMasterSource.setSchema(fieldMetadata);
