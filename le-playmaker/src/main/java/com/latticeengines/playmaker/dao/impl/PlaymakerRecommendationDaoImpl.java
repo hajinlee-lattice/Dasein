@@ -356,7 +356,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             whereClause = String.format(whereClause, oper);
         } else { // ALL or other
             whereClause = "WHERE DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
-                    + ">= :start ";
+                    + ") >= :start ";
         }
         return getAccountExtensionFromClause() + whereClause;
     }
