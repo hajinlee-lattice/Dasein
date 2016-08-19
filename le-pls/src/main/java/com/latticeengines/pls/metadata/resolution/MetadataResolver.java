@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.Sets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -19,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -37,11 +37,13 @@ public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
 
-    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[] { "Interest_esb__c",
-            "Interest_tcat__c", "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed",
-            "kickboxDisposable", "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-    private static final Set<String> STR_SET = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus",
-            "SICCode", "Source_Detail__c", "Cloud_Plan__c" });
+    private static final Set<String> BOOLEAN_SET = Sets
+            .newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c", "kickboxAcceptAll",
+                    "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+    private static final Set<String> STR_SET = Sets
+            .newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+                    "Source_Detail__c", "Cloud_Plan__c" });
 
     private String csvPath;
     private SchemaInterpretation schema;
@@ -56,8 +58,8 @@ public class MetadataResolver {
 
     private Result result;
 
-    public MetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation, Configuration yarnConfiguration,
-            FieldMappingDocument fieldMappingDocument) {
+    public MetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation,
+            Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument) {
         this.csvPath = csvPath;
         this.schema = schemaInterpretation;
         this.yarnConfiguration = yarnConfiguration;
@@ -96,16 +98,17 @@ public class MetadataResolver {
         log.info("Current header list: " + headerFields);
         List<Attribute> attrs = new ArrayList<>();
         for (final String header : headerFields) {
-            Attribute attr = Iterables.find(result.metadata.getAttributes(), new Predicate<Attribute>() {
-                @Override
-                public boolean apply(Attribute input) {
-                    if (input.getDisplayName().equals(header)) {
-                        return true;
-                    }
-                    return false;
-                }
+            Attribute attr = Iterables.find(result.metadata.getAttributes(),
+                    new Predicate<Attribute>() {
+                        @Override
+                        public boolean apply(Attribute input) {
+                            if (input.getDisplayName().equals(header)) {
+                                return true;
+                            }
+                            return false;
+                        }
 
-            });
+                    });
             attrs.add(attr);
         }
         result.metadata.setAttributes(attrs);
@@ -131,7 +134,8 @@ public class MetadataResolver {
                     if (fieldMapping.getMappedField().equals(attribute.getName())) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
-                        attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
+                        attribute
+                                .setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         break;
                     }
                 }
@@ -143,7 +147,8 @@ public class MetadataResolver {
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(), fieldMapping.getFieldType()));
+                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(),
+                        fieldMapping.getFieldType()));
             }
         }
 
@@ -251,7 +256,8 @@ public class MetadataResolver {
 
                     knownColumn.setUserField(header);
                     knownColumn.setMappedField(attribute.getName());
-                    knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                    knownColumn.setFieldType(
+                            getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);
                 }
@@ -329,12 +335,12 @@ public class MetadataResolver {
 
         String fieldType;
         if (userDefinedType == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString().toLowerCase();
+            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString()
+                    .toLowerCase();
         } else {
             fieldType = userDefinedType.getAvroType().toString().toLowerCase();
         }
 
-        log.info(String.format("The fieldType is: %s", fieldType));
         attribute.setName(fieldName.replaceAll("[^A-Za-z0-9_]", "_"));
         attribute.setPhysicalDataType(fieldType);
         attribute.setDisplayName(fieldName);
@@ -354,7 +360,7 @@ public class MetadataResolver {
         case "BOOLEAN":
             fundamentalType = ModelingMetadata.FT_BOOLEAN;
             break;
-        case "NUMBER":
+        case "DOUBLE":
             fundamentalType = ModelingMetadata.FT_NUMERIC;
             break;
         case "STRING":
@@ -371,7 +377,7 @@ public class MetadataResolver {
         case "BOOLEAN":
             statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
             break;
-        case "NUMBER":
+        case "DOUBLE":
             statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
             break;
         case "STRING":
@@ -402,9 +408,11 @@ public class MetadataResolver {
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             InputStream is = fs.open(new Path(csvPath));
-            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is, closeableResourcePool);
+            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is,
+                    closeableResourcePool);
 
-            log.info(String.format("column with header %s is: %s", columnHeaderName, columnFields.toString()));
+            log.info(String.format("column with header %s is: %s", columnHeaderName,
+                    columnFields.toString()));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {
