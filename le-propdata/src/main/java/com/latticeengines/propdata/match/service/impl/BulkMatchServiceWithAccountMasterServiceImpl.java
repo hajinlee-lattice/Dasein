@@ -122,26 +122,27 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         Map<String, String> extraSources = new HashMap<>();
         String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
         Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion);
-        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY, sourceTable.getExtracts().get(0).getPath());
+        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion, sourceTable.getExtracts().get(0).getPath());
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
-        extraSources.put(ACCOUNT_MASTER_KEY, sourceTable.getExtracts().get(0).getPath());
+        extraSources.put(ACCOUNT_MASTER_KEY + dataVersion, sourceTable.getExtracts().get(0).getPath());
         extraSources.put(PUBLIC_DOMAIN_KEY, publicDomainPath);
 
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
         String avroPath = avroInputBuffer.getAvroDir();
-        extraSources.put(INPUT_AVRO_KEY, avroPath);
+        extraSources.put(input.getTableName() + "_" + INPUT_AVRO_KEY, avroPath);
 
         return extraSources;
     }
 
     private CascadingBulkMatchDataflowParameters getDataflowParameters(MatchInput input, String hdfsPodId,
             String outputSchemaPath) {
+        String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
         CascadingBulkMatchDataflowParameters parameters = new CascadingBulkMatchDataflowParameters();
-        parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY);
-        parameters.setAccountMaster(ACCOUNT_MASTER_KEY);
-        parameters.setInputAvro(INPUT_AVRO_KEY);
+        parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion);
+        parameters.setAccountMaster(ACCOUNT_MASTER_KEY + dataVersion);
         parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
+        parameters.setInputAvro(input.getTableName() + "_" + INPUT_AVRO_KEY);
         parameters.setExcludePublicDomains(input.getExcludePublicDomains());
         parameters.setReturnUnmatched(input.getReturnUnmatched());
         parameters.setOutputSchemaPath(outputSchemaPath);

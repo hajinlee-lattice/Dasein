@@ -46,9 +46,20 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         Node accountMasterLookupSource = addSource(parameters.getAccountMasterLookup());
         Node matchedLookupNode = matchLookup(parameters, inputSource, accountMasterLookupSource);
 
+        Node matchedNode = matchAccountMaster(parameters, latticeIdField, inputMetadata, matchedLookupNode);
+        return matchedNode;
+
+    }
+
+    private Node matchAccountMaster(CascadingBulkMatchDataflowParameters parameters, FieldList latticeIdField,
+            List<FieldMetadata> inputMetadata, Node matchedLookupNode) {
         Node accountMasterSource = addSource(parameters.getAccountMaster());
         List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters);
         List<String> predefinedFields = outputList.get(1);
+        List<FieldMetadata> fieldMetadata = accountMasterSource.getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
+        FieldMetadata latticeIdMetadata = new FieldMetadata(LATTICE_ID_FIELDNAME, String.class);
+        fieldMetadata.add(0, latticeIdMetadata);
+        accountMasterSource.setSchema(fieldMetadata);
         accountMasterSource = accountMasterSource.retain(new FieldList(predefinedFields));
 
         JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
@@ -57,9 +68,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
         matchedNode = matchedNode.retain(new FieldList(resultFields.toArray(new String[0])));
-
         return matchedNode;
-
     }
 
     private List<List<String>> buildOutputFieldList(List<FieldMetadata> inputMetadata,

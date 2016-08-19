@@ -20,7 +20,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("processMatchResult")
 public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfiguration> {
 
-    private static final Log log  = LogFactory.getLog(ProcessMatchResult.class);
+    private static final Log log = LogFactory.getLog(ProcessMatchResult.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -29,13 +29,23 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     private String resultTableName;
 
+    private boolean isAccountMaster = false;
+
     @Override
     public void onConfigurationInitialized() {
         ProcessMatchResultConfiguration configuration = getConfiguration();
+        String dataCloudVersion = configuration.getDataCloudVersion();
+        if (dataCloudVersion != null && dataCloudVersion.trim().startsWith("2.")) {
+            isAccountMaster = true;
+        }
+
         Table matchResultTable = JsonUtils.deserialize(executionContext.getString(MATCH_RESULT_TABLE), Table.class);
         Table preMatchTable = JsonUtils.deserialize(executionContext.getString(PREMATCH_EVENT_TABLE), Table.class);
         resultTableName = matchResultTable.getName();
-        String eventTableName = resultTableName.replaceFirst(MatchDataCloud.LDC_MATCH, EVENT);
+        String eventTableName = resultTableName;
+        if (!isAccountMaster) {
+            eventTableName = resultTableName.replaceFirst(MatchDataCloud.LDC_MATCH, EVENT);
+        }
         configuration.setTargetTableName(eventTableName);
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
         parameters.sourceTableName = matchResultTable.getName();
@@ -44,10 +54,20 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
     }
 
     @Override
+    public void execute() {
+        if (!isAccountMaster) {
+            super.execute();
+        }
+    };
+
+    @Override
     public void onExecutionCompleted() {
-        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
+        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getTargetTableName());
         executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
-        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
+        if (!isAccountMaster) {
+            metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
+        }
     }
 
     private List<String> sourceCols(Table preMatchTable) {

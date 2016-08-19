@@ -83,12 +83,25 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
                 } else if (record.size() > 0) {
                     List<Object> row = new ArrayList<>();
                     row.add((int) record.getRecordNumber());
+                    int i = 1;
                     for (String field : record) {
                         if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
                             row.add(null);
                         } else {
-                            row.add(field);
+                            Object value = field;
+                            try {
+                                if (fieldTypes.get(i).equals(Long.class)) {
+                                    value = Long.valueOf(field);
+                                } else if (fieldTypes.get(i).equals(Integer.class)) {
+                                    value = Integer.valueOf(field);
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                value = null;
+                            }
+                            row.add(value);
                         }
+                        i++;
                     }
                     data.add(row);
                 }

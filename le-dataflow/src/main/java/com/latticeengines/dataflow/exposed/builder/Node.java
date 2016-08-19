@@ -323,6 +323,10 @@ public class Node {
         builder.setMetadata(identifier, fms);
     }
 
+    public List<FieldMetadata> getMetadataFromSchemaPath(String schemaPath) {
+        return builder.getMetadataFromSchemaPath(identifier, schemaPath);
+    }
+
     public String getPipeName() {
         return builder.getPipeByIdentifier(identifier).getName();
     }

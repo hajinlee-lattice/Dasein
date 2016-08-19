@@ -171,7 +171,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private List<Class<?>> getDunsAccountMasterAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
-                String.class, String.class, String.class, String.class, String.class, String.class }));
+                Long.class, Long.class, String.class, String.class, String.class, Integer.class }));
         return fieldTypes;
     }
 
@@ -181,6 +181,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
         matchInput.setExcludePublicDomains(false);
+        matchInput.setTableName("AccountMasterTest");
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

@@ -241,7 +241,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Fields declaredFields = new Fields(sortedAllColumns);
         Pipe[] pipes = new Pipe[extracts.size()];
 
-
         Set<String> existing = new HashSet<>();
         for (Extract extract : extracts) {
             Set<String> allColumnsClone = new HashSet<>(allColumns.keySet());
@@ -360,16 +359,21 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             } else {
                 sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
             }
-
-            fields = new ArrayList<>(sourceSchema.getFields().size());
-            for (Field field : sourceSchema.getFields()) {
-                Type avroType = AvroUtils.getType(field);
-                FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
-                fields.add(fm);
-            }
+            fields = getMetadataFromSchema(sourceSchema);
         }
 
         return register(new Pipe(sourceName), fields, sourceName);
+    }
+
+    private List<FieldMetadata> getMetadataFromSchema(Schema sourceSchema) {
+        List<FieldMetadata> fields;
+        fields = new ArrayList<>(sourceSchema.getFields().size());
+        for (Field field : sourceSchema.getFields()) {
+            Type avroType = AvroUtils.getType(field);
+            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+            fields.add(fm);
+        }
+        return fields;
     }
 
     @SuppressWarnings("unchecked")
@@ -563,7 +567,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_26005, ex);
         }
+    }
 
+    protected List<FieldMetadata> getMetadataFromSchemaPath(String identifier, String schemaPath) {
+        try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(getConfig()))) {
+            Schema schema = AvroUtils.readSchemaFromResource(resourceLoader, schemaPath);
+            return getMetadataFromSchema(schema);
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_26005, ex);
+        }
     }
 
     public String addGroupBy(String prior, FieldList groupByFieldList, List<Aggregation> aggregation) {
