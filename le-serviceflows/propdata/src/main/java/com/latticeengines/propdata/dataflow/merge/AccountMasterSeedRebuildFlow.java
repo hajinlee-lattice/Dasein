@@ -156,10 +156,10 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
     private Node addColumnNode(Node node, List<SourceColumn> sourceColumns) {
         for (SourceColumn sourceColumn : sourceColumns) {
             switch (sourceColumn.getCalculation()) {
-                case UUID:
+                case ADD_UUID:
                     node = node.addUUID(sourceColumn.getColumnName());
                     break;
-                case TIMESTAMP:
+                case ADD_TIMESTAMP:
                     node = node.addTimestamp(sourceColumn.getColumnName());
                     break;
                 default:
@@ -173,7 +173,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
             throws JsonParseException, JsonMappingException, IOException {
         List<SeedMergeFieldMapping> list = null;
         for (SourceColumn sourceColumn : sourceColumns) {
-            if (sourceColumn.getCalculation() == Calculation.SEED_MERGE) {
+            if (sourceColumn.getCalculation() == Calculation.MERGE_SEED) {
                 ObjectMapper om = new ObjectMapper();
                 list = om.readValue(sourceColumn.getArguments(), TypeFactory.defaultInstance()
                         .constructCollectionType(List.class, SeedMergeFieldMapping.class));

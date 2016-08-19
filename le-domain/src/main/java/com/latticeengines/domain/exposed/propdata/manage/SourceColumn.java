@@ -187,10 +187,10 @@ public class SourceColumn implements HasPid, Serializable {
         HGDATA_NEWTECH, //
         DEPIVOT, //
         COLUMN_NAME_MAPPING, //
-        SEED_MERGE, //
-        UUID, //
-        TIMESTAMP, //
+        MERGE_SEED, //
+        ADD_UUID, //
+        ADD_TIMESTAMP, //
         STANDARD_DOMAIN, //
-        TYPE_CONVERT;
+        CONVERT_TYPE;
     }
 }
