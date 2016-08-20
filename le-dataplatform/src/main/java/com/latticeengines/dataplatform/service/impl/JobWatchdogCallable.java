@@ -10,6 +10,7 @@ import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.newrelic.api.agent.Trace;
 
 public class JobWatchdogCallable implements Callable<Boolean> {
 
@@ -20,6 +21,7 @@ public class JobWatchdogCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         for (WatchdogPlugin plugin : plugins.values()) {
             plugin.run(null);

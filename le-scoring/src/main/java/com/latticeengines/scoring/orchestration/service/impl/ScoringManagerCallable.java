@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
+import com.newrelic.api.agent.Trace;
 
 public class ScoringManagerCallable implements Callable<Boolean> {
 
@@ -54,12 +55,14 @@ public class ScoringManagerCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
 
         List<Future<Long>> futures = new ArrayList<>();
         List<ScoringCommand> scoringCommands = scoringCommandEntityMgr.getPopulated();
         for (ScoringCommand scoringCommand : scoringCommands) {
-            ScoringProcessorCallable scoringProcessorCallable = (ScoringProcessorCallable) appContext.getBean("scoringProcessor");
+            ScoringProcessorCallable scoringProcessorCallable = (ScoringProcessorCallable) appContext
+                    .getBean("scoringProcessor");
             scoringProcessorCallable.setScoringCommand(scoringCommand);
             futures.add(scoringProcessorExecutor.submit(scoringProcessorCallable));
         }
@@ -80,8 +83,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
         DateTime dt = new DateTime(DateTimeZone.UTC);
         for (ScoringCommand scoringCommand : consumedCommands) {
-            if (scoringCommand.getPopulated().getTime() + cleanUpInterval * 3600 * 1000 < dt
-                    .getMillis()) {
+            if (scoringCommand.getPopulated().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                 if (enableCleanHdfs && scoringCommand.getConsumed() != null) {
                     cleanHdfs(scoringCommand);
@@ -90,11 +92,9 @@ public class ScoringManagerCallable implements Callable<Boolean> {
             }
         }
 
-        List<ScoringCommandResult> consumedResultCommands = scoringCommandResultEntityMgr
-                .getConsumed();
+        List<ScoringCommandResult> consumedResultCommands = scoringCommandResultEntityMgr.getConsumed();
         for (ScoringCommandResult scoringCommandResult : consumedResultCommands) {
-            if (scoringCommandResult.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt
-                    .getMillis()) {
+            if (scoringCommandResult.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
                 metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName());
                 scoringCommandResultEntityMgr.delete(scoringCommandResult);
             }
@@ -104,9 +104,8 @@ public class ScoringManagerCallable implements Callable<Boolean> {
     private void cleanHdfs(ScoringCommand scoringCommand) {
         try {
             String customer = scoringCommand.getId();
-            HdfsUtils.rmdir(yarnConfiguration,
-                    customerBaseDir + "/" + CustomerSpace.parse(customer) + "/scoring/"
-                            + scoringCommand.getTableName());
+            HdfsUtils.rmdir(yarnConfiguration, customerBaseDir + "/" + CustomerSpace.parse(customer) + "/scoring/"
+                    + scoringCommand.getTableName());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -139,8 +138,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder scoringCommandResultEntityMgr(
-                ScoringCommandResultEntityMgr scoringCommandResultEntityMgr) {
+        public Builder scoringCommandResultEntityMgr(ScoringCommandResultEntityMgr scoringCommandResultEntityMgr) {
             this.scoringCommandResultEntityMgr = scoringCommandResultEntityMgr;
             return this;
         }
@@ -203,7 +201,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         public JdbcTemplate getJdbcTemplate() {
             return scoringJdbcTemplate;
         }
-        
+
         public ApplicationContext getApplicationContext() {
             return appContext;
         }

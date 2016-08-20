@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
+import com.newrelic.api.agent.Trace;
 
 @Component
 public class ColumnSelectionServiceImpl implements ColumnSelectionService {
@@ -102,6 +103,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         return "1.0".equals(version);
     }
 
+    @Trace(dispatcher = true)
     private void loadCaches() {
         for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.supportedSelections) {
             try {

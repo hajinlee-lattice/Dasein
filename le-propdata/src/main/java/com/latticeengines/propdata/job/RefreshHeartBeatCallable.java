@@ -2,14 +2,10 @@ package com.latticeengines.propdata.job;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
+import com.newrelic.api.agent.Trace;
 
 public class RefreshHeartBeatCallable implements Callable<Boolean> {
-
-    private static final Log log = LogFactory.getLog(RefreshHeartBeatCallable.class);
 
     private ProgressOrchestrator orchestrator;
     private PropDataScheduler scheduler;
@@ -20,6 +16,7 @@ public class RefreshHeartBeatCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         orchestrator.executeRefresh();
         scheduler.reschedule();

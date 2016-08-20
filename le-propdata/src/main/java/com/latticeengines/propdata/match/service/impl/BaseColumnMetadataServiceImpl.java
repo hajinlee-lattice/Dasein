@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
+import com.newrelic.api.agent.Trace;
 
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> implements ColumnMetadataService {
 
@@ -46,11 +47,13 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined, String dataCloudVersion) {
+    public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined,
+            String dataCloudVersion) {
         return predefinedMetaDataCache.get(predefined);
     }
 
     @Override
+    @Trace
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
         List<E> metadataColumns = new ArrayList<>();
         for (ColumnSelection.Column column : selection.getColumns()) {
@@ -83,8 +86,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 ColumnMetadata columnMetadata = column.toColumnMetadata();
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to extract metadata from MetadataColumn [" + column.getColumnId()
-                        + "]", e);
+                throw new RuntimeException(
+                        "Failed to extract metadata from MetadataColumn [" + column.getColumnId() + "]", e);
             }
         }
         return columnMetadataList;
@@ -132,7 +135,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     abstract protected Schema.Type getAvroTypeDataType(String dataType);
-    
+
     private void loadCache() {
         for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.values()) {
             try {

@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.MatchPlanner;
+import com.newrelic.api.agent.Trace;
 
 @Component("realTimeMatchPlanner")
 public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlanner {
@@ -15,6 +16,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     private int maxRealTimeInput;
 
     @MatchStep
+    @Trace
     public MatchContext plan(MatchInput input) {
         validate(input);
         assignAndValidateColumnSelectionVersion(input);

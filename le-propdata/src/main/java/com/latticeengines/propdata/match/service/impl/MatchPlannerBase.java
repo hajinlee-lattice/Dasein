@@ -34,6 +34,7 @@ import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.PublicDomainService;
+import com.newrelic.api.agent.Trace;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
@@ -53,11 +54,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            input.setPredefinedVersion(validateOrAssignPredefinedVersion(input.getPredefinedSelection(),
-                    input.getPredefinedVersion()));
+            input.setPredefinedVersion(
+                    validateOrAssignPredefinedVersion(input.getPredefinedSelection(), input.getPredefinedVersion()));
         }
     }
 
+    @Trace
     ColumnSelection parseColumnSelection(MatchInput input) {
         if (input.getUnionSelection() != null) {
             return combineSelections(input.getUnionSelection());
@@ -71,7 +73,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @MatchStep(threshold = 100L)
     private ColumnSelection combineSelections(UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
-        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
+        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections()
+                .entrySet()) {
             ColumnSelection.Predefined predefined = entry.getKey();
             validateOrAssignPredefinedVersion(predefined, entry.getValue());
             selections.add(columnSelectionService.parsePredefined(predefined));
@@ -88,8 +91,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             log.debug("Assign version " + version + " to column selection " + predefined);
         }
         if (!columnSelectionService.isValidVersion(predefined, version)) {
-            throw new IllegalArgumentException("The specified version " + version + " is invalid for the selection "
-                    + predefined);
+            throw new IllegalArgumentException(
+                    "The specified version " + version + " is invalid for the selection " + predefined);
         }
         return version;
     }
@@ -102,8 +105,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<NameLocation> nameLocationSet = new HashSet<>();
 
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i, input.getFields()
-                    .size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomains());
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
+                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
+                    input.getExcludePublicDomains());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<Boolean>());
                 records.add(record);
@@ -269,6 +273,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
+    @Trace
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
         matchOutput.setMetadata(metadata);

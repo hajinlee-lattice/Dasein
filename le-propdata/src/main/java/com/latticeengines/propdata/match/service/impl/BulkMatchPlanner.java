@@ -5,10 +5,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.service.MatchPlanner;
+import com.newrelic.api.agent.Trace;
 
 @Component("bulkMatchPlanner")
 public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
+    @Trace
     public MatchContext plan(MatchInput input) {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);

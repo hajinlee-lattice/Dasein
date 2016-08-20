@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.newrelic.api.agent.Trace;
 
 public class SourceFilePurgeCallable implements Callable<Boolean> {
 
@@ -38,6 +39,7 @@ public class SourceFilePurgeCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.info("Begin purge old source files");
         List<SourceFile> allSourceFiles = sourceFileEntityMgr.findAllSourceFiles();
@@ -52,10 +54,10 @@ public class SourceFilePurgeCallable implements Callable<Boolean> {
                     }
                     sourceFileService.delete(sourceFile);
                 } else {
-                    int diffIndaysCreate = (int) ((now.getTime() - sourceFile.getCreated()
-                            .getTime()) / (1000 * 60 * 60 * 24));
-                    int diffIndaysUpdate = (int) ((now.getTime() - sourceFile.getUpdated()
-                            .getTime()) / (1000 * 60 * 60 * 24));
+                    int diffIndaysCreate = (int) ((now.getTime() - sourceFile.getCreated().getTime())
+                            / (1000 * 60 * 60 * 24));
+                    int diffIndaysUpdate = (int) ((now.getTime() - sourceFile.getUpdated().getTime())
+                            / (1000 * 60 * 60 * 24));
                     if (diffIndaysCreate > retainDays && diffIndaysUpdate > retainDays) {
                         try {
                             HdfsUtils.rmdir(yarnConfiguration, sourceFile.getPath());

@@ -202,7 +202,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Boolean verifyResultsByRules(String testName, String targetTable, Long commandId, String processUID,
-                                         String tag) {
+            String tag) {
         Boolean isPassed;
         isPassed = executeVerifyResultsByRulesSP(testName, targetTable, commandId, processUID, tag);
 
@@ -214,7 +214,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Boolean executeVerifyResultsByRulesSP(final String testName, final String targetTable, final Long commandId,
-                                                  final String rootUID, final String tag) {
+            final String rootUID, final String tag) {
         List<SqlParameter> declaredParameters = new ArrayList<>();
 
         declaredParameters.add(new SqlParameter("testName", Types.VARCHAR));
@@ -245,7 +245,7 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
 
     private void showViolationResultsByCommandID(final Long commandId) {
         Object[] parameters = new Object[] { commandId };
-        List results = jdbcTemplate.queryForList(
+        List<?> results = jdbcTemplate.queryForList(
                 "SELECT * FROM [PropDataMatchDB].[dbo].[DataValidator_ViolationTable] where CommandID = ?", parameters);
         log.error("The violation results are:");
         for (Object result : results) {
@@ -254,12 +254,12 @@ public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTes
     }
 
     private Object[][] retrieveTestcases() {
-        List results = jdbcTemplate
+        List<?> results = jdbcTemplate
                 .queryForList("SELECT * FROM [PropDataMatchDB].[dbo].[AcceptanceTestcases] where IsActive = 1");
         Object[][] obj = new Object[results.size()][];
         List<Object[]> list = new ArrayList<>();
         for (Object result : results) {
-            Map mResult = (Map) result;
+            Map<?, ?> mResult = (Map<?, ?>) result;
             List<String> aL = new ArrayList<>();
             aL.add((String) mResult.get("SourceTable"));
             aL.add((String) mResult.get("DestTables"));

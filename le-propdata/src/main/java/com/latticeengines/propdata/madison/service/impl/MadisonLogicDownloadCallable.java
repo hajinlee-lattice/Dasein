@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
+import com.newrelic.api.agent.Trace;
 
 public class MadisonLogicDownloadCallable implements Callable<Boolean> {
 
@@ -22,6 +23,7 @@ public class MadisonLogicDownloadCallable implements Callable<Boolean> {
 
     @SuppressWarnings("unused")
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         long startTime = System.currentTimeMillis();
         try {

@@ -34,7 +34,6 @@ import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.util.MatchUtils;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -65,8 +64,6 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
     @Autowired
     private MatchCommandService matchCommandService;
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Test(groups = "deployment")
     public void testBulkMatchWithSchema() throws Exception {

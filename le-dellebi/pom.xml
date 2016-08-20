@@ -347,6 +347,11 @@
             <artifactId>le-quartzclient</artifactId>
             <version>${le.quartzclient.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>${newrelic.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

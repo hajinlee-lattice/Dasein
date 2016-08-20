@@ -10,15 +10,16 @@ import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.newrelic.api.agent.Trace;
 
 public class DellEbiDailyJobCallable implements Callable<Boolean> {
-    
+
     private static final Log log = LogFactory.getLog(DellEbiDailyJobCallable.class);
-    
+
     private DailyFlow dailyFlow;
     private ExportAndReportService exportAndReportService;
     private String fileTypesList;
-    
+
     public DellEbiDailyJobCallable(Builder builder) {
         this.dailyFlow = builder.getDailyFlow();
         this.exportAndReportService = builder.getExportAndReportService();
@@ -26,6 +27,7 @@ public class DellEbiDailyJobCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.info("Start to process files from inbox.");
         long startTime = System.currentTimeMillis();
@@ -51,44 +53,43 @@ public class DellEbiDailyJobCallable implements Callable<Boolean> {
                 + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
         return result;
     }
-    
+
     public static class Builder {
-        
+
         private DailyFlow dailyFlow;
         private ExportAndReportService exportAndReportService;
         private String fileTypesList;
-        
+
         public Builder() {
-            
+
         }
-        
+
         public Builder dailyFlow(DailyFlow dailyFlow) {
             this.dailyFlow = dailyFlow;
             return this;
         }
-        
+
         public Builder exportAndReportService(ExportAndReportService exportAndReportService) {
             this.exportAndReportService = exportAndReportService;
             return this;
         }
-        
+
         public Builder fileTypesList(String fileTypesList) {
             this.fileTypesList = fileTypesList;
             return this;
         }
-        
+
         public DailyFlow getDailyFlow() {
             return dailyFlow;
         }
-        
+
         public ExportAndReportService getExportAndReportService() {
             return exportAndReportService;
         }
-        
+
         public String getFileTypesList() {
             return fileTypesList;
         }
     }
-    
 
 }

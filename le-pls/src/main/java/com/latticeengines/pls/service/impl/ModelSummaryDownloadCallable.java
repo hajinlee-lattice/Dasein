@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.newrelic.api.agent.Trace;
 
 public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
@@ -68,6 +69,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.info("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();

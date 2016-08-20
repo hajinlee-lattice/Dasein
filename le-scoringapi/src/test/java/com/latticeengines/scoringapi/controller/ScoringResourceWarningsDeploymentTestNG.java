@@ -90,7 +90,6 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
 
     @Test(groups = "deployment", enabled = true)
     public void mismatchedDatatype() throws IOException {
-        String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.getRecord().put("Activity_Count_Click_Email",
                 "$200 to $1000 range ModelExpects this to be a number");

@@ -25,6 +25,7 @@ import com.latticeengines.propdata.match.service.DisposableEmailService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.latticeengines.propdata.match.service.PublicDomainService;
+import com.newrelic.api.agent.Trace;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
 
@@ -69,7 +70,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     @VisibleForTesting
-    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records, List<Map<String, Object>> results) {
+    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
+            List<Map<String, Object>> results) {
         distributeQueryResults(records, results);
         return records;
     }
@@ -78,6 +80,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         distributeQueryResults(records, null, rows);
     }
 
+    @Trace
     private void distributeQueryResults(List<InternalOutputRecord> records, String sourceName,
             List<Map<String, Object>> rows) {
         boolean singlePartitionMode = StringUtils.isEmpty(sourceName);
@@ -157,6 +160,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @VisibleForTesting
     @MatchStep
+    @Trace
     MatchContext mergeResults(MatchContext matchContext) {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
@@ -193,8 +197,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             for (int i = 0; i < columns.size(); i++) {
                 ColumnSelection.Column column = columns.get(i);
                 ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId());
-                String field = (externalColumn != null) ? externalColumn.getDefaultColumnName() : column
-                        .getColumnName();
+                String field = (externalColumn != null) ? externalColumn.getDefaultColumnName()
+                        : column.getColumnName();
 
                 Object value = null;
                 boolean matched = false;
@@ -233,8 +237,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 output.add(value);
 
                 if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())
-                        || ColumnSelection.Predefined.DerivedColumns.equals(matchContext.getInput()
-                                .getPredefinedSelection())) {
+                        || ColumnSelection.Predefined.DerivedColumns
+                                .equals(matchContext.getInput().getPredefinedSelection())) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
                     internalRecord.getColumnMatched().add(value != null);
                 } else {

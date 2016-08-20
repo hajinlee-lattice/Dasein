@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.newrelic.api.agent.Trace;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -48,6 +49,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
         final Long tenantRegistrationTime = tenant.getRegisteredTime();
@@ -162,9 +164,9 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     private static String getRandomForestFiHdfsPath(String modelSummaryHdfsPath) {
         String[] tokens = modelSummaryHdfsPath.split("/");
-        String[] rfModelTokens = new String[tokens.length-1];
-        System.arraycopy(tokens, 0, rfModelTokens, 0, rfModelTokens.length-1);
-        rfModelTokens[rfModelTokens.length-1] ="rf_model.txt";
+        String[] rfModelTokens = new String[tokens.length - 1];
+        System.arraycopy(tokens, 0, rfModelTokens, 0, rfModelTokens.length - 1);
+        rfModelTokens[rfModelTokens.length - 1] = "rf_model.txt";
         return StringUtils.join(rfModelTokens, "/");
     }
 

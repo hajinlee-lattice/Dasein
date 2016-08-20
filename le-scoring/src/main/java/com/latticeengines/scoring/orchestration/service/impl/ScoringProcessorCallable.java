@@ -34,6 +34,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
+import com.newrelic.api.agent.Trace;
 
 @Component("scoringProcessor")
 @Scope("prototype")
@@ -85,6 +86,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Long call() throws Exception {
         int result = ScoringDaemonService.SUCCESS;
         try {
@@ -215,8 +217,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
             details.add(new BasicNameValuePair("scoringCommandId", this.scoringCommand.getPid().toString()));
             details.add(new BasicNameValuePair("yarnAppId", failedYarnApplicationId == null ? "None" : ""));
             details.add(new BasicNameValuePair("deploymentExternalId", this.scoringCommand.getId()));
-            details.add(new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep()
-                    .getDescription()));
+            details.add(
+                    new BasicNameValuePair("failedStep", scoringCommandState.getScoringCommandStep().getDescription()));
             List<ScoringCommandLog> logs = this.scoringCommandLogService.findByScoringCommand(this.scoringCommand);
             if (!logs.isEmpty()) {
                 for (ScoringCommandLog scoringCommandLog : logs) {
@@ -226,8 +228,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
             }
 
             String dedupKey = getClass().getName() + "-" + scoringCommand.getPid().toString();
-            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), dedupKey,
-                    details);
+            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
+                    dedupKey, details);
         } else {
             return "";
         }

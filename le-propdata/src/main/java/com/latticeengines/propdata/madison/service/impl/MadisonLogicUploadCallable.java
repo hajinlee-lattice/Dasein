@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
+import com.newrelic.api.agent.Trace;
 
 public class MadisonLogicUploadCallable implements Callable<Boolean> {
 
@@ -22,6 +23,7 @@ public class MadisonLogicUploadCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         long startTime = System.currentTimeMillis();
 
@@ -34,17 +36,14 @@ public class MadisonLogicUploadCallable implements Callable<Boolean> {
             PropDataContext requestContextForTransformaton = new PropDataContext();
             PropDataContext responseContextForTransformaton = propDataMadisonService
                     .transform(requestContextForTransformaton);
-            if (responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY,
-                    String.class) == null
-                    || !responseContextForTransformaton.getProperty(
-                            PropDataMadisonService.STATUS_KEY, String.class)
+            if (responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class) == null
+                    || !responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class)
                             .equals(PropDataMadisonService.STATUS_OK)) {
                 log.info("Finished! Upload job has no transformation.");
                 return true;
             }
 
-            Date today = responseContextForTransformaton.getProperty(
-                    PropDataMadisonService.TODAY_KEY, Date.class);
+            Date today = responseContextForTransformaton.getProperty(PropDataMadisonService.TODAY_KEY, Date.class);
             PropDataContext requestContextForUpload = new PropDataContext();
             requestContextForUpload.setProperty(PropDataMadisonService.TODAY_KEY, today);
             propDataMadisonService.exportToDB(requestContextForUpload);

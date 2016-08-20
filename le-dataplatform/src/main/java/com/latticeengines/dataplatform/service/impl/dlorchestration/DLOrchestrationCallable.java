@@ -24,6 +24,7 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProc
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
+import com.newrelic.api.agent.Trace;
 
 public class DLOrchestrationCallable implements Callable<Boolean> {
 
@@ -80,14 +81,14 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
     }
 
     @Override
+    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         List<Future<Long>> futures = new ArrayList<>();
         List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();
         String modelCommandsStr = Joiner.on(",").join(modelCommands);
 
         if (log.isDebugEnabled()) {
-            log.debug("Begin processing " + modelCommands.size() + " model commands: "
-                    + modelCommandsStr);
+            log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
         }
 
         for (ModelCommand modelCommand : modelCommands) {
@@ -111,8 +112,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
                     .rowWarnThreshold(rowWarnThreshold) //
                     .positiveEventFailThreshold(positiveEventFailThreshold) //
                     .positiveEventWarnThreshold(positiveEventWarnThreshold) //
-                    .featuresThreshold(featuresThreshold)
-                    .metadataService(metadataService);
+                    .featuresThreshold(featuresThreshold).metadataService(metadataService);
             String tenantId = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
             modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
@@ -130,8 +130,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Finished processing " + modelCommands.size() + " model commands: "
-                    + modelCommandsStr);
+            log.debug("Finished processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
         }
         return true;
     }
@@ -165,8 +164,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
 
         }
 
-        public Builder dlOrchestrationJobTaskExecutor(
-                AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {
+        public Builder dlOrchestrationJobTaskExecutor(AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {
             this.dlOrchestrationJobTaskExecutor = dlOrchestrationJobTaskExecutor;
             return this;
         }
@@ -181,8 +179,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder modelCommandStateEntityMgr(
-                ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
+        public Builder modelCommandStateEntityMgr(ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
             this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
             return this;
         }
@@ -197,8 +194,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder modelCommandResultEntityMgr(
-                ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
+        public Builder modelCommandResultEntityMgr(ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
             this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
             return this;
         }
@@ -208,14 +204,12 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder modelStepOutputResultsProcessor(
-                ModelStepProcessor modelStepOutputResultsProcessor) {
+        public Builder modelStepOutputResultsProcessor(ModelStepProcessor modelStepOutputResultsProcessor) {
             this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
             return this;
         }
 
-        public Builder modelStepRetrieveMetadataProcessor(
-                ModelStepProcessor modelStepRetrieveMetadataProcessor) {
+        public Builder modelStepRetrieveMetadataProcessor(ModelStepProcessor modelStepRetrieveMetadataProcessor) {
             this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
             return this;
         }

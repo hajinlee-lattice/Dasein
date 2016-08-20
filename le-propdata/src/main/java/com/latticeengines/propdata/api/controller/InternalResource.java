@@ -86,7 +86,8 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")
-    public AppSubmission submitYarnJob(@RequestBody PropDataJobConfiguration jobConfiguration, HttpServletRequest request) {
+    public AppSubmission submitYarnJob(@RequestBody PropDataJobConfiguration jobConfiguration,
+            HttpServletRequest request) {
         checkHeader(request);
         ApplicationId applicationId = yarnService.submitPropDataJob(jobConfiguration);
         return new AppSubmission(Collections.singletonList(applicationId));
@@ -107,6 +108,5 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     public Date currentCacheTableVersion() {
         return internalService.currentCacheTableCreatedTime();
     }
-
 
 }

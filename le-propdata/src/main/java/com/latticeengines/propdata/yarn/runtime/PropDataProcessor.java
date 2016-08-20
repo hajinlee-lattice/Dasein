@@ -53,7 +53,6 @@ import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
 import com.latticeengines.propdata.match.metric.MatchResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
-import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
@@ -90,9 +89,6 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private ColumnSelectionService columnSelectionService;
 
     @Autowired
     private MetricService metricService;
@@ -307,8 +303,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
             if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
-                throw new RuntimeException(String.format(
-                        "Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
+                throw new RuntimeException(String
+                        .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }
         } else {
             // check matched rows

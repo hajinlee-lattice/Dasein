@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
 import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
+import com.newrelic.api.agent.Trace;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
@@ -29,30 +30,42 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Trace
     public E getMetadataColumn(String columnId) {
         if (getBlackColumnCache().contains(columnId)) {
             return null;
         }
 
         if (!getWhiteColumnCache().containsKey(columnId)) {
-            synchronized (getWhiteColumnCache()) {
-                E column;
-                try {
-                    column = getMetadataColumnEntityMgr().findById(columnId);
-                } catch (Exception e) {
-                    log.error(String.format("Failed to retrieve column information for [%s]", columnId), e);
-                    return null;
-                }
-                if (column == null) {
-                    getBlackColumnCache().add(columnId);
-                    return null;
-                } else {
-                    getWhiteColumnCache().put(columnId, column);
-                    return column;
-                }
-            }
+            return loadColumnMetadataById(columnId);
         } else {
             return getWhiteColumnCache().get(columnId);
+        }
+    }
+
+    @Trace
+    private E loadColumnMetadataById(String columnId) {
+        synchronized (getWhiteColumnCache()) {
+            return performThreadSafeColumnMetadataLoading(columnId);
+        }
+    }
+
+    @Trace
+    private E performThreadSafeColumnMetadataLoading(String columnId) {
+        E column;
+        try {
+            column = getMetadataColumnEntityMgr().findById(columnId);
+            log.info("Loaded metadata from DB for columnId = " + columnId);
+        } catch (Exception e) {
+            log.error(String.format("Failed to retrieve column information for [%s]", columnId), e);
+            return null;
+        }
+        if (column == null) {
+            getBlackColumnCache().add(columnId);
+            return null;
+        } else {
+            getWhiteColumnCache().put(columnId, column);
+            return column;
         }
     }
 
