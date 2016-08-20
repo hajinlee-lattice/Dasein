@@ -83,8 +83,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
                     break;
                 }
             }
-            log.info(String.format("Not found field %s n in Attribute List.", field.getColumnName()));
             if (!found) {
+                log.info(String.format("Not found field %s n in Attribute List.", field.getColumnName()));
                 Attribute newAttribute = new Attribute();
                 newAttribute.setName(field.getColumnName());
                 overwriteAttributeWithFieldValues(newAttribute, field);
