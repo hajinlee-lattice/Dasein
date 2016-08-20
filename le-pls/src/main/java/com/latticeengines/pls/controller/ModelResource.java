@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -74,6 +75,9 @@ public class ModelResource {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microserviceEndpoint;
 
@@ -87,6 +91,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return ResponseDocument.successResponse( //
                 importMatchAndModelWorkflowSubmitter.submit(parameters).toString());

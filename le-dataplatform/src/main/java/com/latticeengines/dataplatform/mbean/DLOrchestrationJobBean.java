@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.dataplatform.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,9 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
 
     @Autowired
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
+
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
     private ModelStepProcessor modelStepFinishProcessor;
@@ -136,7 +140,8 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
                 .rowFailThreshold(rowFailThreshold)
                 .rowWarnThreshold(rowWarnThreshold)
                 .waitTime(waitTime)
-                .yarnConfiguration(yarnConfiguration);
+                .yarnConfiguration(yarnConfiguration)
+                .modelSummaryDownloadFlagEntityMgr(modelSummaryDownloadFlagEntityMgr);
         return new DLOrchestrationCallable(builder);
     }
 

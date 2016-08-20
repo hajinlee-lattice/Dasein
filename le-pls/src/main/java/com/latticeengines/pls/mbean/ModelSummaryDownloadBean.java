@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,9 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
     @Autowired
     private FeatureImportanceParser featureImportanceParser;
 
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+
     @Value("${pls.downloader.max.pool.size}")
     private int maxPoolSize;
 
@@ -53,6 +57,12 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
 
     @Value("${pls.downloader.queue.capacity}")
     private int queueCapacity;
+
+    @Value("${pls.downloader.full.download.interval:300}")
+    private long fullDownloadInterval;
+
+    @Value("${pls.downloader.partial.count:20}")
+    private int maxPartialDownloadCount;
 
     @PostConstruct
     public void init() {
@@ -75,7 +85,10 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
                 .modelSummaryParser(modelSummaryParser)
                 .featureImportanceParser(featureImportanceParser)
                 .modelSummaryDownloadExecutor(modelSummaryDownloadExecutor)
-                .timeStampContainer(timeStampContainer);
+                .timeStampContainer(timeStampContainer)
+                .modelSummaryDownloadFlagEntityMgr(modelSummaryDownloadFlagEntityMgr)
+                .fullDownloadInterval(fullDownloadInterval)
+                .maxPartialDownloadCount(maxPartialDownloadCount);
         return new ModelSummaryDownloadCallable(builder);
     }
 
