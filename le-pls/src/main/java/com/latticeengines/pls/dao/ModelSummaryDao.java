@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
@@ -12,6 +13,8 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
     ModelSummary findByModelId(String modelId);
 
     ModelSummary findByModelName(String modelName);
+
+    List<ModelSummary> getAllByTenant(Tenant tenant);
 
     List<ModelSummary> findAllValid();
 

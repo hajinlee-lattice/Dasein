@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -28,13 +31,11 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelAlertService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -65,6 +66,9 @@ public class ModelSummaryResource {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private TenantService tenantService;
+
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
@@ -79,7 +83,8 @@ public class ModelSummaryResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
-    public List<ModelSummary> getModelSummaries(@RequestParam(value = "selection", required = false) String selection) {
+    public List<ModelSummary> getModelSummaries(
+            @RequestParam(value = "selection", required = false) String selection) {
 
         List<ModelSummary> summaries;
         if (selection != null && selection.equalsIgnoreCase("all")) {
@@ -87,6 +92,20 @@ public class ModelSummaryResource {
         } else {
             summaries = modelSummaryEntityMgr.findAllValid();
         }
+
+        for (ModelSummary summary : summaries) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
+        }
+        return summaries;
+    }
+
+    @RequestMapping(value = "/tenant/{tenantName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of model summaries available for given tenant")
+    public List<ModelSummary> getAllForTenant(@PathVariable String tenantName) {
+        Tenant tenant = tenantService.findByTenantName(tenantName);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.getAllByTenant(tenant);
 
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());
@@ -109,8 +128,8 @@ public class ModelSummaryResource {
         }
 
         ModelAlerts alerts = new ModelAlerts();
-        ModelAlerts.ModelQualityWarnings modelQualityWarnings = modelAlertService.generateModelQualityWarnings(tenantId,
-                modelId);
+        ModelAlerts.ModelQualityWarnings modelQualityWarnings = modelAlertService
+                .generateModelQualityWarnings(tenantId, modelId);
         ModelAlerts.MissingMetaDataWarnings missingMetaDataWarnings = modelAlertService
                 .generateMissingMetaDataWarnings(tenantId, modelId);
         alerts.setMissingMetaDataWarnings(missingMetaDataWarnings);
@@ -124,14 +143,16 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
     public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary,
-            @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
+            @RequestParam(value = "raw", required = false) boolean usingRaw,
+            HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         if (tenant == null) {
             return null;
         }
 
         if (usingRaw) {
-            return modelSummaryService.createModelSummary(modelSummary.getRawFile(), tenant.getId());
+            return modelSummaryService.createModelSummary(modelSummary.getRawFile(),
+                    tenant.getId());
         } else {
             return modelSummaryService.createModelSummary(modelSummary, tenant.getId());
         }
@@ -152,7 +173,8 @@ public class ModelSummaryResource {
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
         if (!NameValidationUtils.validateModelName(modelId)) {
-            log.error(String.format("Not qualified modelId %s contains unsupported characters.", modelId));
+            log.error(String.format("Not qualified modelId %s contains unsupported characters.",
+                    modelId));
             return false;
         }
 
@@ -182,7 +204,8 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get predictors used by BuyerInsgihts for a specific model")
     public List<Predictor> getPredictorsForBuyerInsights(@PathVariable String modelId) {
-        List<Predictor> predictors = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(modelId);
+        List<Predictor> predictors = modelSummaryEntityMgr
+                .findPredictorsUsedByBuyerInsightsByModelId(modelId);
         return predictors;
     }
 
@@ -190,7 +213,8 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Update predictors of a sourceModelSummary for the use of BuyerInsights")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
-    public Boolean updatePredictors(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
+    public Boolean updatePredictors(@PathVariable String modelId,
+            @RequestBody AttributeMap attrMap) {
         modelSummaryService.updatePredictors(modelId, attrMap);
         return true;
     }
@@ -207,7 +231,8 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get training table attributes used for the specified model")
     public ResponseDocument<List<Attribute>> getTableAttributes(@PathVariable String modelId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+        Table trainingTable = metadataProxy.getTable(
+                MultiTenantContext.getCustomerSpace().toString(),
                 modelSummary.getTrainingTableName());
         return ResponseDocument.successResponse(trainingTable.getAttributes());
     }

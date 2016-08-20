@@ -155,6 +155,43 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     };
 
+    this.GetAllModelsForTenant = function (tenantId) {
+        var deferred = $q.defer();
+        var result;
+        $http({
+            method: 'GET',
+            url: '/pls/modelsummaries/tenant/'+ tenantId,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            if (data === true || data === 'true') {
+                result = {
+                    success: true,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 
     this.updateAsDeletedModel = function (modelId) {
         var deferred = $q.defer();

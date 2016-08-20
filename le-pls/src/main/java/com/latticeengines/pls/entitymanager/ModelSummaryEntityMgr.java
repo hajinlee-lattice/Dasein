@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
@@ -14,7 +15,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     ModelSummary findValidByModelId(String modelId);
 
-    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
+    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
+            boolean validOnly);
 
     ModelSummary findByApplicationId(String applicationId);
 
@@ -22,13 +24,16 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     List<ModelSummary> getAll();
 
+    List<ModelSummary> getAllByTenant(Tenant tenant);
+
     List<ModelSummary> findAllValid();
 
     List<ModelSummary> findAllActive();
 
     int findTotalCount(long lastUpdateTime, boolean considerAllStatus);
 
-    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
+    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus,
+            int offset, int maximum);
 
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
 

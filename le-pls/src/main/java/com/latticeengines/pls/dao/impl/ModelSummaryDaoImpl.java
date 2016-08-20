@@ -2,6 +2,7 @@ package com.latticeengines.pls.dao.impl;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.security.Tenant;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -62,6 +63,18 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
             return null;
         }
         return (ModelSummary) list.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ModelSummary> getAllByTenant(Tenant tenant) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where tenantId = :tenantId and status != :statusId", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("tenantId", tenant.getPid());
+        query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")

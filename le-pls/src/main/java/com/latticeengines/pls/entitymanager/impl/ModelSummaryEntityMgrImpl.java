@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.latticeengines.pls.dao.ModelSummaryProvenancePropertyDao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
@@ -23,26 +22,28 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.dao.ModelSummaryDao;
+import com.latticeengines.pls.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.pls.PredictorElement;
-import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.security.exposed.dao.TenantDao;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 
 @Component("modelSummaryEntityMgr")
-public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
+public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary>
+        implements ModelSummaryEntityMgr {
 
     private static final Log log = LogFactory.getLog(ModelSummaryEntityMgrImpl.class);
 
@@ -86,9 +87,11 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
         modelSummaryDao.create(summary);
 
-        for (ModelSummaryProvenanceProperty provenanceProperty : summary.getModelSummaryProvenanceProperties()) {
+        for (ModelSummaryProvenanceProperty provenanceProperty : summary
+                .getModelSummaryProvenanceProperties()) {
             provenanceProperty.setModelSummary(summary);
-            log.info(String.format("creating model summary provenance with name: %s, value: %s", provenanceProperty.getOption(), provenanceProperty.getValue()));
+            log.info(String.format("creating model summary provenance with name: %s, value: %s",
+                    provenanceProperty.getOption(), provenanceProperty.getValue()));
             modelSummaryProvenancePropertyDao.create(provenanceProperty);
         }
 
@@ -109,6 +112,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getAll() {
         return super.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> getAllByTenant(Tenant tenant) {
+        return modelSummaryDao.getAllByTenant(tenant);
     }
 
     @Override
@@ -137,10 +146,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
-            int maximum) {
-        List<ModelSummary> models = modelSummaryDao.findPaginatedModels(lastUpdateTime, considerAllStatus, offset,
-                maximum);
+    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus,
+            int offset, int maximum) {
+        List<ModelSummary> models = modelSummaryDao.findPaginatedModels(lastUpdateTime,
+                considerAllStatus, offset, maximum);
 
         if (!CollectionUtils.isEmpty(models)) {
             for (ModelSummary model : models) {
@@ -166,18 +175,19 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             JsonNode provenance = details.get("EventTableProvenance");
             if (provenance != null) {
                 if (provenance.has("Predefined_ColumnSelection_Name")) {
-                    String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
+                    String predefinedSelectionName = provenance
+                            .get("Predefined_ColumnSelection_Name").asText();
                     ColumnSelection.Predefined predefined = ColumnSelection.Predefined
                             .fromName(predefinedSelectionName);
                     summary.setPredefinedSelection(predefined);
                     if (provenance.has("Predefined_ColumnSelection_Version")) {
-                        String predefinedSelectionVersion = provenance.get("Predefined_ColumnSelection_Version")
-                                .asText();
+                        String predefinedSelectionVersion = provenance
+                                .get("Predefined_ColumnSelection_Version").asText();
                         summary.setPredefinedSelectionVersion(predefinedSelectionVersion);
                     }
                 } else if (provenance.has("Customized_ColumnSelection")) {
-                    ColumnSelection selection = objectMapper.treeToValue(provenance.get("Customized_ColumnSelection"),
-                            ColumnSelection.class);
+                    ColumnSelection selection = objectMapper.treeToValue(
+                            provenance.get("Customized_ColumnSelection"), ColumnSelection.class);
                     summary.setCustomizedColumnSelection(selection);
                 }
             }
@@ -272,10 +282,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        if (status == ModelSummaryStatus.DELETED && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
+        if (status == ModelSummaryStatus.DELETED
+                && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18021);
         }
-        if (status == ModelSummaryStatus.ACTIVE && summary.getStatus() == ModelSummaryStatus.DELETED) {
+        if (status == ModelSummaryStatus.ACTIVE
+                && summary.getStatus() == ModelSummaryStatus.DELETED) {
             throw new LedpException(LedpCode.LEDP_18024);
         }
         summary.setStatus(status);
@@ -305,8 +317,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
-            boolean validOnly) {
+    public ModelSummary findByModelId(String modelId, boolean returnRelational,
+            boolean returnDocument, boolean validOnly) {
         ModelSummary summary = null;
         if (validOnly) {
             summary = modelSummaryDao.findValidByModelId(modelId);
@@ -322,8 +334,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (summaryTenantId == null //
                 || secCtxTenantId == null //
                 || summaryTenantId.longValue() != secCtxTenantId.longValue()) {
-            log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d", summaryTenantId,
-                    secCtxTenantId));
+            log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d",
+                    summaryTenantId, secCtxTenantId));
             return null;
         }
         if (returnRelational) {
@@ -378,7 +390,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Predictor> findAllPredictorsByModelId(String modelId) {
         if (modelId == null) {
-            throw new NullPointerException("ModelId should not be null when finding all the predictors.");
+            throw new NullPointerException(
+                    "ModelId should not be null when finding all the predictors.");
         }
         ModelSummary summary = findByModelId(modelId, true, false, true);
         return summary == null ? null : summary.getPredictors();
@@ -388,7 +401,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId) {
         if (modelId == null) {
-            throw new NullPointerException("ModelId should not be null when finding the predictors For BuyerInsights.");
+            throw new NullPointerException(
+                    "ModelId should not be null when finding the predictors For BuyerInsights.");
         }
         ModelSummary summary = findByModelId(modelId, true, false, true);
         if (summary == null) {
@@ -409,10 +423,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public void updatePredictors(List<Predictor> predictors, AttributeMap attrMap) {
 
         if (predictors == null) {
-            throw new NullPointerException("Predictors should not be null when updating the predictors");
+            throw new NullPointerException(
+                    "Predictors should not be null when updating the predictors");
         }
         if (attrMap == null) {
-            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
+            throw new NullPointerException(
+                    "Attribute Map should not be null when updating the predictors");
         }
 
         List<String> missingPredictors = getMissingPredictors(predictors, attrMap);
@@ -427,13 +443,16 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
                 throw new NullPointerException("predictorName should not be null.");
             }
             if (attrMap.containsKey(predictorName)) {
-                PredictorStatus updateStatus = PredictorStatus.getStatusByName(attrMap.get(predictorName));
+                PredictorStatus updateStatus = PredictorStatus
+                        .getStatusByName(attrMap.get(predictorName));
                 switch (updateStatus) {
                 case NOT_USED_FOR_BUYER_INSIGHTS:
-                    predictor.setUsedForBuyerInsights(PredictorStatus.NOT_USED_FOR_BUYER_INSIGHTS.getStatus());
+                    predictor.setUsedForBuyerInsights(
+                            PredictorStatus.NOT_USED_FOR_BUYER_INSIGHTS.getStatus());
                     break;
                 case USED_FOR_BUYER_INSIGHTS:
-                    predictor.setUsedForBuyerInsights(PredictorStatus.USED_FOR_BUYER_INSIGHTS.getStatus());
+                    predictor.setUsedForBuyerInsights(
+                            PredictorStatus.USED_FOR_BUYER_INSIGHTS.getStatus());
                     break;
                 default:
                     log.warn("Invalid input for updating predictor status.");
@@ -448,10 +467,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     List<String> getMissingPredictors(List<Predictor> predictors, AttributeMap attrMap) {
 
         if (predictors == null) {
-            throw new NullPointerException("Predictors should not be null when updating the predictors");
+            throw new NullPointerException(
+                    "Predictors should not be null when updating the predictors");
         }
         if (attrMap == null) {
-            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
+            throw new NullPointerException(
+                    "Attribute Map should not be null when updating the predictors");
         }
 
         List<String> predictorNameList = new ArrayList<String>();

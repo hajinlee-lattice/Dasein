@@ -2,6 +2,9 @@ package com.latticeengines.pls.service;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+import java.util.List;
 
 public interface ModelSummaryService {
 
@@ -17,4 +20,5 @@ public interface ModelSummaryService {
 
     ModelSummary getModelSummaryEnrichedByDetails(String modelId);
 
+    List<ModelSummary> getAllByTenant(Tenant tenant);
 }
