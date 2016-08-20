@@ -16,8 +16,14 @@
             <div class="six columns">
               <button class="button gray-button block-button" type="button" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
             </div>
-            <div class="six columns">
+            <div class="six columns" ng-show="jobId">
               <a class="button orange-button block-button" href="#" data-ng-click="cancelJobClickConfirm($event)">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+            </div>
+            <div class="six columns" ng-show="!jobId && opts.sref">
+              <a class="button orange-button block-button" href="{{opts.sref}}" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+            </div>
+            <div class="six columns" ng-show="!jobId && opts.resetImport">
+              <a class="button orange-button block-button" href="{{opts.sref}}" data-ng-click="resetImport()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
             </div>
           </div>
         </div>

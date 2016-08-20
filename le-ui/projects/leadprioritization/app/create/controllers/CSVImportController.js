@@ -9,7 +9,7 @@ angular
 ])
 .controller('csvImportController', function(
     $scope, $state, $q, ResourceUtility, StringUtility, ImportService, FieldMappingSettingsModal,
-    ImportStore, FeatureFlagService
+    ImportStore, FeatureFlagService, CancelJobModal
 ) {
     var vm = this;
 
@@ -218,5 +218,12 @@ angular
         var target = event.target;
         target.style.height = 0;
         target.style.height = target.scrollHeight + 'px';
+    }
+
+    vm.cancelJob = function($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        CancelJobModal.show(null, {sref:'home.models'});
     }
 });

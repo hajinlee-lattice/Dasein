@@ -1,6 +1,6 @@
 angular
 .module('lp.create.import')
-.controller('pmmlImportController', function($scope, $state, $q, ResourceUtility, StringUtility, ImportService, ImportStore) {
+.controller('pmmlImportController', function($scope, $state, $q, ResourceUtility, StringUtility, ImportService, ImportStore, CancelJobModal) {
     var vm = this;
 
     angular.extend(vm, {
@@ -185,5 +185,12 @@ angular
         var target = event.target;
         target.style.height = 0;
         target.style.height = target.scrollHeight + 'px';
+    }
+
+    vm.cancelJob = function($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        CancelJobModal.show(null, {sref:'home.models'});
     }
 });

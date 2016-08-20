@@ -2,7 +2,7 @@ angular
 .module('lp.create.import')
 .controller('CustomFieldsController', function(
     $scope, $state, $stateParams, $timeout, ResourceUtility, 
-    ImportService, ImportStore, FieldDocument, UnmappedFields
+    ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
 ) {
     var vm = this;
 
@@ -97,9 +97,15 @@ angular
         });
     }
 
-    vm.resetClicked = function() {
+    vm.resetClicked = function($event) {
+        /*
         ImportStore.ResetAdvancedSettings();
         $state.go('home.models.import');
+        */
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        CancelJobModal.show(null, {resetImport:true});
     };
 
     vm.clickNext = function() {
