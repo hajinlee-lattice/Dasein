@@ -6,18 +6,16 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.JobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import org.springframework.stereotype.Component;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService {
@@ -52,9 +50,6 @@ public class JobServiceImpl implements JobService {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
-        for (Job job : jobs) {
-            populateJobWithModelDisplayNames(job);
-        }
         return jobs;
     }
 
@@ -64,7 +59,6 @@ public class JobServiceImpl implements JobService {
         log.info("Finding job for application Id " + applicationId + " with pid "
                 + tenantWithPid.getPid());
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
-        populateJobWithModelDisplayNames(job);
         return job;
     }
 
@@ -82,9 +76,6 @@ public class JobServiceImpl implements JobService {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
-        for (Job job : jobs) {
-            populateJobWithModelDisplayNames(job);
-        }
         return jobs;
     }
 
@@ -93,18 +84,4 @@ public class JobServiceImpl implements JobService {
         return tenantEntityMgr.findByTenantId(tenant.getId());
     }
 
-    private void populateJobWithModelDisplayNames(Job job) {
-        String modelId = null;
-        if (job.getOutputs() != null && job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
-            modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-        } else if (job.getInputs() != null && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null) {
-            modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-        }
-
-        if (modelId != null) {
-            ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
-            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    modelSummary.getDisplayName());
-        }
-    }
 }

@@ -43,16 +43,18 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId submit(String modelId, String tableToScore, String sourceDisplayName,
             TransformationGroup transformationGroup) {
         log.info(String.format(
-                "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
-                tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName,
-                transformationGroup);
+                "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s",
+                modelId, tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
+        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore,
+                sourceDisplayName, transformationGroup);
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryService.modelIdinTenant(modelId,
+                MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
@@ -69,7 +71,12 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "scoreWorkflow");
 
         ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
-        ColumnSelection.Predefined selection = ColumnSelection.Predefined.getLegacyDefaultSelection();
+        if (summary != null) {
+            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                    summary.getDisplayName());
+        }
+        ColumnSelection.Predefined selection = ColumnSelection.Predefined
+                .getLegacyDefaultSelection();
         String selectionVersion = null;
         if (summary != null && summary.getPredefinedSelection() != null) {
             selection = summary.getPredefinedSelection();
@@ -91,8 +98,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .columnSelection(selection, selectionVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'), ".csv") + "_scored_"
-                                + DateTime.now().getMillis()) //
+                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'),
+                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .build();
