@@ -4,10 +4,15 @@
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns two" ng-if="state != 'model'">
             <span ng-show="job.modelName"
-                class="model-name"
-                title="{{job.modelName}}"
-                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
-                {{job.modelName}}
+                class="model-name">
+                <a ng-show="job.modelId"
+                    title="{{job.modelName}}"
+                    ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
+                        {{job.modelName}}
+                </a>
+                <strong ng-show="!job.modelId">
+                    {{job.modelName}}
+                </strong>
             </span>
             <span ng-show="!job.modelName">
                 --
