@@ -61,7 +61,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
         ((ModelCopyServiceImpl) modelCopyService).processHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
-                "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel", "cpTrainingTable", "cpEventTable");
+                "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel", "cpTrainingTable", "cpEventTable", "some model display name");
         List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + modelCopyTargetTenant.getId()
                 + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
 
@@ -86,6 +86,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(detail.get("ModelID").asText(), "ms__" + uuid + "-PLSModel");
         assertEquals(detail.get("LookupID").asText(),
                 String.format("%s|%s|%s", modelCopyTargetTenant.getId(), "cpEventTable", uuid));
+        assertEquals(detail.get("DisplayName").asText(), "some model display name");
         JsonNode provenance = json.get("EventTableProvenance");
         assertEquals(provenance.get("TrainingTableName").asText(), "cpTrainingTable");
         assertEquals(provenance.get("EventTableName").asText(), "cpEventTable");

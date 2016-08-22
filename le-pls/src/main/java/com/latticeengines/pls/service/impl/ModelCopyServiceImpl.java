@@ -62,7 +62,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
         try {
             processHdfsData(sourceTenantId, targetTenantId, modelId, eventTableName, cpTrainingTable.getName(),
-                    cpEventTable.getName());
+                    cpEventTable.getName(), modelSummary.getDisplayName());
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_18111, new String[] { modelSummary.getName(), sourceTenantId,
@@ -73,7 +73,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
     @VisibleForTesting
     void processHdfsData(String sourceTenantId, String targetTenantId, String modelId, String eventTableName,
-            String cpTrainingTableName, String cpEventTableName) throws IOException {
+            String cpTrainingTableName, String cpEventTableName, String modelDisplayName) throws IOException {
         String sourceCustomerRoot = customerBase + sourceTenantId;
         String targetCustomerRoot = customerBase + targetTenantId;
 
@@ -90,7 +90,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
         String modelName = getModelName(sourceModelLocalRoot);
         JsonNode newModelSummary = constructNewModelSummary(modelSummaryLocalPath, targetTenantId, cpTrainingTableName,
-                cpEventTableName, uuid);
+                cpEventTableName, uuid, modelDisplayName);
         JsonNode newModel = constructNewModel(sourceModelLocalRoot + "/" + modelName, uuid);
 
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
@@ -127,7 +127,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     }
 
     JsonNode constructNewModelSummary(String modelSummaryLocalPath, String targetTenantId, String cpTrainingTableName,
-            String cpEventTableName, String uuid) throws IOException {
+            String cpEventTableName, String uuid, String modelDisplayName) throws IOException {
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
@@ -136,6 +136,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         detail.put("ModelID", "ms__" + uuid + "-PLSModel");
         detail.put("ConstructionTime", new DateTime().getMillis() / 1000);
         detail.put("LookupID", String.format("%s|%s|%s", targetTenantId, cpEventTableName, uuid));
+        detail.put("DisplayName", modelDisplayName);
 
         ObjectNode provenance = (ObjectNode) json.get("EventTableProvenance");
         provenance.put("TrainingTableName", cpTrainingTableName);
@@ -169,6 +170,8 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         String targetDataRoot = targetCustomerRoot + "/data/";
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
         HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName, targetDataRoot + cpEventTableName);
+        HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot + "-Event-Metadata", targetDataRoot);
+        HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName+ "-Event-Metadata", targetDataRoot + cpEventTableName + "-Event-Metadata");
     }
 
     void copyModelingModelsDirectoryToLocal(String sourceModelSummaryPath, String targetCustomerRoot,
