@@ -26,7 +26,6 @@ public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<CleanDataFlow
     @Override
     public Node construct(CleanDataFlowParameter parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
-        setSchemaToNode(node, parameters.getBaseSourceColumns().get(0));
         node = addDataCleanNode(node, parameters.getColumns());
         node = addColumnNode(node, parameters.getColumns());
         return node;

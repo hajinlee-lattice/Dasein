@@ -190,6 +190,7 @@ public class SourceColumn implements HasPid, Serializable {
         MERGE_SEED, //
         ADD_UUID, //
         ADD_TIMESTAMP, //
+        ADD_ROWNUM, //
         STANDARD_DOMAIN, //
         CONVERT_TYPE;
     }

@@ -18,7 +18,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.CopyValueBetweenColumnFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -31,13 +31,11 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculatio
 public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<RebuildFlowParameter> {
     private static Logger LOG = LogManager.getLogger(AccountMasterSeedRebuildFlow.class);
 
-    // Based on assumption that main base source has all the output columns
-    // (probably with different names)
-    private Map<String, SeedMergeFieldMapping> outputColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
-    // mainBaseSourceColumn -> outputColumn
-    private Map<String, String> mainBaseSourceColumnMapping = new HashMap<String, String>();
-    // mergedBaseSourceColumn -> mainBaseSourceColumn
-    private Map<String, String> mergedBaseSourceColumnMapping = new HashMap<String, String>();
+    private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
+    // dnbCacheSeed columns -> accountMasterSeed columns
+    private Map<String, String> dnbCacheSeedColumnMapping = new HashMap<String, String>();
+    // latticeCacheSeed columns -> accountMasterSeed columns
+    private Map<String, String> latticeCacheSeedColumnMapping = new HashMap<String, String>();
 
 
     @Override
@@ -47,110 +45,66 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);
         }
-        Node mainBaseSource = addSource(parameters.getBaseTables().get(0));
-        mainBaseSource = addRetainNode(mainBaseSource, mainBaseSourceColumnMapping);
-        mainBaseSource = addRenameNode(mainBaseSource, mainBaseSourceColumnMapping);
-        mainBaseSource = addColumnNode(mainBaseSource, parameters.getColumns());
-
-        /*
-        Node mergedBaseSource = addSource(parameters.getBaseTables().get(1));
-        mergedBaseSource = addRetainNode(mergedBaseSource, mergedBaseSourceColumnMapping);
-        mergedBaseSource = addJoinNode(mergedBaseSource, mainBaseSource, outputColumnMapping,
-                JoinType.LEFT);
-        mergedBaseSource = addFilterNode(mergedBaseSource, outputColumnMapping);
-        mergedBaseSource = addPopulateMainBaseSourceColumnNode(mergedBaseSource,
-                mergedBaseSourceColumnMapping);
-        mergedBaseSource = addRetainNode(mergedBaseSource, mainBaseSourceColumnMapping);
-
-        Node joinedBaseSource = addJoinNode(mergedBaseSource, mainBaseSource,
-                outputColumnMapping, JoinType.OUTER);
-        Node joinedBaseSourceMainPart = addGetMainBaseSourcePartNode(joinedBaseSource,
-                parameters.getBaseSourcePrimaryKeys().get(0));
-        joinedBaseSourceMainPart = addRetainNode(joinedBaseSourceMainPart,
-                mainBaseSourceColumnMapping);
-        Node joinedBaseSourceMergedPart = addFilterOutMainBaseSourcePartNode(joinedBaseSource,
-                parameters.getBaseSourcePrimaryKeys().get(0));
-        joinedBaseSourceMergedPart = addRenameMergedNode(joinedBaseSourceMergedPart,
-                mergedBaseSourceColumnMapping);
-        joinedBaseSourceMergedPart = addRetainNode(joinedBaseSourceMergedPart,
-                mainBaseSourceColumnMapping);
-        joinedBaseSourceMainPart = joinedBaseSourceMainPart.merge(joinedBaseSourceMergedPart);
-        joinedBaseSourceMainPart = addRenameNode(joinedBaseSourceMainPart,
-                mainBaseSourceColumnMapping);
-                */
-        /*
-        mergedBaseSource = addFilterNode(mergedBaseSource, outputColumnMapping);
-        mergedBaseSource = addRenameMergedNode(mergedBaseSource, mergedBaseSourceColumnMapping);
-        mergedBaseSource = addRetainNode(mergedBaseSource, mainBaseSourceColumnMapping);
-        mainBaseSource.merge(mergedBaseSource);
-        mainBaseSource = addRenameNode(mainBaseSource, mainBaseSourceColumnMapping);
-        */
-
-        return mainBaseSource;
+        Node dnbCacheSeed = addSource(parameters.getBaseTables().get(0));
+        dnbCacheSeed = addRetainDnBColumnNode(dnbCacheSeed);
+        Node latticeCacheSeed = addSource(parameters.getBaseTables().get(1));
+        Node accountMasterSeed = addJoinNode(latticeCacheSeed, dnbCacheSeed, JoinType.OUTER);
+        accountMasterSeed = addTmpOutputNode(accountMasterSeed, parameters.getBaseSourcePrimaryKeys().get(0));
+        accountMasterSeed = addRetainAccountMasterSeedColumnNode(accountMasterSeed);
+        accountMasterSeed = addRenameAccountMasterSeedColumnNode(accountMasterSeed);
+        accountMasterSeed = addColumnNode(accountMasterSeed, parameters.getColumns());
+        return accountMasterSeed;
     }
 
-    private Node addRetainNode(Node node, Map<String, String> baseSourceColumnMapping) {
-        List<String> columnNames = new ArrayList<String>(baseSourceColumnMapping.keySet());
+    private Node addRetainDnBColumnNode(Node node) {
+        List<String> columnNames = new ArrayList<String>(dnbCacheSeedColumnMapping.keySet());
         return node.retain(new FieldList(columnNames));
     }
 
-    private Node addJoinNode(Node lhs, Node rhs,
-            Map<String, SeedMergeFieldMapping> outputColumnMapping, JoinType joinType) {
-        List<String> lhsJoinColumnNames = new ArrayList<String>();
-        List<String> rhsJoinColumnNames = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : outputColumnMapping.entrySet()) {
+    private Node addJoinNode(Node latticeCacheSeed, Node dnbCacheSeed, JoinType joinType) {
+        List<String> latticeJoinColumns = new ArrayList<String>();
+        List<String> dnbJoinColumns = new ArrayList<String>();
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
             SeedMergeFieldMapping item = entry.getValue();
             if (item.getIsDedup()) {
-                lhsJoinColumnNames.add(item.getMergedSourceColumn());
-                rhsJoinColumnNames.add(item.getMainSourceColumn());
+                latticeJoinColumns.add(item.getMergedSourceColumn());
+                dnbJoinColumns.add(item.getMainSourceColumn());
             }
         }
-        return lhs.join(new FieldList(lhsJoinColumnNames), rhs, new FieldList(rhsJoinColumnNames),
+        return latticeCacheSeed.join(new FieldList(latticeJoinColumns), dnbCacheSeed, new FieldList(dnbJoinColumns),
                 joinType);
     }
 
-    private Node addRenameNode(Node node, Map<String, String> mainBaseSourceColumnMapping) {
-        List<String> newColumnNames = new ArrayList<String>(mainBaseSourceColumnMapping.values());
-        List<String> oldColumnNames = new ArrayList<String>(mainBaseSourceColumnMapping.keySet());
-        return node.rename(new FieldList(oldColumnNames), new FieldList(newColumnNames));
+    private Node addTmpOutputNode(Node node, List<String> dnbPrimaryKeys) {
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+            String outputColumn = "Tmp_" + entry.getKey();
+            String latticeColumn = entry.getValue().getMergedSourceColumn();
+            String dnbColumn = entry.getValue().getMainSourceColumn();
+            List<String> inputColumns = new ArrayList<String>();
+            inputColumns.add(latticeColumn);
+            inputColumns.add(dnbColumn);
+            node = node.apply(new AccountMasterSeedFunction(outputColumn, latticeColumn, dnbColumn, dnbPrimaryKeys),
+                    new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+        }
+        return node;
     }
 
-    private Node addFilterNode(Node node,
-            Map<String, SeedMergeFieldMapping> outputColumnMapping) {
+    private Node addRetainAccountMasterSeedColumnNode(Node node) {
         List<String> columnNames = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : outputColumnMapping.entrySet()) {
-            SeedMergeFieldMapping item = entry.getValue();
-            if (item.getIsDedup()) {
-                columnNames.add(item.getMainSourceColumn());
-            }
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+            columnNames.add("Tmp_" + entry.getKey());
         }
-        StringBuilder sb = new StringBuilder();
-        for (String columnName : columnNames) {
-            sb.append(columnName + " == null && ");
-        }
-        LOG.info("Filter Expression: " + sb.substring(0, sb.length() - 4));
-        if (sb.length() > 0) {
-            return node.filter(sb.substring(0, sb.length() - 4), new FieldList(columnNames));
-        } else {
-            return node;
-        }
+        return node.retain(new FieldList(columnNames));
     }
 
-    private Node addPopulateMainBaseSourceColumnNode(Node node,
-            Map<String, String> mergedBaseSourceColumnMapping) {
-        List<String> inputColumnNames = new ArrayList<String>(
-                mergedBaseSourceColumnMapping.keySet());
-        List<String> outputColumnNames = new ArrayList<String>(
-                mergedBaseSourceColumnMapping.values());
-        String[] outputColumnArr = (String[]) outputColumnNames.toArray();
-        List<FieldMetadata> outputColumnMetaDatas = new ArrayList<FieldMetadata>();
-        for (String columnName : outputColumnNames) {
-            outputColumnMetaDatas.add(new FieldMetadata(columnName, String.class));
+    private Node addRenameAccountMasterSeedColumnNode(Node node) {
+        List<String> newColumnNames = new ArrayList<String>();
+        List<String> oldColumnNames = new ArrayList<String>();
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+            oldColumnNames.add("Tmp_" + entry.getKey());
+            newColumnNames.add(entry.getKey());
         }
-        return node.apply(
-                new CopyValueBetweenColumnFunction(mergedBaseSourceColumnMapping, outputColumnArr),
-                new FieldList(inputColumnNames), outputColumnMetaDatas,
-                new FieldList(outputColumnNames));
+        return node.rename(new FieldList(oldColumnNames), new FieldList(newColumnNames));
     }
 
     private Node addColumnNode(Node node, List<SourceColumn> sourceColumns) {
@@ -161,6 +115,9 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
                     break;
                 case ADD_TIMESTAMP:
                     node = node.addTimestamp(sourceColumn.getColumnName());
+                    break;
+                case ADD_ROWNUM:
+                    node = node.addRowID(sourceColumn.getColumnName());
                     break;
                 default:
                     break;
@@ -182,11 +139,10 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
         }
 
         for (SeedMergeFieldMapping item : list) {
-            outputColumnMapping.put(item.getSourceColumn(), item);
-            mainBaseSourceColumnMapping.put(item.getMainSourceColumn(), item.getSourceColumn());
+            accountMasterSeedColumnMapping.put(item.getSourceColumn(), item);
+            dnbCacheSeedColumnMapping.put(item.getMainSourceColumn(), item.getSourceColumn());
             if (item.getMergedSourceColumn() != null) {
-                mergedBaseSourceColumnMapping.put(item.getMergedSourceColumn(),
-                        item.getMainSourceColumn());
+                latticeCacheSeedColumnMapping.put(item.getMergedSourceColumn(), item.getSourceColumn());
             }
         }
     }
