@@ -47,7 +47,7 @@ def create_template(profile):
     return stack
 
 def tomcat_task(profile_vars):
-    container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
+    container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
