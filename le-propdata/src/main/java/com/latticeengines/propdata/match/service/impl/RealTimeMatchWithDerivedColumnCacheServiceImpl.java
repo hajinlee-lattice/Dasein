@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -44,7 +45,7 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
     @Override
     @MatchStep(threshold = 0L)
     public MatchOutput match(MatchInput input) {
-        MatchContext matchContext = prepareMatchContext(input);
+        MatchContext matchContext = prepareMatchContext(input, null);
         matchContext = executeMatch(matchContext);
         return matchContext.getOutput();
     }
@@ -57,17 +58,17 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
         return doPostProcessing(input, matchContexts);
     }
 
-    private MatchContext prepare(MatchInput input) {
-        return matchPlanner.plan(input);
+    private MatchContext prepare(MatchInput input, List<ColumnMetadata> metadatas) {
+        return matchPlanner.plan(input, metadatas);
     }
 
     private MatchContext executeMatch(MatchContext context) {
         return matchExecutor.execute(context);
     }
 
-    private MatchContext prepareMatchContext(MatchInput input) {
+    private MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas) {
         input.setUuid(UUID.randomUUID());
-        MatchContext matchContext = prepare(input);
+        MatchContext matchContext = prepare(input, metadatas);
         matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         matchContext.setReturnUnmatched(input.getReturnUnmatched());
         return matchContext;
@@ -75,8 +76,13 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
 
     private List<MatchContext> doPreProcessing(BulkMatchInput input) {
         List<MatchContext> matchContexts = new ArrayList<>(input.getInputList().size());
+        List<ColumnMetadata> metadatas = null;
         for (MatchInput matchInput : input.getInputList()) {
-            matchContexts.add(prepareMatchContext(matchInput));
+            MatchContext matchContext = prepareMatchContext(matchInput, metadatas);
+            if (input.isHomogeneous() || metadatas == null) {
+                metadatas = matchContext.getOutput().getMetadata();
+            }
+            matchContexts.add(matchContext);
         }
         return matchContexts;
     }

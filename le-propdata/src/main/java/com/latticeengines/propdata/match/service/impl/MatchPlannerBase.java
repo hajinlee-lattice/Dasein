@@ -127,25 +127,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchContext;
     }
 
-    @Override
-    public void generateInputMetric(MatchInput input) {
-        try {
-            ColumnSelection columnSelection = parseColumnSelection(input);
-            Integer selectedCols = columnSelection.getColumns().size();
-            MatchRequest request = new MatchRequest(input, selectedCols);
-            metricService.write(MetricDB.LDC_Match, request);
-        } catch (Exception e) {
-            log.warn("Failed to extract input metric.", e);
-        }
-    }
-
-    MatchOutput initializeMatchOutput(MatchInput input) {
+    MatchOutput initializeMatchOutput(MatchInput input, List<ColumnMetadata> metadatas) {
         MatchOutput output = new MatchOutput(input.getUuid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
-        output = appendMetadata(output, parseColumnSelection(input), input.getDataCloudVersion());
+        if (metadatas != null && !metadatas.isEmpty()) {
+            output = appendMetadata(output, metadatas);
+        } else {
+            output = appendMetadata(output, parseColumnSelection(input), input.getDataCloudVersion());
+        }
         output = parseOutputFields(output);
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
@@ -276,6 +268,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Trace
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
+        matchOutput.setMetadata(metadata);
+        return matchOutput;
+    }
+
+    @MatchStep(threshold = 100L)
+    @Trace
+    private MatchOutput appendMetadata(MatchOutput matchOutput, List<ColumnMetadata> metadata) {
         matchOutput.setMetadata(metadata);
         return matchOutput;
     }

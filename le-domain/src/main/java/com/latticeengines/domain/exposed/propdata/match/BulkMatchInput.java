@@ -5,6 +5,7 @@ import java.util.List;
 public class BulkMatchInput {
     private String requestId;
     private List<MatchInput> inputList;
+    private boolean homogeneous;
 
     public String getRequestId() {
         return requestId;
@@ -20,5 +21,13 @@ public class BulkMatchInput {
 
     public void setInputList(List<MatchInput> inputList) {
         this.inputList = inputList;
+    }
+
+    public boolean isHomogeneous() {
+        return homogeneous;
+    }
+
+    public void setHomogeneous(boolean homogeneous) {
+        this.homogeneous = homogeneous;
     }
 }

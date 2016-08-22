@@ -1,8 +1,11 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
@@ -18,6 +21,12 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @MatchStep
     @Trace
     public MatchContext plan(MatchInput input) {
+        return  plan(input, null);
+    }
+
+    @MatchStep
+    @Trace
+    public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas) {
         validate(input);
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
@@ -26,7 +35,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
-        MatchOutput output = initializeMatchOutput(input);
+        MatchOutput output = initializeMatchOutput(input, metadatas);
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
