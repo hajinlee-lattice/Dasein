@@ -23,6 +23,7 @@
 
     <import resource="classpath:dataplatform-component-context.xml"/>
     <import resource="classpath:propdata-madison-context.xml"/>
+    <import resource="classpath:db-persistence-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
     <import resource="classpath:pls-component-context.xml"/>
     <import resource="classpath:scoring-context.xml"/>
