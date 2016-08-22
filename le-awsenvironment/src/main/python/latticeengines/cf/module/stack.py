@@ -122,7 +122,7 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, extra_elbs=(), use_external_elb=True, use_asgroup=True, instances=1):
+    def __init__(self, description, extra_elbs=(), use_external_elb=True, use_asgroup=True, instances=1, ips=()):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
         self._elbs = [ PARAM_ELB_NAME ] if use_external_elb else []
@@ -132,7 +132,7 @@ class ECSStack(Stack):
             self._ecscluster, self._asgroup = self._construct(self._elbs)
         else:
             self._asgroup = None
-            self._ecscluster, self._ec2s = self._construct_by_ec2(instances)
+            self._ecscluster, self._ec2s = self._construct_by_ec2(instances, ips=ips)
 
     def add_service(self, service_name, task, capacity=None):
         if capacity is None:
@@ -149,20 +149,25 @@ class ECSStack(Stack):
 
         self.add_resource(service)
 
-    def _construct_by_ec2(self, instances):
+    def _construct_by_ec2(self, instances, ips=()):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        ec2s = self._create_ec2_instances(ecscluster, instances)
+        ec2s = self._create_ec2_instances(ecscluster, instances, ips=ips)
         return ecscluster, ec2s
 
-    def _create_ec2_instances(self, ecscluster, instances):
+    def _create_ec2_instances(self, ecscluster, instances, ips=()):
         ec2s = []
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
             subnet = SUBNETS[n % 3]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster) \
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, "ecs-container", ecscluster) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet)
+
+            if n < len(ips):
+                ip = ips[n]
+                ec2.set_private_ip(ip)
+
             self.add_resource(ec2)
         return ec2s
 

@@ -20,6 +20,7 @@
   },
   "Instance2Options": {
     "t2.micro"  : { "EBSOptimized" : "false" },
+    "t2.small" : { "EBSOptimized" : "false" },
     "t2.medium" : { "EBSOptimized" : "false" },
     "m3.medium" : { "EBSOptimized" : "false" },
     "m3.large"  : { "EBSOptimized" : "false" },

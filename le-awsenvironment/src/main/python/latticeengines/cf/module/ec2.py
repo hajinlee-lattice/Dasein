@@ -109,8 +109,10 @@ class EC2Instance(Resource):
         return self
 
     def set_instanceprofile(self, instanceprofile):
-        assert isinstance(instanceprofile, InstanceProfile) or isinstance(instanceprofile, Parameter)
-        self._template["Properties"]["IamInstanceProfile"] = instanceprofile.ref()
+        if isinstance(instanceprofile, InstanceProfile) or isinstance(instanceprofile, Parameter):
+            self._template["Properties"]["IamInstanceProfile"] = instanceprofile.ref()
+        else:
+            self._template["Properties"]["IamInstanceProfile"] = instanceprofile
         return self
 
     def set_metadata(self, metadata):
@@ -155,7 +157,7 @@ class EC2Instance(Resource):
 
 
 class ECSInstance(EC2Instance):
-    def __init__(self, name, instance_type, ec2_key, instance_profile, ecscluster):
+    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster):
         assert isinstance(instance_type, Parameter)
         assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
@@ -177,7 +179,7 @@ class ECSInstance(EC2Instance):
             }
         }
         self.set_metadata(ecs_metadata(self, ecscluster))
-        self.set_instanceprofile(instance_profile)
+        self.set_instanceprofile(instance_profile_name)
 
     def __ecs_userdata(self):
         return { "Fn::Base64" : { "Fn::Join" : ["", [

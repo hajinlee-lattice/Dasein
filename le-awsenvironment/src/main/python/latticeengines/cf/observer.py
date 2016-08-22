@@ -21,7 +21,7 @@ def template_cli(args):
     template(args.environment, args.upload)
 
 def template(environment, upload=False):
-    stack = create_template()
+    stack = create_template(environment)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -29,11 +29,15 @@ def template(environment, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template():
-    stack = ECSStack("AWS CloudFormation template for ECS cluster.", use_asgroup=False, instances=2)
+def create_template(environment):
+    config = AwsEnvironment(environment)
+    ips = config.zk_observer_ips()
+
+    stack = ECSStack("AWS CloudFormation template for ECS cluster.", use_asgroup=False, instances=2, ips=ips)
     task = observer_task()
     stack.add_resource(task)
     stack.add_service("observer", task, capacity=2)
+
     return stack
 
 def observer_task():
