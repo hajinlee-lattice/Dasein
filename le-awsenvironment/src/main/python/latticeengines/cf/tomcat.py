@@ -77,7 +77,7 @@ def provision(environment, app, stackname, elb, profile, instance_type, tag="lat
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
-    max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 256
+    max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 512
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
     extra_params.append(PARAM_MEM.config(str(max_mem)))
 

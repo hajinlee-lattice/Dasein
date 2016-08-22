@@ -55,7 +55,7 @@ def ecs_metadata(ec2, ecscluster):
                             "echo $PUBADDR >> /etc/externaladdr.txt"
                         ] ] }
                     },
-                    "02_add_instance_to_cluster" : {
+                    "10_add_instance_to_cluster" : {
                         "command" : { "Fn::Join": [ "", [
                             "#!/bin/bash\n",
                             "rm -rf /etc/ecs/ecs.config\n",
@@ -63,6 +63,12 @@ def ecs_metadata(ec2, ecscluster):
                             "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
                             "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
                             "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
+                            "start ecs\n",
+                            "yum install -y aws-cli jq\n",
+                            "instance_arn=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}' )\n",
+                            "az=$(curl -s http://instance-data/latest/meta-data/placement/availability-zone)\n",
+                            "region=", { "Ref" : "AWS::Region" }, "\n",
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances $instance_arn --region $region\n"
                         ] ] }
                     }
                 },

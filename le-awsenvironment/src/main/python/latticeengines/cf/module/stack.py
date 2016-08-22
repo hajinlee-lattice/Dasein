@@ -168,7 +168,8 @@ class ECSStack(Stack):
                 ip = ips[n]
                 ec2.set_private_ip(ip)
 
-            self.add_resource(ec2)
+            ec2s.append(ec2)
+        self.add_resources(ec2s)
         return ec2s
 
     def _construct(self, elbs):

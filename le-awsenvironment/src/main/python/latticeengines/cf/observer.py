@@ -44,7 +44,7 @@ def observer_task():
     container = ContainerDefinition("observer", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
         "/latticeengines/observer" ] ]}) \
-        .mem_mb("1750").publish_port(2181, 2181) \
+        .mem_mb("1700").publish_port(2181, 2181) \
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
@@ -53,7 +53,6 @@ def observer_task():
         }}) \
         .set_env("LE_ENVIRONMENT", PARAM_ENVIRONMENT.ref()) \
         .set_env("JVMFLAGS", "-Xms1g -Xmx1700m") \
-        .set_env("ZOO_LOG4J_PROP", "INFO,ROLLINGFILE") \
         .set_env("ZOO_LOG_DIR", "/var/log/zookeeper")
 
     task = TaskDefinition("observertask")
