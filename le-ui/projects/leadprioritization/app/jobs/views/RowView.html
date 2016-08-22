@@ -2,8 +2,8 @@
     <div class="clearfix">
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns two" ng-if="state != 'model'">
-            <span ng-show="job.modelName"
+        <span class="columns three" ng-if="state != 'model'">
+            <a ng-show="job.modelName"
                 class="model-name">
                 <a ng-show="job.modelId"
                     title="{{job.modelName}}"
@@ -13,7 +13,7 @@
                 <strong ng-show="!job.modelId">
                     {{job.modelName}}
                 </strong>
-            </span>
+            </a>
             <span ng-show="!job.modelName">
                 --
             </span>
@@ -28,7 +28,7 @@
         </span>
         <span class="columns two" ng-if="state != 'model'">{{job.displayName}}</span>
         <span class="columns two {{job.status}}">{{job.status}}</span>
-        <span class="columns three">
+        <span class="columns two">
             <span ng-if="(jobCompleted || jobFailed) && job.id != null">
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
                       ng-if="jobType == 'fitModelWorkflow'">
@@ -73,21 +73,20 @@
             </span>
             &nbsp
         </span>
-        <!--
-        <span class="columns three job-status-username">{{job.user || 'Unknown'}}</span>
-        -->
     </div>
     <div class="chevron-row" data-ng-if="jobRowExpanded">
 
 
-        <ol class="wizard job-status" ng-if="jobType == 'importMatchAndModelWorkflow'">
-            <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
-                <span>
-                    <span>
-                        
-                        <span class="pull-left">
-                            Processing File <br>
-                            <span class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+        <div class="progress-info">
+
+
+            <ol class="wizard job-status" ng-if="jobType == 'importMatchAndModelWorkflow'">
+                <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
+                    <div>
+                            
+                        <span class="pull-left load-data">
+                            <p>Processing File</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
@@ -95,16 +94,14 @@
                             <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'load_data'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
-                <span>
-                    <span>
-                        
-                        <span class="pull-left">
-                            Matching to Data Cloud<br>
-                            <span class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+                    </div>
+                </li>
+                <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
+                    <div>
+                            
+                        <span class="pull-left match-cloud">
+                            <p>Matching to Data Cloud</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
@@ -112,16 +109,14 @@
                             <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li ng-class="(jobStepsCompletedStates.create_global_target_market) ? 'success' : ''">
-                <span>
-                    <span>
-                        
-                        <span class="pull-left">
-                            Building Model<br>
-                            <span class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+                    </div>
+                </li>
+                <li ng-class="(jobStepsCompletedStates.create_global_target_market) ? 'success' : ''">
+                    <div>
+                            
+                        <span class="pull-left building-model">
+                            <p>Building Model</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
@@ -129,19 +124,17 @@
                             <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-        </ol>
+                    </div>
+                </li>
+            </ol>
 
-        <ol class="wizard job-status" ng-if="jobType == 'fitModelWorkflow'">
-            <li>
-                <span>
-                    <span>
+            <ol class="wizard job-status" ng-if="jobType == 'fitModelWorkflow'">
+                <li>
+                    <div>
 
-                        <span class="pull-left">
-                                Load Data
-                                <span class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+                        <span class="pull-left load-data">
+                                <p>Load Data</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
@@ -149,16 +142,14 @@
                             <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'load_data'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li>
-                <span>
-                    <span>
+                    </div>
+                </li>
+                <li>
+                    <div>
 
-                        <span class="pull-left">
-                            Match Data
-                            <span class="completion-times">{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
+                        <span class="pull-left match-data">
+                            <p>Match Data</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.match_data"></span>
@@ -166,16 +157,14 @@
                             <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'match_data'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li>
-                <span>
-                    <span>
+                    </div>
+                </li>
+                <li>
+                    <div>
 
-                        <span class="pull-left">
-                            Generate<br>Insights
-                            <span class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+                        <span class="pull-left generate-insights">
+                            <p>Generate Insights</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
@@ -183,16 +172,14 @@
                             <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'generate_insights'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li>
-                <span>
-                    <span>
+                    </div>
+                </li>
+                <li>
+                    <div>
 
-                        <span class="pull-left">
-                            Create Universal<br>Model
-                            <span class="completion-times">{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</span>
+                        <span class="pull-left universal-model">
+                            <p>Create Universal Model</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_model"></span>
@@ -200,16 +187,14 @@
                             <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_model'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-            <li>
-                <span>
-                    <span>
+                    </div>
+                </li>
+                <li>
+                    <div>
 
-                        <span class="pull-left">
-                            Create Universal<br>Target Market
-                            <span class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+                        <span class="pull-left universal-market">
+                            <p>Create Universal Target Market</p>
+                            <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
                         </span>
                         <span class="pull-right">
                             <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
@@ -217,18 +202,26 @@
                             <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_target_market'"></i>
                         </span>
 
-                    </span>
-                </span>
-            </li>
-        </ol>
+                    </div>
+                </li>
+            </ol>
 
-        <span ng-if="jobFailed && job.id != null && (jobType == 'importMatchAndModelWorkflow' || 'fitModelWorkflow')" class="download-error-report">
+            <ul>
+                <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
+                <li><strong>Filename:</strong> filename.pmml{{job.filename}}</li>
+                <li><strong>App:</strong> {{job.applicationId}}</li>
+            </ul>
+
+
+        </div><!-- End .progress-info -->
+
+        <div class="download-error-report">
             <strong>Report:</strong>
             <p>15 records with errors.</p>
-            <button type="button" data-ng-click="clickGetErrorLog($event)" class="button blue-button block-button">
+            <button type="button" data-ng-click="clickGetErrorLog($event)" ng-if="jobFailed" class="button blue-button block-button">
                 <i class="fa fa-download"></i> Error CSV
             </button>
-        </span>
+        </div>
 
     </div>
 </div>

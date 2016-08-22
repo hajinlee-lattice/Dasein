@@ -92,7 +92,6 @@
     background-color: #f7f7f7 !important;
     text-align: center;
 }
-
 .breadcrumb div {
     color: black !important;
     text-decoration: none;
@@ -108,16 +107,28 @@
 .importMatchAndModelWorkflow .breadcrumb div {
     width: 33%;
 }
+
 .breadcrumb div:first-child:before {
     left: 14px;
 }
 .chevron-row {
     padding-bottom: 1px;
     border-bottom: #e7e7e7 solid 1px;
+    padding: 18px;
+    display: flex;
     &:after {
         display: table;
         content: "";
         clear: both;
+    }
+}
+.progress-info, .download-error-report {
+    flex-grow: 1;
+}
+.progress-info {
+    ul li {
+        display: inline-block;
+        margin-right: 30px;
     }
 }
 .download-error-report {
@@ -125,7 +136,6 @@
     background: #fff;
     margin: 10px 0;
     padding: 10px;
-    float: left;
     strong {
         font-weight: bold;
     }
