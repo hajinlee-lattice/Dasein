@@ -28,6 +28,9 @@ angular
                 case "importmatchandscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                 case "importandrtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                 case "rtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
+                case "importmatchandmodelworkflow": $scope.job.displayName = "Create Model by CSV"; break;
+                case "modelandemailworkflow": $scope.job.displayName = "Create Model by Refine & Clone"; break;
+                case "pmmlmodelworkflow": $scope.job.displayName = "Create Model by PMML"; break;
                 default: $scope.job.displayName = "Create Model";
             }
 
