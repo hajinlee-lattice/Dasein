@@ -79,7 +79,7 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
         List<ColumnMetadata> metadatas = null;
         for (MatchInput matchInput : input.getInputList()) {
             MatchContext matchContext = prepareMatchContext(matchInput, metadatas);
-            if (input.isHomogeneous() || metadatas == null) {
+            if (input.isHomogeneous() && metadatas == null) {
                 metadatas = matchContext.getOutput().getMetadata();
             }
             matchContexts.add(matchContext);
