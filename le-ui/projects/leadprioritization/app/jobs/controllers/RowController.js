@@ -13,7 +13,7 @@ angular
             expanded: '=',
             cancelling: '='
         },
-        controller: function ($http, $scope, $rootScope, $state, JobsStore, JobsService, CancelJobModal) {
+        controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal) {
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
@@ -28,9 +28,9 @@ angular
                 case "importmatchandscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                 case "importandrtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                 case "rtsbulkscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
-                case "importmatchandmodelworkflow": $scope.job.displayName = "Create Model by CSV"; break;
-                case "modelandemailworkflow": $scope.job.displayName = "Create Model by Refine & Clone"; break;
-                case "pmmlmodelworkflow": $scope.job.displayName = "Create Model by PMML"; break;
+                case "importmatchandmodelworkflow": $scope.job.displayName = "Create Model (Training Set)"; break;
+                case "modelandemailworkflow": $scope.job.displayName = "Create Model (Remodel)"; break;
+                case "pmmlmodelworkflow": $scope.job.displayName = "Create Model (PMML File)"; break;
                 default: $scope.job.displayName = "Create Model";
             }
 
@@ -121,7 +121,10 @@ angular
                 );
             };
 
-
+            $scope.applicationIdClicked = function() {
+                $location.path('/cluster/app/' + job.applicationId);
+                $rootScope.$apply();
+            };
 
             $scope.clickGetScoringResults = function($event) {
 
