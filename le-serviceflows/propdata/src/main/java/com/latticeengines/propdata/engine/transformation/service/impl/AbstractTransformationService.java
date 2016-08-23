@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
