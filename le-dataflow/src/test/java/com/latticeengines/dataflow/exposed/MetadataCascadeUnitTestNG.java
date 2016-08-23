@@ -22,7 +22,7 @@ public class MetadataCascadeUnitTestNG {
         metadata.add(field);
 
         FieldMetadata parent = new FieldMetadata("Parent", Integer.class);
-        parent.setPropertyValue("ApprovedUsage", Collections.singletonList(ApprovedUsage.MODEL).toString());
+        parent.setPropertyValue("ApprovedUsage", Collections.singletonList(ApprovedUsage.NONE).toString());
         field.addAncestor(parent);
 
         FieldMetadata grandparent = new FieldMetadata("Grandparent", Integer.class);
