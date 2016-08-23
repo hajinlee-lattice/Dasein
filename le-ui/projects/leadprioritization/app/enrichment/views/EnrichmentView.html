@@ -76,9 +76,8 @@
                     </h2>
                     <p>{{enrichment.Description}}</p>
                     <button class="button" 
-                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'is-dirty': enrichment.IsDirty}" 
-                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)" n
-                    g-class="{'is-dirty': enrichment.IsDirty}">
+                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty}" 
+                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                         <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                     </button>
                 </div>

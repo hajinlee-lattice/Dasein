@@ -17,6 +17,7 @@ angular
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
+            $scope.isPMML = (job.jobType === 'pmmlModelWorkflow');
             $scope.jobRunning = false;
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
@@ -145,7 +146,7 @@ angular
 
                 }, function(reason) {});
             };
-            
+
             function isCompleted() {
                 for (var step in $scope.jobStepsCompletedStates) {
                     if (! $scope.jobStepsCompletedStates[step]) {

@@ -14,7 +14,7 @@ angular.module('lp.enrichment.leadenrichment', [])
             button_save: 'Save',
             button_select: 'Enable',
             button_selected: 'Enabled',
-            button_deselect: 'Disable',
+            button_deselect: 'Enable',
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
@@ -76,7 +76,7 @@ angular.module('lp.enrichment.leadenrichment', [])
                 vm.disabled_count = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': false}).length;
                 vm.label.disabled_alert = '<p><strong>You have disabled ' + vm.disabled_count + ' attribute' + (vm.disabled_count > 1 ? 's' : '') + '</strong>. If you are using any of these attributes for real-time scoring, these attributes will no longer be updated in your system.</p>';
                 vm.label.disabled_alert += '<p>No changes will be saved until you press the \'Save\' button.</p>';
-                vm.statusMessage(vm.label.disabled_alert, {type: 'disabling'});
+                vm.statusMessage(vm.label.disabled_alert, {type: 'disabling', wait: 0});
             }
         }
         if(vm.userSelectedCount < 1) {
@@ -93,7 +93,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         vm.status_alert.message = message;
         $timeout.cancel(status_timer);
         vm.status_alert.show = true;
-        
+
         if(wait) {
             status_timer = $timeout(function(){
                 vm.status_alert.show = false;
@@ -133,7 +133,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
         EnrichmentService.setEnrichments(data).then(function(result){
             vm.saveDisabled = true;
-            vm.statusMessage(vm.label.saved_alert, {type: 'saved', wait: 0});
+            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
             if(selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
                 for(i in dirtyObj){

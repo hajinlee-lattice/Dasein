@@ -3,20 +3,26 @@
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state != 'model'">
-            <a ng-show="job.modelName"
-                class="model-name">
-                <a ng-show="job.modelId"
-                    title="{{job.modelName}}"
-                    ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
-                        {{job.modelName}}
-                </a>
-                <strong ng-show="!job.modelId">
+            <a ng-if="job.modelId && job.modelName && !isPMML" 
+               class="model-name" 
+               title="{{job.modelName}}" 
+               ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
-                </strong>
             </a>
-            <span ng-show="!job.modelName">
-                --
-            </span>
+            <a ng-if="job.modelId && job.modelName && isPMML" 
+               class="model-name" 
+               title="{{job.modelName}}" 
+               ui-sref="home.model.jobs({ modelId: '{{ job.modelId | escape }}' })">
+                    {{job.modelName}}
+            </a>
+            <strong ng-if="!job.modelId" class="model-name">
+                <span ng-if="job.modelName">
+                    {{job.modelName}}
+                </span>
+                <span ng-if="!job.modelName">
+                    --
+                </span>
+            </strong>
         </span>
         <span class="columns two" ng-if="state == 'model'">
             <span

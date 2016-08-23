@@ -348,9 +348,9 @@
         transform: translateX(-50%);
         z-index: 100;
         background: white;
-        border: 1px solid #f16a22;
         border-radius: 4px;
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgb(253,188,84);
+        box-shadow: 0 1px 5px rgba(253,188,84,0.20);
         padding: 0;
         overflow: hidden;
         -webkit-backface-visibility: hidden;
@@ -358,7 +358,7 @@
         .icon {
             @include flex-item(0 0 auto);
             color: white;
-            background: #f16a22;
+            background: rgb(253,188,84);
             position: relative;
             width: 70px;
             &:after {
@@ -388,18 +388,12 @@
             }
         }
         &.saved {
-             border-color: #6fbe4a;
+            border-color: rgb(111,190,74);
             .icon {
-                background: #6fbe4a;
+                background: rgb(111,190,74);
                 &:after {
                     @include font-awesome-inline("\f00c");
                 }
-            }
-        }
-        &.disabling {
-             border-color: #fdbc54;
-            .icon {
-                background: #fdbc54;
             }
         }
         & > .close {
