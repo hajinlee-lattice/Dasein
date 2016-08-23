@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.dataflow.RebuildFlowParameter;
+import com.latticeengines.domain.exposed.propdata.dataflow.AccountMasterSeedRebuildFlowParameter;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
@@ -46,6 +46,10 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
     private static final String HIPHEN = "-";
 
     private static final String FLOWNAME = "FLOWNAME";
+
+    private static final String ENGINE = "ENGINE";
+
+    private static final String TEZ = "Tez";
 
     @Autowired
     private DataTransformationService dataTransformationService;
@@ -112,7 +116,7 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
         String flowName = CollectionDataFlowKeys.REBUILD_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid)
                 .toString();
-        RebuildFlowParameter parameters = new RebuildFlowParameter();
+        AccountMasterSeedRebuildFlowParameter parameters = new AccountMasterSeedRebuildFlowParameter();
         parameters.setTimestampField(source.getTimestampField());
         parameters.setTimestamp(new Date());
         parameters.setColumns(
@@ -126,6 +130,7 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty(FLOWNAME, source.getSourceName() + HIPHEN + flowName);
         ctx.setProperty(SOURCETABLES, sources);
+        ctx.setProperty(ENGINE, TEZ);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
 

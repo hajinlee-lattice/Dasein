@@ -9,4 +9,5 @@ final public class CollectionDataFlowKeys {
     public static final String DEPIVOT_FLOW = "DepivotFlow";
     public static final String CLEAN_FLOW = "CleanFlow";
     public static final String REBUILD_FLOW = "RebuildFlow";
+    public static final String REFRESH_FLOW = "RefreshFlow";
 }

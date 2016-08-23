@@ -35,9 +35,9 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
-@Component("dnbCacheSeedCleanDataFlowService")
-public class DnBCacheSeedCleanDataFlowService extends AbstractTransformationDataFlowService {
-    private static Logger LOG = LogManager.getLogger(DnBCacheSeedCleanDataFlowService.class);
+@Component("accountMasterLookupRefreshDataFlowService")
+public class AccountMasterLookupRefreshDataFlowService extends AbstractTransformationDataFlowService {
+    private static Logger LOG = LogManager.getLogger(AccountMasterLookupRefreshDataFlowService.class);
 
     private static final String SOURCETABLES = "SOURCETABLES";
 
@@ -71,9 +71,8 @@ public class DnBCacheSeedCleanDataFlowService extends AbstractTransformationData
 
     @SuppressWarnings("unchecked")
     @Override
-    public void executeDataProcessing(Source source, String workflowDir, String baseVersion,
-            String uid, String dataFlowBean,
-            TransformationConfiguration transformationConfiguration) {
+    public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
+            String dataFlowBean, TransformationConfiguration transformationConfiguration) {
         if (StringUtils.isEmpty(dataFlowBean)) {
             throw new LedpException(LedpCode.LEDP_25012,
                     new String[] { source.getSourceName(), "Name of dataFlowBean cannot be null" });
@@ -96,12 +95,10 @@ public class DnBCacheSeedCleanDataFlowService extends AbstractTransformationData
         }
         int i = 0;
         for (Source baseSource : fixedIntervalSource.getBaseSources()) {
-            String version = baseVersion != null ? versions[i]
-                    : hdfsSourceEntityMgr.getCurrentVersion(baseSource);
+            String version = baseVersion != null ? versions[i] : hdfsSourceEntityMgr.getCurrentVersion(baseSource);
             LOG.info("baseSource = " + baseSource.getSourceName() + " version = " + version);
             Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
-            List<SourceColumn> baseSourceColumns = sourceColumnEntityMgr
-                    .getSourceColumns(baseSource.getSourceName());
+            List<SourceColumn> baseSourceColumns = sourceColumnEntityMgr.getSourceColumns(baseSource.getSourceName());
             baseSourceColumnsList.add(baseSourceColumns);
             CsvToAvroFieldMapping fieldMapping = new CsvToAvroFieldMappingImpl(baseSourceColumns);
             Schema schema = fieldMapping.getAvroSchema();
@@ -113,19 +110,16 @@ public class DnBCacheSeedCleanDataFlowService extends AbstractTransformationData
             i++;
         }
 
-        String flowName = CollectionDataFlowKeys.CLEAN_FLOW;
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid)
-                .toString();
+        String flowName = CollectionDataFlowKeys.REFRESH_FLOW;
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
         SingleBaseSourceRefreshDataFlowParameter parameters = new SingleBaseSourceRefreshDataFlowParameter();
         parameters.setTimestampField(source.getTimestampField());
         try {
             parameters.setTimestamp(HdfsPathBuilder.dateFormat.parse(baseVersion));
         } catch (ParseException e) {
-            throw new LedpException(LedpCode.LEDP_25012, e,
-                    new String[] { source.getSourceName(), e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_25012, e, new String[] { source.getSourceName(), e.getMessage() });
         }
-        parameters.setColumns(
-                sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource.getSourceName()));
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource.getSourceName()));
         parameters.setBaseSourceColumns(baseSourceColumnsList);
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());
@@ -137,7 +131,6 @@ public class DnBCacheSeedCleanDataFlowService extends AbstractTransformationData
         ctx.setProperty(ENGINE, TEZ);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
-
     }
 
     @Override

@@ -2,9 +2,6 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -17,8 +14,6 @@ import cascading.tuple.TupleEntry;
 public class AccountMasterSeedFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 704139437526099546L;
-
-    private static Logger LOG = LogManager.getLogger(AccountMasterSeedFunction.class);
 
     private String latticeColumn;
     private String dnbColumn;
@@ -42,7 +37,6 @@ public class AccountMasterSeedFunction extends BaseOperation implements Function
                 break;
             }
         }
-        LOG.info("From DnB: " + fromDnb);
         if (fromDnb && dnbColumn != null) {
             functionCall.getOutputCollector().add(new Tuple(arguments.getObject(dnbColumn)));
         } else if (!fromDnb && latticeColumn != null) {

@@ -18,13 +18,13 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.dataflow.CleanDataFlowParameter;
+import com.latticeengines.domain.exposed.propdata.dataflow.SingleBaseSourceRefreshDataFlowParameter;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 @Component("dnbCacheSeedCleanFlow")
-public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<CleanDataFlowParameter> {
+public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<SingleBaseSourceRefreshDataFlowParameter> {
     @Override
-    public Node construct(CleanDataFlowParameter parameters) {
+    public Node construct(SingleBaseSourceRefreshDataFlowParameter parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
         node = addDataCleanNode(node, parameters.getColumns());
         node = addColumnNode(node, parameters.getColumns());

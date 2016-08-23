@@ -22,13 +22,13 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedF
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.dataflow.RebuildFlowParameter;
+import com.latticeengines.domain.exposed.propdata.dataflow.AccountMasterSeedRebuildFlowParameter;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
 
 
 @Component("accountMasterSeedRebuildFlow")
-public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<RebuildFlowParameter> {
+public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<AccountMasterSeedRebuildFlowParameter> {
     private static Logger LOG = LogManager.getLogger(AccountMasterSeedRebuildFlow.class);
 
     private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
@@ -39,7 +39,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Rebuil
 
 
     @Override
-    public Node construct(RebuildFlowParameter parameters) {
+    public Node construct(AccountMasterSeedRebuildFlowParameter parameters) {
         try {
             getColumnMapping(parameters.getColumns());
         } catch (IOException e) {
