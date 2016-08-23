@@ -350,9 +350,11 @@
         background: white;
         border: 1px solid #f16a22;
         border-radius: 4px;
-        box-shadow: 0 7px 0 -5px rgba(0,0,0,0.05); 
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
         padding: 0;
         overflow: hidden;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
         .icon {
             @include flex-item(0 0 auto);
             color: white;
@@ -392,6 +394,12 @@
                 &:after {
                     @include font-awesome-inline("\f00c");
                 }
+            }
+        }
+        &.disabling {
+             border-color: #fdbc54;
+            .icon {
+                background: #fdbc54;
             }
         }
         & > .close {

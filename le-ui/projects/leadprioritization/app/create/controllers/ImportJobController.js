@@ -5,7 +5,8 @@ angular.module('lp.create.import.job', [
 ])
 .controller('ImportJobController', function(
     $scope, $state, $stateParams, $interval, ResourceUtility, 
-    JobsStore, JobsService, ImportStore, ServiceErrorUtility
+    JobsStore, JobsService, ImportStore, ServiceErrorUtility,
+    CancelJobModal
 ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.applicationId = $stateParams.applicationId;
@@ -151,6 +152,14 @@ angular.module('lp.create.import.job', [
             } else {
 
             }
+        });
+    }
+    $scope.cancelJob = function($event, jobId) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        CancelJobModal.show(jobId, {}, function(){
+            $state.go('home.jobs.status');
         });
     }
 });

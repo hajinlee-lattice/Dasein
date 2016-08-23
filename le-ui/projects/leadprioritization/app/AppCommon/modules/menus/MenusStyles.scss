@@ -118,15 +118,18 @@
             border-left: 1px solid #222;
             
             li {
+                @include flex-container;
                 text-align: left;
                 width: 10em;
                 margin: 0;
-                
+                a {
+                    @include flex-item(1 1 auto);
+                }
                 i {
+                    @include flex-item(0 1 auto);
                     margin-top: 5px;
                     margin-right: 0;
                     margin-left: 0;
-                    float: right;
                 }
             }
         }
@@ -185,15 +188,26 @@
             border-left: 1px solid #222;
             
             li {
+                @include flex-container;
                 text-align: left;
                 width: 10em;
                 margin: 0;
                 vertical-align: baseline;
 
+                a {
+                    @include flex-item(1 1 auto);
+                }
+
+                i {
+                    @include flex-item(0 1 auto);
+                }
+
                 span {
+                    @include flex-item(0 1 auto);
+                    font-family: monospace;
                     display: inline-block;
-                    float: right;
                     margin-top: 3px;
+                    padding: 5px 7px; 
                 }
             }
         }

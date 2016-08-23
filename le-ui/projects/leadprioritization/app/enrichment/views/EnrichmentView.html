@@ -22,6 +22,14 @@
                         </a>
                     </div>
                 </li>
+                <li class="menu" ng-click="vm.clickPaginate()">
+                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
+                        <span class="fa fa-sort-alpha-{{ SortOrder == 'FieldName' ? 'asc' : 'desc' }}"></span>
+                    </a>
+                    <a ng-if="vm.enable_grid" class="button icon-button white-button" ng-click="vm.view = (vm.view === 'list' ? 'grid' : 'list')">
+                        <span class="fa {{(vm.view === 'list' ? 'fa-th-large' : 'fa-th-list')}}"></span>
+                    </a>
+                </li>
             </ul>
             <ul class="subheader"  ng-animate-children="true">
                 <li class="totals">
@@ -33,14 +41,6 @@
                             {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}} / {{vm.premiumSelectLimit}}</em>
                         </li>
                     </ul>
-                </li>
-                <li class="menu" ng-click="vm.clickPaginate()">
-                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
-                        <span class="fa fa-sort-alpha-{{ SortOrder == 'FieldName' ? 'asc' : 'desc' }}"></span>
-                    </a>
-                    <a ng-if="vm.enable_grid" class="button icon-button white-button" ng-click="vm.view = (vm.view === 'list' ? 'grid' : 'list')">
-                        <span class="fa {{(vm.view === 'list' ? 'fa-th-large' : 'fa-th-list')}}"></span>
-                    </a>
                 </li>
                 <li class="save">
                     <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>

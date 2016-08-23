@@ -3,12 +3,13 @@ angular.module('lp.jobs.modals.cancelmodal', [
 ])
 .service('CancelJobModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, JobsService) {
     var self = this;
-    this.show = function (jobId, opts) {
+    this.show = function (jobId, opts, callback) {
         $http.get('app/jobs/modals/CancelJobModalView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.jobId = jobId;
             scope.opts = opts || {};
+            scope.callback = callback;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -28,15 +29,18 @@ angular.module('lp.jobs.modals.cancelmodal', [
 })
 .controller('CancelJobController', function ($scope, $rootScope, $state, ResourceUtility, JobsService,  ImportStore) {
     $scope.ResourceUtility = ResourceUtility;
+
     $scope.cancelJobClickConfirm = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
         updateAsCancelledJob($scope.jobId);
+        if(typeof $scope.callback === 'function') {
+            $scope.callback();
+        }
     };
 
     function updateAsCancelledJob(jobId) {
-        console.log(jobId);
         JobsService.cancelJob(jobId);
         $("#modalContainer").modal('hide');
     }
@@ -50,4 +54,5 @@ angular.module('lp.jobs.modals.cancelmodal', [
         $state.go('home.models.import');
         $("#modalContainer").modal('hide');
     };
+
 });

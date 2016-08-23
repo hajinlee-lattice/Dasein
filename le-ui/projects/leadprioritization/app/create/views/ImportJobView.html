@@ -100,6 +100,11 @@
                     {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_CREATE_ANOTHER')}}
                 </button>
             </div>
+            <div class="pull-left" ng-show="jobStatus === 'Running'">
+                <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)">
+                    {{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}
+                </button>
+            </div>
             <div class="pull-right">
                 <button ui-sref="home.models" class="button orange-button" type="button">
                     {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST')}}

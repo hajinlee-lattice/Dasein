@@ -465,6 +465,11 @@ Create Model: Import Job Status
         margin-top: 2em;
         padding-top: 2em;
         border-top: 1px solid #ccc;
+        .pull-left {
+            button {
+                margin-right: 10px;
+            }
+        }
     }
 }
 
