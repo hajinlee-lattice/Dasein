@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.List;
 

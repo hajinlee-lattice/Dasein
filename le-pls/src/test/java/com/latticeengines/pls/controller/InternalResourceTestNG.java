@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
