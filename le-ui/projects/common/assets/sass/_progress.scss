@@ -131,150 +131,167 @@ Wizard Steps
 /* Pure CSS
 ================ */
 .wizard {
-  list-style-type: none;
-  list-style-position: inside;
-  margin: 0;
-  padding: 0;
-  li {
-    display: inline-block;
-    position: relative;  
-    min-width: 100px;
-    padding: 0 20px;
-    margin-right: 20px;
-    &:after, &:before, &:last-child {
-    	background: #fff;
-    	border-color: #959595;
-    	border-style: solid;
-    	border-width: 1px;
-    }
-    &:after, &:before {
-	  display: block;
-	  content: '';
-	  position: absolute;
-    }
-    &:after {
-	  top: -1px;
-	  left: -15px;
-	  right: 0;
-	  height: calc(50% - -1px);
-	  transform: skewX(45deg);
-	  border-bottom: 0;
+	list-style-type: none;
+	list-style-position: inside;
+	margin: 0;
+	padding: 0;
+	li {
+		display: block;
+		margin-bottom: 20px;
 	}
-	&:before {
-	  left: -15px;
-	  right: 0;
-	  bottom: -1px;
-	  height: calc(50% - -1px);
-	  transform: skewX(-45deg);
-	  border-top: 0;
-	}
-	&:first-child {
-		position: relative;
-		background: #fff;
-		border: #959595 solid 1px;
-		top: 1px;
-		&:after, &:before {
-			left: 100%;
-			transform: none;
-			top: 50%;
-			border: solid transparent;
-			content: " ";
-			height: 0;
-			width: 0;
-			position: absolute;
-			pointer-events: none;
-		}
-		&:after {
-			border-color: rgba(255, 255, 255, 0);
-			border-left-color: #fff;
-			border-width: 35px;
-			margin-top: -35px;
-			background: none;
-		}
-		&:before {
-			border-color: rgba(149, 149, 149, 0);
-			border-left-color: #959595;
-			border-width: 36px;
-			margin-top: -36px;
-			background: transparent;
-		}
+	@include media(">large") {
+		li {
+			display: inline-block;
+			position: relative;  
+			min-width: 100px;
+			padding: 0 20px;
+			margin-right: 20px;
+			&:after, &:before, &:last-child {
+				background: #fff;
+				border-color: #959595;
+				border-style: solid;
+				border-width: 1px;
+			}
+			&:after, &:before {
+			  display: block;
+			  content: '';
+			  position: absolute;
+			}
+			&:after {
+			  top: -1px;
+			  left: -15px;
+			  right: 0;
+			  height: calc(50% - -1px);
+			  transform: skewX(45deg);
+			  border-bottom: 0;
+			}
+			&:before {
+			  left: -15px;
+			  right: 0;
+			  bottom: -1px;
+			  height: calc(50% - -1px);
+			  transform: skewX(-45deg);
+			  border-top: 0;
+			}
+			&:first-child {
+				position: relative;
+				background: #fff;
+				border: #959595 solid 1px;
+				top: 1px;
+				&:after, &:before {
+					left: 100%;
+					transform: none;
+					top: 50%;
+					border: solid transparent;
+					content: " ";
+					height: 0;
+					width: 0;
+					position: absolute;
+					pointer-events: none;
+				}
+				&:after {
+					border-color: rgba(255, 255, 255, 0);
+					border-left-color: #fff;
+					border-width: 35px;
+					margin-top: -35px;
+					background: none;
+				}
+				&:before {
+					border-color: rgba(149, 149, 149, 0);
+					border-left-color: #959595;
+					border-width: 36px;
+					margin-top: -36px;
+					background: transparent;
+				}
 
-	}
-	&:nth-child(2) {
-		margin-left: 17px;
-	}
-	&:last-child {
-		border-left: 0;
-		&:after, &:before {
-			border-right: 0;
-			right: 20px;   
+			}
+			&:nth-child(2) {
+				margin-left: 17px;
+			}
+			&:last-child {
+				border-left: 0;
+				&:after, &:before {
+					border-right: 0;
+					right: 20px;   
+				}
+			}
+			&.success {
+				div > span {
+					padding-top: 16px;
+				}
+			}
+			&.success {
+				&:after, &:before, &:last-child {
+			    	border-color: #82c460;
+			    }
+				&:first-child {
+					border: #82c460 solid 1px;
+					&:before {
+						border-color: rgba(130, 196, 96, 0);
+						border-left-color: #82c460;
+					}
+					&:after {
+						border-color: rgba(255, 255, 255, 0);
+						border-left-color: #fff;
+					}
+				}
+			}
+			&.error {
+				&:after, &:before, &:last-child {
+			    	border-color: #ca2b2b;
+			    }
+				&:first-child {
+					border: #ca2b2b solid 1px;
+					&:before {
+						border-color: rgba(202, 43, 43, 0);
+						border-left-color: #ca2b2b;
+					}
+					&:after {
+						border-color: rgba(255, 255, 255, 0);
+						border-left-color: #fff;
+					}
+				}
+			}
+			&.current {
+				&:after, &:before, &:last-child {
+			    	border-color: #235cff;
+			    }
+				&:first-child {
+					border: #235cff solid 1px;
+					&:before {
+						border-color: rgba(35, 92, 255, 0);
+						border-left-color: #235cff;
+					}
+					&:after {
+						border-color: rgba(255, 255, 255, 0);
+						border-left-color: #fff;
+					}
+				}
+			}
+			p {
+				margin-bottom: -5px;
+			}
+			div {
+				position: relative;
+				z-index: 10;
+				& > span {
+					padding: 25px 22px 8px 0px;
+					min-height: 70px;
+					&:first-child {
+						float: left;
+					}
+					&:last-child {
+						float: right;
+						padding-top: 25px;
+						padding-right: 10px;
+					}
+					.fa-exclamation-triangle {
+						color: #ca2b2b;
+					}
+				}
+			}
 		}
 	}
-    &.success, &.error, &.current {
-    	div > span {
-    		padding-top: 16px;
-    	}
-    }
-    &.success {
-    	&:after, &:before, &:last-child {
-	    	border-color: #82c460;
-	    }
-    	&:first-child {
-    		border: #82c460 solid 1px;
-    		&:before {
-				border-color: rgba(130, 196, 96, 0);
-				border-left-color: #82c460;
-    		}
-    		&:after {
-				border-color: rgba(255, 255, 255, 0);
-				border-left-color: #fff;
-			}
-    	}
-    }
-    &.error {
-    	&:after, &:before, &:last-child {
-	    	border-color: #ca2b2b;
-	    }
-		&:first-child {
-			border: #ca2b2b solid 1px;
-    		&:before {
-				border-color: rgba(202, 43, 43, 0);
-				border-left-color: #ca2b2b;
-    		}
-    		&:after {
-				border-color: rgba(255, 255, 255, 0);
-				border-left-color: #fff;
-			}
-		}
-    }
-    &.current {
-    	&:after, &:before, &:last-child {
-	    	border-color: #235cff;
-	    }
-    	&:first-child {
-    		border: #235cff solid 1px;
-    		&:before {
-				border-color: rgba(35, 92, 255, 0);
-				border-left-color: #235cff;
-    		}
-    		&:after {
-				border-color: rgba(255, 255, 255, 0);
-				border-left-color: #fff;
-			}
-    	}
-    }
-	p {
-		margin-bottom: -5px;
-	}
-    div {
-		position: relative;
-		z-index: 10;
-		& > span {
-			padding: 25px 22px 8px 0px;
-			min-height: 70px;
-		}
-    }
-  }
 }
 
 
@@ -395,47 +412,4 @@ Wizard Steps
 // 			}
 // 		}
 // 	}
-// }
-
-
-
-
-
-/* Pure CSS
-1. Using pure CSS. 
-2. No border support. 
-3. Transparent space in between supported, but with pixelized diagonals. 
-4. This example is unstyled. 
-================================= */
-// .wizard {
-//   display:table;
-//   overflow:hidden;
-//   white-space:nowrap;
-//   font-size: 18px;
-// }
-// .wizard li {
-//   display:inline-block;
-//   margin-right: -18px;
-//   line-height: 1.2em;
-//   padding: 20px 60px;
-//   background:linear-gradient(70deg, transparent  1em, lightgray 1em, lightgray 50%, transparent 50%) top  left no-repeat,
-//     linear-gradient(-110deg, transparent 1em, lightgray 1em, lightgray 55%, transparent 55%) top   no-repeat,
-//     linear-gradient(-70deg, transparent  1em, lightgray 1em, lightgray 50%, transparent 50%) bottom  left no-repeat,
-//     linear-gradient(110deg, transparent 1em, lightgray 1em, lightgray 55%, transparent 55%) bottom   no-repeat;
-//   background-size:100% 51.5% ;
-  
-// }
-// .wizard li.active, .wizard li:hover {
-//    background:linear-gradient(70deg, transparent  1em, #FF0000 1em, #FF0000 50%, transparent 50%) top  left no-repeat,
-//     linear-gradient(-110deg, transparent 1em, #FF0000 1em, #FF0000 55%, transparent 55%) top   no-repeat,
-//     linear-gradient(-70deg, transparent  1em, #FF0000 1em, #FF0000 50%, transparent 50%) bottom  left no-repeat,
-//     linear-gradient(110deg, transparent 1em, #FF0000 1em, #FF0000 55%, transparent 55%) bottom   no-repeat;
-//   background-size:100% 51.5% ;
-//   }
-// .wizard li.active a {
-//   text-decoration:none;
-//   transition:0.2s;
-// }
-// .wizard li.active a, .wizard li:hover a {  
-//   color:white;  
 // }
