@@ -61,8 +61,10 @@ angular.module('lp.jobs', [
     };
 
     function getAllJobs(use_cache) {
+        $scope.loadingJobs = true;
         JobsStore.getJobs(use_cache, modelId).then(function(result) {
             $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
+            $scope.loadingJobs = false;
         });
     }
     

@@ -68,8 +68,11 @@
                     cancelling="cancelling"
                     class="job-td-row ngAnimate">
                 </div>
-                <div data-ng-show="(header.filter.filtered | filter: query).length == 0">
+                <div data-ng-show="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
                     There are no jobs to show at the moment
+                </div>
+                <div data-ng-show="loadingJobs">
+                    Loading...
                 </div>
             </div>
         </div>
