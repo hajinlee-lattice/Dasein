@@ -190,14 +190,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected Node addSource(String sourceTableName) {
         DataFlowContext ctx = getDataFlowCtx();
         @SuppressWarnings("unchecked")
-        Map<String, Table> sourceTables = ctx.getProperty("SOURCETABLES", Map.class);
-        Table sourceTable = sourceTables.get(sourceTableName);
+        Map sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
+        Table sourceTable = (Table)sourceTables.get(sourceTableName);
         if (sourceTable == null) {
             throw new RuntimeException(String.format("Could not find source with name %s", sourceTableName));
         }
         validateTableForSource(sourceTable);
 
-        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
 
         List<Extract> extracts = filterExtracts(sourceTable.getName(), sourceTable.getExtracts());
 
@@ -297,7 +297,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected Table getSourceMetadata(String sourceName) {
         DataFlowContext ctx = getDataFlowCtx();
         @SuppressWarnings("unchecked")
-        Map<String, Table> sourceTables = ctx.getProperty("SOURCETABLES", Map.class);
+        Map<String, Table> sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
         Table retrieved = sourceTables.get(sourceName);
         if (retrieved == null) {
             throw new RuntimeException(String.format("%s is not a valid source", sourceName));
@@ -411,7 +411,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private Configuration getConfig() {
         DataFlowContext ctx = getDataFlowCtx();
-        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         if (config == null) {
             config = new Configuration();
         }
@@ -695,7 +695,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe retain = new Retain(pm.getKey(), DataFlowUtils.convertToFields(outputFields.getFields()));
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        fm = DataFlowUtils.retainFields(outputFields, fm);
+        fm = DataFlowUtils.retainOnlyTheseFields(outputFields, fm);
         return register(retain, fm);
     }
 
@@ -797,27 +797,32 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.get(identifier).setValue(fms);
     }
 
+    public FieldMetadata getMetadata(String identifier, String fieldName) {
+        List<FieldMetadata> metadata = getMetadata(identifier);
+        Map<String, FieldMetadata> map = DataFlowUtils.getFieldMetadataMap(metadata);
+        return map.get(fieldName);
+    }
+
     @Override
+    @SuppressWarnings("unchecked")
     public Table runFlow(DataFlowContext dataFlowCtx, String artifactVersion) {
         reset();
         setDataFlowCtx(dataFlowCtx);
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> sourcePaths = dataFlowCtx.getProperty("SOURCES", Map.class);
-        @SuppressWarnings("unchecked")
-        Map<String, Table> sourceTables = dataFlowCtx.getProperty("SOURCETABLES", Map.class);
-        String flowName = dataFlowCtx.getProperty("FLOWNAME", String.class);
-        String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
-        Properties jobProperties = dataFlowCtx.getProperty("JOBPROPERTIES", Properties.class);
-        String engineType = dataFlowCtx.getProperty("ENGINE", String.class);
+        Map sourcePaths = dataFlowCtx.getProperty(DataFlowProperty.SOURCES, Map.class);
+        Map sourceTables = dataFlowCtx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
+        String flowName = dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class);
+        String targetPath = dataFlowCtx.getProperty(DataFlowProperty.TARGETPATH, String.class);
+        Properties jobProperties = dataFlowCtx.getProperty(DataFlowProperty.JOBPROPERTIES, Properties.class);
+        String engineType = dataFlowCtx.getProperty(DataFlowProperty.ENGINE, String.class);
         ExecutionEngine engine = ExecutionEngine.get(engineType);
-        DataFlowParameters parameters = dataFlowCtx.getProperty("PARAMETERS", DataFlowParameters.class);
+        DataFlowParameters parameters = dataFlowCtx.getProperty(DataFlowProperty.PARAMETERS, DataFlowParameters.class);
 
         String lastOperator = null;
         if (sourceTables != null) {
             lastOperator = constructFlowDefinition(parameters).getIdentifier();
         } else {
-            lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
+            lastOperator = constructFlowDefinition(dataFlowCtx, (Map<String, String>)sourcePaths);
         }
         engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
 
@@ -831,7 +836,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
         DataFlowContext ctx = getDataFlowCtx();
-        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         Properties properties = new Properties();
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
@@ -870,7 +875,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         flow.addListener(dataFlowListener);
         flow.addStepListener(dataFlowStepListener);
         flow.complete();
-        return getTableMetadata(dataFlowCtx.getProperty("TARGETTABLENAME", String.class), //
+        return getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
                 targetPath, //
                 pipesAndOutputSchemas.get(lastOperator).getValue());
     }
@@ -878,8 +883,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     private Tap<?, ?, ?> createCheckpointSink(String name) {
         DataFlowContext ctx = getDataFlowCtx();
         String targetPath = String.format("/tmp/checkpoints/%s/%s/%s", //
-                ctx.getProperty("CUSTOMER", String.class), //
-                ctx.getProperty("FLOWNAME", String.class), //
+                ctx.getProperty(DataFlowProperty.CUSTOMER, String.class), //
+                ctx.getProperty(DataFlowProperty.FLOWNAME, String.class), //
                 name);
         targetPath = DataFlowUtils.getLocationPrefixedPath(this, targetPath);
         return new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
@@ -892,7 +897,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private Tap<?, ?, ?> createSink(String lastOperator, String targetPath) {
         DataFlowContext context = getDataFlowCtx();
-        String flowName = context.getProperty("FLOWNAME", String.class);
+        String flowName = context.getProperty(DataFlowProperty.FLOWNAME, String.class);
         Schema schema = getSchema(flowName, lastOperator, context);
         AvroScheme scheme = new AvroScheme(schema);
         if (enforceGlobalOrdering()) {

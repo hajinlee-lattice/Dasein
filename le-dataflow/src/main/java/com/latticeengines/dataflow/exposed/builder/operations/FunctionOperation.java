@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,62 +18,61 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class FunctionOperation extends Operation {
 
-    public FunctionOperation(Input prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
+    public FunctionOperation(Input prior, String expression, FieldList sourceFields, FieldMetadata targetField) {
         ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
                 expression, //
-                fieldsToApply.getFields(), //
-                DataFlowUtils.getTypes(fieldsToApply.getFieldsAsList(), prior.metadata));
+                sourceFields.getFields(), //
+                DataFlowUtils.getTypes(sourceFields.getFieldsAsList(), prior.metadata));
 
-        init(prior, function, fieldsToApply, Collections.singletonList(targetField), null);
+        init(prior, function, sourceFields, Collections.singletonList(targetField), null);
     }
 
-
-    public FunctionOperation(Input prior, String expression, FieldList fieldsToApply, FieldMetadata targetField,
-                             FieldList outputFields) {
+    public FunctionOperation(Input prior, String expression, FieldList sourceFields, FieldMetadata targetField,
+            FieldList outputFields) {
         ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
                 expression, //
-                fieldsToApply.getFields(), //
-                DataFlowUtils.getTypes(fieldsToApply.getFieldsAsList(), prior.metadata));
+                sourceFields.getFields(), //
+                DataFlowUtils.getTypes(sourceFields.getFieldsAsList(), prior.metadata));
 
-        init(prior, function, fieldsToApply, Collections.singletonList(targetField), outputFields);
+        init(prior, function, sourceFields, Collections.singletonList(targetField), outputFields);
     }
 
-    public FunctionOperation(Input prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        init(prior, function, fieldsToApply, Collections.singletonList(targetField), null);
+    public FunctionOperation(Input prior, Function<?> function, FieldList sourceFields, FieldMetadata targetField) {
+        init(prior, function, sourceFields, Collections.singletonList(targetField), null);
     }
 
-    public FunctionOperation(Input prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField,
-                             FieldList outputFields) {
-        init(prior, function, fieldsToApply, Collections.singletonList(targetField), outputFields);
+    public FunctionOperation(Input prior, Function<?> function, FieldList sourceFields, FieldMetadata targetField,
+            FieldList outputFields) {
+        init(prior, function, sourceFields, Collections.singletonList(targetField), outputFields);
     }
 
-    public FunctionOperation(Input prior, Function<?> function, FieldList fieldsToApply,
-                             List<FieldMetadata> targetFields, FieldList outputFields) {
-        init(prior, function, fieldsToApply, targetFields, outputFields);
+    public FunctionOperation(Input prior, Function<?> function, FieldList sourceFields,
+            List<FieldMetadata> targetFields, FieldList outputFields) {
+        init(prior, function, sourceFields, targetFields, outputFields);
     }
 
-    private void init(Input prior, Function<?> function, FieldList fieldsToApply,
-                      List<FieldMetadata> targetFields, FieldList outputFields) {
+    private void init(Input prior, Function<?> function, FieldList sourceFields, List<FieldMetadata> targetFields,
+            FieldList outputFields) {
         Fields fieldStrategy = Fields.ALL;
 
         List<FieldMetadata> fm = Lists.newArrayList(prior.metadata);
 
-        if (fieldsToApply.getFields().length == 1 && targetFields.size() == 1
-                && fieldsToApply.getFields()[0].equals(targetFields.get(0).getFieldName())) {
+        if (sourceFields.getFields().length == 1 && targetFields.size() == 1
+                && sourceFields.getFields()[0].equals(targetFields.get(0).getFieldName())) {
             fieldStrategy = Fields.REPLACE;
         }
 
         if (outputFields != null) {
             fieldStrategy = DataFlowUtils.convertToFields(outputFields.getFields());
         }
-        Pipe each = new Each(prior.pipe, DataFlowUtils.convertToFields(fieldsToApply.getFieldsAsList()), function,
+        Pipe each = new Each(prior.pipe, DataFlowUtils.convertToFields(sourceFields.getFieldsAsList()), function,
                 fieldStrategy);
 
         if (fieldStrategy != Fields.REPLACE) {
             for (FieldMetadata targetField : targetFields) {
                 fm.add(targetField);
             }
-            fm = DataFlowUtils.retainFields(outputFields, fm);
+            fm = DataFlowUtils.retainOnlyTheseFields(outputFields, fm);
         } else {
             Map<String, FieldMetadata> nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(fm);
             for (FieldMetadata targetField : targetFields) {
@@ -90,8 +90,24 @@ public class FunctionOperation extends Operation {
             }
         }
 
+        addAncestry(fm, targetFields, sourceFields);
+
         this.pipe = each;
         this.metadata = fm;
     }
 
+    private void addAncestry(List<FieldMetadata> fm, List<FieldMetadata> targetFields, FieldList sourceFields) {
+        Map<String, FieldMetadata> map = DataFlowUtils.getFieldMetadataMap(fm);
+        List<FieldMetadata> sourceFieldMetadata = new ArrayList<>();
+        for (String field : sourceFields.getFields()) {
+            FieldMetadata metadata = map.get(field);
+            if (metadata != null) {
+                sourceFieldMetadata.add(metadata);
+            }
+        }
+
+        for (FieldMetadata target : targetFields) {
+            target.addAncestors(sourceFieldMetadata);
+        }
+    }
 }

@@ -106,7 +106,7 @@ public class DataFlowUtils {
         return types;
     }
 
-    public static List<FieldMetadata> retainFields(FieldList outputFields, List<FieldMetadata> fm) {
+    public static List<FieldMetadata> retainOnlyTheseFields(FieldList outputFields, List<FieldMetadata> fm) {
         if (outputFields != null) {
             List<FieldMetadata> newFieldMetadata = new ArrayList<>();
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);

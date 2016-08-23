@@ -63,11 +63,10 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
                 }
                 String placeholder = matcher.group(2);
                 String replacement = resolvePlaceholder(placeholder, props, springSystemPropertiesMode);
-                if (replacement != null) {
-                    value = matcher.replaceFirst(replacement);
-                } else {
-                    log.warn(String.format("Replacement for placeholder with key %s is null!", placeholder));
+                if (replacement == null) {
+                    replacement = "";
                 }
+                value = matcher.replaceFirst(replacement);
                 log.debug(String.format("%s: %s", key, value));
             }
             props.put(key, value);

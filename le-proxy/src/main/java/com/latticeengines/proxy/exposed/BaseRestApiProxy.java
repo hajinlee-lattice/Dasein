@@ -154,13 +154,14 @@ public abstract class BaseRestApiProxy {
         return constructUrl(null);
     }
 
-    protected String constructUrl(Object path, Object... urlVariables) {
+    protected String constructUrl(Object path, Object... variables) {
         if (hostport == null || hostport.equals("")) {
             throw new NullPointerException("hostport must be set");
         }
+
         String end = rootpath;
         if (path != null) {
-            String expandedPath = new UriTemplate(path.toString()).expand(urlVariables).toString();
+            String expandedPath = new UriTemplate(path.toString()).expand(variables).toString();
             end = combine(rootpath, expandedPath);
         }
         return combine(hostport, end);

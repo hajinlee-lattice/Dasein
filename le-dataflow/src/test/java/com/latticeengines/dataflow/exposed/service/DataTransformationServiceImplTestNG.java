@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,9 +21,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -109,6 +110,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         Map<String, Table> sources = new HashMap<>();
         sources.put("Lead", MetadataConverter.getTable(config, lead));
         sources.put("Opportunity", MetadataConverter.getTable(config, opportunity));
+        sources.get("Lead").getAttribute("Email").setApprovedUsage(ApprovedUsage.MODEL);
 
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
@@ -120,6 +122,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, true);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
 
         verifyMetadata(table, "/tmp/EventTable");
@@ -199,6 +202,8 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
+
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
     }
@@ -219,6 +224,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
 
         boolean exception = false;
         try {

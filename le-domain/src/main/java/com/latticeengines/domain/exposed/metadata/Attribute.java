@@ -283,17 +283,21 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     private void setListPropertyFromString(String key, String value) {
         Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.matches()) {
-            String contents = matcher.group(1);
-            if (contents.isEmpty()) {
-                setPropertyValue(key, Lists.newArrayList());
-            } else {
-                String[] array = contents.split(",");
-                for (int i = 0; i < array.length; ++i) {
-                    array[i] = array[i].trim();
+        if (value != null) {
+            Matcher matcher = pattern.matcher(value);
+            if (matcher.matches()) {
+                String contents = matcher.group(1);
+                if (contents.isEmpty()) {
+                    setPropertyValue(key, Lists.newArrayList());
+                } else {
+                    String[] array = contents.split(",");
+                    for (int i = 0; i < array.length; ++i) {
+                        array[i] = array[i].trim();
+                    }
+                    setPropertyValue(key, Arrays.asList(array));
                 }
-                setPropertyValue(key, Arrays.asList(array));
+            } else {
+                setPropertyValue(key, Arrays.asList(value));
             }
         } else {
             setPropertyValue(key, Arrays.asList(value));

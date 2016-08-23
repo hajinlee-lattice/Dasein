@@ -48,6 +48,14 @@ public class BaseContext {
         return value;
     }
 
+    public <T> T getProperty(String propertyName, Class<T> propertyValueClass, T dflt) {
+        T value = getProperty(propertyName, propertyValueClass);
+        if (value == null) {
+            return dflt;
+        }
+        return value;
+    }
+
     public Set<Map.Entry<String, Object>> getEntries() {
         return properties.entrySet();
     }

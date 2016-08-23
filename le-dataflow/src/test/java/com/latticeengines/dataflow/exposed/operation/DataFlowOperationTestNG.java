@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,9 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
@@ -511,6 +515,26 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         for (GenericRecord record : output) {
             Assert.assertNotNull(record.get(definition.output));
         }
+    }
+
+    @Test(groups = "functional")
+    public void testTransformCompanyNameLengthCascadeMetadata() throws Exception {
+        final TransformDefinition definition = TransformationPipeline.stdLengthCompanyName;
+        Table table = execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node lead = addSource("Lead2");
+                lead.getSchema("CompanyName").setPropertyValue("ApprovedUsage",
+                        Collections.singletonList(ApprovedUsage.NONE).toString());
+                return lead.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
+            }
+        });
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record : output) {
+            Assert.assertNotNull(record.get(definition.output));
+        }
+        Attribute attribute = table.getAttribute("CompanyName_Length");
+        Assert.assertEquals(attribute.getApprovedUsage().get(0), ApprovedUsage.NONE.toString());
     }
 
     @Test(groups = "functional")

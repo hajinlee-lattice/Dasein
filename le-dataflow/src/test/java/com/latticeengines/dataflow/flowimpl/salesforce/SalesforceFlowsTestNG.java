@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -92,6 +92,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 
@@ -111,7 +112,8 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "EventTable");
         ctx.setProperty(DataFlowProperty.FLOWNAME, "CreateFinalEventTable");
 
-        ctx.setProperty(DataFlowProperty.EVENTDEFNEXPR, "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
+        ctx.setProperty(DataFlowProperty.EVENTDEFNEXPR,
+                "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
         ctx.setProperty(DataFlowProperty.EVENTDEFNCOLS, new String[] { "StageName" });
         ctx.setProperty(DataFlowProperty.APPLYMETADATAPRUNING, true);
 

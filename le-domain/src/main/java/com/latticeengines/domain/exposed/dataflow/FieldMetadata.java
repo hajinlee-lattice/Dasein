@@ -1,10 +1,16 @@
 package com.latticeengines.domain.exposed.dataflow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 
@@ -15,6 +21,8 @@ public class FieldMetadata {
     private Schema.Field avroField;
     private Map<String, String> properties = new HashMap<>();
     private boolean nullable = true;
+    private List<FieldMetadata> ancestors = new ArrayList<>();
+    private String tableName;
 
     public FieldMetadata(FieldMetadata fm) {
         this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties());
@@ -97,8 +105,45 @@ public class FieldMetadata {
         this.nullable = nullable;
     }
 
+    public void addAncestors(List<FieldMetadata> ancestors) {
+        this.ancestors.addAll(ancestors);
+        eliminateDuplicateAncestors();
+    }
+
+    public void addAncestor(FieldMetadata field) {
+        ancestors.add(field);
+        eliminateDuplicateAncestors();
+    }
+
+    public List<FieldMetadata> getImmediateAncestors() {
+        return ancestors;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     @Override
     public String toString() {
         return fieldName;
+    }
+
+    private void eliminateDuplicateAncestors() {
+        Set<Pair<String, String>> set = new HashSet<>();
+
+        ListIterator<FieldMetadata> iter = ancestors.listIterator();
+        while (iter.hasNext()) {
+            FieldMetadata metadata = iter.next();
+            if (metadata.getTableName() != null) {
+                Pair<String, String> pair = new ImmutablePair<>(metadata.getFieldName(), metadata.getTableName());
+                if (set.contains(pair)) {
+                    iter.remove();
+                }
+            }
+        }
     }
 }

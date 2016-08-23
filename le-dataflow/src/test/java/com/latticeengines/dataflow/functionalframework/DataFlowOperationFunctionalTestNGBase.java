@@ -94,10 +94,10 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     protected List<GenericRecord> readOutput() {
         return readOutput(TARGET_PATH);
     }
+
     protected List<GenericRecord> readOutput(String targetPath) {
         return AvroUtils.getDataFromGlob(configuration, targetPath + "/*.avro");
     }
-
 
     protected List<GenericRecord> readInput(String source) {
         Map<String, String> paths = getSourcePaths();
@@ -109,11 +109,11 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         throw new RuntimeException(String.format("Could not find source with name %s", source));
     }
 
-    protected void execute(DataFlowBuilder builder) {
-        execute(builder, TARGET_PATH);
+    protected Table execute(DataFlowBuilder builder) {
+        return execute(builder, TARGET_PATH);
     }
 
-    protected void execute(DataFlowBuilder builder, String tagetPath) {
+    protected Table execute(DataFlowBuilder builder, String tagetPath) {
         builder.setLocal(LOCAL);
 
         DataFlowContext ctx = new DataFlowContext();
@@ -126,7 +126,8 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
         ctx.setProperty(DataFlowProperty.ENGINE, "MR");
-        dataTransformationService.executeNamedTransformation(ctx, builder);
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
+        return dataTransformationService.executeNamedTransformation(ctx, builder);
     }
 
     protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {

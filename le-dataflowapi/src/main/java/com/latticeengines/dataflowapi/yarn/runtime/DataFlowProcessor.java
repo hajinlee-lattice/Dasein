@@ -108,6 +108,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
+        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
 
         String property = String.format("dataflowapi.flow.%s.debug", dataFlowConfig.getDataFlowBeanName());
         String debugStr = PropertyUtils.getProperty(property);

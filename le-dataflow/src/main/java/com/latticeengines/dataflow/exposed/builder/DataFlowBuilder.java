@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -93,8 +94,8 @@ public abstract class DataFlowBuilder {
     protected Schema createSchema(String flowName, List<FieldMetadata> fieldMetadata, DataFlowContext dataFlowCtx) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record("EventTable");
 
-        if (dataFlowCtx.containsProperty("RECORDNAME")) {
-            recordBuilder = SchemaBuilder.record(dataFlowCtx.getProperty("RECORDNAME", String.class));
+        if (dataFlowCtx.containsProperty(DataFlowProperty.RECORDNAME)) {
+            recordBuilder = SchemaBuilder.record(dataFlowCtx.getProperty(DataFlowProperty.RECORDNAME, String.class));
         }
 
         recordBuilder = recordBuilder.prop("uuid", UUID.randomUUID().toString());
@@ -106,7 +107,8 @@ public abstract class DataFlowBuilder {
 
             Map<String, String> props = requiredProps.getValue();
 
-            if (dataFlowCtx != null && dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
+            if (dataFlowCtx != null
+                    && dataFlowCtx.getProperty(DataFlowProperty.APPLYMETADATAPRUNING, Boolean.class) != null) {
                 String logicalType = props.get("logicalType");
                 if (logicalType != null && //
                         (logicalType.equals(LogicalDataType.InternalId.toString()) || //
@@ -169,6 +171,7 @@ public abstract class DataFlowBuilder {
                 }
             }
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+            fm.setTableName(table.getName());
 
             // Merge in properties from Attribute on the Table
             Attribute attribute = table.getAttribute(field.name());
@@ -223,6 +226,11 @@ public abstract class DataFlowBuilder {
 
     // Conversion to Table
     protected Table getTableMetadata(String tableName, String targetPath, List<FieldMetadata> metadata) {
+        Boolean cascade = getDataFlowCtx().getProperty(DataFlowProperty.CASCADEMETADATA, Boolean.class, false);
+        if (cascade) {
+            cascadeMetadata(metadata);
+        }
+
         Table table = new Table();
         table.setName(tableName);
         table.setDisplayName(tableName);
@@ -269,4 +277,10 @@ public abstract class DataFlowBuilder {
 
         return table;
     }
+
+    private void cascadeMetadata(List<FieldMetadata> metadata) {
+        MetadataCascade cascade = new MetadataCascade(metadata);
+        cascade.cascade();
+    }
+
 }
