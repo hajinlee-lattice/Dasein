@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
+import com.latticeengines.pls.service.WorkflowJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.pls.service.JobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,34 +25,34 @@ import io.swagger.annotations.ApiOperation;
 public class JobResource {
 
     @Autowired
-    private JobService jobService;
+    private WorkflowJobService workflowJobService;
 
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
     public Job find(@PathVariable String jobId) {
-        return jobService.find(jobId);
+        return workflowJobService.find(jobId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve all jobs")
     public List<Job> findAll() {
-        return jobService.findAll();
+        return workflowJobService.findAll();
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve job from yarn application id")
     public Job findByApplicationId(@PathVariable String applicationId) {
-        return jobService.findByApplicationId(applicationId);
+        return workflowJobService.findByApplicationId(applicationId);
     }
 
     @RequestMapping(value = "/find", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find jobs with the provided job type")
     public List<Job> findAllWithType(@RequestParam("type") String type) {
-        return jobService.findAllWithType(type);
+        return workflowJobService.findAllWithType(type);
     }
 
     @RequestMapping(value = "/{jobId}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -60,7 +60,7 @@ public class JobResource {
     @ApiOperation(value = "Cancel a running job")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public void cancel(@PathVariable String jobId) {
-        jobService.cancel(jobId);
+        workflowJobService.cancel(jobId);
     }
 
     @RequestMapping(value = "/{jobId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -68,6 +68,6 @@ public class JobResource {
     @ApiOperation(value = "Restart a previous job")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public AppSubmission restart(@PathVariable String jobId) {
-        return jobService.restart(jobId);
+        return workflowJobService.restart(jobId);
     }
 }
