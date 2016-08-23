@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -223,24 +222,14 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     }
 
     private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {
-        List<DataRule> defaultRules = getMasterList();
+        List<DataRule> defaultRules = new ArrayList<DataRule>();
 
-        for (DataRule dataRule : defaultRules) {
-            if (dataRule.getName().equals("UniqueValueCountDS")) {
-                dataRule.setEnabled(true);
-                Map<String, String> countUniqueValueRuleProps = new HashMap<>();
-                countUniqueValueRuleProps.put("uniquevaluecountThreshold", String.valueOf(200));
-                dataRule.setProperties(countUniqueValueRuleProps);
-            } else if (dataRule.getName().equals("PopulatedRowCountDS")) {
-                dataRule.setEnabled(true);
-            }
-        }
-
-        log.info("Default rules submitted: " + JsonUtils.serialize(defaultRules));
+        log.info("Do not create any default data rules.");
 
         return defaultRules;
     }
 
+    @SuppressWarnings("unused")
     private List<DataRule> getMasterList() {
         List<String> columnRuleNames = new ArrayList<>();
         List<String> rowRuleNames = new ArrayList<>();
