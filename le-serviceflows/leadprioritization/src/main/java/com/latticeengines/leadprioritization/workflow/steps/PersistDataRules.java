@@ -90,9 +90,8 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
                 .get(COLUMN_RULE_RESULTS);
         Map<String, List<RowRuleResult>> eventToRowResults = (Map<String, List<RowRuleResult>>) executionContext
                 .get(ROW_RULE_RESULTS);
-        if (eventToColumnResults == null || eventToRowResults == null || eventToColumnResults.isEmpty()
-                || eventToRowResults.isEmpty()) {
-            log.warn("COLUMN_RULE_RESULTS or ROW_RULE_RESULTS is empty");
+        if (eventToColumnResults == null || eventToRowResults == null) {
+            log.warn("COLUMN_RULE_RESULTS or ROW_RULE_RESULTS is null");
             return;
         }
         Tenant tenant = tenantEntityMgr.findByTenantId(configuration.getCustomerSpace().toString());

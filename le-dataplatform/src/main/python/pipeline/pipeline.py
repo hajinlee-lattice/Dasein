@@ -99,10 +99,10 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
             logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
             steps.remove(disabledStep)
 
-    for disabledStep in reversed(defaultDisabledSteps):
-        if disabledStep in steps and disabledStep not in enabledSteps:
-            logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
-            steps.remove(disabledStep)
+        for disabledStep in reversed(defaultDisabledSteps):
+            if disabledStep in steps and disabledStep not in enabledSteps:
+                logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
+                steps.remove(disabledStep)
 
     return steps
 
