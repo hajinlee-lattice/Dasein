@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class FabricMessageProducerImpl implements FabricMessageProducer {
@@ -64,6 +65,16 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
     public Future<RecordMetadata> send(String recordType, String id, GenericRecord value) {
 
         GenericRecord key = messageService.buildKey(producerName, recordType, id);
+
+        ProducerRecord<Object, Object> record = new ProducerRecord<Object, Object>(derivedTopic, key, value);
+
+        log.debug("Send Message to " + derivedTopic);
+        return producer.send(record);
+    }
+
+    public Future<RecordMetadata> send(RecordKey recordKey, GenericRecord value) {
+
+        GenericRecord key = messageService.buildKey(recordKey);
 
         ProducerRecord<Object, Object> record = new ProducerRecord<Object, Object>(derivedTopic, key, value);
 

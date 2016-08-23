@@ -38,6 +38,7 @@ import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerI
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
+import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
@@ -85,8 +86,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.topic = builder.topic;
         this.scope = builder.scope;
         this.disabled = false;
-        if (builder.messageService != null) this.messageService = builder.messageService;
-        if (builder.dataService != null) this.dataService = builder.dataService;
+        if (builder.messageService != null)
+            this.messageService = builder.messageService;
+        if (builder.dataService != null)
+            this.dataService = builder.dataService;
     }
 
     @PostConstruct
@@ -117,10 +120,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         dataStore = dataService.constructDataStore(store, repository, recordType, schema);
 
         if (topic != null) {
-            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder().
-                                                         messageService(this.messageService).
-                                                         topic(this.topic).
-                                                         scope(scope));
+            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
+                    .messageService(this.messageService).topic(this.topic).scope(scope));
 
             consumers = new HashMap<>();
         }
@@ -128,14 +129,16 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void create(T entity) {
-        if (disabled) return;
+        if (disabled)
+            return;
         GenericRecord record = entityToRecord(entity);
         dataStore.createRecord(entity.getId(), record);
     }
 
     @Override
     public void batchCreate(List<T> entities) {
-        if (disabled) return;
+        if (disabled)
+            return;
 
         Map<String, GenericRecord> records = new HashMap<>();
         for (T entity : entities) {
@@ -147,35 +150,40 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void update(T entity) {
-        if (disabled) return;
+        if (disabled)
+            return;
         GenericRecord record = entityToRecord(entity);
         dataStore.updateRecord(entity.getId(), record);
     }
 
     @Override
     public void delete(T entity) {
-        if (disabled) return;
+        if (disabled)
+            return;
         GenericRecord record = entityToRecord(entity);
         dataStore.deleteRecord(entity.getId(), record);
     }
 
     @Override
     public T findByKey(T entity) {
-        if (disabled) return null;
+        if (disabled)
+            return null;
         GenericRecord record = dataStore.findRecord(entity.getId());
         return (record == null) ? null : recordToEntity(record);
     }
 
     @Override
     public T findByKey(String id) {
-        if (disabled) return null;
+        if (disabled)
+            return null;
         GenericRecord record = dataStore.findRecord(id);
         return (record == null) ? null : recordToEntity(record);
     }
 
     @Override
     public List<T> batchFindByKey(List<String> ids) {
-        if (disabled) return null;
+        if (disabled)
+            return null;
         Map<String, GenericRecord> records = dataStore.batchFindRecord(ids);
         List<T> entities = new ArrayList<T>();
         for (String id : ids) {
@@ -187,7 +195,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public List<T> findByProperties(Map<String, String> properties) {
-        if (disabled) return null;
+        if (disabled)
+            return null;
         List<GenericRecord> records = dataStore.findRecords(properties);
         List<T> entities = new ArrayList<T>();
         for (GenericRecord record : records) {
@@ -198,7 +207,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void publish(T entity) {
-        if (disabled || (entity == null)) return;
+        if (disabled || (entity == null))
+            return;
         try {
             GenericRecord record = entityToRecord(entity);
             producer.send(recordType, entity.getId(), record);
@@ -208,26 +218,37 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     @Override
+    public void publish(RecordKey recordKey, T entity) {
+        if (disabled || (entity == null))
+            return;
+        try {
+            GenericRecord record = entityToRecord(entity);
+            producer.send(recordKey, record);
+        } catch (Exception e) {
+            log.info("Publish entity failed " + recordType + " " + entity.getId());
+            log.info(e);
+        }
+    }
+
+    @Override
     public void addConsumer(String consumerGroup, FabricEntityProcessor processor, int numThreads) {
-        if (disabled) return;
+        if (disabled)
+            return;
 
         FabricStreamProc streamProc = new BaseFabricEntityStreamProc(recordType, processor);
 
-        FabricMessageConsumer consumer = new SimpleFabricMessageConsumerImpl(new SimpleFabricMessageConsumerImpl.Builder().
-                                                                             messageService(messageService).
-                                                                             group(consumerGroup).
-                                                                             topic(topic).
-                                                                             scope(scope).
-                                                                             processor(streamProc).
-                                                                             numThreads(numThreads));
+        FabricMessageConsumer consumer = new SimpleFabricMessageConsumerImpl(
+                new SimpleFabricMessageConsumerImpl.Builder().messageService(messageService).group(consumerGroup)
+                        .topic(topic).scope(scope).processor(streamProc).numThreads(numThreads));
         consumers.put(consumerGroup, consumer);
         log.info("Add consumer " + consumerGroup + " " + consumer.toString());
     }
 
     @Override
     public void removeConsumer(String consumerGroup, int timeWaits) {
-        if (disabled) return;
-        FabricMessageConsumer consumer =  (FabricMessageConsumer)consumers.get(consumerGroup);
+        if (disabled)
+            return;
+        FabricMessageConsumer consumer = (FabricMessageConsumer) consumers.get(consumerGroup);
         if (consumer != null) {
             log.info("Remove consumer " + consumerGroup + " " + consumer + "\n");
         } else {
@@ -266,7 +287,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             log.error(e);
             return null;
         } finally {
-            try { output.close(); } catch (Exception e) { }
+            try {
+                output.close();
+            } catch (Exception e) {
+            }
         }
 
         return record;
@@ -277,8 +301,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     @SuppressWarnings("unchecked")
-    private Class<T> getTypeParameterClass()
-    {
+    private Class<T> getTypeParameterClass() {
         Type type = getClass().getGenericSuperclass();
         ParameterizedType paramType = (ParameterizedType) type;
         return (Class<T>) paramType.getActualTypeArguments()[0];
@@ -291,7 +314,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         public BaseFabricEntityStreamProc(String recordType, FabricEntityProcessor processor) {
             this.processor = processor;
-            this.recordType = recordType;;
+            this.recordType = recordType;
+            ;
         }
 
         public void processRecord(String type, String id, GenericRecord record) {
@@ -323,11 +347,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             return this;
         }
 
-
         public Builder repository(String repository) {
             this.repository = repository;
             return this;
         }
+
         public Builder recordType(String recordType) {
             this.recordType = recordType;
             return this;

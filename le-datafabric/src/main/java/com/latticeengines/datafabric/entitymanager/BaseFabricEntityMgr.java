@@ -3,6 +3,8 @@ package com.latticeengines.datafabric.entitymanager;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datafabric.RecordKey;
+
 public interface BaseFabricEntityMgr<T> {
 
     void create(T entity);
@@ -23,6 +25,8 @@ public interface BaseFabricEntityMgr<T> {
 
     void publish(T entity);
 
+    void publish(RecordKey recordKey, T entity);
+
     void addConsumer(String processorName, FabricEntityProcessor proc, int threadNumber);
 
     void removeConsumer(String processorName, int waitTime);
@@ -32,5 +36,3 @@ public interface BaseFabricEntityMgr<T> {
     public void init();
 
 }
-
-

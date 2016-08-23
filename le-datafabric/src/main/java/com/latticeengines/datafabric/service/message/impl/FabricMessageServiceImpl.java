@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 import kafka.admin.AdminUtils;
@@ -113,7 +114,22 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         key.put("version", this.version);
         key.put("producer", producer);
         key.put("record", recordType);
-        key.put("id", id);
+        key.put("Id", id);
+        key.put("customerSpace", "");
+
+        return key;
+    }
+
+    public GenericRecord buildKey(RecordKey recordKey) {
+
+        GenericRecord key = new GenericData.Record(msgKeySchema);
+        // use reflection later
+        key.put("id", recordKey.getId());
+        key.put("customerSpace", recordKey.getCustomerSpace());
+        key.put("timeStamp", recordKey.getTimeStamp());
+        key.put("producer", recordKey.getProducer());
+        key.put("record", recordKey.getRecordType());
+        key.put("version", this.version);
 
         return key;
     }
@@ -132,8 +148,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             if (!AdminUtils.topicExists(zkUtils, derivedTopic)) {
                 AdminUtils.createTopic(zkUtils, derivedTopic, numPartitions, numRepls, new Properties(),
                         RackAwareMode.Enforced$.MODULE$);
-                log.info(
-                        "Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
+                log.info("Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
             } else {
                 log.info("Topic exists. name " + topic);
             }
