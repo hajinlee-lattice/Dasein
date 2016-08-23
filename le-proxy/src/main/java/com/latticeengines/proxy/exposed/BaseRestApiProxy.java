@@ -52,8 +52,8 @@ public abstract class BaseRestApiProxy {
             @Override
             public T doWithRetry(RetryContext context) throws RuntimeException {
                 try {
-                    log.info(String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1));
+                    log.info(String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1));
                     return restTemplate.postForObject(url, body, returnValueClazz);
                 } catch (LedpException e) {
                     context.setExhaustedOnly();
@@ -77,8 +77,8 @@ public abstract class BaseRestApiProxy {
             @Override
             public Void doWithRetry(RetryContext context) throws RuntimeException {
                 try {
-                    log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1));
+                    log.info(String.format("Invoking %s by putting to url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1));
                     restTemplate.put(url, body);
                     return null;
                 } catch (LedpException e) {
