@@ -1,6 +1,7 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,9 +43,15 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
     synchronized private void init() {
         if (initialized) return;
 
-        log.info("Initialize dynamo data service with endPoint " + endPoint);
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-        client = new AmazonDynamoDBClient(credentials).withEndpoint(endPoint);
+
+        if (StringUtils.isNotEmpty(endPoint)) {
+            log.info("Initialize dynamo data service with endPoint " + endPoint);
+            client = new AmazonDynamoDBClient().withEndpoint(endPoint);
+        } else  {
+            log.info("Initialize dynamo data service with BasicAWSCredentials");
+            BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+            client = new AmazonDynamoDBClient(credentials);
+        }
 
         initialized = true;
     }

@@ -48,11 +48,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(DynamoDataStoreImpl.class);
 
-    private final String REPO = "_REPO_";
-    private final String RECORD = "_RECORD_";
+    private static final String REPO = "_REPO_";
+    private static final String RECORD = "_RECORD_";
 
     // Desfault attributes for every table
-    private final String ID = "Id";
+    public final String ID = "Id";
     private final String BLOB = "Record";
 
     private String repository;
@@ -88,8 +88,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.putItem(item);
         } catch (Exception e) {
-            log.error("Uable to save record " + tableName + " id " + id);
-            log.error(e.getMessage());
+            log.error("Unable to save record " + tableName + " id " + id, e);
         }
     }
 
@@ -100,8 +99,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.deleteItem(ID, id);
         } catch (Exception e) {
-            log.error("Uable to delete record " + tableName + " id " + id);
-            log.error(e.getMessage());
+            log.error("Unable to delete record " + tableName + " id " + id, e);
         }
     }
 
@@ -113,8 +111,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.updateItem(updateItemSpec);
         } catch (Exception e) {
-            log.error("Uable to update record " + tableName + " id " + id);
-            log.error(e.getMessage());
+            log.error("Unable to update record " + tableName + " id " + id, e);
         }
     }
 
@@ -124,14 +121,13 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         Table table = dynamoDB.getTable(tableName);
         GenericRecord record = null;
         try {
-            Item item = table.getItem("ID", id);
+            Item item = table.getItem(ID, id);
             if (item != null) {
                 ByteBuffer blob = item.getByteBuffer(BLOB);
                 record = jsonToAvro(blob);
             }
         } catch (Exception e) {
-            log.error("Uable to update record " + tableName + " id " + id);
-            log.error(e.getMessage());
+            log.error("Unable to find record " + tableName + " id " + id, e);
         }
         return record;
     }
@@ -159,8 +155,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
              } while (outcome.getUnprocessedItems().size() > 0);
         } catch (Exception e) {
-            log.error("Uable to batch create records " + tableName);
-            log.error(e.getMessage());
+            log.error("Unable to batch create records " + tableName, e);
         }
     }
 
@@ -204,8 +199,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
             } while (!unprocessed.isEmpty());
         } catch (Exception e) {
-            log.error("Uable to batch get records " + tableName);
-            log.error(e.getMessage());
+            log.error("Unable to batch get records " + tableName, e);
         }
         return records;
     }
@@ -229,17 +223,16 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 records.add(record);
             }
         } catch (Exception e) {
-            log.error("Uable to find records " + tableName);
-            log.error(e.getMessage());
+            log.error("Unable to find records " + tableName, e);
         }
 
         return records;
     }
 
     private ByteBuffer avroToJson(GenericRecord record) {
-      
+        Schema schema = record.getSchema();
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
+                DatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
                 JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output);
                 writer.write(record, encoder);
                 encoder.flush();
@@ -252,7 +245,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private GenericRecord jsonToAvro(ByteBuffer json) {
         try {
-            DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
+            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
 
             byte[] bytes = new byte[json.remaining()];
             json.get(bytes, 0, bytes.length);
@@ -269,19 +262,23 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     private String buildTableName() {
+        return buildTableName(repository, recordType);
+    }
+
+    public static String buildTableName(String repository, String recordType) {
         return REPO + repository + RECORD + recordType;
     }
 
     private Item buildItem(String id, GenericRecord record) {
-        Map<String, Object> attrMap = new  HashMap<String, Object>();
+        Map<String, Object> attrMap = new HashMap<>();
 
         attrMap.put(ID, id);
         attrMap.put(BLOB, avroToJson(record));
 
         if (tableIndex != null) {
-            attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()).toString());
+            attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()));
             if (tableIndex.getRangeKeyAttr() != null) {
-                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()).toString());
+                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()));
             }
         }
         return Item.fromMap(attrMap);

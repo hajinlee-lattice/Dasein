@@ -1,5 +1,7 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
+import static com.latticeengines.datafabric.util.RedisUtil.INDEX;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.ParameterizedType;
@@ -13,13 +15,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +38,8 @@ import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerI
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
+import com.latticeengines.domain.exposed.datafabric.FabricEntity;
+import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
@@ -90,7 +92,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     @PostConstruct
     public void init() {
 
-        log.info("Initing Datafabric " + topic);
+        log.info("Initializing Datafabric " + topic);
 
         if (disabled) {
             log.info("Datafabric disabled");
@@ -98,11 +100,16 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
 
         entityClass = getTypeParameterClass();
+
         // get the reflected schema for Entity
-        schema = RedisUtil.getSchema(entityClass);
+        schema = FabricEntityFactory.getSchema(entityClass, recordType);
 
+        // add redis index
+        String redisIndex = RedisUtil.constructIndex(entityClass);
+        schema.addProp(INDEX, redisIndex);
+
+        // add dynamo attributes
         String dynamoProp = DynamoUtil.constructAttributes(entityClass);
-
         if (dynamoProp != null) {
             schema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
@@ -115,7 +122,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                                                          topic(this.topic).
                                                          scope(scope));
 
-            consumers = new HashMap<String, Object>();
+            consumers = new HashMap<>();
         }
     }
 
@@ -130,7 +137,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public void batchCreate(List<T> entities) {
         if (disabled) return;
 
-        Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+        Map<String, GenericRecord> records = new HashMap<>();
         for (T entity : entities) {
             GenericRecord record = entityToRecord(entity);
             records.put(entity.getId(), record);
@@ -196,8 +203,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             GenericRecord record = entityToRecord(entity);
             producer.send(recordType, entity.getId(), record);
         } catch (Exception e) {
-            log.info("Publish entity failed " + recordType + " " + entity.getId());
-            log.info(e);
+            log.info("Publish entity failed " + recordType + " " + entity.getId(), e);
         }
     }
 
@@ -238,6 +244,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private GenericRecord entityToRecord(T entity) {
 
+        if (entity instanceof FabricEntity) {
+            return ((FabricEntity) entity).toAvroRecord(recordType);
+        }
+
         GenericRecord record  = null;
         ReflectDatumWriter<T> writer = new ReflectDatumWriter<T>(schema);
         GenericDatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
@@ -263,30 +273,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     private T recordToEntity(GenericRecord record) {
-
-        T entity = null;
-
-        GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
-        ReflectDatumReader<T> reader = new ReflectDatumReader<T>(schema);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        try {
-            Encoder encoder = EncoderFactory.get().directBinaryEncoder(output, null);
-            writer.write(record, encoder);
-            encoder.flush();
-
-            ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
-            Decoder decoder = DecoderFactory.get().directBinaryDecoder(input, null);
-            entity = reader.read(null, decoder);
-        } catch (Exception e) {
-            log.error("Failed to convert entity to generic record");
-            log.error(e);
-            return null;
-        } finally {
-            try { output.close(); } catch (Exception e) { }
-        }
-
-        return entity;
+        return FabricEntityFactory.fromAvroRecord(record, entityClass, schema);
     }
 
     @SuppressWarnings("unchecked")

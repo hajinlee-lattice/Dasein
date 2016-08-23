@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -90,8 +90,8 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
 
     private void initEntities() {
 
-        accounts = new ArrayList<LatticeAccount>();
-        lookups = new ArrayList<AccountLookupEntry>();
+        accounts = new ArrayList<>();
+        lookups = new ArrayList<>();
         for (int i = 0; i < NumOfEntities; i++) {
             String accountId = "FakeAccount" + i;
             String domain = "FakeDomain" + i;
@@ -99,7 +99,7 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
 
             LatticeAccount account = new LatticeAccount();
             account.setId(accountId);
-            Map<String, String> attributes = new HashMap<String, String>();
+            Map<String, Object> attributes = new HashMap<>();
             attributes.put("Domain", domain);
             attributes.put("Duns", duns);
             account.setAttributes(attributes);
@@ -152,7 +152,11 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
         try {
             CSVParser parser = CSVParser.parse(new File(url.getFile()), Charset.forName("UTF-8"), LECSVFormat.format);
             for (CSVRecord csvRecord : parser) {
-                Map<String, String> attributes = csvRecord.toMap();
+                Map<String, String> csvMap = csvRecord.toMap();
+                Map<String, Object> attributes = new HashMap<>();
+                for (Map.Entry<String, String> entry: csvMap.entrySet()) {
+                    attributes.put(entry.getKey(), entry.getValue());
+                }
                 LatticeAccount account = new LatticeAccount();
                 account.setId(csvRecord.get(0));
                 account.setAttributes(attributes);
@@ -209,8 +213,8 @@ public class AccountLookupServiceImplTestNG extends PropDataMatchFunctionalTestN
             if (isMatch) {
                 int index = i * (NumOfEntities / NumOfLookups) + 1;
                 Assert.assertEquals(account.getId(), "FakeAccount" + index);
-                String domain = account.getAttributes().get("Domain");
-                String duns = account.getAttributes().get("Duns");
+                String domain = (String) account.getAttributes().get("Domain");
+                String duns = (String) account.getAttributes().get("Duns");
                 Assert.assertEquals(domain, "FakeDomain" + index);
                 Assert.assertEquals(duns, "FakeDuns" + index);
 
