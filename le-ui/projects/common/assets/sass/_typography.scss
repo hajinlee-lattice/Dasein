@@ -205,6 +205,10 @@ Badges
     white-space: nowrap;
     vertical-align: middle;
     background-color: #e7e7e7;
+    &.gray-badge {
+    	color: #222;
+    	background-color: #e7e7e7;
+    }
     &.green-badge { 
     	background-color: #71bc51;
     	color: #fff;

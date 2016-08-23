@@ -91,7 +91,7 @@ nav.primary-nav {
     top: 0;
     left: 0;
     bottom: 0;
-    z-index: 2; // for tabs to hide left edge of first tab since this used to be position fixed
+    z-index: 20; // for tabs to hide left edge of first tab since this used to be position fixed
     min-height: 100vh; // on page load make sure sidebar is 100% high
     width: 60px;
     min-width: 60px; // protection for IE
@@ -524,7 +524,7 @@ html.no-cssmask {
         }
         ul {
             display: block;
-            z-index: 2;
+            z-index: 20;
 
             margin-top: 0;
             width: 100%;

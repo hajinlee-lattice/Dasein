@@ -3,47 +3,21 @@ var mainApp = angular.module('mainApp', [
     'templates-main',
     'ui.router',
     'ui.bootstrap',
-    /*
-    'pd.navigation'
-    'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.services.ResourceStringsService',
-    'mainApp.core.services.HelpService',
-    'mainApp.login.services.LoginService',
-    'mainApp.config.services.ConfigService',
-    'mainApp.core.controllers.MainViewController',
-    */
-    'mainApp.login.controllers.LoginController'
+
+    'login.frame',
+    'login.form',
+    'login.update',
+    'login.forgot',
+    'login.tenants'
 ])
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     //$locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/form');
 
     $stateProvider
         .state('login', {
             url: '/',
             resolve: {
-                /*
-                WidgetConfig: function($q, ConfigService) {
-                    var deferred = $q.defer();
-
-                    ConfigService.GetWidgetConfigDocument().then(function(result) {
-                        deferred.resolve();
-                    });
-
-                    return deferred.promise;
-                },
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-                    
-                    FeatureFlagService.GetAllFlags().then(function() {
-                        deferred.resolve();
-                    });
-                    
-                    return deferred.promise;
-                },
-                */
                 ResourceStrings: function($q, BrowserStorageUtility, ResourceStringsService) {
                     var deferred = $q.defer(),
                         session = BrowserStorageUtility.getClientSession();
@@ -60,36 +34,65 @@ var mainApp = angular.module('mainApp', [
                     template: ''
                 },
                 "main": {
-                    controller: 'LoginController',
-                    templateUrl: 'app/views/LoginView.html'
+                    resolve: {
+                        LoginDocument: function(BrowserStorageUtility) {
+                            return BrowserStorageUtility.getLoginDocument() || {};
+                        },
+                        ClientSession: function(BrowserStorageUtility) {
+                            return BrowserStorageUtility.getClientSession() || {};
+                        }
+                    },
+                    controller: 'LatticeFrameController',
+                    templateUrl: 'app/login/frame/LatticeFrameView.html'
+                }
+            }
+        })
+        .state('login.form', {
+            url: 'form',
+            views: {
+                "FrameContent": {
+                    controller: 'LoginViewController',
+                    templateUrl: 'app/login/form/LoginFormView.html'
+                }
+            }
+        })
+        .state('login.forgot', {
+            url: 'forgot',
+            views: {
+                "FrameContent": {
+                    controller: 'PasswordForgotController',
+                    templateUrl: 'app/login/forgot/PasswordForgotView.html'
+                }
+            }
+        })
+        .state('login.update', {
+            url: 'update',
+            views: {
+                "FrameContent": {
+                    resolve: {
+                        LoginDocument: function(BrowserStorageUtility) {
+                            return BrowserStorageUtility.getLoginDocument() || {};
+                        }
+                    },
+                    controller: 'PasswordUpdateController',
+                    templateUrl: 'app/login/update/PasswordUpdateView.html'
                 }
             }
         })
         .state('login.tenants', {
-            url: '/tenants',
+            url: 'tenants',
             views: {
-                "header": {
-                    controller: 'MainHeaderController',
-                    templateUrl: 'app/views/MainHeaderView.html'
-                },
-                "main": {
-                    template: 'tenants'
-                }
-            }
-        })
-        .state('login.password.update', {
-            url: '/password/update',
-            views: {
-                "main": {
-                    template: 'password update'
-                }
-            }
-        })
-        .state('login.password.forgot', {
-            url: '/password/forgot',
-            views: {
-                "main": {
-                    template: 'password forgot'
+                "FrameContent": {
+                    resolve: {
+                        LoginDocument: function(BrowserStorageUtility) {
+                            return BrowserStorageUtility.getLoginDocument() || {};
+                        },
+                        TenantList: function(LoginDocument) {
+                            return LoginDocument.Tenants || [];
+                        }
+                    },
+                    controller: 'TenantSelectController',
+                    templateUrl: 'app/login/tenants/TenantSelectView.html'
                 }
             }
         });
@@ -126,5 +129,11 @@ var mainApp = angular.module('mainApp', [
         }
     };
 })
-.controller('MainController', function() {
+.controller('MainController', function($rootScope, $state) {
+    $rootScope.$on('$stateChangeError', 
+        function(event, toState, toParams, fromState, fromParams, error){ 
+                // this is required if you want to prevent the $UrlRouter reverting the URL to the previous valid location
+                event.preventDefault();
+                $state.go('login.form');
+        })
 });

@@ -42,9 +42,18 @@
             border-bottom-right-radius: 1px;
             margin: 0;
             padding-right: 1em;
+            -webkit-transition: none;
+            transition: none;
+            animation: none;
 
             &.open {
                 border-bottom-left-radius: 0;
+                background-color: #222;
+                color: #fff;
+                border-color: #222;
+                -webkit-transition: none;
+                transition: none;
+                animation: none;
             }
 
             span {

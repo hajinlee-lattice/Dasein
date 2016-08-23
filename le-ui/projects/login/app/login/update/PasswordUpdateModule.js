@@ -1,4 +1,4 @@
-angular.module('mainApp.login.controllers.UpdatePasswordController', [
+angular.module('login.update', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.StringUtility',
@@ -7,9 +7,16 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.login.services.LoginService'
 ])
 
-.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, NavUtility, LoginService) {
+.controller('PasswordUpdateController', function (
+    $scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
+    StringUtility, NavUtility, LoginService, LoginDocument, TimestampIntervalUtility
+) {
     angular.element('body').addClass('update-password-body');
+    
     $scope.ResourceUtility = ResourceUtility;
+    $scope.isLoggedInWithTempPassword = LoginDocument.MustChangePassword;
+    $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified);
+
     $scope.oldPassword = null;
     $scope.newPassword = null;
     $scope.confirmPassword = null;
@@ -73,16 +80,8 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     }
     
     $scope.cancelAndLogoutClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-
-        if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
-            clearChangePasswordField();
-            LoginService.Logout();
-        } else {
-            $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
-        }
+        clearChangePasswordField();
+        LoginService.Logout();
     };
     
     function clearChangePasswordField() {

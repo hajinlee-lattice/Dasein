@@ -81,9 +81,8 @@ angular
     }
 
     vm.pivotSelect = function(fileName) {
-        var fileName = vm.sanitize(fileName),
-            artifactName = fileName,
-            pivotFile = vm.pivotFileName = fileName,
+        var artifactName = vm.sanitize(fileName),
+            pivotFile = vm.pivotFileName = artifactName,
             moduleName = vm.moduleName;
 
         vm.pivotUploaded = false;
@@ -142,20 +141,6 @@ angular
         vm.showImportError = false;
         vm.importErrorMsg = "";
     }
-
-    vm.sanitize = function(fileName) {
-        return fileName.replace(/[^A-Za-z0-9_\.]/g,'_');
-    }
-
-    vm.stripExt = function(fileName) {
-        var fnSplit = (fileName || '').split('.');
-
-        if (fnSplit.length > 1) {
-            fnSplit.pop();
-        }
-
-        return fnSplit.join('.');
-    }
     
     vm.clickNext = function() {
         ShowSpinner('Modeling...');
@@ -192,5 +177,19 @@ angular
             $event.stopPropagation();
         }
         CancelJobModal.show(null, {sref:'home.models'});
+    }
+
+    vm.sanitize = function(fileName) {
+        return fileName.replace(/[^A-Za-z0-9_\.]/g,'_');
+    }
+
+    vm.stripExt = function(fileName) {
+        var fnSplit = (fileName || '').split('.');
+
+        if (fnSplit.length > 1) {
+            fnSplit.pop();
+        }
+
+        return fnSplit.join('.');
     }
 });

@@ -83,12 +83,18 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
         return this._getProperty("_sessionDocument", "_sessionDocumentStorageKey");
     };
 
+    this.clearSessionDocument = function (successHandler) {
+        this._setProperty(null, successHandler, "_sessionDocument", "_sessionDocumentStorageKey");
+    };
+
     this.setClientSession = function (data, successHandler) {
-        var availableRightsDictionary = {};
         if (data != null && data.AvailableRights != null) {
+            var availableRightsDictionary = {};
+            
             $.each(data.AvailableRights, function(key, availableRight) {
-                        availableRightsDictionary[availableRight.Key] = availableRight.Value;
-                    });
+                availableRightsDictionary[availableRight.Key] = availableRight.Value;
+            });
+            
             data.availableRightsDictionary= availableRightsDictionary;
         }
 
@@ -97,6 +103,10 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
 
     this.getClientSession = function () {
         return this._getProperty("_clientSession", "_clientSessionStorageKey");
+    };
+
+    this.clearClientSession = function (successHandler) {
+        this._setProperty(null, successHandler, "_clientSession", "_clientSessionStorageKey");
     };
 
     this.setCurrentTab = function (data, successHandler) {

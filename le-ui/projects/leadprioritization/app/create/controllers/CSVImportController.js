@@ -117,7 +117,7 @@ angular
                 .removeClass('is-pristine');
 
             var timestamp = new Date().getTime();
-                artifactName = vm.artifactName = vm.stripExt(fileName),
+                artifactName = vm.artifactName = vm.stripExt(vm.sanitize(fileName)),
                 moduleName = vm.moduleName = artifactName + '_' + timestamp;
         }, 25);
     }
@@ -149,7 +149,8 @@ angular
     }
 
     vm.pivotSelect = function(fileName) {
-        var artifactName = vm.artifactName = vm.stripExt(fileName),
+        var fileName = vm.sanitize(fileName),
+            artifactName = vm.artifactName = vm.stripExt(fileName),
             pivotFile = vm.pivotFileName = fileName,
             endpoint = '/pls/metadatauploads/modules/',
             moduleName = vm.moduleName;
@@ -225,5 +226,9 @@ angular
             $event.stopPropagation();
         }
         CancelJobModal.show(null, {sref:'home.models'});
+    }
+
+    vm.sanitize = function(fileName) {
+        return fileName.replace(/[^A-Za-z0-9_\.]/g,'_');
     }
 });

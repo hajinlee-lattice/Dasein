@@ -18,13 +18,6 @@
     </div>
 
     <div class="table-header">
-        <!--
-        <div class="row">
-            <div class="twelve columns">
-                <h2>Jobs</h2>
-            </div>
-        </div>
-        -->
         <div class="row list-header">
             <div class="pull-left">
                 <menu-filter-by config="header.filter"></menu-filter-by>
@@ -51,14 +44,14 @@
     
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
-            <div class="row panel-heading custom-heading" ng-init="SortProperty = 'timestamp'">
-                <span class="columns two" ng-click="SortProperty = 'timestamp'">Timestamp</span>
-                <span class="columns three" ng-click="SortProperty = 'source'" ng-if="state != 'model'">Model Name</span>
-                <span class="columns two" ng-click="SortProperty = 'source'" ng-if="state == 'model'">File Name</span>
-                <span class="columns two" ng-click="SortProperty = 'jobType'" ng-if="state != 'model'">Job Type</span>
-                <span class="columns two" ng-click="SortProperty = 'status'">Status</span>
+            <div class="row panel-heading custom-heading">
+                <span class="columns two">Timestamp</span>
+                <span class="columns three" ng-if="state != 'model'">Model Name</span>
+                <span class="columns two" ng-if="state == 'model'">File Name</span>
+                <span class="columns two" ng-if="state != 'model'">Job Type</span>
+                <span class="columns two">Status</span>
                 <span class="columns two">&nbsp;</span>
-                <!-- <span class="columns three" ng-click="SortProperty = 'user'">User</span> -->
+                <!-- <span class="columns three">User</span> -->
             </div>
             <div class="jobs-table-content">
                 <div 

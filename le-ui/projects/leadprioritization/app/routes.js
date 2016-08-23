@@ -4,7 +4,7 @@ angular
     $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
-            ev.preventDefault();
+            evt.preventDefault();
             window.open("/login", "_self");
         }
 
@@ -66,6 +66,12 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                ClientSession: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getClientSession();
+                },
+                Tenant: function(ClientSession) {
+                    return ClientSession.Tenant;
                 }
             },
             views: {
@@ -74,10 +80,8 @@ angular
                     templateUrl: 'app/navigation/header/views/MainHeaderView.html'
                 },
                 "navigation": {
-                    controller: function($rootScope, $stateParams, $state, BrowserStorageUtility) {
-                        var tenantName = $stateParams.tenantName,
-                            ClientSession = BrowserStorageUtility.getClientSession(),
-                            Tenant = ClientSession ? ClientSession.Tenant : null;
+                    controller: function($rootScope, $stateParams, $state, Tenant) {
+                        var tenantName = $stateParams.tenantName;
 
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);

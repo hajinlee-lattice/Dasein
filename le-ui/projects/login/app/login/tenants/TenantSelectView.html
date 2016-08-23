@@ -1,0 +1,213 @@
+<style>
+    button.button.icon-button, 
+    a.button.icon-button, 
+    .button.icon-button {
+        padding: 0.6em 0.8em 0.5em .7em;
+        font-size: 15px;
+        line-height: 1em;
+        color: #555555;
+        margin-bottom: 0.2em;
+        border-radius: 3px;
+    }
+    div.pd-pagination {
+        text-align: center;
+        font-size: .9em;
+    }
+    select#tenantSelectionInput {
+        border: 1px solid #ccc;
+        height: 24em;
+        margin-top: .5em;
+    }
+    select#tenantSelectionInput option {
+        padding: 0.5em;
+        cursor: pointer;
+    }
+    select#tenantSelectionInput option:nth-child(odd) {
+        background-color: #f5f5f5;
+    }
+    select#tenantSelectionInput option:hover {
+        background: #26639b;
+        color: #fff;
+    }
+    div#tenantSelectionFormContainer {
+        width: 30em;
+    }
+    input.tenant-selection-search {
+        width: 9em;
+        display: inline;
+        line-height: 1em;
+        border-radius: 3px;
+        border-color: #d0d0d0;
+    }
+    input.tenant-selection-search:focus {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        border-color: #ccc;
+    }
+    div.tenant-select-controls-right {
+        float: right;
+        margin-top: -0.8em;
+    }
+    div.panel-body .columns {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    #tenantSelectionInput {
+        margin: 0;
+    }
+    .panel .panel-heading.custom-heading .columns:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .panel .panel-heading.custom-heading .columns {
+        text-align: center;
+    }
+    .panel .panel-heading.custom-heading {
+        padding: 4px 0;
+    }
+    .panel .panel-body .tenant-date,
+    .panel .panel-body .tenant-version {
+        text-align: center;
+    }
+    .panel .panel-body {
+        overflow: auto;
+        height: 25em;
+        border: 1px solid #d0d0d0;
+        border-top: none;
+        border-bottom-right-radius: 3px;
+        border-bottom-left-radius: 3px;
+    }
+    .tenant-select-list {
+        margin: 0.5em 0 1em;
+    }
+    .tenant-select-list.deactivated {
+    }
+    .panel .panel-body .job-td-row {
+        min-height: 2.2em;
+        padding: 0.333em 0;
+    }
+    .tenant-header {
+        font-size: 14pt;
+    }
+    .tenant-total {
+        float: right;
+    }
+    .tenant-list-item,
+    .tenant-list-item * {
+        transition: none;
+    }
+    .tenant-list-item:hover {
+        background: #65b7e5;
+        cursor: pointer;
+        transition: none;
+        color: #fff;
+    }
+    .tenant-list-item:hover .columns {
+    }
+    .tenant-list-item i {
+        position: absolute;
+    }
+    .tenant-list-item span.badge {
+        margin-top: -3px;
+    }
+    .tenant-list-spinner i.fa-spinner {
+        display: inline-block;
+        margin: 0;
+    }
+    .tenant-list-spinner span {
+        display: block;
+        text-align: center;
+        margin-top: 1em;
+    }
+    .tenant-list-spinner {
+        padding-top: 8em;
+        color: #888;
+    }
+    .tenant-list-spinner,
+    .tenant-list-spinner * {
+        
+    }
+    .button.link-button.close-button {
+        color: #fff;
+        margin-top: -0.7em;
+        margin-right: -0.3em;
+    }
+</style>
+<form class="form form-tenant-select" name="tenant-select-form">
+    <div class="messaging error-messaging" data-ng-show="showTenantError">
+        <button class="button link-button close-button" data-ng-click="showTenantError = false;"><i class="fa fa-times"></i></button>
+        <span><i class="fa fa-exclamation-circle"></i> {{tenantErrorMessage}}</span>
+    </div>
+    <div class="">
+        <h4 class="tenant-header">{{ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
+    </div>
+    <div class="" ng-init="SortDirection = '-'">
+        <div class="tenant-select-controls">
+            <span>Version:</span>
+            <label for="tenantSelection2">
+            <input id="tenantSelection2" type="radio" ng-model="version" value="2.0">
+            2.0</label>&nbsp;
+            <label for="tenantSelection3">
+            <input id="tenantSelection3" type="radio" ng-model="version" value="3.0">
+            3.0</label>
+
+            <div class="tenant-select-controls-right pull-right">
+                <input 
+                        type="text" 
+                        class="form-control tenant-selection-search" 
+                        ng-model="SearchValue"
+                        placeholder="Contains:"
+                        autofocus
+                    />
+                <button 
+                        type="button" 
+                        class="button white-button icon-button" 
+                        ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
+                    >
+                    <span class="fa 
+                            fa-sort-alpha-{{ 
+                                SortDirection == '' 
+                                    ? 'asc' 
+                                    : 'desc' 
+                            }}"
+                        >
+                    </span>
+                </button>
+            </div>
+        </div>
+        <div 
+            class="columns twelve panel panel-default tenant-select-list"
+            ng-class="{ 'deactivated': deactivated }"
+            ng-model="select_value" 
+        >
+            <div class="row panel-heading custom-heading">
+                <div class="columns two" ng-click="sort('UIVersion')">Version</div>
+                <div class="columns six" ng-click="sort('DisplayName')">Name</div>
+                <div class="columns four" ng-click="sort('RegisteredTime')">Created</div>
+            </div>
+            <div class="row panel-body">
+                <div 
+                    data-ng-repeat="tenant in tenantList | 
+                        filter: { 'UIVersion': version, 'DisplayName': SearchValue } | 
+                        orderBy: SortDirection + SortProperty"
+                    class="job-td-row tenant-list-item {{$index}}"
+                    ng-if="!deactivated || selected.Identifier == tenant.Identifier"
+                    ng-click="handleTenantSelected(tenant)"
+                >
+                    <!--
+                    <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                    -->
+                    <div class="columns two tenant-version"><span class="badge {{tenant.UIVersion == '3.0' ? 'blue' : 'gray'}}-badge">{{tenant.UIVersion}}</span></div>
+                    <div class="columns seven tenant-name">{{tenant.DisplayName}}</div>
+                    <div class="columns three tenant-date">{{tenant.RegisteredTime | date:'MM/dd/yyyy'}}</div>
+                </div>
+                <div class="text-center tenant-list-spinner" ng-if="deactivated">
+                    <i class="fa fa-spinner fa-pulse fa-fw fa-2x"></i>
+                    <span>Launching LP {{selected.UIVersion}}...</span>
+                </div>
+            </div>
+            <span class="tenant-total">Displaying {{ (tenantList | filter: { 'UIVersion': version, 'DisplayName': SearchValue }).length || 0 }} tenants</span>
+        </div>
+    </div>
+</form>
