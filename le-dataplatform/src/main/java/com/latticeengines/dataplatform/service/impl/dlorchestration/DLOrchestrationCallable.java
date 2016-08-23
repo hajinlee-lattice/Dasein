@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.dataplatform.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +52,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
     private int positiveEventWarnThreshold;
     private int featuresThreshold;
     private MetadataService metadataService;
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
     public DLOrchestrationCallable(Builder builder) {
         this.dlOrchestrationJobTaskExecutor = builder.dlOrchestrationJobTaskExecutor;
@@ -77,7 +77,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
         this.featuresThreshold = builder.featuresThreshold;
         this.metadataService = builder.metadataService;
-        this.modelSummaryDownloadFlagEntityMgr = builder.modelSummaryDownloadFlagEntityMgr;
+        this.modelDownloadFlagEntityMgr = builder.modelDownloadFlagEntityMgr;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
                     .positiveEventWarnThreshold(positiveEventWarnThreshold) //
                     .featuresThreshold(featuresThreshold).metadataService(metadataService);
             String tenantId = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
-            modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
+            modelDownloadFlagEntityMgr.addDownloadFlag(tenantId);
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
         }
         for (Future<Long> future : futures) {
@@ -158,7 +158,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
         private int positiveEventWarnThreshold;
         private int featuresThreshold;
         private MetadataService metadataService;
-        private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+        private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
         public Builder() {
 
@@ -274,9 +274,9 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder modelSummaryDownloadFlagEntityMgr(ModelSummaryDownloadFlagEntityMgr
-                                                                 modelSummaryDownloadFlagEntityMgr) {
-            this.modelSummaryDownloadFlagEntityMgr = modelSummaryDownloadFlagEntityMgr;
+        public Builder modelDownloadFlagEntityMgr(ModelDownloadFlagEntityMgr
+                                                                 modelDownloadFlagEntityMgr) {
+            this.modelDownloadFlagEntityMgr = modelDownloadFlagEntityMgr;
             return this;
         }
 
