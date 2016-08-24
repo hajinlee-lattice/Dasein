@@ -12,6 +12,14 @@ angular.module('lp.jobs', [
     $scope.hideCreationMessage = true;
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     $scope.jobs = [];
+    $scope.isInternalAdmin = false;
+    if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
+        && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
+        var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
+        if (accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
+            $scope.isInternalAdmin = true;
+        }
+    }
 
     var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 

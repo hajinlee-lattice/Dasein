@@ -11,7 +11,8 @@ angular
             state: '=',
             statuses: '=',
             expanded: '=',
-            cancelling: '='
+            cancelling: '=',
+            admin: '='
         },
         controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal) {
             var job = $scope.job;
