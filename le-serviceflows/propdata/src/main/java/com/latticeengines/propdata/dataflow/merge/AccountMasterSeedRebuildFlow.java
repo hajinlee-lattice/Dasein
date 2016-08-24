@@ -48,6 +48,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         Node dnbCacheSeed = addSource(parameters.getBaseTables().get(0));
         dnbCacheSeed = addRetainDnBColumnNode(dnbCacheSeed);
         Node latticeCacheSeed = addSource(parameters.getBaseTables().get(1));
+        latticeCacheSeed = addFilterDomainNode(latticeCacheSeed);
         Node accountMasterSeed = addJoinNode(latticeCacheSeed, dnbCacheSeed, JoinType.OUTER);
         accountMasterSeed = addTmpOutputNode(accountMasterSeed, parameters.getBaseSourcePrimaryKeys().get(0));
         accountMasterSeed = addRetainAccountMasterSeedColumnNode(accountMasterSeed);
@@ -59,6 +60,23 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private Node addRetainDnBColumnNode(Node node) {
         List<String> columnNames = new ArrayList<String>(dnbCacheSeedColumnMapping.keySet());
         return node.retain(new FieldList(columnNames));
+    }
+
+    private Node addFilterDomainNode(Node node) {
+        StringBuilder sb = new StringBuilder();
+        List<String> columnNames = new ArrayList<String>();
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+            SeedMergeFieldMapping item = entry.getValue();
+            if (item.getIsDedup()) {
+                sb.append(item.getMergedSourceColumn() + " != null && ");
+                columnNames.add(item.getMergedSourceColumn());
+            }
+        }
+        if (sb.length() > 0) {
+            LOG.info("Filter expression: " + sb.substring(0, sb.length() - 4));
+            node.filter(sb.substring(0, sb.length() - 4), new FieldList(columnNames));
+        }
+        return node;
     }
 
     private Node addJoinNode(Node latticeCacheSeed, Node dnbCacheSeed, JoinType joinType) {

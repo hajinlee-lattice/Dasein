@@ -48,7 +48,22 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, getYarnConfiguration());
-        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, new Properties());
+        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         return ctx;
+    }
+
+    private Properties getJobProperties() {
+        Properties jobProperties = new Properties();
+        jobProperties.put("mapreduce.job.reduces", "64");
+        jobProperties.put("mapreduce.job.running.map.limit", "64");
+        jobProperties.put("mapreduce.job.running.reduce.limit", "32");
+        jobProperties.put("mapreduce.map.output.compress", "true");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress", "true");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
+        jobProperties.put("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.BZip2Codec");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress.codec",
+                "org.apache.hadoop.io.compress.BZip2Codec");
+
+        return jobProperties;
     }
 }

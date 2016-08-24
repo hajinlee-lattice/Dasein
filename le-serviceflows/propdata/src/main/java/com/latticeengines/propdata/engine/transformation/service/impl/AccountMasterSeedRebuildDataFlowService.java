@@ -47,10 +47,6 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
 
     private static final String FLOWNAME = "FLOWNAME";
 
-    private static final String ENGINE = "ENGINE";
-
-    private static final String TEZ = "Tez";
-
     @Autowired
     private DataTransformationService dataTransformationService;
 
@@ -130,7 +126,6 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty(FLOWNAME, source.getSourceName() + HIPHEN + flowName);
         ctx.setProperty(SOURCETABLES, sources);
-        ctx.setProperty(ENGINE, TEZ);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
 
