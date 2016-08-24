@@ -8,15 +8,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;

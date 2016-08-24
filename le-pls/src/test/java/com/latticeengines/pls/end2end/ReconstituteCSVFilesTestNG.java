@@ -151,7 +151,6 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    @SuppressWarnings("unchecked")
     private List<Entry> findCandidateTables() throws IOException {
         List<Tenant> tenants = tenantEntityMgr.findAll();
         List<Entry> entries = new ArrayList<>();

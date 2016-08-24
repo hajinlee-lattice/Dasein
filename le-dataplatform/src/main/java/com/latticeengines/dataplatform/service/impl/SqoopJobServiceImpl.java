@@ -197,7 +197,6 @@ public class SqoopJobServiceImpl {
         }
 
         List<String> cmds = new ArrayList<>();
-        String connectionUrl = metadataService.getJdbcConnectionUrl(importer.getDbCreds());
         cmds.add("import");
         if (importer.getHadoopArgs() != null) {
             for (String option : importer.getHadoopArgs()) {

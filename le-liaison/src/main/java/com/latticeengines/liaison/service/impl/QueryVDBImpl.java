@@ -313,8 +313,6 @@ public class QueryVDBImpl extends Query {
             }
             while (Boolean.TRUE) {
                 String filterspec = "";
-                String remainingspec = "";
-                boolean isMatched = Boolean.FALSE;
                 int i = 0;
                 int parencount = 0;
                 boolean readingargs = Boolean.FALSE;

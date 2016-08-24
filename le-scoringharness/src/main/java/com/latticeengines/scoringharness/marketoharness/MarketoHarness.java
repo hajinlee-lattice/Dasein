@@ -3,8 +3,6 @@ package com.latticeengines.scoringharness.marketoharness;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
@@ -22,8 +20,6 @@ import com.latticeengines.scoringharness.util.JsonUtil;
 
 @Service
 public class MarketoHarness {
-    private static final Log log = LogFactory.getLog(new Object() {
-    }.getClass().getEnclosingClass());
 
     @Autowired
     private MarketoProperties properties;

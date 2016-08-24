@@ -9,8 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +31,6 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
-    
-    private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
@@ -82,7 +78,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
 
-            
+
             properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
@@ -94,7 +90,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             throw new IllegalStateException(e);
         }
     }
-    
+
     private void setLatticeVersion(Classifier classifier, Properties properties) {
         if (classifier == null) {
             return;
@@ -102,7 +98,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         classifier.setProvenanceProperties(classifier.getProvenanceProperties() + //
                 " Lattice_Version=" + properties.getProperty(PythonContainerProperty.VERSION.name()));
     }
-    
+
     @Override
     public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
         Collection<CopyEntry> copyEntries = super.getCopyEntries(containerProperties);

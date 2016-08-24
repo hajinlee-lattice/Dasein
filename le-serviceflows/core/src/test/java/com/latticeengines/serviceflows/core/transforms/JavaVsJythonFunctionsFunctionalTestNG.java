@@ -131,7 +131,6 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 String dsTitleLength = record.get("DS_Title_Length");
                 String dsTitleLevel = record.get("DS_Title_Level");
                 String emailDomainIsPublic = record.get("Email_Domain_IsPublic");
-                String alexaMonthsSinceOnline = record.get("Alexa_MonthsSinceOnline");
 
                 long attributeTime = System.currentTimeMillis();
                 totalAttTime = attributeTime - startReadTime;
@@ -463,9 +462,8 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 }
 
                 String email = record.get("Email");
-                String dsEmailIsInvalid = record.get("DS_Email_IsInvalid");
-                String dsEmailLength = record.get("DS_Email_Length");
-                String dsEmailPrefixLength = record.get("DS_Email_PrefixLength");
+//                String dsEmailLength = record.get("DS_Email_Length");
+//                String dsEmailPrefixLength = record.get("DS_Email_PrefixLength");
                 String firstName = record.get("FirstName");
                 String lastName = record.get("LastName");
                 String dsNameLength = record.get("DS_Name_Length");
@@ -491,11 +489,11 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
 
                 long fc1Time = System.currentTimeMillis();
                 totalFcn1Time += fc1Time - attributeTime;
-                
+
                 String functionName = "std_visidb_ds_email_isInvalid";
                 Object resultEmailIsInvalid = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         functionName, functionName, new String[] { email }, Boolean.class);
-                Boolean passesEmailIsInvalid = passesBooleanValues(resultEmailIsInvalid, dsEmailIsInvalid);
+//                Boolean passesEmailIsInvalid = passesBooleanValues(resultEmailIsInvalid, dsEmailIsInvalid);
                 // Commented out because VisiDB implementation needs to be changed. Currently it returns "0"
                 //  for all email which is wrong
                 // assertEquals(passesEmailIsInvalid, Boolean.TRUE);
@@ -506,7 +504,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 functionName = "std_visidb_ds_email_length";
                 Object resultEmailLength = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         functionName, functionName, new String[] { email }, Integer.class);
-                Boolean passesEmailLength = passesIntegerValues(resultEmailLength, dsEmailLength);
+//                Boolean passesEmailLength = passesIntegerValues(resultEmailLength, dsEmailLength);
                 // Commented out because VisiDB implementation needs to be changed when there are
                 // special characters.
                 // assertEquals(passesEmailLength, Boolean.TRUE);
@@ -517,7 +515,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                 functionName = "std_visidb_ds_email_prefixlength";
                 Object resultEmailPrefixLength = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         functionName, functionName, new String[] { email }, Integer.class);
-                Boolean passesEmailPrefixLength = passesIntegerValues(resultEmailPrefixLength, dsEmailPrefixLength);
+//                Boolean passesEmailPrefixLength = passesIntegerValues(resultEmailPrefixLength, dsEmailPrefixLength);
                 // Commented out because VisiDB implementation needs to be changed where there are
                 // special characters.
                 // assertEquals(passesEmailPrefixLength, Boolean.TRUE);
@@ -539,7 +537,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                         assertEquals(checkForEquality(resultNameLength, value), Boolean.TRUE);
                     else
                         System.out.println(String.format("TransformNameLength:%s*%s*%s*%s", firstName, lastName, resultNameLength, value));
-                
+
                 functionName = "std_visidb_ds_state_isCanadianProvince";
                 Object resultIsCandianProvince = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         functionName, functionName, new String[] { state }, Boolean.class);
@@ -635,7 +633,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                         assertEquals(checkForEquality(resultTitleChannel, value), Boolean.TRUE);
                     else
                         System.out.println(String.format("TitleChannel: %s,%s,%s,%s", title, dsTitleChannel, resultTitleChannel, value));
-                
+
                 functionName = "std_visidb_ds_title_function";
                 Object resultTitleFunction = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         functionName, functionName, new String[] { title }, String.class);
@@ -647,11 +645,11 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                     if(checkForEquality(resultTitleFunction, value))
                         assertEquals(checkForEquality(resultTitleFunction, value), Boolean.TRUE);
                     else
-                        System.out.println(String.format("TitleFunction: %s,%s,%s,%s", title, dsTitleFunction, resultTitleFunction, value));                    
+                        System.out.println(String.format("TitleFunction: %s,%s,%s,%s", title, dsTitleFunction, resultTitleFunction, value));
 
                 functionName = "std_visidb_ds_title_level_categorical";
                 Object resultTitleLevelCategorical = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
-                        functionName, functionName, new String[] { title }, String.class);                
+                        functionName, functionName, new String[] { title }, String.class);
                 Boolean passesInTitleLevelCategorical = passesStringValues(resultTitleLevelCategorical,
                         dsTitleLevelCategorical);
                 if(passesInTitleLevelCategorical)
@@ -676,7 +674,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                     else {
                         this.applyJavaTransform(functionName, new String[] { title });
                         // Commented out because Director category needs to be removed, and Leadership
-                        // category needs to be preserved 
+                        // category needs to be preserved
                         //System.out.println(String.format("TitleRole:%s*%s*%s*%s", title, dsTitleRole, resultTitleRole, value));
                     }
 
@@ -693,22 +691,22 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                     else {
                         System.out.println(String.format("TitleScope: %s,%s,%s,%s", title, dsTitleScope, resultTitleScope, value));
                     }
-                
+
                 lastLoopEndTime = System.currentTimeMillis();
             }
-            
+
             if (EXECUTION_DETAILS_OUTPUT) {
                 System.out.println(String.format("Number of rows processed: %d", i));
                 System.out.println(String.format("Avg Read Time: %f", (totalReadTime) / ((double) i - 1)));
                 System.out.println(String.format("Avg Att Time: %f", ((double) totalAttTime) / ((double) i)));
-                System.out.println(String.format("Avg Function (1) Time: %f", ((double) totalFcn1Time) / ((double) i)));            
-            }                        
-        }        
+                System.out.println(String.format("Avg Function (1) Time: %f", ((double) totalFcn1Time) / ((double) i)));
+            }
+        }
 
         Assert.assertTrue("Java vs Jython transformation test failed. Unacceptable number of mismatches. ",
                 numberOfErrors < maxNumberOfErrors);
     }
-    
+
     private Object applyJavaTransform(String functionName, String[] values) {
         String modelPath = "";
         String buildVersion = null;
@@ -728,7 +726,7 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
             argumentsAsMap.put("column", functionName);
         else {
             int i = 1;
-            for (String value : values)
+            for (@SuppressWarnings("unused") String value : values)
                 argumentsAsMap.put("column" + i++, "column" + (i - 1));
         }
         return transform.transform(argumentsAsMap, recordAsMap);

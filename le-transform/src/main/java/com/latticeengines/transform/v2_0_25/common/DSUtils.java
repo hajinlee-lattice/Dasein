@@ -1,7 +1,5 @@
 package com.latticeengines.transform.v2_0_25.common;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
@@ -9,12 +7,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class DSUtils {
-
-    private static HashSet<String> unusualCharacterSet = new HashSet<String>((Arrays.asList("!", "@", "#", "\"", "%",
-            "$", "`", "}", "+", "*", "\\", "^", "~", "_", "{", ":", "=", "<", "?", ">")));
-
-    private static HashSet<String> badSet = new HashSet<String>((Arrays.asList("none", "no", "not", "delete", "asd",
-            "sdf", "unknown", "undisclosed", "null", "don", "abc", "xyz", "nonname", "nocompany")));
 
     public static Boolean hasUnUsualChar(String s) {
         if (StringUtils.isEmpty(s))

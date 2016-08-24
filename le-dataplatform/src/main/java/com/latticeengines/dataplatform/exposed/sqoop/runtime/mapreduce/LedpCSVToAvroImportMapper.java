@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
@@ -30,6 +29,7 @@ import org.mortbay.log.Log;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
-import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
 
 /**
@@ -158,9 +157,9 @@ public class LedpCSVToAvroImportMapper extends
     }
 
     private void validateAttribute(List<InputValidator> validators, Map<String, Object> fieldMap, Attribute attr) {
-        String attrKey = attr.getName();
+//        String attrKey = attr.getName();
         if (CollectionUtils.isNotEmpty(validators)) {
-            RequiredIfOtherFieldIsEmpty validator = (RequiredIfOtherFieldIsEmpty) validators.get(0);
+//            RequiredIfOtherFieldIsEmpty validator = (RequiredIfOtherFieldIsEmpty) validators.get(0);
 //            if (!validator.validate(attrKey, fieldMap, table)) {
 //                missingRequiredColValue = true;
 //                if (attrKey.equals(validator.otherField)) {

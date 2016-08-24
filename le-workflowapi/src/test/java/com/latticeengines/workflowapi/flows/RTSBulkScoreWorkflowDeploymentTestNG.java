@@ -170,14 +170,15 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         Assert.assertEquals(files.size(), 1);
         Assert.assertNotNull(HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0)));
         // assert the ordering of the header
-        CSVReader reader = new CSVReader(new InputStreamReader(
-                HdfsUtils.getInputStream(yarnConfiguration, files.get(0))));
-        String[] header = reader.readNext();
-        System.out.println(Arrays.toString(header));
-        Assert.assertEquals(header[header.length - 4], "Score");
-        Assert.assertTrue(header[header.length - 1].contains("Has"));
-        Assert.assertTrue(header[header.length - 2].contains("Has"));
-        Assert.assertTrue(header[header.length - 3].contains("Has"));
+        try (CSVReader reader = new CSVReader(new InputStreamReader(
+                HdfsUtils.getInputStream(yarnConfiguration, files.get(0)))) ) {
+            String[] header = reader.readNext();
+            System.out.println(Arrays.toString(header));
+            Assert.assertEquals(header[header.length - 4], "Score");
+            Assert.assertTrue(header[header.length - 1].contains("Has"));
+            Assert.assertTrue(header[header.length - 2].contains("Has"));
+            Assert.assertTrue(header[header.length - 3].contains("Has"));
+        }
     }
 
     private void score(String modelId, String tableToScore) throws Exception {

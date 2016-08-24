@@ -54,7 +54,7 @@ public class ModelSummaryResourceCrossTenantTestNG extends PlsFunctionalTestNGBa
                 dir + "/topPredictor_model.csv");
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
     public void loginToMarketoTenant_getModelSummariesForEloquaTenant_assertRetrievedModelSummariesCorrect() {
         setupSecurityContext(marketoTenant);
@@ -64,7 +64,7 @@ public class ModelSummaryResourceCrossTenantTestNG extends PlsFunctionalTestNGBa
         assertModelSummariesBelongToTenant(modelSummaries, eloquaTenant);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
     public void loginToEloquaTenant_getModelSummariesForEloquaTenant_assertRetrievedModelSummariesCorrect() {
         setupSecurityContext(eloquaTenant);

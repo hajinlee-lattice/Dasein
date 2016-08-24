@@ -7,6 +7,8 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 @Component("unmatchedSource")
 public class UnmatchedSource implements CollectedSource {
 
+    private static final long serialVersionUID = -689027009730594994L;
+
     private String cronExpression;
 
     @Override

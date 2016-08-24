@@ -107,7 +107,7 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
         return table;
     }
 
-    private void execute(Table table, Map<String, List<ExtractFilter>> extractFilters) {
+    private Table execute(Table table, Map<String, List<ExtractFilter>> extractFilters) {
         DataFlowContext ctx = new DataFlowContext();
         Map<String, Table> sources = new HashMap<>();
         sources.put("ExtractFilterTest", table);
@@ -124,5 +124,6 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty(DataFlowProperty.EXTRACTFILTERS, extractFilters);
 
         Table output = dataTransformationService.executeNamedTransformation(ctx, "extractFilterBuilder");
+        return output;
     }
 }

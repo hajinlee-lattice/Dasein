@@ -78,7 +78,7 @@ public class FeatureImportanceParser {
                     }
                     System.out.println(String.format("Found HDFS path for tenant %s and model id %s", tenant, modelId));
 
-                    
+
                     String path = hdfsPath.getPath().toString();
                     try {
                         Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
