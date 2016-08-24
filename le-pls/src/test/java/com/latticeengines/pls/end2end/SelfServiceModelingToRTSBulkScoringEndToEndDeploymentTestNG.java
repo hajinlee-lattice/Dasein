@@ -119,7 +119,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG
                     return job.getJobType() != null
                             && job.getJobType().equals("rtsBulkScoreWorkflow")
                             && modelId.equals(jobModelId)
-                            && selfServiceModeling.MODEL_DISPLAY_NAME.equals(jobModelName);
+                            && SelfServiceModelingEndToEndDeploymentTestNG.MODEL_DISPLAY_NAME.equals(jobModelName);
                 }
             });
 

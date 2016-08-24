@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -42,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
@@ -452,12 +452,24 @@ public class ScoreCorrectnessService {
         }
         return records;
     }
+    
+    private List<GenericRecord> getAvroRecords(ScoreCorrectnessArtifacts artifacts) throws IOException {
+        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration,
+                artifacts.getPathToSamplesAvro() + "allTest-r-00000.avro");
+        
+        if (avroRecords.size() == 0) {
+            avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, artifacts.getPathToSamplesAvro() + "allTest-r-00001.avro");
+        }
+        
+        return avroRecords;
+
+    }
 
     private Map<String, Map<String, Object>> getExpectedMatchedRecords(ScoreCorrectnessArtifacts artifacts)
             throws IOException {
         Map<String, Map<String, Object>> matchedRecords = new HashMap<>();
-        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration,
-                artifacts.getPathToSamplesAvro() + "allTest-r-00000.avro");
+        List<GenericRecord> avroRecords = getAvroRecords(artifacts);
+        
         Schema schema = avroRecords.get(0).getSchema();
         List<Schema.Field> fields = schema.getFields();
 
