@@ -89,8 +89,8 @@ public class HdfsPathBuilder {
 
     public Path constructSourceDir(Source source) {
         String sourceName = source.getSourceName();
-        sourceName = sourceName.endsWith(PATH_SEPARATOR)
-                ? sourceName.substring(0, sourceName.lastIndexOf(PATH_SEPARATOR)) : sourceName;
+        sourceName = sourceName.endsWith(PATH_SEPARATOR) ? sourceName.substring(0,
+                sourceName.lastIndexOf(PATH_SEPARATOR)) : sourceName;
         return propDataDir().append(SOURCES).append(sourceName);
     }
 
@@ -160,6 +160,11 @@ public class HdfsPathBuilder {
     public Path constructMatchSchemaFile(String rootOperationUid) {
         String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + AVRO_SCHEMA_FILE_EXTENSION;
         return constructMatchOutputDir(rootOperationUid).append(fileName);
+    }
+
+    public Path constructMatchSchemaFileAtRoot(String rootOperationUid) {
+        String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + AVRO_SCHEMA_FILE_EXTENSION;
+        return constructMatchDir(rootOperationUid).append(fileName);
     }
 
     public Path constructMatchOutputFile(String rootOperationUid) {

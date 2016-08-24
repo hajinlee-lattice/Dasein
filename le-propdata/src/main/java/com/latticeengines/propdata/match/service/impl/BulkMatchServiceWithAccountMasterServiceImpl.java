@@ -108,7 +108,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private String writeOutputSchemaAvsc(MatchInput input, Schema outputSchema, String rootOperationUid) {
         try {
-            String matchAvscPath = hdfsPathBuilder.constructMatchSchemaFile(rootOperationUid).toString();
+            String matchAvscPath = hdfsPathBuilder.constructMatchSchemaFileAtRoot(rootOperationUid).toString();
             if (!HdfsUtils.fileExists(yarnConfiguration, matchAvscPath)) {
                 HdfsUtils.writeToFile(yarnConfiguration, matchAvscPath, outputSchema.toString());
             }

@@ -84,6 +84,10 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 selectionVersion = summary.getPredefinedSelectionVersion();
             }
         }
+        String dataCloudVersion = null;
+        if (summary != null) {
+            dataCloudVersion = summary.getDataCloudVersion();
+        }
 
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -96,6 +100,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
+                .dataCloudVersion(dataCloudVersion)
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
                         "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'),

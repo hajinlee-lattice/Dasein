@@ -91,6 +91,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String pivotArtifactPath;
     private String modelType;
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
+    private String dataCloudVersion;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -504,7 +505,8 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return modelSummaryProvenanceProperties;
     }
 
-    public void setModelSummaryProvenanceProperties(List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties) {
+    public void setModelSummaryProvenanceProperties(
+            List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties) {
         this.modelSummaryProvenanceProperties = modelSummaryProvenanceProperties;
     }
 
@@ -601,23 +603,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @Transient
-    @JsonIgnore
     public String getDataCloudVersion() {
-        return getSummaryFieldStringValue("EventTableProvenance", "Data_Cloud_Version");
+        return dataCloudVersion;
     }
 
-    private String getSummaryFieldStringValue(String field1, String field2) {
-        if (getDetails() == null || getDetails().getPayload() == null) {
-            return null;
-        }
-        if (field1 == null || field2 == null) {
-            return null;
-        }
-        String rawModelSummary = getDetails().getPayload();
-        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode field1Node = modelSummaryJson.get(field1);
-        JsonNode field2Node = field1Node != null ? field1Node.get(field2) : null;; 
-        return field2Node != null ? field2Node.textValue() : null;
+    @Transient
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
-
 }

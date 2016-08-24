@@ -114,6 +114,9 @@ public class MatcherImpl implements Matcher {
             predefinedSelections.put(ColumnSelection.Predefined.getLegacyDefaultSelection(), null);
         }
         unionSelections.setPredefinedSelections(predefinedSelections);
+        if (modelSummary != null) {
+            matchInput.setDataCloudVersion(modelSummary.getDataCloudVersion());
+        }
 
         if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
             ColumnSelection customSelection = getCustomColumnSelection(selectedLeadEnrichmentAttributes);
@@ -197,8 +200,8 @@ public class MatcherImpl implements Matcher {
             MatchInput matchInput, //
             MatchOutput matchOutput) {
         if (matchOutput.getResult().isEmpty()) {
-            warnings.addWarning(new Warning(WarningCode.NO_MATCH,
-                    new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
+            warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
+                    JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
         } else {
             List<String> matchFieldNames = matchOutput.getOutputFields();
             OutputRecord outputRecord = matchOutput.getResult().get(0);
@@ -206,21 +209,21 @@ public class MatcherImpl implements Matcher {
             if (outputRecord.getMatchedNameLocation() != null) {
                 nameLocationStr = JsonUtils.serialize(outputRecord.getMatchedNameLocation());
             }
-            String errorMessages = outputRecord.getErrorMessages() == null ? ""
-                    : Joiner.on(",").join(outputRecord.getErrorMessages());
+            String errorMessages = outputRecord.getErrorMessages() == null ? "" : Joiner.on(",").join(
+                    outputRecord.getErrorMessages());
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()), nameLocationStr,
-                        errorMessages));
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()),
+                        nameLocationStr, errorMessages));
             }
 
             mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
             if (!outputRecord.isMatched()) {
-                warnings.addWarning(
-                        new Warning(WarningCode.NO_MATCH, new String[] { JsonUtils.serialize(matchInput.getKeyMap()),
-                                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
+                warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
+                        JsonUtils.serialize(matchInput.getKeyMap()),
+                        Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
             }
         }
         if (log.isDebugEnabled()) {
@@ -261,8 +264,8 @@ public class MatcherImpl implements Matcher {
                     String modelId = partiallyOrderedParsedTupleList.get(idx).getModelId();
                     Map<String, FieldSchema> fieldSchemas = uniqueFieldSchemasMap.get(modelId);
 
-                    Map<String, Object> matchedRecordResult = new HashMap<>(
-							partiallyOrderedParsedTupleList.get(idx).getParsedData().getKey());
+                    Map<String, Object> matchedRecordResult = new HashMap<>(partiallyOrderedParsedTupleList.get(idx)
+                            .getParsedData().getKey());
                     getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput.getInputList().get(idx),
                             output);
 
@@ -271,8 +274,8 @@ public class MatcherImpl implements Matcher {
 
                     if (partiallyOrderedParsedTupleList.get(idx).getRecord().isPerformEnrichment()) {
                         {
-                            Map<String, Object> recordEnrichment = extractEnrichment(matchedRecordResult,
-                                    matchInput.getInputList().get(idx).getUnionSelection());
+                            Map<String, Object> recordEnrichment = extractEnrichment(matchedRecordResult, matchInput
+                                    .getInputList().get(idx).getUnionSelection());
                             recordResultMap.put(ENRICHMENT, recordEnrichment);
                         }
                     }
@@ -290,8 +293,7 @@ public class MatcherImpl implements Matcher {
         return results;
     }
 
-    private Map<String, Object> extractEnrichment(Map<String, Object> matchedRecordResult,
-            UnionSelection unionSelection) {
+    private Map<String, Object> extractEnrichment(Map<String, Object> matchedRecordResult, UnionSelection unionSelection) {
         Map<String, Object> recordEnrichment = new HashMap<>();
         if (unionSelection != null && unionSelection.getCustomSelection() != null) {
             ColumnSelection customSelection = unionSelection.getCustomSelection();
@@ -331,8 +333,8 @@ public class MatcherImpl implements Matcher {
                             recordModelTuple.getParsedData().getKey(), modelSummary, null));
                 }
             } else {
-                matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
-                        recordModelTuple.getParsedData().getKey(), modelSummary, null));
+                matchInputList.add(buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
+                        .getParsedData().getKey(), modelSummary, null));
             }
         }
         return bulkInput;
@@ -356,8 +358,8 @@ public class MatcherImpl implements Matcher {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
         if (matchFieldNames.size() != matchFieldValues.size()) {
-            throw new LedpException(LedpCode.LEDP_31005,
-                    new String[] { String.valueOf(matchFieldNames.size()), String.valueOf(matchFieldValues.size()) });
+            throw new LedpException(LedpCode.LEDP_31005, new String[] { String.valueOf(matchFieldNames.size()),
+                    String.valueOf(matchFieldValues.size()) });
         }
 
         for (int i = 0; i < matchFieldNames.size(); i++) {
@@ -374,8 +376,8 @@ public class MatcherImpl implements Matcher {
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (isPublicDomain) {
-                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
-                                new String[] { Strings.nullToEmpty(outputRecord.getMatchedDomain()) }));
+                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
+                                .nullToEmpty(outputRecord.getMatchedDomain()) }));
                     }
                 }
             }
