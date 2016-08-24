@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
@@ -245,7 +246,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                         originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
             } else {
                 scoreResponse = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
+                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, false);
             }
 
             if (log.isInfoEnabled()) {
@@ -394,7 +395,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
         List<RecordScoreResponse> debugResponseList = new ArrayList<>();
         List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
+                originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true);
         try {
             for (RecordScoreResponse recordResponse : result) {
                 DebugRecordScoreResponse debugRecordResponse = new DebugRecordScoreResponse(recordResponse);
@@ -421,7 +422,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
             List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap) {
+            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap, boolean isDebugMode) {
         Map<String, RecordScoreResponse> responseMap = new HashMap<>();
         List<RecordScoreResponse> responseList = new ArrayList<>();
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
@@ -439,9 +440,12 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                     ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
                     ModelJsonTypeHandler ModelJsonTypeHandler = getModelJsonTypeHandler(
                             scoringArtifacts.getModelJsonType());
-
-                    resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
-
+                    if (isDebugMode) {
+                        resp = ModelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
+                                null);
+                    } else {
+                        resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+                    }
                 } else {
                     if (log.isInfoEnabled()) {
                         log.info("Skip scoring for " + tuple.getRecord().getRecordId() + "_" + tuple.getModelId()
@@ -489,6 +493,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
             if (exception == null) {
                 score.setScore(resp.getScore());
+                if (isDebugMode) {
+                    score.setProbability(((DebugScoreResponse) resp).getProbability());
+                }
             } else {
                 score.setError(exception.getCode().getExternalCode());
                 score.setErrorDescription(exception.getMessage());
