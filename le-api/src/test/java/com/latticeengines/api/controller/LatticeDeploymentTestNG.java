@@ -18,7 +18,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
@@ -38,9 +37,6 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private MetadataService metadataService;
 
     private Model model;
 

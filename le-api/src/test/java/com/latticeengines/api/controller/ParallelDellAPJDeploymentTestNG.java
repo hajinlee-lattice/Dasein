@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -32,9 +31,6 @@ public class ParallelDellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private MetadataService metadataService;
 
     Model model;
 
