@@ -301,6 +301,10 @@
                     <groupId>io.confluent</groupId>
                     <artifactId>kafka-connect-hdfs</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
