@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.merge;
+package com.latticeengines.propdata.dataflow.refresh;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

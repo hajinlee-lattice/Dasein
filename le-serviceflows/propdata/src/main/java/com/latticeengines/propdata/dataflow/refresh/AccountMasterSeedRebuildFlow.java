@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.merge;
+package com.latticeengines.propdata.dataflow.refresh;
 
 import java.io.IOException;
 import java.util.ArrayList;
