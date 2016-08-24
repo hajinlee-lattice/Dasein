@@ -29,8 +29,8 @@ public class SamplingConfiguration {
     private int trainingSetCount = 1;
 
     public static final String TRAINING_SET_PREFIX = "TrainingSet";
-    public static final String TRAINING_ALL_PREFIX = "TrainingAll";
-    public static final String TESTING_SET_PREFIX = "TestingSet";
+    public static final String TRAINING_ALL_PREFIX = "allTraining";
+    public static final String TESTING_SET_PREFIX = "allTest";
 
     private Map<String, String> properties = new HashMap<String, String>();
     private SamplingType samplingType = SamplingType.DEFAULT_SAMPLING;
