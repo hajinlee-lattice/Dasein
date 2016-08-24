@@ -54,15 +54,17 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     }
 
     @Override
-    public TransformationProgress transform(TransformationRequest request, String hdfsPod) {
+    public TransformationProgress transform(TransformationRequest request, String hdfsPod, boolean fromScan) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
 
         TransformationService transformationService = (TransformationService) applicationContext
                 .getBean(request.getSourceBeanName());
+        if (fromScan && transformationService.isManualTriggerred()) {
+            return null;
+        }
         TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
-
         return executor.kickOffNewProgress(transformationProgressEntityMgr);
     }
 
@@ -85,7 +87,7 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
             TransformationRequest request = new TransformationRequest();
             request.setSourceBeanName(transformServiceBeanName);
             request.setSubmitter(PROPDATA_TRIGGER);
-            TransformationProgress progress = transform(request, hdfsPod);
+            TransformationProgress progress = transform(request, hdfsPod, true);
             if (progress != null) {
                 progresses.add(progress);
             }

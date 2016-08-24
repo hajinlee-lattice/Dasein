@@ -26,4 +26,6 @@ public interface TransformationService {
     Class<? extends TransformationConfiguration> getConfigurationClass();
 
     TransformationConfiguration createTransformationConfiguration(List<String> versionsToProcess);
+
+    boolean isManualTriggerred();
 }

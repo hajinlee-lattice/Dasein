@@ -76,6 +76,11 @@ public abstract class AbstractTransformationService extends TransformationServic
     abstract String workflowAvroDir(TransformationProgress progress);
 
     @Override
+    public boolean isManualTriggerred() {
+        return false;
+    }
+
+    @Override
     public TransformationProgress startNewProgress(TransformationConfiguration transformationConfiguration,
             String creator) {
         checkTransformationConfigurationValidity(transformationConfiguration);

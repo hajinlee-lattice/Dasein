@@ -59,6 +59,11 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     Log getLogger() {
         return log;
     }
+    
+    @Override
+    public boolean isManualTriggerred() {
+        return true;
+    }
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,

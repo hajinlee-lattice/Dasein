@@ -9,6 +9,6 @@ public interface SourceTransformationService {
 
     List<TransformationProgress> scan(String hdfsPod);
 
-    TransformationProgress transform(TransformationRequest request, String hdfsPod);
+    TransformationProgress transform(TransformationRequest request, String hdfsPod, boolean fromScan);
 
 }

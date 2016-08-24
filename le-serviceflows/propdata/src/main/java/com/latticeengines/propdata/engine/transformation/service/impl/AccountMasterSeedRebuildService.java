@@ -46,6 +46,11 @@ public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransf
 
     @Autowired
     private AccountMasterSeedRebuildDataFlowService transformationDataFlowService;
+    
+    @Override
+    public boolean isManualTriggerred() {
+        return true;
+    }
 
     @Override
     public List<String> findUnprocessedVersions() {

@@ -80,7 +80,8 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 hdfsPod = HdfsPodContext.getHdfsPodId();
             }
 
-            TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod);
+            TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod,
+                    false);
             if (progress == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 response.getWriter().write("No unprocessed version found.");
