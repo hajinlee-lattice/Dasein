@@ -277,7 +277,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG
                             .get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
                     return job.getJobType() != null && job.getJobType().equals(jobType)
                             && modelId.equals(jobModelId)
-                            && selfServiceModeling.MODEL_DISPLAY_NAME.equals(jobModelName);
+                            && SelfServiceModelingEndToEndDeploymentTestNG.MODEL_DISPLAY_NAME.equals(jobModelName);
                 }
             });
 
