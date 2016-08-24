@@ -85,6 +85,7 @@ angular
 
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
+                            $rootScope.tenantId = window.escape(Tenant.Identifier);
                             
                             $state.go('home.models', { 
                                 tenantName: Tenant.DisplayName

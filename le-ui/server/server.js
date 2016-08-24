@@ -192,11 +192,17 @@ class Server {
                 try {
                     let r = request(url);
 
-                    if (req.query && req.query.Authorization) {
-                        // Since the token was in the URL, +'s got converted to spaces
-                        let token = req.query.Authorization.replace(/ /g,'+');
-
-                        req.headers["Authorization"] = token || '';
+                    if (req.query) {
+                        if (req.query.Authorization) {
+                            // Since the token was in the URL, +'s got converted to spaces
+                            let token = req.query.Authorization.replace(/ /g,'+');
+                            req.headers["Authorization"] = token || '';
+                        }
+                        
+                        if (req.query.TenantId) {
+                            let tenant = req.query.TenantId;
+                            req.headers["TenantId"] = tenant || '';
+                        }
                     }
 
                     req.pipe(r).pipe(res);

@@ -47,6 +47,7 @@ var mainApp = angular.module('mainApp', [
             
             if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
                 config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+                config.headers.TenantId = $rootScope.tenantId;
             }
             
             return config;
