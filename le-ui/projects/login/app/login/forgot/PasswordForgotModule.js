@@ -6,7 +6,6 @@ angular.module('login.forgot', [
 .controller('PasswordForgotController', function ($scope, $state, ResourceUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
 
-    $scope.forgotPasswordUsername = "";
     $scope.forgotPasswordErrorMessage = "";
 
     $scope.cancelForgotPasswordClick = function ($event) {
@@ -17,14 +16,14 @@ angular.module('login.forgot', [
         $state.go('login.form');
     };
 
-    $scope.forgotPasswordOkClick = function () {
+    $scope.forgotPasswordOkClick = function (forgotPasswordUsername) {
         $scope.resetPasswordSuccess = false;
         $scope.showForgotPasswordError = false;
-        $scope.forgotPasswordUsernameInvalid = $scope.forgotPasswordUsername === "";
+        $scope.forgotPasswordUsernameInvalid = forgotPasswordUsername === "";
         if ($scope.forgotPasswordUsernameInvalid) {
             return;
         }
-        LoginService.ResetPassword($scope.forgotPasswordUsername).then(function(result) {
+        LoginService.ResetPassword(forgotPasswordUsername).then(function(result) {
             if (result == null) {
                 return;
             }
