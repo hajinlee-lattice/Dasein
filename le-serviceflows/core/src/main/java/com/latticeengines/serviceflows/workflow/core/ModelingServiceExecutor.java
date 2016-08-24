@@ -139,6 +139,7 @@ public class ModelingServiceExecutor {
         samplingConfig.setCustomer(builder.getCustomer());
         samplingConfig.setTable(builder.getTable());
         samplingConfig.setHdfsDirPath(builder.getHdfsDirToSample());
+        samplingConfig.setParallelEnabled(true);
         SamplingFactory.configSampling(samplingConfig, builder.runTimeParams);
 
         AppSubmission submission = modelProxy.createSamples(samplingConfig);
@@ -156,6 +157,7 @@ public class ModelingServiceExecutor {
         config.setExcludeColumnList(Arrays.asList(builder.getProfileExcludeList()));
         config.setSamplePrefix("all");
         config.setTargets(Arrays.asList(builder.getTargets()));
+        config.setParallelEnabled(true);
         AppSubmission submission = modelProxy.profile(config);
         String appId = submission.getApplicationIds().get(0);
         log.info(String.format("App id for profile: %s", appId));
