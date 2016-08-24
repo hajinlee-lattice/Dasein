@@ -34,15 +34,6 @@ angular.module('login.tenants', [
         return;
     }
 
-    if (TenantList.length == 1) {
-        $scope.handleTenantSelected(TenantList[0]);
-    }
-
-    $scope.sort = function(value) {
-        $scope.SortProperty = value;
-        $scope.SortDirection = ($scope.SortDirection == '' ? '-' : '');
-    };
-
     $scope.handleTenantSelected = function (tenant) {
         $scope.deactivated = true;
         $scope.selected = tenant;
@@ -56,6 +47,15 @@ angular.module('login.tenants', [
                 $scope.showTenantHeaderMessage(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
             }
         });
+    };
+
+    if (TenantList.length == 1) {
+        $scope.handleTenantSelected(TenantList[0]);
+    }
+
+    $scope.sort = function(value) {
+        $scope.SortProperty = value;
+        $scope.SortDirection = ($scope.SortDirection == '' ? '-' : '');
     };
 
     function showTenantHeaderMessage(message) {
