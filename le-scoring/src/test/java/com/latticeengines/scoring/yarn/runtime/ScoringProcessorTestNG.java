@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
@@ -77,6 +76,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @AfterMethod(groups = "functional")
     public void AfterMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dir);
+        FileUtils.deleteQuietly(new File(ScoringProcessor.Import_Error_File_Name));
     }
 
     @Test(groups = "functional")
@@ -120,7 +120,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
                     fileName)) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
                 bulkScoringProcessor.appendScoreResponseToAvro(recordScoreResponseList, dataFileWriter, builder,
-                        leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap, csvFilePrinter);
+                        leadEnrichmentAttributeMap, csvFilePrinter);
             }
         }
         bulkScoringProcessor.copyScoreOutputToHdfs(fileName, targetDir);
@@ -184,7 +184,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testConvertBulkScoreResponseToAvroWithIncorrectAttributeMap() throws IllegalArgumentException,
+    public void testConvertBulkScoreResponseToAvroWithIncompleteAttributeMap() throws IllegalArgumentException,
             Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
@@ -193,11 +193,52 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         try {
             generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap,
                     leadEnrichmentAttributeDisplayNameMap, dir + "/score");
-            Assert.fail("Should have thrown exception");
+            Assert.assertTrue(true, "Should not have thrown exception");
         } catch (LedpException e) {
-            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20039);
-            FileUtils.deleteQuietly(new File("error.csv"));
+            Assert.fail("Should NOT have thrown exception");
         }
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
+        Assert.assertNotNull(files);
+        Assert.assertEquals(files.size(), 2);
+        checkScoreAvro(files.get(0), false);
+        checkErrorCSV(files.get(1));
+    }
+
+    @Test(groups = "functional")
+    public void testConvertBulkScoreResponseToAvroWithNullAttributeMap() throws IllegalArgumentException, Exception {
+        List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
+        try {
+            generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, null, null, dir + "/score");
+            Assert.assertTrue(true, "Should not have thrown exception");
+        } catch (LedpException e) {
+            Assert.fail("Should NOT have thrown exception");
+        }
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
+        Assert.assertNotNull(files);
+        Assert.assertEquals(files.size(), 2);
+        checkScoreAvro(files.get(0), false);
+        checkErrorCSV(files.get(1));
+    }
+
+    @Test(groups = "functional")
+    public void testConvertBulkScoreResponseToAvroWithAttributeMapButNullAttributs() throws IllegalArgumentException,
+            Exception {
+        List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
+        Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
+        Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
+        generateIncorrectEnrichmentAttributeMap(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
+        try {
+            generateScoreResponseAvroAndCopyToHdfs(recordScoreResponseList, leadEnrichmentAttributeMap,
+                    leadEnrichmentAttributeDisplayNameMap, dir + "/score");
+            Assert.assertTrue(true, "Should not have thrown exception");
+        } catch (LedpException e) {
+            Assert.fail("Should NOT have thrown exception");
+        }
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir + "/score");
+        Assert.assertNotNull(files);
+        Assert.assertEquals(files.size(), 2);
+        checkScoreAvro(files.get(0), false);
+        checkErrorCSV(files.get(1));
     }
 
     private void checkErrorCSV(String filePath) throws IOException {
@@ -209,7 +250,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(record.get("Id"), "2");
             Assert.assertEquals(record.get("ErrorMessage"), "some error occurred");
         }
-        FileUtils.deleteQuietly(new File("error.csv"));
+        FileUtils.deleteQuietly(new File(ScoringProcessor.Import_Error_File_Name));
     }
 
     private void generateCorrectEnrichmentAttributeMap(Map<String, Type> leadEnrichmentAttributeMap,
@@ -225,6 +266,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         generateCorrectEnrichmentAttributeMap(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
         leadEnrichmentAttributeMap.remove("attr1");
         leadEnrichmentAttributeDisplayNameMap.remove("attr1");
+        leadEnrichmentAttributeMap.put("attr4", Schema.Type.BOOLEAN);
+        leadEnrichmentAttributeDisplayNameMap.put("attr4", "Display name of attr4");
     }
 
     private List<RecordScoreResponse> generateRecordScoreResponseWithEnrichmentAttributeMap() {

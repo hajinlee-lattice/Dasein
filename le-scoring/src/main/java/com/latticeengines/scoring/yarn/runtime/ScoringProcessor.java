@@ -144,7 +144,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     DataFileWriter<GenericRecord> dataFileWriter = createDataFileWriter(schema, fileName)) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
                 execute(rtsBulkScoringConfig, reader, dataFileWriter, builder, leadEnrichmentAttributeMap,
-                        leadEnrichmentAttributeDisplayNameMap, csvFilePrinter, recordCount);
+                        csvFilePrinter, recordCount);
             }
         }
         copyScoreOutputToHdfs(fileName, rtsBulkScoringConfig.getTargetResultDir());
@@ -357,8 +357,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @VisibleForTesting
     void appendScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-            Map<String, Schema.Type> leadEnrichmentAttributeMap,
-            Map<String, String> leadEnrichmentAttributeDisplayNameMap, CSVPrinter csvFilePrinter) throws IOException {
+            Map<String, Schema.Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter) throws IOException {
+
+        boolean leadEnrichmentEnabled = false;
+        if (leadEnrichmentAttributeMap != null) {
+            leadEnrichmentEnabled = true;
+        } else {
+            log.info("Lead enrichment is not enabled for this tenant.");
+        }
+
         for (RecordScoreResponse scoreResponse : recordScoreResponseList) {
             List<ScoreModelTuple> scoreModelTupleList = scoreResponse.getScores();
             String id = scoreResponse.getId();
@@ -385,17 +392,19 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());
 
                 Map<String, Object> enrichmentAttributeValues = scoreResponse.getEnrichmentAttributeValues();
-                if (leadEnrichmentAttributeMap != null) {
-                    if (enrichmentAttributeValues == null) {
-                        throw new LedpException(LedpCode.LEDP_20038);
-                    }
-                    Iterator<Entry<String, Object>> it = enrichmentAttributeValues.entrySet().iterator();
+                if (leadEnrichmentEnabled) {
+                    Iterator<Entry<String, Schema.Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
                     while (it.hasNext()) {
-                        Entry<String, Object> entry = it.next();
-                        if (!leadEnrichmentAttributeMap.containsKey(entry.getKey())) {
-                            throw new LedpException(LedpCode.LEDP_20039, new String[] { entry.getKey() });
+                        Entry<String, Schema.Type> entry = it.next();
+                        Object value = null;
+                        if (enrichmentAttributeValues == null || !enrichmentAttributeValues.containsKey(entry.getKey())) {
+                            log.warn(String
+                                    .format("The enrichment attribute values in the score response is null or does match this entry. Will set enrichment attribute %s to NULL value",
+                                            entry.getKey()));
+                        } else {
+                            value = enrichmentAttributeValues.get(entry.getKey());
                         }
-                        builder.set(entry.getKey(), entry.getValue());
+                        builder.set(entry.getKey(), value);
                     }
                 }
                 GenericData.Record record = builder.build();
@@ -425,15 +434,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private void execute(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-            Map<String, Type> leadEnrichmentAttributeMap, Map<String, String> leadEnrichmentAttributeDisplayNameMap,
-            CSVPrinter csvFilePrinter, long recordCount) throws Exception {
+            Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, long recordCount) throws Exception {
+
         List<Future<Integer>> futures = new ArrayList<>();
         ExecutorService scoreExecutorService = Executors.newFixedThreadPool(threadpoolSize);
         final AtomicLong counter = new AtomicLong(0);
         for (int i = 0; i < threadpoolSize; i++) {
             futures.add(scoreExecutorService.submit(new BulkScoreApiCallable(rtsBulkScoringConfig, reader,
-                    dataFileWriter, builder, leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap,
-                    csvFilePrinter, counter, recordCount)));
+                    dataFileWriter, builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount)));
         }
 
         for (Future<Integer> future : futures) {
@@ -459,22 +467,21 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         private DataFileWriter<GenericRecord> dataFileWriter;
         private GenericRecordBuilder builder;
         private Map<String, Schema.Type> leadEnrichmentAttributeMap;
-        private Map<String, String> leadEnrichmentAttributeDisplayNameMap;
         private CSVPrinter csvFilePrinter;
         private AtomicLong counter;
         private long recordCount;
 
         BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
                 DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
-                Map<String, Type> leadEnrichmentAttributeMap,
-                Map<String, String> leadEnrichmentAttributeDisplayNameMap, CSVPrinter csvFilePrinter, AtomicLong counter, long recordCount) {
+                Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, AtomicLong counter,
+                long recordCount) {
+
             super();
             this.rtsBulkScoringConfig = rtsBulkScoringConfig;
             this.reader = reader;
             this.dataFileWriter = dataFileWriter;
             this.builder = builder;
             this.leadEnrichmentAttributeMap = leadEnrichmentAttributeMap;
-            this.leadEnrichmentAttributeDisplayNameMap = leadEnrichmentAttributeDisplayNameMap;
             this.csvFilePrinter = csvFilePrinter;
             this.counter = counter;
             this.recordCount = recordCount;
@@ -496,7 +503,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         counter.addAndGet(scoreRequest.getRecords().size()), recordCount));
                 synchronized (dataFileWriter) {
                     ScoringProcessor.this.appendScoreResponseToAvro(scoreResponseList, dataFileWriter, builder,
-                            leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap, csvFilePrinter);
+                            leadEnrichmentAttributeMap, csvFilePrinter);
                 }
             }
             return 0;
