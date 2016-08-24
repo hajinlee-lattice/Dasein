@@ -215,7 +215,7 @@
             <ul>
                 <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
                 <li><strong>Filename:</strong> filename.pmml{{job.fileName}}</li>
-                <li><strong>App:</strong> {{job.applicationId}}</li>
+                <li><strong>App:</strong> <a ng-href="/cluster/app/{{job.applicationId}}" target="_blank">{{job.applicationId}}</a></li>
             </ul>
 
 

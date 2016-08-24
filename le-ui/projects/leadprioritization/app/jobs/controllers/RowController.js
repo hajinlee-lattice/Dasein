@@ -122,11 +122,6 @@ angular
                 );
             };
 
-            $scope.applicationIdClicked = function() {
-                $location.path('/cluster/app/' + job.applicationId);
-                $rootScope.$apply();
-            };
-
             $scope.clickGetScoringResults = function($event) {
 
                 $scope.showProgress = true;
