@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
 @Component
@@ -21,7 +21,7 @@ public class ColumnMetadataResourceFunctionalTestNG extends PropDataApiFunctiona
     @SuppressWarnings("unchecked")
     @Test(groups = { "api" })
     public void testPredefined() {
-        for (ColumnSelection.Predefined predefined: ColumnSelection.Predefined.values()) {
+        for (Predefined predefined: Predefined.values()) {
             String url = getRestAPIHostPort() + PROPDATA_METADATA_PREDEFINED + "/" + predefined.name();
             List<Map<String, Object>> metadataObjs = restTemplate.getForObject(url, List.class);
             Assert.assertNotNull(metadataObjs);

@@ -22,7 +22,10 @@ public class TestMatchInputService {
         for (String id : Arrays.asList("TechIndicator_AddThis", "TechIndicator_AdobeCreativeSuite")) {
             columns.add(externalColumnService.getMetadataColumn(id));
         }
-        return new ColumnSelection(columns);
+
+        ColumnSelection cs = new ColumnSelection();
+        cs.createColumnSelection(columns);
+        return cs;
     }
 
 }

@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.functionalframework.PropDataLeadEnrichmentAttributeServlet;
 import com.latticeengines.pls.service.LeadEnrichmentService;
@@ -32,7 +33,7 @@ public class LeadEnrichmentServiceImplTestNG extends PlsFunctionalTestNGBaseDepr
         httpServer = new StandaloneHttpServer();
         httpServer.init(8082);
         httpServer.addServlet(new PropDataLeadEnrichmentAttributeServlet(),
-                "/propdata/metadata/predefined/" + ColumnSelection.Predefined.LeadEnrichment);
+                "/propdata/metadata/predefined/" + Predefined.LeadEnrichment);
         httpServer.start();
     }
 

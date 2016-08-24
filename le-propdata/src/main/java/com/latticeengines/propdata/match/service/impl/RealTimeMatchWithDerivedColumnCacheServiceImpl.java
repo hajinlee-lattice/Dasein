@@ -26,7 +26,7 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
 
     @Autowired
     @Qualifier("realTimeMatchPlanner")
-    private MatchPlanner matchPlanner;
+    protected MatchPlanner matchPlanner;
 
     @Autowired
     @Qualifier("realTimeMatchExecutor")
@@ -58,17 +58,22 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
         return doPostProcessing(input, matchContexts);
     }
 
-    private MatchContext prepare(MatchInput input, List<ColumnMetadata> metadatas) {
-        return matchPlanner.plan(input, metadatas);
+    protected MatchContext prepare(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
+        return matchPlanner.plan(input, metadatas, skipExecutionPlanning);
     }
 
     private MatchContext executeMatch(MatchContext context) {
         return matchExecutor.execute(context);
     }
 
-    private MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas) {
+    protected MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas) {
+        return prepareMatchContext(input, metadatas, false);
+    }
+
+    protected MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas,
+            boolean skipExecutionPlanning) {
         input.setUuid(UUID.randomUUID());
-        MatchContext matchContext = prepare(input, metadatas);
+        MatchContext matchContext = prepare(input, metadatas, skipExecutionPlanning);
         matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         matchContext.setReturnUnmatched(input.getReturnUnmatched());
         return matchContext;

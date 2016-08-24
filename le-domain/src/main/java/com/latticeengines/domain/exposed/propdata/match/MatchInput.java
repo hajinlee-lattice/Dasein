@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,7 +39,7 @@ public class MatchInput implements Fact, Dimension {
     private Map<MatchKey, List<String>> keyMap;
 
     // only one of these is needed, custom selection has higher priority
-    private ColumnSelection.Predefined predefinedSelection;
+    private Predefined predefinedSelection;
     private ColumnSelection customSelection;
     private UnionSelection unionSelection;
 
@@ -56,7 +57,6 @@ public class MatchInput implements Fact, Dimension {
     private UUID uuid;
 
     private String tableName;
-
 
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
@@ -159,12 +159,12 @@ public class MatchInput implements Fact, Dimension {
 
     @MetricTagGroup
     @JsonProperty("PredefinedSelection")
-    public ColumnSelection.Predefined getPredefinedSelection() {
+    public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
     @JsonProperty("PredefinedSelection")
-    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+    public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
 
@@ -187,7 +187,7 @@ public class MatchInput implements Fact, Dimension {
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
-    
+
     @JsonProperty("CustomSelection")
     public ColumnSelection getCustomSelection() {
         return customSelection;
@@ -254,7 +254,7 @@ public class MatchInput implements Fact, Dimension {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-    
+
     @JsonProperty("TableName")
     public String getTableName() {
         return tableName;

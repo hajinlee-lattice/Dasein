@@ -12,7 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
@@ -78,7 +78,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
         }
 
-        ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
+        Predefined predefined = getConfiguration().getPredefinedColumnSelection();
         if (predefined != null) {
             matchInput.setPredefinedSelection(predefined);
             String version = getConfiguration().getPredefinedSelectionVersion();

@@ -4,21 +4,21 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 
 public class UnionSelection {
 
     @JsonProperty("PredefinedSelections")
-    private Map<ColumnSelection.Predefined, String> predefinedSelections;
+    private Map<Predefined, String> predefinedSelections;
 
     @JsonProperty("CustomSelection")
     private ColumnSelection customSelection;
 
-
-    public Map<ColumnSelection.Predefined, String> getPredefinedSelections() {
+    public Map<Predefined, String> getPredefinedSelections() {
         return predefinedSelections;
     }
 
-    public void setPredefinedSelections(Map<ColumnSelection.Predefined, String> predefinedSelections) {
+    public void setPredefinedSelections(Map<Predefined, String> predefinedSelections) {
         this.predefinedSelections = predefinedSelections;
     }
 

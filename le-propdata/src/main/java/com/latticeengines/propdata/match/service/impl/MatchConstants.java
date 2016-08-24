@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 
 public final class MatchConstants {
     static final String CACHE_TABLE = "DerivedColumnsCache";
@@ -14,8 +14,8 @@ public final class MatchConstants {
     static final String CITY_FIELD = "City";
     static final String LID_FIELD = "LatticeAccountID";
 
-    static final String MODEL = ColumnSelection.Predefined.Model.getName();
-    static final String DERIVED_COLUMNS = ColumnSelection.Predefined.DerivedColumns.getName();
-    static final String RTS = ColumnSelection.Predefined.RTS.getName();
+    static final String MODEL = Predefined.Model.getName();
+    static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
+    static final String RTS = Predefined.RTS.getName();
 
 }

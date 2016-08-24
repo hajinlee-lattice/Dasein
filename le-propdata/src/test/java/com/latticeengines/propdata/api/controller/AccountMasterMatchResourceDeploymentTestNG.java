@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
@@ -175,7 +176,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+        matchInput.setPredefinedSelection(Predefined.RTS);
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
         matchInput.setExcludePublicDomains(false);
         matchInput.setTableName("AccountMasterTest");

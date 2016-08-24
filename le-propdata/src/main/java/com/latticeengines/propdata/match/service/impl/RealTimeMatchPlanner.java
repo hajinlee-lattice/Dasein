@@ -18,15 +18,13 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @Value("${propdata.match.realtime.max.input:1000}")
     private int maxRealTimeInput;
 
-    @MatchStep
-    @Trace
     public MatchContext plan(MatchInput input) {
-        return  plan(input, null);
+        return plan(input, null, false);
     }
 
     @MatchStep
     @Trace
-    public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas) {
+    public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
@@ -35,14 +33,15 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
+        // TODO - this one calls parseColumnSelection twice... fix it
         MatchOutput output = initializeMatchOutput(input, metadatas);
         context.setOutput(output);
         context = scanInputData(input, context);
-        context = sketchExecutionPlan(context);
+        context = sketchExecutionPlan(context, skipExecutionPlanning);
         return context;
     }
 
-    private void validate(MatchInput input) {
+    protected void validate(MatchInput input) {
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
     }
 

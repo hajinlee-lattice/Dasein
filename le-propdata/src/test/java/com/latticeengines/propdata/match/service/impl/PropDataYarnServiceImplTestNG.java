@@ -19,12 +19,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
-
 
 @Component
 public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNGBase {
@@ -60,7 +59,7 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("PDTest"));
         jobConfiguration.setAvroPath(avroPath);
-        jobConfiguration.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+        jobConfiguration.setPredefinedSelection(Predefined.DerivedColumns);
         jobConfiguration.setKeyMap(keyMap);
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());

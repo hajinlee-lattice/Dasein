@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
@@ -63,7 +63,7 @@ public class MatchInputValidatorTestNG extends PropDataMatchFunctionalTestNGBase
         }
         Assert.assertTrue(failed, "Should failed on missing selection.");
 
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
+        matchInput.setPredefinedSelection(Predefined.DerivedColumns);
         try {
             MatchInputValidator.validateBulkInput(matchInput, yarnConfiguration);
         } catch (Exception e) {
@@ -74,7 +74,5 @@ public class MatchInputValidatorTestNG extends PropDataMatchFunctionalTestNGBase
 
         cleanupAvroDir(avroDir);
     }
-
-
 
 }

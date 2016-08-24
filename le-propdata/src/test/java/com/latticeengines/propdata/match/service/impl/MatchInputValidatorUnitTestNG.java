@@ -11,7 +11,7 @@ import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -45,7 +45,7 @@ public class MatchInputValidatorUnitTestNG {
     public void testRealTimeValidation() {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
-        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        input.setPredefinedSelection(Predefined.Model);
 
         Boolean failed = false;
         try {

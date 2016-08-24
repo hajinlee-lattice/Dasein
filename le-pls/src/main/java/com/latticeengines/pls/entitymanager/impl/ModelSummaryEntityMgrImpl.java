@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -174,7 +175,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             if (provenance != null) {
                 if (provenance.has("Predefined_ColumnSelection_Name")) {
                     String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
-                    ColumnSelection.Predefined predefined = ColumnSelection.Predefined
+                    Predefined predefined = Predefined
                             .fromName(predefinedSelectionName);
                     summary.setPredefinedSelection(predefined);
                     if (provenance.has("Predefined_ColumnSelection_Version")) {

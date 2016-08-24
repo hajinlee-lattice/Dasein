@@ -16,8 +16,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -161,7 +161,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+        matchInput.setPredefinedSelection(Predefined.RTS);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

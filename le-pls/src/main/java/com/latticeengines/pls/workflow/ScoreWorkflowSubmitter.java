@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
@@ -75,8 +76,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
                     summary.getDisplayName());
         }
-        ColumnSelection.Predefined selection = ColumnSelection.Predefined
-                .getLegacyDefaultSelection();
+        Predefined selection = Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
         if (summary != null && summary.getPredefinedSelection() != null) {
             selection = summary.getPredefinedSelection();

@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -564,9 +565,9 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Transient
     @JsonIgnore
-    public ColumnSelection.Predefined getPredefinedSelection() {
+    public Predefined getPredefinedSelection() {
         if (StringUtils.isNotEmpty(getPredefinedSelectionName())) {
-            return ColumnSelection.Predefined.fromName(getPredefinedSelectionName());
+            return Predefined.fromName(getPredefinedSelectionName());
         } else {
             return null;
         }
@@ -574,7 +575,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Transient
     @JsonIgnore
-    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+    public void setPredefinedSelection(Predefined predefinedSelection) {
         this.setPredefinedSelectionName(predefinedSelection.getName());
     }
 

@@ -13,8 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -33,7 +36,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     private ColumnMetadataService columnMetadataService;
 
     @Autowired
-    private ColumnSelectionService columnSelectionService;
+    private List<ColumnSelectionService> columnSelectionServiceList;
 
     @Resource(name = "externalColumnService")
     private MetadataColumnService<ExternalColumn> externalColumnService;
@@ -163,8 +166,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Trace
     MatchContext mergeResults(MatchContext matchContext) {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
-        List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
-        List<ColumnSelection.Column> columns = matchContext.getColumnSelection().getColumns();
+        List<String> columnNames = getColumnSelectionService(matchContext.getInput().getDataCloudVersion())
+                .getMatchedColumns(matchContext.getColumnSelection());
+        List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
 
         List<OutputRecord> outputRecords = new ArrayList<>();
@@ -195,7 +199,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Map<String, Object> results = internalRecord.getQueryResult();
             boolean matchedAnyColumn = false;
             for (int i = 0; i < columns.size(); i++) {
-                ColumnSelection.Column column = columns.get(i);
+                Column column = columns.get(i);
                 ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId());
                 String field = (externalColumn != null) ? externalColumn.getDefaultColumnName()
                         : column.getColumnName();
@@ -236,9 +240,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
                 output.add(value);
 
-                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())
-                        || ColumnSelection.Predefined.DerivedColumns
-                                .equals(matchContext.getInput().getPredefinedSelection())) {
+                if (Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())
+                        || Predefined.DerivedColumns.equals(matchContext.getInput().getPredefinedSelection())) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
                     internalRecord.getColumnMatched().add(value != null);
                 } else {
@@ -295,6 +298,15 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
 
         return matchContext;
+    }
+
+    private ColumnSelectionService getColumnSelectionService(String matchVersion) {
+        for (ColumnSelectionService handler : columnSelectionServiceList) {
+            if (handler.accept(matchVersion)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
     }
 
 }

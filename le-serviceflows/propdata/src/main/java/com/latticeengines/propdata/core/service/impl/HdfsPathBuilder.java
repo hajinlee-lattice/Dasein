@@ -10,6 +10,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.IngestedRawSource;
 import com.latticeengines.propdata.core.source.Source;
@@ -193,15 +194,15 @@ public class HdfsPathBuilder {
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 
-    public Path predefinedColumnSelectionDir(ColumnSelection.Predefined predefined) {
+    public Path predefinedColumnSelectionDir(Predefined predefined) {
         return propDataDir().append(COLUMN_SELECTIONS).append(predefined.getName());
     }
 
-    public Path predefinedColumnSelectionFile(ColumnSelection.Predefined predefined, String version) {
+    public Path predefinedColumnSelectionFile(Predefined predefined, String version) {
         return predefinedColumnSelectionDir(predefined).append(predefined.getJsonFileName(version));
     }
 
-    public Path predefinedColumnSelectionVersionFile(ColumnSelection.Predefined predefined) {
+    public Path predefinedColumnSelectionVersionFile(Predefined predefined) {
         return predefinedColumnSelectionDir(predefined).append(VERSION_FILE);
     }
 

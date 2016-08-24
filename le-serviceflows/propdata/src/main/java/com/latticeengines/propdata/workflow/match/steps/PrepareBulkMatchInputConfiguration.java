@@ -15,6 +15,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
@@ -49,7 +50,7 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @NotNull
     private Boolean excludePublicDomains;
 
-    private ColumnSelection.Predefined predefinedSelection;
+    private Predefined predefinedSelection;
 
     private String predefinedSelectionVersion;
 
@@ -143,12 +144,12 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     }
 
     @JsonProperty("predefined_selection")
-    public ColumnSelection.Predefined getPredefinedSelection() {
+    public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
     @JsonProperty("predefined_selection")
-    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+    public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
 

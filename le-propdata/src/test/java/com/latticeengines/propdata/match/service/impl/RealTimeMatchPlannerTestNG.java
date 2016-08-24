@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.UnionSelection;
@@ -32,6 +34,7 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
     MatchPlanner matchPlanner;
 
     @Autowired
+    @Qualifier("columnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Test(groups = "functional")
@@ -47,7 +50,7 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
 
         MatchContext context = matchPlanner.plan(input);
         Assert.assertEquals(context.getInput().getPredefinedVersion(),
-                columnSelectionService.getCurrentVersion(ColumnSelection.Predefined.Model));
+                columnSelectionService.getCurrentVersion(Predefined.Model));
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 
         for (InternalOutputRecord record : context.getInternalResults()) {
@@ -55,6 +58,7 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
             Assert.assertFalse(record.getParsedDomain().contains("abc@"));
         }
     }
+
     @Test(groups = "functional")
     public void testInvalidSelectionVersion() {
         MatchInput input = prepareMatchInput();
@@ -71,22 +75,20 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
     @Test(groups = "functional")
     public void testUnionSelection() {
         MatchInput input = prepareMatchInput();
-        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        input.setPredefinedSelection(Predefined.Model);
         ColumnSelection columnSelection = new ColumnSelection();
-        List<ColumnSelection.Column> columns = Arrays.asList(
-                new ColumnSelection.Column("TechIndicator_Dropbox"),
-                new ColumnSelection.Column("TechIndicator_Box"),
-                new ColumnSelection.Column("TechIndicator_Splunk")
-        );
+        List<Column> columns = Arrays.asList(new Column("TechIndicator_Dropbox"), new Column("TechIndicator_Box"),
+                new Column("TechIndicator_Splunk"));
         columnSelection.setColumns(columns);
         UnionSelection unionSelection = new UnionSelection();
-        Map<ColumnSelection.Predefined, String> map = new HashMap<>();
-        map.put(ColumnSelection.Predefined.RTS, "1.0");
+        Map<Predefined, String> map = new HashMap<>();
+        map.put(Predefined.RTS, "1.0");
         unionSelection.setPredefinedSelections(map);
         unionSelection.setCustomSelection(columnSelection);
         input.setUnionSelection(unionSelection);
         MatchContext context = matchPlanner.plan(input);
-        Integer expectedColumns = columnSelectionService.parsePredefined(ColumnSelection.Predefined.RTS).getColumns().size() + 3;
+        Integer expectedColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.RTS).getColumns()
+                .size() + 3;
         Assert.assertEquals((Integer) context.getColumnSelection().getColumns().size(), expectedColumns);
     }
 
@@ -94,7 +96,7 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
         MatchInput input = new MatchInput();
         input.setUuid(UUID.randomUUID());
         input.setTenant(new Tenant("PD_Test"));
-        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        input.setPredefinedSelection(Predefined.Model);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
@@ -108,6 +110,5 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
         input.setData(mockData);
         return input;
     }
-
 
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -22,7 +22,7 @@ public class ColumnMetadataProxy extends MicroserviceRestApiProxy implements Col
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName, String dataCloudVersion) {
+    public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
         String url = constructUrl("/predefined/{selectName}", String.valueOf(selectName.name()));
         if (StringUtils.isNotBlank(dataCloudVersion)) {
             url = constructUrl("/predefined/{selectName}?datacloudversion", String.valueOf(selectName.name()),
@@ -47,7 +47,7 @@ public class ColumnMetadataProxy extends MicroserviceRestApiProxy implements Col
     }
 
     @Override
-    public String selectionCurrentVersion(ColumnSelection.Predefined selectName) {
+    public String selectionCurrentVersion(Predefined selectName) {
         String url = constructUrl("/predefined/{selectName}/currentversion", String.valueOf(selectName.name()));
         return get("selectionCurrentVersion", url, String.class);
     }

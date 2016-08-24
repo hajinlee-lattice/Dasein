@@ -19,8 +19,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.newrelic.api.agent.Trace;
@@ -29,7 +31,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
     private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
 
-    private ConcurrentMap<ColumnSelection.Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
+    private ConcurrentMap<Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
 
     @Autowired
     @Qualifier("pdScheduler")
@@ -47,8 +49,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<ColumnMetadata> fromPredefinedSelection(ColumnSelection.Predefined predefined,
-            String dataCloudVersion) {
+    public List<ColumnMetadata> fromPredefinedSelection(Predefined predefined, String dataCloudVersion) {
         return predefinedMetaDataCache.get(predefined);
     }
 
@@ -56,7 +57,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Trace
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
         List<E> metadataColumns = new ArrayList<>();
-        for (ColumnSelection.Column column : selection.getColumns()) {
+        for (Column column : selection.getColumns()) {
             metadataColumns.add(getMetadataColumnService().getMetadataColumn(column.getExternalColumnId()));
         }
         List<ColumnMetadata> metadatas = toColumnMetadata(metadataColumns);
@@ -74,7 +75,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
     abstract protected MetadataColumnService<E> getMetadataColumnService();
 
-    private List<ColumnMetadata> fromMetadataColumnService(ColumnSelection.Predefined selectionName) {
+    private List<ColumnMetadata> fromMetadataColumnService(Predefined selectionName) {
         List<E> columns = getMetadataColumnService().findByColumnSelection(selectionName);
         return toColumnMetadata(columns);
     }
@@ -94,7 +95,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public Schema getAvroSchema(ColumnSelection.Predefined selectionName, String recordName, String dataCloudVersion) {
+    public Schema getAvroSchema(Predefined selectionName, String recordName, String dataCloudVersion) {
         List<ColumnMetadata> columnMetadatas = fromPredefinedSelection(selectionName, dataCloudVersion);
         return getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName);
     }
@@ -137,7 +138,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     abstract protected Schema.Type getAvroTypeDataType(String dataType);
 
     private void loadCache() {
-        for (ColumnSelection.Predefined selection : ColumnSelection.Predefined.values()) {
+        for (Predefined selection : Predefined.values()) {
             try {
                 predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection));
             } catch (Exception e) {

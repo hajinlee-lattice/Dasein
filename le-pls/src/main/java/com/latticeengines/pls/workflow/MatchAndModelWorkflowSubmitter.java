@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
@@ -109,7 +110,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                         parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), null)
+                .matchColumnSelection(Predefined.getDefaultSelection(), null)
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //

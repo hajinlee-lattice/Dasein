@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.pls.service.SelectedAttrService;

@@ -25,10 +25,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Column;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -111,7 +111,7 @@ public class MatcherImpl implements Matcher {
             }
             predefinedSelections.put(modelSummary.getPredefinedSelection(), version);
         } else {
-            predefinedSelections.put(ColumnSelection.Predefined.getLegacyDefaultSelection(), null);
+            predefinedSelections.put(Predefined.getLegacyDefaultSelection(), null);
         }
         unionSelections.setPredefinedSelections(predefinedSelections);
         if (modelSummary != null) {
@@ -154,7 +154,8 @@ public class MatcherImpl implements Matcher {
             externalCol.setDefaultColumnName(attr.getFieldName());
         }
 
-        ColumnSelection customSelection = new ColumnSelection(externalColumns);
+        ColumnSelection customSelection = new ColumnSelection();
+        customSelection.createColumnSelection(externalColumns);
         return customSelection;
     }
 
@@ -264,8 +265,8 @@ public class MatcherImpl implements Matcher {
                     String modelId = partiallyOrderedParsedTupleList.get(idx).getModelId();
                     Map<String, FieldSchema> fieldSchemas = uniqueFieldSchemasMap.get(modelId);
 
-                    Map<String, Object> matchedRecordResult = new HashMap<>(partiallyOrderedParsedTupleList.get(idx)
-                            .getParsedData().getKey());
+                    Map<String, Object> matchedRecordResult = new HashMap<>(
+                            partiallyOrderedParsedTupleList.get(idx).getParsedData().getKey());
                     getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput.getInputList().get(idx),
                             output);
 

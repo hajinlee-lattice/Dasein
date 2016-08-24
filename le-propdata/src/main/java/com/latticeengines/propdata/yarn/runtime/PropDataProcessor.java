@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -53,6 +54,7 @@ import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
 import com.latticeengines.propdata.match.metric.MatchResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
@@ -91,11 +93,15 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private Configuration yarnConfiguration;
 
     @Autowired
+    @Qualifier("columnSelectionService")
+    private ColumnSelectionService columnSelectionService;
+
+    @Autowired
     private MetricService metricService;
 
     private BlockDivider divider;
     private Tenant tenant;
-    private ColumnSelection.Predefined predefinedSelection;
+    private Predefined predefinedSelection;
     private String predefinedSelectionVersion;
     private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;

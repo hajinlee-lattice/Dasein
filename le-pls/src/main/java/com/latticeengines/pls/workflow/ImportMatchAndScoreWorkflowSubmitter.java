@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -101,8 +102,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
         ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
 
-        ColumnSelection.Predefined selection = ColumnSelection.Predefined
-                .getLegacyDefaultSelection();
+        Predefined selection = Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
         String dataCloudVersion = null;
         if (summary != null) {

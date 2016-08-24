@@ -9,8 +9,9 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
+import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.newrelic.api.agent.Trace;
@@ -25,12 +26,13 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<E> findByColumnSelection(ColumnSelection.Predefined selectName) {
+    public List<E> findByColumnSelection(Predefined selectName) {
         return getMetadataColumnEntityMgr().findByTag(selectName.getName());
     }
 
     @Override
     @Trace
+    @MatchStep(threshold = 500)
     public E getMetadataColumn(String columnId) {
         if (getBlackColumnCache().contains(columnId)) {
             return null;

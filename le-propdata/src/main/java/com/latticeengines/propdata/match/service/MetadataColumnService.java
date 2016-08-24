@@ -2,15 +2,14 @@ package com.latticeengines.propdata.match.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 
 public interface MetadataColumnService<E> {
 
-    List<E> findByColumnSelection(ColumnSelection.Predefined selectName);
+    List<E> findByColumnSelection(Predefined selectName);
 
     E getMetadataColumn(String columnId);
 
     void loadCache();
 
 }
-

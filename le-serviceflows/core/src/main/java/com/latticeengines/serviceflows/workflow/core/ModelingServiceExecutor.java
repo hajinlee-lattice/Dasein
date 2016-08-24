@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
@@ -371,7 +372,7 @@ public class ModelingServiceExecutor {
         private String trainingTableName;
         private String productType;
         private String transformationGroupName;
-        private ColumnSelection.Predefined predefinedColumnSelection;
+        private Predefined predefinedColumnSelection;
         private String predefinedSelectionVersion;
         private ColumnSelection customizedColumnSelection;
         private ModelSummaryProvenance modelSummaryProvenance;
@@ -576,7 +577,7 @@ public class ModelingServiceExecutor {
             return this;
         }
 
-        public Builder predefinedColumnSelection(ColumnSelection.Predefined predefined,
+        public Builder predefinedColumnSelection(Predefined predefined,
                 String version) {
             this.setPredefinedColumnSelection(predefined);
             this.setPredefinedSelectionVersion(version);
@@ -913,12 +914,12 @@ public class ModelingServiceExecutor {
             this.customizedColumnSelection = customizedColumnSelection;
         }
 
-        public ColumnSelection.Predefined getPredefinedColumnSelection() {
+        public Predefined getPredefinedColumnSelection() {
             return predefinedColumnSelection;
         }
 
         public void setPredefinedColumnSelection(
-                ColumnSelection.Predefined predefinedColumnSelection) {
+                Predefined predefinedColumnSelection) {
             this.predefinedColumnSelection = predefinedColumnSelection;
         }
 

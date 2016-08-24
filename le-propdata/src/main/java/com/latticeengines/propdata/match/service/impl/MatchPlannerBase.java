@@ -18,9 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -41,7 +44,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     private static Log log = LogFactory.getLog(MatchPlannerBase.class);
 
     @Autowired
-    protected ColumnSelectionService columnSelectionService;
+    protected List<ColumnSelectionService> columnSelectionServiceList;
 
     @Resource(name = "columnMetadataServiceDispatch")
     protected ColumnMetadataService columnMetadataService;
@@ -54,30 +57,32 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            input.setPredefinedVersion(
-                    validateOrAssignPredefinedVersion(input.getPredefinedSelection(), input.getPredefinedVersion()));
+            ColumnSelectionService columnSelectionService = getColumnSelectionService(input.getDataCloudVersion());
+            input.setPredefinedVersion(validateOrAssignPredefinedVersion(columnSelectionService,
+                    input.getPredefinedSelection(), input.getPredefinedVersion()));
         }
     }
 
     @Trace
     ColumnSelection parseColumnSelection(MatchInput input) {
+        ColumnSelectionService columnSelectionService = getColumnSelectionService(input.getDataCloudVersion());
+
         if (input.getUnionSelection() != null) {
-            return combineSelections(input.getUnionSelection());
+            return combineSelections(columnSelectionService, input.getUnionSelection());
         } else if (input.getPredefinedSelection() != null) {
-            return columnSelectionService.parsePredefined(input.getPredefinedSelection());
+            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection());
         } else {
             return input.getCustomSelection();
         }
     }
 
     @MatchStep(threshold = 100L)
-    private ColumnSelection combineSelections(UnionSelection unionSelection) {
+    ColumnSelection combineSelections(ColumnSelectionService columnSelectionService, UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
-        for (Map.Entry<ColumnSelection.Predefined, String> entry : unionSelection.getPredefinedSelections()
-                .entrySet()) {
-            ColumnSelection.Predefined predefined = entry.getKey();
-            validateOrAssignPredefinedVersion(predefined, entry.getValue());
-            selections.add(columnSelectionService.parsePredefined(predefined));
+        for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
+            Predefined predefined = entry.getKey();
+            validateOrAssignPredefinedVersion(columnSelectionService, predefined, entry.getValue());
+            selections.add(columnSelectionService.parsePredefinedColumnSelection(predefined));
         }
         if (unionSelection.getCustomSelection() != null && !unionSelection.getCustomSelection().isEmpty()) {
             selections.add(unionSelection.getCustomSelection());
@@ -85,7 +90,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return ColumnSelection.combine(selections);
     }
 
-    private String validateOrAssignPredefinedVersion(ColumnSelection.Predefined predefined, String version) {
+    protected String validateOrAssignPredefinedVersion(ColumnSelectionService columnSelectionService,
+            Predefined predefined, String version) {
         if (StringUtils.isEmpty(version)) {
             version = columnSelectionService.getCurrentVersion(predefined);
             log.debug("Assign version " + version + " to column selection " + predefined);
@@ -121,9 +127,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    MatchContext sketchExecutionPlan(MatchContext matchContext) {
-        ColumnSelection columnSelection = matchContext.getColumnSelection();
-        matchContext.setPartitionColumnsMap(columnSelectionService.getPartitionColumnMap(columnSelection));
+    MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
+        if (!skipExecutionPlanning) {
+            ColumnSelectionService columnSelectionService = getColumnSelectionService(
+                    matchContext.getInput().getDataCloudVersion());
+
+            ColumnSelection columnSelection = matchContext.getColumnSelection();
+            matchContext.setPartitionColumnsMap(columnSelectionService.getPartitionColumnMap(columnSelection));
+        }
         return matchContext;
     }
 
@@ -165,6 +176,19 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
+        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, excludePublicDomains, record);
+
+        if (excludePublicDomains && record.isPublicDomain()) {
+            return null;
+        }
+
+        parseRecordForNameLocationAndDuns(inputRecord, keyPositionMap, nameLocationSet, record);
+
+        return record;
+    }
+
+    private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            Set<String> domainSet, boolean excludePublicDomains, InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
@@ -179,12 +203,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.setParsedDomain(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
+                    record.setPublicDomain(true);
                     if (excludePublicDomains) {
                         log.warn("A record with publid domain is excluded from input.");
-                        return null;
+                        return;
                     }
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
                     // update domain set
+                    record.setPublicDomain(false);
                     domainSet.add(cleanDomain);
                 }
             } catch (Exception e) {
@@ -192,7 +218,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
             }
         }
+    }
 
+    private void parseRecordForNameLocationAndDuns(List<Object> inputRecord,
+            Map<MatchKey, List<Integer>> keyPositionMap, Set<NameLocation> nameLocationSet,
+            InternalOutputRecord record) {
+        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
+        parseRecordForDuns(inputRecord, keyPositionMap, record);
+    }
+
+    private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            Set<NameLocation> nameLocationSet, InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Name) && keyPositionMap.containsKey(MatchKey.State)
                 && keyPositionMap.containsKey(MatchKey.Country)) {
             List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
@@ -242,8 +278,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.addErrorMessage("Error when cleanup name and location fields: " + e.getMessage());
             }
         }
+    }
 
-        return record;
+    private void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+            InternalOutputRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.DUNS)) {
+            List<Integer> dunsPosList = keyPositionMap.get(MatchKey.DUNS);
+            try {
+                String cleanDuns = null;
+                for (Integer dunsPos : dunsPosList) {
+                    String originalDuns = (String) inputRecord.get(dunsPos);
+                    if (StringUtils.isNotEmpty(originalDuns)) {
+                        cleanDuns = originalDuns;
+                        break;
+                    }
+                }
+                record.setParsedDuns(cleanDuns);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessage("Error when cleanup duns field: " + e.getMessage());
+            }
+        }
     }
 
     private static Map<MatchKey, List<Integer>> getKeyPositionMap(MatchInput input) {
@@ -287,6 +342,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
         matchOutput.setOutputFields(fields);
         return matchOutput;
+    }
+
+    protected ColumnSelectionService getColumnSelectionService(String version) {
+        for (ColumnSelectionService handler : columnSelectionServiceList) {
+            if (handler.accept(version)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { version });
     }
 
 }

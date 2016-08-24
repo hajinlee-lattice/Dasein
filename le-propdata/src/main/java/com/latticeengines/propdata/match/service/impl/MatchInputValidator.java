@@ -13,7 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
@@ -128,16 +128,16 @@ class MatchInputValidator {
             throw new IllegalArgumentException(
                     "Must provide predefined or custom column selections in a union selection.");
         } else {
-            for (ColumnSelection.Predefined predefined : unionSelection.getPredefinedSelections().keySet()) {
+            for (Predefined predefined : unionSelection.getPredefinedSelections().keySet()) {
                 validatePredefinedSelection(predefined);
             }
         }
     }
 
-    private static void validatePredefinedSelection(ColumnSelection.Predefined selection) {
-        if (!ColumnSelection.Predefined.supportedSelections.contains(selection)) {
+    private static void validatePredefinedSelection(Predefined selection) {
+        if (!Predefined.supportedSelections.contains(selection)) {
             throw new UnsupportedOperationException("Only Predefined selection "
-                    + ColumnSelection.Predefined.supportedSelections + " are supported at this time.");
+                    + Predefined.supportedSelections + " are supported at this time.");
         }
     }
 

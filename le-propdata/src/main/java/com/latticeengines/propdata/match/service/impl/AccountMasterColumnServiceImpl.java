@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -9,6 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.AccountMasterColumn;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
 
 @Component("accountMasterColumnService")
@@ -35,4 +37,8 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         return blackColumnCache;
     }
 
+    @Override
+    public List<AccountMasterColumn> findByColumnSelection(Predefined selectName) {
+        return getMetadataColumnEntityMgr().findByTag(selectName.getName());
+    }
 }

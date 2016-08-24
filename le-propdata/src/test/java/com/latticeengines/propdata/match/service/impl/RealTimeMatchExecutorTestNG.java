@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -19,10 +21,11 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
-@Component
+//@Component
 public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
+    @Qualifier("realTimeMatchExecutor")
     private RealTimeMatchExecutor realTimeMatchExecutor;
 
     private static final String COLUMN1 = "BusinessIndustry";
@@ -104,10 +107,10 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
     private ColumnSelection prepareColumnSelection() {
         ColumnSelection columnSelection = new ColumnSelection();
 
-        List<ColumnSelection.Column> columns = new ArrayList<>();
+        List<Column> columns = new ArrayList<>();
 
         for (String col : Arrays.asList(COLUMN1, COLUMN2, COLUMN3, COLUMN4)) {
-            ColumnSelection.Column column = new ColumnSelection.Column();
+            Column column = new Column();
             column.setExternalColumnId(col);
             column.setColumnName(col);
             columns.add(column);
@@ -149,29 +152,29 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
             Map<String, Map<String, Object>> results = record.getResultsInPartition();
             if (record.getParsedDomain() != null) {
                 switch (record.getParsedDomain()) {
-                    case "a.com":
-                        Assert.assertTrue(results.containsKey(PARTITION1),
-                                record.getParsedDomain() + " should match " + PARTITION1);
-                        Assert.assertTrue(results.containsKey(PARTITION2),
-                                record.getParsedDomain() + " should match " + PARTITION2);
-                        break;
-                    case "b.com":
-                        Assert.assertFalse(results.containsKey(PARTITION1),
-                                record.getParsedDomain() + " should not match " + PARTITION1);
-                        Assert.assertTrue(results.containsKey(PARTITION2),
-                                record.getParsedDomain() + " should match " + PARTITION2);
-                        break;
-                    case "c.com":
-                        Assert.assertTrue(results.containsKey(PARTITION1),
-                                record.getParsedDomain() + " should match " + PARTITION1);
-                        Assert.assertFalse(results.containsKey(PARTITION2),
-                                record.getParsedDomain() + " should not match " + PARTITION2);
-                        break;
-                    default:
-                        Assert.assertFalse(results.containsKey(PARTITION1),
-                                record.getParsedDomain() + " should not match " + PARTITION1);
-                        Assert.assertFalse(results.containsKey(PARTITION2),
-                                record.getParsedDomain() + " should not match " + PARTITION2);
+                case "a.com":
+                    Assert.assertTrue(results.containsKey(PARTITION1),
+                            record.getParsedDomain() + " should match " + PARTITION1);
+                    Assert.assertTrue(results.containsKey(PARTITION2),
+                            record.getParsedDomain() + " should match " + PARTITION2);
+                    break;
+                case "b.com":
+                    Assert.assertFalse(results.containsKey(PARTITION1),
+                            record.getParsedDomain() + " should not match " + PARTITION1);
+                    Assert.assertTrue(results.containsKey(PARTITION2),
+                            record.getParsedDomain() + " should match " + PARTITION2);
+                    break;
+                case "c.com":
+                    Assert.assertTrue(results.containsKey(PARTITION1),
+                            record.getParsedDomain() + " should match " + PARTITION1);
+                    Assert.assertFalse(results.containsKey(PARTITION2),
+                            record.getParsedDomain() + " should not match " + PARTITION2);
+                    break;
+                default:
+                    Assert.assertFalse(results.containsKey(PARTITION1),
+                            record.getParsedDomain() + " should not match " + PARTITION1);
+                    Assert.assertFalse(results.containsKey(PARTITION2),
+                            record.getParsedDomain() + " should not match " + PARTITION2);
 
                 }
             } else {
@@ -189,32 +192,32 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
 
             if (record.getParsedDomain() != null) {
                 switch (record.getParsedDomain()) {
-                    case "a.com":
-                        Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
-                        Assert.assertEquals(output.get(0), 1);
-                        Assert.assertEquals(output.get(1), "2");
-                        Assert.assertEquals(output.get(2), true);
-                        Assert.assertEquals(output.get(3), "YES");
-                        break;
-                    case "b.com":
-                        Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
-                        Assert.assertEquals(output.get(0), null);
-                        Assert.assertEquals(output.get(1), null);
-                        Assert.assertEquals(output.get(2), null);
-                        Assert.assertEquals(output.get(3), "NO");
-                        break;
-                    case "c.com":
-                        Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
-                        Assert.assertEquals(output.get(0), 3);
-                        Assert.assertEquals(output.get(1), "0");
-                        Assert.assertEquals(output.get(2), false);
-                        Assert.assertEquals(output.get(3), null);
-                        break;
-                    default:
-                        Assert.assertEquals(output.get(0), null);
-                        Assert.assertEquals(output.get(1), null);
-                        Assert.assertEquals(output.get(2), null);
-                        Assert.assertEquals(output.get(3), null);
+                case "a.com":
+                    Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
+                    Assert.assertEquals(output.get(0), 1);
+                    Assert.assertEquals(output.get(1), "2");
+                    Assert.assertEquals(output.get(2), true);
+                    Assert.assertEquals(output.get(3), "YES");
+                    break;
+                case "b.com":
+                    Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
+                    Assert.assertEquals(output.get(0), null);
+                    Assert.assertEquals(output.get(1), null);
+                    Assert.assertEquals(output.get(2), null);
+                    Assert.assertEquals(output.get(3), "NO");
+                    break;
+                case "c.com":
+                    Assert.assertTrue(record.isMatched(), record.getParsedDomain() + " should be matched.");
+                    Assert.assertEquals(output.get(0), 3);
+                    Assert.assertEquals(output.get(1), "0");
+                    Assert.assertEquals(output.get(2), false);
+                    Assert.assertEquals(output.get(3), null);
+                    break;
+                default:
+                    Assert.assertEquals(output.get(0), null);
+                    Assert.assertEquals(output.get(1), null);
+                    Assert.assertEquals(output.get(2), null);
+                    Assert.assertEquals(output.get(3), null);
                 }
             } else {
                 Assert.assertEquals(output.get(0), null);

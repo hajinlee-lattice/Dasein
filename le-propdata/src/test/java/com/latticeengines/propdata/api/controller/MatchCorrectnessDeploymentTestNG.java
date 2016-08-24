@@ -43,8 +43,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
@@ -257,7 +257,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
         private Future<MatchOutput> singleRun(List<Object> row, ExecutorService executor) {
             final MatchInput input = new MatchInput();
             input.setReturnUnmatched(true);
-            input.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+            input.setPredefinedSelection(Predefined.RTS);
             input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
             input.setData(Collections.singletonList(row));
@@ -338,7 +338,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
             MatchInput matchInput = new MatchInput();
             matchInput.setReturnUnmatched(true);
             matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-            matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+            matchInput.setPredefinedSelection(Predefined.RTS);
             AvroInputBuffer inputBuffer = new AvroInputBuffer();
             inputBuffer.setAvroDir(AVRO_DIR);
             matchInput.setInputBuffer(inputBuffer);

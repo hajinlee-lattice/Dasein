@@ -2,11 +2,12 @@ package com.latticeengines.domain.exposed.propdata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 
 public class PropDataMatchConfiguration {
 
     private String customer;
-    private ColumnSelection.Predefined predefinedSelection;
+    private Predefined predefinedSelection;
     private ColumnSelection customizedSelection;
     private String rootOperationUid;
     private String inputDir;
@@ -22,12 +23,12 @@ public class PropDataMatchConfiguration {
     }
 
     @JsonProperty("predefined_selection")
-    public ColumnSelection.Predefined getPredefinedSelection() {
+    public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
     @JsonProperty("predefined_selection")
-    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+    public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
 

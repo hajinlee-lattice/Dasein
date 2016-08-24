@@ -210,6 +210,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         for (Object res : resultObjList) {
             System.out.println("Expected score = " + expectedScores.get(idx).intValue());
             DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
+            Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
+                    new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
             Assert.assertEquals(result.getScores().get(0).getScore().intValue(), expectedScores.get(idx).intValue());
             Assert.assertEquals(new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue(),
                     expectedScores.get(idx).intValue());

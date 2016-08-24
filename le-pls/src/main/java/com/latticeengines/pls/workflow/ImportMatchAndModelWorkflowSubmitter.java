@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.DataRuleUtils;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
@@ -104,11 +105,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
-        ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined
+        Predefined predefinedSelection = Predefined
                 .getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
-            predefinedSelection = ColumnSelection.Predefined.fromName(predefinedSelectionName);
+            predefinedSelection = Predefined.fromName(predefinedSelectionName);
             if (predefinedSelection == null) {
                 throw new IllegalArgumentException(
                         "Cannot parse column selection named " + predefinedSelectionName);

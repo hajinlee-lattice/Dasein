@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;
+    private Boolean isPublicDomain;
+    private String parsedDuns;
     private NameLocation parsedNameLocation;
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
@@ -22,6 +24,22 @@ class InternalOutputRecord extends OutputRecord {
 
     void setParsedDomain(String parsedDomain) {
         this.parsedDomain = parsedDomain;
+    }
+
+    public Boolean isPublicDomain() {
+        return isPublicDomain;
+    }
+
+    public void setPublicDomain(Boolean isPublicDomain) {
+        this.isPublicDomain = isPublicDomain;
+    }
+
+    public String getParsedDuns() {
+        return parsedDuns;
+    }
+
+    public void setParsedDuns(String parsedDuns) {
+        this.parsedDuns = parsedDuns;
     }
 
     public NameLocation getParsedNameLocation() {

@@ -10,5 +10,5 @@ public interface MatchPlanner {
 
     MatchContext plan(MatchInput input);
 
-    MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas);
+    MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning);
 }

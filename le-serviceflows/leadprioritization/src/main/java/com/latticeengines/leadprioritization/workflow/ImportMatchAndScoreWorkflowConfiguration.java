@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.MatchJoinType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
@@ -97,7 +98,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder matchColumnSelection(ColumnSelection.Predefined predefinedColumnSelection, String selectionVersion) {
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }

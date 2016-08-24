@@ -8,17 +8,17 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.service.MatchPlanner;
-import com.newrelic.api.agent.Trace;
 
 @Component("bulkMatchPlanner")
 public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
-    public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas) {
-        throw new UnsupportedOperationException("Not implemented");
+    @Override
+    public MatchContext plan(MatchInput input) {
+        return plan(input, null, false);
     }
 
-    @Trace
-    public MatchContext plan(MatchInput input) {
+    @Override
+    public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
@@ -28,8 +28,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         MatchOutput output = initializeMatchOutput(input, null);
         context.setOutput(output);
         context = scanInputData(input, context);
-        context = sketchExecutionPlan(context);
+        context = sketchExecutionPlan(context, skipExecutionPlanning);
         return context;
     }
-
 }

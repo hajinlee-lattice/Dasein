@@ -5,16 +5,19 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 
 public interface ColumnSelectionService {
 
+    boolean accept(String version);
+
     List<String> getMatchedColumns(ColumnSelection selection);
 
-    ColumnSelection parsePredefined(ColumnSelection.Predefined predefined);
+    ColumnSelection parsePredefinedColumnSelection(Predefined predefined);
 
     Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection);
 
-    String getCurrentVersion(ColumnSelection.Predefined predefined);
+    String getCurrentVersion(Predefined predefined);
 
-    Boolean isValidVersion(ColumnSelection.Predefined predefined, String version);
+    Boolean isValidVersion(Predefined predefined, String version);
 }

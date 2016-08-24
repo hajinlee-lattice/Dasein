@@ -12,6 +12,7 @@
         <component-name>propdata-microservice</component-name>
         <le.microservice.version>2.0.36-SNAPSHOT</le.microservice.version>
         <le.propdata.version>2.0.36-SNAPSHOT</le.propdata.version>
+        <le.aws.version>2.0.36-SNAPSHOT</le.aws.version>
     </properties>
 
     <parent>
@@ -41,9 +42,34 @@
             <classifier>classes</classifier>
         </dependency>
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${le.aws.version}</version>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>${aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${apache.http.version}</version>
         </dependency>
     </dependencies>
 </project>

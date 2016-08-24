@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
@@ -186,7 +187,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder matchColumnSelection(ColumnSelection.Predefined predefinedColumnSelection,
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
                 String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);

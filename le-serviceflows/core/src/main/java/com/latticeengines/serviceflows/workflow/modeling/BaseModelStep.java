@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
@@ -38,8 +39,8 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         }
     }
 
-    protected ColumnSelection.Predefined getPredefinedSelection() {
-        return (ColumnSelection.Predefined) executionContext.get(MATCH_PREDEFINED_SELECTION);
+    protected Predefined getPredefinedSelection() {
+        return (Predefined) executionContext.get(MATCH_PREDEFINED_SELECTION);
     }
 
     protected String getPredefinedSelectionVersion() {

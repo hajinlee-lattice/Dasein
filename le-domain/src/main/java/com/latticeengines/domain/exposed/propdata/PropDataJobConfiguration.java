@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 
 public class PropDataJobConfiguration extends BasePayloadConfiguration {
@@ -23,7 +24,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private Integer groupSize;
     private Integer threadPoolSize;
     private String avroPath;
-    private ColumnSelection.Predefined predefinedSelection;
+    private Predefined predefinedSelection;
     private String predefinedSelectionVersion;
     private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;
@@ -120,12 +121,12 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     }
 
     @JsonProperty("predefined_selection")
-    public ColumnSelection.Predefined getPredefinedSelection() {
+    public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
     @JsonProperty("predefined_selection")
-    public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
+    public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.Predefined;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 
