@@ -53,6 +53,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "pmmlModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelDisplayName);
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, pmmlFileName);
 
         PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration.Builder()
                 .podId(CamilleEnvironment.getPodId()) //

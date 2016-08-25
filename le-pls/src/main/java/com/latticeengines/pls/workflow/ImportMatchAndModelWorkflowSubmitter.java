@@ -101,6 +101,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 "importMatchAndModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
                 parameters.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
+                parameters.getFilename());
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
