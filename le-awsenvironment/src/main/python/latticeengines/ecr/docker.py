@@ -74,7 +74,7 @@ def purge_internal(environment, image):
     if len(revisions) > 0:
         revisions.sort()
         for i in xrange(len(revisions) - REVISIONS_TO_KEEP):
-            to_delete.append(revisions[i])
+            to_delete.append({'imageTag': revisions[i]})
 
     print to_delete
 
