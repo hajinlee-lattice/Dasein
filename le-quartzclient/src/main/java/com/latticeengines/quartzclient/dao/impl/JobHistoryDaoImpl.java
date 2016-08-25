@@ -45,7 +45,7 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
 
     @Override
     public void saveJobHistory(JobHistory jobHistory) {
-        super.create(jobHistory);
+        super.createOrUpdate(jobHistory);
     }
 
     @Override
@@ -61,12 +61,15 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         String queryStr = String
                 .format(
                         "from %s where TenantId = :tenantId and JobName = :jobName and " +
-                                "TriggeredJobStatus = :jobStatus order by PID desc",
+                                "TriggeredJobStatus in (:jobStatus) order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);
         query.setString("jobName", jobName);
-        query.setInteger("jobStatus", TriggeredJobStatus.START.getValue());
+        List<Integer> statusCode = new ArrayList<>();
+        statusCode.add(TriggeredJobStatus.START.getValue());
+        statusCode.add(TriggeredJobStatus.TRIGGERED.getValue());
+        query.setParameterList("jobStatus", statusCode);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -89,6 +92,26 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         query.setString("tenantId", tenantId);
         query.setString("jobName", jobName);
         query.setString("jobHandle", triggeredJobHandle);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            return (JobHistory) list.get(0);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public JobHistory getLastJobHistory(String tenantId, String jobName) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<JobHistory> entityClz = getEntityClass();
+        String queryStr = String
+                .format(
+                        "from %s where TenantId = :tenantId and JobName = :jobName order by PID desc",
+                        entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("tenantId", tenantId);
+        query.setString("jobName", jobName);
         List list = query.list();
         if (list.size() == 0) {
             return null;

@@ -11,6 +11,8 @@ public interface JobHistoryEntityMgr extends BaseJobHistoryEntityMgr {
 
     JobHistory getRecentUnfinishedJobHistory(String tenantId, String jobName);
 
+    JobHistory getLastJobHistory(String tenantId, String jobName);
+
     void saveJobHistory(JobHistory jobHistory);
 
 }

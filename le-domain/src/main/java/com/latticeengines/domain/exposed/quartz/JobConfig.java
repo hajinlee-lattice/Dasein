@@ -13,6 +13,9 @@ public class JobConfig {
     @JsonProperty("dest_url")
     private String destUrl;
 
+    @JsonProperty("secondary_dest_url")
+    private String secondaryDestUrl;
+
     @JsonProperty("query_api")
     private String queryApi;
 
@@ -47,6 +50,14 @@ public class JobConfig {
 
     public void setDestUrl(String destUrl) {
         this.destUrl = destUrl;
+    }
+
+    public String getSecondaryDestUrl() {
+        return secondaryDestUrl;
+    }
+
+    public void setSecondaryDestUrl(String secondaryDestUrl) {
+        this.secondaryDestUrl = secondaryDestUrl;
     }
 
     public String getQueryApi() {

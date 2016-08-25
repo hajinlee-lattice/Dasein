@@ -32,4 +32,10 @@ public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl impleme
         return jobHistoryDao.getRecentUnfinishedJobHistory(tenantId, jobName);
     }
 
+    @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public JobHistory getLastJobHistory(String tenantId, String jobName) {
+        return jobHistoryDao.getLastJobHistory(tenantId, jobName);
+    }
+
 }

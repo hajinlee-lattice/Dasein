@@ -229,6 +229,8 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                         .withIdentity(jobKey).build();
                 jobDetail.getJobDataMap().put(PreDefinedServerJob.DESTURL,
                         jobConfig.getDestUrl());
+                jobDetail.getJobDataMap().put(PreDefinedServerJob.SECONDARYDESTURL,
+                        jobConfig.getSecondaryDestUrl());
                 jobDetail.getJobDataMap().put(PreDefinedServerJob.QUERYAPI,
                         jobConfig.getQueryApi());
                 jobDetail.getJobDataMap().put(PreDefinedServerJob.TIMEOUT,

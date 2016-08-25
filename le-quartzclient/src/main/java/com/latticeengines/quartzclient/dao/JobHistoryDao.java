@@ -12,6 +12,8 @@ public interface JobHistoryDao extends BaseDao<JobHistory> {
 
     JobHistory getJobHistory(String tenantId, String jobName, String triggeredJobHandle);
 
+    JobHistory getLastJobHistory(String tenantId, String jobName);
+
     void updateJobHistory(JobHistory jobHistory);
 
     void saveJobHistory(JobHistory jobHistory);
