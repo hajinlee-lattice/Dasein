@@ -27,6 +27,7 @@ else:
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality']
+COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi']
 
 def cleanupWars():
     print 'clean up existing wars ...'
@@ -122,7 +123,7 @@ def parseCliArgs():
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
     parser.add_argument('-a', dest='apps', type=str, default='microservice',
                         help='comma separated list of apps to be deployed. default is microservice. Avaiable choices are ' + ', '.join(LE_APPS))
-    parser.add_argument('-m', dest='modules', type=str, default=','.join(MS_MODULES),
+    parser.add_argument('-m', dest='modules', type=str, default=','.join(COMMON_MODULES),
                         help='comma separated list of microservice modules to be deployed. core is implicitly included. default is all modules. Avaiable choices are ' + ', '.join(MS_MODULES))
     args = parser.parse_args()
 
