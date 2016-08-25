@@ -17,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,19 +34,22 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterColumn")
+@Table(name = "AccountMasterColumn", uniqueConstraints = {@UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" })})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
     private static final long serialVersionUID = -7516382374246940122L;
 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Id
-    @Column(name = "AMColumnID", nullable = false, length = 100)
+    @Column(name = "AMColumnID", nullable = false, length = 64)
     private String amColumnId;
+
+    @Column(name = "DataCloudVersion", nullable = false, length = 100)
+    private String dataCloudVersion;
 
     @Column(name = "DisplayName", nullable = false)
     private String displayName;
@@ -112,6 +116,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @JsonIgnore
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+
+    @JsonIgnore
     public String getDescription() {
         return description;
     }
@@ -150,6 +164,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @JsonIgnore
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    @JsonIgnore
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    @JsonIgnore
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
     }
 
     @JsonIgnore
