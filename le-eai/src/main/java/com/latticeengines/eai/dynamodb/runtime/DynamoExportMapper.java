@@ -119,7 +119,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     private void loadToBuffer(GenericRecord record) {
-        FabricEntity entity = (FabricEntity) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
+        FabricEntity<?> entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
         GenericRecord mbusRecord = entity.toFabricAvroRecord(recordType);
         log.info("id=" + entity.getId() + "; record=" + mbusRecord.toString());
         recordBuffer.put((String) entity.getId(), mbusRecord);

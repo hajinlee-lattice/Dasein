@@ -5,23 +5,22 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import util.HdfsUriGenerator;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -36,19 +35,15 @@ import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
+import util.HdfsUriGenerator;
+
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     private static final Log log = LogFactory.getLog(FileEventTableImportStrategyBase.class);
 
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
-
-    @Autowired
     private JobService jobService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @Autowired
     private VersionManager versionManager;

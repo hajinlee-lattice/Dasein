@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.match.service.InternalService;
@@ -43,7 +44,7 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     private InternalService internalService;
 
     @Autowired
-    private MetadataColumnService externalColumnService;
+    private MetadataColumnService<ExternalColumn> externalColumnService;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {

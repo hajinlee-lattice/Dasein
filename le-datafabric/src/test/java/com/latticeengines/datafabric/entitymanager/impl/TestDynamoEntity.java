@@ -100,7 +100,6 @@ public class TestDynamoEntity implements FabricEntity<TestDynamoEntity> {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public TestDynamoEntity fromHdfsAvroRecord(GenericRecord record) {
         return this;

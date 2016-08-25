@@ -26,7 +26,7 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
         Query query = session.createQuery(queryStr);
         query.setString("majorVersion", majorVersion);
-        List results = query.list();
+        List<?> results = query.list();
         if (results == null || results.isEmpty()) {
             return null;
         } else {

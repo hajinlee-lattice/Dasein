@@ -21,7 +21,6 @@ import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -30,9 +29,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.UnionSelection;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
-import com.latticeengines.propdata.match.metric.MatchRequest;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
@@ -51,9 +48,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Autowired
     private PublicDomainService publicDomainService;
-
-    @Autowired
-    private MetricService metricService;
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {

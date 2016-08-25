@@ -271,7 +271,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     private GenericRecord entityToRecord(T entity) {
 
         if (entity instanceof FabricEntity) {
-            return ((FabricEntity) entity).toFabricAvroRecord(recordType);
+            return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
         }
 
         GenericRecord record  = null;

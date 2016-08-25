@@ -23,7 +23,7 @@ public final class FabricEntityFactory {
         try {
             if (FabricEntity.class.isAssignableFrom(clz)) {
                 T entity = clz.newInstance();
-                return ((FabricEntity) entity).getSchema(recordType);
+                return ((FabricEntity<?>) entity).getSchema(recordType);
             } else {
                 return ReflectData.get().getSchema(clz);
             }
@@ -37,7 +37,7 @@ public final class FabricEntityFactory {
         try {
             if (FabricEntity.class.isAssignableFrom(clz)) {
                 T entity = clz.newInstance();
-                return (T) ((FabricEntity) entity).fromFabricAvroRecord(record);
+                return (T) ((FabricEntity<?>) entity).fromFabricAvroRecord(record);
             } else {
                 T entity = null;
                 GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
@@ -74,7 +74,7 @@ public final class FabricEntityFactory {
     public static <T> T fromHdfsAvroRecord(GenericRecord record, Class<T> clz) {
         try {
             T entity = clz.newInstance();
-            return (T) ((FabricEntity) entity).fromHdfsAvroRecord(record);
+            return (T) ((FabricEntity<?>) entity).fromHdfsAvroRecord(record);
         } catch (Exception e) {
             throw new RuntimeException("Failed to construct FabricEntity of type " + clz.getSimpleName(), e);
         }

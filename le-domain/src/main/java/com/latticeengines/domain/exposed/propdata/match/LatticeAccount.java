@@ -76,7 +76,6 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public LatticeAccount fromHdfsAvroRecord(GenericRecord record) {
         setId(record.get(LATTICE_ACCOUNT_ID_HDFS).toString());

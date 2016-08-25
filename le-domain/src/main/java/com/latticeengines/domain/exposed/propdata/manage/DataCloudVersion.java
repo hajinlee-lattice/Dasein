@@ -26,7 +26,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCloudVersion implements HasPid, Serializable {
 
-    @Id
+    private static final long serialVersionUID = -6472245305360293747L;
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;

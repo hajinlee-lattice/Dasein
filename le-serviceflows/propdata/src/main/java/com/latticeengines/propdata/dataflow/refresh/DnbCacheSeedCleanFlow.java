@@ -74,7 +74,8 @@ public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<SingleBaseSou
         return node;
     }
 
-    private void setSchemaToNode(Node node, List<SourceColumn> baseSourceColumns) {
+    @SuppressWarnings("unused")
+	private void setSchemaToNode(Node node, List<SourceColumn> baseSourceColumns) {
         CsvToAvroFieldMapping fieldMapping = new CsvToAvroFieldMappingImpl(baseSourceColumns);
         Schema schema = fieldMapping.getAvroSchema();
 
