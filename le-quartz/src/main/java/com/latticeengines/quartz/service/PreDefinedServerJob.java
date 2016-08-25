@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.JobActiveEntityMgr;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
+import static com.latticeengines.common.exposed.util.SSLUtils.turnOffSslChecking;
+
 public class PreDefinedServerJob extends QuartzJobBean {
 
     private static final Log log = LogFactory.getLog(PreDefinedServerJob.class);
@@ -44,6 +46,7 @@ public class PreDefinedServerJob extends QuartzJobBean {
     public void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");
         jobActiveEntityMgr = (JobActiveEntityMgr) appCtx.getBean("jobActiveEntityMgr");
+        turnOffSslChecking();
     }
 
     @Override
