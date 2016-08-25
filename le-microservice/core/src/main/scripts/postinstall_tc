@@ -2,7 +2,9 @@
 
 source /etc/profile
 echo "getting environment information"
-echo $LE_ENVIRONMENT
+echo "LE_ENVIRONMENT=${LE_ENVIRONMENT}"
+echo "WITH_QUARTZ_MICROSERVICE=${WITH_QUARTZ_MICROSERVICE:=false}"
+
 rm -rf /usr/share/tomcat/webapps/ms/*.war
 mkdir -p /usr/share/tomcat/webapps/ms
 rm -rf /usr/share/tomcat/work/MicrosereviceEngine
@@ -13,6 +15,12 @@ cd /tmp/le-microservice-tc-rpm/ms
 for f in $(find . -name "*.war");
 do
     fn=`echo $f | cut -d / -f 2 | cut -d . -f 1`
+
+    if [ "${fn}" = "quartz" -a "${WITH_QUARTZ_MICROSERVICE}" = "false" ]; then
+        echo "skipping quartz war"
+        break;
+    fi
+
     echo "repackaging ${fn}.war"
     mkdir $fn
 
