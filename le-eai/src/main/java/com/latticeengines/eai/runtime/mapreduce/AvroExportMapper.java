@@ -13,6 +13,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
+
 public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
     private static final Log log = LogFactory.getLog(AvroExportMapper.class);
@@ -49,17 +51,29 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
 
     @Override
     public void map(AvroKey<Record> key, NullWritable value, Context context) throws IOException, InterruptedException {
-        Record record = key.datum();
-        avroRowHandler.startRecord(record);
-        for (Field field : schema.getFields()) {
-            avroRowHandler.handleField(record, field);
+        try {
+            Record record = key.datum();
+            avroRowHandler.startRecord(record);
+            for (Field field : schema.getFields()) {
+                avroRowHandler.handleField(record, field);
+            }
+            avroRowHandler.endRecord(record);
+        } catch (Exception e) {
+            context.getCounter(RecordExportCounter.ERROR_RECORDS).increment(1);
+            throw e;
         }
-        avroRowHandler.endRecord(record);
+        context.getCounter(RecordExportCounter.EXPORTED_RECORDS).increment(1);
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
         finalize(context);
+        if (context.getCounter(RecordExportCounter.EXPORTED_RECORDS).getValue() == 0) {
+            context.getCounter(RecordExportCounter.EXPORTED_RECORDS).setValue(0);
+        }
+        if (context.getCounter(RecordExportCounter.ERROR_RECORDS).getValue() == 0) {
+            context.getCounter(RecordExportCounter.ERROR_RECORDS).setValue(0);
+        }
     }
 
 }

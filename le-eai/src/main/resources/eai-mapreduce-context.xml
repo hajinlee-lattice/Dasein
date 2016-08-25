@@ -25,4 +25,13 @@
         <constructor-arg ref="versionManager"/>
         <constructor-arg value="${dataplatform.hdfs.stack:}" />
     </bean>
+
+    <hdp:job id="eaiDynamoExportJob" mapper="com.latticeengines.eai.dynamodb.runtime.DynamoExportMapper" />
+
+    <bean id="eaiDynamoExportCustomization" class="com.latticeengines.eai.dynamodb.runtime.DynamoExportJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+        <constructor-arg ref="versionManager"/>
+        <constructor-arg value="${dataplatform.hdfs.stack:}" />
+    </bean>
 </beans>

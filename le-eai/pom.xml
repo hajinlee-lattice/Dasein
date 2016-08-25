@@ -249,11 +249,6 @@
             <version>${camel.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-aws</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-api</artifactId>
             <version>${hadoop.version}</version>
@@ -353,6 +348,17 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-aws</artifactId>
             <version>${le.aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datafabric</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.confluent</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

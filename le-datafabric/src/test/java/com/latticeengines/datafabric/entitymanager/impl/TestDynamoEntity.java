@@ -12,9 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-public class TestDynamoEntity implements HasId<String>, FabricEntity<TestDynamoEntity> {
+public class TestDynamoEntity implements FabricEntity<TestDynamoEntity> {
 
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
     private static final String JSON_ATTRIBUTES = "json_attributes";
@@ -63,7 +62,7 @@ public class TestDynamoEntity implements HasId<String>, FabricEntity<TestDynamoE
     }
 
     @Override
-    public GenericRecord toAvroRecord(String recordType) {
+    public GenericRecord toFabricAvroRecord(String recordType) {
         Schema schema = new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(LATTICE_ACCOUNT_ID, getId());
@@ -84,7 +83,7 @@ public class TestDynamoEntity implements HasId<String>, FabricEntity<TestDynamoE
 
     @SuppressWarnings("unchecked")
     @Override
-    public TestDynamoEntity fromAvroRecord(GenericRecord record) {
+    public TestDynamoEntity fromFabricAvroRecord(GenericRecord record) {
         setId(record.get(LATTICE_ACCOUNT_ID).toString());
 
         if (record.get(JSON_ATTRIBUTES) != null) {
@@ -98,6 +97,12 @@ public class TestDynamoEntity implements HasId<String>, FabricEntity<TestDynamoE
             Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
             setMapAttributes(mapAttributes);
         }
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public TestDynamoEntity fromHdfsAvroRecord(GenericRecord record) {
         return this;
     }
 

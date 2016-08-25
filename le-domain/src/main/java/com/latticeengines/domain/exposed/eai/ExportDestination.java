@@ -6,6 +6,7 @@ public enum ExportDestination {
     ELOQUA, //
     MARKETO, //
     SALESFORCE, //
-    S3
+    S3, //
+    DYNAMO
 
 }

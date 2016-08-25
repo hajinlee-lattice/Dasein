@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -42,7 +43,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public List<S3ObjectSummary> listObjects(String bucket, String prefix) {
-        return s3Client.listObjects(bucket, prefix).getObjectSummaries();
+        ListObjectsRequest request = new ListObjectsRequest(bucket, prefix, null, null, Integer.MAX_VALUE);
+        return s3Client.listObjects(request).getObjectSummaries();
     }
 
     @Override

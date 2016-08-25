@@ -105,7 +105,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         entityClass = getTypeParameterClass();
 
         // get the reflected schema for Entity
-        schema = FabricEntityFactory.getSchema(entityClass, recordType);
+        schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
 
         // add redis index
         String redisIndex = RedisUtil.constructIndex(entityClass);
@@ -137,8 +137,9 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void batchCreate(List<T> entities) {
-        if (disabled)
+        if (disabled) {
             return;
+        }
 
         Map<String, GenericRecord> records = new HashMap<>();
         for (T entity : entities) {
@@ -150,32 +151,36 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public void update(T entity) {
-        if (disabled)
+        if (disabled) {
             return;
+        }
         GenericRecord record = entityToRecord(entity);
         dataStore.updateRecord(entity.getId(), record);
     }
 
     @Override
     public void delete(T entity) {
-        if (disabled)
+        if (disabled) {
             return;
+        }
         GenericRecord record = entityToRecord(entity);
         dataStore.deleteRecord(entity.getId(), record);
     }
 
     @Override
     public T findByKey(T entity) {
-        if (disabled)
+        if (disabled) {
             return null;
+        }
         GenericRecord record = dataStore.findRecord(entity.getId());
         return (record == null) ? null : recordToEntity(record);
     }
 
     @Override
     public T findByKey(String id) {
-        if (disabled)
+        if (disabled) {
             return null;
+        }
         GenericRecord record = dataStore.findRecord(id);
         return (record == null) ? null : recordToEntity(record);
     }
@@ -266,7 +271,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     private GenericRecord entityToRecord(T entity) {
 
         if (entity instanceof FabricEntity) {
-            return ((FabricEntity) entity).toAvroRecord(recordType);
+            return ((FabricEntity) entity).toFabricAvroRecord(recordType);
         }
 
         GenericRecord record  = null;
@@ -297,7 +302,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     private T recordToEntity(GenericRecord record) {
-        return FabricEntityFactory.fromAvroRecord(record, entityClass, schema);
+        return FabricEntityFactory.fromFabricAvroRecord(record, entityClass, schema);
     }
 
     @SuppressWarnings("unchecked")

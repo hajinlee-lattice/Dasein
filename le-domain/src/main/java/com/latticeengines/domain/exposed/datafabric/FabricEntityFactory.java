@@ -19,7 +19,7 @@ public final class FabricEntityFactory {
 
     private static final Log log = LogFactory.getLog(FabricEntityFactory.class);
 
-    public static <T> Schema getSchema(Class<T> clz, String recordType) {
+    public static <T> Schema getFabricSchema(Class<T> clz, String recordType) {
         try {
             if (FabricEntity.class.isAssignableFrom(clz)) {
                 T entity = clz.newInstance();
@@ -33,11 +33,11 @@ public final class FabricEntityFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T fromAvroRecord(GenericRecord record, Class<T> clz, Schema schema) {
+    public static <T> T fromFabricAvroRecord(GenericRecord record, Class<T> clz, Schema schema) {
         try {
             if (FabricEntity.class.isAssignableFrom(clz)) {
                 T entity = clz.newInstance();
-                return (T) ((FabricEntity) entity).fromAvroRecord(record);
+                return (T) ((FabricEntity) entity).fromFabricAvroRecord(record);
             } else {
                 T entity = null;
                 GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
@@ -65,6 +65,16 @@ public final class FabricEntityFactory {
 
                 return entity;
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to construct FabricEntity of type " + clz.getSimpleName(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T fromHdfsAvroRecord(GenericRecord record, Class<T> clz) {
+        try {
+            T entity = clz.newInstance();
+            return (T) ((FabricEntity) entity).fromHdfsAvroRecord(record);
         } catch (Exception e) {
             throw new RuntimeException("Failed to construct FabricEntity of type " + clz.getSimpleName(), e);
         }

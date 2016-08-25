@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.match;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Id;
@@ -7,15 +8,17 @@ import javax.persistence.Id;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-public class LatticeAccount implements HasId<String>, FabricEntity<LatticeAccount> {
+public class LatticeAccount implements FabricEntity<LatticeAccount> {
+
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
     private static final String ATTRIBUTES = "attributes";
+    private static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeAccountId";
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
     private static final String SCHEMA_TEMPLATE = String.format(
@@ -48,7 +51,7 @@ public class LatticeAccount implements HasId<String>, FabricEntity<LatticeAccoun
     }
 
     @Override
-    public GenericRecord toAvroRecord(String recordType) {
+    public GenericRecord toFabricAvroRecord(String recordType) {
         Schema schema = new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(LATTICE_ACCOUNT_ID, getId());
@@ -63,13 +66,30 @@ public class LatticeAccount implements HasId<String>, FabricEntity<LatticeAccoun
 
     @SuppressWarnings("unchecked")
     @Override
-    public LatticeAccount fromAvroRecord(GenericRecord record) {
+    public LatticeAccount fromFabricAvroRecord(GenericRecord record) {
         setId(record.get(LATTICE_ACCOUNT_ID).toString());
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
             Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
             setAttributes(mapAttributes);
         }
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public LatticeAccount fromHdfsAvroRecord(GenericRecord record) {
+        setId(record.get(LATTICE_ACCOUNT_ID_HDFS).toString());
+        Map<String, Object> mapAttributes = new HashMap<>();
+        for (Schema.Field field : record.getSchema().getFields()) {
+            String key = field.name();
+            Object value = record.get(key);
+            if (value instanceof Utf8) {
+                value = value.toString();
+            }
+            mapAttributes.put(key, value);
+        }
+        setAttributes(mapAttributes);
         return this;
     }
 

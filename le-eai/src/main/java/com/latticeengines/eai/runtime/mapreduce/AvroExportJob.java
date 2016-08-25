@@ -7,6 +7,8 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,6 +31,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class AvroExportJob extends Configured implements Tool, MRJobCustomization {
+
+    private static final Log log = LogFactory.getLog(AvroExportJob.class);
 
     public static final String CSV_EXPORT_JOB_TYPE = "eaiCSVExportJob";
 
@@ -102,6 +106,7 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
                 AvroKeyInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
             }
             config.setInt(MAPRED_MAP_TASKS_PROPERTY, getNumMappers());
+            log.info("Set num mappers to " + getNumMappers());
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
             List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
