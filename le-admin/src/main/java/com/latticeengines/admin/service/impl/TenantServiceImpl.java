@@ -251,6 +251,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         Set<String> components = serviceService.getRegisteredServices();
+        log.info(String.format("Checking status of services %s", components));
         BootstrapState state = null;
         for (String serviceName : components) {
             LatticeComponent latticeComponent = orchestrator.getComponent(serviceName);
@@ -268,6 +269,7 @@ public class TenantServiceImpl implements TenantService {
                     throw new RuntimeException(
                             String.format("Error getting the newState of the Service: %s", serviceName));
                 }
+                log.info(String.format("State of required service %s is %s", serviceName, newState));
 
                 if (newState != null) {
                     if (state == null) {
