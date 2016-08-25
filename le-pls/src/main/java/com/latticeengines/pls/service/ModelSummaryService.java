@@ -21,4 +21,8 @@ public interface ModelSummaryService {
     ModelSummary getModelSummaryEnrichedByDetails(String modelId);
 
     List<ModelSummary> getAllByTenant(Tenant tenant);
+
+    ModelSummary getModelSummary(String modelId);
+
+    List<ModelSummary> getModelSummaries(String selection);
 }

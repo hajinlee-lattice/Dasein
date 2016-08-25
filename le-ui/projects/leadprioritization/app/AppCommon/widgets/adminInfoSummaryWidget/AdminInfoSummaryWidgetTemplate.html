@@ -65,7 +65,7 @@
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_FILE_LABEL')}}</th>
                     <td>
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="TrainingFile.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="TrainingFile.csv" filetype="text/csv" ng-if="TrainingFileExist">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFileExist">N/A</a>
                         <br/></span>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_PIVOT_FILE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/pivotmappingcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="PivotMappingFile.csv" filetype="text/csv" ng-if="showPivotMapping && PivotArtifactPath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!showPivotMapping || !PivotArtifactPath">N/A</a></span>

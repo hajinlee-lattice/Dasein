@@ -23,6 +23,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
     $scope.PivotArtifactPath = data.ModelDetails.PivotArtifactPath;
+    $scope.TrainingFileExist = data.ModelDetails.TrainingFileExist;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
 
     $scope.exportThresholdClicked = function () {

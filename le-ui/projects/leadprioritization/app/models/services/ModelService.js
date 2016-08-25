@@ -395,7 +395,7 @@ angular.module('mainApp.models.services.ModelService', [
                 modelSummary.ModelDetails.Uploaded = data.Uploaded;
                 modelSummary.ModelDetails.PivotArtifactPath = data.PivotArtifactPath;
                 modelSummary.ModelDetails.SourceSchemaInterpretation = data.SourceSchemaInterpretation;
-                modelSummary.ModelDetails.PivotArtifactPath = data.PivotArtifactPath;
+                modelSummary.ModelDetails.TrainingFileExist = data.TrainingFileExist;
 
                 // sync with front-end json structure
                 result.resultObj = modelSummary;

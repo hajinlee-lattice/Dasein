@@ -73,11 +73,7 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
     public ModelSummary getModelSummary(@PathVariable String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (summary != null) {
-            summary.setPredictors(new ArrayList<Predictor>());
-        }
-        return summary;
+        return modelSummaryService.getModelSummary(modelId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -85,19 +81,7 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(
             @RequestParam(value = "selection", required = false) String selection) {
-
-        List<ModelSummary> summaries;
-        if (selection != null && selection.equalsIgnoreCase("all")) {
-            summaries = modelSummaryEntityMgr.findAll();
-        } else {
-            summaries = modelSummaryEntityMgr.findAllValid();
-        }
-
-        for (ModelSummary summary : summaries) {
-            summary.setPredictors(new ArrayList<Predictor>());
-            summary.setDetails(null);
-        }
-        return summaries;
+        return modelSummaryService.getModelSummaries(selection);
     }
 
     @RequestMapping(value = "/tenant/{tenantName}", method = RequestMethod.GET, headers = "Accept=application/json")

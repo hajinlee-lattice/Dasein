@@ -85,6 +85,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String eventTableName;
     private String sourceSchemaInterpretation;
     private String trainingTableName;
+    private Boolean trainingFileExist = false;
     private String transformationGroupName;
     private String predefinedSelectionName;
     private String predefinedSelectionVersion;
@@ -464,6 +465,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     public void setTrainingTableName(String trainingTableName) {
         this.trainingTableName = trainingTableName;
+    }
+
+    @Transient
+    @JsonProperty("TrainingFileExist")
+    public Boolean getTrainingFileExist() {
+        return trainingFileExist;
+    }
+
+    public void setTrainingFileExist(Boolean trainingFileExist) {
+        this.trainingFileExist = trainingFileExist;
     }
 
     @JsonProperty("TransformationGroupName")

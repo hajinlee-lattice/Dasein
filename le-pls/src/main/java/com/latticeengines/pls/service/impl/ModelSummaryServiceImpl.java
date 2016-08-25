@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -31,6 +33,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
+
+    @Autowired
+    private SourceFileEntityMgr sourceFileEntityMgr;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -134,5 +139,45 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Override
     public List<ModelSummary> getAllByTenant(Tenant tenant) {
         return modelSummaryEntityMgr.getAllByTenant(tenant);
+    }
+
+    @Override
+    public ModelSummary getModelSummary(String modelId) {
+        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (summary != null) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            getModelSummaryTrainingFileState(summary);
+        }
+        return summary;
+    }
+
+    @Override
+    public List<ModelSummary> getModelSummaries(String selection) {
+        List<ModelSummary> summaries;
+        if (selection != null && selection.equalsIgnoreCase("all")) {
+            summaries = modelSummaryEntityMgr.findAll();
+        } else {
+            summaries = modelSummaryEntityMgr.findAllValid();
+        }
+
+        for (ModelSummary summary : summaries) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
+            getModelSummaryTrainingFileState(summary);
+        }
+        return summaries;
+    }
+
+    private void getModelSummaryTrainingFileState(ModelSummary summary) {
+        if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
+            summary.setTrainingFileExist(false);
+        } else {
+            SourceFile sourceFile = sourceFileEntityMgr.findByTableName(summary.getTrainingTableName());
+            if (sourceFile == null) {
+                summary.setTrainingFileExist(false);
+            } else {
+                summary.setTrainingFileExist(true);
+            }
+        }
     }
 }
