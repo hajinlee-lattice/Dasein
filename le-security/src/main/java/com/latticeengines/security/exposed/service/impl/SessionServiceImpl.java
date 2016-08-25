@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
@@ -63,13 +64,12 @@ public class SessionServiceImpl implements SessionService {
             } catch (Exception e) {
                 LOGGER.warn("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
                         + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
-            } finally {
-                try {
-                    retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
-                    Thread.sleep(retryInterval);
-                } catch (Exception e) {
-                    // ignore
-                }
+            }
+            try {
+                retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+                Thread.sleep(retryInterval);
+            } catch (Exception e) {
+                // ignore
             }
         }
         if (session != null) {
@@ -92,6 +92,18 @@ public class SessionServiceImpl implements SessionService {
     public void logout(Ticket ticket) {
         globalAuthenticationService.discard(ticket);
         sessionCache.removeToken(ticket.getData());
+    }
+
+    @Override
+    public void clearCacheIfNecessary(String tenantId, String token) {
+        Session session = sessionCache.retrieve(token);
+        Tenant tenant = session.getTenant();
+        if (tenant == null || !tenant.getId().equals(tenantId)) {
+            LOGGER.info(String.format(
+                    "Clearing cache for ticket %s because client thinks that tenant is %s and our cache has %s", token,
+                    tenantId, tenant != null ? tenant.getId() : ""));
+            sessionCache.removeToken(token);
+        }
     }
 
     private void interpretGARights(Session session) {

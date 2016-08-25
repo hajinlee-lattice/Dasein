@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -29,6 +30,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
@@ -41,13 +43,15 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private SessionService sessionService;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        String passwd = DigestUtils.sha256Hex(adminPassword);
-        ticket = globalAuthenticationService.authenticateUser(adminUsername,
-                passwd);
+        createAdminUser();
+        ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         assertNotNull(ticket);
         Session session = login(adminUsername, adminPassword);
         tenant = session.getTenant();
@@ -66,8 +70,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "attach" })
     public void retrieve() {
-        Ticket t = new Ticket(ticket.getUniqueness() + "."
-                + ticket.getRandomness());
+        Ticket t = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
         Session session = sessionService.retrieve(t);
         assertNotNull(session);
         assertTrue(session.getRights().size() >= 4);
@@ -78,18 +81,14 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "attach" })
     public void interpretGlobalAuthRights() {
         // rights in rights out
-        List<GrantedRight> rightsIn = Arrays.asList(
-                GrantedRight.VIEW_PLS_CONFIGURATIONS,
-                GrantedRight.VIEW_PLS_MODELS);
+        List<GrantedRight> rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_CONFIGURATIONS, GrantedRight.VIEW_PLS_MODELS);
         AccessLevel levelIn;
-        List<GrantedRight> rightsOut = AccessLevel.INTERNAL_USER
-                .getGrantedRights();
+        List<GrantedRight> rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
         AccessLevel levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, null, rightsOut, levelOut);
 
-        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_CONFIGURATIONS,
-                GrantedRight.VIEW_PLS_MODELS, GrantedRight.VIEW_PLS_MODELS,
-                GrantedRight.EDIT_PLS_MODELS);
+        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_CONFIGURATIONS, GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.VIEW_PLS_MODELS, GrantedRight.EDIT_PLS_MODELS);
         rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
         levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, null, rightsOut, levelOut);
@@ -102,20 +101,17 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
 
         // level + rights in level + rights out
-        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_MODELS,
-                GrantedRight.VIEW_PLS_CONFIGURATIONS);
+        rightsIn = Arrays.asList(GrantedRight.VIEW_PLS_MODELS, GrantedRight.VIEW_PLS_CONFIGURATIONS);
         levelIn = AccessLevel.INTERNAL_USER;
         rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
         levelOut = AccessLevel.INTERNAL_USER;
         testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
     }
 
-    private void testInterpretGARights(List<GrantedRight> rightsIn,
-            AccessLevel levelIn, List<GrantedRight> rightsOut,
+    private void testInterpretGARights(List<GrantedRight> rightsIn, AccessLevel levelIn, List<GrantedRight> rightsOut,
             AccessLevel levelOut) {
         makeSureUserDoesNotExist(testUsername);
-        createUser(testUsername, testUsername, "Test", "Tester",
-                generalPasswordHash);
+        createUser(testUsername, testUsername, "Test", "Tester", generalPasswordHash);
 
         if (levelIn != null) {
             grantRight(levelIn.name(), tenant.getId(), testUsername);
@@ -168,8 +164,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
                 private void test() throws InterruptedException {
                     for (int i = 0; i < 5; i++) {
                         String passwd = DigestUtils.sha256Hex(adminPassword);
-                        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername,
-                                passwd);
+                        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
                         assertNotNull(ticket);
                         Session session = login(adminUsername, adminPassword);
                         Tenant tenant = session.getTenant();
@@ -192,14 +187,13 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         }
 
         int successCases = 0;
-        for (Future<Integer> future: futures) {
+        for (Future<Integer> future : futures) {
             successCases += future.get();
         }
 
         Assert.assertEquals(successCases, numTestCases,
                 String.format("Only %d out of %d test cases passed.", successCases, numTestCases));
     }
-
 
     @Test(groups = "functional")
     public void testConcurrentRetrieve() throws InterruptedException, ExecutionException {
@@ -239,7 +233,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         }
 
         int successCases = 0;
-        for (Future<Integer> future: futures) {
+        for (Future<Integer> future : futures) {
             successCases += future.get();
         }
 

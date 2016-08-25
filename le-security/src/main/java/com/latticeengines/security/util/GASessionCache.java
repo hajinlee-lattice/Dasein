@@ -47,14 +47,13 @@ public class GASessionCache {
                                 } catch (Exception e) {
                                     log.warn("Failed to retrieve session " + token + " from GA - retried " + retries
                                             + " out of " + MAX_RETRY + " times", e);
-                                } finally {
-                                    try {
-                                        retryInterval = new Double(retryInterval
-                                                * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
-                                        Thread.sleep(retryInterval);
-                                    } catch (Exception e) {
-                                        // ignore
-                                    }
+                                }
+                                try {
+                                    retryInterval = new Double(retryInterval
+                                            * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+                                    Thread.sleep(retryInterval);
+                                } catch (Exception e) {
+                                    // ignore
                                 }
                             }
                             if (session != null && session.getRights() != null && !session.getRights().isEmpty()) {
@@ -81,7 +80,8 @@ public class GASessionCache {
     }
 
     public void put(String token, Session session) {
-        log.info("Putting a session into cache for token " + token);
+        log.info(String.format("Putting a session for tenant %s into cache for token %s",
+                session.getTenant().getId(), token));
         tokenExpirationCache.put(token, session);
     }
 

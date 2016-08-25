@@ -12,4 +12,7 @@ public interface SessionService {
     Session retrieve(Ticket ticket);
 
     void logout(Ticket ticket);
+
+    @Deprecated
+    void clearCacheIfNecessary(String tenantId, String token);
 }

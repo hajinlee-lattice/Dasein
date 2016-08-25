@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -15,8 +16,12 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.service.SessionService;
 
 public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    @Autowired
+    private SessionService sessionService;
 
     public RestGlobalAuthenticationFilter() {
         super("/globalauth_security_check");
@@ -30,6 +35,8 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
                 request.getRequestURL());
         try (PerformanceTimer timer = new PerformanceTimer(methodName)) {
             String ticket = request.getHeader(Constants.AUTHORIZATION);
+            detectSessionCacheDirtiness(request);
+
             if (ticket == null) {
                 throw new BadCredentialsException("Unauthorized.");
             }
@@ -76,5 +83,13 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
             retVal = true;
         }
         return retVal;
+    }
+
+    private void detectSessionCacheDirtiness(HttpServletRequest request) {
+        String tenantId = request.getHeader(Constants.TENANT_ID);
+        String token = request.getHeader(Constants.AUTHORIZATION);
+        if (tenantId != null) {
+            sessionService.clearCacheIfNecessary(tenantId, token);
+        }
     }
 }
