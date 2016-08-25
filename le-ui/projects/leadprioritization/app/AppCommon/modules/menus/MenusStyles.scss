@@ -89,6 +89,13 @@
     }
 
     &.white-select-menu.sort-select {
+        button,
+        button span,
+        button span:after, 
+        button span:before {
+            animation: none;
+            transition: none;
+        }
         button {
             border-radius: 0;
             
@@ -112,10 +119,12 @@
                 margin-left: 0;
                 
                 &.open {
-                    color: initial;
-                    background-color: initial;
-                    border-color: #ccc;
-                    border-bottom-right-radius: 0;
+                    background-color: #222;
+                    border-color: #222;
+                    border-bottom-color: #222;
+                    border-left-color: #fff;
+                    color: #fff;
+                    border-bottom-left-radius: 0px;
                 }
             }
         }
