@@ -16,4 +16,8 @@
 
     <task:scheduler id="pdScheduler" pool-size="4" />
 
+    <bean id="dataCloudVersionDao" class="com.latticeengines.propdata.core.dao.impl.DataCloudVersionDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

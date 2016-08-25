@@ -43,13 +43,15 @@ public class DataSourceUtils {
 
     public static void retainUrls(Collection<DataSourceConnection> conns) {
         List<String> urlsToRetain = new ArrayList<>();
-        for (DataSourceConnection conn: conns) {
-            urlsToRetain.add(conn.getUrl());
-        }
-        Set<String> urlsToRemove = new HashSet<>(jdbcTemplateMap.keySet());
-        urlsToRemove.removeAll(urlsToRetain);
-        for (String url: urlsToRemove) {
-            jdbcTemplateMap.remove(url);
+        if (conns != null) {
+            for (DataSourceConnection conn : conns) {
+                urlsToRetain.add(conn.getUrl());
+            }
+            Set<String> urlsToRemove = new HashSet<>(jdbcTemplateMap.keySet());
+            urlsToRemove.removeAll(urlsToRetain);
+            for (String url : urlsToRemove) {
+                jdbcTemplateMap.remove(url);
+            }
         }
     }
 
