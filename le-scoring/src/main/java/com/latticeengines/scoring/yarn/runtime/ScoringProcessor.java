@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
@@ -73,7 +74,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     public static final String RECORD_SOURCE = "file";
     public static final String DEFAULT_ID_TYPE = "internal";
     public static final boolean DEFAULT_ENRICHMENT = false;
-    public static final String Import_Error_File_Name = "error.csv";
 
     @Value("${scoring.processor.threadpool.size}")
     private int threadpoolSize = 5;
@@ -137,7 +137,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         long recordCount = checkForInternalIdAndCountRecords(path);
         Schema schema = createOutputSchema(leadEnrichmentAttributeMap, leadEnrichmentAttributeDisplayNameMap);
-        log.info("schema is " + schema);
+        log.info(String.format("schema is %s", schema));
 
         try (CSVPrinter csvFilePrinter = initErrorCSVFilePrinter(rtsBulkScoringConfig.getImportErrorPath())) {
             try (FileReader<GenericRecord> reader = instantiateReaderForBulkScoreRequest(path);
@@ -156,20 +156,21 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         CSVFormat format = LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage");
         if (StringUtils.isNotEmpty(importErrorPath) && HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, importErrorPath, ".");
-            FileUtils.deleteQuietly(new File("." + Import_Error_File_Name + ".crc"));
+            FileUtils.deleteQuietly(new File("." + ScoringDaemonService.Import_Error_File_Name + ".crc"));
             format = format.withSkipHeaderRecord();
         }
-        return new CSVPrinter(new FileWriter(Import_Error_File_Name, true), format); //
+        return new CSVPrinter(new FileWriter(ScoringDaemonService.Import_Error_File_Name, true), format); //
 
     }
 
     @VisibleForTesting
     void copyScoreOutputToHdfs(String fileName, String targetDir) throws IOException {
         String scorePath = String.format(targetDir + "/%s", fileName);
-        log.info("The output score path is " + scorePath);
+        log.info(String.format("The output score path is %s", scorePath));
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, scorePath);
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, Import_Error_File_Name, targetDir + "/error.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.Import_Error_File_Name, targetDir
+                + "/error.csv");
     }
 
     @VisibleForTesting
@@ -220,7 +221,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             attributeMap.put(attribute.getFieldName(), avroType);
             attributeDisplayNameMap.put(attribute.getFieldName(), attribute.getDisplayName());
         }
-        log.info("The attributeMap is: " + attributeMap);
+        log.info(String.format("The attributeMap is: %s", attributeMap));
     }
 
     @VisibleForTesting
@@ -324,18 +325,24 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             idAttr.setPhysicalDataType(Type.LONG.name());
         }
         Attribute modelIdAttr = new Attribute();
-        modelIdAttr.setName("ModelId");
-        modelIdAttr.setDisplayName("ModelId");
+        modelIdAttr.setName(ScoringDaemonService.MODEL_ID);
+        modelIdAttr.setDisplayName(ScoringDaemonService.MODEL_ID);
         modelIdAttr.setSourceLogicalDataType("");
         modelIdAttr.setPhysicalDataType(Type.STRING.name());
         Attribute scoreAttr = new Attribute();
-        scoreAttr.setName("Score");
-        scoreAttr.setDisplayName("Score");
+        scoreAttr.setName(ScoreResultField.Percentile.displayName);
+        scoreAttr.setDisplayName(ScoreResultField.Percentile.displayName);
         scoreAttr.setSourceLogicalDataType("");
         scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
+        Attribute rawScoreAttr = new Attribute();
+        rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
+        rawScoreAttr.setDisplayName(ScoreResultField.RawScore.displayName);
+        rawScoreAttr.setSourceLogicalDataType("");
+        rawScoreAttr.setPhysicalDataType(Type.DOUBLE.name());
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
+        outputTable.addAttribute(rawScoreAttr);
 
         if (leadEnrichmentAttributeMap != null) {
             Iterator<Entry<String, Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
@@ -386,8 +393,13 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (score != null && (score > 99 || score < 5)) {
                     throw new LedpException(LedpCode.LEDP_20037);
                 }
-                builder.set("ModelId", modelId);
-                builder.set("Score", score);
+                Double rawScore = tuple.getProbability();
+                if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
+                    throw new LedpException(LedpCode.LEDP_20038);
+                }
+                builder.set(ScoringDaemonService.MODEL_ID, modelId);
+                builder.set(ScoreResultField.Percentile.displayName, score);
+                builder.set(ScoreResultField.RawScore.displayName, rawScore);
 
                 writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());
 

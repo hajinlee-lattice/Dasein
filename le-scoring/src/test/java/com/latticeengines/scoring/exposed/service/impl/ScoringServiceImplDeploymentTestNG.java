@@ -8,18 +8,26 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -27,9 +35,11 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.scoring.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
@@ -42,19 +52,21 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     @Autowired
     private ScoringServiceImpl scoringService;
 
-    private static final String TEST_INPUT_DATA_DIR = "/Pods/QA/Contracts/ScoringServiceImplDeploymentTestNG/Tenants/ScoringServiceImplDeploymentTestNG/Spaces/Production/Data/Tables/";
+    private static String TEST_INPUT_DATA_DIR;
 
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
 
-    private static final String AVRO_FILE = "part-m-00000.avro";
+    private static final String AVRO_FILE = "part-m-00000_small.avro";
 
     private static final String TEST_MODEL_NAME_PREFIX = "b8684c37-a3b9-452f-b7e3-af440e4365b8";
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
-    protected static final String TENANT_ID = "ScoringServiceImplDeploymentTestNG.ScoringServiceImplDeploymentTestNG.Production";
+    protected static String TENANT_ID;
 
-    protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
+    protected static String targetDir;
+
+    protected static CustomerSpace customerSpace;
 
     protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
@@ -68,6 +80,13 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @BeforeClass(groups = "deployment")
     public void setup() throws IOException {
+
+        TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
+        customerSpace = CustomerSpace.parse(TENANT_ID);
+        System.out.println(customerSpace.toString());
+        TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), customerSpace)
+                .toString();
+
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
@@ -78,41 +97,6 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         createModel(plsRest, tenant, modelConfiguration, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
-    }
-
-    private void saveAttributeSelection(CustomerSpace customerSpace) {
-        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
-                plsApiHostPort);
-        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
-    }
-
-    private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
-                .getLeadEnrichmentAttributes(customerSpace, null, null, false);
-        LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
-        List<String> selectedAttributes = new ArrayList<>();
-        selectedAttributeMap.setSelectedAttributes(selectedAttributes);
-        List<String> deselectedAttributes = new ArrayList<>();
-        selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
-        int premiumSelectCount = 2;
-        int selectCount = 1;
-
-        for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
-            if (attr.getIsPremium()) {
-                if (premiumSelectCount > 0) {
-                    premiumSelectCount--;
-                    selectedAttributes.add(attr.getFieldName());
-                }
-            } else {
-                if (selectCount > 0) {
-                    selectCount--;
-                    selectedAttributes.add(attr.getFieldName());
-                }
-            }
-        }
-
-        return selectedAttributeMap;
     }
 
     @AfterClass(groups = "deployment")
@@ -129,8 +113,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         RTSBulkScoringConfiguration rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
         rtsBulkScoringConfig.setCustomerSpace(customerSpace);
         List<String> modelGuids = new ArrayList<String>();
-        modelGuids.add("ms__" + TEST_MODEL_NAME_PREFIX
-                + "_");
+        modelGuids.add("ms__" + TEST_MODEL_NAME_PREFIX + "_");
         rtsBulkScoringConfig.setModelGuids(modelGuids);
         Table metadataTable = new Table();
         Extract extract = new Extract();
@@ -139,8 +122,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         rtsBulkScoringConfig.setMetadataTable(metadataTable);
         String tableName = String.format("RTSBulkScoreResult_%s_%d", TEST_MODEL_NAME_PREFIX.replaceAll("-", "_"),
                 System.currentTimeMillis());
-        String targeDir = TEST_INPUT_DATA_DIR + tableName;
-        rtsBulkScoringConfig.setTargetResultDir(targeDir);
+        targetDir = TEST_INPUT_DATA_DIR + tableName;
+        rtsBulkScoringConfig.setTargetResultDir(targetDir);
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
         rtsBulkScoringConfig.setInternalResourceHostPort(plsApiHostPort);
         ApplicationId appId = scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
@@ -148,10 +131,35 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         System.out.println(appId);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        testHdfsFile();
+    }
+
+    private void testHdfsFile() throws IllegalArgumentException, Exception {
+        List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.avro$");
+        Assert.assertNotNull(avroFiles);
+        Assert.assertEquals(avroFiles.size(), 1);
+        String scoreContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, avroFiles.get(0));
+        Assert.assertNotNull(scoreContents);
+        List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertEquals(list.size(), 20);
+
+        GenericRecord record = list.get(0);
+        Schema schema = record.getSchema();
+        List<Schema.Field> fields = schema.getFields();
+        System.out.println(schema);
+        Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
+        Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
+        Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
+        Assert.assertEquals(fields.get(3).name(), ScoreResultField.RawScore.displayName);
+        Assert.assertEquals(fields.size(), 7);
+
+        List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");
+        Assert.assertNotNull(csvfiles);
+        Assert.assertEquals(csvfiles.size(), 1);
     }
 
     private Tenant setupTenant() throws IOException {
-        String tenantId = TENANT_ID;
+        String tenantId = customerSpace.toString();
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantId);
@@ -196,13 +204,13 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
-        URL dataCompositionUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
-        URL rfpmmlUrl = ClassLoader
-                .getSystemResource(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
-        URL scoreDerivationUrl = ClassLoader.getSystemResource(
-                modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+        URL rfpmmlUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.PMML_FILENAME);
+        URL scoreDerivationUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+                + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
         URL inputAvroFile = ClassLoader.getSystemResource(LOCAL_DATA_DIR + AVRO_FILE);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
@@ -214,17 +222,52 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.mkdir(yarnConfiguration, inputDataDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
-                artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), artifactTableDir
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
-                artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
-                enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
-                enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir
+                + ModelJsonTypeHandler.PMML_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
+                + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), enhancementsDir
+                + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputAvroFile.getFile(), inputDataDir);
+    }
+
+    private void saveAttributeSelection(CustomerSpace customerSpace) {
+        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
+                plsApiHostPort);
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+    }
+
+    private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, false);
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
+        List<String> selectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setSelectedAttributes(selectedAttributes);
+        List<String> deselectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
+        int premiumSelectCount = 2;
+        int selectCount = 1;
+
+        for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
+            if (attr.getIsPremium()) {
+                if (premiumSelectCount > 0) {
+                    premiumSelectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            } else {
+                if (selectCount > 0) {
+                    selectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            }
+        }
+
+        return selectedAttributeMap;
     }
 
     public class ScoringTestModelConfiguration {

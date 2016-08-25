@@ -268,7 +268,7 @@ public enum LedpCode {
     LEDP_20035("This score does not have score row Id."), //
     LEDP_20036("This score does not have model Id."), //
     LEDP_20037("This score does not have valid score."), //
-    LEDP_20038("Lead enrichment columns cannot be null."), //
+    LEDP_20038("This score does not have valid raw score."), //
     LEDP_20039("Lead enrichment columns {0} does not have corresponding type in the lead enrichment attribute map."), //
     LEDP_20040("Convert the sql type to avro type encounters illegal argument exception."), //
     LEDP_20041("Convert the sql type to avro type encounters illegal access exception."), //
