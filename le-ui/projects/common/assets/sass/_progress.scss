@@ -235,6 +235,15 @@ Wizard Steps
 						border-left-color: #fff;
 					}
 				}
+				.load-data {
+			        background-image: url("/assets/images/ico-status-process-file-success.png");
+			    }
+			    .match-cloud {
+			        background-image: url("/assets/images/ico-status-data-cloud-success.png");
+			    }
+			    .building-model {
+			        background-image: url("/assets/images/ico-status-building-model-success.png");
+			    }
 			}
 			&.error {
 				&:after, &:before, &:last-child {
@@ -251,6 +260,15 @@ Wizard Steps
 						border-left-color: #fff;
 					}
 				}
+				.load-data {
+			        background-image: url("/assets/images/ico-status-process-file-failed.png");
+			    }
+			    .match-cloud {
+			        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
+			    }
+			    .building-model {
+			        background-image: url("/assets/images/ico-status-building-model-failed.png");
+			    }
 			}
 			&.current {
 				&:after, &:before, &:last-child {
@@ -287,6 +305,20 @@ Wizard Steps
 					}
 					.fa-exclamation-triangle {
 						color: #ca2b2b;
+					}
+					&.load-data, &.match-cloud, &.building-model {
+					    padding-left: 46px;
+					    background-repeat: no-repeat;
+					    background-position: left;
+					}
+					&.load-data {
+					    background-image: url("/assets/images/ico-status-process-file-inactive.png");
+					}
+					&.match-cloud {
+					    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
+					}
+					&.building-model {
+					    background-image: url("/assets/images/ico-status-building-model-inactive.png");
 					}
 				}
 			}
