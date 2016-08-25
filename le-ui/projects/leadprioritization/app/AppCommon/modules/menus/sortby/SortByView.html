@@ -3,7 +3,7 @@
             type="button"
             class="button icon-button white-button select-label"
             title="Sort Property"
-            ng-click="visible = !visible"
+            ng-click="toggle($event)"
             ng-class="{ 'open': visible }">
         {{ label }}
     </button

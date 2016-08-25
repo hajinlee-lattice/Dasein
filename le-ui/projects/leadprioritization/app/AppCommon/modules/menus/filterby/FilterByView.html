@@ -3,14 +3,14 @@
             if="label"
             type="button"
             class="button icon-button white-button select-label"
-            ng-click="toggle()" 
+            ng-click="toggle($event)" 
             ng-class="{ 'open': visible }">
         {{ label }}
     </button
     ><button 
             type="button"
             class="button icon-button white-button select-more"
-            ng-click="toggle()" 
+            ng-click="toggle($event)" 
             ng-class="{ 'open': visible }">
         <span class="{{ icon || 'fa fa-filter' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
     </button>

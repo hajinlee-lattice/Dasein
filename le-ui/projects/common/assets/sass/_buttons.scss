@@ -292,6 +292,7 @@ Use this structure for angled buttons:
         margin-bottom: 0px;
         background: #fff;
         z-index: 2;
+        pointer-events: none;
         span {
             color: #333;
         }

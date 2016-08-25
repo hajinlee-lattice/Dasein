@@ -10,7 +10,7 @@
     ><button 
             type="button"
             class="button icon-button {{ iconclass }}"
-            ng-click="visible = !visible" 
+            ng-click="toggle($event)" 
             ng-class="{ 'open': visible }">
         <span class="{{ icon || 'fa fa-chevron-down' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
     </button>

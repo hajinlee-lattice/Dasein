@@ -7,7 +7,7 @@ angular
             config:'='
         },
         templateUrl: 'app/AppCommon/modules/menus/sortby/SortByView.html',
-        controller: function ($scope) {
+        controller: function ($scope, $document) {
             angular.extend($scope, $scope.config, {
                 visible: false
             }, {
@@ -24,10 +24,28 @@ angular
                     $scope.order = $scope.config.order = ($scope.order == '' ? '-' : '');
                 },
                 clickProperty: function(item) {
-                    console.log('click', item);
                     $scope.label = item.label; 
                     $scope.icon = item.icon; 
                     $scope.property = $scope.config.property = item.property;
+                },
+                toggle: function($event){
+                    $scope.visible = !$scope.visible;
+                    
+                    if($event && $event.target) {
+                        var target = angular.element($event.target),
+                        parent = target.parent();
+                        var click = function($event){
+                            var clicked = angular.element($event.target),
+                            inside = clicked.closest(parent).length;
+
+                            if(!inside) {
+                                $scope.visible = false;
+                                $scope.$digest();
+                                $document.unbind('click', click);
+                            }
+                        }
+                        $document.bind('click', click);
+                    }
                 }
             });
 

@@ -12,7 +12,7 @@ angular
             config:'='
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
-        controller: function ($scope, $filter) {
+        controller: function ($scope, $filter, $document) {
             angular.extend($scope, $scope.config, {
                 visible: false
             }, {
@@ -21,7 +21,7 @@ angular
                         $scope.label = $scope.items[0].label;
                     }
                 },
-                toggle: function() {
+                toggle: function($event) {
                     $scope.visible = !$scope.visible;
 
                     if ($scope.visible) {
@@ -29,6 +29,20 @@ angular
                             item.filtered = $filter('filter')($scope.config.unfiltered, item.action, true);
                             item.total = item.filtered.length;
                         });
+                    }
+                    if($event && $event.target) {
+                        var target = angular.element($event.target),
+                        parent = target.parent();
+                        var click = function($event){
+                            var clicked = angular.element($event.target),
+                            inside = clicked.closest(parent).length;
+                            if(!inside) {
+                                $scope.visible = false;
+                                $scope.$digest();
+                                $document.unbind('click', click);
+                            }
+                        }
+                        $document.bind('click', click);
                     }
                 },
                 click: function(item) {
