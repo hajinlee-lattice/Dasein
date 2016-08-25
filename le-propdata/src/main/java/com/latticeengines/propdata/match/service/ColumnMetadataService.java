@@ -6,7 +6,7 @@ import org.apache.avro.Schema;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public interface ColumnMetadataService {
     List<ColumnMetadata> fromPredefinedSelection(Predefined selectionName, String dataCloudVersion);

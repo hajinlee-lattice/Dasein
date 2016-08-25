@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.AccountMasterColumn;
-import com.latticeengines.domain.exposed.propdata.manage.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.propdata.match.entitymanager.MetadataColumnEntityMgr;
 
 @Component("accountMasterColumnService")

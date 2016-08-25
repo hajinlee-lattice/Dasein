@@ -2,7 +2,7 @@ package com.latticeengines.propdata.match.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public interface MetadataColumnService<E> {
 
