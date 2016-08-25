@@ -19,7 +19,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.Column;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -41,7 +42,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 @Component
 public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
-    private static final String DATA_CLOUD_VERSION = "2.0.000000001";
+    private static final String DATA_CLOUD_VERSION = "2.0.0";
 
     @Autowired
     private MatchProxy matchProxy;
@@ -117,8 +118,8 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(14));
         int totalEmployees = 0;
         for (GenericRecord record : records) {
-            if (record.get("EmployeesTotal") != null) {
-                totalEmployees += totalEmployees + Integer.parseInt(record.get("EmployeesTotal").toString());
+            if (record.get("EMPLOYEES_TOTAL") != null) {
+                totalEmployees += totalEmployees + Integer.parseInt(record.get("EMPLOYEES_TOTAL").toString());
             }
         }
         Assert.assertTrue(totalEmployees > 0);
@@ -168,14 +169,13 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private List<Class<?>> getDunsAccountMasterAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
-                Long.class, Long.class, String.class, String.class, String.class, Integer.class }));
+                Integer.class, Integer.class, String.class, String.class, String.class, Integer.class }));
         return fieldTypes;
     }
 
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setPredefinedSelection(Predefined.RTS);
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
         matchInput.setExcludePublicDomains(false);
         matchInput.setTableName("AccountMasterTest");
@@ -190,6 +190,16 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         }
         matchInput.setInputBuffer(inputBuffer);
         matchInput.setReturnUnmatched(true);
+
+//        matchInput.setPredefinedSelection(Predefined.RTS);
+        ColumnSelection customSelection = new ColumnSelection();
+        customSelection.setName("Custom");
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("EMPLOYEES_TOTAL"));
+        columns.add(new Column("SALES_VOLUME_US_DOLLARS"));
+        columns.add(new Column("YEAR_STARTED"));
+        customSelection.setColumns(columns);
+         matchInput.setCustomSelection(customSelection);
         return matchInput;
     }
 }

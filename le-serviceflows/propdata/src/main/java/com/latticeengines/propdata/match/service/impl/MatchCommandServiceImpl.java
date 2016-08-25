@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
@@ -121,8 +120,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public MatchBlock updateBlockByApplicationReport(String blockOperationUid, ApplicationReport report) {
         FinalApplicationStatus status = report.getFinalApplicationStatus();
-        MatchBlockUpdaterImpl matchBlockUpdater = updateBlock(blockOperationUid)
-                .status(report.getYarnApplicationState()).progress(report.getProgress());
+        MatchBlockUpdaterImpl matchBlockUpdater = updateBlock(blockOperationUid).status(
+                report.getYarnApplicationState()).progress(report.getProgress());
         String rootOperationUid = matchBlockUpdater.getRootOperationUid();
         String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
                 .toString();
@@ -147,7 +146,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return null;
         }
 
-        if (MatchStatus.NEW.equals(command.getMatchStatus()) || command.getLatestStatusUpdate() == null
+        if (MatchStatus.NEW.equals(command.getMatchStatus())
+                || command.getLatestStatusUpdate() == null
                 || (System.currentTimeMillis() - command.getLatestStatusUpdate().getTime()) > TimeUnit.MINUTES
                         .toMillis(20)) {
             String appIdStr = command.getApplicationId();
@@ -197,14 +197,17 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     private static String columnSelectionString(MatchInput input) {
-        String version;
+        String version = "";
         if (input.getPredefinedSelection() != null) {
             version = input.getPredefinedSelection().getName();
             if (StringUtils.isNotEmpty(input.getPredefinedVersion())) {
                 version += "|" + input.getPredefinedVersion();
             }
-        } else {
-            version = JsonUtils.serialize(input.getCustomSelection());
+        } else if (input.getCustomSelection() != null) {
+            version = input.getCustomSelection().getName();
+            if (StringUtils.isNotEmpty(input.getCustomSelection().getVersion())) {
+                version += "|" + input.getCustomSelection().getVersion();
+            }
         }
         return version;
     }

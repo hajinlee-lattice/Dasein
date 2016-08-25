@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -19,8 +20,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
@@ -69,6 +72,9 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private BulkMatchPlanner bulkMatchPlanner;
 
     @Override
     public boolean accept(String version) {
@@ -152,8 +158,17 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     }
 
     private Schema constructOutputSchema(MatchInput input, String rootOperationUid) {
-        Schema outputSchema = columnMetadataService.getAvroSchema(input.getPredefinedSelection(),
-                "PropDataMatchOutput", input.getDataCloudVersion());
+        Schema outputSchema = null;
+        if (input.getPredefinedSelection() != null) {
+            outputSchema = columnMetadataService.getAvroSchema(input.getPredefinedSelection(), "PropDataMatchOutput",
+                    input.getDataCloudVersion());
+        } else {
+            ColumnSelection columnSelection = bulkMatchPlanner.parseColumnSelection(input);
+            List<ColumnMetadata> columnMetadatas = columnMetadataService.fromSelection(columnSelection,
+                    input.getDataCloudVersion());
+            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(columnMetadatas,
+                    "PropDataMatchOutput", input.getDataCloudVersion());
+        }
 
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;

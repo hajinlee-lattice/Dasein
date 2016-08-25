@@ -21,8 +21,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.newrelic.api.agent.Trace;
@@ -87,8 +87,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 ColumnMetadata columnMetadata = column.toColumnMetadata();
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to extract metadata from MetadataColumn [" + column.getColumnId() + "]", e);
+                throw new RuntimeException("Failed to extract metadata from MetadataColumn [" + column.getColumnId()
+                        + "]", e);
             }
         }
         return columnMetadataList;
@@ -97,10 +97,12 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Override
     public Schema getAvroSchema(Predefined selectionName, String recordName, String dataCloudVersion) {
         List<ColumnMetadata> columnMetadatas = fromPredefinedSelection(selectionName, dataCloudVersion);
-        return getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName);
+        return getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName, dataCloudVersion);
     }
 
-    private Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName) {
+    @Override
+    public Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName,
+            String dataCloudVersion) {
         SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(recordName);
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;

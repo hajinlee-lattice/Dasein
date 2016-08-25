@@ -1,4 +1,4 @@
-LatticeID,Domain,DUNS,EmployeesTotal,LocalSales,TechIndicator_Amazon,TechIndicator_Dropbox,TradestyleName,YearStarted
+LatticeID,Domain,DUNS,EMPLOYEES_TOTAL,SALES_VOLUME_US_DOLLARS,TechIndicator_Amazon,TechIndicator_Dropbox,TradestyleName,YEAR_STARTED
 D64D0F86-C9EB-4095-987D-8E8E8EFB778D,consolidatedthreadmills.com,1000330,17,1600000,No,Yes,CONSOLIDATED THREAD MILLS,1933
 6E9BE574-61B2-4256-BE3C-236D8FFBDCCB,harrisonspecialty.com,1000355,50,10335273,Yes,No,NULL,1979
 05FA9871-F972-4950-8566-830F0AE39C98,gersonco.com,1000363,150,22764057,Yes,No,NULL,1945

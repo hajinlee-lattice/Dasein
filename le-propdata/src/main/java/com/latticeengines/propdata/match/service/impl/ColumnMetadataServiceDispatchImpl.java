@@ -47,4 +47,13 @@ public class ColumnMetadataServiceDispatchImpl implements ColumnMetadataService 
         return columnMetadataService.getAvroSchema(selectionName, recordName, dataCloudVersion);
     }
 
+    @Override
+    public Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName,
+            String dataCloudVersion) {
+        if (MatchUtils.isAccountMaster(dataCloudVersion)) {
+            return accountMasterColumnMetadataService.getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName,
+                    dataCloudVersion);
+        }
+        return columnMetadataService.getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName, dataCloudVersion);
+    }
 }
