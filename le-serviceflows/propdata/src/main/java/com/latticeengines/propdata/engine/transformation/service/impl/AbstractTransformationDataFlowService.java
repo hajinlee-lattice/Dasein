@@ -44,19 +44,18 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
         String translatedQueue = LedpQueueAssigner
                 .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
-
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, getYarnConfiguration());
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
+        ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         return ctx;
     }
 
     private Properties getJobProperties() {
         Properties jobProperties = new Properties();
-        jobProperties.put("mapreduce.job.reduces", "64");
+        jobProperties.put("mapreduce.job.reduces", "8");
         jobProperties.put("mapreduce.job.running.map.limit", "64");
-        jobProperties.put("mapreduce.job.running.reduce.limit", "32");
 
         return jobProperties;
     }

@@ -22,8 +22,8 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.impl.DnBCacheSeedRaw;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedRawConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedRawConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
@@ -65,6 +65,11 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     Log getLogger() {
         return log;
+    }
+
+    @Override
+    public boolean isManualTriggerred() {
+        return true;
     }
 
     @Override

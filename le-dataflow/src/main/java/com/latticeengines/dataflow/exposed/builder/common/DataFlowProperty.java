@@ -22,4 +22,5 @@ public class DataFlowProperty {
     public static final String PARTITIONS = "PARTITIONS";
     public static final String DEBUG = "DEBUG";
     public static final String CASCADEMETADATA = "CASCADEMETADATA";
+    public static final String ENFORCEGLOBALORDERING = "ENFORCEGLOBALORDERING";
 }

@@ -64,7 +64,12 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
         dataFlow.setLocal(configuration == null || configuration.get(FS_DEFAULT_FS).equals(LOCAL_FS));
         dataFlow.setCheckpoint(doCheckpoint);
-        dataFlow.setEnforceGlobalOrdering(true);
+        if (context.containsProperty(DataFlowProperty.ENFORCEGLOBALORDERING)
+                && context.getProperty(DataFlowProperty.ENFORCEGLOBALORDERING, Boolean.class) == false) {
+            dataFlow.setEnforceGlobalOrdering(false);
+        } else {
+            dataFlow.setEnforceGlobalOrdering(true);
+        }
         dataFlow.setDebug(debug != null ? debug : false);
 
         return dataFlow.runFlow(context, versionManager.getCurrentVersionInStack(stackName));
