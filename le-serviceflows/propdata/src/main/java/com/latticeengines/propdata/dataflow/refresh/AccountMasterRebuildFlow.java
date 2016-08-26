@@ -50,82 +50,49 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         List<Node> domainBased = new ArrayList<Node>();
         List<Node> dunsBased = new ArrayList<Node>();
 
-        Node lastSource = buildInputSources(parameters, domainBased, dunsBased, joinKeyMap);
-
-        Node domainConverged = convergeSources(domainBased, joinKeyMap);
-        Node dunsConverged = convergeSources(dunsBased, joinKeyMap);
-
-        FieldList domainField = new FieldList(domainKey);
-        FieldList dunsField = new FieldList(dunsKey);
+        Node firstSource = buildInputSources(parameters, domainBased, dunsBased, joinKeyMap);
 
         Node joined = seed;
-        if (domainConverged != null) {
-            String joinKey = joinKeyMap.get(domainConverged);
-            joined = joined.join(domainField, domainConverged, new FieldList(joinKey), JoinType.LEFT);
-        }
-        if (dunsConverged != null) {
-            String joinKey = joinKeyMap.get(dunsConverged);
-            joined = joined.join(dunsField, dunsConverged, new FieldList(joinKey), JoinType.LEFT);
-        }
 
-        if (lastSource != null) {
-            log.info("Join final source");
-            String joinKey = joinKeyMap.get(lastSource);
-            joined = joined.join(dunsField, lastSource, new FieldList(joinKey), JoinType.LEFT);
+        if (firstSource != null) {
+            log.info("Join first source");
+            String joinKey = joinKeyMap.get(firstSource);
+            joined = joined.join(new FieldList(dunsKey), firstSource, new FieldList(joinKey), JoinType.LEFT);
             String secondKey = joinKey + SECOND_KEY_SUFFIX;
             String filterFunc = secondKey + " == null || " + secondKey + " == " + domainKey;
             joined = joined.filter(filterFunc, new FieldList(secondKey, domainKey));
-
         }
+
+        joined = convergeSources(joined, domainBased, domainKey, joinKeyMap);
+
+        joined = convergeSources(joined, dunsBased, dunsKey, joinKeyMap);
+
+        List<String> id = parameters.getId();
+
+        joined = joined.filter(id.get(0) + " != null", new FieldList(id));
 
         FieldList joinFields = getJoinFields(joined);
         Node discarded = joined.discard(joinFields);
-        Node stamped = discarded.addTimestamp(parameters.getTimestampField()); 
+        Node stamped = discarded.addTimestamp(parameters.getTimestampField());
 
-        return stamped; 
+        return stamped;
     }
 
-    private Node convergeSources(List<Node> nodes, Map<Node, String> joinKeyMap) {
+    private Node convergeSources(Node seed, List<Node> nodes, String joinKey, Map<Node, String> joinKeyMap) {
 
         if (nodes.size() == 0) {
-            return null;
+            return seed;
         }
 
-        List<Node> convergedSources = nodes;
-
-        while (convergedSources.size() > 1) {
-            List<Node> sources = new ArrayList<Node>();
-            Node prevSource = null;
-            log.info("Converging sources " + convergedSources.size());
-            for (Node source : convergedSources) {
-                 if (prevSource == null) {
-                     prevSource = source;
-                 } else {
-
-                     String leftJoinKey = joinKeyMap.get(source);
-                     String rightJoinKey = joinKeyMap.get(prevSource);
-                     Node joined = source.join(new FieldList(leftJoinKey), prevSource, new FieldList(rightJoinKey), JoinType.OUTER);
-
-                     String mergeFunc = leftJoinKey + " == null ? " + rightJoinKey + " : " + leftJoinKey;
-                     String mergedJoinKey = newJoinKey(joinKeyMap);
-                     FieldMetadata joinMeta = new FieldMetadata(mergedJoinKey, String.class);
-                     Node merged = joined.addFunction(mergeFunc, new FieldList(leftJoinKey, rightJoinKey), joinMeta);
-
-                     joinKeyMap.put(merged, mergedJoinKey);
-                     sources.add(merged);
-
-                     prevSource = null;
-                 }
-            }
-            if (prevSource != null) {
-                sources.add(prevSource);
-            }
-            convergedSources = sources;
+        List<FieldList> groupFieldLists = new ArrayList<FieldList>();
+        for (Node node : nodes) {
+            String groupKey = joinKeyMap.get(node);
+            groupFieldLists.add(new FieldList(groupKey));
         }
 
-        Node converged = convergedSources.get(0);
+        Node coGrouped = seed.coGroup(new FieldList(joinKey), nodes, groupFieldLists, JoinType.OUTER);
 
-        return converged;
+        return coGrouped;
     }
 
     private Node convertSource(AccountMasterSourceParameters source, Map<Node, String> joinKeyMap) {

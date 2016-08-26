@@ -53,6 +53,21 @@ public class Node {
         return new Node(builder.addJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType), builder);
     }
 
+    public Node coGroup(FieldList lhsFields, List<Node> groupNodes, List<FieldList> groupFieldLists, JoinType joinType) {
+
+        List<String> identifiers = new ArrayList<>();
+        List<FieldList> fieldLists = new ArrayList<>();
+
+        identifiers.add(identifier);
+        fieldLists.add(lhsFields);
+        for (Node node : groupNodes) {
+            identifiers.add(node.getIdentifier());
+        }
+        fieldLists.addAll(groupFieldLists);
+
+        return new Node(builder.addCoGroup(identifiers, fieldLists, joinType), builder);
+    }
+
     public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
         Node join = new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
 

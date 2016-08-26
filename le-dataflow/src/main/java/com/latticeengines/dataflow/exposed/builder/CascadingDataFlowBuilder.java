@@ -477,6 +477,61 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(join, declaredFields);
     }
 
+    protected String addCoGroup(List<String> identifiers, List<FieldList> groupFieldLists, JoinType joinType) {
+
+        if (identifiers.size() != groupFieldLists.size()) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { "Group size mismatch" });
+        }
+
+        if (identifiers.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { "No id defined" });
+        }
+
+        BaseJoiner joiner = null;
+        switch (joinType) {
+        case LEFT:
+            joiner = new LeftJoin();
+            break;
+        case RIGHT:
+            joiner = new RightJoin();
+            break;
+        case OUTER:
+            joiner = new OuterJoin();
+            break;
+        default:
+            joiner = new InnerJoin();
+            break;
+        }
+
+        int groupSize = identifiers.size();
+        Pipe[] pipes = new Pipe[groupSize];
+        Fields[] groupFieldsArray = new Fields[groupSize];
+        List<FieldMetadata> declaredFields = null;
+
+        for (int i = 0; i < groupSize; i++) {
+
+            String id = identifiers.get(i);
+            FieldList fieldList = groupFieldLists.get(i);
+
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipesAndFields = pipesAndOutputSchemas.get(id);
+            List<FieldMetadata> metadataList = pipesAndFields.getValue();
+            if (declaredFields == null) {
+                declaredFields = metadataList;
+            } else {
+                declaredFields = combineFields(id, declaredFields, metadataList);
+            }
+
+            pipes[i] = pipesAndFields.getKey();
+            groupFieldsArray[i] = DataFlowUtils.convertToFields(fieldList.getFields());
+        }
+
+        Pipe coGroup = new CoGroup(pipes, groupFieldsArray, //
+                                   DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
+                                   joiner);
+        return register(coGroup, declaredFields);
+    }
+
+
     private List<FieldMetadata> combineFields(String rhsId, List<FieldMetadata> lhsFields, List<FieldMetadata> rhsFields) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
         Set<String> seenFields = new HashSet<>();
