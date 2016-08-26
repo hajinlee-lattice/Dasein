@@ -79,4 +79,17 @@ public class AccountMasterSeed implements FixedIntervalSource {
     public Long getCutoffDuration() {
         return cutoffLimitInSeconds;
     }
+
+    public String getDomainField() {
+        return "Domain";
+    }
+
+    public String getDunsField() {
+        return "DUNS";
+    }
+
+    public String[] getRetainFields() {
+        return new String[] { "LatticeID", "DUNS", "Domain", "Name", "Street",
+                              "City", "State", "Country", "ZipCode" };
+    }
 }

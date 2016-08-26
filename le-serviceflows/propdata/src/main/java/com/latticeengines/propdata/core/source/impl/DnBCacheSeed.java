@@ -3,12 +3,14 @@ package com.latticeengines.propdata.core.source.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.DunsBased;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("dnBCacheSeed")
-public class DnBCacheSeed implements FixedIntervalSource {
+public class DnBCacheSeed implements FixedIntervalSource, DomainBased, DunsBased {
 
     private static final long serialVersionUID = -6280748201445659077L;
 
@@ -75,5 +77,15 @@ public class DnBCacheSeed implements FixedIntervalSource {
     @Override
     public Long getCutoffDuration() {
         return cutoffLimitInSeconds;
+    }
+
+    @Override
+    public String getDunsField() {
+         return "DUNS_NUMBER";
+    }
+
+    @Override
+    public String getDomainField() {
+         return "LE_DOMAIN";
     }
 }
