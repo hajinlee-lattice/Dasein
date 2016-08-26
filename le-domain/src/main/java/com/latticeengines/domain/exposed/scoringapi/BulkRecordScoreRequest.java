@@ -28,6 +28,9 @@ public class BulkRecordScoreRequest {
     @ApiModelProperty(hidden = true)
     private boolean homogeneous;
 
+    @ApiModelProperty(hidden = true)
+    private String dataCloudVersion;
+
     public String getSource() {
         return source;
     }
@@ -66,6 +69,14 @@ public class BulkRecordScoreRequest {
 
     public void setHomogeneous(boolean homogeneous) {
         this.homogeneous = homogeneous;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     public String toString() {
