@@ -16,7 +16,7 @@ for f in $(find . -name "*.war");
 do
     fn=`echo $f | cut -d / -f 2 | cut -d . -f 1`
 
-    if [[ ${MS_MODULES} == *"${fn}"* ]]
+    if [[ ${MS_MODULES} == *"${fn}"* -o "${fn}" == "ROOT" ]]
     then
         echo "repackaging ${fn}.war"
         mkdir $fn
