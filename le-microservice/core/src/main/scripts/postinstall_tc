@@ -3,7 +3,10 @@
 source /etc/profile
 echo "getting environment information"
 echo "LE_ENVIRONMENT=${LE_ENVIRONMENT}"
-echo "MS_MODULES=${MS_MODULES:=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}"
+
+MS_MODULES=${MS_MODULES:=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}
+MS_MODULES="ROOT,${MS_MODULES}"
+echo "MS_MODULES=${MS_MODULES}"
 
 rm -rf /usr/share/tomcat/webapps/ms/*.war
 mkdir -p /usr/share/tomcat/webapps/ms
@@ -16,7 +19,7 @@ for f in $(find . -name "*.war");
 do
     fn=`echo $f | cut -d / -f 2 | cut -d . -f 1`
 
-    if [[ ${MS_MODULES} == *"${fn}"* -o "${fn}" == "ROOT" ]]
+    if [[ ${MS_MODULES} == *"${fn}"* ]]
     then
         echo "repackaging ${fn}.war"
         mkdir $fn
