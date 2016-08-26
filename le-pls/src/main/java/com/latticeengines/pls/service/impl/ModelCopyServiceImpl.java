@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,10 +25,14 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -48,6 +53,12 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private SourceFileEntityMgr sourceFileEntityMgr;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
 
@@ -59,6 +70,13 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
         Table cpTrainingTable = metadataProxy.copyTable(sourceTenantId, trainingTableName, targetTenantId);
         Table cpEventTable = metadataProxy.copyTable(sourceTenantId, eventTableName, targetTenantId);
+
+        Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
+        SourceFile sourceFile = sourceFileEntityMgr.findByTableName(trainingTableName);
+        sourceFile.setPid(null);
+        sourceFile.setTableName(cpTrainingTable.getName());
+        sourceFile.setTenant(targetTenant);
+        sourceFileEntityMgr.create(sourceFile);
 
         try {
             processHdfsData(sourceTenantId, targetTenantId, modelId, eventTableName, cpTrainingTable.getName(),
@@ -81,7 +99,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
                 + UuidUtils.extractUuid(modelId);
         String sourceModelSummaryPath = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, sourceModelRoot);
         String uuid = UUID.randomUUID().toString();
-        String sourceModelDirPath = new Path(sourceModelSummaryPath).getParent().getParent().toString(); 
+        String sourceModelDirPath = new Path(sourceModelSummaryPath).getParent().getParent().toString();
         String sourceModelLocalRoot = new Path(sourceModelDirPath).getName();
         String modelSummaryLocalPath = sourceModelLocalRoot + "/enhancements/modelsummary.json";
 
@@ -92,7 +110,8 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         String modelFileName = getModelFileName(sourceModelLocalRoot);
         JsonNode newModelSummary = constructNewModelSummary(modelSummaryLocalPath, targetTenantId, cpTrainingTableName,
                 cpEventTableName, uuid, modelDisplayName);
-        JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__" + uuid + "-PLSModel");
+        JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"
+                + uuid + "-PLSModel");
 
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
         FileUtils.write(new File(modelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
@@ -139,7 +158,8 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
         HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName, targetDataRoot + cpEventTableName);
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot + "-Event-Metadata", targetDataRoot);
-        HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName+ "-Event-Metadata", targetDataRoot + cpEventTableName + "-Event-Metadata");
+        HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName + "-Event-Metadata", targetDataRoot
+                + cpEventTableName + "-Event-Metadata");
     }
 
     @Override
