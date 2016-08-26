@@ -87,9 +87,9 @@ public abstract class BaseScoring {
 
     private static final String GET_TENANT_FROM_OAUTH = "getTenantFromOAuth";
 
-    private static final String AVERAGE_TOTAL_DURATION_PER_RECORD = "requestDurationAveragePerRecordMS";
-
     protected static final int MAX_ALLOWED_RECORDS = 200;
+
+    private static final String TOTAL_TIME_PREFIX = "total_";
 
     private static final String MDC_CUSTOMERSPACE = "customerspace";
 
@@ -123,8 +123,7 @@ public abstract class BaseScoring {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    protected List<Model> getActiveModels(HttpServletRequest request, ModelType type,
-            CustomerSpace customerSpace) {
+    protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(type);
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
@@ -143,12 +142,10 @@ public abstract class BaseScoring {
         }
     }
 
-    protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start,
-            int offset, int maximum, boolean considerAllStatus, CustomerSpace customerSpace)
-            throws ParseException {
+    protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
+            boolean considerAllStatus, CustomerSpace customerSpace) throws ParseException {
         start = validateStartValue(start);
-        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus,
-                customerSpace);
+        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus, customerSpace);
     }
 
     protected int getModelCount(HttpServletRequest request, String start, boolean considerAllStatus,
@@ -157,8 +154,8 @@ public abstract class BaseScoring {
         return fetchModelCount(request, start, considerAllStatus, customerSpace);
     }
 
-    protected ScoreResponse scorePercentileRecord(HttpServletRequest request,
-            ScoreRequest scoreRequest, CustomerSpace customerSpace) {
+    protected ScoreResponse scorePercentileRecord(HttpServletRequest request, ScoreRequest scoreRequest,
+            CustomerSpace customerSpace) {
         return scoreRecord(request, scoreRequest, false, customerSpace);
     }
 
@@ -172,21 +169,20 @@ public abstract class BaseScoring {
         return scoreRecords(request, scoreRequest, true, customerSpace);
     }
 
-    protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request,
-            ScoreRequest scoreRequest, CustomerSpace customerSpace) {
+    protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,
+            CustomerSpace customerSpace) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace);
     }
 
-    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest,
-            boolean isDebug, CustomerSpace customerSpace) {
+    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
+            CustomerSpace customerSpace) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequest));
             }
-            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest,
-                    isDebug);
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
@@ -199,8 +195,7 @@ public abstract class BaseScoring {
             requestInfo.put(HAS_ERROR, Boolean.toString(false));
             requestInfo.put(SCORE, String.valueOf(response.getScore()));
             requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
-            requestInfo.put(IS_ENRICHMENT_REQUESTED,
-                    String.valueOf(scoreRequest.isPerformEnrichment()));
+            requestInfo.put(IS_ENRICHMENT_REQUESTED, String.valueOf(scoreRequest.isPerformEnrichment()));
             requestInfo.put(RECORD_ID, response.getId());
             requestInfo.put(LATTICE_ID, response.getLatticeId());
             requestInfo.put(ID_TYPE, scoreRequest.getIdType());
@@ -231,8 +226,7 @@ public abstract class BaseScoring {
         metrics.setParseRecordDurationMS(getSplit(splits, "parseRecordDurationMS"));
         metrics.setRequestDurationMS(getSplit(splits, REQUEST_DURATION_MS));
         metrics.setRequestPreparationDurationMS(getSplit(splits, "requestPreparationDurationMS"));
-        metrics.setRetrieveModelArtifactsDurationMS(
-                getSplit(splits, "retrieveModelArtifactsDurationMS"));
+        metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
         metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
         metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
 
@@ -243,11 +237,10 @@ public abstract class BaseScoring {
         return Integer.valueOf(splits.get(key));
     }
 
-    private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start,
-            int offset, int maximum, boolean considerAllStatus, CustomerSpace customerSpace) {
+    private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
+            boolean considerAllStatus, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum,
-                    considerAllStatus);
+            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus);
         }
     }
 
@@ -258,8 +251,8 @@ public abstract class BaseScoring {
         }
     }
 
-    private List<RecordScoreResponse> scoreRecords(HttpServletRequest request,
-            BulkRecordScoreRequest scoreRequests, boolean isDebug, CustomerSpace customerSpace) {
+    private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
+            boolean isDebug, CustomerSpace customerSpace) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
@@ -287,8 +280,7 @@ public abstract class BaseScoring {
         }
     }
 
-    private void logBulkScoreSummary(BulkRecordScoreRequest scoreRequests,
-            List<RecordScoreResponse> responseList) {
+    private void logBulkScoreSummary(BulkRecordScoreRequest scoreRequests, List<RecordScoreResponse> responseList) {
         try {
             requestInfo.put(IS_BULK_REQUEST, Boolean.TRUE.toString());
             requestInfo.put(SOURCE, scoreRequests.getSource());
@@ -297,20 +289,11 @@ public abstract class BaseScoring {
             if (CollectionUtils.isEmpty(responseList)) {
                 requestInfo.logSummary(stopWatchSplits);
             } else {
-                int idx = 0;
                 requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
-                if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
-                    try {
-                        int avgTime = new Float(
-                                (Integer.parseInt(stopWatchSplits.get(REQUEST_DURATION_MS)) * 1.0
-                                        / responseList.size())).intValue();
-                        requestInfo.put(AVERAGE_TOTAL_DURATION_PER_RECORD, String.valueOf(avgTime));
-                    } catch (Exception ex) {
-                        // ignore any exception as it should not fail overall
-                        // score
-                        // request
-                    }
-                }
+
+                processDurationMSForLogging(responseList, stopWatchSplits);
+
+                int idx = 0;
                 for (RecordScoreResponse resp : responseList) {
                     Record record = scoreRequests.getRecords().get(idx++);
                     for (ScoreModelTuple scoreTuple : resp.getScores()) {
@@ -350,14 +333,12 @@ public abstract class BaseScoring {
                         }
                         requestInfo.put(SCORE, String.valueOf(score));
                         requestInfo.put(RECORD_ID, resp.getId());
-                        requestInfo.put(RECORD_CARDINALITY,
-                                String.valueOf(record.getModelAttributeValuesMap().size()));
+                        requestInfo.put(RECORD_CARDINALITY, String.valueOf(record.getModelAttributeValuesMap().size()));
                         requestInfo.put(LATTICE_ID, resp.getLatticeId());
                         requestInfo.put(MODEL_ID, scoreTuple.getModelId());
                         requestInfo.put(RULE, record.getRule());
                         requestInfo.put(ID_TYPE, record.getIdType());
-                        requestInfo.put(IS_ENRICHMENT_REQUESTED,
-                                String.valueOf(record.isPerformEnrichment()));
+                        requestInfo.put(IS_ENRICHMENT_REQUESTED, String.valueOf(record.isPerformEnrichment()));
 
                         requestInfo.putAll(logMap);
                         requestInfo.logSummary(stopWatchSplits);
@@ -365,8 +346,24 @@ public abstract class BaseScoring {
                 }
             }
         } catch (Exception ex) {
-            log.debug("Any exception in logging block should not fail rest of the scoring: "
-                    + ex.getMessage(), ex);
+            log.debug("Any exception in logging block should not fail rest of the scoring: " + ex.getMessage(), ex);
+        }
+    }
+
+    private void processDurationMSForLogging(List<RecordScoreResponse> responseList,
+            Map<String, String> stopWatchSplits) {
+        if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
+            Map<String, String> originalStopWatchSplits = new HashMap<>(stopWatchSplits);
+
+            stopWatchSplits.clear();
+
+            for (String timeKey : originalStopWatchSplits.keySet()) {
+                int totalTimeTaken = Integer.parseInt(originalStopWatchSplits.get(timeKey));
+                int avgTimeTaken = new Float(totalTimeTaken * 1.0 / responseList.size()).intValue();
+
+                stopWatchSplits.put(timeKey, String.valueOf(avgTimeTaken));
+                stopWatchSplits.put(TOTAL_TIME_PREFIX + timeKey, String.valueOf(totalTimeTaken));
+            }
         }
     }
 
