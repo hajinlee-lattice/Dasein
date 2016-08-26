@@ -121,8 +121,7 @@ angular
 
             $scope.clickDownloadErrorReport = function($event) {
 
-                var JobResult = JobsStore.getJob($scope.job.id),
-                    reports = JobResult.reports,
+                var reports = $scope.job.reports
                     JobReport = null;
 
                 console.log(reports);
@@ -146,7 +145,7 @@ angular
 
                 $scope.showProgress = true;
 
-                JobsService.getErrorLog(JobReport, JobResult.jobType).then(function(result) {
+                JobsService.getErrorLog(JobReport, $scope.job.jobType).then(function(result) {
                     var blob = new Blob([ result ], { type: "application/csv" }),
                         date = new Date(),
                         year = date.getFullYear(),
