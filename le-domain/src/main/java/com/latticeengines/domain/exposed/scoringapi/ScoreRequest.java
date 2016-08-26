@@ -42,6 +42,9 @@ public class ScoreRequest {
             required = true)
     private Map<String, Object> record;
 
+    @ApiModelProperty(hidden = true)
+    private String dataCloudVersion;
+
     public String getRecordId() {
         return recordId;
     }
@@ -96,6 +99,14 @@ public class ScoreRequest {
 
     public void setRule(String rule) {
         this.rule = rule;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
 }
