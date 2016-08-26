@@ -48,7 +48,7 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
     @BeforeMethod(groups = { "collection", "deployment" })
     public void setUp() throws Exception {
         source = getSource();
-//        prepareCleanPod(source);
+        prepareCleanPod(source);
         transformationService = getTransformationService();
         progressEntityMgr = getProgressEntityMgr();
     }
