@@ -2,7 +2,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.latticeengines</groupId>
   <artifactId>scoringharness</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -13,14 +12,14 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  
+
   <parent>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <version>2.0.36-SNAPSHOT</version>
     <relativePath>../le-parent</relativePath>
   </parent>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -45,7 +44,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <dependencies>
 	<dependency>
 	  <groupId>org.apache.httpcomponents</groupId>
@@ -73,11 +72,11 @@
     	<artifactId>argparse4j</artifactId>
     	<version>0.4.4</version>
     </dependency>
-    
+
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>2.4.1</version>
-    </dependency>    
+    </dependency>
   </dependencies>
 </project>
