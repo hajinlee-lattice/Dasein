@@ -1,6 +1,7 @@
 angular
 .module('lp.jobs.status', [
-    'lp.jobs.modals.cancelmodal'
+    'lp.jobs.modals.cancelmodal',
+    'lp.create.import.report'
 ])
 .directive('jobStatusRow', function() {
     return {
@@ -60,6 +61,15 @@ angular
 
 
 
+
+            $scope.downloadErrorLogClick = function($event){
+
+                JobsService.downloadErrorLog();
+
+            };
+
+
+
             if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {
                 $scope.jobStepsRunningStates = { 
                     load_data: false, match_data: false, generate_insights: false, 
@@ -100,13 +110,6 @@ angular
             };
 
 
-            $scope.cancelJobClick = function ($event) {
-                if ($event != null) {
-                    $event.stopPropagation();
-                }
-                CancelJobModal.show(job.id);
-            };
-
             // Use this in JobStatusRow.html
             // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
             $scope.rescoreFailedJob = function() {
@@ -122,6 +125,54 @@ angular
                     }
                 );
             };
+
+
+
+            $scope.clickDownloadErrorReport = function($event) {
+
+                var JobResult = JobsStore.getJob($scope.job.id),
+                    reports = JobResult.reports,
+                    JobReport = null;
+
+
+                console.log(reports);
+
+
+                reports.forEach(function(item) {
+                    if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                        JobReport = item;
+                    }
+                });
+
+                if (!JobReport) {
+                    return;
+                }
+                
+                JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
+
+                $scope.report = JobReport;
+                $scope.data = data = JSON.parse(JobReport.json.Payload);
+                $scope.data.total_records = data.imported_records + data.ignored_records;
+                $scope.errorlog = '/pls/fileuploads/' + JobReport.name + '/import/errors';
+
+                $scope.showProgress = true;
+
+                JobsService.getErrorLog(JobReport, JobResult.jobType).then(function(result) {
+                    var blob = new Blob([ result ], { type: "application/csv" }),
+                        date = new Date(),
+                        year = date.getFullYear(),
+                        month = (1 + date.getMonth()).toString(),
+                        month = month.length > 1 ? month : '0' + month,
+                        day = date.getDate().toString(),
+                        day = day.length > 1 ? day : '0' + day,
+                        filename = 'import_errors.' + year + month + day + '.csv';
+                    
+                    saveAs(blob, filename);
+                    $scope.showProgress = false;
+
+                }, function(reason) {});
+            };
+
 
             $scope.clickGetScoringResults = function($event) {
 
