@@ -137,7 +137,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     public void testBulkMatchAndJoin() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
                 .bulkMatchAndJoin(customerSpace, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList,
-                        originalOrderModelSummaryList);
+                        originalOrderModelSummaryList, false);
 
         unorderedMatchedRecordMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
         unorderedLeadEnrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT);

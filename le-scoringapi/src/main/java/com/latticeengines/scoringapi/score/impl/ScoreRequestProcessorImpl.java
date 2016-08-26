@@ -213,7 +213,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
             if (!partiallyOrderedParsedTupleList.isEmpty()) {
                 Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = bulkMatchAndJoin(
-                        space, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList);
+                        space, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList,
+                        request.isHomogeneous());
 
                 Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                         unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
@@ -324,10 +325,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     Map<RecordModelTuple, Map<String, Map<String, Object>>> bulkMatchAndJoin(CustomerSpace space,
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList) {
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList,
+            boolean isHomogeneous) {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = matcher
                 .matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList);
+                        originalOrderModelSummaryList, isHomogeneous);
         return unorderedMatchedRecordEnrichmentMap;
     }
 

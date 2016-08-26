@@ -115,6 +115,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             boolean isPmmlModel, CustomerSpace customerSpace) throws IOException {
         try {
             BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList, isPmmlModel);
+            bulkScoreRequest.setHomogeneous(true);
             ObjectMapper om = new ObjectMapper();
             long timeDuration = System.currentTimeMillis();
             System.out.println(om.writeValueAsString(bulkScoreRequest));

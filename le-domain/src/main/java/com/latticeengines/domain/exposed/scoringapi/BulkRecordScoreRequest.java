@@ -25,6 +25,9 @@ public class BulkRecordScoreRequest {
     @ApiModelProperty(hidden = true)
     private String requestTimestamp;
 
+    @ApiModelProperty(hidden = true)
+    private boolean homogeneous;
+
     public String getSource() {
         return source;
     }
@@ -55,6 +58,14 @@ public class BulkRecordScoreRequest {
 
     public void setRequestTimestamp(String requestTimestamp) {
         this.requestTimestamp = requestTimestamp;
+    }
+
+    public boolean isHomogeneous() {
+        return homogeneous;
+    }
+
+    public void setHomogeneous(boolean homogeneous) {
+        this.homogeneous = homogeneous;
     }
 
     public String toString() {
