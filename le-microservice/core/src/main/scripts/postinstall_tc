@@ -18,7 +18,7 @@ do
 
     if [ "${fn}" = "quartz" -a "${WITH_QUARTZ_MICROSERVICE}" = "false" ]; then
         echo "skipping quartz war"
-        break;
+        continue;
     fi
 
     echo "repackaging ${fn}.war"
