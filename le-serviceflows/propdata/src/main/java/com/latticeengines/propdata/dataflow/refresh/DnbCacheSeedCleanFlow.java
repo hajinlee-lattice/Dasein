@@ -20,26 +20,20 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<SingleBaseSourceRefreshDataFlowParameter> {
     private static Logger log = LogManager.getLogger(DnbCacheSeedCleanFlow.class);
 
+    private final static String DUNS_FIELD = "DUNS_NUMBER";
+
     @Override
     public Node construct(SingleBaseSourceRefreshDataFlowParameter parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
-        node = addFilterNode(node, parameters.getJoinFields());
+        node = addFilterNode(node);
         node = addDataCleanNode(node, parameters.getColumns());
         node = addDedupNode(node, parameters.getJoinFields());
         node = addColumnNode(node, parameters.getColumns());
         return node;
     }
 
-    private Node addFilterNode(Node node, String[] filterColumns) {
-        StringBuilder sb = new StringBuilder();
-        for (String column : filterColumns) {
-            sb.append(column + " != null && ");
-        }
-        if (sb.length() > 0) {
-            log.info("Filter expression: " + sb.substring(0, sb.length() - 4));
-            node.filter(sb.substring(0, sb.length() - 4), new FieldList(filterColumns));
-        }
-        return node;
+    private Node addFilterNode(Node node) {
+        return node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
     }
 
     private Node addDedupNode(Node node, String[] dedupColumns) {
