@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.ModelReplaceService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
@@ -71,6 +73,9 @@ public class ModelResource {
 
     @Autowired
     private ModelCopyService modelCopyService;
+
+    @Autowired
+    private ModelReplaceService modelReplaceService;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -109,9 +114,10 @@ public class ModelResource {
 
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(parameters
                 .getSourceModelSummaryId());
-        Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(), modelSummary.getEventTableName());
-        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(parentModelEventTable.getAttributes(),
-                parameters.getAttributes());
+        Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
+                modelSummary.getEventTableName());
+        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
+                parentModelEventTable.getAttributes(), parameters.getAttributes());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
@@ -138,13 +144,23 @@ public class ModelResource {
 
     }
 
-    @RequestMapping(value = "/copymodel/{modelName}", method = RequestMethod.POST)
+    @RequestMapping(value = "/copymodel/{modelId}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Copy a model from current tenant to target tenant.")
-    public ResponseDocument<Boolean> copyModel(@PathVariable String modelName,
+    public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
             @RequestParam(value = "targetTenantId") String targetTenantId) {
         return ResponseDocument.successResponse( //
-                modelCopyService.copyModel(targetTenantId, modelName));
+                modelCopyService.copyModel(targetTenantId, modelId));
+    }
+
+    @RequestMapping(value = "/replacemodel/{sourceModelId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Use source tenant's model to replace target tenant's model.")
+    public ResponseDocument<Boolean> replaceModel(@PathVariable String sourceModelId,
+            @RequestParam(value = "targetTenantId") String targetTenantId,
+            @RequestParam(value = "targetModelId") String targetModelId) {
+        return ResponseDocument.successResponse( //
+                modelReplaceService.replaceModel(sourceModelId, targetTenantId, targetModelId));
     }
 
     @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
