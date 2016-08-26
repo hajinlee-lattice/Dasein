@@ -70,10 +70,10 @@
             </span>
             
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
-                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.timestamp != null && job.id != null && (jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow')">
+                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.timestamp != null && job.id != null">
                     <span><i class="fa fa-angle-double-down fa-lg"></i></span>
                 </a>
-                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && job.timestamp != null && job.id != null && (jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow')">
+                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && job.timestamp != null && job.id != null">
                     <span><i class="fa fa-angle-double-up fa-lg"></i></span>
                 </a>
             </span>
@@ -86,7 +86,7 @@
         <div class="progress-info">
 
 
-            <ol class="wizard job-status" ng-if="jobType == 'importMatchAndModelWorkflow'">
+            <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow'">
                 <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                     <div>
                             
