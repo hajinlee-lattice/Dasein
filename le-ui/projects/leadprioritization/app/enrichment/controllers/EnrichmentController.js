@@ -1,7 +1,10 @@
 // green msg after save, 3s
 // grid view multple of 12, dynamic across
-angular.module('lp.enrichment.leadenrichment', [])
-.controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+angular.module('lp.enrichment.leadenrichment', [
+    'mainApp.core.utilities.BrowserStorageUtility'
+])
+.controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, BrowserStorageUtility,
+    EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this,
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
@@ -27,6 +30,7 @@ angular.module('lp.enrichment.leadenrichment', [])
         },
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
+        authToken: BrowserStorageUtility.getTokenDocument(),
         category: null,
         userSelectedCount: 0,
         selectDisabled: 1,
@@ -142,7 +146,7 @@ angular.module('lp.enrichment.leadenrichment', [])
             }
         });
     }
-    
+
     vm.fieldType = function(fieldType){
         var fieldType = fieldType.replace(/[0-9]+/g, '*');
         var fieldTypes = {

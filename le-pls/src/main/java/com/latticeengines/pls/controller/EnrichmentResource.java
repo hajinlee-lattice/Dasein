@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,22 @@ public class EnrichmentResource {
                 : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
                 onlySelectedAttributes);
+    }
+
+    @RequestMapping(value = LEAD_ENRICH_PATH
+            + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Download lead enrichment attributes")
+    public void downloadEnrichmentCSV(HttpServletRequest request, HttpServletResponse response,
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        String fileName = onlySelectedAttributes ? "selectedEnrichmentAttributes.csv"
+                : "enrichmentAttributes.csv";
+        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName,
+                tenant, onlySelectedAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/premiumattributeslimitation", //

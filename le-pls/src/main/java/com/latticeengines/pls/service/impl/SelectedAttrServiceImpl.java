@@ -1,11 +1,15 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,9 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
+    private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description",
+            "Data Type", "Status", "Premium");
+
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
 
@@ -98,8 +105,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant,
             String attributeDisplayNameFilter, Category category, Boolean onlySelectedAttributes) {
-        List<ColumnMetadata> allColumns = columnMetadataProxy
-                .columnSelection(Predefined.Enrichment, null);
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+                null);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
@@ -123,6 +130,64 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
                 .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
+    }
+
+    @Override
+    public void downloadAttributes(HttpServletRequest request, HttpServletResponse response,
+            String mimeType, String fileName, Tenant tenant, Boolean isSelected) {
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+                null);
+        List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
+
+        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null,
+                null, isSelected);
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
+                getCSVFromAttributes(attributes));
+        downloader.downloadFile(request, response);
+    }
+
+    private String getCSVFromAttributes(List<LeadEnrichmentAttribute> attributes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < CSV_HEADERS.size(); i++) {
+            if (i + 1 < CSV_HEADERS.size()) {
+                stringBuffer.append(modifyStringForCSV(CSV_HEADERS.get(i)) + ",");
+            } else {
+                stringBuffer.append(modifyStringForCSV(CSV_HEADERS.get(i)));
+            }
+        }
+        stringBuffer.append("\r\n");
+
+        for (LeadEnrichmentAttribute attribute : attributes) {
+            stringBuffer.append(modifyStringForCSV(attribute.getDisplayName()) + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getCategory()) + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getDescription()) + ",");
+            stringBuffer
+                    .append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldType())) + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getIsSelected().toString()) + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getIsPremium().toString()));
+            stringBuffer.append("\r\n");
+        }
+
+        return stringBuffer.toString();
+    }
+
+    private String modifyStringForCSV(String value) {
+        return "\"" + value.replaceAll("\"", "\"\"") + "\"";
+    }
+
+    private String getDataTypeDisplay(String dataType) {
+        String displayName;
+
+        switch (dataType.toUpperCase()) {
+        case "NVARCHAR(3)":
+            displayName = "Text (3)";
+            break;
+        default:
+            displayName = "Text (3)";
+            break;
+        }
+
+        return displayName;
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
