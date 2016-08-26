@@ -46,7 +46,6 @@ angular
             var periodicQueryId;
             var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
-
             $scope.cancelJobClick = function ($event) {
                 if ($event != null) {
                     $event.stopPropagation();
@@ -59,16 +58,11 @@ angular
                 $scope.cancelling[job.id] = true;
             };
 
-
-
-
             $scope.downloadErrorLogClick = function($event){
 
                 JobsService.downloadErrorLog();
 
             };
-
-
 
             if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {
                 $scope.jobStepsRunningStates = { 
@@ -109,7 +103,6 @@ angular
                 }
             };
 
-
             // Use this in JobStatusRow.html
             // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
             $scope.rescoreFailedJob = function() {
@@ -126,17 +119,13 @@ angular
                 );
             };
 
-
-
             $scope.clickDownloadErrorReport = function($event) {
 
                 var JobResult = JobsStore.getJob($scope.job.id),
                     reports = JobResult.reports,
                     JobReport = null;
 
-
                 console.log(reports);
-
 
                 reports.forEach(function(item) {
                     if (item.purpose == "IMPORT_DATA_SUMMARY") {
@@ -172,7 +161,6 @@ angular
 
                 }, function(reason) {});
             };
-
 
             $scope.clickGetScoringResults = function($event) {
 

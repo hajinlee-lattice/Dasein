@@ -6,19 +6,17 @@
     </div>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.models"><span class="ico-container"><span class="ico ico-model ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
+            <a ui-sref="home.models"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
         </li>
         <li ng-if="showUserManagement" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.users"><span class="ico-container"><span class="ico ico-user ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
+            <a ui-sref="home.users"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
         </li>
         <li ng-if="showLeadEnrichmentPage" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.enrichment"><span class="ico-container"><span class="ico ico-enrichment ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ENRICHMENT')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ENRICHMENT')}}</span></a>
+            <a ui-sref="home.enrichment"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ENRICHMENT')}}"><span class="ico ico-enrichment ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ENRICHMENT')}}</span></a>
         </li>
         <li ng-if="showJobsPage" role="presentation" ui-sref-active="active">
-            <a 
-                    title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}} [{{RunningJobs.length}}/{{jobs.length}}]"
-                    ui-sref="home.jobs.status">
-                <span class="ico-container" ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}">
+            <a ui-sref="home.jobs.status">
+                <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}" class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}} [{{RunningJobs.length}}/{{jobs.length}}]">
                     <span class="ico ico-cog ico-light-gray"></span>
                 </span>
                 <span class="label">
@@ -28,16 +26,16 @@
             </a>
         </li>   
         <li ng-if="showMarketoSettings" role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
-            <a ui-sref="home.marketosettings.apikey"><span class="ico-container"><span class="ico ico-marketo ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}</span></a>
+            <a ui-sref="home.marketosettings.apikey"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}"><span class="ico ico-marketo ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}</span></a>
         </li>
         <li ng-if="showEloquaSettings" role="presentation" ng-class="{active: $state.includes('home.eloquasettings')}">
-            <a ui-sref="home.eloquasettings.apikey"><span class="ico-container"><span class="ico ico-eloqua ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}</span></a>
+            <a ui-sref="home.eloquasettings.apikey"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}"><span class="ico ico-eloqua ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}</span></a>
         </li>
         <li ng-if="showSalesforceSettings" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.sfdcsettings"><span class="ico-container"><span class="ico ico-salesforce ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}</span></a>
+            <a ui-sref="home.sfdcsettings"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}"><span class="ico ico-salesforce ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SFDC')}}</span></a>
         </li>
         <li ng-if="showApiConsole" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.apiconsole"><span class="ico-container"><span class="ico ico-api-console ico-light-gray" title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}</span></a>
+            <a ui-sref="home.apiconsole"><span class="ico-container tool-tip" data-title="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}"><span class="ico ico-api-console ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}</span></a>
         </li>
     </ul>
     <button class="open-button open">

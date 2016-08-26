@@ -49,7 +49,6 @@ span.ico-container {
     height: 36px;
     width: 36px;
     padding: 4px;
-    overflow: hidden;
     border-radius: 50%;
     background: rgba(255,255,255,.08);
     text-align: center;
@@ -96,9 +95,9 @@ nav.primary-nav {
     width: 60px;
     min-width: 60px; // protection for IE
     @media screen and (max-height: $max-height) {
-        overflow: auto;
+        //overflow: auto;
+        //overflow-x: hidden;
         width: 70px;
-        overflow-x: hidden;
     }
     .lp-sidebar-menu {
         background: #222831;
@@ -568,4 +567,24 @@ html.no-cssmask {
     background-repeat: no-repeat; 
     background-position: 12px 50%;
 }
-
+body:not(.open-nav) .tool-tip[data-title] {
+    position: relative;
+    &:after {
+        content: attr(data-title);
+        font-size: 12px;
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        transform: translateY(-50%);
+        margin-left: 10px;
+        padding: 5px;
+        border-radius: 3px;
+        background: rgba(0,0,0,1);
+    }
+    &:hover {
+        &:after {
+            display: block;
+        }
+    }
+}
