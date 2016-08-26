@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -233,9 +234,12 @@ public abstract class AbstractTransformationService extends TransformationServic
 
                 for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
                         avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
-                    String avroFileName = avroFilePath.substring(avroFilePath.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
-                    HdfsUtils.copyFiles(yarnConfiguration, avroFilePath,
-                            sourceDir + HDFS_PATH_SEPARATOR + avroFileName);
+                    if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
+                        HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+                    }
+                    String avroFileName = new Path(avroFilePath).getName();
+                    LOG.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
+                    HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
                 }
 
                 try {
