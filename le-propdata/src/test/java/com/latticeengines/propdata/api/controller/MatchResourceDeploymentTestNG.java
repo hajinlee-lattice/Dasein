@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -16,10 +17,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -59,6 +61,39 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+    }
+
+    @Test(groups = "deployment", enabled = false)
+    public void testAccountMasterRTSMatch() {
+        MatchInput input = prepareSimpleMatchInput(true);
+        input.setDataCloudVersion("2.0");
+        MatchOutput output = matchProxy.matchRealTime(input);
+        Assert.assertNotNull(output);
+
+        input.setReturnUnmatched(false);
+        output = matchProxy.matchRealTime(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+    }
+
+    private MatchInput prepareSimpleMatchInput(boolean resolveKeyMap) {
+        Object[][] data = new Object[][] { { 0, "lincolntextile.com", "1011964" } };
+        List<List<Object>> mockData = new ArrayList<>();
+        for (Object[] row : data) {
+            mockData.add(Arrays.asList(row));
+        }
+        MatchInput input = new MatchInput();
+        input.setReturnUnmatched(true);
+        input.setPredefinedSelection(Predefined.RTS);
+        input.setTenant(new Tenant("PD_Test"));
+        List<String> fields = Arrays.asList("ID", "Domain", "DUNS");
+        input.setFields(fields);
+        if (resolveKeyMap) {
+            input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
+        }
+        input.setData(mockData);
+        return input;
     }
 
     @Test(groups = "deployment")
