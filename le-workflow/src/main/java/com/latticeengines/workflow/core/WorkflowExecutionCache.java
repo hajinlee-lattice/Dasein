@@ -13,8 +13,11 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -54,6 +57,9 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private JobExplorer jobExplorer;
+
+    @Autowired
+    private JobProxy jobProxy;
 
     @Autowired
     private WorkflowService workflowService;
@@ -115,6 +121,12 @@ public class WorkflowExecutionCache {
                 if (errorDetails != null) {
                     job.setErrorCode(errorDetails.getErrorCode());
                     job.setErrorMsg(errorDetails.getErrorMsg());
+                }
+                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                        .getApplicationId());
+                workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+                if (YarnUtils.FAILED_STATUS.contains(workflowJob.getStatus())) {
+                    job.setJobStatus(JobStatus.FAILED);
                 }
             }
 

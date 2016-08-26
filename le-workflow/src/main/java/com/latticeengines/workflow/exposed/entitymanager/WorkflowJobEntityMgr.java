@@ -14,4 +14,6 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     List<WorkflowJob> findByTenant(Tenant tenant);
 
+    WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus);
 }

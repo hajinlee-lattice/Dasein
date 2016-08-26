@@ -20,6 +20,7 @@
         <le.security.version>2.0.36-SNAPSHOT</le.security.version>
         <le.db.version>2.0.36-SNAPSHOT</le.db.version>
         <le.monitor.version>2.0.36-SNAPSHOT</le.monitor.version>
+        <le.proxy.version>2.0.36-SNAPSHOT</le.proxy.version>
         <le.security.version>2.0.36-SNAPSHOT</le.security.version>
         <spring.batch.version>3.0.3.RELEASE</spring.batch.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
@@ -107,6 +108,11 @@
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
         </dependency>
     </dependencies>
     <build>

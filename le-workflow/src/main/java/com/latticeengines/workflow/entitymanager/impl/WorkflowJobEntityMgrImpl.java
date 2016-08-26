@@ -55,4 +55,13 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         return workflowJobDao.findByTenant(tenant);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
+        workflowJob.setStatus(yarnJobStatus.getStatus());
+        workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
+        update(workflowJob);
+        return workflowJob;
+    }
 }

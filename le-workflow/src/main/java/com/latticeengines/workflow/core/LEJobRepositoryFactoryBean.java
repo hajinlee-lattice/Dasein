@@ -42,6 +42,7 @@ public class LEJobRepositoryFactoryBean extends JobRepositoryFactoryBean {
             ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
             backOffPolicy.setInitialInterval(retryBackOffInitialIntervalMsec);
             backOffPolicy.setMultiplier(retryBackOffMultiplier);
+            template.setBackOffPolicy(backOffPolicy);
 
             retryAdvice.setRetryOperations(template);
 

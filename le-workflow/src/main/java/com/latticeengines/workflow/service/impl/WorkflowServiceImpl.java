@@ -285,7 +285,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 }
             } catch (Exception e) {
                 log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),
-                        e.getMessage()));
+                        e.getMessage()), e);
                 if (--retryOnException == 0)
                     throw e;
             } finally {
