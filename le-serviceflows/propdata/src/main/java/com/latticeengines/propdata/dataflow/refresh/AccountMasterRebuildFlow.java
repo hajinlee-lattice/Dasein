@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.dataflow.refresh;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,8 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         Node seed = addSource(parameters.getBaseTables().get(0));
         
         String[] seedFields = parameters.getSeedFields();
-        log.info("Retain seed fields " + seedFields);
+        
+        log.info("Retain seed fields " + Arrays.toString(seedFields));
         List<String> fieldList = new ArrayList<String>();
         for (int i = 0; i< seedFields.length; i++) {
              fieldList.add(seedFields[i]);
@@ -71,8 +73,8 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
             String joinKey = joinKeyMap.get(lastSource);
             joined = joined.join(dunsField, lastSource, new FieldList(joinKey), JoinType.LEFT);
             String secondKey = joinKey + SECOND_KEY_SUFFIX;
-            String filterFunc = domainKey + " == null || " + domainKey + " == " + secondKey;
-            joined = joined.filter(filterFunc, new FieldList(domainKey, secondKey));
+            String filterFunc = secondKey + " == null || " + secondKey + " == " + domainKey;
+            joined = joined.filter(filterFunc, new FieldList(secondKey, domainKey));
 
         }
 
