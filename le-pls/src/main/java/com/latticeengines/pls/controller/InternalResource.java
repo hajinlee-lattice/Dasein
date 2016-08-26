@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -540,14 +541,30 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+                                        @PathVariable("tenantId") String tenantId,
+                                        @RequestBody AdditionalEmailInfo emailInfo,
+                                        HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
-        for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                if (result.equals("COMPLETED")) {
-                    emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl);
-                } else {
-                    emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl);
+        String modelName = emailInfo.getModelId();
+        if (modelName != null && !modelName.isEmpty()) {
+            for (User user : users) {
+                if (user.getEmail().equals(emailInfo.getUserId())) {
+                    String tenantName = tenantService.findByTenantId(tenantId).getName();
+                    if (result.equals("COMPLETED")) {
+                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName, true);
+                        } else {
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName, false);
+                        }
+                    } else {
+                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                        } else {
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                        }
+                    }
                 }
             }
         }
@@ -557,15 +574,35 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
-    public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
+    public void sendPlsScoreEmail(@PathVariable("result") String result,
+                                  @PathVariable("tenantId") String tenantId,
+                                  @RequestBody AdditionalEmailInfo emailInfo,
+                                  HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
-        for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                if (result.equals("COMPLETED")) {
-                    emailService.sendPlsScoreCompletionEmail(user, appPublicUrl);
-                } else {
-                    emailService.sendPlsScoreErrorEmail(user, appPublicUrl);
+        String modelId = emailInfo.getModelId();
+        if (modelId != null && !modelId.isEmpty()) {
+            for (User user : users) {
+                if (user.getEmail().equals(emailInfo.getUserId())) {
+                    String tenantName = tenantService.findByTenantId(tenantId).getName();
+                    ModelSummary modelSummary = modelSummaryService.getModelSummary(modelId);
+                    if (modelSummary != null) {
+                        String modelName = modelSummaryService.getModelSummary(modelId).getDisplayName();
+                        if (result.equals("COMPLETED")) {
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName, true);
+                            } else {
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName, false);
+                            }
+                        } else {
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                            } else {
+                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                            }
+                        }
+                    }
                 }
             }
         }

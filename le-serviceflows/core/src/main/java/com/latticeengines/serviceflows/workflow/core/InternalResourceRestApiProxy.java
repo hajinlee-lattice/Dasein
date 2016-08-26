@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -161,11 +162,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public void sendPlsCreateModelEmail(String result, String tenantId) {
+    public void sendPlsCreateModelEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl("pls/internal/emails/createmodel/result", result, tenantId);
             log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, result);
+            restTemplate.put(url, info);
         } catch (Exception e) {
             throw new RuntimeException("sendCreateModelEmail: Remote call failure", e);
         }
@@ -183,11 +184,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return modelSummary;
     }
 
-    public void sendPlsScoreEmail(String result, String tenantId) {
+    public void sendPlsScoreEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl("pls/internal/emails/score/result", result, tenantId);
             log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, result);
+            restTemplate.put(url, info);
         } catch (Exception e) {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }

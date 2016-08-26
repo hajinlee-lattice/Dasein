@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Lattice Reset Password Email</title>
+    <title>Lattice Job Error</title>
 
 
     <style type="text/css">
@@ -75,15 +75,17 @@
                                 <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
                                         <p style="margin: 20px;">{{firstname}},</p>
-                                        <p style="margin: 20px;">
-                                            Someone requested a new password for your account on Lattice Predictive Insights. You can sign in using the temporary credentials listed below.
-                                        </p>
-                                        <p style="margin: 20px;"><strong>Lattice Predictive Insights URL:</strong><br/>https://app.lattice-engines.com</p>
-                                        <p style="margin: 20px;">
-                                            <strong>Email:</strong> {{username}}<br/>
-                                            <strong>Temporary Password:</strong> {{password}}
-                                        </p>
-                                        <p style="margin: 20px;">You will be prompted to change your password the next time you login.</p>
+                                        <p style="margin: 20px;">The job listed below failed. </p>
+                                        <p style="margin: 20px;"><strong>Lattice Predictive Insights URL:</strong><br />https://app.lattice-engines.com</p>
+                                        <p style="margin: 20px;"><strong>Tenant Name:</strong><br/>{{tenantname}}</p>
+                                        <p style="margin: 20px;"><strong>Job Type:</strong><br/>{{jobtype}}</p>
+                                        <p style="margin: 20px;"><strong>Model Name:</strong><br/>{{modelname}}</p>
+                                        <p style="margin: 20px;"><strong>Error:</strong><br/>{{errormsg}} <a href="{{url}}">{{linkmsg}}</a></p>
+                                    </td>
+                                </tr>
+                                <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                    <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px; text-align: center;" valign="top">
+                                        <a href="{{url}}" class="btn-primary" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background: #e96339; margin: 0; padding: 0; border-color: #e96339; border-style: solid; border-width: 10px 20px;">SIGN IN TO LATTICE</a>
                                     </td>
                                 </tr>
                             </table>
@@ -93,10 +95,7 @@
                 <div class="footer" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
                     <table width="100%" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                         <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
-                            <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                If you didn't make a request for your password to be reset,
-                                please contact us at <a href="mailto:support@lattice-engines.com">support@lattice-engines.com</a>
-                            </td>
+                            <td class="aligncenter content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; text-align: center; margin: 0; padding: 0 0 20px;" align="center" valign="top">Do not respond to this automated message. Emails sent to this address are not monitored.</td>
                         </tr>
                     </table>
                 </div></div>

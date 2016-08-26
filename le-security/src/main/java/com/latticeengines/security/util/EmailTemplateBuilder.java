@@ -81,7 +81,9 @@ public class EmailTemplateBuilder {
         PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"),
         SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html"), //
         PLS_JOB_SUCCESS("pls_job_success.html"), //
-        PLS_JOB_ERROR("pls_job_error.html"); 
+        PLS_JOB_ERROR("pls_job_error.html"),
+        PLS_JOB_SUCCESS_INTERNAL("pls_job_success_internal.html"),
+        PLS_JOB_ERROR_INTERNAL("pls_job_error_internal.html");
 
         private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;

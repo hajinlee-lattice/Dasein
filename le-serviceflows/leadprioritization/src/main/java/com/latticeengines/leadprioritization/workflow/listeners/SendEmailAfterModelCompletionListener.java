@@ -1,5 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.listeners;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobExecution;
@@ -22,8 +25,17 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
         log.info("tenantid: " + tenantId);
         String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
         log.info("hostPort: " + hostPort);
+        String userId = jobExecution.getJobParameters().getString("User_Id");
+        AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+        emailInfo.setUserId(userId);
+        String modelStepConfiguration = jobExecution.getJobParameters().getString(
+                ModelStepConfiguration.class.getCanonicalName());
+        String modelName = JsonUtils.deserialize(modelStepConfiguration, ModelStepConfiguration.class)
+                .getModelName();
+        emailInfo.setModelId(modelName);
+        log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-        proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId);
+        proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
     }
 
 }

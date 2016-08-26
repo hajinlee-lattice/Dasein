@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.security.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.logging.Log;
@@ -54,6 +55,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
     private static final String CUSTOMER_SPACE = "CustomerSpace";
     private static final String INTERNAL_RESOURCE_HOST_PORT = "Internal_Resource_Host_Port";
+    private static final String USER_ID = "User_Id";
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
     @Autowired
@@ -100,6 +102,11 @@ public class WorkflowServiceImpl implements WorkflowService {
             if (workflowConfiguration.getInternalResourceHostPort() != null) {
                 parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT, workflowConfiguration.getInternalResourceHostPort()
                         .toString());
+            }
+            if (workflowConfiguration.getUserId() != null) {
+                parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
+            } else {
+                parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
             }
             for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
                 parmsBuilder.addString(configurationClassName,

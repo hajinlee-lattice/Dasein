@@ -46,13 +46,13 @@ public interface EmailService {
 
     void sendPlsValidateMetadataErrorEmail(User user, String hostport);
 
-    void sendPlsCreateModelCompletionEmail(User user, String hostport);
+    void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
-    void sendPlsCreateModelErrorEmail(User user, String hostport);
+    void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
-    void sendPlsScoreCompletionEmail(User user, String hostport);
+    void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
-    void sendPlsScoreErrorEmail(User user, String hostport);
+    void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
     void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
 
