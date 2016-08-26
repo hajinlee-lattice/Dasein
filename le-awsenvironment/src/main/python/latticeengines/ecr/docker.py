@@ -94,13 +94,13 @@ def tag_for_remote(args):
         reg_url = NEXUS_DOCKER_REGISTRY
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     print "tagging image %s as %s ..." % (source, destination)
-    subprocess.call(["docker", "tag", source, destination])
+    subprocess.call(["docker", "tag", "-f", source, destination])
 
 def tag_for_local(registry, image, remotetag, localtag):
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
     print "tagging image %s as %s:%s ..." % (source, image, localtag)
     destination = "" + NAMESPACE + "/" +  image + ":" + localtag
-    subprocess.call(["docker", "tag", source, destination])
+    subprocess.call(["docker", "tag", "-f", source, destination])
 
 def login(environment):
     if environment == 'dev':
