@@ -18,13 +18,16 @@ angular.module('pd.navigation.header', [
 ) {
     $scope.ResourceUtility = ResourceUtility;
 
-    var clientSession = BrowserStorageUtility.getClientSession();
+    var ClientSession = BrowserStorageUtility.getClientSession();
     
-    if (clientSession != null) {
-        var Tenant = clientSession ? clientSession.Tenant : null;
+    if (ClientSession != null) {
+        var LoginDocument = BrowserStorageUtility.getLoginDocument();
+        var Tenants = LoginDocument ? LoginDocument.Tenants : {};
+        var Tenant = ClientSession ? ClientSession.Tenant : {};
 
-        $scope.userDisplayName = clientSession.DisplayName;
+        $scope.userDisplayName = ClientSession.DisplayName;
         $scope.tenantName = window.escape(Tenant.DisplayName);
+        $scope.tenants = Tenants;
     }
 
     $scope.showProfileNav = false;

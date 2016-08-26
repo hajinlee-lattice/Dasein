@@ -25,12 +25,15 @@
                 <search-filter query="query"></search-filter>
             </div>
             <div class="pull-right">
+                <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
                 <!--
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
-                <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
+                <menu-dropdown ng-if="state == 'model' && !IsPmml" config="header.scoring"></menu-dropdown>
+                <a ng-if="state == 'model' && IsPmml" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Score a File</button></a>
+                <!--
                 <button ng-if="state == 'model' && !IsPmml" ng-click="handleRescoreClick($event); $event.stopPropagation();" type="button" class="button orange-button">Score Training Data</button>
-                <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Score a File</button></a>
+                -->
             </div>
         </div><!-- End .row -->
     </div><!-- End .table-header -->

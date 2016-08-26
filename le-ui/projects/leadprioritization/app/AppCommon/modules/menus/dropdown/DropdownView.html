@@ -3,7 +3,8 @@
             if="label"
             type="button"
             class="button icon-button {{ class }}"
-            ui-sref="{{ sref }}"
+            ng-click="click()"
+            ui-sref="{{ sref || '.' }}"
             ng-class="{ 'open': visible }">
         {{ label }}
     </button

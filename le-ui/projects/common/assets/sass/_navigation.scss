@@ -525,20 +525,20 @@ html.no-cssmask {
         ul {
             display: block;
             z-index: 20;
-
+            padding-bottom: 1em;
             margin-top: 0;
             width: 100%;
             border: none;
             -webkit-box-shadow: none;
             -moz-box-shadow:    none;
             box-shadow:         none;
+            background: #222;
             & > li {
                 text-align: left;
                 border-bottom: none;
                 & > a {
                     display: block;
                     padding: 4px 28px;
-                    background: #222;
                     color: #fff;
                     width: inherit;
                     &:first-of-type {

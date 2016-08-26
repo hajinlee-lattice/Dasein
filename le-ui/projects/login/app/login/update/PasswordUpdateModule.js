@@ -8,7 +8,7 @@ angular.module('login.update', [
 ])
 
 .controller('PasswordUpdateController', function (
-    $scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
+    $scope, $state, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
     StringUtility, NavUtility, LoginService, LoginDocument, TimestampIntervalUtility
 ) {
     angular.element('body').addClass('update-password-body');
@@ -108,10 +108,12 @@ angular.module('login.update', [
             $scope.saveInProgess = true;
             LoginService.ChangePassword($scope.oldPassword, $scope.newPassword, $scope.confirmPassword).then(function(result) {
                 $scope.saveInProgess = false;
+                console.log('updatePasswordClick',result);
                 if (result.Success) {
-                    $("#changePasswordSuccessAlert").fadeIn();
+                    //$("#changePasswordSuccessAlert").fadeIn();
                     BrowserStorageUtility.clear(false);
-                    $rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
+                    $state.go('login.success');
+                    //$rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
                 } else {
                     if (result.Status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
@@ -126,7 +128,7 @@ angular.module('login.update', [
         }
     };
 })
-.controller('UpdatePasswordSuccessController', function ($scope, ResourceUtility, LoginService) {
+.controller('PasswordUpdateSuccessController', function ($scope, ResourceUtility, LoginService) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.clickRelogin = function(){

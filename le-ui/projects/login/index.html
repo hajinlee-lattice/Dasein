@@ -13,14 +13,10 @@
         <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
     </head>
     <body data-ng-controller="MainController" class="blue-background">
-        <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
         <div id="mainView">
-            <div ui-view="header" id="mainHeaderView"></div>
-            <div ui-view="summary" id="mainSummaryView"></div>
             <div ui-view="info" id="mainInfoView"></div>
             <div ui-view="main" id="mainContentView"></div>
         </div>
-        <!--[if IE]><div id="isIE"></div><![endif]-->
     </body>
     <script src="/assets/vendor.min.js"></script>
     <script src="/assets/lattice.min.js"></script>
@@ -38,12 +34,4 @@
         angular.module('templates-main', []);
     </script>
     <!-- /build -->
-    <script type="text/javascript">
-        WebFontConfig = {
-            google: { families: [ 'Open Sans' ] }
-        };
-
-        // Create global variable for Evergage to use
-        var _aaq = _aaq || [];
-    </script>
 </html>

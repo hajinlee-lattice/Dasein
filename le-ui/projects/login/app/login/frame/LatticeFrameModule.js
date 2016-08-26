@@ -9,7 +9,6 @@ angular.module('login.frame', [
 .controller('LatticeFrameController', function(
     $scope, $state, ResourceUtility, LoginService, LoginStore, LoginDocument, ClientSession
 ) {
-    $scope.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
     $scope.login = LoginStore.login;
     $scope.state = $state;

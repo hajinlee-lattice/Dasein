@@ -40,59 +40,67 @@ angular.module('login.form', [
     }
 })
 .controller('LoginViewController', function (
-    $scope, $templateCache, $http, $rootScope, $compile, $state, ResourceUtility, TimestampIntervalUtility,
+    $templateCache, $http, $rootScope, $compile, $state, ResourceUtility, TimestampIntervalUtility,
     BrowserStorageUtility, LoginService, ResourceStringsService, LoginStore
 ) {
-    $('[autofocus]').focus();
+    var vm = this;
 
-    $scope.ResourceUtility = ResourceUtility;
+    angular.extend(vm, {
+        ResourceUtility: ResourceUtility,
+        username: "",
+        password: "",
+        visible: false,
+        loginMessage: null,
+        loginErrorMessage: null,
+        showLoginError: false,
+        showSuccessMessage: false,
+        successMessage: "",
+        loginInProgress: false,
+        showForgotPassword: false,
+        forgotPasswordUsername: "",
+        copyrightString: ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]),
+        forgotPasswordErrorMessage: ""
+    })
 
-    $scope.username = "";
-    $scope.password = "";
-    $scope.loginMessage = null;
-    $scope.loginErrorMessage = null;
-    $scope.showLoginError = false;
-    $scope.showSuccessMessage = false;
-    $scope.successMessage = "";
-    $scope.loginInProgress = false;
-    $scope.showLoginForm = true;
-    $scope.showForgotPassword = false;
-    $scope.forgotPasswordUsername = "";
-    $scope.forgotPasswordErrorMessage = "";
+    vm.init = function() {
+        vm.visible = true;
 
-    $scope.loginClick = function () {
-        $scope.showLoginError = false;
-        $scope.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
+        $('[autofocus]').focus();
+    }
+
+    vm.loginClick = function () {
+        vm.showLoginError = false;
+        vm.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
         
-        if ($scope.loginInProgress) {
+        if (vm.loginInProgress) {
             return;
         }
 
-        $scope.usernameInvalid = $scope.username === "";
-        $scope.passwordInvalid = $scope.password === "";
+        vm.usernameInvalid = vm.username === "";
+        vm.passwordInvalid = vm.password === "";
 
-        if ($scope.usernameInvalid || $scope.passwordInvalid) {
+        if (vm.usernameInvalid || vm.passwordInvalid) {
             return;
         }
 
-        $scope.loginInProgress = true;
+        vm.loginInProgress = true;
 
-        LoginService.Login($scope.username, $scope.password).then(function(result) {
-            $scope.loginInProgress = false;
-            $scope.loginMessage = null;
+        LoginService.Login(vm.username, vm.password).then(function(result) {
+            vm.loginInProgress = false;
+            vm.loginMessage = null;
             if (result != null && result.Success === true) {
                 $rootScope.$broadcast("LoggedIn");
 
                 $state.go('login.tenants')
-                //$scope.handleTenantSelection(result.Result.Tenants);
+                //vm.handleTenantSelection(result.Result.Tenants);
             } else {
                 // Need to fail gracefully if we get no service response at all
-                $scope.showLoginHeaderMessage(result.errorMessage);
+                vm.showLoginHeaderMessage(result.errorMessage);
             }
         });
     };
 
-    $scope.showLoginHeaderMessage = function (message) {
+    vm.showLoginHeaderMessage = function (message) {
         if (message == null) {
             return;
         }
@@ -101,11 +109,13 @@ angular.module('login.form', [
             message = ResourceUtility.getString("LOGIN_GLOBAL_AUTH_ERROR");
         }
 
-        $scope.loginErrorMessage = message;
-        $scope.showLoginError = true;
+        vm.loginErrorMessage = message;
+        vm.showLoginError = true;
     };
 
-    $scope.forgotPasswordClick = function ($event) {
+    vm.forgotPasswordClick = function ($event) {
         $state.go('login.forgot');
     };
+
+    vm.init();
 });

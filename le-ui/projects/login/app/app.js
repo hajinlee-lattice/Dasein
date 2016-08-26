@@ -52,6 +52,7 @@ var mainApp = angular.module('mainApp', [
             views: {
                 "FrameContent": {
                     controller: 'LoginViewController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/login/form/LoginFormView.html'
                 }
             }
@@ -73,12 +74,33 @@ var mainApp = angular.module('mainApp', [
                         LoginDocument: function(BrowserStorageUtility) {
                             return BrowserStorageUtility.getLoginDocument() || {};
                         }
-                    },
+                    }, 
                     controller: 'PasswordUpdateController',
                     templateUrl: 'app/login/update/PasswordUpdateView.html'
                 }
             }
-        })
+        }) 
+        .state('login.success', {
+            url: 'success',
+            views: {
+                "FrameContent": {
+                    controller: 'PasswordUpdateSuccessController',
+                    templateUrl: 'app/login/update/PasswordUpdateSuccessView.html'
+                }
+            }
+        }) 
+        .state('logout', {
+            url: 'logout',
+            views: {
+                "main": {
+                    controller: function(LoginService) {
+                        console.log('hi');
+                        LoginService.Logout();
+                    },
+                    template: ''
+                }
+            }
+        }) 
         .state('login.tenants', {
             url: 'tenants',
             views: {
@@ -92,6 +114,7 @@ var mainApp = angular.module('mainApp', [
                         }
                     },
                     controller: 'TenantSelectController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/login/tenants/TenantSelectView.html'
                 }
             }
@@ -133,6 +156,7 @@ var mainApp = angular.module('mainApp', [
     $rootScope.$on('$stateChangeError', 
         function(event, toState, toParams, fromState, fromParams, error){ 
                 // this is required if you want to prevent the $UrlRouter reverting the URL to the previous valid location
+                console.log(error);
                 event.preventDefault();
                 $state.go('login.form');
         })

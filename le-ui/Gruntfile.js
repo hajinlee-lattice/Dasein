@@ -51,6 +51,7 @@ module.exports = function (grunt) {
             qa: {
                 NODE_ENV: 'qa',
                 API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 APICON_URL: 'https://testapi.lattice-engines.com',
                 RM_URL: 'http://10.41.1.105:8088',
                 COMPRESSED: true,

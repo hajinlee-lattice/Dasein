@@ -3,62 +3,74 @@ angular.module('login.tenants', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('TenantSelectController', function (
-    $scope, $state, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
+    $state, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
     LoginService, LoginStore, LoginDocument, TenantList
 ) {
-    $('[autofocus]').focus();
-    var ClientSession = BrowserStorageUtility.getClientSession();
-    
-    $scope.ResourceUtility = ResourceUtility;
-    $scope.tenantList = TenantList;
-    $scope.isLoggedInWithTempPassword = LoginDocument.MustChangePassword;
-    $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified);
-    $scope.SortProperty = 'RegisteredTime';
-    $scope.SortDirection = '-';
-    $scope.deactivated = false;
-    $scope.selected = null;
+    var vm = this;
 
-    LoginStore.set(LoginDocument, ClientSession);
+    angular.extend(vm, {
+        ResourceUtility: ResourceUtility,
+        tenantList: TenantList,
+        isLoggedInWithTempPassword: LoginDocument.MustChangePassword,
+        isPasswordOlderThanNinetyDays: TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified),
+        SortProperty: 'RegisteredTime',
+        SortDirection: '-',
+        deactivated: false,
+        selected: null,
+        visible: false
+    });
 
-    if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
-        $state.go('login.update');
-    }
-
-    if (TenantList == null || TenantList.length === 0) {
-        if (LoginDocument && !LoginStore.login.username) {
-            showTenantHeaderMessage(ResourceUtility.getString("LOGIN_EXPIRED_AUTHENTICATION_CREDENTIALS"));
-        } else {
-            showTenantHeaderMessage(ResourceUtility.getString("NO_TENANT_MESSAGE"));
+    vm.init = function() {
+        var ClientSession = BrowserStorageUtility.getClientSession();
+        
+        LoginStore.set(LoginDocument, ClientSession);
+        
+        if (vm.isLoggedInWithTempPassword || vm.isPasswordOlderThanNinetyDays) {
+            $state.go('login.update');
+            return;
+        }
+        
+        if (TenantList.length == 1) {
+            vm.select(TenantList[0]);
+            return;
         }
 
-        return;
+        if (TenantList == null || TenantList.length === 0) {
+            if (LoginDocument && !LoginStore.login.username) {
+                showError(ResourceUtility.getString("LOGIN_EXPIRED_AUTHENTICATION_CREDENTIALS"));
+            } else {
+                showError(ResourceUtility.getString("NO_TENANT_MESSAGE"));
+            }
+            return;
+        }
+
+        vm.visible = true;
+        
+        $('[autofocus]').focus();
     }
 
-    $scope.handleTenantSelected = function (tenant) {
-        $scope.deactivated = true;
-        $scope.selected = tenant;
+
+    vm.select = function (tenant) {
+        vm.deactivated = true;
+        vm.selected = tenant;
 
         LoginService.GetSessionDocument(tenant).then(function(data) {
             if (data != null && data.Success === true) {
                 LoginStore.redirectToLP(tenant);
             } else {
-                $scope.deactivated = false;
-                $scope.selected = null;
-                $scope.showTenantHeaderMessage(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
+                vm.deactivated = false;
+                vm.selected = null;
+                vm.showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
             }
         });
     };
 
-    if (TenantList.length == 1) {
-        $scope.handleTenantSelected(TenantList[0]);
-    }
-
-    $scope.sort = function(value) {
-        $scope.SortProperty = value;
-        $scope.SortDirection = ($scope.SortDirection == '' ? '-' : '');
+    vm.sort = function(value) {
+        vm.SortProperty = value;
+        vm.SortDirection = (vm.SortDirection == '' ? '-' : '');
     };
 
-    function showTenantHeaderMessage(message) {
+    function showError(message) {
         if (message == null) {
             return;
         }
@@ -67,7 +79,9 @@ angular.module('login.tenants', [
             message = ResourceUtility.getString("LOGIN_GLOBAL_AUTH_ERROR");
         }
 
-        $scope.tenantErrorMessage = message;
-        $scope.showTenantError = true;
+        vm.tenantErrorMessage = message;
+        vm.showTenantError = true;
     };
+
+    vm.init();
 });

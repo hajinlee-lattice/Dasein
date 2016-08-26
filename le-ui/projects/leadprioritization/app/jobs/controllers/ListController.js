@@ -13,97 +13,114 @@ angular.module('lp.jobs', [
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     $scope.jobs = [];
     $scope.isInternalAdmin = false;
-    if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
-        && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
-        var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
-        if (accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
-            $scope.isInternalAdmin = true;
-        }
-    }
 
-    var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
-
-    if (modelId) {
-        if (!JobsStore.data.models[modelId]) {
-            JobsStore.data.models[modelId] = [];
+    $scope.init = function() {
+        if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
+            && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
+            var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
+            if (accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
+                $scope.isInternalAdmin = true;
+            }
         }
 
-        $scope.jobs = JobsStore.data.models[modelId];
-    } else {
-        $scope.jobs = JobsStore.data.jobs;
-    }
-    
-    $scope.header = {
-        filter: { 
-            label: 'Filter By',
-            unfiltered: $scope.jobs,
-            filtered: $scope.jobs,
-            items: [
-                { label: "All", action: { } },
-                { label: "Completed", action: { jobStatus: 'Completed' } },
-                { label: "Pending", action: { jobStatus: 'Pending' } },
-                { label: "Running", action: { jobStatus: 'Running' } },
-                { label: "Failed", action: { jobStatus: "Failed" } }
-            ]
-        },
-        sort: {
-            label: 'Sort By',
-            icon: 'numeric',
-            order: '-',
-            property: 'timestamp',
-            items: [
-                { label: 'Timestamp',   icon: 'numeric', property: 'timestamp' },
-                { label: 'Model Name',  icon: 'alpha',   property: 'modelName' },
-                { label: 'Job Type',    icon: 'alpha',   property: 'jobType' },
-                { label: 'Job Status',  icon: 'alpha',   property: 'status' }
-            ]
-        },
-        create: {
-            label: 'Create Model',
-            sref: 'home.models.import',
-            class: 'orange-button select-label',
-            icon: 'fa fa-chevron-down',
-            iconclass: 'orange-button select-more',
-            iconrotate: true
-        }
-    };
+        var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
 
-    function getAllJobs(use_cache) {
-        $scope.loadingJobs = true;
-        JobsStore.getJobs(use_cache, modelId).then(function(result) {
-            $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
-            $scope.loadingJobs = false;
-        });
-    }
-    
-    var BULK_SCORING_INTERVAL = 30 * 1000,
-        BULK_SCORING_ID;
+        if (modelId) {
+            if (!JobsStore.data.models[modelId]) {
+                JobsStore.data.models[modelId] = [];
+            }
 
-    // this stuff happens only on Model Bulk Scoring page
-    getAllJobs();
-    if (modelId) {
-        BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
-    }
-
-    $scope.$on("JobCompleted", function() {
-        $scope.succeeded = true;
-        if ($scope.state == 'model') {
-            $scope.successMsg = 'Success! Scoring job has completed.';
+            $scope.jobs = JobsStore.data.models[modelId];
         } else {
-            $scope.successMsg = 'Success! Modeling job has completed.';
+            $scope.jobs = JobsStore.data.jobs;
         }
-    });
 
-    $scope.$on("$destroy", function() {
-        $interval.cancel(BULK_SCORING_ID);
-        $scope.expanded = {};
-        $scope.statuses = {};
-        $timeout.cancel($scope.timeoutTask);
-    });
+        $scope.header = {
+            filter: { 
+                label: 'Filter By',
+                unfiltered: $scope.jobs,
+                filtered: $scope.jobs,
+                items: [
+                    { label: "All", action: { } },
+                    { label: "Completed", action: { jobStatus: 'Completed' } },
+                    { label: "Pending", action: { jobStatus: 'Pending' } },
+                    { label: "Running", action: { jobStatus: 'Running' } },
+                    { label: "Failed", action: { jobStatus: "Failed" } }
+                ]
+            },
+            sort: {
+                label: 'Sort By',
+                icon: 'numeric',
+                order: '-',
+                property: 'timestamp',
+                items: [
+                    { label: 'Timestamp',   icon: 'numeric', property: 'timestamp' },
+                    { label: 'Model Name',  icon: 'alpha',   property: 'modelName' },
+                    { label: 'Job Type',    icon: 'alpha',   property: 'jobType' },
+                    { label: 'Job Status',  icon: 'alpha',   property: 'status' }
+                ]
+            },
+            scoring: {
+                label: 'Score List',
+                click: $scope.handleRescoreClick,
+                class: 'orange-button select-label',
+                icon: 'fa fa-chevron-down',
+                iconclass: 'orange-button select-more',
+                iconrotate: true,
+                items: [
+                    { 
+                        click: $scope.handleRescoreClick,
+                        label: 'Score List',
+                        icon: 'fa fa fa-th-list' 
+                    },{
+                        sref: 'home.model.scoring',
+                        label: 'Score Training Set',
+                        icon: 'fa fa-file-excel-o' 
+                    }
+                ]
+            }
+        };
 
-    $scope.$on("SCORING_JOB_SUCCESS", function(event, data) {
-        $scope.handleJobCreationSuccess(data);
-    });
+        function getAllJobs(use_cache) {
+            $scope.loadingJobs = true;
+            JobsStore.getJobs(use_cache, modelId).then(function(result) {
+                $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
+                $scope.loadingJobs = false;
+            });
+        }
+        
+        var BULK_SCORING_INTERVAL = 30 * 1000,
+            BULK_SCORING_ID;
+
+        // this stuff happens only on Model Bulk Scoring page
+        getAllJobs();
+        
+        if (modelId) {
+            BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
+        }
+
+        $scope.$on("JobCompleted", function() {
+            $scope.succeeded = true;
+            if ($scope.state == 'model') {
+                $scope.successMsg = 'Success! Scoring job has completed.';
+            } else {
+                $scope.successMsg = 'Success! Modeling job has completed.';
+            }
+        });
+
+        $scope.$on("$destroy", function() {
+            $interval.cancel(BULK_SCORING_ID);
+            $scope.expanded = {};
+            $scope.statuses = {};
+            $timeout.cancel($scope.timeoutTask);
+        });
+
+        $scope.$on("SCORING_JOB_SUCCESS", function(event, data) {
+            $scope.handleJobCreationSuccess(data);
+        });
+
+        $scope.handleJobCreationSuccess($stateParams.jobCreationSuccess);
+    };
 
     $scope.handleJobCreationSuccess = function(data) {
         if (data) {
@@ -125,10 +142,12 @@ angular.module('lp.jobs', [
 
             $scope.timeoutTask = $timeout($scope.closeJobCreationMessage, 30000);
         }
-    }
+    };
 
     $scope.handleRescoreClick = function($event) {
-        $event.target.disabled = true;
+        if ($event) {
+            $event.target.disabled = true;
+        }
         ScoreLeadEnrichmentModal.showRescoreModal();
     };
     
@@ -146,5 +165,5 @@ angular.module('lp.jobs', [
         }
     };
 
-    $scope.handleJobCreationSuccess($stateParams.jobCreationSuccess);
+    $scope.init();
 });

@@ -5,45 +5,50 @@
     <button class="button link-button close-button" data-ng-click="showLoginError = false;"><i class="fa fa-times"></i></button>
     <span><i class="fa fa-exclamation-circle"></i> {{loginErrorMessage}}</span>
 </div>
-<form class="form form-signin" name="login-form">
+<form class="form form-signin" name="login-form" ng-if="vm.visible">
     <div class="form-group">
-        <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
+        <label>{{vm.ResourceUtility.getString('LOGIN_USERNAME')}}</label>
         <input  type="text" 
                 id="username" 
                 autocomplete="on" 
                 name="le-login_username"
-                data-ng-model="username" data-ng-enter="loginClick()" 
-                title="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
-                class="form-control {{usernameInvalid ? 'error' : ''}}" 
+                data-ng-model="vm.username" 
+                data-ng-enter="vm.loginClick()" 
+                title="{{vm.ResourceUtility.getString('LOGIN_USERNAME')}}"
+                class="form-control {{vm.usernameInvalid ? 'error' : ''}}" 
                 autofocus>
     </div>
     <div class="form-group">
-        <label>{{ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
+        <label>{{vm.ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
         <input  type="password"  
                 id="password"
                 name="le-login_password"
                 autocomplete="on" 
-                data-ng-model="password" 
-                data-ng-enter="loginClick()" 
-                title="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 
-                class="form-control {{passwordInvalid ? 'error' : ''}}">
+                data-ng-model="vm.password" 
+                data-ng-enter="vm.loginClick()" 
+                title="{{vm.ResourceUtility.getString('LOGIN_PASSWORD')}}" 
+                class="form-control {{vm.passwordInvalid ? 'error' : ''}}">
     </div>
     <div class="form-actions">
         <button 
                 id="loginButton" 
                 type="submit" 
-                data-ng-click="loginClick()" 
+                data-ng-click="vm.loginClick()" 
                 class="button orange-button"
-                ng-disabled="loginInProgress">
-            {{ResourceUtility.getString('LOGIN_LABEL')}}
+                ng-disabled="vm.loginInProgress">
+            {{vm.ResourceUtility.getString('LOGIN_LABEL')}}
         </button>
-        <i ng-show="loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
+        <i ng-show="vm.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
         <div class="secondary-actions">
-            <a data-toggle="modal" href="javascript:void(0);" data-ng-click="forgotPasswordClick($event)">
-                {{ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
+            <a href="javascript:void(0)" data-ng-click="vm.forgotPasswordClick($event)">
+                {{vm.ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
             </a>
         </div>
     </div>
-    <p class="footer smallest login-footer">© {{copyrightString}} <a href="http://lattice-engines.com/about/privacy-policy">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
+    <p class="footer smallest login-footer">© {{vm.copyrightString}}
+        <a href="http://lattice-engines.com/about/privacy-policy">
+            {{vm.ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+        </a>
+    </p>
 
 </form>

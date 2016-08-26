@@ -134,40 +134,40 @@
         margin-right: -0.3em;
     }
 </style>
-<form class="form form-tenant-select" name="tenant-select-form">
-    <div class="messaging error-messaging" data-ng-show="showTenantError">
-        <button class="button link-button close-button" data-ng-click="showTenantError = false;"><i class="fa fa-times"></i></button>
-        <span><i class="fa fa-exclamation-circle"></i> {{tenantErrorMessage}}</span>
+<form class="form form-tenant-select" name="tenant-select-form" ng-if="vm.visible">
+    <div class="messaging error-messaging" data-ng-show="vm.showTenantError">
+        <button class="button link-button close-button" data-ng-click="vm.showTenantError = false;"><i class="fa fa-times"></i></button>
+        <span><i class="fa fa-exclamation-circle"></i> {{vm.tenantErrorMessage}}</span>
     </div>
-    <div class="">
-        <h4 class="tenant-header">{{ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
+    <div class="tenant-select-header">
+        <h4 class="tenant-header">{{vm.ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
     </div>
-    <div class="" ng-init="SortDirection = '-'">
+    <div class="tenant-select-body">
         <div class="tenant-select-controls">
             <span>Version:</span>
             <label for="tenantSelection2">
-            <input id="tenantSelection2" type="radio" ng-model="version" value="2.0">
+            <input id="tenantSelection2" type="radio" ng-model="vm.version" value="2.0">
             2.0</label>&nbsp;
             <label for="tenantSelection3">
-            <input id="tenantSelection3" type="radio" ng-model="version" value="3.0">
+            <input id="tenantSelection3" type="radio" ng-model="vm.version" value="3.0">
             3.0</label>
 
             <div class="tenant-select-controls-right pull-right">
                 <input 
                         type="text" 
                         class="form-control tenant-selection-search" 
-                        ng-model="SearchValue"
+                        ng-model="vm.SearchValue"
                         placeholder="Contains:"
                         autofocus
                     />
                 <button 
                         type="button" 
                         class="button white-button icon-button" 
-                        ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
+                        ng-click="vm.SortDirection = (vm.SortDirection == '' ? '-' : '')" 
                     >
                     <span class="fa 
                             fa-sort-alpha-{{ 
-                                SortDirection == '' 
+                                vm.SortDirection == '' 
                                     ? 'asc' 
                                     : 'desc' 
                             }}"
@@ -178,22 +178,22 @@
         </div>
         <div 
             class="columns twelve panel panel-default tenant-select-list"
-            ng-class="{ 'deactivated': deactivated }"
+            ng-class="{ 'deactivated': vm.deactivated }"
             ng-model="select_value" 
         >
             <div class="row panel-heading custom-heading">
-                <div class="columns two" ng-click="sort('UIVersion')">Version</div>
-                <div class="columns six" ng-click="sort('DisplayName')">Name</div>
-                <div class="columns four" ng-click="sort('RegisteredTime')">Created</div>
+                <div class="columns two" ng-click="vm.sort('UIVersion')">Version</div>
+                <div class="columns six" ng-click="vm.sort('DisplayName')">Name</div>
+                <div class="columns four" ng-click="vm.sort('RegisteredTime')">Created</div>
             </div>
             <div class="row panel-body">
                 <div 
-                    data-ng-repeat="tenant in tenantList | 
-                        filter: { 'UIVersion': version, 'DisplayName': SearchValue } | 
-                        orderBy: SortDirection + SortProperty"
+                    data-ng-repeat="tenant in vm.tenantList | 
+                        filter: { 'UIVersion': vm.version, 'DisplayName': vm.SearchValue } | 
+                        orderBy: vm.SortDirection + vm.SortProperty"
                     class="job-td-row tenant-list-item {{$index}}"
-                    ng-if="!deactivated || selected.Identifier == tenant.Identifier"
-                    ng-click="handleTenantSelected(tenant)"
+                    ng-if="!vm.deactivated || vm.selected.Identifier == vm.tenant.Identifier"
+                    ng-click="vm.select(tenant)"
                 >
                     <!--
                     <i class="fa fa-spinner fa-pulse fa-fw"></i>
@@ -204,10 +204,10 @@
                 </div>
                 <div class="text-center tenant-list-spinner" ng-if="deactivated">
                     <i class="fa fa-spinner fa-pulse fa-fw fa-2x"></i>
-                    <span>Launching LP {{selected.UIVersion}}...</span>
+                    <span>Launching LP {{vm.selected.UIVersion}}...</span>
                 </div>
             </div>
-            <span class="tenant-total">Displaying {{ (tenantList | filter: { 'UIVersion': version, 'DisplayName': SearchValue }).length || 0 }} tenants</span>
+            <span class="tenant-total">Displaying {{ (vm.tenantList | filter: { 'UIVersion': vm.version, 'DisplayName': vm.SearchValue }).length || 0 }} tenants</span>
         </div>
     </div>
 </form>
