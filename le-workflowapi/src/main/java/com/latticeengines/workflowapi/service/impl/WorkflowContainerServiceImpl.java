@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -150,8 +149,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null && !workflowJob
-                    .getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals("bulkMatchWorkflow")) {
+            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null
+                    && !workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals(
+                            "bulkMatchWorkflow")) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
                 if (workflowId == null) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
@@ -192,20 +192,20 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } else {
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
                     .getJobStatus(applicationId);
-            // query yarn for jobs which have failed, killed final status, and
-            // finished state without workflowId
-            if (YarnUtils.FAILED_STATUS.contains(yarnJobStatus.getStatus()) //
-                    || yarnJobStatus.getState().equals(YarnApplicationState.FINISHED)) {
-                job.setJobStatus(JobStatus.FAILED);
-                job.setStartTimestamp(new Date(yarnJobStatus.getStartTime()));
-                workflowJob.setStatus(FinalApplicationStatus.FAILED);
-                workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
-                workflowJobEntityMgr.update(workflowJob);
-            } else {
-                job.setJobStatus(JobStatus.PENDING);
-            }
+            workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, yarnJobStatus);
+            job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
         }
         return job;
+    }
+
+    private JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status) {
+        if (YarnUtils.FAILED_STATUS.contains(status)) {
+            return JobStatus.FAILED;
+        } else if (status == FinalApplicationStatus.UNDEFINED || status == null) {
+            return JobStatus.PENDING;
+        } else {
+            return JobStatus.COMPLETED;
+        }
     }
 
     @Override
