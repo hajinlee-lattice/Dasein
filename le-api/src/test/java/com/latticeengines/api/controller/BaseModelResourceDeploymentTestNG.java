@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    @SuppressWarnings("deprecation")
     protected LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -20,7 +19,7 @@ public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 .port(dataSourcePort) //
                 .db(dataSourceDB) //
                 .user(dataSourceUser) //
-                .password(dataSourcePasswd) //
+                .clearTextPassword(dataSourcePasswd) //
                 .dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);

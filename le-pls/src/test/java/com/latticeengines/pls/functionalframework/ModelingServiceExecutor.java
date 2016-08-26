@@ -75,7 +75,6 @@ public class ModelingServiceExecutor {
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, builder.getMetadataContents());
     }
 
-    @SuppressWarnings("deprecation")
     public void loadData() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
 
@@ -84,7 +83,7 @@ public class ModelingServiceExecutor {
                 .port(builder.getPort()) //
                 .db(builder.getDb()) //
                 .user(builder.getUser()) //
-                .password(builder.getPassword()) //
+                .clearTextPassword(builder.getPassword()) //
                 .dbType(builder.getDbType());
         DbCreds creds = new DbCreds(credsBldr);
         config.setCreds(creds);

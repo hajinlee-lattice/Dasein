@@ -35,11 +35,10 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
 
     private Model model;
 
-    @SuppressWarnings("deprecation")
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).dbType(dataSourceDBType);
+                .clearTextPassword(dataSourcePasswd).dbType(dataSourceDBType);
         return new DbCreds(builder);
     }
 

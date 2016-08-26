@@ -136,6 +136,7 @@ public class MetadataConverter {
         return AvroUtils.getSchema(configuration, new Path(extract.getPath()));
     }
 
+    @SuppressWarnings("deprecation")
     public static Attribute getAttribute(Schema.Field field) {
         try {
             Attribute attribute = new Attribute();

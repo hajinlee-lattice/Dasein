@@ -107,7 +107,6 @@ public class ModelingServiceExecutor {
         HdfsUtils.writeToFile(yarnConfiguration, rtsHdfsPath, builder.getDataCompositionContents());
     }
 
-    @SuppressWarnings("deprecation")
     public void loadData() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
 
@@ -116,7 +115,7 @@ public class ModelingServiceExecutor {
                 .port(builder.getPort()) //
                 .db(builder.getDb()) //
                 .user(builder.getUser()) //
-                .password(builder.getPassword()) //
+                .clearTextPassword(builder.getPassword()) //
                 .dbType(builder.getDbType());
         DbCreds creds = new DbCreds(credsBldr);
         config.setCreds(creds);
@@ -620,7 +619,7 @@ public class ModelingServiceExecutor {
             this.runTimeParams = runTimeParams;
             return this;
         }
-        
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             this.dataCloudVersion = dataCloudVersion;
             return this;

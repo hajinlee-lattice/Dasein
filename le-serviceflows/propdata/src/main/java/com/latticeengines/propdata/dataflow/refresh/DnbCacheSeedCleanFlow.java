@@ -3,8 +3,6 @@ package com.latticeengines.propdata.dataflow.refresh;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -18,7 +16,6 @@ import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 @Component("dnbCacheSeedCleanFlow")
 public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<SingleBaseSourceRefreshDataFlowParameter> {
-    private static Logger log = LogManager.getLogger(DnbCacheSeedCleanFlow.class);
 
     private final static String DUNS_FIELD = "DUNS_NUMBER";
 

@@ -38,7 +38,6 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         serverControl.shutdown();
     }
 
-    @SuppressWarnings("deprecation")
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void getDataTypes() {
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -46,7 +45,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 .db("SP_7_Tests") //
                 .port(1433) //
                 .user("root") //
-                .password("welcome");
+                .clearTextPassword("welcome");
 
         DbCreds creds = new DbCreds(builder);
 

@@ -11,12 +11,11 @@ public class LoadConfigurationUnitTestNG {
 
     private static final String PASSWORD = "welcome";
 
-    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testSerDe() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password(PASSWORD).dbType("MySQL");
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").clearTextPassword(PASSWORD).dbType("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("DELL");

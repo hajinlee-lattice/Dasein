@@ -47,7 +47,6 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
 
     private LoadConfiguration loadConfig = new LoadConfiguration();
 
-    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -55,7 +54,7 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
                 .db("SP_7_Tests") //
                 .port(1433) //
                 .user("root") //
-                .password("welcome");
+                .clearTextPassword("welcome");
 
         creds = new DbCreds(builder);
         loadConfig.setTable("Play_11_TrainingSample_WithRevenue_2");

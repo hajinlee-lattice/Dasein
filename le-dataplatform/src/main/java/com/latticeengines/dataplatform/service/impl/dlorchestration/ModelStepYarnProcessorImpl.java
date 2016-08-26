@@ -142,12 +142,11 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return appIds;
     }
 
-    @SuppressWarnings("deprecation")
     private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommand modelcommand,
             ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
+        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).clearTextPassword(dbPassword).dbType(dbType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(customer);
@@ -288,7 +287,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             } else {
                 algorithm = new LogisticRegressionAlgorithm();
             }
-            
+
             algorithm.resetAlgorithmProperties();
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
@@ -412,7 +411,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         String[] properties = commandParameters.getAlgorithmProperties().split("\\s+");
         for (String prop : properties) {
             if (prop.toLowerCase().startsWith(ModelCommandParameters.FEATURE_THRESHOLD.toLowerCase())) {
-                String[] tokens = prop.split("="); 
+                String[] tokens = prop.split("=");
                 if (tokens.length == 2) {
                     featureThreshold = Integer.parseInt(tokens[1]);
                     break;

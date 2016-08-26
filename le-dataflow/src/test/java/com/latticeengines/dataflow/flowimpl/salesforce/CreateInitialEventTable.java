@@ -2,13 +2,12 @@ package com.latticeengines.dataflow.flowimpl.salesforce;
 
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -34,6 +33,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 "(Email == null || Email.trim().isEmpty()) && (Contact__Email == null || Contact__Email.trim().isEmpty())", //
                 new FieldList("Email", "Contact__Email"));
 
+        @SuppressWarnings("deprecation")
         String normalizeEmail = addFunction(removeNullsForEmailsOnBothSides, //
                 "Email != null ? Email : Contact__Email", //
                 new FieldList("Email", "Contact__Email"), //
@@ -44,6 +44,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         domain.setPropertyValue("precision", "0");
         domain.setPropertyValue("scale", "0");
 
+        @SuppressWarnings("deprecation")
         String addDomain = addFunction(normalizeEmail, //
                 "CleanEmail.substring(CleanEmail.indexOf('@') + 1)", //
                 new FieldList("CleanEmail"), //

@@ -113,7 +113,7 @@ public class ExportAndReportService {
         String targetJdbcDb = dellEbiFlowService.getTargetDB(context);
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                .password(targetJdbcPassword).dbType(targetJdbcType);
+                .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();

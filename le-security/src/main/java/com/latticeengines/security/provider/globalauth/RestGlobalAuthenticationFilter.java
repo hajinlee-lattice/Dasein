@@ -85,6 +85,7 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
         return retVal;
     }
 
+    @SuppressWarnings("deprecation")
     private void detectSessionCacheDirtiness(HttpServletRequest request) {
         String tenantId = request.getHeader(Constants.TENANT_ID);
         String token = request.getHeader(Constants.AUTHORIZATION);

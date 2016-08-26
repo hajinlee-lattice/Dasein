@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class DbCreds {
-    
+
     private String user;
     private String password;
     private String encryptedPassword;
@@ -171,14 +171,12 @@ public class DbCreds {
         }
 
         /**
-         * This method uses clear text password. It is depcreated. Please use
-         * encryptedPassword(String) instead.
-         * 
+         * This method encrypts a clear text password.
+         *
          * @param password
          * @return
          */
-        @Deprecated
-        public Builder password(String password) {
+        public Builder clearTextPassword(String password) {
             this.encryptedPassword = CipherUtils.encrypt(password);
             return this;
         }

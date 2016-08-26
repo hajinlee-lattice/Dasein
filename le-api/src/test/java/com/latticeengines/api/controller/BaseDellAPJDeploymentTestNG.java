@@ -41,12 +41,11 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
         return model;
     }
 
-    @SuppressWarnings("deprecation")
     protected LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).dbType(dataSourceDBType);
+                .clearTextPassword(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(model.getCustomer());

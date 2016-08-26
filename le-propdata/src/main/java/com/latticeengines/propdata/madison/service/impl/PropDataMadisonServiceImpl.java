@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -109,7 +109,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
-    @SuppressWarnings("deprecation")
     @Override
     public PropDataContext importFromDB(PropDataContext requestContext) {
 
@@ -146,7 +145,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(sourceDataJdbcHost).port(Integer.parseInt(sourceDataJdbcPort)).db(sourceDataJdbcDb)
-                    .user(sourceDataJdbcUser).password(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
+                    .user(sourceDataJdbcUser).clearTextPassword(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
             DbCreds creds = new DbCreds(builder);
 
             SqoopImporter importer = new SqoopImporter.Builder()
@@ -271,7 +270,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     }
 
-    @SuppressWarnings("deprecation")
     private String getHdfsWorkflowTargetSchemaPath() {
         String schemaPath = propdataBaseDir + "/" + propdataSourceDir + "/workflow/" + getJobName() + "/schema";
         try {
@@ -282,7 +280,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
                 DbCreds.Builder builder = new DbCreds.Builder();
                 builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
-                        .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+                        .user(targetJdbcUser).clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
                 DbCreds creds = new DbCreds(builder);
 
                 SqoopImporter importer = new SqoopImporter.Builder()
@@ -394,7 +392,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return response;
     }
 
-    @SuppressWarnings("deprecation")
     private void uploadAggregateData(String sourceDir) {
         log.info("Uploading today's aggregation data=" + sourceDir);
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
@@ -402,7 +399,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                .password(targetJdbcPassword).dbType(targetJdbcType);
+                .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
 
         SqoopExporter exporter = new SqoopExporter.Builder()
@@ -443,7 +440,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return targetTable + "_new";
     }
 
-    @SuppressWarnings("deprecation")
     private void uploadTodayRawData(String todayIncrementalPath) throws Exception {
 
         if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
@@ -468,7 +464,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                .password(targetJdbcPassword).dbType(targetJdbcType);
+                .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         propDataJobService.eval("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
                         + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",

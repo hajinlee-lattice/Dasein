@@ -1,5 +1,7 @@
 package com.latticeengines.quartz.service;
 
+import static com.latticeengines.common.exposed.util.SSLUtils.turnOffSslChecking;
+
 import java.net.URI;
 import java.util.Date;
 
@@ -16,15 +18,12 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.PredefinedJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.JobActiveEntityMgr;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
-
-import static com.latticeengines.common.exposed.util.SSLUtils.turnOffSslChecking;
 
 public class PreDefinedServerJob extends QuartzJobBean {
 

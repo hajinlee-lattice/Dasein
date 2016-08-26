@@ -361,12 +361,11 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     }
 
-    @SuppressWarnings("deprecation")
     private DbCreds getSQLServerCreds() {
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
-                .password(targetJdbcPassword).dbType(targetJdbcType);
+                .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         return creds;
     }

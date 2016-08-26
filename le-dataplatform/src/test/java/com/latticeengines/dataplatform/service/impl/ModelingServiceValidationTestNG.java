@@ -49,12 +49,11 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
 
     private JdbcTemplate jdbcTemplate;
 
-    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional", "functional.production" })
     public void setup() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(Integer.parseInt(dataSourcePort)).db(dataSourceDB).dbType(dataSourceDBType)
-                .user(dataSourceUser).password(dataSourcePasswd);
+                .user(dataSourceUser).clearTextPassword(dataSourcePasswd);
         DbCreds creds = new DbCreds(builder);
 
         config = new LoadConfiguration();

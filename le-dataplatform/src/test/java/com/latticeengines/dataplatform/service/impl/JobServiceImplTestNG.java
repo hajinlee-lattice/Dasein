@@ -85,7 +85,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
     private String baseDir = "/functionalTests/" + suffix;
-    
+
     private ApplicationId applicationId;
 
     @BeforeClass(groups = { "functional", "functional.production" })
@@ -358,15 +358,14 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * src/test/resources/com/latticeengines/dataplatform/
      * service/impl/mysql/create.sql should have been run before executing this
      * test.
-     * 
+     *
      * @throws Exception
      */
-    @SuppressWarnings("deprecation")
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).dbType(dataSourceDBType);
+                .clearTextPassword(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = sqoopSyncJobService.importData("iris", baseDir + "/tmp/import", creds,
                 LedpQueueAssigner.getModelingQueueNameForSubmission(), "Dell",
