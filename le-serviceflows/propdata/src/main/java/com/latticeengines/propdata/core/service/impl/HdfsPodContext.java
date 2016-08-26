@@ -19,4 +19,8 @@ public class HdfsPodContext {
         return HdfsPodContext.podId.get();
     }
 
+    public static String getDefaultHdfsPodId() {
+        return CamilleEnvironment.getPodId();
+    }
+
 }

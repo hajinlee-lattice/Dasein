@@ -77,7 +77,8 @@ public class TransformationResource extends InternalResourceBase implements Tran
         checkHeader(request);
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
-                hdfsPod = HdfsPodContext.getHdfsPodId();
+                hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+                HdfsPodContext.changeHdfsPodId(hdfsPod);
             }
 
             TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod,
@@ -93,6 +94,9 @@ public class TransformationResource extends InternalResourceBase implements Tran
             return progress;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getSourceBeanName() });
+        } finally {
+            hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
     }
 }
