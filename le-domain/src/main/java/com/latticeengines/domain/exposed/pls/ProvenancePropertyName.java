@@ -8,7 +8,7 @@ public enum ProvenancePropertyName {
     private String name;
     private Class<?> type;
 
-    ProvenancePropertyName(String name, Class type) {
+    ProvenancePropertyName(String name, Class<?> type) {
         this.name = name;
         this.type = type;
     }
@@ -17,7 +17,7 @@ public enum ProvenancePropertyName {
         return this.name;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return this.type;
     }
 }

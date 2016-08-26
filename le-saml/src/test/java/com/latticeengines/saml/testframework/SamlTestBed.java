@@ -123,8 +123,8 @@ public abstract class SamlTestBed {
 
     public RestTemplate getSamlRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        HttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
-        HttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
+        HttpMessageConverter<?> formHttpMessageConverter = new FormHttpMessageConverter();
+        HttpMessageConverter<?> stringHttpMessageConverter = new StringHttpMessageConverter();
         restTemplate.getMessageConverters().add(formHttpMessageConverter);
         restTemplate.getMessageConverters().add(stringHttpMessageConverter);
         return restTemplate;

@@ -84,7 +84,7 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        Map response = restTemplate.getForObject(
+        Map<?, ?> response = restTemplate.getForObject(
                 String.format("%s/pls/internal/currentstack", getDeployedRestAPIHostPort()), Map.class);
         String revision = null;
         for (Object key : response.keySet()) {
