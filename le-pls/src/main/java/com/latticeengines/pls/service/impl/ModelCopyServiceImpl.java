@@ -76,6 +76,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         sourceFile.setPid(null);
         sourceFile.setTableName(cpTrainingTable.getName());
         sourceFile.setTenant(targetTenant);
+        sourceFile.setName("file_" + cpTrainingTable.getName());
         sourceFileEntityMgr.create(sourceFile);
 
         try {

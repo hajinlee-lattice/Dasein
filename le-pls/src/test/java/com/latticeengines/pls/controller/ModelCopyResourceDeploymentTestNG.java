@@ -32,8 +32,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -58,6 +60,9 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
+    @Autowired
+    private SourceFileEntityMgr sourceFileEntityMgr;
+
     private static final String localPathBase = ClassLoader.getSystemResource(
             "com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
 
@@ -73,7 +78,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants();
         cleanup();
         setupHdfs();
-        log.info("Wait for 30 seconds to download model summary");
+        log.info("Wait for 300 seconds to download model summary");
         Thread.sleep(300000L);
         setupTables();
     }
@@ -127,6 +132,14 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         extract.setPath(customerBase + tenant1.getId() + "/data/AccountModel/Samples/allTraining-r-00000.avro");
         eventTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
         metadataProxy.createTable(tenant1.getId(), eventTable.getName(), eventTable);
+
+        setupSecurityContext(tenant1);
+        SourceFile sourceFile = new SourceFile();
+        sourceFile.setTenant(tenant1);
+        sourceFile.setName("sourceFile");
+        sourceFile.setPath("sourceFilePath");
+        sourceFile.setTableName(trainingTable.getName());
+        sourceFileEntityMgr.create(sourceFile);
     }
 
     private void setupHdfs() throws IOException {
@@ -144,7 +157,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testModelCopy() throws Exception {
-        setupSecurityContext(tenant1);
+
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
         log.info("Wait for 300 seconds to download model summary");
