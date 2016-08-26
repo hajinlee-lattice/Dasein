@@ -611,7 +611,7 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-                <version>${maven.jar.version}</version>
+                <version>${maven.jar.version}</version><!--$NO-MVN-MAN-VER$-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
