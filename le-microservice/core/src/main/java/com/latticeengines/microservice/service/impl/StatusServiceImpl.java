@@ -25,7 +25,7 @@ public class StatusServiceImpl implements StatusService {
 
     private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
 
-    @Value("${microservices}")
+    @Value("${microservices:modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata}")
     protected String microservicesStr;
 
     @Value("${microservice.rest.endpoint.hostport}")

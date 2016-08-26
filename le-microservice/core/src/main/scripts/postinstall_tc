@@ -3,7 +3,7 @@
 source /etc/profile
 echo "getting environment information"
 echo "LE_ENVIRONMENT=${LE_ENVIRONMENT}"
-echo "WITH_QUARTZ_MICROSERVICE=${WITH_QUARTZ_MICROSERVICE:=false}"
+echo "MS_MODULES=${MS_MODULES:=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata}"
 
 rm -rf /usr/share/tomcat/webapps/ms/*.war
 mkdir -p /usr/share/tomcat/webapps/ms
@@ -16,27 +16,28 @@ for f in $(find . -name "*.war");
 do
     fn=`echo $f | cut -d / -f 2 | cut -d . -f 1`
 
-    if [ "${fn}" = "quartz" -a "${WITH_QUARTZ_MICROSERVICE}" = "false" ]; then
-        echo "skipping quartz war"
-        continue;
-    fi
-
-    echo "repackaging ${fn}.war"
-    mkdir $fn
-
-    pushd $fn
-    jar xvf ../$fn.war
-    popd
-    rm -rf $fn.war
-
-    if [ -f "/tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties" ]
+    if [[ ${MS_MODULES} == *"${fn}"* ]]
     then
-        echo "replacing log4j.properties for ${fn}.war"
-        cp -f /tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties ${fn}/WEB-INF/classes/log4j.properties
+        echo "repackaging ${fn}.war"
+        mkdir $fn
+
+        pushd $fn
+        jar xvf ../$fn.war
+        popd
+        rm -rf $fn.war
+
+        if [ -f "/tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties" ]
+        then
+            echo "replacing log4j.properties for ${fn}.war"
+            cp -f /tmp/le-microservice-tc-rpm/env/${LE_ENVIRONMENT}/${fn}_log4j.properties ${fn}/WEB-INF/classes/log4j.properties
+        fi
+
+        jar cvf $fn.war -C $fn/ .
+        cp -f $fn.war /usr/share/tomcat/webapps/ms/$fn.war
+    else
+        echo "skipping ${fn} war"
     fi
 
-    jar cvf $fn.war -C $fn/ .
-    cp -f $fn.war /usr/share/tomcat/webapps/ms/$fn.war
 done
 
 chown -R tomcat:tomcat /usr/share/tomcat/webapps/ms
