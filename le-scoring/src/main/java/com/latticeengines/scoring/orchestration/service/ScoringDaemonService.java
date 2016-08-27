@@ -42,7 +42,7 @@ public interface ScoringDaemonService {
     public static final String SCORING_JOB_TYPE = "scoringJob";
     public static final String UNIQUE_KEY_COLUMN = "LeadID";
 
-    public static final String Import_Error_File_Name = "error.csv";
+    public static final String IMPORT_ERROR_FILE_NAME = "error.csv";
     public static final String MODEL_ID = "ModelId";
 
 }
