@@ -1,9 +1,10 @@
 angular
 .module('lp.jobs.status', [
     'lp.jobs.modals.cancelmodal',
-    'lp.create.import.report'
+    'lp.create.import.report',
+    'mainApp.models.services.ModelService'
 ])
-.directive('jobStatusRow', function() {
+.directive('jobStatusRow', function(ModelStore) {
     return {
         restrict: 'EA',
         templateUrl: 'app/jobs/views/RowView.html',
@@ -13,7 +14,8 @@ angular
             statuses: '=',
             expanded: '=',
             cancelling: '=',
-            admin: '='
+            admin: '=',
+            auth: '='
         },
         controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal) {
             var job = $scope.job;

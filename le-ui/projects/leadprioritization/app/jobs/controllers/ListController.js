@@ -13,6 +13,7 @@ angular.module('lp.jobs', [
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     $scope.jobs = [];
     $scope.isInternalAdmin = false;
+    $scope.auth = BrowserStorageUtility.getTokenDocument();
 
     $scope.init = function() {
         if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null

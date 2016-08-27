@@ -101,9 +101,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
                 parameters.getDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
-                parameters.getFilename());
+                sourceFile.getDisplayName());
 
-        Map<String, String> extraSources = new HashMap<>();
+       Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
         Predefined predefinedSelection = Predefined

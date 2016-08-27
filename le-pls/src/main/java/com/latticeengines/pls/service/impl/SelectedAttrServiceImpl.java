@@ -163,8 +163,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             stringBuffer.append(modifyStringForCSV(attribute.getDescription()) + ",");
             stringBuffer
                     .append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldType())) + ",");
-            stringBuffer.append(modifyStringForCSV(attribute.getIsSelected().toString()) + ",");
-            stringBuffer.append(modifyStringForCSV(attribute.getIsPremium().toString()));
+            stringBuffer.append(modifyStringForCSV(attribute.getIsSelected() ? "On" : "Off") + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getIsPremium() ? "Yes" : "No"));
             stringBuffer.append("\r\n");
         }
 

@@ -214,7 +214,10 @@
 
             <ul>
                 <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
-                <li data-ng-if="job.source != null"><strong>Filename:</strong> {{job.source}}</li>
+                <li data-ng-if="job.source != null"><strong>Filename:</strong>
+                    <a data-ng-if="job.modelId != null" href="/files/datafiles/trainingfilecsv?modelId={{job.modelId}}&Authorization={{auth}}">{{job.source}}</a>
+                    <span data-ng-if="job.modelId == null">{{job.source}}</span>
+                </li>
                 <li data-ng-if="admin"><strong>App:</strong> <a ng-href="/cluster/app/{{job.applicationId}}" target="_blank">{{job.applicationId}}</a></li>
             </ul>
 
