@@ -60,11 +60,11 @@ class EnhancedFilesTest(TrainingTestBase):
 
         # Check Top Sample
         topSample = summary["TopSample"]
-        self.assertEqual(len(topSample), 0)
+        self.assertEqual(len(topSample), 10)
 
         # Check Bottom Sample
         bottomSample = summary["BottomSample"]
-        self.assertEqual(len(bottomSample), 0)
+        self.assertEqual(len(bottomSample), 10)
 
         # Check Provenance
         provenance = summary["EventTableProvenance"]

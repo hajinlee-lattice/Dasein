@@ -122,8 +122,10 @@ class ArgumentParser(object):
         try:
             if self.metadataSchema[name] is None:
                 return element;
-            properties = self.metadataSchema[name].strip()
-            element = dict(u.split("=") for u in properties.split(" "))
+            properties = self.metadataSchema[name].strip().split(" ")
+            if properties == ['']:
+                return element
+            element = dict(u.split("=") for u in properties)
         except Exception, e:
             logger.error(str(e))
 

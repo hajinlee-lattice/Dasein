@@ -61,6 +61,7 @@ class TrainingTestBase(TestBase):
         os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
         os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
         os.symlink(basePath + "/main/python/evpipeline/evpipeline.py", "evpipeline.py")
+        os.symlink(basePath + "/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
 
         shutil.copy(basePath + "/main/python" + enginedir, fwkdir + enginedir)
 
@@ -134,7 +135,7 @@ class TrainingTestBase(TestBase):
                 first = False
             else:
                 line += ","
-            if typeDict[columnsWithValue[i][0]] == '-9':
+            if typeDict[columnsWithValue[i][0]] == 'string':
                 line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
             else:
                 line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])

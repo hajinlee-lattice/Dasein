@@ -19,7 +19,7 @@ class TrainingTest(TrainingTestBase):
             del sys.modules['launcher']
         from launcher import Launcher
 
-        traininglauncher = Launcher("model.json")
+        traininglauncher = Launcher("SlimEventTable_Mulesoft_Metadata_Modeling_20160624_155355.json")
         fieldList = traininglauncher.getParser().fields
         traininglauncher.execute(False)
  
@@ -52,21 +52,18 @@ class TrainingTest(TrainingTestBase):
             if entry["Key"].startswith("std_"):
                 foundStandardFunction = True
 
-        self.assertTrue(foundStandardFunction)
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
-        self.assertEquals(jsonDict["Model"]["LatticeVersion"], "2.0.22-SNAPSHOT")
-        self.assertEquals(jsonDict["Model"]["RandomSeed"], "99999")
 
         # Test the scoring engine using the generated pipeline that was deserialized
-        inputColumns = json.loads(open(glob.glob("model.json")[0]).read())["features"]
+        inputColumns = json.loads(open(glob.glob("SlimEventTable_Mulesoft_Metadata_Modeling_20160624_155355.json")[0]).read())["features"]
 
         value = [random() for _ in range(len(inputColumns))]
 
         typeDict = {}
         for field in fieldList:
-            typeDict[field['columnName']] = field['sqlType']
+            typeDict[field['name']] = field['type'][0]
 
         lines = self.getLineToScore(inputColumns, typeDict, value)
         rowDicts = []
