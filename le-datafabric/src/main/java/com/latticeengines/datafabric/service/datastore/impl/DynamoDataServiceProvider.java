@@ -19,14 +19,13 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
     private final String name = "DYNAMO";
 
-    @Value("${datafabric.dataService.dynamo.endpoint:http://localhost:8000}")
+    @Value("${datafabric.dataService.dynamo.endPoint}")
     private String endPoint;
 
-
-    @Value("${datafabric.dataService.dynamo.accessKey:hup2R9WP51zD3YXRxv6nj5ErjuYArOjTxjn15nmQ4dM=")
+    @Value("${aws.default.access.key.encrypted}")
     private String accessKey;
 
-    @Value("${datafabric.dataService.dynamo.secretKey:JBblsfXyUAzeuY5OtrbeaOqR9wj5IFkhFWE+vfSr/nWpCPkbZc2xWUzXOUR2YdYn")
+    @Value("${aws.default.secret.key.encrypted}")
     private String secretKey;
 
     private AmazonDynamoDBClient client = null;
@@ -35,21 +34,20 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
     public DynamoDataServiceProvider() {
     }
 
-
     public DynamoDataServiceProvider(String endPoint) {
         this.endPoint = endPoint;
     }
 
     synchronized private void init() {
-        if (initialized) return;
-
-
+        if (initialized)
+            return;
+        
+        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         if (StringUtils.isNotEmpty(endPoint)) {
             log.info("Initialize dynamo data service with endPoint " + endPoint);
-            client = new AmazonDynamoDBClient().withEndpoint(endPoint);
-        } else  {
+            client = new AmazonDynamoDBClient(credentials).withEndpoint(endPoint);
+        } else {
             log.info("Initialize dynamo data service with BasicAWSCredentials");
-            BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             client = new AmazonDynamoDBClient(credentials);
         }
 
@@ -58,15 +56,16 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
     public FabricDataStore constructDataStore(String repository, String recordType, Schema schema) {
 
-        FabricDataStore dataStore  = null;
+        FabricDataStore dataStore = null;
         log.info("Initialize dynamo data store " + " repo " + repository + " record " + recordType);
-        if (!initialized) init();
+        if (!initialized)
+            init();
 
         dataStore = new DynamoDataStoreImpl(client, repository, recordType, schema);
         return dataStore;
     }
 
     public String getName() {
-         return name;
+        return name;
     }
 }

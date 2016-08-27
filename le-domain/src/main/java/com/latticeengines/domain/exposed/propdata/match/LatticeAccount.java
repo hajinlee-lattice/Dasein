@@ -52,7 +52,12 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
 
     @Override
     public GenericRecord toFabricAvroRecord(String recordType) {
-        Schema schema = new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
+        // we need to replace special char '.' from recordType otherwise avro
+        // schema parser will run into exception
+        String recordTypeStrForAvroSchema = recordType.replace('.', '_');
+
+        Schema schema = new Schema.Parser()
+                .parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(LATTICE_ACCOUNT_ID, getId());
         try {
@@ -94,7 +99,11 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
 
     @Override
     public Schema getSchema(String recordType) {
-        return new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
+        // we need to replace special char '.' from recordType otherwise avro
+        // schema parser will run into exception
+        String recordTypeStrForAvroSchema = recordType.replace('.', '_');
+
+        return new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordTypeStrForAvroSchema));
     }
 
 }

@@ -111,14 +111,12 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         List<Column> selectedColumns = columnSelection.getColumns();
 
         for (LatticeAccount result : matchedResults) {
-            OutputRecord outputRecord = new OutputRecord();
-            List<Object> attributeValues = getAttributeValues(selectedColumns, result.getAttributes());
-//            List<Object> attributeValueObjs = new ArrayList<>();
-//            for (String val : attributeValues) {
-//                attributeValueObjs.add(val);
-//            }
 
-            outputRecord.setOutput(attributeValues);//Objs);
+            OutputRecord outputRecord = new OutputRecord();
+            outputRecord.setMatched(result != null);
+            outputRecord.setOutput(
+                    outputRecord.isMatched() ? getAttributeValues(selectedColumns, result.getAttributes()) : null);
+
             outputRecords.add(outputRecord);
         }
 

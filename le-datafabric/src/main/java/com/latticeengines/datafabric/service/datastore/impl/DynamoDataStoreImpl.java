@@ -246,11 +246,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private GenericRecord jsonToAvro(ByteBuffer json) {
         try {
             DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
+            String val = json.toString();
+            
 
             byte[] bytes = new byte[json.remaining()];
             json.get(bytes, 0, bytes.length);
             try (InputStream input = new ByteArrayInputStream(bytes)) {
-
                  DataInputStream din = new DataInputStream(input);
                  Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
                  GenericRecord datum = reader.read(null, decoder);
@@ -276,9 +277,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         attrMap.put(BLOB, avroToJson(record));
 
         if (tableIndex != null) {
-            attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()));
+            attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()).toString());
             if (tableIndex.getRangeKeyAttr() != null) {
-                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()));
+                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()).toString());
             }
         }
         return Item.fromMap(attrMap);
