@@ -156,10 +156,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         CSVFormat format = LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage");
         if (StringUtils.isNotEmpty(importErrorPath) && HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, importErrorPath, ".");
-            FileUtils.deleteQuietly(new File("." + ScoringDaemonService.Import_Error_File_Name + ".crc"));
+            FileUtils.deleteQuietly(new File("." + ScoringDaemonService.IMPORT_ERROR_FILE_NAME + ".crc"));
             format = format.withSkipHeaderRecord();
         }
-        return new CSVPrinter(new FileWriter(ScoringDaemonService.Import_Error_File_Name, true), format); //
+        return new CSVPrinter(new FileWriter(ScoringDaemonService.IMPORT_ERROR_FILE_NAME, true), format); //
 
     }
 
@@ -169,7 +169,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info(String.format("The output score path is %s", scorePath));
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, scorePath);
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.Import_Error_File_Name,
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.IMPORT_ERROR_FILE_NAME,
                 targetDir + "/error.csv");
     }
 

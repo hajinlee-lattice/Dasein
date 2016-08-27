@@ -77,7 +77,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     @AfterMethod(groups = "functional")
     public void AfterMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dir);
-        FileUtils.deleteQuietly(new File(ScoringDaemonService.Import_Error_File_Name));
+        FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
     }
 
     @Test(groups = "functional")
@@ -226,7 +226,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(record.get("Id"), "2");
             Assert.assertEquals(record.get("ErrorMessage"), "some error occurred");
         }
-        FileUtils.deleteQuietly(new File(ScoringDaemonService.Import_Error_File_Name));
+        FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
     }
 
     private void generateScoreResponseAvroAndCopyToHdfs(List<RecordScoreResponse> recordScoreResponseList,
