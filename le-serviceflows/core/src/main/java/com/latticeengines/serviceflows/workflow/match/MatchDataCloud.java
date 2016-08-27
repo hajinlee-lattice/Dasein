@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,6 +35,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     static final String LDC_MATCH = "DataCloudMatch";
 
     @Autowired
+    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     @Autowired

@@ -1,7 +1,6 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -10,7 +9,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -18,27 +16,25 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
+import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
-import com.latticeengines.proxy.exposed.propdata.MatchProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component
-public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
+public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     @Autowired
-    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     private static final String avroDir = "/tmp/MatchResourceDeploymentTestNG";
@@ -65,39 +61,6 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = false)
-    public void testAccountMasterRTSMatch() {
-        MatchInput input = prepareSimpleMatchInput(true);
-        input.setDataCloudVersion("2.0");
-        MatchOutput output = matchProxy.matchRealTime(input);
-        Assert.assertNotNull(output);
-
-        input.setReturnUnmatched(false);
-        output = matchProxy.matchRealTime(input);
-        Assert.assertNotNull(output);
-        Assert.assertTrue(output.getResult().size() > 0);
-        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
-    }
-
-    private MatchInput prepareSimpleMatchInput(boolean resolveKeyMap) {
-        Object[][] data = new Object[][] { { 0, "lincolntextile.com", "1011964" } };
-        List<List<Object>> mockData = new ArrayList<>();
-        for (Object[] row : data) {
-            mockData.add(Arrays.asList(row));
-        }
-        MatchInput input = new MatchInput();
-        input.setReturnUnmatched(true);
-        input.setPredefinedSelection(Predefined.RTS);
-        input.setTenant(new Tenant("PD_Test"));
-        List<String> fields = Arrays.asList("ID", "Domain", "DUNS");
-        input.setFields(fields);
-        if (resolveKeyMap) {
-            input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
-        }
-        input.setData(mockData);
-        return input;
-    }
-
     @Test(groups = "deployment")
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
@@ -112,7 +75,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testBulkMatchWithSchema() throws Exception {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
@@ -123,7 +86,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
-        uploadDataCsv(avroDir, fileName, "com/latticeengines/propdata/match/BulkMatchInput.csv", fieldTypes, "ID");
+        uploadDataCsv(avroDir, fileName, "com/latticeengines/matchapi/BulkMatchInput.csv", fieldTypes, "ID");
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
 
@@ -160,7 +123,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testMultiBlockBulkMatch() throws InterruptedException {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -215,7 +178,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private void uploadTestAVro(String avroDir, String fileName) {
         try {
             HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration,
-                    "com/latticeengines/propdata/match/SourceFile_csv.avro", avroDir + "/" + fileName);
+                    "com/latticeengines/matchapi/SourceFile_csv.avro", avroDir + "/" + fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }

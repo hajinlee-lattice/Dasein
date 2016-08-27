@@ -11,6 +11,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,6 +46,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private static final String DATA_CLOUD_VERSION = "2.0.0";
 
     @Autowired
+    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     private static final String avroDir = "/tmp/AccountMasterMatchResourceDeploymentTestNG";

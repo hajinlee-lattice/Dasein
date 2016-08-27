@@ -3,6 +3,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:matchapi-context.xml"/>
+    <import resource="classpath:common-properties-context.xml"/>
     <bean class="com.latticeengines.matchapi.swagger.SwaggerConfig" />
+
+    <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
+        <property name="componentName" value="matchapi" />
+    </bean>
 
 </beans>

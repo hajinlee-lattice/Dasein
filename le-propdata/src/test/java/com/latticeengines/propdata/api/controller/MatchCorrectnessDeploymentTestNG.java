@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -68,6 +69,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
     private static final String REALTIME_VALUE = "realtimeValue";
 
     @Autowired
+    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     @Autowired

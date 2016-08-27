@@ -11,7 +11,7 @@ function processErrors
 }
 
 
-PYTHON=${PYTHON:python}
+PYTHON=${PYTHON:=python}
 
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"

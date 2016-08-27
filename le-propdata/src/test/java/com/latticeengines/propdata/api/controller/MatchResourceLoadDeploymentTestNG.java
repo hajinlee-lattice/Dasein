@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -46,6 +47,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
     private static Log log = LogFactory.getLog(MatchResourceLoadDeploymentTestNG.class);
 
     @Autowired
+    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     private static List<List<Object>> accountPool;

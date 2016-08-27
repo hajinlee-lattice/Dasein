@@ -1,20 +1,21 @@
-package com.latticeengines.proxy.exposed.propdata;
+package com.latticeengines.proxy.exposed.matchapi;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
-@Component("matchProxyDeprecated")
-public class MatchProxy extends MicroserviceRestApiProxy implements MatchInterface {
+@Component("matchProxy")
+public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
 
     public MatchProxy() {
-        super("propdata/matches");
+        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport") + "/match/matches");
     }
 
     @Override
