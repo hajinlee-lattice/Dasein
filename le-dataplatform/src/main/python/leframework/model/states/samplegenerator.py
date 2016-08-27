@@ -91,23 +91,21 @@ class SampleGenerator(State):
         schema = mediator.schema
         samples = schema["samples"]
 
-        def getSample(row):
+        def getTestSample(row, requireValue):
+            if not isTest(row):
+                return None
             lead = OrderedDict()
-            lead["Company"] = row[samples["company"]].strip()
-            lead["FirstName"] = row[samples["firstname"]].strip()
-            lead["LastName"] = row[samples["lastname"]].strip()
+            for colname, samplename in {'CompanyName':'Company', 'FirstName':'FirstName', 'LastName':'LastName'}.iteritems():
+                if colname not in samples.values():
+                    lead[samplename] = '(Not Provided)'
+                else:
+                    ## If the column exists in the sample and is required, but the value is not populated, reject this lead
+                    if requireValue and pd.isnull(row[colname]):
+                        return None
+                    lead[samplename] = row[colname].strip() if pd.notnull(row[colname]) else '(Unknown)'
             lead["Converted"] = True if row[schema["target"]] == 1 else False
             lead["Score"] = row[schema["reserved"]["percentilescore"]]
             return lead
-
-        def isValid(row):
-            company = row[samples["company"]] if "company" in samples and pd.notnull(row[samples["company"]]) else None
-            firstName = row[samples["firstname"]] if "firstname" in samples and pd.notnull(row[samples["firstname"]]) else None
-            lastName = row[samples["lastname"]] if "lastname" in samples and pd.notnull(row[samples["lastname"]]) else None
-            validCompany = company is not None and len(company.strip()) > 0
-            validFirstName = firstName is not None and len(firstName.strip()) > 0
-            validLastName = lastName is not None and len(lastName.strip()) > 0
-            return validCompany and validFirstName and validLastName
 
         def isSpam(row):
             spamIndicator = row[samples["spamindicator"]] if "spamindicator" in samples else None
@@ -126,10 +124,10 @@ class SampleGenerator(State):
             rows = readoutSample.shape[0]
             for i in xrange(rows):
                 row = readoutSample.iloc[i]
-                if isTest(row) and isValid(row) and not isSpam(row):
-                    sample = getSample(row)
+                sample = getTestSample(row, requireValue=True)
+                if sample is not None and not isSpam(row):
                     company = sample["Company"]
-                    if company not in companies:
+                    if "CompanyName" not in samples.values() or company not in companies:
                         leadConverted = sample["Converted"]
                         if leadConverted and numConverted < converted:
                             result.append(sample)
@@ -150,13 +148,14 @@ class SampleGenerator(State):
             rows = readoutSample.shape[0]
             for i in xrange(rows):
                 row = readoutSample.iloc[rows - 1 - i]
-                if isTest(row) and isValid(row):
-                    sample = getSample(row)
+                sample = getTestSample(row, requireValue=False)
+                if sample is not None:
                     company = sample["Company"]
-                    if company not in companies:
+                    if "CompanyName" not in samples.values() or company not in companies:
                         leadConverted = sample["Converted"]
                         if not leadConverted:
                             result.append(sample)
+                            companies.add(company)
                             numSample += 1
                 if len(result) == sampleSize: break
             result.reverse()
