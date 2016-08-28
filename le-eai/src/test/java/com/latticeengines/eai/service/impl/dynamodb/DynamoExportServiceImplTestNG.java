@@ -55,7 +55,7 @@ import com.snowflake.client.jdbc.internal.apache.commons.lang3.StringUtils;
 public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("DynamoTestCustomer");
-    private AmazonDynamoDBClient client = new AmazonDynamoDBClient().withEndpoint("http://localhost:8000");
+    private AmazonDynamoDBClient client;
     private static final String RECORD_TYPE = "LatticeAccount";
 
     @Autowired
@@ -92,25 +92,28 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private Table table;
 
     private String repo;
+    private String tableName;
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
         repo = String.format("%s_%s_%s", leEnv, leStack, "testRepo");
+        tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
 
         HdfsUtils.rmdir(yarnConfiguration, sourceDir);
         HdfsUtils.rmdir(yarnConfiguration, targetDir);
         HdfsUtils.mkdir(yarnConfiguration, sourceDir);
         table = createTable();
 
-        String tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         dynamoService.deleteTable(tableName);
-        dynamoService.createTable(tableName, 40, 40, "Id", ScalarAttributeType.S.name(), null, null);
+        dynamoService.createTable(tableName, 10, 50, "Id", ScalarAttributeType.S.name(), null, null);
+        client = dynamoService.getClient();
         ListTablesResult result = client.listTables();
-        System.out.println("Tables: " + result.getTableNames());
+        log.info("Tables: " + result.getTableNames());
     }
 
     @AfterClass(groups = "aws")
     public void cleanup() throws IOException {
+        dynamoService.deleteTable(tableName);
     }
 
     @Test(groups = "aws")

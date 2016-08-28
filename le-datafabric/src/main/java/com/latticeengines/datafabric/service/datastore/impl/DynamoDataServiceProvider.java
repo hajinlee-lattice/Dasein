@@ -19,7 +19,7 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
     private final String name = "DYNAMO";
 
-    @Value("${datafabric.dataService.dynamo.endPoint}")
+    @Value("${aws.dynamo.endpoint:}")
     private String endPoint;
 
     @Value("${aws.default.access.key.encrypted}")
@@ -39,15 +39,16 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
     }
 
     synchronized private void init() {
-        if (initialized)
+        if (initialized) {
             return;
-        
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        }
+
         if (StringUtils.isNotEmpty(endPoint)) {
             log.info("Initialize dynamo data service with endPoint " + endPoint);
-            client = new AmazonDynamoDBClient(credentials).withEndpoint(endPoint);
+            client = new AmazonDynamoDBClient().withEndpoint(endPoint);
         } else {
             log.info("Initialize dynamo data service with BasicAWSCredentials");
+            BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             client = new AmazonDynamoDBClient(credentials);
         }
 

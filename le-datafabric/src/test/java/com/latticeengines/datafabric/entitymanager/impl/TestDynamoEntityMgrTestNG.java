@@ -1,19 +1,19 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
 import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntityMgrImpl.RECORD_TYPE;
-import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntityMgrImpl.REPO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
@@ -23,37 +23,46 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 
 public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
 
-    private AmazonDynamoDBClient client = new AmazonDynamoDBClient().withEndpoint("http://localhost:8000");
-
     private TestDynamoEntityMgrImpl entityMgr;
+
+    @Autowired
+    private DynamoService dynamoService;
+
+    private String tableName;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    private String repo;
 
     @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
+        repo = leEnv + "_" + leStack + "_testRepo";
+        tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         teardown();
 
-        String tableName = DynamoDataStoreImpl.buildTableName(REPO, RECORD_TYPE);
-        CreateTableRequest request = createTable(tableName, 40, 40, "Id", ScalarAttributeType.S.name(), null, null);
-        DynamoDB dynamoDB = new DynamoDB(client);
-        dynamoDB.createTable(request);
+        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
+        AmazonDynamoDBClient client = dynamoService.getClient();
         ListTablesResult result = client.listTables();
-        System.out.println("Tables: " + result.getTableNames());
+        log.info("Tables: " + result.getTableNames());
 
-        entityMgr = new TestDynamoEntityMgrImpl(messageService, dataService);
+        entityMgr = new TestDynamoEntityMgrImpl(messageService, dataService, repo);
         entityMgr.init();
 
     }
 
     @AfterClass(groups = "dynamo")
-    public void teardown() {
-        String tableName = DynamoDataStoreImpl.buildTableName(REPO, RECORD_TYPE);
-        if (client.listTables().getTableNames().contains(tableName)) {
-            client.deleteTable(tableName);
-        }
+    public void teardown() throws Exception {
+        dynamoService.deleteTable(tableName);
     }
 
     @Test(groups = "dynamo")

@@ -1,7 +1,6 @@
 package com.latticeengines.aws.dynamo.impl;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,6 +46,17 @@ public class DynamoServiceImpl implements DynamoService {
         this.dynamoDB = new DynamoDB(client);
     }
 
+    @Override
+    public AmazonDynamoDBClient getClient() {
+        return client;
+    }
+
+    @Override
+    public DynamoDB getDynamoDB() {
+        return dynamoDB;
+    }
+
+    @Override
     public Table createTable(String tableName, long readCapacityUnits, long writeCapacityUnits,
                             String partitionKeyName, String partitionKeyType,
                             String sortKeyName, String sortKeyType) {
@@ -80,6 +90,7 @@ public class DynamoServiceImpl implements DynamoService {
         try {
             log.info("Creating table " + tableName);
             Table table = dynamoDB.createTable(request);
+            log.info("Waiting for table " + tableName + " to become active. This may take a while.");
             table.waitForActive();
             return table;
         } catch (InterruptedException e) {
@@ -87,19 +98,16 @@ public class DynamoServiceImpl implements DynamoService {
         }
     }
 
+    @Override
     public void deleteTable(String tableName) {
         if (client.listTables().getTableNames().contains(tableName)) {
-            client.deleteTable(tableName);
-            long startTime = System.currentTimeMillis();
-            while (client.listTables().getTableNames().contains(tableName)) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-                if (System.currentTimeMillis() - startTime > TimeUnit.MINUTES.toMillis(30)) {
-                    throw new RuntimeException("Waited 30 min for deleting table " + tableName);
-                }
+            Table table = dynamoDB.getTable(tableName);
+            table.delete();
+            log.info("Waiting for " + tableName + " to be deleted...this may take a while...");
+            try {
+                table.waitForDelete();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to delete dynamo table " + tableName, e);
             }
         }
     }

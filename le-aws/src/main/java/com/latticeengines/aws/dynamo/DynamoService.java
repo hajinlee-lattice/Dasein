@@ -1,5 +1,7 @@
 package com.latticeengines.aws.dynamo;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 
 public interface DynamoService {
@@ -8,5 +10,9 @@ public interface DynamoService {
             String partitionKeyType, String sortKeyName, String sortKeyType);
 
     void deleteTable(String tableName);
+
+    AmazonDynamoDBClient getClient();
+
+    DynamoDB getDynamoDB();
 
 }

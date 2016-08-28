@@ -6,13 +6,12 @@ import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 class TestDynamoEntityMgrImpl extends BaseFabricEntityMgrImpl<TestDynamoEntity>  {
 
-    static final String REPO = "testRepo";
     static final String RECORD_TYPE = "testRecord";
 
-    TestDynamoEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService) {
+    TestDynamoEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService, String repo) {
         super(new BaseFabricEntityMgrImpl.Builder().messageService(messageService).dataService(dataService) //
                 .recordType(RECORD_TYPE).topic("TestDynamoEntity") //
-                .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(REPO));
+                .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
     }
 
 }
