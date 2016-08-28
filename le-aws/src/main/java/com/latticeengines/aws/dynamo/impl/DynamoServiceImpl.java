@@ -1,6 +1,7 @@
 package com.latticeengines.aws.dynamo.impl;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -101,14 +102,21 @@ public class DynamoServiceImpl implements DynamoService {
     @Override
     public void deleteTable(String tableName) {
         if (client.listTables().getTableNames().contains(tableName)) {
-            Table table = dynamoDB.getTable(tableName);
-            table.delete();
-            log.info("Waiting for " + tableName + " to be deleted...this may take a while...");
+            client.deleteTable(tableName);
             try {
-                table.waitForDelete();
+                log.info("Waiting for " + tableName + " to be deleted...this may take a while...");
+                long startTime = System.currentTimeMillis();
+                while (client.listTables().getTableNames().contains(tableName)) {
+                    if (System.currentTimeMillis() - startTime > TimeUnit.MINUTES.toMillis(30)) {
+                        throw new RuntimeException("Failed to delete table within 30 min");
+                    }
+                    Thread.sleep(3000L);
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Failed to delete dynamo table " + tableName, e);
             }
         }
     }
 }
+
+

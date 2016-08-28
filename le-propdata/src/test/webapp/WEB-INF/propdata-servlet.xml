@@ -5,14 +5,4 @@
 
     <import resource="classpath:test-propdata-api-context.xml"/>
 
-    <bean id="h2WebServer" class="org.h2.tools.Server" factory-method="createWebServer" init-method="start"
-          destroy-method="stop">
-        <constructor-arg value="-web,-webAllowOthers,-webPort,3080"/>
-    </bean>
-
-    <bean id="h2Server" class="org.h2.tools.Server" factory-method="createTcpServer" init-method="start"
-          destroy-method="stop" depends-on="h2WebServer">
-        <constructor-arg value="-tcp,-tcpAllowOthers,-tcpPort,7080"/>
-    </bean>
-
 </beans>

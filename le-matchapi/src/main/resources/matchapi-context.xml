@@ -20,6 +20,7 @@
 
     <mvc:annotation-driven/>
 
+    <import resource="classpath:aws-context.xml" />
     <import resource="classpath:propdata-match-context.xml"/>
 
     <mvc:annotation-driven />
