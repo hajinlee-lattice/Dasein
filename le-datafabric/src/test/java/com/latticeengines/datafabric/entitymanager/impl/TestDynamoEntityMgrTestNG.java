@@ -2,7 +2,6 @@ package com.latticeengines.datafabric.entitymanager.impl;
 
 import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntityMgrImpl.RECORD_TYPE;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,12 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
-import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,39 +84,6 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
         Assert.assertEquals(entity2.getJsonAttributes().get("key3").asLong(), 123L);
         Assert.assertEquals(entity2.getJsonAttributes().get("key3").asInt(), 123);
         Assert.assertEquals(entity2.getMapAttributes().get("key3"), 123);
-    }
-
-    private static CreateTableRequest createTable(
-            String tableName, long readCapacityUnits, long writeCapacityUnits,
-            String partitionKeyName, String partitionKeyType,
-            String sortKeyName, String sortKeyType) {
-
-        ArrayList<KeySchemaElement> keySchema = new ArrayList<>();
-        ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
-
-        keySchema.add(new KeySchemaElement()
-                .withAttributeName(partitionKeyName)
-                .withKeyType(KeyType.HASH)); //Partition key
-        attributeDefinitions.add(new AttributeDefinition()
-                .withAttributeName(partitionKeyName)
-                .withAttributeType(partitionKeyType));
-
-        if (sortKeyName != null) {
-            keySchema.add(new KeySchemaElement()
-                    .withAttributeName(sortKeyName)
-                    .withKeyType(KeyType.RANGE)); //Sort key
-            attributeDefinitions.add(new AttributeDefinition()
-                    .withAttributeName(sortKeyName)
-                    .withAttributeType(sortKeyType));
-        }
-
-        return new CreateTableRequest()
-                .withTableName(tableName)
-                .withKeySchema(keySchema)
-                .withAttributeDefinitions(attributeDefinitions)
-                .withProvisionedThroughput( new ProvisionedThroughput()
-                        .withReadCapacityUnits(readCapacityUnits)
-                        .withWriteCapacityUnits(writeCapacityUnits));
     }
 
 }

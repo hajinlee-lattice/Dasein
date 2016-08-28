@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -246,9 +245,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private GenericRecord jsonToAvro(ByteBuffer json) {
         try {
-            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-            String val = json.toString();
-            
+            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);           
 
             byte[] bytes = new byte[json.remaining()];
             json.get(bytes, 0, bytes.length);
