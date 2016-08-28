@@ -73,8 +73,15 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
     @Override
     @MatchStep(threshold = 0L)
     public BulkMatchOutput matchBulk(BulkMatchInput input) {
-        // TODO - need to be implemented by Anoop in next txn
-        throw new NotImplementedException("Impl of account master based match is yet to be implemented");
+        input.setRequestId(UUID.randomUUID().toString());
+        BulkMatchOutput output = new BulkMatchOutput();
+        List<MatchOutput> outputList = new ArrayList<>();
+        output.setOutputList(outputList);
+        for (MatchInput singleInput : input.getInputList()) {
+            MatchOutput singleOutput = match(singleInput);
+            outputList.add(singleOutput);
+        }
+        return output;
     }
 
     private AccountLookupRequest createLookupRequest(MatchContext matchContext,
