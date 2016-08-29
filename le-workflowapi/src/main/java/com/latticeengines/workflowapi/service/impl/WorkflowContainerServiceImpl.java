@@ -177,8 +177,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                     workflowIds.toString(), e.getMessage()));
         }
         for (com.latticeengines.domain.exposed.workflow.Job job : jobs) {
-            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH, String.format(
-                    "http://%s/cluster/app/%s", resourceManagerUrl, job.getApplicationId()));
+            if (job.getApplicationId() != null) {
+                job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
+                        String.format("http://%s/cluster/app/%s", resourceManagerUrl,
+                                job.getApplicationId()));
+            }
         }
 
         return jobs;
