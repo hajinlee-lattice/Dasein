@@ -130,199 +130,248 @@ Wizard Steps
 ============================================================ */
 /* Pure CSS
 ================ */
-.wizard {
-	list-style-type: none;
-	list-style-position: inside;
-	margin: 0;
-	padding: 0;
+@mixin arrow-wizard {
 	li {
-		display: block;
-		margin-bottom: 20px;
-	}
-	@include media(">large") {
-		li {
-			display: inline-block;
-			position: relative;  
-			min-width: 100px;
-			padding: 0 20px;
-			margin-right: 20px;
-			&:after, &:before, &:last-child {
-				background: #fff;
-				border-color: #959595;
-				border-style: solid;
-				border-width: 1px;
-			}
+		display: inline-block;
+		position: relative;  
+		min-width: 100px;
+		border-bottom: 0;
+		padding: 0 20px;
+		margin-right: 20px;
+		&:after, &:before, &:last-child {
+			background: #fff;
+			border-color: #959595;
+			border-style: solid;
+			border-width: 1px;
+		}
+		&:after, &:before {
+		  display: block;
+		  content: '';
+		  position: absolute;
+		}
+		&:after {
+		  top: -1px;
+		  left: -15px;
+		  right: 0;
+		  height: calc(50% - -1px);
+		  transform: skewX(45deg);
+		  border-bottom: 0;
+		}
+		&:before {
+		  left: -15px;
+		  right: 0;
+		  bottom: -1px;
+		  height: calc(50% - -1px);
+		  transform: skewX(-45deg);
+		  border-top: 0;
+		}
+		&:first-child {
+			position: relative;
+			background: #fff;
+			border: #959595 solid 1px;
+			top: 1px;
 			&:after, &:before {
-			  display: block;
-			  content: '';
-			  position: absolute;
+				left: 100%;
+				transform: none;
+				top: 50%;
+				border: solid transparent;
+				content: " ";
+				height: 0;
+				width: 0;
+				position: absolute;
+				pointer-events: none;
 			}
 			&:after {
-			  top: -1px;
-			  left: -15px;
-			  right: 0;
-			  height: calc(50% - -1px);
-			  transform: skewX(45deg);
-			  border-bottom: 0;
+				border-color: rgba(255, 255, 255, 0);
+				border-left-color: #fff;
+				border-width: 35px;
+				margin-top: -35px;
+				background: none;
 			}
 			&:before {
-			  left: -15px;
-			  right: 0;
-			  bottom: -1px;
-			  height: calc(50% - -1px);
-			  transform: skewX(-45deg);
-			  border-top: 0;
+				border-color: rgba(149, 149, 149, 0);
+				border-left-color: #959595;
+				border-width: 36px;
+				margin-top: -36px;
+				background: transparent;
 			}
+
+		}
+		&:nth-child(2) {
+			margin-left: 17px;
+		}
+		&:last-child {
+			margin-bottom: 9px;
+			border-left: 0;
+			&:after, &:before {
+				border-right: 0;
+				right: 20px;   
+			}
+		}
+		&.success {
+			div > span {
+				padding-top: 16px;
+			}
+		}
+		&.success {
+			&:after, &:before, &:last-child {
+		    	border-color: #82c460;
+		    }
 			&:first-child {
-				position: relative;
-				background: #fff;
-				border: #959595 solid 1px;
-				top: 1px;
-				&:after, &:before {
-					left: 100%;
-					transform: none;
-					top: 50%;
-					border: solid transparent;
-					content: " ";
-					height: 0;
-					width: 0;
-					position: absolute;
-					pointer-events: none;
+				border: #82c460 solid 1px;
+				&:before {
+					border-color: rgba(130, 196, 96, 0);
+					border-left-color: #82c460;
 				}
 				&:after {
 					border-color: rgba(255, 255, 255, 0);
 					border-left-color: #fff;
-					border-width: 35px;
-					margin-top: -35px;
-					background: none;
-				}
-				&:before {
-					border-color: rgba(149, 149, 149, 0);
-					border-left-color: #959595;
-					border-width: 36px;
-					margin-top: -36px;
-					background: transparent;
-				}
-
-			}
-			&:nth-child(2) {
-				margin-left: 17px;
-			}
-			&:last-child {
-				border-left: 0;
-				&:after, &:before {
-					border-right: 0;
-					right: 20px;   
-				}
-			}
-			&.success {
-				div > span {
-					padding-top: 16px;
-				}
-			}
-			&.success {
-				&:after, &:before, &:last-child {
-			    	border-color: #82c460;
-			    }
-				&:first-child {
-					border: #82c460 solid 1px;
-					&:before {
-						border-color: rgba(130, 196, 96, 0);
-						border-left-color: #82c460;
-					}
-					&:after {
-						border-color: rgba(255, 255, 255, 0);
-						border-left-color: #fff;
-					}
-				}
-				.load-data {
-			        background-image: url("/assets/images/ico-status-process-file-success.png");
-			    }
-			    .match-cloud {
-			        background-image: url("/assets/images/ico-status-data-cloud-success.png");
-			    }
-			    .building-model {
-			        background-image: url("/assets/images/ico-status-building-model-success.png");
-			    }
-			}
-			&.error {
-				&:after, &:before, &:last-child {
-			    	border-color: #ca2b2b;
-			    }
-				&:first-child {
-					border: #ca2b2b solid 1px;
-					&:before {
-						border-color: rgba(202, 43, 43, 0);
-						border-left-color: #ca2b2b;
-					}
-					&:after {
-						border-color: rgba(255, 255, 255, 0);
-						border-left-color: #fff;
-					}
-				}
-				.load-data {
-			        background-image: url("/assets/images/ico-status-process-file-failed.png");
-			    }
-			    .match-cloud {
-			        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
-			    }
-			    .building-model {
-			        background-image: url("/assets/images/ico-status-building-model-failed.png");
-			    }
-			}
-			&.current {
-				&:after, &:before, &:last-child {
-			    	border-color: #235cff;
-			    }
-				&:first-child {
-					border: #235cff solid 1px;
-					&:before {
-						border-color: rgba(35, 92, 255, 0);
-						border-left-color: #235cff;
-					}
-					&:after {
-						border-color: rgba(255, 255, 255, 0);
-						border-left-color: #fff;
-					}
-				}
-			}
-			p {
-				margin-bottom: -5px;
-			}
-			div {
-				position: relative;
-				z-index: 10;
-				& > span {
-					padding: 25px 22px 8px 0px;
-					min-height: 70px;
-					&:first-child {
-						float: left;
-					}
-					&:last-child {
-						float: right;
-						padding-top: 25px;
-						padding-right: 10px;
-					}
-					.fa-exclamation-triangle {
-						color: #ca2b2b;
-					}
-					&.load-data, &.match-cloud, &.building-model {
-					    padding-left: 46px;
-					    background-repeat: no-repeat;
-					    background-position: left;
-					}
-					&.load-data {
-					    background-image: url("/assets/images/ico-status-process-file-inactive.png");
-					}
-					&.match-cloud {
-					    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
-					}
-					&.building-model {
-					    background-image: url("/assets/images/ico-status-building-model-inactive.png");
-					}
 				}
 			}
 		}
+		&.error {
+			&:after, &:before, &:last-child {
+		    	border-color: #ca2b2b;
+		    }
+			&:first-child {
+				border: #ca2b2b solid 1px;
+				&:before {
+					border-color: rgba(202, 43, 43, 0);
+					border-left-color: #ca2b2b;
+				}
+				&:after {
+					border-color: rgba(255, 255, 255, 0);
+					border-left-color: #fff;
+				}
+			}
+		}
+		&.current {
+			&:after, &:before, &:last-child {
+		    	border-color: #235cff;
+		    }
+			&:first-child {
+				border: #235cff solid 1px;
+				&:before {
+					border-color: rgba(35, 92, 255, 0);
+					border-left-color: #235cff;
+				}
+				&:after {
+					border-color: rgba(255, 255, 255, 0);
+					border-left-color: #fff;
+				}
+			}
+		}
+		p {
+			margin-bottom: -5px;
+		}
+		div {
+			position: relative;
+			z-index: 10;
+		}
+	}
+}
+
+
+
+.wizard {
+	list-style-type: none;
+	list-style-position: inside;
+	margin: 0 0 20px;
+	padding: 0;
+	background: #fff;
+	border: #959595 solid 1px;
+	li {
+		display: block;
+		margin-bottom: 10px;
+		padding: 20px 20px 10px;
+		border-bottom: dotted #959595 1px;
+		&:last-child {
+			margin-bottom: 0;
+			border-bottom: 0;
+		}
+		.load-data, .match-cloud, .building-model {
+		    padding-left: 40px;
+		    background-repeat: no-repeat;
+		    background-position: left;
+		}
+		.load-data {
+		    background-image: url("/assets/images/ico-status-process-file-inactive.png");
+		}
+		.match-cloud {
+		    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
+		}
+		.building-model {
+		    background-image: url("/assets/images/ico-status-building-model-inactive.png");
+		}
+		&.success {
+			.load-data {
+		        background-image: url("/assets/images/ico-status-process-file-success.png");
+		    }
+		    .match-cloud {
+		        background-image: url("/assets/images/ico-status-data-cloud-success.png");
+		    }
+		    .building-model {
+		        background-image: url("/assets/images/ico-status-building-model-success.png");
+		    }
+		}
+		&.error {
+			.load-data {
+		        background-image: url("/assets/images/ico-status-process-file-failed.png");
+		    }
+		    .match-cloud {
+		        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
+		    }
+		    .building-model {
+		        background-image: url("/assets/images/ico-status-building-model-failed.png");
+		    }
+		}
+		div {
+			&:after {
+				display: table;
+				content: "";
+				clear: both;
+			}
+			& > span {
+				padding-top: 25px;
+				padding-right: 22px;
+				padding-bottom: 8px;
+				min-height: 70px;
+				&:first-child {
+					float: left;
+				}
+				&:last-child {
+					float: right;
+					padding-top: 25px;
+					padding-right: 0;
+				}
+				.fa-exclamation-triangle {
+					color: #ca2b2b;
+				}
+			}
+		}
+	}
+	@include media(">1220px") {
+		background: transparent;
+		border: none;
+		@include arrow-wizard;
+	}
+}
+
+.open-nav .wizard {
+	@include media(">1430px") {
+		@include arrow-wizard;
+	}
+}
+.progress-info {
+	li {
+	    display: block;
+	    margin: 0;
+	}
+    @include media(">1220px") {
+    	li {
+	        display: inline-block;
+	        margin: 0 30px 0 0;
+	    }
 	}
 }
 
