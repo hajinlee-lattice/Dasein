@@ -52,7 +52,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             donutRect = donut.getBoundingClientRect(),
             pathRect = path.getBoundingClientRect(),
             center = (donut.offsetLeft) + (donutRect.width >> 1),
-            top = (pathRect.top - donutRect.top + (pathRect.height >> 1)) / donutRect.height;
+            scrollTop = $(document.body).scrollTop();
+            top = ((pathRect.top - donutRect.top + (pathRect.height >> 1)) / donutRect.height);
         
         //console.log(center, donutRect.left, donutRect.width);
         // Adjust height of tail pseudo-element to anchor to path element
@@ -69,7 +70,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             '}', styleSheet.cssRules.length // append to end of styleSheet
         );
 
-        hoverElem.css("top", donutRect.top + (donutRect.height >> 1));
+        hoverElem.css("top", donutRect.top + (donutRect.height >> 1) + scrollTop);
 
         if (xPos > 0) {
             hoverElem.css("left", center + width - 5);

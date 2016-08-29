@@ -50,7 +50,7 @@
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
                       ng-if="isScoringJob && job.status != 'Failed'">
-                    <a href="javascript:void(0)" data-ng-click="clickGetScoringResults()">
+                    <a href="/files/scores/jobs/{{job.id}}/results?Authorization={{AuthToken}}">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
                         <i data-ng-show="showProgress" class="fa fa-spinner fa-spin fa-inverse fa-fw"></i>
                         Download

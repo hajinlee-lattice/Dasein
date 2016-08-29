@@ -17,7 +17,7 @@ angular
             admin: '=',
             auth: '='
         },
-        controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal) {
+        controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal, BrowserStorageUtility) {
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
@@ -26,6 +26,7 @@ angular
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
+            $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
 
             var reports = $scope.job.reports,
                 JobReport = null;

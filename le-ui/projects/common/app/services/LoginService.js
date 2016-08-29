@@ -149,7 +149,7 @@ angular.module('mainApp.login.services.LoginService', [
         var username = BrowserStorageUtility.getLoginDocument().UserName;
         $http({
             method: 'PUT',
-            url: '/pls/users/' + username + '/creds',
+            url: '/pls/password/' + username + '/',
             data: creds,
             headers: {
                 "Content-Type": "application/json"

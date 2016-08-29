@@ -19,7 +19,7 @@
 
         <div class="row data">
             <div class="three columns">
-                <div class="attributes lattice-attributes" data-ng-show="showExternalCategories">
+                <div class="attributes lattice-attributes {{ showExternalCategories ? '' : 'not-visible' }}">
                     <h4>{{::externalPredictorTotal}}</h4>
                     <ul>    
                         <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
