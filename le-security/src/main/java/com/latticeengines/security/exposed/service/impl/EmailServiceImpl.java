@@ -69,6 +69,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail("Welcome to Lattice Predictive Insights", mp, Collections.singleton(user.getEmail()));
@@ -90,6 +91,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());
@@ -111,6 +113,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(String.format("Invitation to Access %s (Lattice Predictive Insights)",
@@ -151,6 +154,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Password Reset for Lattice Predictive Insights", mp, Collections.singleton(user.getEmail()));
@@ -381,6 +385,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{modelname}}", modelName);
             builder.replaceToken("{{completemsg}}", "We have completed the model creation.");
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format("SUCCESS - Create Model - %s ", modelName), mp,
@@ -411,6 +416,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{errormsg}}", "Failed to create a model.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format("FAILURE - Create Model - %s ", modelName), mp,
@@ -440,6 +446,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{modelname}}", modelName);
             builder.replaceToken("{{completemsg}}", "We have completed the scoring.");
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format("SUCCESS - Score List - %s ", modelName), mp,
@@ -470,6 +477,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{errormsg}}", "Failed to score.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format("FAILURE - Score List - %s ", modelName), mp,
