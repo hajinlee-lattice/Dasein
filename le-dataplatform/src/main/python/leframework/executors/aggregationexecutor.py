@@ -25,6 +25,7 @@ from leframework.model.states.percentilebucketgenerator import PercentileBucketG
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
 from leframework.model.states.provenancegenerator import ProvenanceGenerator
+from leframework.model.states.revenuemodelimportancesortinggenerator import RevenueModelImportanceSortingGenerator
 from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
 from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.rocgenerator import ROCGenerator
@@ -75,7 +76,8 @@ class AggregationExecutor(Executor):
         stateMachine.addState(ScoreDerivationGenerator(), 19)
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(RevenueModelQualityGenerator(), 21)
-        stateMachine.addState(EnhancedSummaryGenerator(), 22)
+        stateMachine.addState(RevenueModelImportanceSortingGenerator(), 22)
+        stateMachine.addState(EnhancedSummaryGenerator(), 23)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 

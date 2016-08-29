@@ -40,5 +40,8 @@ class EnhancedSummaryGenerator(State):
         if hasattr(self.mediator, "modelquality"):
             self.result["ModelQuality"] = self.mediator.modelquality
 
+        if hasattr(self.mediator, "importancesorting"):
+            self.result["ImportanceSorting"] = self.mediator.importancesorting
+
         # Add Result to Mediator
         self.mediator.enhancedsummary = self.result
