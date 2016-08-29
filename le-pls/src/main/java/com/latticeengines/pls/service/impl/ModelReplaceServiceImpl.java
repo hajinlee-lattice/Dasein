@@ -135,11 +135,11 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
         HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rfpmml.xml", targetModelDirPath
                 + "/rfpmml.xml.bak");
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rfpmml.xml", sourceModelLocalRoot);
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rfpmml.xml", targetModelDirPath);
 
         HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rf_model.txt", targetModelDirPath
                 + "/rf_model.txt.bak");
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rf_model.txt", sourceModelLocalRoot);
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rf_model.txt", targetModelDirPath);
     }
 
     JsonNode constructNewModelSummary(String modelSummaryLocalPath, ModelSummary targetModelSummary) throws IOException {
