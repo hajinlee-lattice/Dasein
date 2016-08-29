@@ -7,6 +7,7 @@ public class WorkflowContextConstants {
     public static class Outputs {
         public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
         public static final Object ERROR_OUTPUT_PATH = "ERROR_OUTPUT_PATH";
+        public static final String YARN_LOG_LINK_PATH = "YARN_LOG_LINK_PATH";
     }
 
     public static class Inputs {

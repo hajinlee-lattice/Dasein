@@ -12,9 +12,9 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'https://testapp.lattice-engines.com',
+                // API_URL: 'https://testapp.lattice-engines.com',
+                API_URL: 'https://10.41.0.13:8081',
                 APICON_URL: 'https://testapi.lattice-engines.com:8073',
-                RM_URL: 'http://10.41.1.105:8088',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -39,7 +39,6 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 API_URL: 'http://localhost:8081',
                 APICON_URL: 'http://localhost:8073',
-                RM_URL: 'http://localhost:8088',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -53,7 +52,6 @@ module.exports = function (grunt) {
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 APICON_URL: 'https://testapi.lattice-engines.com',
-                RM_URL: 'http://10.41.1.105:8088',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -67,7 +65,6 @@ module.exports = function (grunt) {
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
                 APICON_URL: 'https://api.lattice-engines.com',
-                RM_URL: 'http://bodcprodvhdp196.prod.lattice.local:8088',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -81,7 +78,6 @@ module.exports = function (grunt) {
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
                 APICON_URL: 'https://api.lattice-engines.com',
-                RM_URL: 'http://bodcprodvhdp196.prod.lattice.local:8088',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,

@@ -22,7 +22,6 @@ const options   = {
     HTTPS_PASS: process.env.HTTPS_PASS  || false,
     API_URL:    process.env.API_URL     || 'http://app.lattice.local',
     APICON_URL: process.env.APICON_URL  || 'http://localhost:8073',
-    RM_URL:     process.env.RM_URL      || 'http://localhost:8088',
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || false,
     LOGGING:    process.env.LOGGING     || './server/log',
@@ -53,10 +52,6 @@ options.API_URL
 // setup apiconsole proxy
 options.APICON_URL
     ? server.createApiProxy(options.APICON_URL, '/score') : null;
-
-app.all('/cluster/app/*', function (req, res, next) {
-    res.redirect(301, options.RM_URL + req.url);
-});
 
 // proxy so clients can download files that need Authorization header
 options.API_URL
