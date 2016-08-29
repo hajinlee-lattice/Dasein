@@ -121,11 +121,15 @@ public class WorkflowExecutionCache {
                     job.setErrorCode(errorDetails.getErrorCode());
                     job.setErrorMsg(errorDetails.getErrorMsg());
                 }
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
-                        .getApplicationId());
-                workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
-                if (YarnUtils.FAILED_STATUS.contains(workflowJob.getStatus())) {
-                    job.setJobStatus(JobStatus.FAILED);
+                try {
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                            .getApplicationId());
+                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+                    if (YarnUtils.FAILED_STATUS.contains(workflowJob.getStatus())) {
+                        job.setJobStatus(JobStatus.FAILED);
+                    }
+                } catch (Exception e) {
+                    log.warn("Not able to find job status from yarn according to appid: " + job.getApplicationId());
                 }
             }
 
