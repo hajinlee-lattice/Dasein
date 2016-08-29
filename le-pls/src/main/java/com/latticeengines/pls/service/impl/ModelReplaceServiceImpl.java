@@ -105,17 +105,17 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         FileUtils
                 .write(new File(sourceModelLocalRoot + "/" + targetModelFileName), newModel.toString(), "UTF-8", false);
 
-        deprecateSourceModelDir(sourceModelRoot, sourceModelSummary.getId());
+        //deprecateSourceModelDir(sourceModelRoot, sourceModelSummary.getId());
         copyModelingArtifacts(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
 
     }
 
-    private void deprecateSourceModelDir(String sourceModelRoot, String sourceModelId) throws IllegalArgumentException,
-            IOException {
-        String uuid = UuidUtils.extractUuid(sourceModelId);
-        HdfsUtils.copyFiles(yarnConfiguration, sourceModelRoot + "/" + uuid, sourceModelRoot + "/" + uuid
-                + "-deprecated");
-    }
+//    private void deprecateSourceModelDir(String sourceModelRoot, String sourceModelId) throws IllegalArgumentException,
+//            IOException {
+//        String uuid = UuidUtils.extractUuid(sourceModelId);
+//        HdfsUtils.copyFiles(yarnConfiguration, sourceModelRoot + "/" + uuid, sourceModelRoot + "/" + uuid
+//                + "-deprecated");
+//    }
 
     private void copyModelingArtifacts(String sourceModelLocalRoot, String targetModelDirPath,
             String targetModelFileName) throws IOException {
