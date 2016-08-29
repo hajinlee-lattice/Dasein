@@ -32,7 +32,7 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
 
         try {
             log.info("Started!");
-            if (propdataJobsEnabled == false) {
+            if (!propdataJobsEnabled) {
                 log.info("Job is disabled");
                 return;
             }

@@ -22,7 +22,7 @@
     <bean id="refreshHeartBeatCronTrigger"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="refreshJobHeartBeatDetail" />
-        <property name="cronExpression" value="${propdata.job.heartbeat.schedule}" />
+        <property name="cronExpression" value="${propdata.job.legacy.heartbeat.schedule}" />
     </bean>
 
     <bean id="propDataHeartBeatScheduler"
@@ -41,6 +41,7 @@
                   value="com.latticeengines.propdata.job.EngineHeartBeat" />
         <property name="jobDataAsMap">
             <map>
+                <entry key="proxyHostport" value="${propdata.job.proxy.hostport}" />
                 <entry key="ingestionProxy" value-ref="ingestionProxy" />
                 <entry key="transformationProxy" value-ref="transformationProxy" />
                 <entry key="publicationProxy" value-ref="publicationProxy" />
@@ -51,7 +52,7 @@
     <bean id="propDataEngineHeartBeatTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="propDataEngineHeartBeatDetail" />
-        <property name="cronExpression" value="${propdata.job.heartbeat.schedule}" />
+        <property name="cronExpression" value="${propdata.job.engine.heartbeat.schedule}" />
     </bean>
 
     <bean id="propDataEngineHeartBeatScheduler"

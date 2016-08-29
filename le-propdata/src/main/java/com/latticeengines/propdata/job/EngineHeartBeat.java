@@ -6,11 +6,13 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.proxy.exposed.propdata.IngestionProxy;
 import com.latticeengines.proxy.exposed.propdata.PublicationProxy;
 import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
+@Component("engineHeartBeat")
 @DisallowConcurrentExecution
 public class EngineHeartBeat extends QuartzJobBean {
 
@@ -19,10 +21,13 @@ public class EngineHeartBeat extends QuartzJobBean {
     private TransformationProxy transformationProxy;
     private PublicationProxy publicationProxy;
     private IngestionProxy ingestionProxy;
+    private String proxyHostport;
 
     @Override
-    public void executeInternal(JobExecutionContext jobExecutionContext)
-            throws JobExecutionException {
+    public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        ingestionProxy.setHostport(proxyHostport);
+        transformationProxy.setHostport(proxyHostport);
+        publicationProxy.setHostport(proxyHostport);
 
         try {
             log.info(this.getClass().getSimpleName() + " invoking publication proxy scan.");
@@ -45,7 +50,6 @@ public class EngineHeartBeat extends QuartzJobBean {
             log.error("Failed to scan ingestion engine", e);
         }
 
-
     }
 
     // ==============================
@@ -64,4 +68,7 @@ public class EngineHeartBeat extends QuartzJobBean {
         this.ingestionProxy = ingestionProxy;
     }
 
+    public void setProxyHostport(String proxyHostport) {
+        this.proxyHostport = proxyHostport;
+    }
 }

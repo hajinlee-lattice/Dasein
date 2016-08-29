@@ -29,7 +29,7 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements Ma
         long startTime = System.currentTimeMillis();
         try {
             log.info("Started!");
-            if (propdataJobsEnabled == false) {
+            if (!propdataJobsEnabled) {
                 log.info("Job is disabled");
                 return;
             }
