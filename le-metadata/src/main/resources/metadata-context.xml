@@ -17,7 +17,7 @@
     <import resource="classpath:metadata-aspects-context.xml"/>
     <import resource="classpath:metadata-hive-context.xml"/>
     <import resource="classpath:metadata-camille-context.xml"/>
-    <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 </beans>
