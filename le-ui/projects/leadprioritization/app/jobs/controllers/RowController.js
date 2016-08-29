@@ -27,6 +27,15 @@ angular
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
 
+            var reports = $scope.job.reports,
+                JobReport = null;
+            
+            reports.forEach(function(item) {
+                if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                    $scope.data = data = JSON.parse(item.json.Payload);
+                }
+            });
+
             switch ($scope.jobType.toLowerCase()) {
                 case "scoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                 case "placeholder": $scope.job.displayName = "Pending..."; break;
@@ -122,9 +131,6 @@ angular
             };
 
             $scope.clickDownloadErrorReport = function($event) {
-
-                var reports = $scope.job.reports
-                    JobReport = null;
 
                 console.log(reports);
 

@@ -115,21 +115,15 @@
     padding-bottom: 1px;
     border-bottom: #e7e7e7 solid 1px;
     padding: 18px;
-    display: flex;
     &:after {
         display: table;
         content: "";
         clear: both;
     }
 }
-.progress-info, .download-error-report {
-    flex-grow: 1;
-}
-.progress-info {
-    ul li {
-        display: inline-block;
-        margin-right: 30px;
-    }
+.progress-info li {
+    display: inline-block;
+    margin-right: 30px;
 }
 .download-error-report {
     border: rgba(0,0,0,0.3) solid 1px;

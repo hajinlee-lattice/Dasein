@@ -83,154 +83,156 @@
     <div class="chevron-row" data-ng-if="jobRowExpanded">
 
 
-        <div class="progress-info">
+        <div class="row">
+            <div class="nine columns">
 
 
-            <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow'">
-                <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
-                    <div>
-                            
-                        <span class="load-data">
-                            <p>Processing File</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
-                            <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'load_data'"></i>
-                        </span>
-
-                    </div>
-                </li>
-                <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
-                    <div>
-                            
-                        <span class="match-cloud">
-                            <p>Matching to Data Cloud</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
-                            <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
-                        </span>
-
-                    </div>
-                </li>
-                <li ng-class="(jobStepsCompletedStates.create_global_target_market) ? 'success' : ''">
-                    <div>
-                            
-                        <span class="building-model">
-                            <p>Building Model</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
-                            <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
-                        </span>
-
-                    </div>
-                </li>
-            </ol>
-
-            <ol class="wizard job-status" ng-if="jobType == 'fitModelWorkflow'">
-                <li>
-                    <div>
-
-                        <span class="load-data">
-                                <p>Load Data</p>
+                <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow'">
+                    <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
+                        <div>
+                                
+                            <span class="load-data">
+                                <p>Processing File</p>
                                 <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
-                            <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'load_data'"></i>
-                        </span>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'load_data'"></i>
+                            </span>
 
-                    </div>
-                </li>
-                <li>
-                    <div>
+                        </div>
+                    </li>
+                    <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
+                        <div>
+                                
+                            <span class="match-cloud">
+                                <p>Matching to Data Cloud</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
+                            </span>
 
-                        <span class="match-data">
-                            <p>Match Data</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.match_data"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.match_data"></i>
-                            <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'match_data'"></i>
-                        </span>
+                        </div>
+                    </li>
+                    <li ng-class="(jobStepsCompletedStates.create_global_target_market) ? 'success' : ''">
+                        <div>
+                                
+                            <span class="building-model">
+                                <p>Building Model</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
+                            </span>
 
-                    </div>
-                </li>
-                <li>
-                    <div>
+                        </div>
+                    </li>
+                </ol>
 
-                        <span class="generate-insights">
-                            <p>Generate Insights</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
-                            <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'generate_insights'"></i>
-                        </span>
+                <ol class="wizard job-status" ng-if="jobType == 'fitModelWorkflow'">
+                    <li>
+                        <div>
 
-                    </div>
-                </li>
-                <li>
-                    <div>
+                            <span class="load-data">
+                                    <p>Load Data</p>
+                                    <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
+                                <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'load_data'"></i>
+                            </span>
 
-                        <span class="universal-model">
-                            <p>Create Universal Model</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_model"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_model"></i>
-                            <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_model'"></i>
-                        </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
 
-                    </div>
-                </li>
-                <li>
-                    <div>
+                            <span class="match-data">
+                                <p>Match Data</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.match_data"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.match_data"></i>
+                                <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'match_data'"></i>
+                            </span>
 
-                        <span class="universal-market">
-                            <p>Create Universal Target Market</p>
-                            <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
-                        </span>
-                        <span>
-                            <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
-                            <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
-                            <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_target_market'"></i>
-                        </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
 
-                    </div>
-                </li>
-            </ol>
+                            <span class="generate-insights">
+                                <p>Generate Insights</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
+                                <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'generate_insights'"></i>
+                            </span>
 
-            <ul>
-                <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
-                <li data-ng-if="job.source != null"><strong>Filename:</strong>
-                    <a data-ng-if="job.modelId != null" href="/files/datafiles/trainingfilecsv?modelId={{job.modelId}}&Authorization={{auth}}">{{job.source}}</a>
-                    <span data-ng-if="job.modelId == null">{{job.source}}</span>
-                </li>
-                <li data-ng-if="admin"><strong>App:</strong> <a ng-href="/cluster/app/{{job.applicationId}}" target="_blank">{{job.applicationId}}</a></li>
-            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
 
+                            <span class="universal-model">
+                                <p>Create Universal Model</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_model"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_model"></i>
+                                <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_model'"></i>
+                            </span>
 
-        </div><!-- End .progress-info -->
+                        </div>
+                    </li>
+                    <li>
+                        <div>
 
-        <div class="download-error-report">
-            <strong>Report:</strong>
-            <p>15 records with errors.</p>
-            <button type="button" data-ng-click="clickDownloadErrorReport()" ng-if="jobFailed" class="button blue-button block-button">
-                <i class="fa fa-download"></i> Error CSV
-            </button>
-        </div>
+                            <span class="universal-market">
+                                <p>Create Universal Target Market</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
+                                <i class="fa fa-exclamation-triangle" data-ng-if="stepFailed == 'create_global_target_market'"></i>
+                            </span>
+
+                        </div>
+                    </li>
+                </ol>
+
+                <ul class="progress-info">
+                    <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
+                    <li data-ng-if="job.source != null"><strong>Filename:</strong>
+                        <a data-ng-if="job.modelId != null" href="/files/datafiles/trainingfilecsv?modelId={{job.modelId}}&Authorization={{auth}}">{{job.source}}</a>
+                        <span data-ng-if="job.modelId == null">{{job.source}}</span>
+                    </li>
+                    <li data-ng-if="admin"><strong>App:</strong> <a ng-href="/cluster/app/{{job.applicationId}}" target="_blank">{{job.applicationId}}</a></li>
+                </ul>
+
+            </div><!-- End .columns -->
+            <div class="three columns">
+                <div class="download-error-report">
+                    <strong>Report:</strong>
+                    <p><span data-ng-if="data.ignored_records != 0">{{data.ignored_records}}</span><span data-ng-if="data.ignored_records == 0 || data.ignored == null">0</span> records with errors.</p>
+                    <button type="button" data-ng-click="clickDownloadErrorReport()" ng-if="jobFailed" class="button blue-button block-button">
+                        <i class="fa fa-download"></i> Error CSV
+                    </button>
+                </div>
+            </div>
+        </div><!-- End .row -->
 
     </div>
 </div>
