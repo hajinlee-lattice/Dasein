@@ -150,6 +150,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{username}}", user.getUsername());
             builder.replaceToken("{{password}}", password);
+            builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail("Password Reset for Lattice Predictive Insights", mp, Collections.singleton(user.getEmail()));
