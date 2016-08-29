@@ -62,7 +62,7 @@ angular.module('lp.jobs', [
                 ]
             },
             scoring: {
-                label: 'Score List',
+                label: 'Score Training Set',
                 click: $scope.handleRescoreClick,
                 class: 'orange-button select-label',
                 icon: 'fa fa-chevron-down',
@@ -71,11 +71,11 @@ angular.module('lp.jobs', [
                 items: [
                     { 
                         click: $scope.handleRescoreClick,
-                        label: 'Score List',
+                        label: 'Score Training Set',
                         icon: 'fa fa fa-th-list' 
                     },{
                         sref: 'home.model.scoring',
-                        label: 'Score Training Set',
+                        label: 'Score List',
                         icon: 'fa fa-file-excel-o' 
                     }
                 ]
