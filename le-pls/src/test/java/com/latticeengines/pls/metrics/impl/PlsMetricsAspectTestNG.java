@@ -17,21 +17,19 @@ import org.apache.commons.logging.Log;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryResource modelSummaryResource;
@@ -59,6 +57,8 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Log newLog = mock(Log.class);
         PlsMetricsAspectImpl.log = newLog;
 
+        String testUser = TestFrameworkUtils.SUPER_ADMIN_USERNAME;
+
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
         final List<String> logs = new ArrayList<>();
         doAnswer(new Answer<Object>() {
@@ -70,11 +70,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         }).when(newLog).info(any());
 
-        TicketAuthenticationToken auth = new TicketAuthenticationToken("", "Uniqueness.Randomness");
-        Session session = new Session();
-        session.setEmailAddress("bnguyen@lattice-engines.com");
-        auth.setSession(session);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        setupSecurityContext(mainTestTenant, testUser);
         ModelSummaryEntityMgr summaryEntityMgr = mock(ModelSummaryEntityMgr.class);
         modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
 
@@ -82,7 +78,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
         verify(newLog, times(1)).info(anyString());
         Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
         Assert.assertTrue(logs.get(0).contains("Track Id="));
-        Assert.assertTrue(logs.get(0).contains("User=bnguyen@lattice-engines.com"));
+        Assert.assertTrue(logs.get(0).contains("User=" + testUser));
 
         modelSummaryResource.getModelSummaries(null);
         verify(newLog, times(2)).info(anyString());
@@ -90,8 +86,8 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
         modelSummaryResource.getModelSummaryEntityMgr();
         verify(newLog, times(2)).info(anyString());
 
-        String passwd = DigestUtils.sha256Hex(adminPassword);
-        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
+        String passwd = DigestUtils.sha256Hex(TestFrameworkUtils.GENERAL_PASSWORD);
+        Ticket ticket = globalAuthenticationService.authenticateUser(testUser, passwd);
         assertNotNull(ticket);
         assertTrue(ticket.getTenants().size() >= 2);
         boolean result = globalAuthenticationService.discard(ticket);
