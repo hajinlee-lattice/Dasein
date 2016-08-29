@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +19,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
@@ -40,6 +39,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
 
     protected static ObjectMapper objectMapper = new ObjectMapper();
     private String rowIdField = "RowId" + UUID.randomUUID().toString().replace("-", "");
+    private static final String ESCAPED_COMMA = "{{COMMA}}";
 
     @Override
     public Node construct(PivotDataFlowParameters parameters) {
@@ -370,7 +370,12 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                 valueColumn = rowIdField;
             }
 
-            String[] pivotKeys = json.get("TargetPivotKeys").asText().split(",");
+            String[] rawPivotKeys = json.get("TargetPivotKeys").asText().split(",");
+            String[] pivotKeys = new String[rawPivotKeys.length];
+            for (int i = 0; i < rawPivotKeys.length; i++) {
+                String key = parsePivotKey(rawPivotKeys[i]);
+                pivotKeys[i] = key;
+            }
             Set<String> keySet = new HashSet<>();
             List<AbstractMap.SimpleImmutableEntry<String, String>> columnMappingList = new ArrayList<>();
             for (String key : pivotKeys) {
@@ -455,6 +460,11 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, columnMap, classMap, null, typeMap, null,
                 defaultValues, null);
     }
+
+    private static String parsePivotKey(String rawKey) {
+        return rawKey.replace(ESCAPED_COMMA, ",");
+    }
+
 
     private boolean hasRowCount(PivotStrategyImpl impl) {
         return rowIdField.equals(impl.valueColumn);
