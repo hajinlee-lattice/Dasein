@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.ResetPasswordRequest;
 import com.latticeengines.domain.exposed.security.Session;
@@ -168,6 +170,20 @@ public class LoginResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/password", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update password of user")
+    public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
+                                                   HttpServletRequest request) {
+        User user = new User();
+        user.setUsername(userService.getURLSafeUsername(username).toLowerCase());
+        if(userService.updateCredentials(user, data)) {
+            return SimpleBooleanResponse.successResponse();
+        } else {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList("Could not change password."));
+        }
+
+    }
 
     class TenantNameSorter implements Comparator<Tenant> {
 
