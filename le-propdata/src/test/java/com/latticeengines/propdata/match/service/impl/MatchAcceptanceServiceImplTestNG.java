@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,7 +32,7 @@ import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTe
 
 public class MatchAcceptanceServiceImplTestNG extends PropDataMatchFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchAcceptanceServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(MatchAcceptanceServiceImplTestNG.class);
 
     @Autowired
     private MatchCommandsService matchCommandsService;
