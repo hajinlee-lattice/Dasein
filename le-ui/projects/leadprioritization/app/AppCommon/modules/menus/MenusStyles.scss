@@ -132,16 +132,18 @@
         ul {
             border-top-left-radius: 0;
             left: 0;
+            right: auto; // for IE
             right: initial;
             border-left: 1px solid #222;
             
             li {
                 @include flex-container;
                 text-align: left;
-                width: 10em;
+                width: 100%;
                 margin: 0;
                 a {
                     @include flex-item(1 1 auto);
+                    display: inline-block;
                 }
                 i {
                     @include flex-item(0 1 auto);
@@ -202,18 +204,20 @@
         ul {
             border-top-left-radius: 0;
             left: 0;
+            right: auto; // for IE
             right: initial;
             border-left: 1px solid #222;
             
             li {
                 @include flex-container;
                 text-align: left;
-                width: 10em;
+                width: 100%;
                 margin: 0;
                 vertical-align: baseline;
 
                 a {
                     @include flex-item(1 1 auto);
+                    display: inline-block;
                 }
 
                 i {

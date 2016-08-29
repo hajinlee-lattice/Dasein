@@ -186,7 +186,7 @@ nav.primary-nav {
         }
         a {
             display: inline-block;
-            width: 100%;
+            width: 37px;
         }
         & > li {
             &> a {
@@ -358,6 +358,11 @@ html.no-cssmask {
                 top: -9px;
                 transform: rotate(180deg);
             }
+        }
+        .menu {
+            a {
+                width: 100%;
+        }
         }
         .logo-container {
             .logo {
@@ -567,24 +572,14 @@ html.no-cssmask {
     background-repeat: no-repeat; 
     background-position: 12px 50%;
 }
-body:not(.open-nav) .tool-tip[data-title] {
-    position: relative;
-    &:after {
-        content: attr(data-title);
-        font-size: 12px;
-        display: none;
-        position: absolute;
-        top: 50%;
-        left: 100%;
-        transform: translateY(-50%);
-        margin-left: 10px;
-        padding: 5px;
-        border-radius: 3px;
-        background: rgba(0,0,0,1);
-    }
+body.open-nav [data-stooltip] {
     &:hover {
         &:after {
-            display: block;
+            display: none;
         }
     }
+}
+a[ui-sref="home.jobs.status"][data-stooltip]:after {
+    //margin-left: -14px; //4px for ie
+    //margin-top: -3px;
 }
