@@ -52,7 +52,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJobEntityMgr.delete(workflowJob);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void getJobStatusForJobWithoutWorkflowIdFromYarn() {
         Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
 
