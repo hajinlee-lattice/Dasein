@@ -170,7 +170,7 @@ public class LoginResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/password", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/password/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
