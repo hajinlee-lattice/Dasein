@@ -76,7 +76,7 @@
                 <div data-ng-show="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
                     There are no jobs to show at the moment
                 </div>
-                <div data-ng-show="loadingJobs">
+                <div data-ng-show="loadingJobs && header.filter.filtered.length == 0">
                     Loading...
                 </div>
             </div>
