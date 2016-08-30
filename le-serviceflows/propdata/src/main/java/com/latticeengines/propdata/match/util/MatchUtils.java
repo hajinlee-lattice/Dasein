@@ -41,10 +41,4 @@ public class MatchUtils {
     public static boolean isAccountMaster(String dataCloudVersion) {
         return StringUtils.isNotBlank(dataCloudVersion) && dataCloudVersion.startsWith("2.");
     }
-
-    public static String getDataVersion(String dataCloudVersion) {
-        String[] tokens = StringUtils.split(dataCloudVersion, ".");
-        return tokens.length >= 3 ? tokens[2] : dataCloudVersion;
-    }
-
 }

@@ -31,7 +31,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     public static final String PARSED_DOMAIN = "__PARSED_DOMAIN__";
     public static final String PARSED_DUNS = "__PARSED_DUNS__";
 
-    private String LOOKUP_KEY_FIELDNAME = "ID";
+    private String LOOKUP_KEY_FIELDNAME = "Key";
     private String LATTICE_ID_FIELDNAME = "LatticeID";
     private String PUBLIC_DOMAIN_FIELDNAME = "Domain";
     private String PUBLIC_DOMAIN_NEW_FIELDNAME = "__Public_Domain__";
@@ -54,7 +54,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     private Node matchAccountMaster(CascadingBulkMatchDataflowParameters parameters, FieldList latticeIdField,
             List<FieldMetadata> inputMetadata, Node matchedLookupNode) {
         Node accountMasterSource = addSource(parameters.getAccountMaster());
-        List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters);
+        List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters, accountMasterSource);
         List<String> predefinedFields = outputList.get(1);
         List<FieldMetadata> fieldMetadata = getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
         FieldMetadata latticeIdMetadata = new FieldMetadata(LATTICE_ID_FIELDNAME, String.class);
@@ -72,21 +72,27 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     }
 
     private List<List<String>> buildOutputFieldList(List<FieldMetadata> inputMetadata,
-            CascadingBulkMatchDataflowParameters parameters) {
+            CascadingBulkMatchDataflowParameters parameters, Node accountMasterSource) {
         List<String> outputFields = new ArrayList<>();
-        Set<String> outputFieldSet = new HashSet<>();
+        Set<String> inputputFieldSet = new HashSet<>();
         for (FieldMetadata fieldMetadata : inputMetadata) {
             outputFields.add(fieldMetadata.getFieldName());
-            outputFieldSet.add(fieldMetadata.getFieldName().toLowerCase());
+            inputputFieldSet.add(fieldMetadata.getFieldName().toLowerCase());
         }
 
+        List<String> accountMasterFieldNames = accountMasterSource.getFieldNames();
+        Set<String> accountMasterFieldSet = new HashSet<>(accountMasterFieldNames);
         FieldList predefinedFieldList = buildFieldListFromSchema(parameters.getOutputSchemaPath());
         List<String> predefinedFields = new ArrayList<>();
         predefinedFields.add(LATTICE_ID_FIELDNAME);
         for (String predefinedField : predefinedFieldList.getFields()) {
-            if (!outputFieldSet.contains(predefinedField.toLowerCase())) {
+            if (!inputputFieldSet.contains(predefinedField.toLowerCase())
+                    && accountMasterFieldSet.contains(predefinedField)) {
                 predefinedFields.add(predefinedField);
                 outputFields.add(predefinedField);
+            }
+            if (!accountMasterFieldSet.contains(predefinedField)) {
+                log.warn("Missing predefined field in Account Master file:" + predefinedField);
             }
         }
         List<List<String>> outputList = new ArrayList<List<String>>();

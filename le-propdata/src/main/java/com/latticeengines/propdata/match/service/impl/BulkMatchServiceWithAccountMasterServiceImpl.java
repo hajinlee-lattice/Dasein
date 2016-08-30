@@ -24,16 +24,17 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
-import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -75,6 +76,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Autowired
     private BulkMatchPlanner bulkMatchPlanner;
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @Override
     public boolean accept(String version) {
@@ -126,11 +129,15 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private Map<String, String> getDataflowExtraSources(MatchInput input) {
         Map<String, String> extraSources = new HashMap<>();
-        String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
-        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion);
-        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion, sourceTable.getExtracts().get(0).getPath());
-        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
-        extraSources.put(ACCOUNT_MASTER_KEY + dataVersion, sourceTable.getExtracts().get(0).getPath());
+        DataCloudVersion dataVersion = dataCloudVersionEntityMgr.findVersion(input.getDataCloudVersion());
+
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup,
+                dataVersion.getAccountLookupHdfsVersion());
+        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion(), sourceTable
+                .getExtracts().get(0).getPath());
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion.getAccountMasterHdfsVersion());
+        extraSources.put(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion(),
+                sourceTable.getExtracts().get(0).getPath());
         extraSources.put(PUBLIC_DOMAIN_KEY, publicDomainPath);
 
         InputBuffer inputBuffer = input.getInputBuffer();
@@ -143,10 +150,11 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private CascadingBulkMatchDataflowParameters getDataflowParameters(MatchInput input, String hdfsPodId,
             String outputSchemaPath) {
-        String dataVersion = MatchUtils.getDataVersion(input.getDataCloudVersion());
+
+        DataCloudVersion dataVersion = dataCloudVersionEntityMgr.findVersion(input.getDataCloudVersion());
         CascadingBulkMatchDataflowParameters parameters = new CascadingBulkMatchDataflowParameters();
-        parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion);
-        parameters.setAccountMaster(ACCOUNT_MASTER_KEY + dataVersion);
+        parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion());
+        parameters.setAccountMaster(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion());
         parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
         parameters.setInputAvro(input.getTableName() + "_" + INPUT_AVRO_KEY);
         parameters.setExcludePublicDomains(input.getExcludePublicDomains());

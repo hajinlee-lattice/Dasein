@@ -88,17 +88,7 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
                         if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
                             row.add(null);
                         } else {
-                            Object value = field;
-                            try {
-                                if (fieldTypes.get(i).equals(Long.class)) {
-                                    value = Long.valueOf(field);
-                                } else if (fieldTypes.get(i).equals(Integer.class)) {
-                                    value = Integer.valueOf(field);
-                                }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                                value = null;
-                            }
+                            Object value = getValue(fieldTypes, i, field);
                             row.add(value);
                         }
                         i++;
@@ -110,6 +100,43 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             uploadAvroData(data, fieldNames, fieldTypes, avroDir, fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
+        }
+    }
+
+    private Object getValue(List<Class<?>> fieldTypes, int i, String field) {
+        Object value = field;
+        try {
+            if (fieldTypes.get(i).equals(Long.class)) {
+                value = Long.valueOf(field);
+            } else if (fieldTypes.get(i).equals(Integer.class)) {
+                value = Integer.valueOf(field);
+            } else if (fieldTypes.get(i).equals(Double.class)) {
+                value = Double.valueOf(field);
+            } else if (fieldTypes.get(i).equals(Boolean.class)) {
+                value = Boolean.valueOf(field);
+            }
+        } catch (Exception ex) {
+            value = null;
+        }
+        return value;
+    }
+
+    protected List<String> getFieldNamesFromCSVFile(String csvFile) {
+        try {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(csvFile);
+            if (url == null) {
+                throw new RuntimeException("Cannot find resource file=" + csvFile);
+            }
+            CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT.withHeader());
+            Map<String, Integer> columnMap = parser.getHeaderMap();
+            List<String> fieldNames = new ArrayList<>();
+            for (String key : columnMap.keySet()) {
+                fieldNames.add(key);
+            }
+            return fieldNames;
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to get field names.", ex);
         }
     }
 

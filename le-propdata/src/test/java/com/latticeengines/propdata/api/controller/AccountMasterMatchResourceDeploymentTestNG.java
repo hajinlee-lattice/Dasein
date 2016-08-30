@@ -3,6 +3,8 @@ package com.latticeengines.propdata.api.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -19,9 +21,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -29,13 +34,14 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.PropDataConstants;
+import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
+import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -48,6 +54,9 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     @Autowired
     @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
+
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     private static final String avroDir = "/tmp/AccountMasterMatchResourceDeploymentTestNG";
     private static final String avroFileName = "AccountMaster_SourceFile_csv.avro";
@@ -67,6 +76,9 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
     @Autowired
     private MatchCommandService matchCommandService;
+
+    @Resource(name = "columnMetadataServiceDispatch")
+    private ColumnMetadataService columnMetadataService;
 
     @Test(groups = "deployment")
     public void testBulkMatchWithSchema() throws Exception {
@@ -113,7 +125,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 9);
+        Assert.assertEquals(fields.size(), 860);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
         Assert.assertEquals(records.size(), 14);
@@ -133,13 +145,15 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         uploadDataCsv(avroDir, avroFileName, "com/latticeengines/propdata/match/AccountMasterBulkMatchInput.csv",
                 fieldTypes, "ID__");
         fieldTypes = getAccountMasterLookupAvroTypes();
-        String dataVersion = MatchUtils.getDataVersion(DATA_CLOUD_VERSION);
-        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion);
+        DataCloudVersion dataVersion = dataCloudVersionEntityMgr.findVersion(DATA_CLOUD_VERSION);
+
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup,
+                dataVersion.getAccountLookupHdfsVersion());
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMasterLookup.avro",
                 "com/latticeengines/propdata/match/AccountMasterLookup.csv", fieldTypes, "ID__");
 
-        fieldTypes = getDunsAccountMasterAvroTypes();
-        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion);
+        fieldTypes = getDnBAccountMasterAvroTypes("com/latticeengines/propdata/match/AccountMaster.csv");
+        sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion.getAccountMasterHdfsVersion());
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMaster.avro",
                 "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes, "ID__");
 
@@ -156,7 +170,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
     private List<Class<?>> getInputAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
-                String.class, String.class, String.class }));
+                String.class, String.class }));
         return fieldTypes;
     }
 
@@ -167,12 +181,66 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         return fieldTypes;
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Class<?>> getDunsAccountMasterAvroTypes() {
+    private List<Class<?>> getDnBAccountMasterAvroTypes(String csvFile) {
+        List<String> fieldNames = getFieldNamesFromCSVFile(csvFile);
+        fieldNames = fieldNames.subList(9, fieldNames.size());
+        ColumnSelection selection = getColumnSelection(fieldNames);
+        List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(selection, DATA_CLOUD_VERSION);
+        List<Class<?>> fieldTypesInMetadata = getFieldTypesFromMetadata(metadatas);
         List<Class<?>> fieldTypes = new ArrayList<>();
-        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
-                Integer.class, Integer.class, String.class, String.class, String.class, Integer.class }));
+        // for internal columns
+        fieldTypes.add(Integer.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+
+        fieldTypes.addAll(fieldTypesInMetadata);
         return fieldTypes;
+    }
+
+    private List<Class<?>> getFieldTypesFromMetadata(List<ColumnMetadata> metadatas) {
+        List<Class<?>> fieldTypes = new ArrayList<>();
+        for (ColumnMetadata metadata : metadatas) {
+            String javaClassName = metadata.getJavaClass();
+            Class<?> javaClass = mapJavaClass(javaClassName);
+            fieldTypes.add(javaClass);
+        }
+        return fieldTypes;
+    }
+
+    private Class<?> mapJavaClass(String javaClassName) {
+        javaClassName = javaClassName.toLowerCase();
+        switch (javaClassName) {
+        case "boolean":
+            return Boolean.class;
+        case "string":
+            return String.class;
+        case "integer":
+            return Integer.class;
+        case "long":
+            return Long.class;
+        case "double":
+            return Double.class;
+        }
+        return String.class;
+    }
+
+    private ColumnSelection getColumnSelection(List<String> fieldNames) {
+        ColumnSelection columnSelection = new ColumnSelection();
+        List<Column> columns = new ArrayList<>();
+        for (String fieldName : fieldNames) {
+            columns.add(new Column(fieldName));
+        }
+        columnSelection.setColumns(columns);
+        columnSelection.setName("ColumnSelection");
+        return columnSelection;
     }
 
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
@@ -193,7 +261,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         matchInput.setInputBuffer(inputBuffer);
         matchInput.setReturnUnmatched(true);
 
-//        matchInput.setPredefinedSelection(Predefined.RTS);
+        matchInput.setPredefinedSelection(Predefined.RTS);
         ColumnSelection customSelection = new ColumnSelection();
         customSelection.setName("Custom");
         List<Column> columns = new ArrayList<>();
@@ -201,7 +269,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         columns.add(new Column("SALES_VOLUME_US_DOLLARS"));
         columns.add(new Column("YEAR_STARTED"));
         customSelection.setColumns(columns);
-         matchInput.setCustomSelection(customSelection);
+        // matchInput.setCustomSelection(customSelection);
         return matchInput;
     }
 }
