@@ -39,7 +39,7 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "appId", required = false) String appId) {
+            @RequestParam(value = "app_id", required = false) String appId) {
         log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");
         return oauth2Service.createOAuth2AccessToken(tenantId, appId).getValue();
     }
@@ -49,7 +49,7 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "appId", required = false) String appId) {
+            @RequestParam(value = "app_id", required = false) String appId) {
         log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");
         String token = oauth2Service.createOAuth2AccessToken(tenantId, appId).getValue();
         return JsonUtils.serialize(ImmutableMap.<String, String> of("token", token));

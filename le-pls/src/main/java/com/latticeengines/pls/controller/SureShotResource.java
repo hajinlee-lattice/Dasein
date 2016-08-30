@@ -42,7 +42,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
     public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType,
-            @RequestParam(value = "appId", required = false) String appId) {
+            @RequestParam(value = "app_id", required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
@@ -58,7 +58,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
     public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType,
-            @RequestParam(value = "appId", required = false) String appId) {
+            @RequestParam(value = "app_id", required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");

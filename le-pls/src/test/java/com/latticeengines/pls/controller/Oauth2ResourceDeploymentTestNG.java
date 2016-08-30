@@ -47,7 +47,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createOAuth2AccessTokenWithAppId1() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestTenant.getId() + "&appId=" + DUMMY_APP1, String.class);
+                + mainTestTenant.getId() + "&app_id=" + DUMMY_APP1, String.class);
         assertTrue(StringUtils.isNotEmpty(token));
         List<String> oauth2TokenList = new ArrayList<>();
         oauth2TokenList.add(token);
@@ -58,7 +58,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createOAuth2AccessTokenWithAppId2() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestTenant.getId() + "&appId=" + DUMMY_APP2, String.class);
+                + mainTestTenant.getId() + "&app_id=" + DUMMY_APP2, String.class);
         assertTrue(StringUtils.isNotEmpty(token));
         List<String> oauth2TokenList = new ArrayList<>();
         oauth2TokenList.add(token);
@@ -91,7 +91,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createOAuth2AccessTokenWithAppId1Phase2() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestTenant.getId() + "&appId=" + DUMMY_APP1, String.class);
+                + mainTestTenant.getId() + "&app_id=" + DUMMY_APP1, String.class);
         assertTrue(StringUtils.isNotEmpty(token));
         List<String> oauth2TokenList = appOauth2Map.get(DUMMY_APP1);
         oauth2TokenList.add(token);
@@ -101,7 +101,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createOAuth2AccessTokenWithAppId2Phase2() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestTenant.getId() + "&appId=" + DUMMY_APP2, String.class);
+                + mainTestTenant.getId() + "&app_id=" + DUMMY_APP2, String.class);
         assertTrue(StringUtils.isNotEmpty(token));
         List<String> oauth2TokenList = appOauth2Map.get(DUMMY_APP2);
         oauth2TokenList.add(token);
