@@ -40,10 +40,10 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,IngestionName,Source,CronExpression,SchedularEnabled,NewJobRetryInterval,NewJobMaxRetry,IngestionType,IngestionCriteria);
 
-INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, HdfsVersion, Status)
+INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, Status)
 VALUES
-  ('2.0.0', '2016-07-01', '2.0', '2016-07-01_00-00-00_UTC', 'APPROVED'),
-  ('2.0.1', '2016-08-01', '2.0', '2016-08-01_00-00-00_UTC', 'NEW');
+  ('2.0.0', '2016-08-28', '2.0', '2016-08-28_13-52-03_UTC', '2016-08-27_21-41-25_UTC', 'APPROVED'),
+  ('2.0.1', '2016-09-01', '2.0', '2016-09-01_13-52-03_UTC', '2016-09-01_21-41-25_UTC', 'NEW');
 
 SET SQL_SAFE_UPDATES = 0;
 

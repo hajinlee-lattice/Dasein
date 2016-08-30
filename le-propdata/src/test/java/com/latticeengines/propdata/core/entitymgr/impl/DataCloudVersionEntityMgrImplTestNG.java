@@ -54,14 +54,16 @@ public class DataCloudVersionEntityMgrImplTestNG extends PropDataCoreFunctionalT
         DataCloudVersion version1 = new DataCloudVersion();
         version1.setVersion("1.0.0");
         version1.setCreateDate(new Date());
-        version1.setHdfsVersion("version1");
+        version1.setAccountMasterHdfsVersion("version1");
+        version1.setAccountLookupHdfsVersion("version1");
         version1.setMajorVersion("1.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
 
         DataCloudVersion version2 = new DataCloudVersion();
         version2.setVersion("1.0.1");
         version2.setCreateDate(new Date());
-        version2.setHdfsVersion("version2");
+        version2.setAccountMasterHdfsVersion("version2");
+        version2.setAccountLookupHdfsVersion("version2");
         version2.setMajorVersion("1.0");
         version2.setStatus(DataCloudVersion.Status.APPROVED);
 

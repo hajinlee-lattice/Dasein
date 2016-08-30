@@ -44,8 +44,11 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "CreateDate", nullable = false)
     private Date createDate;
 
-    @Column(name = "HdfsVersion", nullable = false)
-    private String hdfsVersion;
+    @Column(name = "AccountMasterHdfsVersion", nullable = false)
+    private String accountMasterHdfsVersion;
+
+    @Column(name = "AccountLookupHdfsVersion", nullable = false)
+    private String accountLookupHdfsVersion;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
@@ -69,12 +72,20 @@ public class DataCloudVersion implements HasPid, Serializable {
         this.version = version;
     }
 
-    public String getHdfsVersion() {
-        return hdfsVersion;
+    public String getAccountMasterHdfsVersion() {
+        return accountMasterHdfsVersion;
     }
 
-    public void setHdfsVersion(String hdfsVersion) {
-        this.hdfsVersion = hdfsVersion;
+    public void setAccountMasterHdfsVersion(String accountMasterHdfsVersion) {
+        this.accountMasterHdfsVersion = accountMasterHdfsVersion;
+    }
+
+    public String getAccountLookupHdfsVersion() {
+        return accountLookupHdfsVersion;
+    }
+
+    public void setAccountLookupHdfsVersion(String accountLookupHdfsVersion) {
+        this.accountLookupHdfsVersion = accountLookupHdfsVersion;
     }
 
     public String getMajorVersion() {
