@@ -83,7 +83,7 @@
                     </li>
 
                     <li class="" ng-if="login.username">
-                        <button ui-sref="logout" class="button white-button block-button">
+                        <button ng-click="clickLogout()" class="button white-button block-button">
                             Sign Out
                         </button>
                     </li>
@@ -98,7 +98,9 @@
 
             <div class="columns five login-content">
 
-                <div ui-view="FrameContent"></div>
+                <div ng-if="state.loading">Loading</div>
+
+                <div ui-view="FrameContent" ng-if="!state.loading"></div>
                 
             </div><!-- End .columns.five -->
 

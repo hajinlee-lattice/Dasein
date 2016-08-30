@@ -32,10 +32,7 @@ angular.module('login.frame', [
         if ($event != null) {
             $event.preventDefault();
         }
-
         LoginService.Logout();
-        
-        $state.go('login.form');
     }
 
     $scope.clickModelList = function() {
