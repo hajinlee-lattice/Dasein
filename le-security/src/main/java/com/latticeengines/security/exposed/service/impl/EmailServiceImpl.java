@@ -137,7 +137,7 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(String.format("Invitation to Access %s (Lattice Predictive Insights)",
-                    tenant.getName()), mp, Collections.singleton(user.getEmail()));
+                    tenant.getName()), mp, Collections.singleton(user.getEmail()), Collections.singleton(businessOpsEmail));
             log.info("Sending PLS existing external user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send existing PLS external user email to " + user.getEmail() + " " + e.getMessage());
