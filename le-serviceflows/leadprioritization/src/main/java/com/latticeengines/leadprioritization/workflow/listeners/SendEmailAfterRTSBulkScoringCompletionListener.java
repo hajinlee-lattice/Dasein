@@ -31,13 +31,18 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
         emailInfo.setUserId(userId);
         String scoreStepConfiguration = jobExecution.getJobParameters().getString(
                 ScoreStepConfiguration.class.getCanonicalName());
-        String modelId = JsonUtils.deserialize(scoreStepConfiguration, ScoreStepConfiguration.class)
-                .getModelId();
-        emailInfo.setModelId(modelId);
-        log.info(String.format("userId: %s; modelId: %s", emailInfo.getUserId(), emailInfo.getModelId()));
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-        proxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
-
+        ScoreStepConfiguration config = JsonUtils.deserialize(scoreStepConfiguration, ScoreStepConfiguration.class);
+        if (config != null) {
+            String modelId = config.getModelId();
+            emailInfo.setModelId(modelId);
+            log.info(String.format("userId: %s; modelId: %s", emailInfo.getUserId(), emailInfo.getModelId()));
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+            try {
+                proxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+            } catch (Exception e) {
+                log.error("Can not send RTS bulk scoring email: " + e.getMessage());
+            }
+        }
     }
 
 }

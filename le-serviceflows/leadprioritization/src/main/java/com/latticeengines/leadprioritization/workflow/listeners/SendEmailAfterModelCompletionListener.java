@@ -30,12 +30,18 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
         emailInfo.setUserId(userId);
         String modelStepConfiguration = jobExecution.getJobParameters().getString(
                 ModelStepConfiguration.class.getCanonicalName());
-        String modelName = JsonUtils.deserialize(modelStepConfiguration, ModelStepConfiguration.class)
-                .getModelName();
-        emailInfo.setModelId(modelName);
-        log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-        proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+        ModelStepConfiguration config = JsonUtils.deserialize(modelStepConfiguration, ModelStepConfiguration.class);
+        if (config != null) {
+            String modelName = config.getModelName();
+            emailInfo.setModelId(modelName);
+            log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+            try {
+                proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+            } catch (Exception e) {
+                log.error("Can not send create model email: " + e.getMessage());
+            }
+        }
     }
 
 }
