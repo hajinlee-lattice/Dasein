@@ -63,8 +63,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/pmml";
     private static final String PMML_FILE_NAME = "rfpmml.xml";
-    private static final Log log = LogFactory
-            .getLog(PMMLModelingToScoringEndToEndDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(PMMLModelingToScoringEndToEndDeploymentTestNG.class);
     private Tenant tenantToAttach;
     private String modelName = "pmmlmodel";
     private String modelId;
@@ -105,11 +104,10 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s",
-                        getRestAPIHostPort(), "module1", "pivotmappings", "pivotvalues"), //
+                String.format("%s/pls/metadatauploads/modules/%s/%s?artifactName=%s", getRestAPIHostPort(), "module1",
+                        "pivotmappings", "pivotvalues"), //
                 requestEntity, ResponseDocument.class);
         String pivotFilePath = new ObjectMapper().convertValue(response.getResult(), String.class);
         System.out.println(pivotFilePath);
@@ -132,10 +130,9 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     public void createModel() throws InterruptedException {
         @SuppressWarnings("rawtypes")
         ResponseDocument response = restTemplate.postForObject( //
-                String.format(
-                        "%s/pls/models/pmml/%s?displayname=%s&module=%s&pivotfile=%s&pmmlfile=%s&schema=%s",
-                        getRestAPIHostPort(), modelName, "PMML MODEL", "module1", "pivotvalues.csv",
-                        PMML_FILE_NAME, SchemaInterpretation.SalesforceLead), //
+                String.format("%s/pls/models/pmml/%s?displayname=%s&module=%s&pivotfile=%s&pmmlfile=%s&schema=%s",
+                        getRestAPIHostPort(), modelName, "PMML MODEL", "module1", "pivotvalues.csv", PMML_FILE_NAME,
+                        SchemaInterpretation.SalesforceLead), //
                 null, ResponseDocument.class);
         String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
         System.out.println(applicationId);
@@ -144,8 +141,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(completedStatus, JobStatus.COMPLETED);
         ModelSummary modelSummary = getModelSummary(modelName);
         modelId = modelSummary.getId();
-        assertEquals(modelSummary.getSourceSchemaInterpretation(),
-                SchemaInterpretation.SalesforceLead.toString());
+        assertEquals(modelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(modelSummary.getPivotArtifactPath());
     }
 
@@ -157,8 +153,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
             List<Object> summaries = restTemplate.getForObject( //
                     String.format("%s/pls/modelsummaries", getRestAPIHostPort()), List.class);
             for (Object rawSummary : summaries) {
-                ModelSummary summary = new ObjectMapper().convertValue(rawSummary,
-                        ModelSummary.class);
+                ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
                 if (summary.getName().contains(modelName)) {
                     found = summary;
                 }
@@ -216,8 +211,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         ScoreRequest request = new ScoreRequest();
         request.setModelId(modelId);
         request.setRecord(record);
-        DebugScoreResponse response = internalScoringApiProxy.scoreProbabilityRecord(request,
-                tenantToAttach.getName());
+        DebugScoreResponse response = internalScoringApiProxy.scoreProbabilityRecord(request, tenantToAttach.getName());
         return response;
     }
 
@@ -229,12 +223,10 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
-                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s",
-                        getRestAPIHostPort(), modelId, "SelfServiceScoring Test File.csv"),
-                requestEntity, ResponseDocument.class);
+                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
+                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
         assertTrue(response.isSuccess());
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -242,11 +234,11 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void scoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE",
-                getRestAPIHostPort(), modelId, sourceFile.getName()));
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
+                sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(),
-                        modelId, sourceFile.getName()), //
+                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
+                        sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score testing data applicationId = %s", applicationId));
@@ -256,26 +248,23 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "scoreTestingData", timeOut = 120000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "scoreTestingData", timeOut = 600000)
     public void testJobIsListed() {
         final String jobType = "importAndRTSBulkScoreWorkflow";
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
             List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId),
-                    List.class);
+                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
                 @Override
                 public boolean apply(@Nullable Job job) {
-                    String jobModelId = job.getInputs()
-                            .get(WorkflowContextConstants.Inputs.MODEL_ID);
-                    String pmmlFileName = job.getInputs()
-                            .get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
-                    return job.getJobType() != null && job.getJobType().equals(jobType)
-                            && modelId.equals(jobModelId) && PMML_FILE_NAME.equals(pmmlFileName);
+                    String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+                    String pmmlFileName = job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
+                    return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId)
+                            && PMML_FILE_NAME.equals(pmmlFileName);
                 }
             });
 
@@ -301,8 +290,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         JobStatus terminal;
         while (true) {
             Job job = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId),
-                    Job.class);
+                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
             assertNotNull(job);
             jobId = job.getId();
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
@@ -317,14 +305,13 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     @Test(groups = "deployment.lp", dependsOnMethods = "poll")
     public void downloadCsv() throws IOException {
-        selfServiceModeling.getRestTemplate().getMessageConverters()
-                .add(new ByteArrayHttpMessageConverter());
+        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId),
-                HttpMethod.GET, entity, byte[].class);
+                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
