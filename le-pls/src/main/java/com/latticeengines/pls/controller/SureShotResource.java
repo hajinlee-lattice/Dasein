@@ -18,6 +18,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
 @Api(value = "sureshot", description = "REST resource for providing SureShot links")
 @RestController
 @RequestMapping(value = "/sureshot")
@@ -30,6 +31,9 @@ public class SureShotResource {
 
     @Value("${pls.sureshot.scoring.settings}")
     private String scoringSettingsUrl;
+
+    @Value("${pls.sureshot.enrichment.settings}")
+    private String enrichmentSettingUrl;
 
     @Autowired
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
@@ -45,7 +49,8 @@ public class SureShotResource {
         }
         String tenantId = tenant.getId();
         Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
-        return String.format(mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId, token.getAccessToken());
+        return String.format(mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
+                tenantId, token.getAccessToken());
     }
 
     @RequestMapping(value = "/urls", method = RequestMethod.GET)
@@ -59,11 +64,16 @@ public class SureShotResource {
         }
         String tenantId = tenant.getId();
         Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
-        String credsUrl = String.format(mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
+        String credsUrl = String.format(
+                mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
                 token.getAccessToken()).toString();
-        String settingsUrl = String.format(scoringSettingsUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
+        String scoringUrl = String.format(
+                scoringSettingsUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
                 token.getAccessToken()).toString();
-        SureShotUrls urls = new SureShotUrls(credsUrl, settingsUrl);
+        String enrichmentUrl = String.format(
+                enrichmentSettingUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
+                tenantId, token.getAccessToken()).toString();
+        SureShotUrls urls = new SureShotUrls(credsUrl, scoringUrl, enrichmentUrl);
         return ResponseDocument.successResponse(urls);
     }
 }
