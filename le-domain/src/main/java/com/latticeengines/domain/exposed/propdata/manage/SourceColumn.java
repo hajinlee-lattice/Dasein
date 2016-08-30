@@ -32,7 +32,7 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "ColumnName", nullable = false, length = 100)
     private String columnName;
 
-    @Column(name = "ColumnType", nullable = false, length = 50)
+    @Column(name = "ColumnType", nullable = true, length = 50)
     private String columnType;
 
     @Column(name = "BaseSource", length = 100)

@@ -64,7 +64,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "Category", nullable = false, length = 50)
     private Category category;
 
-    @Column(name = "Subcategory", nullable = false, length = 200)
+    @Column(name = "Subcategory", nullable = true, length = 200)
     private String subcategory;
 
     @Enumerated(EnumType.STRING)
