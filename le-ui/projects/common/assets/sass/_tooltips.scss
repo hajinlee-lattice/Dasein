@@ -5,22 +5,48 @@
  */
 [data-stooltip] {
     position: relative;
+    perspective: 500px;
+
     &:after {
         content: attr(data-stooltip);
+        visibility: hidden;
         font-size: 12px;
-        display: none;
+        letter-spacing: 1px; /* makes it look more like sidebar nav */
+        color: #eee;
+        background: #222831; /* sidebar background */
         position: absolute;
         top: 50%;
         left: 100%;
-        transform: translateY(-50%);
-        margin-left: 10px;
-        padding: 5px;
-        border-radius: 3px;
-        background: rgba(0,0,0,1);
+        transform: rotateY(85deg); /* perspective makes 90deg too far */
+        margin-top: -1.8em; /* this isn't great, but translatex(-50%) disables font smoothing/aliasing */
+        margin-left: 13px;
+        padding: 10px 15px 10px 5px; 
+        border-radius: 0px;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+
+        -webkit-transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;
+        transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;
+        
+        -webkit-transform-origin: 0% 50%;
+        transform-origin: 0% 50%;
+        
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+
+        pointer-events: none;
+        opacity: 0;
     }
     &:hover {
         &:after {
-            display: block;
+            visibility: visible;
+            opacity: 1;
+            
+            -webkit-transition: none;
+            transition: none;
+
+            -webkit-transform: none;
+            transform: none;
         }
     }
 }
