@@ -15,7 +15,9 @@
                ui-sref="home.model.jobs({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
-            <strong ng-if="!job.modelId" class="model-name">
+            <strong ng-if="!job.modelId" 
+                    class="model-name"
+                    title="{{job.modelName}}">
                 <span ng-if="job.modelName">
                     {{job.modelName}}
                 </span>
