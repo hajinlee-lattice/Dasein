@@ -361,6 +361,20 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 line.push(word);
                 tspan.text(line.join(" "));
                 if (tspan.node().getComputedTextLength() > width) {
+                    if(wordLength === 1) {
+                        var _length = text.node().getComputedTextLength(),
+                            i = 0,
+                            limit = 100; // let's be cool and not do this 10,000 times
+
+                        while (_length > (width - 2) && word.length > 0 && i < limit) {
+                            word = word.slice(0, -1);
+                            text.text(word);
+                            _length = text.node().getComputedTextLength();
+                            i++;
+                        }
+                        text.text(null); // I don't know why, but this seems to be necessary because it's done above ^
+                        word = word + '...';
+                    }
                     dy = -0.5;
                     tspan.attr("dy", dy + "em");
                     line.pop();
