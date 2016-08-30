@@ -563,8 +563,10 @@ angular
                 },
                 "main@": {
                     controller: function(urls) {
-                        $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                        if(urls && urls.creds_url) {
+                            $('#sureshot_iframe_container')
+                                .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                        }
                     },
                     template: '<div id="sureshot_iframe_container"></div>'
                 }
@@ -592,8 +594,41 @@ angular
                 },
                 "main@": {
                     controller: function(urls) {
-                        $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                        if(urls && urls.scoring_settings_url) {
+                            $('#sureshot_iframe_container')
+                                .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                        }
+                    },
+                    template: '<div id="sureshot_iframe_container"></div>'
+                }
+            }
+        })
+        .state('home.eloquasettings.enrichments', {
+            url: '/enrichments',
+            params: {
+                pageIcon: 'ico-eloqua',
+                pageTitle: 'Eloqua Enrichments'
+            }, 
+            views: {
+                "summary@": {
+                    resolve: {
+                        ResourceString: function() {
+                            return 'SUMMARY_ELOQUA_ENRICHMENTS';
+                        }
+                    },
+                    /*
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
+                    templateUrl: 'app/navigation/summary/EloquaTabs.html'
+                },
+                "main@": {
+                    controller: function(urls) {
+                        if(urls && urls.enrichment_settings_url) {
+                            $('#sureshot_iframe_container')
+                                .html('<iframe src="' + urls.enrichment_settings_url + '"></iframe>');
+                        }
                     },
                     template: '<div id="sureshot_iframe_container"></div>'
                 }
