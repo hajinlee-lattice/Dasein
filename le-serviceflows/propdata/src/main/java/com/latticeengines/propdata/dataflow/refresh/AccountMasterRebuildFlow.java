@@ -59,7 +59,8 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
             String joinKey = joinKeyMap.get(firstSource);
             joined = joined.join(new FieldList(dunsKey), firstSource, new FieldList(joinKey), JoinType.LEFT);
             String secondKey = joinKey + SECOND_KEY_SUFFIX;
-            String filterFunc = secondKey + " == null || " + secondKey + " == " + domainKey;
+
+            String filterFunc = secondKey + " == null || " + secondKey + ".equals(" + domainKey +")";
             joined = joined.filter(filterFunc, new FieldList(secondKey, domainKey));
         }
 
