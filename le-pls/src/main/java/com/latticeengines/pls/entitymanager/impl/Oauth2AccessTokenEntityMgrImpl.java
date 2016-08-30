@@ -1,9 +1,11 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -16,8 +18,8 @@ import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("oauth2AccessTokenEntityMgr")
-public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2AccessToken> implements
-        Oauth2AccessTokenEntityMgr {
+public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2AccessToken>
+        implements Oauth2AccessTokenEntityMgr {
 
     @Autowired
     private Oauth2AccessTokenDao oauth2AccessTokenDao;
@@ -32,32 +34,44 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Oauth2AccessToken get(String tenantId) {
+    public Oauth2AccessToken get(String tenantId, String appId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
         }
-        Oauth2AccessToken token = findByTenant(tenant);
+        if (StringUtils.isEmpty(appId)) {
+            // use null if appId is empty
+            appId = null;
+        }
+        Oauth2AccessToken token = findByTenant(tenant, appId);
         if (token != null) {
             token.setAccessToken(CipherUtils.decrypt(token.getAccessToken()));
             return token;
         }
         token = new Oauth2AccessToken();
         token.setTenant(tenant);
+        token.setAppId(appId);
         token.setAccessToken("");
         return token;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Oauth2AccessToken findByTenant(Tenant tenant) {
-        return oauth2AccessTokenDao.findByField("tenantId", tenant.getPid());
+    public Oauth2AccessToken findByTenant(Tenant tenant, String appId) {
+        if (StringUtils.isEmpty(appId)) {
+            // use null if appId is empty
+            appId = null;
+        }
+        Oauth2AccessToken searchToken = new Oauth2AccessToken();
+        searchToken.setTenant(tenant);
+        searchToken.setAppId(appId);
+        return oauth2AccessTokenDao.findByTenantAppId(tenant.getPid(), appId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void createOrUpdate(Oauth2AccessToken oauth2AccessToken, String tenantId) {
-        Oauth2AccessToken token = get(tenantId);
+    public void createOrUpdate(Oauth2AccessToken oauth2AccessToken, String tenantId, String appId) {
+        Oauth2AccessToken token = get(tenantId, appId);
         token.setAccessToken(CipherUtils.encrypt(oauth2AccessToken.getAccessToken()));
         super.createOrUpdate(token);
     }

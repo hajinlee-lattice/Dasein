@@ -9,7 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -23,9 +23,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "OAUTH2_ACCESS_TOKEN", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "APP_ID" }) })
 @Filters({ //
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 public class Oauth2AccessToken implements HasPid, HasTenantId {
 
     @Id
@@ -34,13 +34,16 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "TENANT_ID", nullable = false)
+    @Column(name = "TENANT_ID", nullable = false, unique = false)
     private Long tenantId;
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false, unique = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
+
+    @Column(name = "APP_ID", nullable = true, unique = false)
+    private String appId;
 
     @Column(name = "ACCESS_TOKEN", nullable = false)
     private String accessToken;
@@ -76,6 +79,14 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
 
     public Tenant getTenant() {
         return tenant;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     public String getAccessToken() {

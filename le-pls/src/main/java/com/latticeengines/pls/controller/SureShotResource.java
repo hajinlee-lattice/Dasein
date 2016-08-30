@@ -41,14 +41,15 @@ public class SureShotResource {
     @RequestMapping(value = "/credentials", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
-    public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType) {
+    public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType,
+            @RequestParam(value = "appId", required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
             return null;
         }
         String tenantId = tenant.getId();
-        Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
+        Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId, appId);
         return String.format(mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
                 tenantId, token.getAccessToken());
     }
@@ -56,23 +57,27 @@ public class SureShotResource {
     @RequestMapping(value = "/urls", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
-    public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType) {
+    public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType,
+            @RequestParam(value = "appId", required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
             return ResponseDocument.failedResponse(new RuntimeException("Not able to get the tenant"));
         }
         String tenantId = tenant.getId();
-        Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
-        String credsUrl = String.format(
-                mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
-                token.getAccessToken()).toString();
-        String scoringUrl = String.format(
-                scoringSettingsUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s", tenantId,
-                token.getAccessToken()).toString();
-        String enrichmentUrl = String.format(
-                enrichmentSettingUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
-                tenantId, token.getAccessToken()).toString();
+        Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId, appId);
+        String credsUrl = String
+                .format(mapCredsAuthUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
+                        tenantId, token.getAccessToken())
+                .toString();
+        String scoringUrl = String
+                .format(scoringSettingsUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
+                        tenantId, token.getAccessToken())
+                .toString();
+        String enrichmentUrl = String
+                .format(enrichmentSettingUrl.replace("$$CRM_TYPE$$", crmType.toLowerCase()) + "?tenantId=%s&token=%s",
+                        tenantId, token.getAccessToken())
+                .toString();
         SureShotUrls urls = new SureShotUrls(credsUrl, scoringUrl, enrichmentUrl);
         return ResponseDocument.successResponse(urls);
     }

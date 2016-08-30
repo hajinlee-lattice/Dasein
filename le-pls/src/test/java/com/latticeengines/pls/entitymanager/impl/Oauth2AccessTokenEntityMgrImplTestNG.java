@@ -1,10 +1,12 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
+
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
@@ -49,31 +51,34 @@ public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void testCreateToken() {
+        String appId1 = "DUMMY_APP1";
         Tenant tenant1 = new Tenant();
         tenant1.setId("TENANT1");
         tenant1.setName("TENANT1");
         tenantEntityMgr.create(tenant1);
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "");
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId(), appId1).getAccessToken(), "");
 
+        String appId2 = null;
         Tenant tenant2 = new Tenant();
         tenant2.setId("TENANT2");
         tenant2.setName("TENANT2");
         tenantEntityMgr.create(tenant2);
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId()).getAccessToken(), "");
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId(), appId2).getAccessToken(), "");
 
         Oauth2AccessToken token1 = new Oauth2AccessToken();
         token1.setAccessToken("somevalue1");
-        oauth2AccessTokenEntityMgr.createOrUpdate(token1, tenant1.getId());
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "somevalue1");
+        oauth2AccessTokenEntityMgr.createOrUpdate(token1, tenant1.getId(), appId1);
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId(), appId1).getAccessToken(), "somevalue1");
 
         Oauth2AccessToken token2 = new Oauth2AccessToken();
         token2.setAccessToken("somevalue2");
-        oauth2AccessTokenEntityMgr.createOrUpdate(token2, tenant2.getId());
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId()).getAccessToken(), "somevalue2");
+        oauth2AccessTokenEntityMgr.createOrUpdate(token2, tenant2.getId(), appId2);
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant2.getId(), appId2).getAccessToken(), "somevalue2");
 
-        Oauth2AccessToken token3 = oauth2AccessTokenEntityMgr.get(tenant1.getId());
+        String appId3 = "";
+        Oauth2AccessToken token3 = oauth2AccessTokenEntityMgr.get(tenant1.getId(), appId3);
         token3.setAccessToken("somevalue3");
-        oauth2AccessTokenEntityMgr.createOrUpdate(token3, tenant1.getId());
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId()).getAccessToken(), "somevalue3");
+        oauth2AccessTokenEntityMgr.createOrUpdate(token3, tenant1.getId(), appId3);
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenant1.getId(), appId3).getAccessToken(), "somevalue3");
     }
 }

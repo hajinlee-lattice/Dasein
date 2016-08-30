@@ -20,7 +20,7 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 @Component("oAuthUserEntityMgr")
 public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(OAuthUserEntityMgrImpl.class);
 
     @Autowired
     private OAuthUserDao userDao;

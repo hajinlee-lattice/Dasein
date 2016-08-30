@@ -44,24 +44,27 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void createAccessAndRefreshToken() {
         setupSecurityContext(mainTestTenant);
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), "");
-
-        OAuth2AccessToken accessToken = oauth2Service.createOAuth2AccessToken(tenantId);
+        String appId = "DUMMY_APP";
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), "");
+        OAuth2AccessToken accessToken = oauth2Service.createOAuth2AccessToken(tenantId, appId);
         assertTrue(StringUtils.isNotEmpty(accessToken.getValue()));
-        assertTrue(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken), "Cannot find the new token in DB.");
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken.getValue());
+        assertTrue(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken),
+                "Cannot find the new token in DB.");
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken.getValue());
 
-        OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId);
+        OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
         assertTrue(StringUtils.isNotEmpty(accessToken2.getValue()));
-        assertFalse(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken), "Should not have the old token in DB.");
-        assertTrue(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken2), "Cannot find the new token in DB.");
-        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken2.getValue());
-        assertNotEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken.getValue());
+        assertFalse(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken),
+                "Should not have the old token in DB.");
+        assertTrue(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken2),
+                "Cannot find the new token in DB.");
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken2.getValue());
+        assertNotEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken.getValue());
     }
 
     private boolean hasTokenValue(List<Oauth2AccessToken> tokens, OAuth2AccessToken targetToken) {
-        String value =targetToken.getValue();
-        for (Oauth2AccessToken token: tokens) {
+        String value = targetToken.getValue();
+        for (Oauth2AccessToken token : tokens) {
             if (value.equals(CipherUtils.decrypt(token.getAccessToken()))) {
                 return true;
             }

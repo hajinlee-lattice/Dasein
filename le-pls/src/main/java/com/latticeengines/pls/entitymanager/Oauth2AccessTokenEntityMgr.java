@@ -9,9 +9,9 @@ public interface Oauth2AccessTokenEntityMgr {
 
     List<Oauth2AccessToken> findAll();
 
-    void createOrUpdate(Oauth2AccessToken entity, String tenantId);
+    void createOrUpdate(Oauth2AccessToken entity, String tenantId, String appId);
 
-    Oauth2AccessToken get(String tenantId);
+    Oauth2AccessToken get(String tenantId, String appId);
 
-    Oauth2AccessToken findByTenant(Tenant tenant);
+    Oauth2AccessToken findByTenant(Tenant tenant, String appId);
 }

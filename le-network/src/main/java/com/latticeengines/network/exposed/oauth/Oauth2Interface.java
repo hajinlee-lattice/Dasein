@@ -6,5 +6,5 @@ public interface Oauth2Interface {
 
     String createAPIToken(String tenantId);
 
-    OAuth2AccessToken createOAuth2AccessToken(String tenantId);
+    OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId);
 }

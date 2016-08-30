@@ -103,7 +103,8 @@ public class ScoreCorrectnessService {
 
     public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore)
             throws IOException {
-        String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId).getValue();
+        String appId = "DUMMY_APP";
+        String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId, appId).getValue();
         Oauth2HeaderHttpRequestInterceptor interceptor = new Oauth2HeaderHttpRequestInterceptor(accessToken);
         scoringRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));
 
@@ -452,15 +453,16 @@ public class ScoreCorrectnessService {
         }
         return records;
     }
-    
+
     private List<GenericRecord> getAvroRecords(ScoreCorrectnessArtifacts artifacts) throws IOException {
         List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration,
                 artifacts.getPathToSamplesAvro() + "allTest-r-00000.avro");
-        
+
         if (avroRecords.size() == 0) {
-            avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, artifacts.getPathToSamplesAvro() + "allTest-r-00001.avro");
+            avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration,
+                    artifacts.getPathToSamplesAvro() + "allTest-r-00001.avro");
         }
-        
+
         return avroRecords;
 
     }
@@ -469,7 +471,7 @@ public class ScoreCorrectnessService {
             throws IOException {
         Map<String, Map<String, Object>> matchedRecords = new HashMap<>();
         List<GenericRecord> avroRecords = getAvroRecords(artifacts);
-        
+
         Schema schema = avroRecords.get(0).getSchema();
         List<Schema.Field> fields = schema.getFields();
 
