@@ -253,7 +253,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy, String columns) {
+            List<Integer> accountIds, String filterBy, long recStart, String columns) {
         String extensionColumns = getAccountExtensionColumns(columns);
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
@@ -264,6 +264,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + getAccountExtensionFromWhereClause(accountIds, filterBy)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
+        if (StringUtils.isNotEmpty(filterBy)
+                && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+            source.addValue("recStart", recStart);
+        }
         source.addValue("start", start);
         source.addValue("startRow", offset + 1);
         source.addValue("endRow", offset + maximum);
@@ -317,9 +321,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy) {
+    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy, long recStart) {
         String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
         MapSqlParameterSource source = new MapSqlParameterSource();
+        if (StringUtils.isNotEmpty(filterBy)
+                && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+            source.addValue("recStart", recStart);
+        }
         source.addValue("start", start);
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
@@ -351,7 +359,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         filterBy = filterBy.trim().toUpperCase();
         String whereClause = null;
         if (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS")) {
-            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :start) ";
+            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :recStart) "
+                    + " AND DATEDIFF(s,'19700101 00:00:00:000', "
+                    + getAccountExtensionLastModificationDate()
+                    + ") >= :start ";
             String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
             whereClause = String.format(whereClause, oper);
         } else { // ALL or other

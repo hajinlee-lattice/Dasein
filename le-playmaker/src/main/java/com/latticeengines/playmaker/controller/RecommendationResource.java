@@ -115,13 +115,13 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
-                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, start changes to Last Modification Date "
-                    + "in Unix timestamp on Recommendations.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) long recStart,
             @ApiParam(value = "columns are selected column names for output; column names are delimited by a comma.", required = false) @RequestParam(value = "columns", required = false) String columns) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensions(tenantName, start, offset, maximum, accountIds,
-                filterBy, columns);
+        Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensions(tenantName, start,
+                offset, maximum, accountIds, filterBy, recStart, columns);
         return accountExtensions;
     }
 
@@ -133,11 +133,11 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
-                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, start changes to Last Modification Date "
-                    + "in Unix timestamp on Recommendations.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy) {
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, start, accountIds, filterBy);
+        return playmakerRecommendationMgr.getAccountextExsionCount(tenantName, start, accountIds, filterBy, recStart);
     }
 
     @RequestMapping(value = "/accountextensionschema", method = RequestMethod.GET, headers = "Accept=application/json")

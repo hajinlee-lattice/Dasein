@@ -7,11 +7,13 @@ import com.latticeengines.db.exposed.dao.GenericDao;
 
 public interface PlaymakerRecommendationDao extends GenericDao {
 
-    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination, List<Integer> playIds);
+    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
+            List<Integer> playIds);
 
     List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds);
 
-    List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds, String filterBy, String columns);
+    List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds,
+            String filterBy, long recStart, String columns);
 
     List<Map<String, Object>> getAccountExtensionSchema();
 
@@ -19,11 +21,11 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     List<Map<String, Object>> getWorkflowTypes();
 
-    int getRecommendationCount(long start, int syncDestination, List<Integer>playIds);
+    int getRecommendationCount(long start, int syncDestination, List<Integer> playIds);
 
     int getPlayCount(long start, List<Integer> playgroupIds);
 
-    int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy);
+    int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy, long recStart);
 
     int getPlayValueCount(long start, List<Integer> playgroupIds);
 
@@ -32,7 +34,6 @@ public interface PlaymakerRecommendationDao extends GenericDao {
     List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum);
 
     int getPlayGroupCount(long start);
-
 
     List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds);
 
