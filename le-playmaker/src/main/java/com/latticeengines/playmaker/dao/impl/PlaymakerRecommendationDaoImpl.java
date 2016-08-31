@@ -253,7 +253,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy, long recStart, String columns) {
+            List<Integer> accountIds, String filterBy, Long recStart, String columns) {
         String extensionColumns = getAccountExtensionColumns(columns);
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
@@ -266,6 +266,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy)
                 && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+            if (recStart == null) {
+                throw new RuntimeException("Missng recStart when filterBy is used.");
+            }
             source.addValue("recStart", recStart);
         }
         source.addValue("start", start);
@@ -321,11 +324,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy, long recStart) {
+    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy, Long recStart) {
         String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy)
                 && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+            if (recStart == null) {
+                throw new RuntimeException("Missng recStart when filterBy is used.");
+            }
             source.addValue("recStart", recStart);
         }
         source.addValue("start", start);
