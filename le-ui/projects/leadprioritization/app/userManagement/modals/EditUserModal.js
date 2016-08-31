@@ -34,7 +34,7 @@ app.service('EditUserModal', function ($compile, $templateCache, $rootScope, $ht
 });
 
 
-app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
+app.controller('EditUserController', function ($scope, $rootScope, $state, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.user = $scope.$parent.user;
     
@@ -93,7 +93,7 @@ app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUt
 
     $scope.refreshClick = function(){
         $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
+        $state.go('home.users', {}, { reload: true });
     };
     
 });

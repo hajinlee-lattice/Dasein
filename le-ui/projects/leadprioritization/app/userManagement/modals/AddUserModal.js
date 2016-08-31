@@ -33,7 +33,7 @@ app.service('AddUserModal', function ($compile, $templateCache, $rootScope, $htt
     };
 });
 
-app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
+app.controller('AddUserController', function ($scope, $rootScope, $state, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     //$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
@@ -148,7 +148,7 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
 
     $scope.refreshClick = function(){
         $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
+        $state.go('home.users', {}, { reload: true });
     };
 
     $scope.yesClick = function ($event) {

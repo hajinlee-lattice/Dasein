@@ -33,7 +33,7 @@ app.service('DeleteUserModal', function ($compile, $templateCache, $rootScope, $
     };
 });
 
-app.controller('DeleteUserController', function ($scope, $rootScope, _, ResourceUtility,
+app.controller('DeleteUserController', function ($scope, $rootScope, $state, _, ResourceUtility,
                                                  BrowserStorageUtility, StringUtility, PasswordUtility,
                                                  NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
@@ -51,8 +51,8 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
 
         UserManagementService.DeleteUser($scope.user).then(function(result){
             if(result.Success) {
-                $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
                 $("#modalContainer").modal('hide');
+                $state.go('home.users', {}, { reload: true });
             } else {
                 if (result.ResultErrors === ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')) {
                     $scope.deleteUserErrorMessage = ResourceUtility.getString("DELETE_USER_GENERAL_ERROR");
