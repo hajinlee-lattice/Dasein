@@ -362,7 +362,6 @@ angular.module('lp.managefields', [
     $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
         $scope.oneLeadPerDomain = oneLeadPerDomain;
         $scope.includePersonalEmailDomains = includePersonalEmailDomains;
-        $scope.useLatticeAttributes = useLatticeAttributes;
 
         if ($scope.useLatticeAttributes != useLatticeAttributes) {
             if (!useLatticeAttributes) {
