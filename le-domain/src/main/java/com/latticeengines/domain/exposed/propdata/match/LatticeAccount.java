@@ -18,7 +18,7 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
 
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
     private static final String ATTRIBUTES = "attributes";
-    private static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeAccountId";
+    public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
     private static final String SCHEMA_TEMPLATE = String.format(

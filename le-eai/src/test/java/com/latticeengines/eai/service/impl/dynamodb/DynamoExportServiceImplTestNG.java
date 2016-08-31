@@ -33,6 +33,7 @@ import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.propdata.match.LatticeAccount;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
@@ -56,7 +58,9 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("DynamoTestCustomer");
     private AmazonDynamoDBClient client;
-    private static final String RECORD_TYPE = "LatticeAccount";
+
+    private static final String LATTICE_ACCOUNT=LatticeAccount.class.getSimpleName();
+    private static final String ACCOUNT_LOOKUP_ENTRY=AccountLookupEntry.class.getSimpleName();
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -90,34 +94,80 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private String sourceFilePath = sourceDir + "/LatticeAccount.avro";
     private String targetDir = "/tmp/" + TEST_CUSTOMER.getContractId() + "/output";
     private Table table;
-
     private String repo;
-    private String tableName;
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
+    }
+
+    @AfterClass(groups = "aws")
+    public void cleanup() throws IOException {
+    }
+
+    @Test(groups = "aws")
+    public void exportLatticeAccount() throws Exception {
+        setupMethod(LATTICE_ACCOUNT);
+
+        table = createLatticeAccountTable();
+        ExportContext ctx = submitExport(LatticeAccount.class, LATTICE_ACCOUNT);
+        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
+        assertNotNull(appId);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        TestLatticeAccountEntityMgrImpl entityMgr = new TestLatticeAccountEntityMgrImpl();
+        entityMgr.init();
+
+        for (int i = 0; i < 10; i++) {
+            Integer idx = new Random().nextInt(10000);
+            LatticeAccount account = entityMgr.findByKey(idx.toString());
+            Assert.assertNotNull(account);
+            System.out.println(account.toFabricAvroRecord(LATTICE_ACCOUNT));
+        }
+    }
+
+    @Test(groups = "aws")
+    public void exportAccountLookup() throws Exception {
+        setupMethod(ACCOUNT_LOOKUP_ENTRY);
+
+        table = createAccountLookupTable();
+        ExportContext ctx = submitExport(AccountLookupEntry.class, ACCOUNT_LOOKUP_ENTRY);
+
+        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
+        assertNotNull(appId);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        TestAccountLookupEntityMgrImpl entityMgr = new TestAccountLookupEntityMgrImpl();
+        entityMgr.init();
+
+        for (int i = 0; i < 10; i++) {
+            Integer idx = new Random().nextInt(10000);
+            String key = String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", idx);
+            AccountLookupEntry account = entityMgr.findByKey(key);
+            Assert.assertNotNull(account);
+            Assert.assertEquals(account.getDomain(), "lattice-engines.com");
+            Assert.assertEquals(account.getDuns(), String.format("%09d", idx));
+            System.out.println(JsonUtils.serialize(account));
+        }
+    }
+
+    private void setupMethod(String recordType) throws Exception {
         repo = String.format("%s_%s_%s", leEnv, leStack, "testRepo");
-        tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
+        String tableName = DynamoDataStoreImpl.buildTableName(repo, recordType);
 
         HdfsUtils.rmdir(yarnConfiguration, sourceDir);
         HdfsUtils.rmdir(yarnConfiguration, targetDir);
         HdfsUtils.mkdir(yarnConfiguration, sourceDir);
-        table = createTable();
 
         dynamoService.deleteTable(tableName);
-        dynamoService.createTable(tableName, 10, 50, "Id", ScalarAttributeType.S.name(), null, null);
+        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
         client = dynamoService.getClient();
         ListTablesResult result = client.listTables();
         log.info("Tables: " + result.getTableNames());
     }
 
-    @AfterClass(groups = "aws")
-    public void cleanup() throws IOException {
-        dynamoService.deleteTable(tableName);
-    }
-
-    @Test(groups = "aws")
-    public void exportMetadataAndDataAndWriteToHdfs() throws Exception {
+    private ExportContext submitExport(Class<?> entityClz, String recordType) {
         ExportContext ctx = new ExportContext(yarnConfiguration);
 
         ExportConfiguration fileExportConfig = new ExportConfiguration();
@@ -135,8 +185,8 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(ExportProperty.NUM_MAPPERS, "2");
 
         props.put(DynamoExportJob.CONFIG_REPOSITORY, repo);
-        props.put(DynamoExportJob.CONFIG_RECORD_TYPE, RECORD_TYPE);
-        props.put(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME, LatticeAccount.class.getName());
+        props.put(DynamoExportJob.CONFIG_RECORD_TYPE, recordType);
+        props.put(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME, entityClz.getName());
 
         if (StringUtils.isEmpty(endpoint)) {
             props.put(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
@@ -149,29 +199,15 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         fileExportConfig.setProperties(props);
         exportService.exportDataFromHdfs(fileExportConfig, ctx);
-
-        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-        TestLatticeAccountEntityMgrImpl entityMgr = new TestLatticeAccountEntityMgrImpl();
-        entityMgr.init();
-
-        for (int i = 0; i < 10; i++) {
-            Integer idx = new Random().nextInt(10000);
-            LatticeAccount account = entityMgr.findByKey(idx.toString());
-            Assert.assertNotNull(account);
-            System.out.println(account.toFabricAvroRecord(RECORD_TYPE));
-        }
+        return ctx;
     }
 
-    private Table createTable() throws IOException {
+    private Table createLatticeAccountTable() throws IOException {
         Table table = new Table();
         table.setName("LatticeAccount");
         Schema schema = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"LatticeAccount\",\"doc\":\"Testing data\"," + "\"fields\":["
-                        + "{\"name\":\"LatticeAccountId\",\"type\":[\"string\",\"null\"]},"
+                        + "{\"name\":\"" + LatticeAccount.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"string\",\"null\"]},"
                         + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                         + "{\"name\":\"DUNS\",\"type\":[\"string\",\"null\"]}" + "]}");
 
@@ -186,7 +222,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (List<Object> tuple : data) {
-            builder.set("LatticeAccountId", tuple.get(0));
+            builder.set(LatticeAccount.LATTICE_ACCOUNT_ID_HDFS, tuple.get(0));
             builder.set("Domain", tuple.get(1));
             builder.set("DUNS", tuple.get(2));
             recordList.add(builder.build());
@@ -194,7 +230,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, sourceFilePath, recordList);
 
         Attribute attribute = new Attribute();
-        attribute.setName("LatticeAccountId");
+        attribute.setName(LatticeAccount.LATTICE_ACCOUNT_ID_HDFS);
         attribute.setDataType("String");
         table.addAttribute(attribute);
 
@@ -211,11 +247,57 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         return table;
     }
 
+    private Table createAccountLookupTable() throws IOException {
+        Table table = new Table();
+        table.setName("LatticeAccount");
+        Schema schema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"AccountMasterLookup\",\"doc\":\"Testing data\"," + "\"fields\":["
+                        + "{\"name\":\"" + AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"string\",\"null\"]},"
+                        + "{\"name\":\"Key\",\"type\":[\"string\",\"null\"]}" + "]}");
+
+        List<GenericRecord> recordList = new ArrayList<>();
+        List<List<Object>> data = new ArrayList<>();
+
+        for (int i = 0; i < 10000; i++) {
+            List<Object> tuple = Arrays.asList((Object) String.valueOf(i), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
+            data.add(tuple);
+        }
+
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (List<Object> tuple : data) {
+            builder.set(AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS, tuple.get(0));
+            builder.set("Key", tuple.get(1));
+            recordList.add(builder.build());
+        }
+        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, sourceFilePath, recordList);
+
+        Attribute attribute = new Attribute();
+        attribute.setName(AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS);
+        attribute.setDataType("String");
+        table.addAttribute(attribute);
+
+        attribute = new Attribute();
+        attribute.setName("Key");
+        attribute.setDataType("String");
+        table.addAttribute(attribute);
+
+        return table;
+    }
+
     private class TestLatticeAccountEntityMgrImpl extends BaseFabricEntityMgrImpl<LatticeAccount> {
         TestLatticeAccountEntityMgrImpl() {
             super(new BaseFabricEntityMgrImpl.Builder().messageService(null)
                     .dataService(fabricDataService) //
-                    .recordType(RECORD_TYPE).topic(null) //
+                    .recordType(LATTICE_ACCOUNT).topic(null) //
+                    .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
+        }
+    }
+
+    private class TestAccountLookupEntityMgrImpl extends BaseFabricEntityMgrImpl<AccountLookupEntry> {
+        TestAccountLookupEntityMgrImpl() {
+            super(new BaseFabricEntityMgrImpl.Builder().messageService(null)
+                    .dataService(fabricDataService) //
+                    .recordType(ACCOUNT_LOOKUP_ENTRY).topic(null) //
                     .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
         }
     }

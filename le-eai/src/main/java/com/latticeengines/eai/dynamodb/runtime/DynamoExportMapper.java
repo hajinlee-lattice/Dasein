@@ -121,18 +121,19 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     private void loadToBuffer(GenericRecord record) {
         FabricEntity<?> entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
         GenericRecord mbusRecord = entity.toFabricAvroRecord(recordType);
-        log.info("id=" + entity.getId() + "; record=" + mbusRecord.toString());
-        recordBuffer.put((String) entity.getId(), mbusRecord);
+        recordBuffer.put(entity.getId(), mbusRecord);
     }
 
     private void commitBuffer(Counter whiteBuffer, Counter blackBuffer) {
         try {
             dataStore.createRecords(recordBuffer);
             whiteBuffer.increment(recordBuffer.size());
-            log.info("Committed " + recordBuffer.size() + " records to DynamoDB.");
+            log.info("Committed " + recordBuffer.size() + " records to DynamoDB. Total committed  = "
+                    + whiteBuffer.getValue());
         } catch (Exception e) {
             blackBuffer.increment(recordBuffer.size());
-            log.error("Failed to commit a buffer of size " + recordBuffer.size(), e);
+            log.error("Failed to commit a buffer of size " + recordBuffer.size() + ". Total failed  = "
+                    + blackBuffer.getValue(), e);
         } finally {
             recordBuffer.clear();
         }

@@ -51,7 +51,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private static final String REPO = "_REPO_";
     private static final String RECORD = "_RECORD_";
 
-    // Desfault attributes for every table
+    // Default attributes for every table
     public final String ID = "Id";
     private final String BLOB = "Record";
 
@@ -87,6 +87,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         Item item = buildItem(id, record);
         try {
             table.putItem(item);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to save record " + tableName + " id " + id, e);
         }
@@ -98,6 +101,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
         try {
             table.deleteItem(ID, id);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to delete record " + tableName + " id " + id, e);
         }
@@ -110,13 +116,15 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, record);
         try {
             table.updateItem(updateItemSpec);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to update record " + tableName + " id " + id, e);
         }
     }
 
     public GenericRecord findRecord(String id) {
-
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(tableName);
         GenericRecord record = null;
@@ -126,6 +134,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 ByteBuffer blob = item.getByteBuffer(BLOB);
                 record = jsonToAvro(blob);
             }
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to find record " + tableName + " id " + id, e);
         }
@@ -154,6 +165,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                     }
 
              } while (outcome.getUnprocessedItems().size() > 0);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to batch create records " + tableName, e);
         }
@@ -198,6 +212,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                     outcome = dynamoDB.batchGetItemUnprocessed(unprocessed);
                 }
             } while (!unprocessed.isEmpty());
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to batch get records " + tableName, e);
         }
@@ -222,6 +239,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 GenericRecord record = jsonToAvro(item.getByteBuffer(BLOB));
                 records.add(record);
             }
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
+                    "it might because the table name or key attributes are wrong.");
         } catch (Exception e) {
             log.error("Unable to find records " + tableName, e);
         }
@@ -245,7 +265,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private GenericRecord jsonToAvro(ByteBuffer json) {
         try {
-            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);           
+            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
 
             byte[] bytes = new byte[json.remaining()];
             json.get(bytes, 0, bytes.length);
