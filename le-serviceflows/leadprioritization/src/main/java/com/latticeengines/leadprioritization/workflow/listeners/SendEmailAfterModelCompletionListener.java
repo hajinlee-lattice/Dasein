@@ -2,10 +2,14 @@ package com.latticeengines.leadprioritization.workflow.listeners;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -14,6 +18,9 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class SendEmailAfterModelCompletionListener extends LEJobListener {
 
     private static final Log log = LogFactory.getLog(SendEmailAfterModelCompletionListener.class);
+
+    @Autowired
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -28,11 +35,9 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
         String userId = jobExecution.getJobParameters().getString("User_Id");
         AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
         emailInfo.setUserId(userId);
-        String modelStepConfiguration = jobExecution.getJobParameters().getString(
-                ModelStepConfiguration.class.getCanonicalName());
-        ModelStepConfiguration config = JsonUtils.deserialize(modelStepConfiguration, ModelStepConfiguration.class);
-        if (config != null) {
-            String modelName = config.getModelName();
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        if (job != null) {
+            String modelName = job.getInputContextValue(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
             emailInfo.setModelId(modelName);
             log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
