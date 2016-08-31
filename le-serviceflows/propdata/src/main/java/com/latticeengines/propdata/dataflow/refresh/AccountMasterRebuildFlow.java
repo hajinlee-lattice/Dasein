@@ -43,6 +43,7 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         seed = seed.retain(new FieldList(fieldList));
 
         String domainKey = parameters.getDomainKey();
+
         String dunsKey = parameters.getDunsKey();
 
         Map<Node, String> joinKeyMap = new HashMap<Node, String>();
@@ -52,25 +53,29 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
 
         Node firstSource = buildInputSources(parameters, domainBased, dunsBased, joinKeyMap);
 
-        Node joined = seed;
 
+        Node joined = seed;
         if (firstSource != null) {
             log.info("Join first source");
             String joinKey = joinKeyMap.get(firstSource);
             joined = joined.join(new FieldList(dunsKey), firstSource, new FieldList(joinKey), JoinType.LEFT);
             String secondKey = joinKey + SECOND_KEY_SUFFIX;
-
             String filterFunc = secondKey + " == null || " + secondKey + ".equals(" + domainKey +")";
             joined = joined.filter(filterFunc, new FieldList(secondKey, domainKey));
         }
 
-        joined = convergeSources(joined, domainBased, domainKey, joinKeyMap);
+        String id = parameters.getId().get(0);
+        Node domainConverged = convergeSources(seed, domainBased, domainKey, id, joinKeyMap);
 
-        joined = convergeSources(joined, dunsBased, dunsKey, joinKeyMap);
+        if (domainConverged != null) {
+            joined = joined.leftOuterJoin(new FieldList(id), domainConverged, new FieldList(id));
+        }
 
-        List<String> id = parameters.getId();
 
-        joined = joined.filter(id.get(0) + " != null", new FieldList(id));
+        Node dunsConverged = convergeSources(seed, dunsBased, dunsKey, id, joinKeyMap);
+        if (dunsConverged != null) {
+            joined = joined.leftOuterJoin(new FieldList(id), dunsConverged, new FieldList(joinKeyMap.get(dunsConverged)));
+        }
 
         FieldList joinFields = getJoinFields(joined);
         Node discarded = joined.discard(joinFields);
@@ -79,11 +84,18 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         return stamped;
     }
 
-    private Node convergeSources(Node seed, List<Node> nodes, String joinKey, Map<Node, String> joinKeyMap) {
+    private Node convergeSources(Node seed, List<Node> nodes, String joinKey, String id, Map<Node, String> joinKeyMap) {
 
         if (nodes.size() == 0) {
-            return seed;
+            log.info("No source for " + joinKey);
+            return null;
         }
+
+
+        Node filteredSeed = seed.filter(joinKey + " != null", new FieldList(joinKey));
+
+        Node retainedSeed = filteredSeed.retain(new FieldList(id, joinKey));
+
 
         List<FieldList> groupFieldLists = new ArrayList<FieldList>();
         for (Node node : nodes) {
@@ -91,9 +103,11 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
             groupFieldLists.add(new FieldList(groupKey));
         }
 
-        Node coGrouped = seed.coGroup(new FieldList(joinKey), nodes, groupFieldLists, JoinType.OUTER);
+        Node coGrouped = retainedSeed.coGroup(new FieldList(joinKey), nodes, groupFieldLists, JoinType.OUTER);
 
-        return coGrouped;
+        Node filtered = coGrouped.filter(id + " != null", new FieldList(id));
+
+        return filtered;
     }
 
     private Node convertSource(AccountMasterSourceParameters source, Map<Node, String> joinKeyMap) {
@@ -132,8 +146,9 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
 
         String lastSourceName = parameters.getLastSource();
         for (AccountMasterSourceParameters sourceParameters : parameters.getSourceParameters()) {
-            Node node = convertSource(sourceParameters, joinKeyMap);
             String sourceName = sourceParameters.getSourceName();
+            Node node = convertSource(sourceParameters, joinKeyMap);
+            log.info("Converting source " + sourceName);
             if (sourceName.equals(lastSourceName)) {
                 log.info("Add last source to process " + sourceName);
                 lastSource = node;
@@ -149,6 +164,7 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
     }
 
     private String newJoinKey(Map<Node, String> joinKeyMap) {
+        log.info("New Join Key " + JOIN_KEY_PREFIX + joinKeyMap.size());
         return JOIN_KEY_PREFIX + joinKeyMap.size();
     }
 
