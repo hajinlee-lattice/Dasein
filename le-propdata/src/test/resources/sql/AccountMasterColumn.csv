@@ -37,12 +37,12 @@ PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subca
 76,LE_COUNTRY,2.0.0,Country,Country of domestic ultimate business. Available Globally.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,"RTS,Enrichment"
 77,Domain,2.0.0,Website,Website of  a business. Available globally.Blank-filled when not available.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,None,0,Enrichment
 78,LE_EMPLOYEE_RANGE,2.0.0,Employee Range,Employee Range of domestic ultimate business.Available Globally.,String,FIRMOGRAPHICS,NULL,INTERVAL,NULL,ENUM,Model,0,"RTS,Enrichment"
-79,LE_INDUSTRY,2.0.0,Industry,Primary SIC Decsription of domestic ultimate businessAvailable Globally.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,NOMINAL,Model,0,"RTS,Enrichment"
+79,LE_INDUSTRY,2.0.0,Industry,Primary SIC Decsription of domestic ultimate businessAvailable Globally.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,"RTS,Enrichment"
 81,LE_IS_PRIMARY_LOCATION,2.0.0,Primary Location,"Indicates whether the business address (street, city, state & country) is the HQ business address. Available globally.",String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,BOOLEAN,Model,0,"RTS,Enrichment"
-82,LE_NAICS_CODE,2.0.0,NAIC Code (6 digit), 6 digit NAICS Code of domestic ultimate business,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,NOMINAL,Model,0,RTS
+82,LE_NAICS_CODE,2.0.0,NAIC Code (6 digit), 6 digit NAICS Code of domestic ultimate business,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,RTS
 83,LE_NUMBER_OF_LOCATIONS,2.0.0,Locations,Number of location of domestic ultimate business. Available Globally.,Integer,FIRMOGRAPHICS,NULL,RATIO,"""{""""geometric"""": { """"minValue"""":1,""""multiplierList"""":[2,2.5,2],""""minSamples"""":100,""""minFreq"""":0.01,""""maxBuckets"""":5,""""maxPercentile"""":1}}""",NUMERIC,Model,0,RTS
 85,LE_REVENUE_RANGE,2.0.0,Revenue Range,Revenue Range of domestic ultimate business.Available Globally.,String,FIRMOGRAPHICS,NULL,INTERVAL,NULL,ENUM,Model,0,"RTS,Enrichment"
-86,LE_SIC_CODE,2.0.0,SIC Code (8 digit), 8 digit SIC Code of domestic ultimate business,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,NOMINAL,Model,0,RTS
+86,LE_SIC_CODE,2.0.0,SIC Code (8 digit), 8 digit SIC Code of domestic ultimate business,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,RTS
 87,LEASE_BALANCE_RANKING_1_TO_10,2.0.0,Lease Balance Ranking (1-10),NULL,String,FIRMOGRAPHICS,NULL,NULL,NULL,NULL,Model,0,"RTS,Enrichment"
 88,LEGAL_STATUS_CODE,2.0.0,Legal Status Code,A code value which describes the legal structure of the businessAvailable globally.Zero-filled when not available.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,RTS
 89,LINE_OF_BUSINESS,2.0.0,Line of Business,A narrative description of the operations or activities of the business.  Relates to the primary four-digit 1987 US SIC.  In English. Available globally.,String,FIRMOGRAPHICS,NULL,NOMINAL,NULL,ALPHA,Model,0,"RTS,Enrichment"
