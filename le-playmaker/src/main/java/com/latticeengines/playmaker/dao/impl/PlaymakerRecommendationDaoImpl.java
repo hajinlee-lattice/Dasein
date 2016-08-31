@@ -265,7 +265,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -328,7 +328,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals(
+                        "NORECOMMENDATIONS"))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -364,7 +365,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private String getAccountExtensionFromWhereClauseWithFilterBy(String filterBy) {
         filterBy = filterBy.trim().toUpperCase();
         String whereClause = null;
-        if (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS")) {
+        if (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS")) {
             whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :recStart) "
                     + " AND DATEDIFF(s,'19700101 00:00:00:000', "
                     + getAccountExtensionLastModificationDate()
