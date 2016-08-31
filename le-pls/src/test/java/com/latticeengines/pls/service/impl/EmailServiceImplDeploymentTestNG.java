@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.EmailSettings;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -44,7 +45,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
     private static final String EXTERNAL_USER_EMAIL_PASSWORD = "MrB2uild";
-    private static final String EMAIL_SUBJECT = "Welcome to Lattice Predictive Insights";
     private static final String APP_URL_PATTERN = "href=\"[^\"]*";
 
     private String testUsername;
@@ -147,7 +147,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             Message[] messages = folder.getMessages();
 
             for (Message message : messages) {
-                if (!message.getSubject().equalsIgnoreCase(EMAIL_SUBJECT)) {
+                if (!message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
                     log.info(String.format("The subject of the message is %s", message.getSubject()));
                     continue;
                 }
