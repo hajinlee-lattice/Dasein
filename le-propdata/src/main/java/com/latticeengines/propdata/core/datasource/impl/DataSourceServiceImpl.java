@@ -52,8 +52,10 @@ public class DataSourceServiceImpl implements DataSourceService {
         List<JdbcTemplate> jdbcTemplates = new ArrayList<>();
         synchronized (roundRobinPos) {
             for (int i = 0; i < num; i++) {
-                DataSourceConnection connection = connectionList.get(roundRobinPos.get());
-                jdbcTemplates.add(DataSourceUtils.getJdbcTemplate(connection));
+                if (roundRobinPos.get() < connectionList.size()) {
+                    DataSourceConnection connection = connectionList.get(roundRobinPos.get());
+                    jdbcTemplates.add(DataSourceUtils.getJdbcTemplate(connection));
+                }
                 Integer nextPos = (roundRobinPos.get() + 1) % connectionList.size();
                 roundRobinPos.set(nextPos);
             }
