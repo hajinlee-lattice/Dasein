@@ -35,7 +35,7 @@ PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subca
 74,LE_COMPANY_DESCRIPTION,2.0.0,Description,Description of a business. Available for US Only.Blank-filled when not available.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,None,0,Enrichment
 75,LE_COMPANY_PHONE,2.0.0,Phone,"The primary voice telephone number for the business with no formatting or punctuation.  This string contains all telecommunication number components (area code, exchange, number).Available globally.Blank-filled when not available.",String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,None,0,Enrichment
 76,LE_COUNTRY,2.0.0,Country,Country of domestic ultimate business. Available Globally.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,Model,0,"RTS,Enrichment"
-77,LE_DOMAIN,2.0.0,Website,Website of  a business. Available globally.Blank-filled when not available.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,None,0,Enrichment
+77,Domain,2.0.0,Website,Website of  a business. Available globally.Blank-filled when not available.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,None,0,Enrichment
 78,LE_EMPLOYEE_RANGE,2.0.0,Employee Range,Employee Range of domestic ultimate business.Available Globally.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,Model,0,"RTS,Enrichment"
 79,LE_INDUSTRY,2.0.0,Industry,Primary SIC Decsription of domestic ultimate businessAvailable Globally.,String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,Model,0,"RTS,Enrichment"
 81,LE_IS_PRIMARY_LOCATION,2.0.0,Primary Location,"Indicates whether the business address (street, city, state & country) is the HQ business address. Available globally.",String,FIRMOGRAPHICS,NULL,NULL,NULL,ALPHA,Model,0,"RTS,Enrichment"
