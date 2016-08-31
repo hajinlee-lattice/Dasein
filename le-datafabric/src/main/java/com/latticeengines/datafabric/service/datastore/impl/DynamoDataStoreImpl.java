@@ -63,7 +63,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private DynamoIndex tableIndex;
     private String tableName = null;
 
-
     public DynamoDataStoreImpl(AmazonDynamoDBClient client, String repository, String recordType, Schema schema) {
 
         this.client = client;
@@ -75,10 +74,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         String attributeProp = schema.getProp(DynamoUtil.ATTRIBUTES);
         this.tableIndex = DynamoUtil.getAttributes(attributeProp);
 
-        log.info("Constructed Dynamo data store repo " + repository + " record " + recordType +
-                 " attributes " + attributeProp);
+        log.info("Constructed Dynamo data store repo " + repository + " record " + recordType + " attributes "
+                + attributeProp);
     }
-
 
     public void createRecord(String id, GenericRecord record) {
 
@@ -88,22 +86,22 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.putItem(item);
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to save record " + tableName + " id " + id, e);
         }
     }
 
-    public void deleteRecord(String id, GenericRecord record)  {
+    public void deleteRecord(String id, GenericRecord record) {
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(tableName);
 
         try {
             table.deleteItem(ID, id);
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to delete record " + tableName + " id " + id, e);
         }
@@ -117,8 +115,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.updateItem(updateItemSpec);
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to update record " + tableName + " id " + id, e);
         }
@@ -135,8 +133,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 record = jsonToAvro(blob);
             }
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to find record " + tableName + " id " + id, e);
         }
@@ -155,24 +153,22 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
             do {
+                // Check for unprocessed keys which could happen if you exceed
+                // provisioned throughput
+                Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
 
-                    // Check for unprocessed keys which could happen if you exceed provisioned throughput
+                if (outcome.getUnprocessedItems().size() != 0) {
+                    outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
+                }
 
-                    Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
-
-                    if (outcome.getUnprocessedItems().size() != 0) {
-                        outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
-                    }
-
-             } while (outcome.getUnprocessedItems().size() > 0);
+            } while (outcome.getUnprocessedItems().size() > 0);
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to batch create records " + tableName, e);
         }
     }
-
 
     public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
 
@@ -182,7 +178,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         TableKeysAndAttributes keys = new TableKeysAndAttributes(tableName);
 
         for (String id : idList) {
-            if (id == null) continue;
+            if (id == null)
+                continue;
             keys = keys.addPrimaryKey(new PrimaryKey(ID, id));
         }
 
@@ -200,11 +197,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             do {
                 List<Item> items = outcome.getTableItems().get(tableName);
                 for (Item item : items) {
-                     GenericRecord record = jsonToAvro(item.getByteBuffer(BLOB));
-                     records.put(item.getString(ID), record);
+                    GenericRecord record = jsonToAvro(item.getByteBuffer(BLOB));
+                    records.put(item.getString(ID), record);
                 }
 
-                // Check for unprocessed keys which could happen if you exceed provisioned
+                // Check for unprocessed keys which could happen if you exceed
+                // provisioned
                 // throughput or reach the limit on response size.
                 unprocessed = outcome.getUnprocessedKeys();
 
@@ -213,21 +211,22 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
             } while (!unprocessed.isEmpty());
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to batch get records " + tableName, e);
         }
         return records;
     }
 
-    public List<GenericRecord> findRecords(Map<String, String> properties)  {
+    public List<GenericRecord> findRecords(Map<String, String> properties) {
 
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(tableName);
         QuerySpec querySpec = buildQuerySpec(properties);
 
-        if (querySpec == null) return null;
+        if (querySpec == null)
+            return null;
 
         List<GenericRecord> records = new ArrayList<GenericRecord>();
         try {
@@ -240,8 +239,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 records.add(record);
             }
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, " +
-                    "it might because the table name or key attributes are wrong.");
+            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
+                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to find records " + tableName, e);
         }
@@ -252,12 +251,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private ByteBuffer avroToJson(GenericRecord record) {
         Schema schema = record.getSchema();
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                DatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
-                JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output);
-                writer.write(record, encoder);
-                encoder.flush();
-                output.flush();
-                return ByteBuffer.wrap(output.toByteArray());
+            DatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
+            JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output);
+            writer.write(record, encoder);
+            encoder.flush();
+            output.flush();
+            return ByteBuffer.wrap(output.toByteArray());
         } catch (Exception e) {
             return null;
         }
@@ -270,10 +269,10 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             byte[] bytes = new byte[json.remaining()];
             json.get(bytes, 0, bytes.length);
             try (InputStream input = new ByteArrayInputStream(bytes)) {
-                 DataInputStream din = new DataInputStream(input);
-                 Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
-                 GenericRecord datum = reader.read(null, decoder);
-                 return datum;
+                DataInputStream din = new DataInputStream(input);
+                Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
+                GenericRecord datum = reader.read(null, decoder);
+                return datum;
             }
         } catch (Exception e) {
             return null;
@@ -308,11 +307,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
         updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToJson(record)));
 
-        if (tableIndex !=null) {
-              updateItemSpec = updateItemSpec.addAttributeUpdate(
-                  new AttributeUpdate(tableIndex.getHashKeyAttr()).put(record.get(tableIndex.getHashKeyField()).toString()));
-              updateItemSpec = updateItemSpec.addAttributeUpdate(
-                  new AttributeUpdate(tableIndex.getRangeKeyAttr()).put(record.get(tableIndex.getRangeKeyField()).toString()));
+        if (tableIndex != null) {
+            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getHashKeyAttr())
+                    .put(record.get(tableIndex.getHashKeyField()).toString()));
+            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getRangeKeyAttr())
+                    .put(record.get(tableIndex.getRangeKeyField()).toString()));
         }
 
         return updateItemSpec;
@@ -320,13 +319,14 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private QuerySpec buildQuerySpec(Map<String, String> properties) {
         String hashValue = properties.get(tableIndex.getHashKeyField());
-        if (hashValue == null) return null;
+        if (hashValue == null)
+            return null;
         String rangeValue = properties.get(tableIndex.getRangeKeyField());
 
         StringBuilder builder = new StringBuilder();
         builder.append(tableIndex.getHashKeyAttr() + " = " + hashValue);
         if (rangeValue != null) {
-             builder.append(" and " + tableIndex.getRangeKeyAttr() + " = " + rangeValue);
+            builder.append(" and " + tableIndex.getRangeKeyAttr() + " = " + rangeValue);
         }
         return new QuerySpec().withKeyConditionExpression(builder.toString());
     }
