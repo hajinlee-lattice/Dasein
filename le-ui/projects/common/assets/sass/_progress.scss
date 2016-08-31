@@ -48,10 +48,59 @@ Spinner Balls
 	transform: translateX(-50%);
 	-webkit-font-smoothing: antialiased;
 	.meter {
-		background: url(/assets/images/spinner-lattice-dots.gif) center center no-repeat;
+		background: url(/assets/images/spinners/spinner-lattice-dots-100x100.gif) center center no-repeat;
 		background-size: contain;
-		height: 300px;
-		width: 300px;
+		height: 100px;
+		width: 100px;
+	}
+	&.small, &.size-20x20 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-20x20.gif);
+			height: 20px;
+			width: 20px;
+		}
+	}
+	&.small, &.size-40x40 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-40x40.gif);
+			height: 40px;
+			width: 40px;
+		}
+	}
+	&.small, &.size-50x50 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-50x50.gif);
+			height: 50px;
+			width: 50px;
+		}
+	}
+	&.small, &.size-100x100 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-100x100.gif);
+			height: 100px;
+			width: 100px;
+		}
+	}
+	&.small, &.size-200x200 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-200x200.gif);
+			height: 200px;
+			width: 200px;
+		}
+	}
+	&.small, &.size-300x300 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-300x300.gif);
+			height: 300px;
+			width: 300px;
+		}
+	}
+	&.small, &.size-400x400 {
+		 .meter {
+			background-image: url(/assets/images/spinners/spinner-lattice-dots-400x400.gif);
+			height: 400px;
+			width: 400px;
+		}
 	}
 	h2 {
 		font-size: 16px;

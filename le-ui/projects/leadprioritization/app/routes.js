@@ -603,8 +603,8 @@ angular
                 }
             }
         })
-        .state('home.eloquasettings.enrichments', {
-            url: '/enrichments',
+        .state('home.eloquasettings.enrichment', {
+            url: '/enrichment',
             params: {
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Enrichments'
