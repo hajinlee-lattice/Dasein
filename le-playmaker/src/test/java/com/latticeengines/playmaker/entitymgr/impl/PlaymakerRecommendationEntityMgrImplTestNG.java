@@ -122,7 +122,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getAccountExtensions() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                1000, 1, 100, null, null, 0, null);
+                1000, 1, 100, null, null, 0L, null);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
@@ -136,7 +136,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getAccountExtensionCount() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountextExsionCount(tenant.getTenantName(),
-                1000, null, null, 0);
+                1000, null, null, 0L);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
@@ -322,7 +322,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         accountIds.add(10);
         accountIds.add(12);
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountextExsionCount(
-                tenant.getTenantName(), 0, accountIds, null, 0);
+                tenant.getTenantName(), 0, accountIds, null, 0L);
         Assert.assertTrue(((Integer) mapResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
 
     }
@@ -334,7 +334,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         accountIds.add(10);
         accountIds.add(12);
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                0, 0, 100, accountIds, null, 0, null);
+                0, 0, 100, accountIds, null, 0L, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -345,7 +345,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     @Test(groups = "functional", enabled = true)
     public void getAccountExtensionsWithFilterBy() throws Exception {
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                0, 0, 100, null, "RECOMMENDATIONS", 0 , null);
+                0, 0, 100, null, "RECOMMENDATIONS", 0L, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -353,7 +353,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertTrue(accountextensions.size() > 0);
 
         mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), 0, 0, 100, null,
-                "NORECOMMENDATIONS", 0, null);
+                "NORECOMMENDATIONS", 0L, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions2 = (List<Map<String, Object>>) mapResult
@@ -365,12 +365,12 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getAccountExtensionCountWithFilterBy() throws Exception {
 
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountextExsionCount(
-                tenant.getTenantName(), 0, null, "RECOMMENDATIONS", 0);
+                tenant.getTenantName(), 0, null, "RECOMMENDATIONS", 0L);
         Integer count = (Integer) mapResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
         Assert.assertTrue(count > 0);
 
         mapResult = playMakerRecommendationEntityMgr.getAccountextExsionCount(tenant.getTenantName(), 0, null,
-                "NORECOMMENDATIONS", 0);
+                "NORECOMMENDATIONS", 0L);
         count = (Integer) mapResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
         Assert.assertTrue(count > 0);
     }
@@ -380,7 +380,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     public void getAccountExtensionsWithSelectedColumns() throws Exception {
 
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                0, 0, 100, null, null, 0, null);
+                0, 0, 100, null, null, 0L, null);
         Assert.assertNotNull(mapResult);
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
@@ -390,7 +390,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertTrue(extension.containsKey("RevenueGrowth"));
 
         mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), 0, 0, 100, null,
-               null, 0, " yyy, CrmRefreshDate, DnBSites,xxxx, ,,,,");
+               null, 0L, " yyy, CrmRefreshDate, DnBSites,xxxx, ,,,,");
         Assert.assertNotNull(mapResult);
         accountextensions = (List<Map<String, Object>>) mapResult.get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(accountextensions.size() > 0);
