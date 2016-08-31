@@ -76,6 +76,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
     @Autowired
     private MatchCommandService matchCommandService;
+    
 
     @Resource(name = "columnMetadataServiceDispatch")
     private ColumnMetadataService columnMetadataService;
@@ -145,18 +146,28 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         uploadDataCsv(avroDir, avroFileName, "com/latticeengines/propdata/match/AccountMasterBulkMatchInput.csv",
                 fieldTypes, "ID__");
         fieldTypes = getAccountMasterLookupAvroTypes();
+
         DataCloudVersion dataVersion = dataCloudVersionEntityMgr.findVersion(DATA_CLOUD_VERSION);
 
-        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup,
-                dataVersion.getAccountLookupHdfsVersion());
+        Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion.getAccountLookupHdfsVersion());
+
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMasterLookup.avro",
                 "com/latticeengines/propdata/match/AccountMasterLookup.csv", fieldTypes, "ID__");
 
-        fieldTypes = getDnBAccountMasterAvroTypes("com/latticeengines/propdata/match/AccountMaster.csv");
+        fieldTypes = getDunsAccountMasterAvroTypes();
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion.getAccountMasterHdfsVersion());
+
         uploadDataCsv(getAvroPath(sourceTable.getExtracts().get(0).getPath()), "AccountMaster.avro",
                 "com/latticeengines/propdata/match/AccountMaster.csv", fieldTypes, "ID__");
 
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<Class<?>> getDunsAccountMasterAvroTypes() {
+        List<Class<?>> fieldTypes = new ArrayList<>();
+        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
+                Integer.class, Long.class, String.class, String.class, String.class, String.class }));
+        return fieldTypes;
     }
 
     private String getAvroPath(String avroPath) {
@@ -181,6 +192,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         return fieldTypes;
     }
 
+    @SuppressWarnings({ "unchecked", "unused" })
     private List<Class<?>> getDnBAccountMasterAvroTypes(String csvFile) {
         List<String> fieldNames = getFieldNamesFromCSVFile(csvFile);
         fieldNames = fieldNames.subList(9, fieldNames.size());
@@ -188,20 +200,10 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
         List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(selection, DATA_CLOUD_VERSION);
         List<Class<?>> fieldTypesInMetadata = getFieldTypesFromMetadata(metadatas);
         List<Class<?>> fieldTypes = new ArrayList<>();
-        // for internal columns
-        fieldTypes.add(Integer.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
 
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
-        fieldTypes.add(String.class);
+        fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
+                Integer.class, Long.class, String.class, String.class, String.class, String.class }));
 
-        fieldTypes.addAll(fieldTypesInMetadata);
         return fieldTypes;
     }
 
