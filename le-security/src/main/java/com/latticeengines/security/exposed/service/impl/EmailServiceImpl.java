@@ -134,6 +134,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(String.format("Invitation to Access %s (Lattice Predictive Insights)",
