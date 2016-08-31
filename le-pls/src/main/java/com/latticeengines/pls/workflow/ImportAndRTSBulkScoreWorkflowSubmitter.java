@@ -69,8 +69,10 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 "Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
                 modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
                 sourceFile.getDisplayName()));
-        return workflowJobService.submit(configuration);
-
+        ApplicationId applicationId = workflowJobService.submit(configuration);
+        sourceFile.setApplicationId(applicationId.toString());
+        sourceFileService.update(sourceFile);
+        return applicationId;
     }
 
     public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId,

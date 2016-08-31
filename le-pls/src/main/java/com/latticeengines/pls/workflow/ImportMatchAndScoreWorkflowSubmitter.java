@@ -78,7 +78,10 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 "Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
                 modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
                 sourceFile.getDisplayName()));
-        return workflowJobService.submit(configuration);
+        ApplicationId applicationId = workflowJobService.submit(configuration);
+        sourceFile.setApplicationId(applicationId.toString());
+        sourceFileService.update(sourceFile);
+        return applicationId;
 
     }
 

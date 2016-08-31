@@ -34,6 +34,9 @@ angular.module('lp.jobs', [
             $scope.jobs = JobsStore.data.models[modelId];
         } else {
             $scope.jobs = JobsStore.data.jobs;
+            if (JobsStore.data.isModelState) {
+                $scope.jobs = [];
+            }
         }
 
         $scope.header = {

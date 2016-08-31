@@ -13,7 +13,8 @@ angular
     this.data = {
         jobs: [],
         models: {},
-        jobsMap: {}
+        jobsMap: {},
+        isModelState: false
     };
 
     this.getJob = function(jobId) {
@@ -33,6 +34,7 @@ angular
 
     this.getJobs = function(use_cache, modelId) {
         var deferred = $q.defer(),
+            isModelState = modelId ? true : false,
             jobs = modelId 
                 ? this.data.models[modelId] 
                 : this.data.jobs;

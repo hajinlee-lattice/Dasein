@@ -26,16 +26,17 @@ angular
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
-            $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
 
             var reports = $scope.job.reports,
                 JobReport = null;
-            
-            reports.forEach(function(item) {
-                if (item.purpose == "IMPORT_DATA_SUMMARY") {
-                    $scope.data = data = JSON.parse(item.json.Payload);
-                }
-            });
+
+            if (reports != null) {
+                reports.forEach(function(item) {
+                    if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                        $scope.data = data = JSON.parse(item.json.Payload);
+                    }
+                });
+            }
 
             switch ($scope.jobType.toLowerCase()) {
                 case "scoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
@@ -47,6 +48,14 @@ angular
                 case "modelandemailworkflow": $scope.job.displayName = "Create Model (Remodel)"; break;
                 case "pmmlmodelworkflow": $scope.job.displayName = "Create Model (PMML File)"; break;
                 default: $scope.job.displayName = "Create Model";
+            }
+
+            $scope.showFileName = false;
+            if ($scope.jobType.toLowerCase() == "importmatchandscoreworkflow" || $scope.jobType.toLowerCase() == "importandrtsbulkscoreworkflow"
+                    || $scope.jobType.toLowerCase() == "importmatchandmodelworkflow") {
+                if ($scope.job.applicationId != null && $scope.job.source != null) {
+                    $scope.showFileName = true;
+                }
             }
 
             if ($scope.job.displayName == "Bulk Scoring") {
@@ -130,6 +139,27 @@ angular
                     }
                 );
             };
+
+            /* $scope.downloadSourceClicked = function() {
+                var downloadUrl = '/files/datafiles/sourcefilecsv/';
+                downloadUrl += job.applicationId;
+                downloadUrl += '?fileName=' + job.source;
+                downloadUrl += '&Authorization=' + $scope.auth;
+                $http({
+                    method: 'GET',
+                    url: downloadUrl,
+                    headers: {
+                        'ErrorDisplayMethod': 'modal|home.models'
+                    }
+                }).then(
+                    function onSuccess(response) {
+                        if (response.status == 200) {
+                            var blob = new Blob([ response.data ], { type: "application/csv" });
+                            saveAs(blob, job.source);
+                        }
+                    }
+                );
+            } */
 
             $scope.clickDownloadErrorReport = function($event) {
 

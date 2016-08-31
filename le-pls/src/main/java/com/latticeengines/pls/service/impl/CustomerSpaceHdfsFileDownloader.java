@@ -13,14 +13,20 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
     private String filePath;
 
+    private String fileName;
+
     public CustomerSpaceHdfsFileDownloader(FileDownloadBuilder builder) {
         super(builder.mimeType);
         this.yarnConfiguration = builder.yarnConfiguration;
         this.filePath = builder.filePath;
+        this.fileName = builder.fileName;
     }
 
     @Override
     protected String getFileName() throws Exception {
+        if (this.fileName != null) {
+            return this.fileName;
+        }
         return StringUtils.substringAfterLast(filePath, "/");
     }
 
@@ -35,6 +41,7 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
         private String mimeType;
         private Configuration yarnConfiguration;
         private String filePath;
+        private String fileName;
 
         public FileDownloadBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -43,6 +50,11 @@ public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader 
 
         public FileDownloadBuilder setFilePath(String filePath) {
             this.filePath = filePath;
+            return this;
+        }
+
+        public FileDownloadBuilder setFileName(String fileName) {
+            this.fileName = fileName;
             return this;
         }
 

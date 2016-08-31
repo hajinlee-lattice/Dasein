@@ -52,7 +52,7 @@
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
                       ng-if="isScoringJob && job.status != 'Failed'">
-                    <a href="/files/scores/jobs/{{job.id}}/results?Authorization={{AuthToken}}">
+                    <a href="/files/scores/jobs/{{job.id}}/results?Authorization={{auth}}">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
                         <i data-ng-show="showProgress" class="fa fa-spinner fa-spin fa-inverse fa-fw"></i>
                         Download
@@ -217,9 +217,8 @@
 
                 <ul class="progress-info">
                     <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
-                    <li data-ng-if="job.source != null"><strong>Filename:</strong>
-                        <a data-ng-if="job.modelId != null" href="/files/datafiles/trainingfilecsv?modelId={{job.modelId}}&Authorization={{auth}}">{{job.source}}</a>
-                        <span data-ng-if="job.modelId == null">{{job.source}}</span>
+                    <li data-ng-if="showFileName"><strong>Filename:</strong>
+                        <a href="/files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}">{{job.source}}</a>
                     </li>
                     <li data-ng-if="admin && job.applicationId != null">
                         <strong>App:</strong>
