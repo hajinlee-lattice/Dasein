@@ -64,7 +64,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "Category", nullable = false, length = 50)
     private Category category;
 
-    @Column(name = "Subcategory", nullable = true, length = 200)
+    @Column(name = "Subcategory", length = 200)
     private String subcategory;
 
     @Enumerated(EnumType.STRING)
@@ -72,7 +72,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     private StatisticalType statisticalType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "FundamentalType", nullable = false, length = 50)
+    @Column(name = "FundamentalType", length = 50)
     private FundamentalType fundamentalType;
 
     @Column(name = "ApprovedUsage")
@@ -81,7 +81,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "Groups", nullable = false, length = 1000)
     private String groups;
 
-    @Column(name = "IsPremium")
+    @Column(name = "IsPremium", nullable = false)
     private boolean isPremium;
 
     @Column(name = "DisplayDiscretizationStrategy", length = 1000)

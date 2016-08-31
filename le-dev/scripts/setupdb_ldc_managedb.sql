@@ -59,6 +59,14 @@ UPDATE ExternalColumn
 SET DataType = NULL
 WHERE DataType = '';
 
+UPDATE AccountMasterColumn
+SET StatisticalType = NULL
+WHERE StatisticalType = '';
+
+UPDATE AccountMasterColumn
+SET FundamentalType = NULL
+WHERE FundamentalType = '';
+
 UPDATE LDC_ManageDB.SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')
 WHERE SourceName = 'DnBCacheSeedRaw';
