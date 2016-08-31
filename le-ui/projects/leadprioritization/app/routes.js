@@ -905,10 +905,11 @@ angular
         });
 });
 
-function ShowSpinner(LoadingString) {
+function ShowSpinner(LoadingString, type) {
     // state change spinner
-    var element = $('#mainContentView');
-    
+    var element = $('#mainContentView'),
+        LoadingString = LoadingString || '',
+        type = type || 'lattice';
     element
         .scrollTop(0)
         .children()
@@ -920,7 +921,7 @@ function ShowSpinner(LoadingString) {
         })
         .prepend(
             $(
-                '<section class="loading-spinner">' +
+                '<section class="loading-spinner ' + type + '">' +
                 '<h2 class="text-center">' + LoadingString + '</h2></div>' +
                 '<div class="meter"><span class="indeterminate"></span></div>' +
                 '</section>'

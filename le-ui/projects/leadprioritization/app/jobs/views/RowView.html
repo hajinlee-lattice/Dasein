@@ -35,7 +35,7 @@
                 tooltip-close-button="false">{{job.source | limitTo: 16 }}{{job.source.length > 16 ? '&hellip;' : ''}}</span>
         </span>
         <span class="columns two" ng-if="state != 'model'">{{job.displayName}}</span>
-        <span class="columns two {{job.status}}">{{job.status}}</span>
+        <span class="columns two {{job.status}}" ng-show="job.status">{{job.status}}</span>
         <span class="columns two">
             <span ng-if="(jobCompleted || jobFailed) && job.id != null">
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
@@ -231,8 +231,8 @@
             <div class="three columns">
                 <div class="download-error-report">
                     <strong>Report:</strong>
-                    <p>{{data.ignored_records == null ? 0 : data.ignored_records}} records with errors.</p>
-                    <button type="button" data-ng-click="clickDownloadErrorReport()" ng-if="data.ignored_records != 0" class="button blue-button block-button">
+                    <p>{{data.ignored_records == null ? 0 : data.ignored_records|number}} records with errors.</p>
+                    <button type="button" data-ng-click="clickDownloadErrorReport()" ng-if="data.ignored_records && data.ignored_records != 0" class="button blue-button block-button">
                         <i class="fa fa-download"></i> Error CSV
                     </button>
                 </div>

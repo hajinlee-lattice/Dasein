@@ -51,7 +51,6 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
         return o.DisplayName !== vm.asTenantName; 
     });
 
-
     vm.modal_change_state = function(key){
         vm.copying = false;
         _.each(vm.modal_state, function(_value,_key){
