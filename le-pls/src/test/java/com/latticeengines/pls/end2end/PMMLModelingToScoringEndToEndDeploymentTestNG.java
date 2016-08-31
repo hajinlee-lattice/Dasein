@@ -263,9 +263,10 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
                 @Override
                 public boolean apply(@Nullable Job job) {
                     String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-                    String pmmlFileName = job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
+                    String testSourceFileName = job.getInputs()
+                            .get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
                     return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId)
-                            && TEST_FILE_DISPLAY_NAME.equals(pmmlFileName);
+                            && TEST_FILE_DISPLAY_NAME.equals(testSourceFileName);
                 }
             });
 
