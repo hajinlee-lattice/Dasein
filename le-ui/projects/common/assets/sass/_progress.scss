@@ -130,6 +130,84 @@ Wizard Steps
 ============================================================ */
 /* Pure CSS
 ================ */
+@mixin smallscreen-wizard {
+	list-style-type: none;
+	list-style-position: inside;
+	margin: 0 0 20px;
+	padding: 0;
+	background: #fff;
+	border: #959595 solid 1px;
+	li {
+		display: block;
+		margin-bottom: 10px;
+		padding: 20px 20px 10px;
+		border-bottom: dotted #959595 1px;
+		&:last-child {
+			margin-bottom: 0;
+			border-bottom: 0;
+		}
+		.load-data, .match-cloud, .building-model {
+		    padding-left: 40px;
+		    background-repeat: no-repeat;
+		    background-position: left;
+		}
+		.load-data {
+		    background-image: url("/assets/images/ico-status-process-file-inactive.png");
+		}
+		.match-cloud {
+		    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
+		}
+		.building-model {
+		    background-image: url("/assets/images/ico-status-building-model-inactive.png");
+		}
+		&.success {
+			.load-data {
+		        background-image: url("/assets/images/ico-status-process-file-success.png");
+		    }
+		    .match-cloud {
+		        background-image: url("/assets/images/ico-status-data-cloud-success.png");
+		    }
+		    .building-model {
+		        background-image: url("/assets/images/ico-status-building-model-success.png");
+		    }
+		}
+		&.error {
+			.load-data {
+		        background-image: url("/assets/images/ico-status-process-file-failed.png");
+		    }
+		    .match-cloud {
+		        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
+		    }
+		    .building-model {
+		        background-image: url("/assets/images/ico-status-building-model-failed.png");
+		    }
+		}
+		div {
+			&:after {
+				display: table;
+				content: "";
+				clear: both;
+			}
+			& > span {
+				padding-top: 25px;
+				padding-right: 22px;
+				padding-bottom: 8px;
+				min-height: 70px;
+				&:first-child {
+					float: left;
+				}
+				&:last-child {
+					float: right;
+					padding-top: 25px;
+					padding-right: 0;
+				}
+				.fa-exclamation-triangle {
+					color: #ca2b2b;
+				}
+			}
+		}
+	}
+}
 @mixin arrow-wizard {
 	li {
 		display: inline-block;
@@ -274,94 +352,14 @@ Wizard Steps
 
 
 .wizard {
-	list-style-type: none;
-	list-style-position: inside;
-	margin: 0 0 20px;
-	padding: 0;
-	background: #fff;
-	border: #959595 solid 1px;
-	li {
-		display: block;
-		margin-bottom: 10px;
-		padding: 20px 20px 10px;
-		border-bottom: dotted #959595 1px;
-		&:last-child {
-			margin-bottom: 0;
-			border-bottom: 0;
-		}
-		.load-data, .match-cloud, .building-model {
-		    padding-left: 40px;
-		    background-repeat: no-repeat;
-		    background-position: left;
-		}
-		.load-data {
-		    background-image: url("/assets/images/ico-status-process-file-inactive.png");
-		}
-		.match-cloud {
-		    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
-		}
-		.building-model {
-		    background-image: url("/assets/images/ico-status-building-model-inactive.png");
-		}
-		&.success {
-			.load-data {
-		        background-image: url("/assets/images/ico-status-process-file-success.png");
-		    }
-		    .match-cloud {
-		        background-image: url("/assets/images/ico-status-data-cloud-success.png");
-		    }
-		    .building-model {
-		        background-image: url("/assets/images/ico-status-building-model-success.png");
-		    }
-		}
-		&.error {
-			.load-data {
-		        background-image: url("/assets/images/ico-status-process-file-failed.png");
-		    }
-		    .match-cloud {
-		        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
-		    }
-		    .building-model {
-		        background-image: url("/assets/images/ico-status-building-model-failed.png");
-		    }
-		}
-		div {
-			&:after {
-				display: table;
-				content: "";
-				clear: both;
-			}
-			& > span {
-				padding-top: 25px;
-				padding-right: 22px;
-				padding-bottom: 8px;
-				min-height: 70px;
-				&:first-child {
-					float: left;
-				}
-				&:last-child {
-					float: right;
-					padding-top: 25px;
-					padding-right: 0;
-				}
-				.fa-exclamation-triangle {
-					color: #ca2b2b;
-				}
-			}
-		}
-	}
-	@include media(">1220px") {
+	@include smallscreen-wizard;
+	@include media(">1440px") {
 		background: transparent;
 		border: none;
 		@include arrow-wizard;
 	}
 }
 
-.open-nav .wizard {
-	@include media(">1430px") {
-		@include arrow-wizard;
-	}
-}
 .progress-info {
 	li {
 	    display: block;
