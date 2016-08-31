@@ -22,42 +22,37 @@ public class AccountMasterLookupRefreshFlow extends TypesafeDataFlowBuilder<Sing
     @Override
     public Node construct(SingleBaseSourceRefreshDataFlowParameter parameters) {
         Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
-        Node onlyDomain = addGetOnlyDomainNode(accountMasterSeed);
-        Node onlyDuns = addGetOnlyDunsNode(accountMasterSeed);
-        Node both = addGetBothDunsAndDomainNode(accountMasterSeed);
-        Node merged = both.merge(onlyDomain).merge(onlyDuns);
-        merged = addPopulateKeyNode(merged);
-        merged = addRetainNode(merged);
-        return merged;
+        Node searchByDuns = addSearchByDuns(accountMasterSeed);
+        Node searchByDomain = addSearchByDomainNode(accountMasterSeed);
+        Node searchByBoth = addSearchByBothNode(accountMasterSeed);
+        return searchByDuns.merge(searchByDomain).merge(searchByBoth);
     }
 
-    // Accounts from LatticeCacheSeed.
-    private Node addGetOnlyDomainNode(Node node) {
-        node = node.filter(DOMAIN_FIELD + " != null && " + DUNS_FIELD + " == null",
-                new FieldList(DOMAIN_FIELD, DUNS_FIELD));
-        return node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
+    // Accounts from LatticeCacheSeed with domains, no DUNS.
+    private Node addSearchByDomainNode(Node node) {
+        node = node.filter(DOMAIN_FIELD + " != null", new FieldList(DOMAIN_FIELD));
+        node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
+        node = node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, DOMAIN_FIELD, null),
+                new FieldList(node.getFieldNames()), new FieldMetadata(KEY_FIELD, String.class));
+        return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
     }
 
     // Accounts from DnBCacheSeed with DUNS but no Domains
-    private Node addGetOnlyDunsNode(Node node) {
-        node = node.filter(DOMAIN_FIELD + " == null && " + DUNS_FIELD + " != null",
-                new FieldList(DOMAIN_FIELD, DUNS_FIELD));
-        return node.groupByAndLimit(new FieldList(DUNS_FIELD), new FieldList(PRIMARY_DOMAIN_FIELD), 1, true, true);
+    private Node addSearchByDuns(Node node) {
+        node = node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
+        node = node.groupByAndLimit(new FieldList(DUNS_FIELD), new FieldList(PRIMARY_DOMAIN_FIELD), 1, true, true);
+        node = node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, null, DUNS_FIELD),
+                new FieldList(node.getFieldNames()), new FieldMetadata(KEY_FIELD, String.class));
+        return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
     }
 
     // Accounts from DnBCacheSeed with both DUNS and Domains
-    private Node addGetBothDunsAndDomainNode(Node node) {
+    private Node addSearchByBothNode(Node node) {
         node = node.filter(DOMAIN_FIELD + " != null && " + DUNS_FIELD + " != null",
                 new FieldList(DOMAIN_FIELD, DUNS_FIELD));
-        return node.groupByAndLimit(new FieldList(DOMAIN_FIELD, DUNS_FIELD), 1);
-    }
-
-    private Node addPopulateKeyNode(Node node) {
-        return node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, DOMAIN_FIELD, DUNS_FIELD),
+        node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD, DUNS_FIELD), 1);
+        node = node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, DOMAIN_FIELD, DUNS_FIELD),
                 new FieldList(node.getFieldNames()), new FieldMetadata(KEY_FIELD, String.class));
-    }
-
-    private Node addRetainNode(Node node) {
         return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
     }
 }

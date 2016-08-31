@@ -27,16 +27,16 @@ public class AccountMasterLookupKeyFunction extends BaseOperation implements Fun
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String domain = arguments.getString(domainColumn);
-        String duns = arguments.getString(dunsColumn);
-        if (domain != null) {
-            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, null)));
-        }
-        if (duns != null) {
-            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(null, duns)));
-        }
-        if (domain != null && duns != null) {
+        if (domainColumn != null && dunsColumn != null) {
+            String domain = arguments.getString(domainColumn);
+            String duns = arguments.getString(dunsColumn);
             functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, duns)));
+        } else if (domainColumn != null) {
+            String domain = arguments.getString(domainColumn);
+            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, null)));
+        } else if (dunsColumn != null) {
+            String duns = arguments.getString(dunsColumn);
+            functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(null, duns)));
         }
     }
 }
