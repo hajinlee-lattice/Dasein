@@ -2,8 +2,8 @@ package com.latticeengines.propdata.core.datasource.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
@@ -21,8 +21,6 @@ import com.latticeengines.propdata.core.service.ZkConfigurationService;
 
 @Component
 public class DataSourceServiceImpl implements DataSourceService {
-
-    private final AtomicInteger roundRobinPos = new AtomicInteger(0);
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
@@ -50,15 +48,11 @@ public class DataSourceServiceImpl implements DataSourceService {
     public List<JdbcTemplate> getJdbcTemplatesFromDbPool(DataSourcePool pool, Integer num) {
         List<DataSourceConnection> connectionList = zkConfigurationService.getConnectionsInPool(pool);
         List<JdbcTemplate> jdbcTemplates = new ArrayList<>();
-        synchronized (roundRobinPos) {
-            for (int i = 0; i < num; i++) {
-                if (roundRobinPos.get() < connectionList.size()) {
-                    DataSourceConnection connection = connectionList.get(roundRobinPos.get());
-                    jdbcTemplates.add(DataSourceUtils.getJdbcTemplate(connection));
-                }
-                Integer nextPos = (roundRobinPos.get() + 1) % connectionList.size();
-                roundRobinPos.set(nextPos);
-            }
+        Integer roundRobinPos = new Random(System.currentTimeMillis()).nextInt(connectionList.size());
+        for (int i = 0; i < num; i++) {
+            DataSourceConnection connection = connectionList.get(roundRobinPos);
+            jdbcTemplates.add(DataSourceUtils.getJdbcTemplate(connection));
+            roundRobinPos = (roundRobinPos + 1) % connectionList.size();
         }
         return jdbcTemplates;
     }
