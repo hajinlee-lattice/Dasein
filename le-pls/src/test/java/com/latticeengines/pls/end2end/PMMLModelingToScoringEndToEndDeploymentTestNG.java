@@ -63,6 +63,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/pmml";
     private static final String PMML_FILE_NAME = "rfpmml.xml";
+    private static final String TEST_FILE_DISPLAY_NAME = "SelfServiceScoring Test File.csv";
     private static final Log log = LogFactory.getLog(PMMLModelingToScoringEndToEndDeploymentTestNG.class);
     private Tenant tenantToAttach;
     private String modelName = "pmmlmodel";
@@ -226,7 +227,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
-                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
+                        TEST_FILE_DISPLAY_NAME), requestEntity, ResponseDocument.class);
         assertTrue(response.isSuccess());
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -264,7 +265,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
                     String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
                     String pmmlFileName = job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
                     return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId)
-                            && PMML_FILE_NAME.equals(pmmlFileName);
+                            && TEST_FILE_DISPLAY_NAME.equals(pmmlFileName);
                 }
             });
 
