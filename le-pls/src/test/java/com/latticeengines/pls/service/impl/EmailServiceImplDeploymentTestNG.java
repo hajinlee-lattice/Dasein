@@ -20,6 +20,8 @@ import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -35,13 +37,14 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
-
 public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    protected static final Log log = LogFactory.getLog(EmailServiceImplDeploymentTestNG.class);
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
     private static final String EXTERNAL_USER_EMAIL_PASSWORD = "MrB2uild";
-    private static final String EMAIL_SUBJECT = "Welcome to Lattice Lead Prioritization";
+    private static final String EMAIL_SUBJECT = "Welcome to Lattice Predictive Insights";
     private static final String APP_URL_PATTERN = "href=\"[^\"]*";
 
     private String testUsername;
@@ -73,7 +76,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         createNewUserAndSendEmail(EXTERNAL_USER_EMAIL);
         int numOfRetries = 30;
         boolean verified = false;
-        while(numOfRetries-- > 0 && !verified) {
+        while (numOfRetries-- > 0 && !verified) {
             Thread.sleep(3000L);
             verified = verifyReceivedEmailInGmail(registrationTimestamp);
         }
@@ -125,14 +128,14 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
     private boolean verifyReceivedEmailInGmail(Date registrationTimestamp) {
-        String receivingHost="imap.gmail.com";
+        String receivingHost = "imap.gmail.com";
 
-        Properties props=System.getProperties();
+        Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
         props.setProperty("mail.imaps.starttls.enable", "true");
         props.setProperty("mail.imaps.port", "993");
         props.setProperty("mail.imaps.ssl.trust", "*");
-        Session session=Session.getDefaultInstance(props, null);
+        Session session = Session.getDefaultInstance(props, null);
 
         try {
             Store store = session.getStore("imaps");
@@ -144,7 +147,10 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             Message[] messages = folder.getMessages();
 
             for (Message message : messages) {
-                if (!message.getSubject().equalsIgnoreCase(EMAIL_SUBJECT)) { continue; }
+                if (!message.getSubject().equalsIgnoreCase(EMAIL_SUBJECT)) {
+                    log.info(String.format("The subject of the message is %s", message.getSubject()));
+                    continue;
+                }
 
                 Date receivedDate = message.getReceivedDate();
 
@@ -152,7 +158,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
                 if (message.getReceivedDate().after(registrationTimestamp)) {
                     String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
-
+                    log.info(String.format("The url of the message is %s", url));
                     if (appUrl.equalsIgnoreCase(url)) {
                         // delete the message
                         message.setFlag(Flags.Flag.DELETED, true);
