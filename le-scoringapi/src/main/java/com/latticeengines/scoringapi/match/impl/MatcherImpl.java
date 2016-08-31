@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -44,8 +43,8 @@ import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.propdata.match.service.RealTimeMatchService;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
@@ -57,11 +56,10 @@ public class MatcherImpl implements Matcher {
     private static final Log log = LogFactory.getLog(MatcherImpl.class);
 
     @Autowired
-    @Qualifier("matchProxyDeprecated")
-    private MatchProxy matchProxy;
+    private Warnings warnings;
 
     @Autowired
-    private Warnings warnings;
+    private List<RealTimeMatchService> realTimeMatchServiceList;
 
     @Value("${scoringapi.pls.api.hostport}")
     private String internalResourceHostPort;
@@ -172,7 +170,9 @@ public class MatcherImpl implements Matcher {
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
-        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+
+        MatchOutput matchOutput = getRealTimeMatchService(matchInput.getDataCloudVersion()).match(matchInput);
+
         if (log.isDebugEnabled()) {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
         }
@@ -253,7 +253,9 @@ public class MatcherImpl implements Matcher {
                 log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
             }
 
-            BulkMatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+            BulkMatchOutput matchOutput = getRealTimeMatchService(
+                    matchInput.getInputList().get(0).getDataCloudVersion()).matchBulk(matchInput);
+
             if (log.isDebugEnabled()) {
                 log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
             }
@@ -411,6 +413,15 @@ public class MatcherImpl implements Matcher {
             keyMap.put(matchKey, keyFields);
         }
         keyFields.add(field);
+    }
+
+    private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
+        for (RealTimeMatchService handler : realTimeMatchServiceList) {
+            if (handler.accept(matchVersion)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
     }
 
 }

@@ -15,7 +15,8 @@
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:oauth2db-persistence-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
-
+    <import resource="classpath:propdata-match-context.xml"/>
+    
     <context:annotation-config />
 
     <context:component-scan
@@ -27,4 +28,5 @@
             expression="com.latticeengines.scoringapi.swagger.SwaggerConfig" />
     </context:component-scan>
 
+    
 </beans>

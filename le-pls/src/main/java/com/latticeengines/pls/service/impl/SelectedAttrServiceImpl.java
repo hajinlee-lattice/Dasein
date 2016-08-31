@@ -33,8 +33,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
-    private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description",
-            "Data Type", "Status", "Premium");
+    private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description", "Data Type",
+            "Status", "Premium");
 
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
@@ -66,8 +66,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
             for (String selectedAttrStr : attributes.getSelectedAttributes()) {
-                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes,
-                        selectedAttrStr);
+                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
                 addAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -80,8 +79,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
-                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(
-                        allAttributes, deselectedAttrStr);
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -91,11 +90,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
 
         // TODO - add check for per datasource limitation as well
-        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount
-                + additionalPremiumAttrCount) {
+        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
             // throw exception if effective premium count crosses limitation
-            throw new LedpException(LedpCode.LEDP_18112,
-                    new String[] { premiumAttributeLimitation.toString() });
+            throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
         }
 
         selectedAttrEntityMgr.add(addAttrList);
@@ -103,14 +100,26 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     }
 
     @Override
-    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant,
-            String attributeDisplayNameFilter, Category category, Boolean onlySelectedAttributes) {
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                null);
+    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
+            Category category, Boolean onlySelectedAttributes) {
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
+
+        List<String> selectedAttributeInternalNames = getselectedAttributeInternalNames(selectedAttributes);
+
+        // TODO - pass selectedAttributeInternalNames to columnSelection() to
+        // get metadata about only these names
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
                 onlySelectedAttributes);
+    }
+
+    private List<String> getselectedAttributeInternalNames(List<SelectedAttribute> selectedAttributes) {
+        List<String> selectedAttributeInternalNames = new ArrayList<>();
+        for (SelectedAttribute attr : selectedAttributes) {
+            selectedAttributeInternalNames.add(attr.getColumnId());
+        }
+        return selectedAttributeInternalNames;
     }
 
     @Override
@@ -126,21 +135,18 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
         Map<String, Integer> limitationMap = new HashMap<>();
-        int premiumAttributesLimitation = tenantConfigService
-                .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        int premiumAttributesLimitation = tenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
     }
 
     @Override
-    public void downloadAttributes(HttpServletRequest request, HttpServletResponse response,
-            String mimeType, String fileName, Tenant tenant, Boolean isSelected) {
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                null);
+    public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String fileName, Tenant tenant, Boolean isSelected) {
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
-        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null,
-                null, isSelected);
+        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, isSelected);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
                 getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
@@ -161,8 +167,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             stringBuffer.append(modifyStringForCSV(attribute.getDisplayName()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getCategory()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getDescription()) + ",");
-            stringBuffer
-                    .append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldType())) + ",");
+            stringBuffer.append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldType())) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsSelected() ? "On" : "Off") + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsPremium() ? "Yes" : "No"));
             stringBuffer.append("\r\n");
@@ -191,8 +196,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
-            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter,
-            Category category, Boolean onlySelectedAttributes) {
+            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
+            Boolean onlySelectedAttributes) {
         List<String> selectedAttributeNames = new ArrayList<>();
 
         for (SelectedAttribute selectedAttribute : selectedAttributes) {
@@ -215,8 +220,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             }
 
             if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
-                if (!column.getDisplayName().toUpperCase()
-                        .contains(attributeDisplayNameFilter.toUpperCase())) {
+                if (!column.getDisplayName().toUpperCase().contains(attributeDisplayNameFilter.toUpperCase())) {
                     continue;
                 }
             }
@@ -227,8 +231,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         return superimposedList;
     }
 
-    private void addAttrInFinalList(List<String> selectedAttributeNames,
-            List<LeadEnrichmentAttribute> superimposedList, ColumnMetadata column) {
+    private void addAttrInFinalList(List<String> selectedAttributeNames, List<LeadEnrichmentAttribute> superimposedList,
+            ColumnMetadata column) {
         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
         attr.setDisplayName(column.getDisplayName());
         attr.setFieldName(column.getColumnId());
@@ -259,8 +263,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
     }
 
-    private LeadEnrichmentAttribute findEnrichmentAttributeByName(
-            List<LeadEnrichmentAttribute> allAttributes, String selectedAttrStr) {
+    private LeadEnrichmentAttribute findEnrichmentAttributeByName(List<LeadEnrichmentAttribute> allAttributes,
+            String selectedAttrStr) {
         for (LeadEnrichmentAttribute attr : allAttributes) {
             if (attr.getFieldName().equals(selectedAttrStr)) {
                 return attr;
@@ -270,8 +274,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         throw new LedpException(LedpCode.LEDP_18114, new String[] { selectedAttrStr });
     }
 
-    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr,
-            Tenant tenant) {
+    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
         SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
         attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
         return attr;

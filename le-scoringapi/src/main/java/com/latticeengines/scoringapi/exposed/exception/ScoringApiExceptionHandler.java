@@ -10,6 +10,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -30,6 +32,8 @@ import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 
 @ControllerAdvice
+// define precedence to avoid conflit with PropDataExceptionHandler
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ScoringApiExceptionHandler {
 
     private static final Log log = LogFactory.getLog(ScoringApiExceptionHandler.class);
@@ -119,13 +123,12 @@ public class ScoringApiExceptionHandler {
         return generateExceptionResponse(code, ex, false);
     }
 
-    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex,
-            boolean fireAlert) {
+    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert) {
         return generateExceptionResponse(code, ex, fireAlert, false, true);
     }
 
-    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex,
-            boolean fireAlert, boolean includeErrors, boolean includeTrace) {
+    private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert,
+            boolean includeErrors, boolean includeTrace) {
         ExceptionHandlerErrors exceptionHandlerErrors = new ExceptionHandlerErrors();
         List<String> errorMessages = new ArrayList<String>();
         Throwable cause = ex;
@@ -154,8 +157,8 @@ public class ScoringApiExceptionHandler {
         if (fireAlert) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes();
-            String identifier = String.valueOf(
-                    attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
+            String identifier = String
+                    .valueOf(attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
             alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
@@ -163,8 +166,8 @@ public class ScoringApiExceptionHandler {
             alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
 
             String logUrl = SPLUNK_URL + identifier + "%22";
-            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-"
-                    + code + "-" + ex.getClass().getName();
+            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-" + code + "-"
+                    + ex.getClass().getName();
             alertService.triggerCriticalEvent(errorMessage, logUrl, dedupKey, alertDetails);
         }
 
