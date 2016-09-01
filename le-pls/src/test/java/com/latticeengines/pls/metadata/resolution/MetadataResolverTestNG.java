@@ -65,10 +65,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
 
-        path = ClassLoader
-                .getSystemResource(
-                        "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles/Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv")
-                .getPath();
+        path = ClassLoader.getSystemResource("com/latticeengines/pls/metadata/csvfiles/sample_lead.csv").getPath();
 
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath2);
