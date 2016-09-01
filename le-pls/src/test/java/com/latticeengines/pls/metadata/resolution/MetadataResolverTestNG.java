@@ -59,10 +59,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
-        String path = ClassLoader
-                .getSystemResource(
-                        "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv")
-                .getPath();
+        String path = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath();
 
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
@@ -78,12 +76,12 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getFieldMappingsTest() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath,
-                SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
 
-        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column",
-                "Boolean Column", "Number Column", "Almost Boolean Column" });
+        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column",
+                "Number Column", "Almost Boolean Column" });
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -102,34 +100,28 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "website");
         assertEquals(table.getAttribute(InterfaceName.Event).getDisplayName(), "Event");
         assertEquals(table.getAttribute(InterfaceName.Country).getDisplayName(), "Billing Country");
-        assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(),
-                "ACCOUNT Name");
-        assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(),
-                "Last Modified Date");
+        assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "ACCOUNT Name");
+        assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(), "Last Modified Date");
         assertNull(table.getAttribute(InterfaceName.AnnualRevenue));
 
         Attribute attribute = table.getAttribute("Some_Column");
         assertEquals(attribute.getTags().size(), 1);
         assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
         assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-        assertEquals(attribute.getPhysicalDataType(),
-                UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
 
         attribute = table.getAttribute("Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(),
-                UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
         attribute = table.getAttribute("Number_Column");
-        assertEquals(attribute.getPhysicalDataType(),
-                UserDefinedType.NUMBER.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.NUMBER.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_NUMERIC);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.RATIO_STAT_TYPE);
         attribute = table.getAttribute("Almost_Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(),
-                UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
 
@@ -143,8 +135,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToLatticeAttr_assertMappedCorrectly() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath,
-                SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -166,8 +158,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath,
-                SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
 
         assertFalse(resolver.isMetadataFullyDefined());
@@ -186,16 +178,15 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         for (Attribute attribute : table.getAttributes()) {
             if (ignoredFields.contains(attribute.getDisplayName())) {
                 log.info("The ignored field is " + attribute.getDisplayName());
-                assertEquals(attribute.getApprovedUsage(),
-                        Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
+                assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
             }
         }
     }
 
     @Test(groups = "functional")
     public void getMappingFromDocument_setColumnToSpecificType_assertTypeIsSet() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath,
-                SchemaInterpretation.SalesforceAccount, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
+                yarnConfiguration, null);
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -214,24 +205,18 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         Table table = resolver.getMetadata();
         Attribute attribute = table.getAttribute("Almost_Boolean_Column");
-        assertEquals(attribute.getPhysicalDataType(),
-                UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.BOOLEAN.getAvroType().toString().toLowerCase());
     }
 
     @Test(groups = "functional")
     public void testCalculateBasedOnExistingMetadata() throws IOException {
-        String path = ClassLoader
-                .getSystemResource(
-                        "com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json")
-                .getPath();
+        String path = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json").getPath();
 
-        Table table = JsonUtils.deserialize(FileUtils.readFileToString(new File(path)),
-                Table.class);
-        table.getAttributeFromDisplayName("Some Column")
-                .setApprovedUsage(ApprovedUsage.NONE.toString());
+        Table table = JsonUtils.deserialize(FileUtils.readFileToString(new File(path)), Table.class);
+        table.getAttributeFromDisplayName("Some Column").setApprovedUsage(ApprovedUsage.NONE.toString());
 
-        final Table schema = SchemaRepository.instance()
-                .getSchema(SchemaInterpretation.SalesforceLead);
+        final Table schema = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead);
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
@@ -239,10 +224,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 List<String> tags = attr.getTags();
 
                 if (schema.getAttribute(attr.getName()) == null
-                        && (approvedUsages == null || approvedUsages.isEmpty()
-                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString())) //
-                        || (tags == null || tags.isEmpty()
-                                || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
+                        && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
+                                ApprovedUsage.NONE.toString())) //
+                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
                     log.info("Removing attr:" + attr.getName());
                     return true;
                 }
@@ -251,8 +235,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         });
         assertEquals(table.getAttributes().size(), 30);
 
-        MetadataResolver resolver = new MetadataResolver(hdfsPath2,
-                SchemaInterpretation.SalesforceLead, yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead,
+                yarnConfiguration, null);
         List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(fieldMappings);
@@ -267,11 +251,13 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         }
         assertTrue(foundSomeColumn);
-        assertEquals(fieldMappings.size(), 33);
-        assertEquals(table.getAttributes().size(), 33);
+        assertEquals(fieldMappings.size(), 34);
+        assertEquals(table.getAttributes().size(), 34);
         assertNotNull(table.getAttribute("BusinessCountry"));
+        assertNotNull(table.getAttribute("avro_1to300"));
         assertEquals(table.getAttributes().get(0).getDisplayName(), "LEAD");
-        assertEquals(table.getAttributes().get(32).getDisplayName(), "SourceColumn");
+        assertEquals(table.getAttributes().get(1).getDisplayName(), "1to300");
+        assertEquals(table.getAttributes().get(33).getDisplayName(), "SourceColumn");
     }
 
     @AfterClass(groups = "functional")
