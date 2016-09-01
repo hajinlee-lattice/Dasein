@@ -103,7 +103,10 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             mrJob.setMapperClass(getMapperClass());
             mrJob.setNumReduceTasks(0);
             if (getNumMappers() == 1) {
-                AvroKeyInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
+                AvroKeyInputFormat.setMinInputSplitSize(mrJob, Long.MAX_VALUE);
+            } else {
+                AvroKeyInputFormat.setMinInputSplitSize(mrJob, 104857600L);
+                AvroKeyInputFormat.setMaxInputSplitSize(mrJob, 10737418240L);
             }
             config.setInt(MAPRED_MAP_TASKS_PROPERTY, getNumMappers());
             log.info("Set num mappers to " + getNumMappers());
