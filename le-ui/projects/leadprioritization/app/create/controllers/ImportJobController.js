@@ -45,7 +45,6 @@ angular.module('lp.create.import.job', [
     function performCalc() {
         JobsStore.getJobs(true).then(function(jobs) {
             if (jobs.length > 0) {
-                console.log(jobs);
                 var pendings = [];
 
                 for (var i=0; i<jobs.length; i++) {
@@ -62,7 +61,6 @@ angular.module('lp.create.import.job', [
                     job = pendings.pop();
                 }
 
-                console.log($scope.applicationId, job);
                 if (!job) {
                     return;
                 }
