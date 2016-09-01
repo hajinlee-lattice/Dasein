@@ -113,7 +113,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_EXISTING_USER_SUBJECT, tenant.getName()), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending existing PLS internal user email to " + user.getEmail() + " succeeded.");
@@ -134,7 +134,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_EXISTING_USER_SUBJECT, tenant.getName()), mp,
                     Collections.singleton(user.getEmail()), Collections.singleton(businessOpsEmail));
             log.info("Sending PLS existing external user email to " + user.getEmail() + " succeeded.");
