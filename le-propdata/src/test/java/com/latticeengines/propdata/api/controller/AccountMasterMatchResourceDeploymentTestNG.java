@@ -126,7 +126,7 @@ public class AccountMasterMatchResourceDeploymentTestNG extends PropDataApiDeplo
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 860);
+        Assert.assertEquals(fields.size(), 11);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
         Assert.assertEquals(records.size(), 14);
