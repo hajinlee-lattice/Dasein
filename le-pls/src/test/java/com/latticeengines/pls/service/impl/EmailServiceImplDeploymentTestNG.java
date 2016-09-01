@@ -148,7 +148,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
             for (Message message : messages) {
                 if (!message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
-                    log.info(String.format("The subject of the message is %s", message.getSubject()));
                     continue;
                 }
 
@@ -158,7 +157,6 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
                 if (message.getReceivedDate().after(registrationTimestamp)) {
                     String url = getHrefUrlFromMultiPart((Multipart) m.getContent());
-                    log.info(String.format("The url of the message is %s", url));
                     if (appUrl.equalsIgnoreCase(url)) {
                         // delete the message
                         message.setFlag(Flags.Flag.DELETED, true);
