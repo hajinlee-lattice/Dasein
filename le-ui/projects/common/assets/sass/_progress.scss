@@ -41,7 +41,7 @@ Spinner Balls
  * lattice spinner
  * ShowSpinner(<text>, 'lattice'); // default is also lattice
  */
-.loading-spinner.lattice {
+.loading-spinner.lattice:not(.bar) {
 	position: absolute;
 	top: 5em;
 	left: 50%;
@@ -141,7 +141,7 @@ ShowSpinner(<text>, 'bar');
       font-weight: bold;
     }
 }
-.meter {
+.meter.bar {
 	height: 36px; 
 	position: relative;
 	background: #fefefe;
@@ -152,56 +152,57 @@ ShowSpinner(<text>, 'bar');
 	-webkit-box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
 	-moz-box-shadow   : inset 0 -1px 1px rgba(255,255,255,0.3);
 	box-shadow        : inset 0 -1px 1px rgba(255,255,255,0.3);
-}
-.meter > span {
-	display: block;
-	-webkit-transition: width 4s;
-	transition: width 4s;
-	height: 100%;
-	background-color: #a2e264;
-	position: relative;
-	overflow: hidden;
-	&.indeterminate {
-		width: 100%;
+
+	& > span {
+		display: block;
+		-webkit-transition: width 4s;
+		transition: width 4s;
+		height: 100%;
+		background-color: #a2e264;
+		position: relative;
+		overflow: hidden;
+		&.indeterminate {
+			width: 100%;
+		}
 	}
-}
-.meter > span:after, .animate > span > span {
-	content: "";
-	position: absolute;
-	top: 0; left: 0; bottom: 0; right: 0;
-	background-image:
-	   -webkit-gradient(linear, 0 0, 100% 100%,
-		  color-stop(.25, rgba(255, 255, 255, .2)),
-		  color-stop(.25, transparent), color-stop(.5, transparent),
-		  color-stop(.5, rgba(255, 255, 255, .2)),
-		  color-stop(.75, rgba(255, 255, 255, .2)),
-		  color-stop(.75, transparent), to(transparent)
-	   );
-	background-image:
-		-moz-linear-gradient(
-		  -45deg,
-		  rgba(255, 255, 255, .1) 25%,
-		  transparent 25%,
-		  transparent 50%,
-		  rgba(255, 255, 255, .1) 50%,
-		  rgba(255, 255, 255, .1) 75%,
-		  transparent 75%,
-		  transparent
-	   );
-	z-index: 1;
-	-webkit-background-size: 50px 50px;
-	-moz-background-size: 50px 50px;
-	background-size: 50px 50px;
-	-webkit-animation: move 2.5s linear infinite;
-	-moz-animation: move 2.5s linear infinite;
-	animation: move 2.5s linear infinite;
-	-webkit-border-radius: 8px;
-	   -moz-border-radius: 8px;
-			border-radius: 8px;
-	overflow: hidden;
-}
-.animate > span:after {
-	display: none;
+	& > span:after, .animate > span > span {
+		content: "";
+		position: absolute;
+		top: 0; left: 0; bottom: 0; right: 0;
+		background-image:
+		   -webkit-gradient(linear, 0 0, 100% 100%,
+			  color-stop(.25, rgba(255, 255, 255, .2)),
+			  color-stop(.25, transparent), color-stop(.5, transparent),
+			  color-stop(.5, rgba(255, 255, 255, .2)),
+			  color-stop(.75, rgba(255, 255, 255, .2)),
+			  color-stop(.75, transparent), to(transparent)
+		   );
+		background-image:
+			-moz-linear-gradient(
+			  -45deg,
+			  rgba(255, 255, 255, .1) 25%,
+			  transparent 25%,
+			  transparent 50%,
+			  rgba(255, 255, 255, .1) 50%,
+			  rgba(255, 255, 255, .1) 75%,
+			  transparent 75%,
+			  transparent
+		   );
+		z-index: 1;
+		-webkit-background-size: 50px 50px;
+		-moz-background-size: 50px 50px;
+		background-size: 50px 50px;
+		-webkit-animation: move 2.5s linear infinite;
+		-moz-animation: move 2.5s linear infinite;
+		animation: move 2.5s linear infinite;
+		-webkit-border-radius: 8px;
+		   -moz-border-radius: 8px;
+				border-radius: 8px;
+		overflow: hidden;
+	}
+	&.animate > span:after {
+		display: none;
+	}
 }
 @-webkit-keyframes move {
 	0% {
