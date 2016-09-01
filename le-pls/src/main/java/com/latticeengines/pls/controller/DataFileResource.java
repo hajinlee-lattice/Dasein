@@ -105,9 +105,7 @@ public class DataFileResource {
     @ApiOperation(value = "Get RF model csv file for specific model summary")
     public void getRfModelCsvFile(@RequestParam(value = "modelId") String modelId,
             HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        dataFileProviderService.downloadFile(request, response, modelId, MediaType.TEXT_PLAIN,
-                ".*rf_model.txt");
+        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*rf_model.txt");
     }
 
     @RequestMapping(value = "/postmatcheventtablecsv/{eventTableType}", method = RequestMethod.GET)

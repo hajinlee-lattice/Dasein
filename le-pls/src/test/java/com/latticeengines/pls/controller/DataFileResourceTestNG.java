@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,19 +30,16 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
-public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class DataFileResourceTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileResourceTestNG.class);
-    private static final String TENANT_ID = "TENANT1";
     private static final String UUID = "8195dcf1-0898-4ad3-b94d-0d0f806e979e";
 
     @Value("${pls.modelingservice.basedir}")
@@ -50,63 +49,54 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private TenantService tenantService;
+    private ModelSummaryParser modelSummaryParser;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setupUsers();
-
-        Tenant tenant1 = new Tenant();
-        tenant1.setId(TENANT_ID);
-        tenant1.setName(TENANT_ID);
-        tenantService.discardTenant(tenant1);
-        tenantService.registerTenant(tenant1);
-        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, TENANT_ID,
-                getTheTestingUserAtLevel(AccessLevel.SUPER_ADMIN).getUsername());
-
-        setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
+        setupTestEnvironmentWithOneTenant();
+        switchToSuperAdmin();
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
-        String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/Q_PLS_Modeling_TENANT1/" + UUID
+        String dir = modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId() + "/models/Q_PLS_Modeling_TENANT1/" + UUID
                 + "/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
-                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua-token.json");
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/metadata.avsc");
-        HdfsUtils
-                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
-        dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID) + "/data/ANY_TABLE/csv_files";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+        String newDir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(mainTestTenant.getId()) + "/data/ANY_TABLE/csv_files";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), newDir
                 + "/postMatchEventTable_allTraining-r-00000.csv");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), newDir
                 + "/postMatchEventTable_allTest-r-00000.csv");
+
+        String content = FileUtils.readFileToString(new File(modelSummaryUrl.getFile()));
+        content = content.replace("{uuid}", UUID);
+        content = content.replace("{tenantId}", mainTestTenant.getId());
+        ModelSummary summary = modelSummaryParser.parse(dir + "/enhancements/modelsummary.json", content);
+        summary.setId("ms__" + UUID + "-model");
+
+        restTemplate.postForEntity(getRestAPIHostPort() + "/pls/modelsummaries", summary, ModelSummary.class);
+
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", JsonUtils.serialize(summary));
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void teardown() throws Exception {
-        userService.resignAccessLevel(TENANT_ID, getTheTestingUserAtLevel(AccessLevel.SUPER_ADMIN).getUsername());
-        Tenant tenant1 = tenantService.findByTenantId(TENANT_ID);
-        tenantService.discardTenant(tenant1);
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
-        Tenant tenantToAttach = tenantService.findByTenantId(TENANT_ID);
-        UserDocument uDoc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
-        useSessionDoc(uDoc);
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.size(), 1);
@@ -142,7 +132,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", MediaType.TEXT_PLAIN }, //
                 { "explorercsv", "application/csv" }, //
-                { "rfmodelcsv", MediaType.TEXT_PLAIN }, //
+                { "rfmodelcsv", "application/csv" }, //
                 { "postmatcheventtablecsv/training", MediaType.APPLICATION_OCTET_STREAM }, //
                 { "postmatcheventtablecsv/test", MediaType.APPLICATION_OCTET_STREAM } };
     }

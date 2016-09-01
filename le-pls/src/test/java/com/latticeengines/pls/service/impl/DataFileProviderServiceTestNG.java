@@ -5,6 +5,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atMost;
 import static org.testng.Assert.assertEquals;
 
 import java.net.URL;
@@ -34,12 +35,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileProviderServiceTestNG.class);
@@ -74,15 +75,13 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
 
-        setupUsers();
-
         Tenant tenant1 = new Tenant();
         tenant1.setId(TENANT_ID);
         tenant1.setName(TENANT_ID);
         tenantService.discardTenant(tenant1);
         tenantService.registerTenant(tenant1);
 
-        setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
+        setupDbWithEloquaSMB(tenant1);
 
         Tenant tenant = tenantEntityMgr.findByTenantId(TENANT_ID);
         setupSecurityContext(tenant);
@@ -93,7 +92,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
         fileFolder = dir;
         URL modelSummaryUrl = ClassLoader
-                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+                .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua-token.json");
         fileContents = IOUtils.toString(modelSummaryUrl);
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
@@ -130,7 +129,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         try {
             when(response.getOutputStream()).thenReturn(os);
             dataFileProviderService.downloadFile(request, response, modelId, mimeType, filter);
-            verify(response).setHeader(eq("Content-Disposition"), anyString());
+            verify(response, atMost(2)).setHeader(eq("Content-Disposition"), anyString());
             verify(response).setContentType(mimeType);
 
         } catch (Exception ex) {
@@ -139,7 +138,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         }
     }
 
-    @Test(groups = {"functional"}, dataProvider = "dataFilePathProvider")
+    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider")
     public void downloadFileByPath(final String mimeType, final String filePath) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -156,7 +155,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         }
     }
 
-    @Test(groups = {"functional"}, dataProvider = "dataFilePathProviderNotFound")
+    @Test(groups = { "functional" }, dataProvider = "dataFilePathProviderNotFound")
     public void downloadFileByPathNotFound(final String mimeType, final String filePath) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -211,7 +210,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
                 { "application/csv", ".*_readoutsample.csv" }, //
                 { MediaType.TEXT_PLAIN, ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
-                { MediaType.TEXT_PLAIN, "rf_model.txt" }, //
+                { "application/csv", "rf_model.txt" }, //
                 { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Training.*.csv" }, //
                 { MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv" } };
     }
@@ -235,7 +234,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
     public static Object[][] getDataFilePathProvierNotFound() {
 
         return new Object[][] { { "application/json", "modelsummaryNotFound.json" },
-                {MediaType.APPLICATION_OCTET_STREAM, "/postMatchEventTable_allTraining-r-00000.csv"}, //
+                { MediaType.APPLICATION_OCTET_STREAM, "/postMatchEventTable_allTraining-r-00000.csv" }, //
 
         };
     }

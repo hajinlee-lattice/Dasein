@@ -11178,7 +11178,12 @@
     ], 
     "EventTableProvenance": {
         "SourceURL": "https://bodcdevvint187.dev.lattice.local:8080//DLRestService", 
-        "TenantName": "BD_ADEDTBDd69264296nJ26263627n1",
-        "QueryName": "Q_PLS_Modeling"
+        "TenantName": "BD_ADEDTBDd69264296nJ26263627n1", 
+        "QueryName": "Q_PLS_Modeling",
+        "EventTableName": "ANY_TABLE",
+        "SourceSchemaInterpretation": "SalesforceLead",
+        "Exclude_Public_Domains": "true",
+        "Is_One_Lead_Per_Domain": "false",
+        "Exclude_Propdata_Columns": "true"
     }
 }

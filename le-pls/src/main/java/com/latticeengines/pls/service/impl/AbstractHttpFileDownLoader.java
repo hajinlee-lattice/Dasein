@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.FileCopyUtils;
@@ -41,6 +42,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     }
                 }
             } else {
+                if (mimeType.equals("application/csv")) {
+                    response.setHeader(
+                            "Content-Disposition",
+                            String.format("attachment; filename=\"%s\"", //
+                                    StringUtils.substringBeforeLast(getFileName(), ".") + ".csv"));
+                }
                 FileCopyUtils.copy(getFileInputStream(), response.getOutputStream());
             }
 
