@@ -81,6 +81,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName());
         Assert.assertNotNull(useAccountMasterFeatureFlag);
 
+        FeatureFlagDefinition useDnbRtsAndModelingFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName());
+        Assert.assertNotNull(useDnbRtsAndModelingFeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -128,6 +132,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && useAccountMasterFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && useAccountMasterFeatureFlag.getDisplayName() != null
                 && useAccountMasterFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(useDnbRtsAndModelingFeatureFlag.getConfigurable()
+                && useDnbRtsAndModelingFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && useDnbRtsAndModelingFeatureFlag.getDisplayName() != null
+                && useDnbRtsAndModelingFeatureFlag.getDocumentation() != null);
 
     }
 
