@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -17,6 +18,9 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -66,9 +70,28 @@ public class MatcherImpl implements Matcher {
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    @Value("${scoringapi.enrichment.cache.size:100}")
+    private int maxEnrichmentCacheSize;
+
+    @Value("${scoringapi.enrichment.cache.expiration.time:5}")
+    private int enrichmentCacheExpirationTime;
+
+    private LoadingCache<CustomerSpace, List<LeadEnrichmentAttribute>> leadEnrichmentAttributeCache;
+
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+
+        leadEnrichmentAttributeCache = //
+                CacheBuilder.newBuilder()//
+                        .maximumSize(maxEnrichmentCacheSize)//
+                        .expireAfterWrite(enrichmentCacheExpirationTime, TimeUnit.MINUTES)//
+                        .build(new CacheLoader<CustomerSpace, List<LeadEnrichmentAttribute>>() {
+                            public List<LeadEnrichmentAttribute> load(CustomerSpace customerSpace) throws Exception {
+                                return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, null,
+                                        null, true);
+                            }
+                        });
     }
 
     private MatchInput buildMatchInput(CustomerSpace space, //
@@ -78,8 +101,7 @@ public class MatcherImpl implements Matcher {
             boolean forEnrichment) {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
         if (forEnrichment) {
-            selectedLeadEnrichmentAttributes = internalResourceRestApiProxy.getLeadEnrichmentAttributes(space, null,
-                    null, true);
+            selectedLeadEnrichmentAttributes = getEnrichmentAttributesMetadata(space, selectedLeadEnrichmentAttributes);
         }
         return buildMatchInput(space, interpreted, record, modelSummary, selectedLeadEnrichmentAttributes);
     }
@@ -334,8 +356,8 @@ public class MatcherImpl implements Matcher {
             if (recordModelTuple.getRecord().isPerformEnrichment()) {
                 if (selectedLeadEnrichmentAttributes == null) {
                     // we need to execute only once therefore null check is done
-                    selectedLeadEnrichmentAttributes = internalResourceRestApiProxy.getLeadEnrichmentAttributes(space,
-                            null, null, true);
+                    selectedLeadEnrichmentAttributes = getEnrichmentAttributesMetadata(space,
+                            selectedLeadEnrichmentAttributes);
                 }
 
                 if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
@@ -413,6 +435,16 @@ public class MatcherImpl implements Matcher {
             keyMap.put(matchKey, keyFields);
         }
         keyFields.add(field);
+    }
+
+    private List<LeadEnrichmentAttribute> getEnrichmentAttributesMetadata(CustomerSpace space,
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
+        try {
+            selectedLeadEnrichmentAttributes = leadEnrichmentAttributeCache.get(space);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, e, new String[] { e.getMessage() });
+        }
+        return selectedLeadEnrichmentAttributes;
     }
 
     private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
