@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 import com.latticeengines.monitor.alerts.service.impl.AlertServiceImpl;
-import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTestNGBase {
@@ -132,11 +131,11 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
 
-        PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
+        callable.handleJobFailed();
 
         List<String> failedAppIds = new ArrayList<String>();
         failedAppIds.add("application_1415144508340_0729");
-        PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed(failedAppIds));
+        callable.handleJobFailed(failedAppIds);
     }
 
     @Test(groups = "functional")

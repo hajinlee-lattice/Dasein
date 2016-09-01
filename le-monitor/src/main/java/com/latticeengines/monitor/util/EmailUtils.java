@@ -1,4 +1,4 @@
-package com.latticeengines.security.util;
+package com.latticeengines.monitor.util;
 
 import java.util.Collection;
 import java.util.Properties;
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.EmailSettings;
+import com.latticeengines.domain.exposed.monitor.EmailSettings;
 
 public final class EmailUtils {
     private static final Log log = LogFactory.getLog(EmailUtils.class);

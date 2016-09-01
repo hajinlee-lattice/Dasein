@@ -34,9 +34,9 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
-import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Api(value = "bisaccesstoken", description = "REST resource for getting the one-time bis access token")

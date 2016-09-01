@@ -197,12 +197,12 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     @VisibleForTesting
-    String handleJobFailed() {
-        return this.handleJobFailed(null);
+    void handleJobFailed() {
+        handleJobFailed(null);
     }
 
     @VisibleForTesting
-    String handleJobFailed(String failedYarnApplicationId) {
+    void handleJobFailed(String failedYarnApplicationId) {
         ScoringCommandState scoringCommandState = this.scoringCommandStateEntityMgr
                 .findLastStateByScoringCommand(this.scoringCommand);
         this.setJobFailed(scoringCommandState);
@@ -228,10 +228,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
             }
 
             String dedupKey = getClass().getName() + "-" + scoringCommand.getPid().toString();
-            return this.alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
+            alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
                     dedupKey, details);
-        } else {
-            return "";
         }
     }
 

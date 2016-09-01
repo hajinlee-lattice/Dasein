@@ -13,6 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -20,17 +25,12 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.EmailSettings;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalUserManagementService")
@@ -39,22 +39,22 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private static final Log log = LogFactory.getLog(GlobalUserManagementServiceImpl.class);
 
-    @Value("${security.emailsettings.from}")
+    @Value("${monitor.emailsettings.from}")
     private String EMAIL_FROM;
 
-    @Value("${security.emailsettings.server}")
+    @Value("${monitor.emailsettings.server}")
     private String EMAIL_SERVER;
 
-    @Value("${security.emailsettings.username}")
+    @Value("${monitor.emailsettings.username}")
     private String EMAIL_USERNAME;
 
-    @Value("${security.emailsettings.password}")
+    @Value("${monitor.emailsettings.password}")
     private String EMAIL_PASSWORD;
 
-    @Value("${security.emailsettings.port}")
+    @Value("${monitor.emailsettings.port}")
     private int EMAIL_PORT;
 
-    @Value("${security.emailsettings.useSSL}")
+    @Value("${monitor.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
     @Autowired

@@ -22,24 +22,20 @@ public class AlertServiceTestNG extends MonitorFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException {
-        String result = this.alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+        alertService.triggerCriticalEvent("testTriggerOneDetail", "http://AlertServiceTestNG",
                 "testTriggerOneDetail", new BasicNameValuePair("testmetric", "testvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException {
-        String result = this.alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
-                "testTriggerNoDetail");
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG", "testTriggerNoDetail");
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException {
-        String result = this.alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+        alertService.triggerCriticalEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
                 "testTriggerMultipleDetail", new BasicNameValuePair("testmetric", "testvalue"), new BasicNameValuePair(
                         "anothertestmetric", "anothertestvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
     }
 
 }

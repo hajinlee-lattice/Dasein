@@ -1,6 +1,5 @@
 package com.latticeengines.monitor.alerts.service.impl;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -24,36 +23,34 @@ public class AlertServiceImpl implements AlertService {
     private boolean alertServiceEnabled;
 
     @Autowired
-    private PagerDutyService pagerDutyService;
+    private PagerDutyService pagerDutyEmailService;
 
     @Override
     public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
             BasicNameValuePair... details) {
-        return this.triggerCriticalEvent(description, clientUrl, dedupKey, Arrays.asList(details));
+        return triggerCriticalEvent(description, clientUrl, dedupKey, Arrays.asList(details));
     }
 
     @Override
     public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {
         if (!this.alertServiceEnabled) {
-            return "";
+            return "disabled";
         }
-
-        String result = "";
 
         try {
-            result = this.pagerDutyService.triggerEvent(description, clientUrl, dedupKey, details);
-        } catch (IOException e) {
+            pagerDutyEmailService.triggerEvent(description, clientUrl, dedupKey, details);
+        } catch (Exception e) {
             // Intentionally log and consume error
-            log.error(String.format("Problem sending event to PagerDuty. description:%s clientUrl:%s dedupKey:%s",
+            log.fatal(String.format("Problem sending event to PagerDuty. description:%s clientUrl:%s dedupKey:%s",
                     description, clientUrl, dedupKey), e);
+            return "fail";
         }
-
-        return result;
+        return "success";
     }
 
     public void enableTestMode() {
         this.alertServiceEnabled = true;
-        ((PagerDutyServiceImpl) this.pagerDutyService).useTestServiceApiKey();
+        ((PagerDutyEmailServiceImpl) this.pagerDutyEmailService).useTestService();
     }
 }

@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.monitor.alerts.service.impl.AlertServiceImpl;
-import com.latticeengines.monitor.alerts.service.impl.PagerDutyTestUtils;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -157,8 +156,8 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         String failedAppId = "application_1415144508340_0729";
         ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
         this.scoringCommandStateEntityMgr.create(scoringCommandState);
-        PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed(failedAppId));
-        PagerDutyTestUtils.confirmPagerDutyIncident(this.scoringProcessor.handleJobFailed());
+        this.scoringProcessor.handleJobFailed(failedAppId);
+        this.scoringProcessor.handleJobFailed();
     }
 
     @Test(groups = "functional", enabled = true)

@@ -1,10 +1,10 @@
-package com.latticeengines.security.exposed.service;
+package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
 
 import javax.mail.Multipart;
 
-import com.latticeengines.domain.exposed.security.EmailSettings;
+import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 

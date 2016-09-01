@@ -1,4 +1,4 @@
-package com.latticeengines.security.exposed.service.impl;
+package com.latticeengines.monitor.exposed.service.impl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.security.EmailSettings;
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.security.exposed.service.EmailService;
-import com.latticeengines.security.util.EmailTemplateBuilder;
-import com.latticeengines.security.util.EmailUtils;
+import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.monitor.util.EmailTemplateBuilder;
+import com.latticeengines.monitor.util.EmailUtils;
 
 @Component
 public class EmailServiceImpl implements EmailService {
@@ -28,11 +29,16 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private EmailSettings emailsettings;
 
-    @Value("${security.email.enabled:true}")
+    @Value("${monitor.email.enabled:true}")
     private boolean emailEnabled;
 
-    @Value("${security.email.businessops:businessops@lattice-engines.com}")
+    @Value("${monitor.email.businessops:businessops@lattice-engines.com}")
     private String businessOpsEmail;
+
+    @VisibleForTesting
+    public void enableEmail() {
+        emailEnabled = true;
+    }
 
     @Override
     public void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients) {

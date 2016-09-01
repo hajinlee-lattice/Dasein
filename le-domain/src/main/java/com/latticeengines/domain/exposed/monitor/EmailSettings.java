@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.security;
+package com.latticeengines.domain.exposed.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class EmailSettings {
+
 
     public static final String PLS_NEW_INTERNAL_USER_EMAIL_MSG = "You have been added to the <strong>%s</strong> Lead Prioritization Tenant.";
     public static final String PLS_NEW_USER_SUBJECT = "Welcome to Lattice Predictive Insights";

@@ -287,12 +287,12 @@ public class ModelCommandCallable implements Callable<Long> {
     }
 
     @VisibleForTesting
-    String handleJobFailed() {
-        return handleJobFailed(Collections.<String> emptyList());
+    void handleJobFailed() {
+        handleJobFailed(Collections.<String> emptyList());
     }
 
     @VisibleForTesting
-    String handleJobFailed(List<String> failedYarnApplicationIds) {
+    void handleJobFailed(List<String> failedYarnApplicationIds) {
         modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(),
                 ModelCommandStatus.FAIL);
         ModelCommandResult result = modelCommandResultEntityMgr.findByModelCommand(modelCommand);
@@ -328,8 +328,7 @@ public class ModelCommandCallable implements Callable<Long> {
         }
 
         String dedupKey = getClass().getName() + "-" + modelCommand.getPid().toString();
-        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(), dedupKey,
-                details);
+        alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(), dedupKey, details);
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {

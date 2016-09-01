@@ -1,6 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -37,6 +37,7 @@ public class BaseExceptionHandlerTestNG extends SecurityFunctionalTestNGBase {
     @SuppressWarnings("unchecked")
     public void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
+
         when(
                 alertService.triggerCriticalEvent(any(String.class), any(String.class), any(String.class),
                         any(Iterable.class))).thenAnswer(new Answer<String>() {
@@ -50,7 +51,7 @@ public class BaseExceptionHandlerTestNG extends SecurityFunctionalTestNGBase {
                         assertEquals(pair.getValue(), CustomerSpace.parse("BaseExceptionHandlerTestNG").toString());
                     }
                 }
-                return "{}";
+                return "success";
             }
         });
     }

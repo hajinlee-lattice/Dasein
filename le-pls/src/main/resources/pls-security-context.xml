@@ -13,7 +13,7 @@
     <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
-    <import resource="classpath:security-email-settings-context.xml"/>
+    <import resource="classpath:monitor-email-settings-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:remote-context.xml"/>

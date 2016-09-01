@@ -29,13 +29,13 @@ import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.DlCallback;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentManager;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("tenantDeploymentManager")
