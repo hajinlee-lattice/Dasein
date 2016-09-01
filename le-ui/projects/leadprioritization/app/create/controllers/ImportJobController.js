@@ -34,7 +34,8 @@ angular.module('lp.create.import.job', [
     var up = true,
         value = 0,
         increment = 4,
-        ceiling = 10;
+        ceiling = 10,
+        initialized = false;
 
     $scope.$on("$destroy", function() {
         $interval.cancel(REFRESH_JOB_INTERVAL_ID);
@@ -44,35 +45,54 @@ angular.module('lp.create.import.job', [
     function performCalc() {
         JobsStore.getJobs(true).then(function(jobs) {
             if (jobs.length > 0) {
+                console.log(jobs);
+                var pendings = [];
+
                 for (var i=0; i<jobs.length; i++) {
-                    if (jobs.applicationId == $scope.applicationId) {
-                        var resultObj = jobs[i];
+                    if (jobs[i].applicationId == $scope.applicationId) {
+                        var job = jobs[i];
+                    } 
+
+                    if (jobs[i].jobStatus == 'Pending' && !jobs[i].applicationId) {
+                        pendings.push(jobs[i]);
                     }
                 }
 
-                if (!resultObj) {
+                if (!job && pendings.length > 0) {
+                    job = pendings.pop();
+                }
+
+                console.log($scope.applicationId, job);
+                if (!job) {
                     return;
                 }
-                
-                ServiceErrorUtility.process({ data: resultObj });
+                ServiceErrorUtility.process({ data: job });
 
-                var jobStatus = job.resultObj;
-
-                if (jobStatus.stepRunning == 'load_data'){
-                    ceiling = 30;
-                } else if (jobStatus.stepRunning == 'generate_insights'){
+                if (job.jobStatus == 'Pending') {
+                    ceiling = 10;
+                } else if (job.stepRunning == 'load_data'){
+                    ceiling = 35;
+                } else if (job.stepRunning == 'generate_insights'){
                     ceiling = 60;
-                } else if (jobStatus.stepRunning == 'create_global_target_market'){
-                    ceiling = 90;
+                } else if (job.stepRunning == 'create_global_target_market'){
+                    ceiling = 80;
+                } else if (job.jobStatus == 'Completed') {
+                    ceiling = 100;
                 }
 
-                if (up == true && value <= ceiling){
+                if (initialized) {
+                    value = ceiling;
+                } else if (up == true && value <= ceiling){
                     value += increment
                 }
+
                 if (value == ceiling){
                     up = false;
                 }
+                
                 $scope.compress_percent = value;
+                $scope.jobStatus = job.jobStatus;
+                initialized = true;
             };
         });
     };
@@ -107,6 +127,8 @@ angular.module('lp.create.import.job', [
         if (jobStatus.jobStatus == "Completed") {
             $scope.jobRunning = false;
             $scope.jobCompleted = true;
+            $scope.compress_percent = 100;
+            $scope.jobStatus = jobStatus.jobStatus;
         } else if (jobStatus.jobStatus == "Failed" || jobStatus.jobStatus == "Cancelled") {
             $scope.jobRunning = false;
             for (var jobState in $scope.jobStepsRunningStates) {

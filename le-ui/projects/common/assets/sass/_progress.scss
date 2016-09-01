@@ -52,6 +52,7 @@ Spinner Balls
 		background-size: contain;
 		height: 100px;
 		width: 100px;
+	    margin: 0.5em auto;
 	}
 	&.small, &.size-20x20 {
 		 .meter {
@@ -111,74 +112,17 @@ Spinner Balls
 Progress Bar 
 ShowSpinner(<text>, 'bar');
 ============================================================ */
-.loading-spinner.bar {
-    top: 10em;
-    left: 30%;
-    right: 30%;
-    margin: -2.5em 0 0;
-    padding: 1.25em;
-    background: white;
-    border: none;
-    border-radius: 6px;
-    box-shadow: 0 0px 75px 50px rgba(255,255,255,.9);
-	.meter {
-		height: 36px; 
-		position: relative;
-		background: #fefefe;
-		border: #ccc solid 1px;
-		-moz-border-radius: 2px;
-		-webkit-border-radius: 2px;
-		border-radius: 2px;
-		-webkit-box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
-		-moz-box-shadow   : inset 0 -1px 1px rgba(255,255,255,0.3);
-		box-shadow        : inset 0 -1px 1px rgba(255,255,255,0.3);
-	}
-	.meter > span {
-		display: block;
-		-webkit-transition: width 4s;
-	    transition: width 4s;
-		height: 100%;
-		background-color: #a2e264;
-		position: relative;
-		overflow: hidden;
-		&.indeterminate {
-			width: 100%;
-		}
-	}
-	.meter > span:after, .animate > span > span {
-		content: "";
-		position: absolute;
-		top: 0; left: 0; bottom: 0; right: 0;
-		background-image:
-		   -webkit-gradient(linear, 0 0, 100% 100%,
-		      color-stop(.25, rgba(255, 255, 255, .2)),
-		      color-stop(.25, transparent), color-stop(.5, transparent),
-		      color-stop(.5, rgba(255, 255, 255, .2)),
-		      color-stop(.75, rgba(255, 255, 255, .2)),
-		      color-stop(.75, transparent), to(transparent)
-		   );
-		background-image:
-			-moz-linear-gradient(
-			  -45deg,
-		      rgba(255, 255, 255, .1) 25%,
-		      transparent 25%,
-		      transparent 50%,
-		      rgba(255, 255, 255, .1) 50%,
-		      rgba(255, 255, 255, .1) 75%,
-		      transparent 75%,
-		      transparent
-		   );
-		z-index: 1;
-		-webkit-background-size: 50px 50px;
-		-moz-background-size: 50px 50px;
-		background-size: 50px 50px;
-		-webkit-animation: move 2.5s linear infinite;
-		-moz-animation: move 2.5s linear infinite;
-		animation: move 2.5s linear infinite;
-		-webkit-border-radius: 8px;
-		   -moz-border-radius: 8px;
-		        border-radius: 8px;
-		overflow: hidden;
+.bar {
+	background: white;
+	border: none;
+	border-radius: 6px;
+	box-shadow: 0 0px 75px 50px rgba(255,255,255,.9);
+	&.loading-spinner {
+		top: 10em;
+		left: 30%;
+		right: 30%;
+		margin: -2.5em 0 0;
+		padding: 1.25em;
 	}
     h2 {
       display: inline-block;
@@ -196,44 +140,103 @@ ShowSpinner(<text>, 'bar');
       color: #fff;
       font-weight: bold;
     }
-	.animate > span:after {
-		display: none;
+}
+.meter {
+	height: 36px; 
+	position: relative;
+	background: #fefefe;
+	border: #ccc solid 1px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	-webkit-box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
+	-moz-box-shadow   : inset 0 -1px 1px rgba(255,255,255,0.3);
+	box-shadow        : inset 0 -1px 1px rgba(255,255,255,0.3);
+}
+.meter > span {
+	display: block;
+	-webkit-transition: width 4s;
+	transition: width 4s;
+	height: 100%;
+	background-color: #a2e264;
+	position: relative;
+	overflow: hidden;
+	&.indeterminate {
+		width: 100%;
 	}
-	@-webkit-keyframes move {
-	    0% {
-	       background-position: 0 0;
-	    }
-	    100% {
-	       background-position: 50px 50px;
-	    }
+}
+.meter > span:after, .animate > span > span {
+	content: "";
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+	background-image:
+	   -webkit-gradient(linear, 0 0, 100% 100%,
+		  color-stop(.25, rgba(255, 255, 255, .2)),
+		  color-stop(.25, transparent), color-stop(.5, transparent),
+		  color-stop(.5, rgba(255, 255, 255, .2)),
+		  color-stop(.75, rgba(255, 255, 255, .2)),
+		  color-stop(.75, transparent), to(transparent)
+	   );
+	background-image:
+		-moz-linear-gradient(
+		  -45deg,
+		  rgba(255, 255, 255, .1) 25%,
+		  transparent 25%,
+		  transparent 50%,
+		  rgba(255, 255, 255, .1) 50%,
+		  rgba(255, 255, 255, .1) 75%,
+		  transparent 75%,
+		  transparent
+	   );
+	z-index: 1;
+	-webkit-background-size: 50px 50px;
+	-moz-background-size: 50px 50px;
+	background-size: 50px 50px;
+	-webkit-animation: move 2.5s linear infinite;
+	-moz-animation: move 2.5s linear infinite;
+	animation: move 2.5s linear infinite;
+	-webkit-border-radius: 8px;
+	   -moz-border-radius: 8px;
+			border-radius: 8px;
+	overflow: hidden;
+}
+.animate > span:after {
+	display: none;
+}
+@-webkit-keyframes move {
+	0% {
+	   background-position: 0 0;
 	}
+	100% {
+	   background-position: 50px 50px;
+	}
+}
 
-	@-moz-keyframes move {
-	    0% {
-	       background-position: 0 0;
-	    }
-	    100% {
-	       background-position: 50px 50px;
-	    }
+@-moz-keyframes move {
+	0% {
+	   background-position: 0 0;
 	}
-	.orange > span {
-		background-color: #f1a165;
-		background-image: -moz-linear-gradient(top, #f1a165, #f36d0a);
-		background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f1a165),color-stop(1, #f36d0a));
-		background-image: -webkit-linear-gradient(#f1a165, #f36d0a);
+	100% {
+	   background-position: 50px 50px;
 	}
-	.red > span {
-		background-color: #f0a3a3;
-		background-image: -moz-linear-gradient(top, #f0a3a3, #f42323);
-		background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f0a3a3),color-stop(1, #f42323));
-		background-image: -webkit-linear-gradient(#f0a3a3, #f42323);
-	}
-	.nostripes > span > span, .nostripes > span:after {
-		-webkit-animation: none;
-		-moz-animation: none;
-		animation: none;
-		background-image: none;
-	}
+}
+.orange > span {
+	background-color: #f1a165;
+	background-image: -moz-linear-gradient(top, #f1a165, #f36d0a);
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f1a165),color-stop(1, #f36d0a));
+	background-image: -webkit-linear-gradient(#f1a165, #f36d0a);
+}
+.red > span {
+	background-color: #f0a3a3;
+	background-image: -moz-linear-gradient(top, #f0a3a3, #f42323);
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f0a3a3),color-stop(1, #f42323));
+	background-image: -webkit-linear-gradient(#f0a3a3, #f42323);
+}
+.nostripes > span > span, .nostripes > span:after {
+	-webkit-animation: none;
+	-moz-animation: none;
+	animation: none;
+	background-image: none;
 }
 
 /* 

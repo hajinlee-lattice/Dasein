@@ -1,14 +1,4 @@
 <style>
-    button.button.icon-button, 
-    a.button.icon-button, 
-    .button.icon-button {
-        padding: 0.6em 0.8em 0.5em .7em;
-        font-size: 15px;
-        line-height: 1em;
-        color: #555555;
-        margin-bottom: 0.2em;
-        border-radius: 3px;
-    }
     div.pd-pagination {
         text-align: center;
         font-size: .9em;
@@ -43,10 +33,6 @@
         box-shadow: none;
         -webkit-box-shadow: none;
         border-color: #ccc;
-    }
-    div.tenant-select-controls-right {
-        float: right;
-        margin-top: -0.8em;
     }
     div.panel-body .columns {
         text-overflow: ellipsis;
@@ -89,6 +75,10 @@
     }
     .tenant-header {
         font-size: 14pt;
+        text-align: center;
+        margin-bottom: 1em;
+        padding-bottom: .5em;
+        border-bottom: 1px solid #d0d0d0;
     }
     .tenant-total {
         float: right;
@@ -126,12 +116,27 @@
     }
     .tenant-list-spinner,
     .tenant-list-spinner * {
-        
+        position: relative;
     }
     .button.link-button.close-button {
         color: #fff;
         margin-top: -0.7em;
         margin-right: -0.3em;
+    }
+    .ng-search a.button {
+
+    }
+    .ng-search.open-absolute .form-control,
+    .ng-search .form-control {
+        width: 100px;
+        left: initial;
+        right: 2em;
+    }
+    .button-group>.button:first-child:not(:last-child):not(.dropdown-toggle) {
+        border-right: none;
+    }
+    .button-group>.button:last-child:not(:first-child), .button-group>.dropdown-toggle:not(:first-child) {
+        border-left: none;
     }
 </style>
 <form class="form form-tenant-select" name="tenant-select-form" ng-if="vm.visible">
@@ -139,41 +144,31 @@
         <button class="button link-button close-button" data-ng-click="vm.showTenantError = false;"><i class="fa fa-times"></i></button>
         <span><i class="fa fa-exclamation-circle"></i> {{vm.tenantErrorMessage}}</span>
     </div>
-    <div class="tenant-select-header">
+    <div class="tenant-select-header row">
         <h4 class="tenant-header">{{vm.ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
     </div>
     <div class="tenant-select-body">
         <div class="tenant-select-controls">
-            <span>Version:</span>
-            <label for="tenantSelection2">
-            <input id="tenantSelection2" type="radio" ng-model="vm.version" value="2.0">
-            2.0</label>&nbsp;
-            <label for="tenantSelection3">
-            <input id="tenantSelection3" type="radio" ng-model="vm.version" value="3.0">
-            3.0</label>
-
+            <div class="button-group" role="group" aria-label="Basic example">
+                <button ng-click="vm.version = ''" type="button" class="button {{!vm.version?'orange':'white'}}-button icon-button">All</button>
+                <button ng-click="vm.version = '2.0'" type="button" class="button {{vm.version=='2.0'?'orange':'white'}}-button icon-button">2.0</button>
+                <button ng-click="vm.version = '3.0'" type="button" class="button {{vm.version=='3.0'?'orange':'white'}}-button icon-button">3.0</button>
+            </div>
             <div class="tenant-select-controls-right pull-right">
-                <input 
+                <div class="select-menu ng-search open-absolute">
+                    <input 
                         type="text" 
-                        class="form-control tenant-selection-search" 
-                        ng-model="vm.SearchValue"
-                        placeholder="Contains:"
+                        class="form-control" 
+                        placeholder="Contains:" 
+                        ng-model="vm.SearchValue" 
+                        ng-show="visible"
                         autofocus
                     />
-                <button 
-                        type="button" 
-                        class="button white-button icon-button" 
-                        ng-click="vm.SortDirection = (vm.SortDirection == '' ? '-' : '')" 
-                    >
-                    <span class="fa 
-                            fa-sort-alpha-{{ 
-                                vm.SortDirection == '' 
-                                    ? 'asc' 
-                                    : 'desc' 
-                            }}"
-                        >
-                    </span>
-                </button>
+                    <a class="button icon-button white-button" ng-init="visible = true" ng-click="visible = !visible;">
+                        <span class="fa fa-search" ng-show="!visible"></span>
+                        <span class="fa fa-times" ng-show="visible"></span>
+                    </a>
+                </div>
             </div>
         </div>
         <div 
@@ -182,9 +177,18 @@
             ng-model="select_value" 
         >
             <div class="row panel-heading custom-heading">
-                <div class="columns two" ng-click="vm.sort('UIVersion')">Version</div>
-                <div class="columns six" ng-click="vm.sort('DisplayName')">Name</div>
-                <div class="columns four" ng-click="vm.sort('RegisteredTime')">Created</div>
+                <div class="columns two" ng-click="vm.sort('UIVersion')">
+                    Ver.
+                    <i ng-if="vm.SortProperty == 'UIVersion'" class="fa fa-caret-{{vm.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
+                <div class="columns six" ng-click="vm.sort('DisplayName')">
+                    Name
+                    <i ng-if="vm.SortProperty == 'DisplayName'" class="fa fa-caret-{{vm.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
+                <div class="columns four" ng-click="vm.sort('RegisteredTime')">
+                    Created
+                    <i ng-if="vm.SortProperty == 'RegisteredTime'" class="fa fa-caret-{{vm.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
             </div>
             <div class="row panel-body">
                 <div 
@@ -192,19 +196,18 @@
                         filter: { 'UIVersion': vm.version, 'DisplayName': vm.SearchValue } | 
                         orderBy: vm.SortDirection + vm.SortProperty"
                     class="job-td-row tenant-list-item {{$index}}"
-                    ng-if="!vm.deactivated || vm.selected.Identifier == vm.tenant.Identifier"
+                    ng-if="!vm.deactivated"
                     ng-click="vm.select(tenant)"
                 >
-                    <!--
-                    <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                    -->
                     <div class="columns two tenant-version"><span class="badge {{tenant.UIVersion == '3.0' ? 'blue' : 'gray'}}-badge">{{tenant.UIVersion}}</span></div>
                     <div class="columns seven tenant-name">{{tenant.DisplayName}}</div>
                     <div class="columns three tenant-date">{{tenant.RegisteredTime | date:'MM/dd/yyyy'}}</div>
                 </div>
-                <div class="text-center tenant-list-spinner" ng-if="deactivated">
-                    <i class="fa fa-spinner fa-pulse fa-fw fa-2x"></i>
-                    <span>Launching LP {{vm.selected.UIVersion}}...</span>
+                <div class="text-center tenant-list-spinner" ng-if="vm.deactivated">
+                    <section class="loading-spinner lattice show-spinner"> 
+                        <h2 class="text-center">Launching LP {{vm.selected.UIVersion}}</h2>
+                        <div class="meter"><span class="indeterminate"></span></div> 
+                    </section>
                 </div>
             </div>
             <span class="tenant-total">Displaying {{ (vm.tenantList | filter: { 'UIVersion': vm.version, 'DisplayName': vm.SearchValue }).length || 0 }} tenants</span>

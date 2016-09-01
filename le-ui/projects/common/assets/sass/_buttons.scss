@@ -44,6 +44,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	border-radius: 5px;
 	font-weight: bold;
 	transition: all 200ms ease;
+	outline: none;
   
 	&:hover {
 		transition: none;

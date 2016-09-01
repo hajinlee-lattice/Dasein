@@ -596,8 +596,8 @@ a[ui-sref="home.jobs.status"][data-stooltip]:after {
         margin-left: 13px;
         padding: 10px 15px 10px 5px; 
         border-radius: 0px;
-        border-top-right-radius: 20px;
-        border-bottom-right-radius: 20px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
 
         -webkit-transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;
         transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;

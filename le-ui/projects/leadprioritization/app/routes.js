@@ -910,6 +910,7 @@ function ShowSpinner(LoadingString, type) {
     var element = $('#mainContentView'),
         LoadingString = LoadingString || '',
         type = type || 'lattice';
+        
     element
         .scrollTop(0)
         .children()
@@ -922,7 +923,7 @@ function ShowSpinner(LoadingString, type) {
         .prepend(
             $(
                 '<section class="loading-spinner ' + type + '">' +
-                '<h2 class="text-center">' + LoadingString + '</h2></div>' +
+                '<h2 class="text-center">' + LoadingString + '</h2>' +
                 '<div class="meter"><span class="indeterminate"></span></div>' +
                 '</section>'
             )

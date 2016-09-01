@@ -1,7 +1,9 @@
 angular
 .module('lp.jobs')
-.run(function($interval, JobsStore) {
-    JobsStore.getJobs();
+.run(function($timeout, $interval, JobsStore) {
+    $timeout(function() {
+        JobsStore.getJobs();
+    }, 1000); // FIXME: we wont need this soon, this is for switching tenants fix hack
 
     $interval(function() {
         JobsStore.getJobs();

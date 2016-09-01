@@ -25,8 +25,8 @@
 
             <div ng-if="!isPMMLJob">
                 <dl>
-                    <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Loading Data</dt>
-                    <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Loading Data</dt>
+                    <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</dt>
+                    <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</dt>
                     <dd>
                         <div class="progress-icon">
                             <span data-ng-if="jobStepsRunningStates.load_data">
@@ -83,9 +83,8 @@
     </div>
     <div class="row">
         <div class="six columns offset-three">
-
-            <div class="meter animate" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
-                <span ng-style="{ width: compress_percent + '%' }"><span></span></span>
+            <div class="meter" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
+                <span ng-style="{ width: compress_percent + '%' }" class="indeterminate"></span>
             </div>
             <div>
                 <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> {{jobStatus}}</p>

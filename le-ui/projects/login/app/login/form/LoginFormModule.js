@@ -91,8 +91,7 @@ angular.module('login.form', [
             if (result != null && result.Success === true) {
                 $rootScope.$broadcast("LoggedIn");
 
-                $state.go('login.tenants')
-                //vm.handleTenantSelection(result.Result.Tenants);
+                $state.go('login.tenants');
             } else {
                 // Need to fail gracefully if we get no service response at all
                 vm.showLoginHeaderMessage(result.errorMessage);

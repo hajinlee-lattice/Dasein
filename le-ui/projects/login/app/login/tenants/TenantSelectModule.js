@@ -66,8 +66,13 @@ angular.module('login.tenants', [
     };
 
     vm.sort = function(value) {
+        if (vm.SortProperty == value) {
+            vm.SortDirection = (vm.SortDirection == '' ? '-' : '');
+        } else {
+            vm.SortDirection = '';
+        }
+
         vm.SortProperty = value;
-        vm.SortDirection = (vm.SortDirection == '' ? '-' : '');
     };
 
     function showError(message) {
