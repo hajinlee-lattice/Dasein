@@ -113,9 +113,10 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
+            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
-                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart,
             @ApiParam(value = "columns are selected column names for output; column names are delimited by a comma.", required = false) @RequestParam(value = "columns", required = false) String columns) {
 
@@ -131,9 +132,10 @@ public class RecommendationResource extends SpringBootServletInitializer {
     public Map<String, Object> getAccountExtensionCount(
             HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
+            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
-                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
+                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
+                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
