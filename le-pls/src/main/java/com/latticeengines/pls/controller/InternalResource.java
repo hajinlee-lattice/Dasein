@@ -584,9 +584,9 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    ModelSummary modelSummary = modelSummaryService.getModelSummary(modelId);
+                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
                     if (modelSummary != null) {
-                        String modelName = modelSummaryService.getModelSummary(modelId).getDisplayName();
+                        String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                     || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {

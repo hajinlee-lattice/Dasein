@@ -41,7 +41,7 @@ public class SendEmailAfterScoringCompletionListener extends LEJobListener {
         if (job != null) {
             String modelId = job.getInputContextValue(WorkflowContextConstants.Inputs.MODEL_ID);
             emailInfo.setModelId(modelId);
-            log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
+            log.info(String.format("userId: %s; modelId: %s", emailInfo.getUserId(), emailInfo.getModelId()));
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             try {
                 proxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);

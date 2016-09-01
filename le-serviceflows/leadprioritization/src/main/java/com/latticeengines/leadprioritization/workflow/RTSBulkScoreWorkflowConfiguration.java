@@ -54,6 +54,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             score.setInternalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
