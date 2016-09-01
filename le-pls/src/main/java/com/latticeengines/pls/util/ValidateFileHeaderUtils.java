@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.avro.SchemaParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -38,6 +39,7 @@ public class ValidateFileHeaderUtils {
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
     public static final int MAX_NUM_ROWS = 100;
+    public static final String AVRO_FIELD_NAME_PREFIX = "avro_";
 
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
@@ -174,5 +176,18 @@ public class ValidateFileHeaderUtils {
         if (headerFields.size() == 1) {
             throw new LedpException(LedpCode.LEDP_19111);
         }
+    }
+
+    public static String convertFieldNameToAvroFriendlyFormat(String fieldName) {
+        int length = fieldName.length();
+        if (length == 0) {
+            throw new SchemaParseException("Empty name");
+        }
+        StringBuilder sb = new StringBuilder();
+        char first = fieldName.charAt(0);
+        if (!(Character.isLetter(first) || first == '_')) {
+            sb.append(AVRO_FIELD_NAME_PREFIX);
+        }
+        return sb.append(fieldName).toString().replaceAll("[^A-Za-z0-9_]", "_");
     }
 }

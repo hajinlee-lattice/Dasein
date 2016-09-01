@@ -12,11 +12,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ValidateFileHeaderUtilsUnitTestNG {
 
@@ -73,5 +73,12 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         }
         assertNotNull(thrown);
         assertEquals(thrown.getCode(), LedpCode.LEDP_18109);
+    }
+
+    @Test(groups = "unit")
+    public void testConvertFieldNameToAvroFriendlyFormat() {
+        String malformedName = "2name?*wer23";
+        String expectedString = "avro_2name__wer23";
+        assertEquals(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(malformedName), expectedString);
     }
 }

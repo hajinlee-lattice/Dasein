@@ -3,16 +3,12 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
-import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
-import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
-import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
-import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +18,17 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -46,7 +50,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private MetadataProxy metadataProxy;
 
     @Override
-    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation) {
+    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
+            SchemaInterpretation schemaInterpretation) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
@@ -59,7 +64,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolver resolver = getMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(), fieldMappingDocument);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(),
+                fieldMappingDocument);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
@@ -80,10 +86,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         sourceFileService.update(sourceFile);
     }
 
-
     @Override
     public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
-                                            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
+            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -109,7 +114,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-                                            String fileDisplayName) {
+            String fileDisplayName) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -133,14 +138,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields() {
         Map<SchemaInterpretation, List<LatticeSchemaField>> schemaToLatticeSchemaFields = new HashMap<>();
 
-        List<Attribute> accountAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount).getAttributes();
+        List<Attribute> accountAttributes = SchemaRepository.instance()
+                .getSchema(SchemaInterpretation.SalesforceAccount).getAttributes();
         List<LatticeSchemaField> latticeAccountSchemaFields = new ArrayList<>();
         for (Attribute accountAttribute : accountAttributes) {
             latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }
         schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceAccount, latticeAccountSchemaFields);
 
-        List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead).getAttributes();
+        List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead)
+                .getAttributes();
         List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
         for (Attribute leadAttribute : leadAttributes) {
             latticeLeadSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
@@ -156,7 +163,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         latticeSchemaField.setName(attribute.getName());
         // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
         latticeSchemaField.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
-        if (! attribute.getNullable()) {
+        if (!attribute.getNullable()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
         } else if (!attribute.getValidatorWrappers().isEmpty()) {
             String requiredIfNoField = getRequiredIfNoField(attribute.getValidatorWrappers());
@@ -176,18 +183,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
         UserDefinedType fieldType;
         switch (attributeType.toUpperCase()) {
-            case "BOOLEAN":
-                fieldType = UserDefinedType.BOOLEAN;
-                break;
-            case "LONG":
-            case "INT":
-            case "DOUBLE":
-                fieldType = UserDefinedType.NUMBER;
-                break;
-            case "STRING":
-            default:
-                fieldType = UserDefinedType.TEXT;
-                break;
+        case "BOOLEAN":
+            fieldType = UserDefinedType.BOOLEAN;
+            break;
+        case "LONG":
+        case "INT":
+        case "DOUBLE":
+            fieldType = UserDefinedType.NUMBER;
+            break;
+        case "STRING":
+        default:
+            fieldType = UserDefinedType.TEXT;
+            break;
         }
         return fieldType;
     }
@@ -212,7 +219,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return sourceFile;
     }
 
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, FieldMappingDocument fieldMappingDocument) {
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
+            FieldMappingDocument fieldMappingDocument) {
         return new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
     }
 }

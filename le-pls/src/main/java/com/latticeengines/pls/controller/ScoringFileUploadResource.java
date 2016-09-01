@@ -125,13 +125,14 @@ public class ScoringFileUploadResource {
                 table.setDisplayName(sourceFile.getDisplayName());
                 for (String header : headers) {
                     Attribute attr = new Attribute();
-                    attr.setName(header.replaceAll("[^A-Za-z0-9_]", "_"));
+                    attr.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
                     attr.setDisplayName(header);
                     attr.setPhysicalDataType(FieldType.STRING.avroTypes()[0]);
                     attr.setNullable(true);
                     attr.setTags(Tag.INTERNAL);
                     table.addAttribute(attr);
                 }
+                table.deDuplicateAttribute();
                 sourceFile.setTableName(table.getName());
                 metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
             }
