@@ -94,12 +94,17 @@ angular.module('login.form', [
                 $state.go('login.tenants');
             } else {
                 // Need to fail gracefully if we get no service response at all
-                vm.showLoginHeaderMessage(result.errorMessage);
+                vm.showLoginHeaderMessage(result);
+                vm.showLoginError = true;
             }
         });
     };
 
     vm.showLoginHeaderMessage = function (message) {
+
+        console.log(message);
+
+
         if (message == null) {
             return;
         }

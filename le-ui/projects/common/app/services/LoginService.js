@@ -13,14 +13,16 @@ angular.module('mainApp.login.services.LoginService', [
         var passwordHash = CryptoJS.SHA256(password);
         var httpHeaders = {
         };
-        
+        var params = JSON.stringify({ Username: username, Password: passwordHash.toString() });
+
         $http({
             method: 'POST', 
             url: '/pls/login',
-            data: JSON.stringify({ Username: username, Password: passwordHash.toString() })
+            data: params
          }).then(
             function onSuccess(response) {
                 var result = response.data;
+                console.log(result);
                 if (result != null && result !== "") {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
                     result.Result.UserName = username;
@@ -28,12 +30,16 @@ angular.module('mainApp.login.services.LoginService', [
                 }
                 deferred.resolve(result);
             }, function onError(response) {
+                
                 var result = {
                     Success: false,
                     errorMessage: ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
                 };
-                if (response.data.errorCode == 'LEDP_18001') result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
-                deferred.resolve(result);
+
+                if (response.data.errorCode == 'LEDP_18001') {
+                    result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
+                }
+                deferred.resolve(result.errorMessage);
             });
         
         return deferred.promise;

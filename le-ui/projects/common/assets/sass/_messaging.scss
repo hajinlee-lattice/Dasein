@@ -25,13 +25,11 @@
 		padding-right: .5em;
 		vertical-align: middle;
 	}
-	.close {
+	.close, .link-button.close-button {
 		float: right;
 		opacity: .8;
-		font-size: 1.75em;
 		border: none;
 		background: transparent;
-		margin-top: -5px;
 		color: white;
 	}
 }
