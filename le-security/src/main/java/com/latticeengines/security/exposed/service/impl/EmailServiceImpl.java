@@ -93,7 +93,7 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());
-            sendMultiPartEmail("EmailSettings.PLS_NEW_USER_SUBJECT", mp, Collections.singleton(user.getEmail()),
+            sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()),
                     Collections.singleton(businessOpsEmail));
             log.info("Sending new PLS external user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
