@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -105,17 +104,9 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         FileUtils
                 .write(new File(sourceModelLocalRoot + "/" + targetModelFileName), newModel.toString(), "UTF-8", false);
 
-        //deprecateSourceModelDir(sourceModelRoot, sourceModelSummary.getId());
         copyModelingArtifacts(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
 
     }
-
-//    private void deprecateSourceModelDir(String sourceModelRoot, String sourceModelId) throws IllegalArgumentException,
-//            IOException {
-//        String uuid = UuidUtils.extractUuid(sourceModelId);
-//        HdfsUtils.copyFiles(yarnConfiguration, sourceModelRoot + "/" + uuid, sourceModelRoot + "/" + uuid
-//                + "-deprecated");
-//    }
 
     private void copyModelingArtifacts(String sourceModelLocalRoot, String targetModelDirPath,
             String targetModelFileName) throws IOException {
@@ -164,13 +155,14 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     private void copyDataComposition(String sourceCustomerRoot, String targetCustomerRoot, String sourceEventTableName,
             String targetEventTableName) throws IOException {
-        String sourceDataComposition = sourceCustomerRoot + "/data/" + sourceEventTableName
-                + "-Event-Metadata/datacomposition.json";
-        String targetDataComposition = targetCustomerRoot + "/data/" + targetEventTableName
-                + "-Event-Metadata/datacomposition.json";
+        String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+                sourceCustomerRoot + "/data/", sourceEventTableName);
+        String targetStandardDataComposiitonPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+                targetCustomerRoot + "/data/", targetEventTableName);
 
-        HdfsUtils.moveFile(yarnConfiguration, targetDataComposition, targetDataComposition + ".bak");
-        HdfsUtils.copyFiles(yarnConfiguration, sourceDataComposition, targetDataComposition);
+        HdfsUtils.moveFile(yarnConfiguration, targetStandardDataComposiitonPath, targetStandardDataComposiitonPath
+                + ".bak");
+        HdfsUtils.copyFiles(yarnConfiguration, sourceStandardDataCompositionPath, targetStandardDataComposiitonPath);
     }
 
     String getModelFileName(String path, boolean isLocal) throws IllegalArgumentException, IOException {

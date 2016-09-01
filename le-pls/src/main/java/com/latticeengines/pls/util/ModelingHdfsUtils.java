@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -46,12 +47,23 @@ public class ModelingHdfsUtils {
         return json;
     }
 
-    public static String getModelFileName(Configuration config, String path) throws IllegalArgumentException,
+    public static String getModelFileName(Configuration conf, String path) throws IllegalArgumentException,
             IOException {
-        List<String> paths = HdfsUtils.getFilesForDir(config, path, ".*.model.json");
+        List<String> paths = HdfsUtils.getFilesForDir(conf, path, ".*.model.json");
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);
         }
         return new Path(paths.get(0)).getName();
+    }
+
+    public static String getStandardDataComposition(Configuration conf, String sourceDataDir, final String eventTableName) throws IOException{
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(conf, sourceDataDir, new HdfsFileFilter() {
+                    @Override
+                    public boolean accept(FileStatus file) {
+                       return file.getPath().getName().equals("datacomposition.json") //
+                                    && file.getPath().getParent().getName().startsWith(eventTableName);
+                    }
+                });
+        return paths.get(0);
     }
 }

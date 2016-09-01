@@ -44,37 +44,40 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         modelCopySourceTenant.setId("modelCopySourceTenant");
         modelCopyTargetTenant.setId("modelCopyTargetTenant");
 
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
+        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
+
         String localPathBase = ClassLoader
                 .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
-        HdfsUtils
-                .copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + modelCopySourceTenant.getId());
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + modelCopySourceTenant.getId());
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
+                + modelCopySourceTenant.getId());
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data",
+                customerBase + modelCopySourceTenant.getId());
     }
 
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
-        HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
     }
 
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
-        ((ModelCopyServiceImpl) modelCopyService).processHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
-                "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel", "cpTrainingTable", "cpEventTable", "some model display name");
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + modelCopyTargetTenant.getId()
-                + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
+        ((ModelCopyServiceImpl) modelCopyService).processHdfsData(modelCopySourceTenant.getId(),
+                modelCopyTargetTenant.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel",
+                "cpTrainingTable", "cpEventTable", "some model display name");
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
+                customerBase + modelCopyTargetTenant.getId() + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
 
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-                String name = file.getPath().getName().toString();
-                return name.equals("modelsummary.json");
-            }
+                    @Override
+                    public boolean accept(FileStatus file) {
+                        if (file == null) {
+                            return false;
+                        }
+                        String name = file.getPath().getName().toString();
+                        return name.equals("modelsummary.json");
+                    }
 
-        });
+                });
         assertTrue(paths.size() == 1);
         String modelSummaryPath = paths.get(0);
         String uuid = UuidUtils.parseUuid(modelSummaryPath);

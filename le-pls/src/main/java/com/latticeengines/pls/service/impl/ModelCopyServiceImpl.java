@@ -159,12 +159,13 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     void copyModelingDataDirectory(String sourceCustomerRoot, String targetCustomerRoot, String eventTableName,
             String cpEventTableName) throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
-        String targetDataRoot = targetCustomerRoot + "/data/";
+        String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
-        HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName, targetDataRoot + cpEventTableName);
-        HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot + "-Event-Metadata", targetDataRoot);
-        HdfsUtils.moveFile(yarnConfiguration, targetDataRoot + eventTableName + "-Event-Metadata", targetDataRoot
-                + cpEventTableName + "-Event-Metadata");
+
+        String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration, sourceCustomerRoot + "/data/",
+                eventTableName);
+        String targetStandardDataCompositionPath = sourceStandardDataCompositionPath.replace(sourceCustomerRoot, targetCustomerRoot).replace(eventTableName, cpEventTableName);
+        HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(), new Path(targetStandardDataCompositionPath).getParent().toString());
     }
 
     @Override
