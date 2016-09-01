@@ -65,6 +65,10 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     @Override
     public boolean copyModel(String sourceTenantId, String targetTenantId, String modelId) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+
         String trainingTableName = modelSummary.getTrainingTableName();
         String eventTableName = modelSummary.getEventTableName();
 
