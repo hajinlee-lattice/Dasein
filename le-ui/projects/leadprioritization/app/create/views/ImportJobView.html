@@ -88,8 +88,8 @@
                 <span ng-style="{ width: compress_percent + '%' }"><span></span></span>
             </div>
             <div>
-                <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed'"></i> {{jobStatus}}</p>
-                <a ui-sref="home.jobs.status.csv({jobId: jobId})" data-ng-if="jobStatus == 'Completed'">View Report</a>
+                <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> {{jobStatus}}</p>
+                <a ui-sref="home.jobs.status.csv({jobId: jobId})" data-ng-if="jobStatus == 'Completed' && !isPMMLJob">View Report</a>
             </div>
         </div>
     </div>
