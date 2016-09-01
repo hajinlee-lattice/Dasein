@@ -35,22 +35,21 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         try {
             response.setContentType(mimeType);
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", getFileName()));
-            if (mimeType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
+            switch (mimeType) {
+            case MediaType.APPLICATION_OCTET_STREAM:
                 try (InputStream is = getFileInputStream()) {
                     try (OutputStream os = response.getOutputStream()) {
                         GzipUtils.copyAndCompressStream(is, os);
                     }
                 }
-            } else {
-                if (mimeType.equals("application/csv")) {
-                    response.setHeader(
-                            "Content-Disposition",
-                            String.format("attachment; filename=\"%s\"", //
-                                    StringUtils.substringBeforeLast(getFileName(), ".") + ".csv"));
-                }
+                break;
+            case "application/csv":
+                response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", //
+                        StringUtils.substringBeforeLast(getFileName(), ".") + ".csv"));
+            default:
                 FileCopyUtils.copy(getFileInputStream(), response.getOutputStream());
+                break;
             }
-
         } catch (Exception ex) {
             log.error("Failed to download file.", ex);
             throw new LedpException(LedpCode.LEDP_18022, ex);
