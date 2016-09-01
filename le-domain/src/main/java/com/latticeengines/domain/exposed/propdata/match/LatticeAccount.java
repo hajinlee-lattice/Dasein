@@ -88,6 +88,9 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
         for (Schema.Field field : record.getSchema().getFields()) {
             String key = field.name();
             Object value = record.get(key);
+            if (value == null) {
+                continue;
+            }
             if (value instanceof Utf8) {
                 value = value.toString();
             }
