@@ -176,7 +176,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
     }
 
     protected String getMetadataTableFolderName(Table eventTable, Attribute currentEvent) {
-        return String.format("%s-%s-Metadata", eventTable.getName(),
-                currentEvent.getDisplayName().replaceAll("[^A-Za-z0-9_]", "_"));
+        return String.format("%s-%s-Metadata", eventTable.getName().replaceAll("[^A-Za-z0-9_-]", "_"), currentEvent
+                .getDisplayName().replaceAll("[^A-Za-z0-9_-]", "_"));
     }
 }
