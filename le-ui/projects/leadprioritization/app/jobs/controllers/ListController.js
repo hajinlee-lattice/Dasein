@@ -65,7 +65,7 @@ angular.module('lp.jobs', [
                 ]
             },
             scoring: {
-                label: 'Score Training Set',
+                label: 'Score List',
                 click: $scope.handleRescoreClick,
                 class: 'orange-button select-label',
                 icon: 'fa fa-chevron-down',
