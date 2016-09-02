@@ -572,18 +572,13 @@ html.no-cssmask {
     background-repeat: no-repeat; 
     background-position: 12px 50%;
 }
-body.open-nav [data-stooltip] {
+body.open-nav .primary-nav [data-stooltip] {
     &:hover {
         &:after {
             display: none;
         }
     }
 }
-a[ui-sref="home.jobs.status"][data-stooltip]:after {
-    //margin-left: -14px; //4px for ie
-    //margin-top: -3px;
-}
-
 .primary-nav [data-stooltip] {
     perspective: 500px;
     &:after {
