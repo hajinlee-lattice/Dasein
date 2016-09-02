@@ -14,7 +14,7 @@
                     {{job.modelName}}
             </a>
             <strong ng-if="!job.modelId"
-                    class="model-name"
+                    class="model-name">
                 <span ng-if="job.modelName">
                     {{job.modelName}}
                 </span>
@@ -23,7 +23,7 @@
                 </span>
             </strong>
             <strong ng-if="job.modelName && job.isDeleted"
-                    class="model-name"
+                    class="model-name">
                 <span ng-if="job.modelName">
                     (Deleted) {{job.modelName}}
                 </span>
