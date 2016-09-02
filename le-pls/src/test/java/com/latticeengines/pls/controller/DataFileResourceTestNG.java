@@ -51,7 +51,7 @@ public class DataFileResourceTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
-    @BeforeClass(groups = { "functional", "deployment" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
         switchToSuperAdmin();
@@ -89,13 +89,13 @@ public class DataFileResourceTestNG extends PlsDeploymentTestNGBase {
         HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", JsonUtils.serialize(summary));
     }
 
-    @AfterClass(groups = { "functional", "deployment" })
+    @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
+    @Test(groups = { "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         Assert.assertNotNull(response);
