@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;
-    private Boolean isPublicDomain;
+    private Boolean isPublicDomain = false;
     private String parsedDuns;
     private NameLocation parsedNameLocation;
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
