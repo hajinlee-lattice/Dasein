@@ -15,12 +15,12 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.JsonEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -130,7 +130,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             Item item = table.getItem(ID, id);
             if (item != null) {
                 ByteBuffer blob = item.getByteBuffer(BLOB);
-                record = jsonToAvro(blob);
+                record = bytesToAvro(blob);
             }
         } catch (NoSuchMethodError e) {
             throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
@@ -197,7 +197,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             do {
                 List<Item> items = outcome.getTableItems().get(tableName);
                 for (Item item : items) {
-                    GenericRecord record = jsonToAvro(item.getByteBuffer(BLOB));
+                    GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
                     records.put(item.getString(ID), record);
                 }
 
@@ -235,7 +235,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             Iterator<Item> iterator = items.iterator();
             while (iterator.hasNext()) {
                 Item item = iterator.next();
-                GenericRecord record = jsonToAvro(item.getByteBuffer(BLOB));
+                GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
                 records.add(record);
             }
         } catch (NoSuchMethodError e) {
@@ -248,11 +248,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return records;
     }
 
-    private ByteBuffer avroToJson(GenericRecord record) {
+    private ByteBuffer avroToBytes(GenericRecord record) {
         Schema schema = record.getSchema();
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
-            JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output);
+            BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(output, null);
             writer.write(record, encoder);
             encoder.flush();
             output.flush();
@@ -262,7 +262,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         }
     }
 
-    private GenericRecord jsonToAvro(ByteBuffer json) {
+    private GenericRecord bytesToAvro(ByteBuffer json) {
         try {
             DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
 
@@ -270,9 +270,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             json.get(bytes, 0, bytes.length);
             try (InputStream input = new ByteArrayInputStream(bytes)) {
                 DataInputStream din = new DataInputStream(input);
-                Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
-                GenericRecord datum = reader.read(null, decoder);
-                return datum;
+                Decoder decoder = DecoderFactory.get().binaryDecoder(din, null);
+                return reader.read(null, decoder);
             }
         } catch (Exception e) {
             return null;
@@ -291,7 +290,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         Map<String, Object> attrMap = new HashMap<>();
 
         attrMap.put(ID, id);
-        attrMap.put(BLOB, avroToJson(record));
+        attrMap.put(BLOB, avroToBytes(record));
 
         if (tableIndex != null) {
             attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()).toString());
@@ -305,7 +304,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private UpdateItemSpec buildUpdateItemSpec(String id, GenericRecord record) {
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(ID, id);
 
-        updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToJson(record)));
+        updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToBytes(record)));
 
         if (tableIndex != null) {
             updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getHashKeyAttr())

@@ -18,6 +18,8 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
+import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
@@ -98,10 +101,12 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
+        LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
     }
 
     @AfterClass(groups = "aws")
     public void cleanup() throws IOException {
+        LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
     }
 
     @Test(groups = "aws")
@@ -122,11 +127,11 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             Integer idx = new Random().nextInt(10000);
             LatticeAccount account = entityMgr.findByKey(idx.toString());
             Assert.assertNotNull(account);
-            System.out.println(account.toFabricAvroRecord(LATTICE_ACCOUNT));
+            System.out.println(JsonUtils.serialize(account));
         }
     }
 
-    @Test(groups = "aws")
+    @Test(groups = "aws", enabled = false)
     public void exportAccountLookup() throws Exception {
         setupMethod(ACCOUNT_LOOKUP_ENTRY);
 
