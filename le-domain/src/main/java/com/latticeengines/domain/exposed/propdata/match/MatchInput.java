@@ -60,7 +60,7 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
-        return returnUnmatched;
+        return returnUnmatched == null ? Boolean.FALSE : returnUnmatched;
     }
 
     @JsonProperty("ReturnUnmatched")
@@ -70,7 +70,7 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("ExcludePublicDomains")
     public Boolean getExcludePublicDomains() {
-        return excludePublicDomains;
+        return excludePublicDomains == null ? Boolean.FALSE : excludePublicDomains;
     }
 
     @JsonProperty("ExcludePublicDomains")
