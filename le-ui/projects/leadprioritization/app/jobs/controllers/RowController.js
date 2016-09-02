@@ -71,12 +71,9 @@ angular
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-                CancelJobModal.show(job.id);
-            };
-
-            $scope.cancelJobClickConfirm = function () {
                 $scope.cancelClicked = true;
                 $scope.cancelling[job.id] = true;
+                CancelJobModal.show(job.id);
             };
 
             $scope.downloadErrorLogClick = function($event){

@@ -27,7 +27,7 @@ angular.module('lp.jobs.modals.cancelmodal', [
         });
     };
 })
-.controller('CancelJobController', function ($scope, $rootScope, $state, ResourceUtility, JobsService,  ImportStore) {
+.controller('CancelJobController', function ($scope, $rootScope, $state, $stateParams, ResourceUtility, JobsService,  ImportStore) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.cancelJobClickConfirm = function ($event) {
