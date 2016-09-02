@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.service.MatchPlanner;
@@ -22,10 +23,11 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
-        context.setColumnSelection(parseColumnSelection(input));
+        ColumnSelection columnSelection = parseColumnSelection(input);
+        context.setColumnSelection(columnSelection);
         context.setReturnUnmatched(input.getReturnUnmatched());
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
-        MatchOutput output = initializeMatchOutput(input, null);
+        MatchOutput output = initializeMatchOutput(input, columnSelection, null);
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);

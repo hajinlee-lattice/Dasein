@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
@@ -29,12 +30,12 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
-        context.setColumnSelection(parseColumnSelection(input));
+        ColumnSelection columnSelection = parseColumnSelection(input);
+        context.setColumnSelection(columnSelection);
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
-        // TODO - this one calls parseColumnSelection twice... fix it
-        MatchOutput output = initializeMatchOutput(input, metadatas);
+        MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);

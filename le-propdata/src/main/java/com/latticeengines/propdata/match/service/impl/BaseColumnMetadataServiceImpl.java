@@ -21,8 +21,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.propdata.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MetadataColumnService;
 import com.newrelic.api.agent.Trace;
@@ -63,9 +63,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
         List<ColumnMetadata> metadatas = toColumnMetadata(metadataColumns);
         for (int i = 0; i < metadatas.size(); i++) {
             ColumnMetadata metadata = metadatas.get(i);
-            String overwrittenName = selection.getColumnNames().get(i);
+            String overwrittenName = selection.getColumns().get(i).getColumnName();
             if (StringUtils.isNotEmpty(overwrittenName)) {
-                metadata.setColumnName(selection.getColumnNames().get(i));
+                metadata.setColumnName(overwrittenName);
             } else if (StringUtils.isEmpty(metadata.getColumnName())) {
                 throw new IllegalArgumentException(String.format("Cannot find column name for column No.%d", i));
             }
@@ -87,8 +87,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 ColumnMetadata columnMetadata = column.toColumnMetadata();
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to extract metadata from MetadataColumn [" + column.getColumnId()
-                        + "]", e);
+                throw new RuntimeException(
+                        "Failed to extract metadata from MetadataColumn [" + column.getColumnId() + "]", e);
             }
         }
         return columnMetadataList;

@@ -25,11 +25,12 @@ public class AccountMasterRealTimeMatchPlanner extends RealTimeMatchPlanner {
         assignAndValidateColumnSelectionVersion(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
-        context.setColumnSelection(parseColumnSelection(input));
+        ColumnSelection columnSelection = parseColumnSelection(input);
+        context.setColumnSelection(columnSelection);
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
-        MatchOutput output = initializeMatchOutput(input, metadatas);
+        MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);

@@ -60,7 +60,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Trace
     ColumnSelection parseColumnSelection(MatchInput input) {
         ColumnSelectionService columnSelectionService = getColumnSelectionService(input.getDataCloudVersion());
-
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection());
         } else if (input.getPredefinedSelection() != null) {
@@ -132,7 +131,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchContext;
     }
 
-    MatchOutput initializeMatchOutput(MatchInput input, List<ColumnMetadata> metadatas) {
+    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection, List<ColumnMetadata> metadatas) {
         MatchOutput output = new MatchOutput(input.getUuid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
@@ -141,7 +140,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (metadatas != null && !metadatas.isEmpty()) {
             output = appendMetadata(output, metadatas);
         } else {
-            output = appendMetadata(output, parseColumnSelection(input), input.getDataCloudVersion());
+            output = appendMetadata(output, columnSelection, input.getDataCloudVersion());
         }
         output = parseOutputFields(output);
         MatchStatistics statistics = initializeStatistics(input);
