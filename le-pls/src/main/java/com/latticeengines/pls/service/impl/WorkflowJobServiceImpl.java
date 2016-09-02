@@ -1,7 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,10 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -80,7 +85,29 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
+        updateJobsWithModelSummeries(jobs);
         return jobs;
+    }
+
+    private void updateJobsWithModelSummeries(List<Job> jobs) {
+        Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
+        for (ModelSummary modelSummary : modelSummaryEntityMgr.findAll()) {
+            modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
+        }
+
+        for (Job job : jobs) {
+            String modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null
+                    ? job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID)
+                    : job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
+                continue;
+            }
+            if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
+            }
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                    modelIdToModelSummaries.get(modelId).getDisplayName());
+        }
     }
 
     @Override

@@ -12,6 +12,7 @@ public class WorkflowContextConstants {
 
     public static class Inputs {
         public static final String MODEL_ID = "MODEL_ID";
+        public static final String MODEL_DELETED = "MODEL_DELETED";
         public static final String MODEL_DISPLAY_NAME = "MODEL_DISPLAY_NAME";
         public static final String SOURCE_DISPLAY_NAME = "SOURCE_DISPLAY_NAME";
         public static final String JOB_TYPE = "JOB_TYPE";

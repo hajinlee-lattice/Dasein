@@ -3,19 +3,19 @@
         <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state != 'model'">
-            <a ng-if="job.modelId && job.modelName && !isPMML" 
+            <a ng-if="job.modelId && job.modelName && !isPMML && !job.isDeleted"
                class="model-name" 
                title="{{job.modelName}}" 
                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
-            <a ng-if="job.modelId && job.modelName && isPMML" 
+            <a ng-if="job.modelId && job.modelName && isPMML && !job.isDeleted"
                class="model-name" 
                title="{{job.modelName}}" 
                ui-sref="home.model.jobs({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
-            <strong ng-if="!job.modelId" 
+            <strong ng-if="!job.modelId"
                     class="model-name"
                     title="{{job.modelName}}">
                 <span ng-if="job.modelName">
@@ -23,6 +23,13 @@
                 </span>
                 <span ng-if="!job.modelName">
                     --
+                </span>
+            </strong>
+            <strong ng-if="job.modelName && job.isDeleted"
+                    class="model-name"
+                    title="{{job.modelName}}">
+                <span ng-if="job.modelName">
+                    (Deleted) {{job.modelName}}
                 </span>
             </strong>
             <strong ng-if="job.modelId && !job.modelName" 

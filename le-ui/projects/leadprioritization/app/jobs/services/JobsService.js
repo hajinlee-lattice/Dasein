@@ -178,6 +178,7 @@ angular
                         jobStatus: job.jobStatus,
                         modelName: job.inputs.MODEL_DISPLAY_NAME,
                         modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
+                        isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
                         startTimestamp: job.startTimestamp,
                         applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null,
                         stepRunning: stepRunning,
