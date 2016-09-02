@@ -2,9 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -14,8 +13,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
@@ -62,8 +63,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     public boolean modelIdinTenant(String modelId, String tenantId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false,
-                false);
+        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
         if (modelSummary == null) {
             return false;
         }
@@ -72,50 +72,44 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     private void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
-        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
-        List<String> existingNames = new ArrayList<>();
-        List<String> existingIds = new ArrayList<>();
+        ModelSummary summaryWithSameId = modelSummaryEntityMgr.findValidByModelId(modelSummary.getId());
+        if (summaryWithSameId != null) {
+            String newId = String.format("ms__%s-PLSModel", UUID.randomUUID());
+            modelSummary.setId(newId);
+            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.", modelSummary.getId(),
+                    newId));
+        }
+
+        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.findAll();
+        List<String> existingNames = new ArrayList<String>();
         for (ModelSummary summary : modelSummaries) {
             if (summary.getTenant().getId().equals(tenantId)) {
                 existingNames.add(summary.getName());
             }
-            existingIds.add(summary.getId());
         }
         int version = 0;
         String possibleName = modelSummary.getName();
-        String possibleId = modelSummary.getId();
-        String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
-        while (existingNames.contains(possibleName) || existingIds.contains(possibleId)) {
-            possibleName = modelSummary.getName().replace(rootname,
-                    rootname + "-" + String.format("%03d", ++version));
-            possibleId = rootId + "-" + String.format("%03d", version);
+        while (existingNames.contains(possibleName)) {
+            possibleName = modelSummary.getName().replace(rootname, rootname + "-" + String.format("%03d", ++version));
         }
-
         if (version > 0) {
             log.info(String.format("Change model name from \"%s\" to \"%s\" to avoid conflicts.",
                     modelSummary.getName(), possibleName));
-            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.",
-                    modelSummary.getId(), possibleId));
         }
-
-        modelSummary.setId(possibleId);
         modelSummary.setName(possibleName);
     }
 
     public void updatePredictors(String modelId, AttributeMap attrMap) {
         if (modelId == null) {
-            throw new NullPointerException(
-                    "ModelId should not be null when updating the predictors");
+            throw new NullPointerException("ModelId should not be null when updating the predictors");
         }
         if (attrMap == null) {
-            throw new NullPointerException(
-                    "Attribute Map should not be null when updating the predictors");
+            throw new NullPointerException("Attribute Map should not be null when updating the predictors");
         }
         ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, true, false, true);
         if (summary == null) {
-            throw new NullPointerException(
-                    "ModelSummary should not be null when updating the predictors");
+            throw new NullPointerException("ModelSummary should not be null when updating the predictors");
         }
         List<Predictor> predictors = summary.getPredictors();
         modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
