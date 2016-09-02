@@ -64,6 +64,11 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
     }
 
     @Override
+    public boolean isManualTriggerred() {
+        return true;
+    }
+
+    @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
             TransformationConfiguration transformationConfiguration) {
         accountMasterRebuildDataFlowService.executeDataProcessing(accountMaster, workflowDir, progress.getVersion(),
