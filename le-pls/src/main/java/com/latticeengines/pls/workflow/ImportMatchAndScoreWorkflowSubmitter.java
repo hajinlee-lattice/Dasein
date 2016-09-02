@@ -136,8 +136,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchColumnSelection(selection, selectionVersion) //
                 .dataCloudVersion(dataCloudVersion) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/" + sourceFileDisplayName.replace(' ', '_') + "_scored_"
-                        + DateTime.now().getMillis()) //
+                .outputFilename("/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
+                        ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //

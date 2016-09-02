@@ -74,7 +74,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'),
+                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
                                 ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //

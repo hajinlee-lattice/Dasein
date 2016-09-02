@@ -89,6 +89,9 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                     modelSummary.getDisplayName());
         }
 
+        String sourceFileDisplayName = sourceFile.getDisplayName() != null
+                ? sourceFile.getDisplayName() : "unnamed";
+
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -100,7 +103,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replace(' ', '_'),
+                        "/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
                                 ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
