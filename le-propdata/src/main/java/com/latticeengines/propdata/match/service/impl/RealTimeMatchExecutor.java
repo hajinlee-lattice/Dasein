@@ -55,6 +55,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         return matchContexts;
     }
 
+    @MatchStep
     private void generateOutputMetric(final MatchContext matchContext) {
         matchExecutor.execute(new Runnable() {
             @Override
@@ -64,6 +65,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         });
     }
 
+    @MatchStep
     private void generateOutputMetric(final List<MatchContext> matchContexts) {
         matchExecutor.execute(new Runnable() {
             @Override
