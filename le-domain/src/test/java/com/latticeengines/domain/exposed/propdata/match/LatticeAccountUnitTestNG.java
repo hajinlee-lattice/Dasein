@@ -58,12 +58,12 @@ public class LatticeAccountUnitTestNG {
         System.out.println("[compression=" + compression + "] Final byte length in mbus:     " + compressedSize + String
                 .format(" Time Elapsed for encoding: %.2f msec", 1.0 * duration / REPEAT));
 
-        ByteBuffer byteBuffer = avroToBytes(mbusRecord, compression);
+        byte[] bytes = avroToBytes(mbusRecord, compression).array();
         Schema schema = mbusRecord.getSchema();
-        GenericRecord restored = bytesToAvro(byteBuffer, schema, compression);
+        GenericRecord restored = bytesToAvro(bytes, schema, compression);
         startTime = System.currentTimeMillis();
         for (int i = 0; i < REPEAT; i++) {
-            bytesToAvro(byteBuffer, schema, compression);
+            bytesToAvro(bytes, schema, compression);
         }
         duration = System.currentTimeMillis() - startTime;
 
@@ -99,15 +99,15 @@ public class LatticeAccountUnitTestNG {
         return String.format("LongLongLongLongLongColumnName%05d", i);
     }
 
-    private GenericRecord bytesToAvro(ByteBuffer byteBuffer, Schema schema, boolean compression) {
+    private GenericRecord bytesToAvro(byte[] bytes, Schema schema, boolean compression) {
         try {
-            ByteBuffer decompressed;
+            byte[] decompressed;
             if (CompressAlgo.SNAPPY.equals(algo)) {
-                decompressed = compression ? ByteBuffer.wrap(Snappy.uncompress(byteBuffer.array())) : byteBuffer;
+                decompressed = compression ? Snappy.uncompress(bytes) : bytes;
             } else {
-                decompressed = compression ? codec.decompress(byteBuffer) : byteBuffer;
+                decompressed = compression ? codec.decompress(ByteBuffer.wrap(bytes)).array() : bytes;
             }
-            try (InputStream input = new ByteArrayInputStream(decompressed.array())) {
+            try (InputStream input = new ByteArrayInputStream(decompressed)) {
                 DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
                 DataInputStream din = new DataInputStream(input);
                 Decoder decoder = DecoderFactory.get().binaryDecoder(din, null);
