@@ -90,7 +90,7 @@
 
 
         <div class="row">
-            <div class="nine columns">
+            <div class="twelve columns">
 
 
                 <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow'">
@@ -218,8 +218,11 @@
                         </div>
                     </li>
                 </ol>
-
-                <ul class="progress-info">
+            </div><!-- End .columns -->
+        </div>
+        <div class="row">
+            <div class="twelve columns progress-info">
+                <ul>
                     <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
                     <li data-ng-if="showFileName"><strong>Filename:</strong>
                         <a href="/files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}">{{job.source}}</a>
@@ -230,9 +233,6 @@
                         <span data-ng-if="job.applicationLogUrl == null">{{job.applicationId}}</span>
                     </li>
                 </ul>
-
-            </div><!-- End .columns -->
-            <div class="three columns">
                 <div class="download-error-report">
                     <strong>Report:</strong>
                     <p>{{data.ignored_records == null ? 0 : data.ignored_records|number}} records with errors.</p>
