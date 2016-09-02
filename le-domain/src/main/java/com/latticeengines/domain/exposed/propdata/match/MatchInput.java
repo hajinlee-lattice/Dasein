@@ -66,6 +66,9 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("ReturnUnmatched")
     public void setReturnUnmatched(Boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+        if (this.returnUnmatched == null) {
+            this.returnUnmatched = Boolean.FALSE;
+        }
     }
 
     @JsonProperty("ExcludePublicDomains")
@@ -76,6 +79,9 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("ExcludePublicDomains")
     public void setExcludePublicDomains(Boolean excludePublicDomains) {
         this.excludePublicDomains = excludePublicDomains;
+        if (this.excludePublicDomains == null) {
+            this.excludePublicDomains = Boolean.FALSE;
+        }
     }
 
     @JsonProperty("KeyMap")
