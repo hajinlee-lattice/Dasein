@@ -52,6 +52,11 @@ public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfigurati
             return this;
         }
 
+        public Builder partitions(Integer partitions) {
+            stepConfigiguraton.setPartitions(partitions);
+            return this;
+        }
+        
         public Builder dataflowExtraSources(Map<String, String> dataflowExtaSources) {
             stepConfigiguraton.setExtraSources(dataflowExtaSources);
             return this;

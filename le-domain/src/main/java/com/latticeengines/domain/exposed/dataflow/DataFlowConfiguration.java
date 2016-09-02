@@ -12,6 +12,7 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     private DataFlowParameters dataFlowParameters;
     private String targetTableName;
     private String targetPath;
+    private Integer partitions;
 
     @JsonProperty("bean_name")
     public String getDataFlowBeanName() {
@@ -62,4 +63,15 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
+
+    @JsonProperty("partitions")
+    public Integer getPartitions() {
+        return partitions;
+    }
+
+    @JsonProperty("partitions")
+    public void setPartitions(Integer partitions) {
+        this.partitions = partitions;
+    }
+    
 }

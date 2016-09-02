@@ -62,12 +62,15 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         accountMasterSource.setSchema(fieldMetadata);
         accountMasterSource = accountMasterSource.retain(new FieldList(predefinedFields));
 
-        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
-        Node matchedNode = matchedLookupNode.join(latticeIdField, accountMasterSource, latticeIdField, joinType);
+        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.RIGHT : JoinType.INNER;
 
+//        Node matchedNode = matchedLookupNode.join(latticeIdField, accountMasterSource, latticeIdField, joinType);
+        Node matchedNode = accountMasterSource.hashJoin(latticeIdField, matchedLookupNode, latticeIdField, joinType);
+        
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
         matchedNode = matchedNode.retain(new FieldList(resultFields.toArray(new String[0])));
+        
         return matchedNode;
     }
 

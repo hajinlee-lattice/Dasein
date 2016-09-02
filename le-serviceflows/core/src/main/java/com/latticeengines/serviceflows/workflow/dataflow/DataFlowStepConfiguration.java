@@ -23,6 +23,8 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     private String targetPath;
 
+    private Integer partitions;
+    
     private DataFlowParameters dataFlowParams;
 
 
@@ -64,6 +66,16 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("target_path")
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
+    }
+    
+    @JsonProperty("partitions")
+    public Integer getPartitions() {
+        return partitions;
+    }
+
+    @JsonProperty("partitions")
+    public void setPartitions(Integer partitions) {
+        this.partitions = partitions;
     }
 
     @JsonProperty("data_flow_params")

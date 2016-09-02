@@ -40,6 +40,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Discard;
@@ -191,7 +192,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         DataFlowContext ctx = getDataFlowCtx();
         @SuppressWarnings("unchecked")
         Map sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
-        Table sourceTable = (Table)sourceTables.get(sourceTableName);
+        Table sourceTable = (Table) sourceTables.get(sourceTableName);
         if (sourceTable == null) {
             throw new RuntimeException(String.format("Could not find source with name %s", sourceTableName));
         }
@@ -440,6 +441,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType) {
+        return internalAddJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, joinType, false);
+    }
+
+    private String internalAddJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields,
+            JoinType joinType, boolean hashJoin) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
         if (lhsPipesAndFields == null) {
@@ -468,12 +474,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             break;
         }
 
-        Pipe join = new CoGroup(lhsPipesAndFields.getKey(), //
-                DataFlowUtils.convertToFields(lhsJoinFields.getFields()), //
-                rhsPipesAndFields.getKey(), //
-                DataFlowUtils.convertToFields(rhsJoinFields.getFields()), //
-                DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
-                joiner);
+        Pipe join = null;
+        if (!hashJoin) {
+            join = new CoGroup(lhsPipesAndFields.getKey(), //
+                    DataFlowUtils.convertToFields(lhsJoinFields.getFields()), //
+                    rhsPipesAndFields.getKey(), //
+                    DataFlowUtils.convertToFields(rhsJoinFields.getFields()), //
+                    DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
+                    joiner);
+        } else {
+            join = new HashJoin(lhsPipesAndFields.getKey(), //
+                    DataFlowUtils.convertToFields(lhsJoinFields.getFields()), //
+                    rhsPipesAndFields.getKey(), //
+                    DataFlowUtils.convertToFields(rhsJoinFields.getFields()), //
+                    DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
+                    joiner);
+        }
         return register(join, declaredFields);
     }
 
@@ -526,11 +542,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Pipe coGroup = new CoGroup(pipes, groupFieldsArray, //
-                                   DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
-                                   joiner);
+                DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
+                joiner);
         return register(coGroup, declaredFields);
     }
-
 
     private List<FieldMetadata> combineFields(String rhsId, List<FieldMetadata> lhsFields, List<FieldMetadata> rhsFields) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
@@ -877,7 +892,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (sourceTables != null) {
             lastOperator = constructFlowDefinition(parameters).getIdentifier();
         } else {
-            lastOperator = constructFlowDefinition(dataFlowCtx, (Map<String, String>)sourcePaths);
+            lastOperator = constructFlowDefinition(dataFlowCtx, (Map<String, String>) sourcePaths);
         }
         engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
 
@@ -971,6 +986,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { identifier });
         }
         return new Operation.Input(pipeAndMetadata.getKey(), Lists.newArrayList(pipeAndMetadata.getValue()));
+    }
+
+    protected String addHashJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields,
+            JoinType joinType) {
+        return internalAddJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, joinType, true);
     }
 
 }

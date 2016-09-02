@@ -364,4 +364,8 @@ public class Node {
         // Make a copy of the fieldmetadata so that consumers don't have to
         return new Operation.Input(pipeAndMetadata.getKey(), Lists.newArrayList(pipeAndMetadata.getValue()));
     }
+
+    public Node hashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
+        return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType), builder);
+    }
 }

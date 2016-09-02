@@ -59,6 +59,9 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Value("${propdata.match.public_domain.path}")
     protected String publicDomainPath;
 
+    @Value("${propdata.collection.cascading.partitions:8}")
+    protected Integer cascadingPartitions;
+
     @Autowired
     private AccountMaster accountMaster;
 
@@ -102,6 +105,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .inputProperties() //
                 .targetTableName(input.getTableName() + "_match_target") //
                 .targetPath(targetPath) //
+                .partitions(cascadingPartitions) //
                 .setBeanName("cascadingBulkMatchDataflow");
 
         Schema outputSchema = constructOutputSchema(input, rootOperationUid);
