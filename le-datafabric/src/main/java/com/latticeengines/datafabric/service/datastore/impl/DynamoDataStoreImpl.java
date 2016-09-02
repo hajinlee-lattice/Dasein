@@ -23,6 +23,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xerial.snappy.Snappy;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.AttributeUpdate;
@@ -256,24 +257,24 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             writer.write(record, encoder);
             encoder.flush();
             output.flush();
-            return ByteBuffer.wrap(output.toByteArray());
+            return ByteBuffer.wrap(Snappy.compress(output.toByteArray()));
         } catch (Exception e) {
+            log.warn("Exception in encoding generic record.", e);
             return null;
         }
     }
 
-    private GenericRecord bytesToAvro(ByteBuffer json) {
+    private GenericRecord bytesToAvro(ByteBuffer byteBuffer) {
         try {
-            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-
-            byte[] bytes = new byte[json.remaining()];
-            json.get(bytes, 0, bytes.length);
-            try (InputStream input = new ByteArrayInputStream(bytes)) {
+            ByteBuffer uncompressed = ByteBuffer.wrap(Snappy.uncompress(byteBuffer.array()));
+            try (InputStream input = new ByteArrayInputStream(uncompressed.array())) {
+                DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
                 DataInputStream din = new DataInputStream(input);
                 Decoder decoder = DecoderFactory.get().binaryDecoder(din, null);
                 return reader.read(null, decoder);
             }
         } catch (Exception e) {
+            log.warn("Exception in decoding generic record.", e);
             return null;
         }
     }
