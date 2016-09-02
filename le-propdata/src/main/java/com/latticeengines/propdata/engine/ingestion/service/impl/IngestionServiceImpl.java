@@ -339,20 +339,35 @@ public class IngestionServiceImpl implements IngestionService {
                 .getRetryFailedProgresses();
         List<IngestionProgress> processingProgresses = ingestionProgressService
                 .getProcessingProgresses();
-        Set<String> processingIngestion = new HashSet<String>();
+        Map<String, Integer> processingIngestion = new HashMap<String, Integer>();
         for (IngestionProgress progress : processingProgresses) {
-            processingIngestion.add(progress.getIngestionName());
+            if (!processingIngestion.containsKey(progress.getIngestionName())) {
+                processingIngestion.put(progress.getIngestionName(), 1);
+            } else {
+                processingIngestion.put(progress.getIngestionName(),
+                        processingIngestion.get(progress.getIngestionName()) + 1);
+            }
         }
         for (IngestionProgress progress : retryFailedProgresses) {
-            if (!processingIngestion.contains(progress.getIngestionName())) {
+            if (!processingIngestion.containsKey(progress.getIngestionName())) {
                 progresses.add(progress);
-                processingIngestion.add(progress.getIngestionName());
+                processingIngestion.put(progress.getIngestionName(), 1);
+            } else if (progress.getIngestion().getProviderConfiguration().getConcurrentNum() > processingIngestion
+                    .get(progress.getIngestionName())) {
+                progresses.add(progress);
+                processingIngestion.put(progress.getIngestionName(),
+                        processingIngestion.get(progress.getIngestionName()) + 1);
             }
         }
         for (IngestionProgress progress : newProgresses) {
-            if (!processingIngestion.contains(progress.getIngestionName())) {
+            if (!processingIngestion.containsKey(progress.getIngestionName())) {
                 progresses.add(progress);
-                processingIngestion.add(progress.getIngestionName());
+                processingIngestion.put(progress.getIngestionName(), 1);
+            } else if (progress.getIngestion().getProviderConfiguration().getConcurrentNum() > processingIngestion
+                    .get(progress.getIngestionName())) {
+                progresses.add(progress);
+                processingIngestion.put(progress.getIngestionName(),
+                        processingIngestion.get(progress.getIngestionName()) + 1);
             }
         }
         return submitAll(progresses);
