@@ -1,10 +1,11 @@
 angular.module('login.tenants', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'common.utilities.SessionTimeout'
 ])
 .controller('TenantSelectController', function (
     $state, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
-    LoginService, LoginStore, LoginDocument, TenantList
+    LoginService, LoginStore, LoginDocument, TenantList, SessionTimeoutUtility
 ) {
     var vm = this;
 
@@ -21,6 +22,7 @@ angular.module('login.tenants', [
     });
 
     vm.init = function() {
+        
         var ClientSession = BrowserStorageUtility.getClientSession();
         
         LoginStore.set(LoginDocument, ClientSession);
@@ -44,6 +46,8 @@ angular.module('login.tenants', [
             return;
         }
 
+        SessionTimeoutUtility.init();
+        
         vm.visible = true;
         
         $('[autofocus]').focus();

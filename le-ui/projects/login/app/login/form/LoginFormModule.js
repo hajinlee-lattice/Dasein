@@ -36,6 +36,8 @@ angular.module('login.form', [
             "2.0": "/lp2/"
         };
 
+        var previousSession = BrowserStorageUtility.getClientSession();
+
         return window.open(pathMap[UIVersion] || "/lp2", "_self");
     }
 })

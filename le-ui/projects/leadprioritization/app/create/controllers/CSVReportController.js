@@ -1,7 +1,8 @@
 angular.module('lp.create.import.report', [
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.core.modules.ServiceErrorModule'
 ])
-.controller('CSVReportController', function($scope, JobsService, JobResult, ResourceUtility) {
+.controller('CSVReportController', function($scope, JobsService, JobResult, ResourceUtility, ServiceErrorUtility) {
     var reports = JobResult.reports,
         JobReport = null;
 
@@ -22,6 +23,8 @@ angular.module('lp.create.import.report', [
     $scope.data.total_records = data.imported_records + data.ignored_records;
     $scope.errorlog = '/pls/fileuploads/' + JobReport.name + '/import/errors';
     $scope.ResourceUtility = ResourceUtility;
+
+    ServiceErrorUtility.process({ data: JobResult });
 
     $scope.clickGetErrorLog = function($event) {
         JobsService.getErrorLog(JobReport, JobResult.jobType).then(function(result) {

@@ -73,9 +73,9 @@ var mainApp = angular.module('mainApp', [
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
 })
 .config(function($animateProvider){
-  $animateProvider.classNameFilter(/ngAnimate/);
+    $animateProvider.classNameFilter(/ngAnimate/);
 })
 // add escape filter to angular {{ foobar | escape }}
 .filter('escape', function() {
-  return window.escape;
+    return window.escape;
 });

@@ -153,11 +153,11 @@ var mainApp = angular.module('mainApp', [
     };
 })
 .controller('MainController', function($rootScope, $state) {
-    $rootScope.$on('$stateChangeError', 
-        function(event, toState, toParams, fromState, fromParams, error){ 
-                // this is required if you want to prevent the $UrlRouter reverting the URL to the previous valid location
-                console.log(error);
-                event.preventDefault();
-                $state.go('login.form');
-        })
+    $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error){ 
+        console.log('-!- error changing state:', error);
+
+        event.preventDefault();
+
+        $state.go('login.form');
+    });
 });
