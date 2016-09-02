@@ -36,10 +36,10 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
-public class DataFileResourceTestNG extends PlsDeploymentTestNGBase {
+public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(DataFileResourceTestNG.class);
+    private static final Log log = LogFactory.getLog(DataFileResourceDeploymentTestNG.class);
     private static final String UUID = "8195dcf1-0898-4ad3-b94d-0d0f806e979e";
 
     @Value("${pls.modelingservice.basedir}")
