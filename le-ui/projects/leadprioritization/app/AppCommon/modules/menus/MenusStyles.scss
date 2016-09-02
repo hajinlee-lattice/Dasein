@@ -154,6 +154,15 @@
             }
         }
     }
+    &.white-select-menu {
+        button.select-label {
+            min-width: 100px;
+            text-align: left;
+        }
+        ul.model-menu {
+          min-width: 150px;
+        }
+    }
 
     &.white-select-menu.filter-select {
         button,
@@ -199,6 +208,9 @@
         span {
             margin-right: 0em;
             margin-left: 0em;
+            &.badge {
+                margin-left: 10px;
+            }
         }
 
         ul {

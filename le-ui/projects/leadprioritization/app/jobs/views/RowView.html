@@ -25,6 +25,12 @@
                     --
                 </span>
             </strong>
+            <strong ng-if="job.modelId && !job.modelName" 
+                    class="model-name">
+                <span>
+                    --
+                </span>
+            </strong>
         </span>
         <span class="columns two" ng-if="state == 'model'">
             <span
