@@ -121,10 +121,22 @@
         clear: both;
     }
 }
+.progress-info {
+    ul, div {
+        display: inline-block;
+    }
+    ul {
+        margin: 0;
+        padding: 0;
+        li {
+            margin: 0 0 2px 0;
+        }
+    }
+}
 .download-error-report {
     border: rgba(0,0,0,0.3) solid 1px;
     background: #fff;
-    margin: 0 10px;
+    margin: 0 10px 0 26px;
     padding: 10px;
     strong {
         font-weight: bold;
