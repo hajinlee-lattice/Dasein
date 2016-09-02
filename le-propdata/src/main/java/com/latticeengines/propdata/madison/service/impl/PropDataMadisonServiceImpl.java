@@ -129,7 +129,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
                 if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(targetDir))) {
 
-                    uploadTodayRawData(targetDir);
+                    // uploadTodayRawData(targetDir);
                     dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
                     propDataMadisonEntityMgr.executeUpdate(dailyProgress);
                     log.info("Data is already processed for record=" + dailyProgress);
@@ -173,7 +173,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             HdfsUtils.writeToFile(yarnConfiguration, getTableNameFromFile(targetDir),
                     dailyProgress.getDestinationTable());
 
-            uploadTodayRawData(targetDir);
+            // uploadTodayRawData(targetDir);
 
             response.setProperty(RESULT_KEY, dailyProgress);
             response.setProperty(STATUS_KEY, STATUS_OK);
@@ -440,6 +440,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return targetTable + "_new";
     }
 
+    @SuppressWarnings("unused")
     private void uploadTodayRawData(String todayIncrementalPath) throws Exception {
 
         if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
