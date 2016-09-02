@@ -107,6 +107,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
             job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
                     modelIdToModelSummaries.get(modelId).getDisplayName());
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
+                    modelIdToModelSummaries.get(modelId).getModelType());
         }
     }
 
