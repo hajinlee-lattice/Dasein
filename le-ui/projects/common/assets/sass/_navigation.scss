@@ -54,7 +54,14 @@ span.ico-container {
     text-align: center;
     position: relative;
     animation-duration: 5s;
-
+    &.page-icon {
+        .ico {
+            &.ico-marketo {
+                height: 15px;
+                width: 23px;
+            }
+        }
+    }
     .ico {
         position: absolute;
         top: 50%;
