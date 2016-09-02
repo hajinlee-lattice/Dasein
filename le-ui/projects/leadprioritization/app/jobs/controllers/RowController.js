@@ -21,7 +21,7 @@ angular
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
-            $scope.isPMML = (job.jobType === 'pmmlModelWorkflow');
+            $scope.isPMML = (['PmmlModel'].indexOf(job.modelType) > -1);
             $scope.jobRunning = false;
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
