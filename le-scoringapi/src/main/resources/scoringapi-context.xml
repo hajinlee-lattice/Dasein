@@ -15,7 +15,9 @@
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:oauth2db-persistence-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
+    <!-- TODO - anoop - enable it for M5 patch1
     <import resource="classpath:propdata-match-context.xml"/>
+    -->
     
     <context:annotation-config />
 

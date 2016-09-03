@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -47,14 +48,14 @@ import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.propdata.match.service.RealTimeMatchService;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component("matcher)")
-public class MatcherImpl implements Matcher {
+public class MatcherImpl implements Matcher {// , ApplicationContextAware {
 
     private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final Log log = LogFactory.getLog(MatcherImpl.class);
@@ -62,8 +63,20 @@ public class MatcherImpl implements Matcher {
     @Autowired
     private Warnings warnings;
 
+    // TODO - anoop - enable it for M5 Patch1
+    // private ApplicationContext applicationContext;
+    //
+    // @Autowired
+    // private RealTimeMatchFetcher realTimeMatchFetcher;
+    //
+    // @Value("${scoringapi.propdata.shortcircuit:true}")
+    // private boolean shouldShortcircuitPropdata;
+    //
+    // private List<RealTimeMatchService> realTimeMatchServiceList;
+
     @Autowired
-    private List<RealTimeMatchService> realTimeMatchServiceList;
+    @Qualifier("matchProxyDeprecated")
+    private MatchProxy matchProxy;
 
     @Value("${scoringapi.pls.api.hostport}")
     private String internalResourceHostPort;
@@ -92,6 +105,21 @@ public class MatcherImpl implements Matcher {
                                         null, true);
                             }
                         });
+
+        // TODO - anoop - enable it for M5 Patch1
+        // if (shouldShortcircuitPropdata) {
+        // Map<String, RealTimeMatchService> realTimeMatchServiceMap = //
+        // applicationContext//
+        // .getBeansOfType(RealTimeMatchService.class, //
+        // false, true);
+        // realTimeMatchServiceList = //
+        // new
+        // ArrayList<RealTimeMatchService>(realTimeMatchServiceMap.values());
+        // } else {
+        // // shutdown propdata fetchers which got started in scoringapi
+        // realTimeMatchFetcher.shutdownFeatchers();
+        // realTimeMatchFetcher = null;
+        // }
     }
 
     private MatchInput buildMatchInput(CustomerSpace space, //
@@ -193,7 +221,15 @@ public class MatcherImpl implements Matcher {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
 
-        MatchOutput matchOutput = getRealTimeMatchService(matchInput.getDataCloudVersion()).match(matchInput);
+        MatchOutput matchOutput = null;
+
+        // TODO - anoop - enable it for M5 Patch1
+        // if (shouldShortcircuitPropdata) {
+        // matchOutput =
+        // getRealTimeMatchService(matchInput.getDataCloudVersion()).match(matchInput);
+        // } else {
+        matchOutput = matchProxy.matchRealTime(matchInput);
+        // }
 
         if (log.isDebugEnabled()) {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
@@ -275,8 +311,16 @@ public class MatcherImpl implements Matcher {
                 log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
             }
 
-            BulkMatchOutput matchOutput = getRealTimeMatchService(
-                    matchInput.getInputList().get(0).getDataCloudVersion()).matchBulk(matchInput);
+            BulkMatchOutput matchOutput = null;
+
+            // TODO - anoop - enable it for M5 Patch1
+            // if (shouldShortcircuitPropdata) {
+            // matchOutput =
+            // getRealTimeMatchService(matchInput.getInputList().get(0).getDataCloudVersion())
+            // .matchBulk(matchInput);
+            // } else {
+            matchOutput = matchProxy.matchRealTime(matchInput);
+            // }
 
             if (log.isDebugEnabled()) {
                 log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
@@ -447,13 +491,22 @@ public class MatcherImpl implements Matcher {
         return selectedLeadEnrichmentAttributes;
     }
 
-    private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
-        for (RealTimeMatchService handler : realTimeMatchServiceList) {
-            if (handler.accept(matchVersion)) {
-                return handler;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
-    }
+    // TODO - anoop - enable it for M5 Patch1
+    // private RealTimeMatchService getRealTimeMatchService(String matchVersion)
+    // {
+    // for (RealTimeMatchService handler : realTimeMatchServiceList) {
+    // if (handler.accept(matchVersion)) {
+    // return handler;
+    // }
+    // }
+    // throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion
+    // });
+    // }
+    //
+    // @Override
+    // public void setApplicationContext(ApplicationContext applicationContext)
+    // throws BeansException {
+    // this.applicationContext = applicationContext;
+    // }
 
 }
