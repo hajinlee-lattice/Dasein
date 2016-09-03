@@ -72,13 +72,10 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     private void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
-        ModelSummary summaryWithSameId = modelSummaryEntityMgr.findValidByModelId(modelSummary.getId());
-        if (summaryWithSameId != null) {
-            String newId = String.format("ms__%s-PLSModel", UUID.randomUUID());
-            modelSummary.setId(newId);
-            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.", modelSummary.getId(),
-                    newId));
-        }
+
+        String newId = String.format("ms__%s-PLSModel", UUID.randomUUID());
+        modelSummary.setId(newId);
+        log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.", modelSummary.getId(), newId));
 
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.findAll();
         List<String> existingNames = new ArrayList<String>();
