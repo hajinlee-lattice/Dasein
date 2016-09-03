@@ -5,7 +5,7 @@ angular.module('mainApp.login.services.LoginService', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('LoginService', function ($http, $q, $location, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
+.service('LoginService', function ($http, $q, $window, $location, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
     
     this.Login = function (username, password) {
         var deferred = $q.defer();
@@ -123,10 +123,12 @@ angular.module('mainApp.login.services.LoginService', [
             }
         })
         .success(function(data, status, headers, config) {
+            console.log(data);
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
-                window.location.reload();
+                
+                setTimeout(function() { $window.location.href = "/login"; }, 300);
             } else {
                 SessionService.HandleResponseErrors(data, status);
             }
