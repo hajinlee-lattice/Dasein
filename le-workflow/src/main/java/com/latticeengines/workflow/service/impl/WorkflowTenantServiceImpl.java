@@ -38,7 +38,7 @@ public class WorkflowTenantServiceImpl implements WorkflowTenantService {
             throw new LedpException(LedpCode.LEDP_28016, new String[] { String.valueOf(tenantPid) });
         }
 
-        log.info("Looking for workflows for tenant: " + tenantWithPid.toString());
+        log.debug("Looking for workflows for tenant: " + tenantWithPid.toString());
         return tenantWithPid;
     }
 }

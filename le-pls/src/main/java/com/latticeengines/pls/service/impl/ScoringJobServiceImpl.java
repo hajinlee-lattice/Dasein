@@ -67,7 +67,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public List<Job> getJobs(String modelId) {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid "
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
                 + tenantWithPid.getPid() + " and model " + modelId);
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         List<Job> ret = new ArrayList<>();

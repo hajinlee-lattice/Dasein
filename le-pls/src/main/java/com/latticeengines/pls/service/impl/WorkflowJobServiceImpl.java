@@ -53,7 +53,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> findAllWithType(String type) {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid "
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
                 + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid(), type);
         if (jobs == null) {
@@ -65,7 +65,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public Job findByApplicationId(String applicationId) {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding job for application Id " + applicationId + " with pid "
+        log.debug("Finding job for application Id " + applicationId + " with pid "
                 + tenantWithPid.getPid());
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
         return job;
@@ -79,7 +79,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
-        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid "
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
                 + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         if (jobs == null) {
