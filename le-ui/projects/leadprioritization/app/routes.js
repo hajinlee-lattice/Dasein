@@ -166,6 +166,7 @@ angular
                 "navigation@": {
                     controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService) {
                         $scope.IsPmml = IsPmml;
+                        $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
 
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();

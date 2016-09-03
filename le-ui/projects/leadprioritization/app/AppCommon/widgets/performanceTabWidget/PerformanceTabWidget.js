@@ -12,6 +12,7 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
             //if ($scope.data == null) return;
 
             $scope.threasholdData = $scope.data.ThresholdChartData;
+            $scope.sourceSchemaType = $scope.data.ModelDetails.SourceSchemaInterpretation;
 
             $scope.decileData = [[ ResourceUtility.getString("DECILE_GRID_CONVERSIONS") ]];
             $scope.data.ThresholdDecileData.forEach(function(d){
@@ -19,7 +20,8 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
             });
             var top_label = ResourceUtility.getString("DECILE_GRID_TOP_LABEL");
             $scope.decileColumns = [
-                { title: ResourceUtility.getString("DECILE_GRID_LEADS_LABEL") },
+                { title: $scope.sourceSchemaType == "SalesforceLead" ? ResourceUtility.getString("DECILE_GRID_LEADS_LABEL")
+                    : ResourceUtility.getString("DECILE_GRID_ACCOUNTS_LABEL")},
                 { title: "10%", superTitle: top_label },
                 { title: "20%", superTitle: top_label },
                 { title: "30%", superTitle: top_label },
@@ -39,7 +41,8 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
                 $scope.liftData[0].push($filter("number")(d, 1) + "x");
             });
             $scope.liftColumns = [
-                { title: ResourceUtility.getString("LIFT_GRID_LEAD_SCORE") },
+                { title: $scope.sourceSchemaType == "SalesforceLead" ? ResourceUtility.getString("LIFT_GRID_LEAD_SCORE")
+                    : ResourceUtility.getString("LIFT_GRID_ACCOUNT_SCORE")},
                 { title: "91-100" },
                 { title: "81-90" },
                 { title: "71-80" },

@@ -48,7 +48,8 @@ angular
         FieldMappingSettingsModal.showForModelCreation(
             ImportStore.GetAdvancedSetting('oneLeadPerDomain'),
             ImportStore.GetAdvancedSetting('includePersonalEmailDomains'), 
-            ImportStore.GetAdvancedSetting('useLatticeAttributes')
+            ImportStore.GetAdvancedSetting('useLatticeAttributes'),
+            vm.accountLeadCheck
         );
     };
 

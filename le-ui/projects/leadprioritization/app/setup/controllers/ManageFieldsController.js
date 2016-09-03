@@ -27,6 +27,7 @@ angular.module('lp.managefields', [
         Model.EventTableProvenance.Exclude_Public_Domains == "false";
     $scope.useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns == null ? true :
         Model.EventTableProvenance.Exclude_Propdata_Columns == "false";
+    $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
 
     getOptionsAndFields();
 
@@ -356,7 +357,8 @@ angular.module('lp.managefields', [
     };
 
     $scope.advancedSettingsClicked = function() {
-        FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes);
+        FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains,
+            $scope.useLatticeAttributes, $scope.sourceType);
     };
 
     $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {

@@ -35,7 +35,8 @@
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
+                    <th>{{sourceType=='SalesforceLead' ? ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')
+                            : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="readout.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>

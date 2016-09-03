@@ -17,7 +17,7 @@
         <div data-ng-hide="saveInProgress">
             <div class="modal-body">
                 <div class="row">
-                    <label id="oneLeadPerDomainCheckbox"><input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain"> Use One Lead Per Domain </label></br>
+                    <label id="oneLeadPerDomainCheckbox"><input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain">{{sourceType!='SalesforceAccount' ? "Use One Lead Per Domain" : "Use One Account Per Domain"}}</label></br>
                     <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="includePersonalEmailDomains" data-ng-checked="includePersonalEmailDomains"> Include Personal Email Domains </label></br>
                     <label id="useLatticeAttributesCheckbox"><input type="checkbox" id="cbox3" data-ng-model="useLatticeAttributes" data-ng-checked="useLatticeAttributes"> Use Lattice Data Cloud Attributes </label>
                 </div>

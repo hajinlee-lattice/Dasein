@@ -4,7 +4,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
 .directive('thresholdExplorer', function () {
     return {
         template: '<div id="thresholdExplorerChart" class="threshold-explorer-chart"></div>',
-        scope: {data: "="},
+        scope: {data: "=", source: '='},
         controller: function ($scope, ResourceUtility) {
             if ($scope.data == null) {
                 return;
@@ -146,7 +146,8 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .style("font-size", "12px")
                 .style("font-family", "ProximaNova-Semibold")
                 .style("fill", "#aaa")
-                .text(ResourceUtility.getString("THRESHOLD_EXPLORER_X_AXIS_LABEL"));
+                .text($scope.source == "SalesforceLead" ? ResourceUtility.getString("THRESHOLD_EXPLORER_X_AXIS_LABEL")
+                    : ResourceUtility.getString("THRESHOLD_EXPLORER_X_AXIS_LABEL_ACCOUNTS"));
 
             svg.append("g")
                 .attr("class", "y axis")

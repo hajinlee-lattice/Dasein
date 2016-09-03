@@ -4,12 +4,13 @@ angular.module('mainApp.setup.modals.FieldMappingSettingsModal', [
 ])
 .service('FieldMappingSettingsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
-    this.show = function(oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
+    this.show = function(oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, sourceType) {
         $http.get('app/setup/views/FieldMappingSettingsView.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.oneLeadPerDomain = oneLeadPerDomain;
             scope.includePersonalEmailDomains = includePersonalEmailDomains;
             scope.useLatticeAttributes = useLatticeAttributes;
+            scope.sourceType = sourceType;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -27,12 +28,13 @@ angular.module('mainApp.setup.modals.FieldMappingSettingsModal', [
         });
     };
 
-    this.showForModelCreation = function (oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
+    this.showForModelCreation = function (oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, sourceType) {
         $http.get('app/setup/views/FieldMappingSettingsView.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.oneLeadPerDomain = oneLeadPerDomain;
             scope.includePersonalEmailDomains = includePersonalEmailDomains;
             scope.useLatticeAttributes = useLatticeAttributes;
+            scope.sourceType = sourceType;
             scope.modelCreation = true;
 
             var modalElement = $("#modalContainer");

@@ -25,6 +25,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.PivotArtifactPath = data.ModelDetails.PivotArtifactPath;
     $scope.TrainingFileExist = data.ModelDetails.TrainingFileExist;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
+    $scope.sourceType = data.ModelDetails.SourceSchemaInterpretation;
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
