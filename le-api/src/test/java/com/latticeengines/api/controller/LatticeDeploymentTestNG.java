@@ -65,8 +65,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
-        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model,
-                StringList.class, new Object[] {});
+        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model, StringList.class,
+                new Object[] {});
         return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
     }
 
@@ -78,7 +78,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
     }
 
     private LoadConfiguration getLoadConfig() {
@@ -114,12 +114,12 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples", samplingConfig,
+                AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
@@ -130,13 +130,14 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
-        config.setTargets(Arrays.<String>asList(new String[] { "P1_Event" }));
+        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED,
+                String.format("ApplicationId is %s", profileAppId.toString()));
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
@@ -152,7 +153,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
             FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED,
+                    String.format("ApplicationId is %s", appId.toString()));
         }
     }
 
