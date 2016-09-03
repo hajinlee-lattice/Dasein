@@ -65,4 +65,15 @@ public abstract class WorkflowSubmitter {
         }
         return transformationGroup;
     }
+
+    public boolean useDnBFlagFromZK() {
+
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
+        if (flags.containsKey(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName())
+                && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName()))) {
+            return true;
+        }
+        return false;
+    }
 }
