@@ -3,6 +3,7 @@ package com.latticeengines.propdata.match.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.annotation.Resource;
 
@@ -106,6 +107,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .targetTableName(input.getTableName() + "_match_target") //
                 .targetPath(targetPath) //
                 .partitions(cascadingPartitions) //
+                .jobProperties(getJobProperties()) //
+                .engine("MR") //
                 .setBeanName("cascadingBulkMatchDataflow");
 
         Schema outputSchema = constructOutputSchema(input, rootOperationUid);
@@ -117,6 +120,13 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         submitter.setWorkflowProxy(workflowProxy);
         ApplicationId appId = submitter.submit(builder.build());
         return matchCommandService.start(input, appId, rootOperationUid);
+    }
+
+    private Properties getJobProperties() {
+        Properties jobProperties = new Properties();
+        jobProperties.put("mapred.reduce.tasks", "16");
+        jobProperties.put("cascading.spill.map.threshold", "100000");
+        return jobProperties;
     }
 
     private String writeOutputSchemaAvsc(MatchInput input, Schema outputSchema, String rootOperationUid) {

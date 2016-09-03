@@ -2,6 +2,7 @@ package com.latticeengines.propdata.workflow.match;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
@@ -56,7 +57,17 @@ public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfigurati
             stepConfigiguraton.setPartitions(partitions);
             return this;
         }
-        
+
+        public Builder jobProperties(Properties jobProperties) {
+            stepConfigiguraton.setJobProperties(jobProperties);
+            return this;
+        }
+
+        public Builder engine(String engine) {
+            stepConfigiguraton.setEngine(engine);
+            return this;
+        }
+
         public Builder dataflowExtraSources(Map<String, String> dataflowExtaSources) {
             stepConfigiguraton.setExtraSources(dataflowExtaSources);
             return this;

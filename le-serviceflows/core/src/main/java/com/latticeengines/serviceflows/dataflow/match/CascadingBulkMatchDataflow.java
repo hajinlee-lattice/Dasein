@@ -45,7 +45,6 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
 
         Node accountMasterLookupSource = addSource(parameters.getAccountMasterLookup());
         Node matchedLookupNode = matchLookup(parameters, inputSource, accountMasterLookupSource);
-
         Node matchedNode = matchAccountMaster(parameters, latticeIdField, inputMetadata, matchedLookupNode);
         return matchedNode;
 
@@ -53,6 +52,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
 
     private Node matchAccountMaster(CascadingBulkMatchDataflowParameters parameters, FieldList latticeIdField,
             List<FieldMetadata> inputMetadata, Node matchedLookupNode) {
+
         Node accountMasterSource = addSource(parameters.getAccountMaster());
         List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters, accountMasterSource);
         List<String> predefinedFields = outputList.get(1);
@@ -62,15 +62,17 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         accountMasterSource.setSchema(fieldMetadata);
         accountMasterSource = accountMasterSource.retain(new FieldList(predefinedFields));
 
-        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.RIGHT : JoinType.INNER;
+        Node matchedLookupIdNode = matchedLookupNode.retain(latticeIdField);
+        matchedLookupIdNode = matchedLookupIdNode.groupByAndLimit(latticeIdField, 1);
+        Node matchedNode = accountMasterSource.hashJoin(latticeIdField, matchedLookupIdNode, latticeIdField,
+                JoinType.INNER);
 
-//        Node matchedNode = matchedLookupNode.join(latticeIdField, accountMasterSource, latticeIdField, joinType);
-        Node matchedNode = accountMasterSource.hashJoin(latticeIdField, matchedLookupNode, latticeIdField, joinType);
-        
+        JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
+        matchedNode = matchedLookupNode.join(latticeIdField, matchedNode, latticeIdField, joinType);
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
         matchedNode = matchedNode.retain(new FieldList(resultFields.toArray(new String[0])));
-        
+
         return matchedNode;
     }
 

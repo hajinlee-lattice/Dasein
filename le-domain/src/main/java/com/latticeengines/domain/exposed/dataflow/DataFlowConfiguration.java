@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.dataflow;
 
 import java.util.List;
+import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
@@ -13,6 +14,8 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     private String targetTableName;
     private String targetPath;
     private Integer partitions;
+    private Properties jobProperties;
+    private String engine;
 
     @JsonProperty("bean_name")
     public String getDataFlowBeanName() {
@@ -73,5 +76,25 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     public void setPartitions(Integer partitions) {
         this.partitions = partitions;
     }
-    
+
+    @JsonProperty("job_properties")
+    public Properties getJobProperties() {
+        return jobProperties;
+    }
+
+    @JsonProperty("job_properties")
+    public void setJobProperties(Properties jobProperties) {
+        this.jobProperties = jobProperties;
+    }
+
+    @JsonProperty("engine")
+    public String getEngine() {
+        return this.engine;
+    }
+
+    @JsonProperty("engine")
+    public void setEngine(String engine) {
+        this.engine = engine;
+    }
+
 }

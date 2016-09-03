@@ -105,13 +105,20 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         ctx.setProperty(DataFlowProperty.FLOWNAME, dataFlowConfig.getDataFlowBeanName());
         ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
-        ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        if (StringUtils.isNotEmpty(dataFlowConfig.getEngine())) {
+            ctx.setProperty(DataFlowProperty.ENGINE, dataFlowConfig.getEngine());
+        } else {
+            ctx.setProperty(DataFlowProperty.ENGINE, engine);
+        }
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
         ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         Integer partitions = dataFlowConfig.getPartitions();
         if (partitions != null) {
             ctx.setProperty(DataFlowProperty.PARTITIONS, partitions);
+        }
+        if (dataFlowConfig.getJobProperties() != null) {
+            ctx.setProperty(DataFlowProperty.JOBPROPERTIES, dataFlowConfig.getJobProperties());
         }
 
         String property = String.format("dataflowapi.flow.%s.debug", dataFlowConfig.getDataFlowBeanName());

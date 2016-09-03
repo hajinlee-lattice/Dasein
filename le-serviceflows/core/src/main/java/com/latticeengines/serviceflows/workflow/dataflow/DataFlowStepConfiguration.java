@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
@@ -24,9 +25,12 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     private String targetPath;
 
     private Integer partitions;
-    
+
     private DataFlowParameters dataFlowParams;
 
+    private Properties jobProperties;
+
+    private String engine;
 
     @JsonProperty("extra_sources")
     public Map<String, String> getExtraSources() {
@@ -67,7 +71,7 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
-    
+
     @JsonProperty("partitions")
     public Integer getPartitions() {
         return partitions;
@@ -76,6 +80,26 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("partitions")
     public void setPartitions(Integer partitions) {
         this.partitions = partitions;
+    }
+
+    @JsonProperty("job_properties")
+    public Properties getJobProperties() {
+        return jobProperties;
+    }
+
+    @JsonProperty("job_properties")
+    public void setJobProperties(Properties jobProperties) {
+        this.jobProperties = jobProperties;
+    }
+
+    @JsonProperty("engine")
+    public String getEngine() {
+        return this.engine;
+    }
+
+    @JsonProperty("engine")
+    public void setEngine(String engine) {
+        this.engine = engine;
     }
 
     @JsonProperty("data_flow_params")
