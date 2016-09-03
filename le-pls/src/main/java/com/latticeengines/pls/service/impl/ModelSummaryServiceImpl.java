@@ -86,7 +86,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
 
-		ModelSummary dupModelSummary = modelSummaryEntityMgr.findByModelId(possibleId, false, false, false);
+		ModelSummary dupModelSummary = modelSummaryEntityMgr.getByModelId(possibleId);
 		if (dupModelSummary != null && !existingIds.contains(dupModelSummary.getId())) {
             existingIds.add(dupModelSummary.getId());
 		}
