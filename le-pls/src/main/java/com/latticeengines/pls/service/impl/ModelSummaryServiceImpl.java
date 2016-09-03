@@ -85,6 +85,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         String possibleId = modelSummary.getId();
         String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
+
+		ModelSummary dupModelSummary = modelSummaryEntityMgr.findByModelId(possibleId, false, false, false);
+		if (dupModelSummary != null && !existingIds.contains(dupModelSummary.getId())) {
+            existingIds.add(dupModelSummary.getId());
+		}
         while (existingNames.contains(possibleName) || existingIds.contains(possibleId)) {
             possibleName = modelSummary.getName().replace(rootname,
                     rootname + "-" + String.format("%03d", ++version));
