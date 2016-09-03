@@ -28,4 +28,7 @@ public interface InternalScoringApiInterface {
 
     List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier);
+
+    List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
+            String tenantIdentifier);
 }

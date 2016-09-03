@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreMod
 import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNGBase;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
-import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
@@ -73,8 +73,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
             Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
 
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                modelIdSelectionMap.put(modelId,
-                        uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary().getPredefinedSelection());
+                modelIdSelectionMap.put(modelId, uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary()
+                        .getPredefinedSelection());
             }
 
             recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
@@ -184,8 +184,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getScore());
-        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability()
-                .doubleValue() != recordScoreResponseDebugList.get(0).getScores().get(0).getScore().doubleValue());
+        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability().doubleValue() != recordScoreResponseDebugList
+                .get(0).getScores().get(0).getScore().doubleValue());
 
         checkScoreResultList(recordScoreResponseDebugList, true);
 
@@ -201,8 +201,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
         Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getScore());
-        Assert.assertTrue(recordScoreResponseList.get(0).getScores().get(0).getProbability()
-                .doubleValue() != recordScoreResponseList.get(0).getScores().get(0).getScore().doubleValue());
+        Assert.assertTrue(recordScoreResponseList.get(0).getScores().get(0).getProbability().doubleValue() != recordScoreResponseList
+                .get(0).getScores().get(0).getScore().doubleValue());
 
         checkScoreResultList(recordScoreResponseList, false);
     }

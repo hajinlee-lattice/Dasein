@@ -141,6 +141,13 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         String scoreContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, avroFiles.get(0));
         Assert.assertNotNull(scoreContents);
         List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+        for (GenericRecord record : list) {
+            Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
+            Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
+            Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
+            Assert.assertNotNull(record.get(ScoreResultField.RawScore.displayName));
+            System.out.println(record);
+        }
         Assert.assertEquals(list.size(), 20);
 
         GenericRecord record = list.get(0);

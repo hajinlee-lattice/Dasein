@@ -10,11 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -22,6 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -38,12 +43,21 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -62,6 +76,14 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small_Testing.csv";
 
+    // TODO change this value to a smaller value, at least 0.5, after fixing
+    // PLS-1944
+    private static final double DIFFERENCE_THRESHOLD = 5;
+
+    private Path mrScoreResultDir;
+
+    private Path rtsScoreReusltDir;
+
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
 
@@ -79,11 +101,14 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private String jobType;
 
+    private Tenant tenant;
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
         trainingFileName = TRAINING_CSV_FILE;
         testingFileName = TESTING_CSV_FILE;
+        tenant = selfServiceModeling.getTenant();
         modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, trainingFileName);
     }
 
@@ -101,20 +126,6 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 600000)
-    public void testScoreTestingDataUsingMR() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
-                sourceFile.getName()));
-        applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
-                null, String.class);
-        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
-        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
-        assertNotNull(applicationId);
-        jobType = "importMatchAndScoreWorkflow";
-        testScoreTestingDatea();
-    }
-
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 1200000)
     public void testScoreTrainingDataUsingRTS() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
                 getRestAPIHostPort(), modelId));
@@ -129,8 +140,24 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         testScoreRTSTrainingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingRTS", enabled = true, timeOut = 1200000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingRTS", enabled = true, timeOut = 600000)
+    public void testScoreTestingDataUsingMR() throws Exception {
+        uploadTestingDataFile();
+        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
+                sourceFile.getName()));
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        jobType = "importMatchAndScoreWorkflow";
+        testScoreMRTestingData();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 600000)
     public void testScoreTestingDataUsingRTS() throws Exception {
+        uploadTestingDataFile();
         System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
                 getRestAPIHostPort(), modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
@@ -141,15 +168,13 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         System.out.println(String.format("Score testing data applicationId = %s", applicationId));
         assertNotNull(applicationId);
         jobType = "importAndRTSBulkScoreWorkflow";
-        testScoreTestingDatea();
+        testScoreRTSTestingData();
     }
 
     private void testScoreMRTrainingData() throws IOException {
         testJobIsListed(jobType);
         poll();
         downloadCsv(TOTAL_TRAINING_LINES);
-
-        uploadTestingDataFile();
     }
 
     private void testScoreRTSTrainingData() throws IOException {
@@ -157,14 +182,91 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         poll();
         downloadCsv(TOTAL_TRAINING_LINES);
         retrieveErrorsFile();
-        uploadTestingDataFile();
+        compareDataResult();
     }
 
-    private void testScoreTestingDatea() throws IOException {
+    private void compareDataResult() throws IOException {
+        Map<String, ScoreResult> mrResults = getScoreResults(false);
+        Map<String, ScoreResult> rtsResults = getScoreResults(true);
+        if (!compareScoringResults(mrResults, rtsResults)) {
+            assertTrue(false, "MR score and RTS score are not the same within safty range.");
+        }
+        cleanResults();
+    }
+
+    private Map<String, ScoreResult> getScoreResults(boolean getRtsResult) throws IOException {
+        Map<String, ScoreResult> scoreResults = new HashMap<String, ScoreResult>();
+        final String scoreDirPrefix = getRtsResult ? "/RTSBulkScoreResult_" : "/ScoreResult_";
+        System.out.println("getRtsResult is " + getRtsResult + ", and scoreDirPrefix is " + scoreDirPrefix);
+
+        List<String> scoreDir = HdfsUtils.getFilesForDirRecursive(
+                yarnConfiguration,
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
+                        CustomerSpace.parse(tenant.getName())).toString(), new HdfsFileFilter() {
+                    @Override
+                    public boolean accept(FileStatus file) {
+                        if (!file.isDirectory() && file.getPath().toString().contains(scoreDirPrefix)
+                                && file.getPath().getName().endsWith("avro")) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }, true);
+
+        System.out.println(scoreDir);
+        Path rtsScoreReusltPath = new Path(scoreDir.get(0));
+        if (getRtsResult) {
+            rtsScoreReusltDir = rtsScoreReusltPath.getParent();
+        } else {
+            mrScoreResultDir = rtsScoreReusltPath.getParent();
+        }
+
+        List<GenericRecord> scores = AvroUtils.getData(yarnConfiguration, scoreDir);
+        for (GenericRecord score : scores) {
+            String id = String.valueOf(score.get(InterfaceName.Id.toString()));
+            Double rawScore = score.get(ScoreResultField.RawScore.displayName) != null ? Double.valueOf(score.get(
+                    ScoreResultField.RawScore.displayName).toString()) : null;
+            Double percentileScore = Double.valueOf(score.get(ScoreResultField.Percentile.displayName).toString());
+            ScoreResult scoreResult = new ScoreResult(rawScore, percentileScore);
+            scoreResults.put(id, scoreResult);
+        }
+        return scoreResults;
+    }
+
+    private boolean compareScoringResults(Map<String, ScoreResult> truthResults,
+            Map<String, ScoreResult> comparingResults) {
+        int differentResultNum = 0;
+        for (String key : truthResults.keySet()) {
+            if (!truthResults.get(key).equals(comparingResults.get(key))) {
+                System.err.println(String.format("For Id: %s, the MR score is %s, and rts score is %s.", key,
+                        truthResults.get(key), comparingResults.get(key)));
+                differentResultNum++;
+            }
+        }
+        System.out.println("differentResultNum is " + differentResultNum);
+        double differentRate = (double) (differentResultNum / (double) truthResults.size() * 100.0);
+        System.out.println(String.format("differentRate is %4.6f percent", differentRate));
+        return differentRate < DIFFERENCE_THRESHOLD;
+    }
+
+    private void cleanResults() throws IOException {
+        HdfsUtils.rmdir(yarnConfiguration, rtsScoreReusltDir.toString());
+        HdfsUtils.rmdir(yarnConfiguration, mrScoreResultDir.toString());
+    }
+
+    private void testScoreMRTestingData() throws IOException {
         testJobIsListed(jobType);
         poll();
         downloadCsv(TOTAL_TESTING_LINES);
         retrieveErrorsFile();
+    }
+
+    private void testScoreRTSTestingData() throws IOException {
+        testJobIsListed(jobType);
+        poll();
+        downloadCsv(TOTAL_TESTING_LINES);
+        retrieveErrorsFile();
+        compareDataResult();
     }
 
     private void retrieveErrorsFile() {
@@ -285,6 +387,54 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public class ScoreResult {
+
+        private static final double EPS = 1e-6;
+        private static final double DELTA = 1;
+
+        public Double rawScore;
+        public Double score;
+
+        public ScoreResult(Double rawScore, Double score) {
+            this.rawScore = rawScore;
+            this.score = score;
+        }
+
+        public void setRawScore(Double rawScore) {
+            this.rawScore = rawScore;
+        }
+
+        public void setScore(Double score) {
+            this.score = score;
+        }
+
+        public Double getRawScore() {
+            return this.rawScore;
+        }
+
+        public Double getScore() {
+            return this.score;
+        }
+
+        @Override
+        public String toString() {
+            return JsonUtils.serialize(this);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == this) {
+                return true;
+            }
+            if (!(object instanceof ScoreResult)) {
+                return false;
+            }
+            ScoreResult score = (ScoreResult) object;
+            return (Math.abs(this.rawScore - score.rawScore) <= EPS && Math.abs(this.score - score.score) <= DELTA);
+        }
+
     }
 
 }

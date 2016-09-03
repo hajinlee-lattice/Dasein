@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
@@ -113,6 +114,24 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             for (Object obj : resultList) {
                 String json = JsonUtils.serialize(obj);
                 RecordScoreResponse recordScoreResponse = JsonUtils.deserialize(json, RecordScoreResponse.class);
+                recordScoreResponseList.add(recordScoreResponse);
+            }
+        }
+        return recordScoreResponseList;
+    }
+
+    @Override
+    public List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
+            String tenantIdentifier) {
+        String url = constructUrl("/records/debug?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
+        List<?> resultList = post("scorePercentileAndProbabilityRecords", url, scoreRequest, List.class);
+        List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
+        if (resultList != null) {
+
+            for (Object obj : resultList) {
+                String json = JsonUtils.serialize(obj);
+                DebugRecordScoreResponse recordScoreResponse = JsonUtils.deserialize(json,
+                        DebugRecordScoreResponse.class);
                 recordScoreResponseList.add(recordScoreResponse);
             }
         }

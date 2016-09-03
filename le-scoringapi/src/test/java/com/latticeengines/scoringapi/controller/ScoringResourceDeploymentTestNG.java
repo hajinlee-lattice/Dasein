@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
+import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.scoringapi.exposed.DebugRecordScoreResponse;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
@@ -210,13 +210,13 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         for (Object res : resultObjList) {
             System.out.println("Expected score = " + expectedScores.get(idx).intValue());
             DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
-            Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
-                    new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
+            Assert.assertEquals(result.getScores().get(0).getScore().intValue(), new Double(
+                    signleRecordScoreResponseList.get(idx).getScore()).intValue());
             Assert.assertEquals(result.getScores().get(0).getScore().intValue(), expectedScores.get(idx).intValue());
             Assert.assertEquals(new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue(),
                     expectedScores.get(idx).intValue());
-            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
-                    result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
+            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(), result
+                    .getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
             idx++;
         }
     }
