@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -13,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
