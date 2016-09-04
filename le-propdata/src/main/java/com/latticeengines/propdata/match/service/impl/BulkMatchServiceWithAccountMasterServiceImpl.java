@@ -108,7 +108,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .targetPath(targetPath) //
                 .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties()) //
-                .engine("MR") //
+//                .engine("MR") //
                 .setBeanName("cascadingBulkMatchDataflow");
 
         Schema outputSchema = constructOutputSchema(input, rootOperationUid);
