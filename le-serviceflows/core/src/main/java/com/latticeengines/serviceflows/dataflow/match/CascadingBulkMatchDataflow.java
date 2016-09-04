@@ -64,16 +64,16 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
 
         Node matchedLookupIdNode = matchedLookupNode.retain(latticeIdField);
         matchedLookupIdNode = matchedLookupIdNode.groupByAndLimit(latticeIdField, 1);
-        Node matchedNode = accountMasterSource.hashJoin(latticeIdField, matchedLookupIdNode, latticeIdField,
+        Node hashMatchedNode = accountMasterSource.hashJoin(latticeIdField, matchedLookupIdNode, latticeIdField,
                 JoinType.INNER);
 
         JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
-        matchedNode = matchedLookupNode.join(latticeIdField, matchedNode, latticeIdField, joinType);
+        matchedLookupNode = matchedLookupNode.join(latticeIdField, hashMatchedNode, latticeIdField, joinType);
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
-        matchedNode = matchedNode.retain(new FieldList(resultFields.toArray(new String[0])));
+        matchedLookupNode = matchedLookupNode.retain(new FieldList(resultFields.toArray(new String[0])));
 
-        return matchedNode;
+        return matchedLookupNode;
     }
 
     private List<List<String>> buildOutputFieldList(List<FieldMetadata> inputMetadata,
@@ -113,9 +113,14 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         Node matchedLookupNode = processDomain(parameters, inputSource, keyMap);
         matchedLookupNode = generateMatchKey(keyMap, matchedLookupNode);
 
+        FieldList matchIdField = new FieldList(MATCH_ID_KEY);
+        Node matchedLookupIdNode = matchedLookupNode.retain(matchIdField);
+        matchedLookupIdNode = matchedLookupIdNode.groupByAndLimit(matchIdField, 1);
+        Node hashMatchedLookupNode = accountMasterLookupSource.hashJoin(new FieldList(LOOKUP_KEY_FIELDNAME),
+                matchedLookupIdNode, matchIdField, JoinType.INNER);
+
         JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
-        matchedLookupNode = matchedLookupNode.join(new FieldList(MATCH_ID_KEY), accountMasterLookupSource,
-                new FieldList(LOOKUP_KEY_FIELDNAME), joinType);
+        matchedLookupNode = matchedLookupNode.join(matchIdField, hashMatchedLookupNode, matchIdField, joinType);
         return matchedLookupNode;
     }
 
