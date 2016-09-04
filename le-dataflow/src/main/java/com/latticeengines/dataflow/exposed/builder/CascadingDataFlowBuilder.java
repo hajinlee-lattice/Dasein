@@ -27,6 +27,33 @@ import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
 
+import com.google.common.collect.Lists;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
+
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -57,33 +84,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
-
-import com.google.common.collect.Lists;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -190,7 +190,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     protected Node addSource(String sourceTableName) {
         DataFlowContext ctx = getDataFlowCtx();
-        @SuppressWarnings("unchecked")
         Map sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
         Table sourceTable = (Table) sourceTables.get(sourceTableName);
         if (sourceTable == null) {
