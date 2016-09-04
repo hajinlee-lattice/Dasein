@@ -96,7 +96,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         for (Job job : jobs) {
-            String modelId = job != null && job.getInputs() != null && job.getOutputs() != null && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null
+		    if (job == null || job.getInputs() == null || job.getOutputs() == null) {
+			    continue;
+			}
+            String modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null
                     ? job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID)
                     : job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
             if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
