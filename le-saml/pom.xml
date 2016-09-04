@@ -9,19 +9,19 @@
 
     <properties>
         <component-name>saml</component-name>
-        <le.domain.version>2.0.39-SNAPSHOT</le.domain.version>
-        <le.db.version>2.0.39-SNAPSHOT</le.db.version>
-        <le.auth.version>2.0.39-SNAPSHOT</le.auth.version>
-        <le.security.version>2.0.39-SNAPSHOT</le.security.version>
-        <le.testfwk.version>2.0.39-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>2.0.39-SNAPSHOT</le.remote.version>
+        <le.domain.version>2.0.40-SNAPSHOT</le.domain.version>
+        <le.db.version>2.0.40-SNAPSHOT</le.db.version>
+        <le.auth.version>2.0.40-SNAPSHOT</le.auth.version>
+        <le.security.version>2.0.40-SNAPSHOT</le.security.version>
+        <le.testfwk.version>2.0.40-SNAPSHOT</le.testfwk.version>
+        <le.remote.version>2.0.40-SNAPSHOT</le.remote.version>
         <spring.saml.version>1.0.2.RELEASE</spring.saml.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.39-SNAPSHOT</version>
+        <version>2.0.40-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
