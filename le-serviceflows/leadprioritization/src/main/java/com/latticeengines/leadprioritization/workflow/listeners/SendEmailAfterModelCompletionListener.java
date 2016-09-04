@@ -1,17 +1,16 @@
 package com.latticeengines.leadprioritization.workflow.listeners;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
-import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("sendEmailAfterModelCompletionListener")
