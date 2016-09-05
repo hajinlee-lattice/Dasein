@@ -56,14 +56,14 @@ public class LedpRestClient {
     }
 
     public List<String> loadData(final LoadConfiguration config) throws Exception {
-        AppSubmission submission = retryRequest("http://" + restEndpointHost + "/rest/load", config);
+        AppSubmission submission = retryRequest(restEndpointHost + "/rest/load", config);
         List<String> applicationIds = submission.getApplicationIds();
         log.info(applicationIds);
         return applicationIds;
     }
 
     public List<String> createSamples(SamplingConfiguration config) throws Exception {
-        AppSubmission submission = rt.postForObject("http://" + restEndpointHost + "/rest/createSamples", config,
+        AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/createSamples", config,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
         log.info(applicationIds);
@@ -71,7 +71,7 @@ public class LedpRestClient {
     }
 
     public List<String> profile(DataProfileConfiguration config) throws Exception {
-        AppSubmission submission = rt.postForObject("http://" + restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
         log.info(applicationIds);
@@ -79,7 +79,7 @@ public class LedpRestClient {
     }
 
     public List<String> submitModel(Model model) throws Exception {
-        AppSubmission submission = rt.postForObject("http://" + restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
         log.info(applicationIds);
@@ -87,13 +87,13 @@ public class LedpRestClient {
     }
 
     public List<String> getFeatures(Model model) throws Exception {
-        StringList features = rt.postForObject("http://" + restEndpointHost + "/rest/features", model,
+        StringList features = rt.postForObject(restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return features.getElements();
     }
 
     public JobStatus getJobStatus(final String appId) throws Exception {
-        JobStatus js = rt.getForObject("http://" + restEndpointHost + "/rest/getJobStatus/" + appId, JobStatus.class,
+        JobStatus js = rt.getForObject(restEndpointHost + "/rest/getJobStatus/" + appId, JobStatus.class,
                 new HashMap<String, Object>());
         return js;
     }
@@ -133,7 +133,7 @@ public class LedpRestClient {
             // List<String> appIds = lrc.loadData(new LoadConfiguration());
             // System.out.println(appIds.size());
             LoadData ld = new LoadData();
-            ld.setConfiguration("localhost:8080", new LoadConfiguration());
+            ld.setConfiguration("http://localhost:8074", new LoadConfiguration());
             // List<String> appIds = ld.executeJob();
         } catch (Exception e) {
             // TODO Auto-generated catch block
