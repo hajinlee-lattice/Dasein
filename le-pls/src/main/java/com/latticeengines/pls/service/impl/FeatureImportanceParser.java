@@ -139,7 +139,6 @@ public class FeatureImportanceParser {
         return null;
     }
 
-    @SuppressWarnings("resource")
     private Map<String, Double> parse(Reader reader) throws IOException {
         Map<String, Double> fiMap = new HashMap<>();
         try (BufferedReader r = new BufferedReader(reader)) {
