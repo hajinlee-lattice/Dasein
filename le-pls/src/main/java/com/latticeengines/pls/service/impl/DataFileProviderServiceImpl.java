@@ -53,7 +53,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         String trainingTableName = summary.getTrainingTableName();
         if (trainingTableName != null && !trainingTableName.isEmpty()) {
-            SourceFile sourceFile = sourceFileEntityMgr.findByTableName(trainingTableName);
+            SourceFile sourceFile = sourceFileEntityMgr.getByTableName(trainingTableName);
             if (sourceFile != null) {
                 String filePath = sourceFile.getPath();
                 downloadFileByPath(request, response, mimeType, filePath);

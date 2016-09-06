@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -20,7 +22,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -38,7 +40,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private SourceFileEntityMgr sourceFileEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
 
     @Override
     public AppSubmission restart(String jobId) {
@@ -91,19 +96,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private void updateJobsWithModelSummeries(List<Job> jobs) {
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
-        for (ModelSummary modelSummary : modelSummaryEntityMgr.findAll()) {
+        for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
         for (Job job : jobs) {
-		    if (job == null || job.getInputs() == null || job.getOutputs() == null) {
-			    continue;
-			}
-            String modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID) != null
-                    ? job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID)
-                    : job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            String modelId = null;
+            if (job.getInputs() != null
+                    && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+                modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            } else if (job.getOutputs() != null
+                    && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+                modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            }
             if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
                 continue;
+            }
+
+            if (job.getInputs() == null) {
+                job.setInputs(new HashMap<String, String>());
             }
             if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
                 job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
@@ -112,6 +123,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     modelIdToModelSummaries.get(modelId).getDisplayName());
             job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
                     modelIdToModelSummaries.get(modelId).getModelType());
+            job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
+                    getJobSourceFileExists(job.getApplicationId()).toString());
         }
     }
 
@@ -137,6 +150,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private Tenant getTenant() {
         Tenant tenant = MultiTenantContext.getTenant();
         return tenantEntityMgr.findByTenantId(tenant.getId());
+    }
+
+    private Boolean getJobSourceFileExists(String applicationId) {
+        if (applicationId == null && applicationId.isEmpty()) {
+            return false;
+        }
+
+        SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
+        if (sourceFile != null) {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -173,7 +173,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
             summary.setTrainingFileExist(false);
         } else {
-            SourceFile sourceFile = sourceFileEntityMgr.findByTableName(summary.getTrainingTableName());
+            SourceFile sourceFile = sourceFileEntityMgr.getByTableName(summary.getTrainingTableName());
             if (sourceFile == null) {
                 summary.setTrainingFileExist(false);
             } else {
