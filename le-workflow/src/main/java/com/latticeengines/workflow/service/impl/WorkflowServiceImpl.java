@@ -18,7 +18,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
@@ -41,6 +40,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -58,7 +58,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
     @Autowired
-    private JobExplorer jobExplorer;
+    private LEJobExecutionRetriever leJobExecutionRetriever;
 
     @Autowired
     private JobLauncher jobLauncher;
@@ -185,7 +185,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public WorkflowStatus getStatus(WorkflowExecutionId workflowId) {
-        JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
         WorkflowStatus workflowStatus = new WorkflowStatus();
         workflowStatus.setStatus(jobExecution.getStatus());
         workflowStatus.setStartTime(jobExecution.getStartTime());
@@ -244,12 +244,12 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private String getWorkflowName(WorkflowExecutionId workflowId) {
-        return jobExplorer.getJobExecution(workflowId.getId()).getJobInstance().getJobName();
+        return leJobExecutionRetriever.getJobExecution(workflowId.getId()).getJobInstance().getJobName();
     }
 
     @Override
     public List<String> getStepNames(WorkflowExecutionId workflowId) {
-        JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
 
         return getStepNamesFromExecution(jobExecution);
     }
