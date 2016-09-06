@@ -136,10 +136,14 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
         while (retry++ < MAX_RETRIES && !recordBuffer.isEmpty()) {
             try {
+                if (retry > 1) {
+                    log.info("Attempt to commit record buffer (Attempt=" + retry + "). BufferSize="
+                            + recordBuffer.size());
+                }
                 attemptCommitBuffer(whiteBuffer);
                 Thread.sleep(interval);
             } catch (Exception e) {
-                log.warn("Attempt to commit buffer failed. (Attemp=" + retry + ")", e);
+                log.warn("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
             } finally {
                 interval = interval + random.nextInt(interval);
             }
@@ -149,8 +153,8 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
                 + whiteBuffer.getValue());
         if (!recordBuffer.isEmpty()) {
-            log.error("Failed to commit " + recordBuffer.size() + " records. Total failed  = "
-                    + blackBuffer.getValue());
+            log.error(
+                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackBuffer.getValue());
         }
 
         recordBuffer.clear();
@@ -164,7 +168,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         }
 
         List<String> ids = new ArrayList<>(recordBuffer.keySet());
-        for (String id: ids) {
+        for (String id : ids) {
             GenericRecord record = null;
             try {
                 record = dataStore.findRecord(id);
