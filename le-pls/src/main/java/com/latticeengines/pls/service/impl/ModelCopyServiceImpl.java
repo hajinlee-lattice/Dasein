@@ -77,11 +77,13 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
         Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
         SourceFile sourceFile = sourceFileEntityMgr.findByTableName(trainingTableName);
-        sourceFile.setPid(null);
-        sourceFile.setTableName(cpTrainingTable.getName());
-        sourceFile.setTenant(targetTenant);
-        sourceFile.setName("file_" + cpTrainingTable.getName());
-        sourceFileEntityMgr.create(sourceFile);
+        if (sourceFile != null) {
+            sourceFile.setPid(null);
+            sourceFile.setTableName(cpTrainingTable.getName());
+            sourceFile.setTenant(targetTenant);
+            sourceFile.setName("file_" + cpTrainingTable.getName());
+            sourceFileEntityMgr.create(sourceFile);
+        }
 
         try {
             processHdfsData(sourceTenantId, targetTenantId, modelId, eventTableName, cpTrainingTable.getName(),
@@ -162,10 +164,12 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
         HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
 
-        String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration, sourceCustomerRoot + "/data/",
-                eventTableName);
-        String targetStandardDataCompositionPath = sourceStandardDataCompositionPath.replace(sourceCustomerRoot, targetCustomerRoot).replace(eventTableName, cpEventTableName);
-        HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(), new Path(targetStandardDataCompositionPath).getParent().toString());
+        String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+                sourceCustomerRoot + "/data/", eventTableName);
+        String targetStandardDataCompositionPath = sourceStandardDataCompositionPath.replace(sourceCustomerRoot,
+                targetCustomerRoot).replace(eventTableName, cpEventTableName);
+        HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
+                new Path(targetStandardDataCompositionPath).getParent().toString());
     }
 
     @Override
