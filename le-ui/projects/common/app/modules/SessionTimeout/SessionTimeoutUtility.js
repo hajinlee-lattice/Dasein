@@ -7,8 +7,8 @@ angular.module('common.utilities.SessionTimeout', [
 ) {
     var vm = this;
 
-    var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
-    var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
+    var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 1 * 1000;
+    var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 20 * 1000;  // 14.5 minutes
     var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 1000;
 
     this.inactivityCheckingId = null;
@@ -91,7 +91,7 @@ angular.module('common.utilities.SessionTimeout', [
             animation: true,
             backdrop: true,
             scope: $rootScope,
-            templateUrl: '/lp/app/navigation/header/views/WarningModal.html'
+            templateUrl: '/app/modules/SessionTimeout/WarningModal.html'
         });
 
         $rootScope.refreshSession = function() {
