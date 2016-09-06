@@ -129,40 +129,52 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     private void commitBuffer(Counter whiteCounter, Counter blackCounter) {
-        int originalSize = recordBuffer.size();
-        int retry = 0;
-        long interval = 1000L;
-        long startTime = System.currentTimeMillis();
-
-        while (!recordBuffer.isEmpty() && System.currentTimeMillis() - startTime < TIMEOUT) {
-            try {
-                attemptCommitBuffer(whiteCounter);
-                if (!recordBuffer.isEmpty()) {
-                    log.info(String.format("Still remain %d records to write in the buffer. (Attempt=%d)",
-                            recordBuffer.size(), retry));
-                }
-            } catch (Exception e) {
-                log.error("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
-            } finally {
-                retry++;
-                try {
-                    Thread.sleep(interval);
-                } catch (Exception e) {
-                    // ignore
-                }
-                interval *= 2;
-            }
+        try {
+            dataStore.createRecords(recordBuffer);
+            whiteCounter.increment(recordBuffer.size());
+            log.info("Committed " + recordBuffer.size() + " records to DynamoDB. Total committed  = "
+                    + whiteCounter.getValue());
+        } catch (Exception e) {
+            blackCounter.increment(recordBuffer.size());
+            log.error("Failed to commit a buffer of size " + recordBuffer.size() + ". Total failed  = "
+                    + blackCounter.getValue(), e);
+        } finally {
+            recordBuffer.clear();
         }
 
-        int finalSize = recordBuffer.size();
-        log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
-                + whiteCounter.getValue());
-        if (!recordBuffer.isEmpty()) {
-            log.error(
-                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackCounter.getValue());
-        }
-
-        recordBuffer.clear();
+//        int originalSize = recordBuffer.size();
+//        int retry = 0;
+//        long interval = 1000L;
+//        long startTime = System.currentTimeMillis();
+//
+//        while (!recordBuffer.isEmpty() && System.currentTimeMillis() - startTime < TIMEOUT) {
+//            try {
+//                attemptCommitBuffer(whiteCounter);
+//                if (!recordBuffer.isEmpty()) {
+//                    log.info(String.format("Still remain %d records to write in the buffer. (Attempt=%d)",
+//                            recordBuffer.size(), retry));
+//                }
+//            } catch (Exception e) {
+//                log.error("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
+//            } finally {
+//                retry++;
+//                try {
+//                    Thread.sleep(interval);
+//                } catch (Exception e) {
+//                    // ignore
+//                }
+//                interval *= 2;
+//            }
+//        }
+//        int finalSize = recordBuffer.size();
+//        log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
+//                + whiteCounter.getValue());
+//        if (!recordBuffer.isEmpty()) {
+//            log.error(
+//                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackCounter.getValue());
+//        }
+//
+//        recordBuffer.clear();
     }
 
     private void attemptCommitBuffer(Counter whiteCounter) {
