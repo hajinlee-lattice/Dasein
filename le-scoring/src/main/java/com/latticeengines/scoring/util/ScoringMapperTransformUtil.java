@@ -32,9 +32,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
@@ -55,7 +57,7 @@ public class ScoringMapperTransformUtil {
 
             if (p.getName().equals("scoring.py")) {
                 scoringScriptProvided = true;
-            } else if (!p.getName().endsWith(".jar")) {
+            } else if (!p.getName().endsWith(".jar") && !p.getName().endsWith("_scorederivation")) {
                 String uuid = p.getName();
                 JsonNode modelJsonObj = parseFileContentToJsonNode(p);
                 // use the uuid to identify a model. It is a contact that when
@@ -279,6 +281,21 @@ public class ScoringMapperTransformUtil {
         decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
         writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
 
+    }
+
+    public static Map<String, ScoreDerivation> deserializeLocalScoreDerivationFiles(Path[] paths) throws IOException {
+        Map<String, ScoreDerivation> scoreDerivations = new HashMap<>();
+        for (Path p : paths) {
+            if (p.getName().endsWith("_scorederivation")) {
+                String content = FileUtils.readFileToString(new File(p.toString()));
+                String uuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(p.getName(), "_scorederivation");
+                scoreDerivations.put(uuid, JsonUtils.deserialize(content, ScoreDerivation.class));
+            }
+        }
+        if (scoreDerivations.isEmpty()) {
+            log.warn("Score Derivation Map is empty");
+        }
+        return scoreDerivations;
     }
 
 }

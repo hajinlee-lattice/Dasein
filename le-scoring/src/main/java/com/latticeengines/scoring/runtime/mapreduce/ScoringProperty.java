@@ -6,5 +6,6 @@ public enum ScoringProperty {
     TENANT_ID, //
     LOG_DIR, //
     UNIQUE_KEY_COLUMN, //
+    USE_SCOREDERIVATION, //
     MODEL_GUID; //
 }

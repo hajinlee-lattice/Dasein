@@ -206,7 +206,7 @@ public class ScoringMapperPredictUtilTestNG {
         if ((result1.getLift() - result2.getLift()) >= eps) {
             isSame = false;
         }
-        if (!compareTwoCharSequences(result1.getPlay_Display_Name(), result2.getPlay_Display_Name())) {
+        if (!compareTwoCharSequences(result1.getPlayDisplayName(), result2.getPlayDisplayName())) {
             isSame = false;
         }
         if (result1.getPercentile() != result2.getPercentile()) {

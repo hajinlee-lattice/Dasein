@@ -65,11 +65,11 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
         this.LeadID = leadID;
     }
 
-    public String getPlay_Display_Name() {
+    public String getPlayDisplayName() {
         return Play_Display_Name;
     }
 
-    public void setPlay_Display_Name(String playDisplayName) {
+    public void setPlayDisplayName(String playDisplayName) {
         this.Play_Display_Name = playDisplayName;
     }
 

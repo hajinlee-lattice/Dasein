@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -17,6 +18,8 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -83,6 +86,8 @@ public class ScoringJobUtil {
                         throw new LedpException(LedpCode.LEDP_20021, new String[] { path, tenant });
                     }
                     modelUrlsToLocalize.add(path + "#" + uuid);
+                    modelUrlsToLocalize.add(new Path(path).getParent() + "/enhancements/scorederivation.json" + "#"
+                            + uuid + "_scorederivation");
                     continue label;
                 }
             }
@@ -130,7 +135,8 @@ public class ScoringJobUtil {
         return scoreResultTable;
     }
 
-    public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter, List<ScoreOutput> resultList, File outputFile) throws IOException {
+    public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter,
+            List<ScoreOutput> resultList, File outputFile) throws IOException {
         Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema();
         Schema schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
 

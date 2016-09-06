@@ -78,7 +78,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     // TODO change this value to a smaller value, at least 0.5, after fixing
     // PLS-1944
-    private static final double DIFFERENCE_THRESHOLD = 5;
+    private static final double DIFFERENCE_THRESHOLD = 0.5;
 
     private Path mrScoreResultDir;
 

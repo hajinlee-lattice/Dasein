@@ -60,6 +60,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     public ApplicationId score(ScoringConfiguration scoringConfig) {
         validateScoringConfig(scoringConfig);
         Properties properties = generateCustomizedProperties(scoringConfig);
+        properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         return this.score(properties);
     }
 

@@ -2,6 +2,7 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
@@ -50,8 +52,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             long transformStartTime = System.currentTimeMillis();
             JsonNode dataType = ScoringJobUtil.generateDataTypeSchema(schema);
             log.info("DataType :" + dataType.asText());
-            ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context, dataType,
-                    models, recordFileThreshold);
+            ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
+                    dataType, models, recordFileThreshold);
 
             if (modelAndRecordInfo.getTotalRecordCount() == 0) {
                 return;
@@ -64,8 +66,18 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             log.info("The mapper has transformed: " + totalRecordCount + " records.");
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
-            List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndRecordInfo, models,
-                    recordFileThreshold);
+            List<ScoreOutput> resultList = new ArrayList<>();
+            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.booleanValue()) == Boolean.TRUE
+                    .booleanValue()) {
+                log.info("Using score derivation to generate percentile score.");
+                Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
+                        .deserializeLocalScoreDerivationFiles(paths);
+                resultList = ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(modelAndRecordInfo,
+                        scoreDerivationMap, recordFileThreshold);
+            } else {
+                resultList = ScoringMapperPredictUtil
+                        .processScoreFiles(modelAndRecordInfo, models, recordFileThreshold);
+            }
             log.info("The mapper has scored: " + resultList.size() + " records.");
             if (totalRecordCount != resultList.size()) {
                 throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordCount),

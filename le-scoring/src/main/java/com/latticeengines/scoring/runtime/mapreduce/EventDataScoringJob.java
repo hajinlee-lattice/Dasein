@@ -49,7 +49,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         setConf(config);
     }
 
-    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry, VersionManager versionManager, String stackName) {
+    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
+            VersionManager versionManager, String stackName) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
@@ -68,7 +69,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Configuration config = mrJob.getConfiguration();
             config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(),
                     properties.getProperty(ScoringProperty.UNIQUE_KEY_COLUMN.name()));
-
+            config.set(ScoringProperty.USE_SCOREDERIVATION.name(),
+                    properties.getProperty(ScoringProperty.USE_SCOREDERIVATION.name()));
             if (properties.containsKey(ScoringProperty.MODEL_GUID.name())) {
                 config.set(ScoringProperty.MODEL_GUID.name(), properties.getProperty(ScoringProperty.MODEL_GUID.name()));
             }
@@ -106,9 +108,10 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setNumReduceTasks(0);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName) + scoringPythonPath));
-            List<String> jarFilePaths = HdfsUtils
-                    .getFilesForDir(mrJob.getConfiguration(), dependencyPath + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
+            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName)
+                    + scoringPythonPath));
+            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
+                    + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }
