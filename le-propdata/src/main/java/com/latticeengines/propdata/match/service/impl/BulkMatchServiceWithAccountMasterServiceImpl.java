@@ -106,7 +106,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .inputProperties() //
                 .targetTableName(input.getTableName() + "_match_target") //
                 .targetPath(targetPath) //
-                .partitions(cascadingPartitions) //
+                .partitions(16) // cascadingPartitions) //
                 .jobProperties(getJobProperties()) //
                 .engine("MR") //
                 .setBeanName("cascadingBulkMatchDataflow");
@@ -126,6 +126,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         Properties jobProperties = new Properties();
         jobProperties.put("mapred.reduce.tasks", "16");
         jobProperties.put("cascading.spill.map.threshold", "100000");
+        jobProperties.put("mapreduce.job.running.map.limit", "100");
         return jobProperties;
     }
 
