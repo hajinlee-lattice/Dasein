@@ -342,7 +342,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
             }
             System.out.println("Waiting for modelRunId=" + modelRunId + " Status:" + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
-            if ((end - start) > 3 * 3_600_000) { // 3 hours max
+            if ((end - start) > 10 * 3_600_000) { // 10 hours max
                 Assert.fail("Timeout for modelRunId=" + modelRunId);
             }
             try {
