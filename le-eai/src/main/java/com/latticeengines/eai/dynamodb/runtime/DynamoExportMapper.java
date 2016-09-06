@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -36,7 +36,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     private static final Log log = LogFactory.getLog(DynamoExportMapper.class);
     private static final int BUFFER_SIZE = 25;
-    private static final int MAX_RETRIES = 10;
+    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
     private String recordType;
     private String repo;
@@ -128,39 +128,44 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         recordBuffer.put(entity.getId(), mbusRecord);
     }
 
-    private void commitBuffer(Counter whiteBuffer, Counter blackBuffer) {
+    private void commitBuffer(Counter whiteCounter, Counter blackCounter) {
         int originalSize = recordBuffer.size();
         int retry = 0;
-        int interval = 100;
-        Random random = new Random(System.currentTimeMillis());
+        long interval = 1000L;
+        long startTime = System.currentTimeMillis();
 
-        while (retry++ < MAX_RETRIES && !recordBuffer.isEmpty()) {
+        while (!recordBuffer.isEmpty() && System.currentTimeMillis() - startTime < TIMEOUT) {
             try {
-                if (retry > 1) {
-                    log.info("Attempt to commit record buffer (Attempt=" + retry + "). BufferSize="
-                            + recordBuffer.size());
+                attemptCommitBuffer(whiteCounter);
+                if (!recordBuffer.isEmpty()) {
+                    log.info(String.format("Still remain %d records to write in the buffer. (Attempt=%d)",
+                            recordBuffer.size(), retry));
                 }
-                attemptCommitBuffer(whiteBuffer);
-                Thread.sleep(interval);
             } catch (Exception e) {
-                log.warn("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
+                log.error("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
             } finally {
-                interval = interval + random.nextInt(interval);
+                retry++;
+                try {
+                    Thread.sleep(interval);
+                } catch (Exception e) {
+                    // ignore
+                }
+                interval *= 2;
             }
         }
 
         int finalSize = recordBuffer.size();
         log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
-                + whiteBuffer.getValue());
+                + whiteCounter.getValue());
         if (!recordBuffer.isEmpty()) {
             log.error(
-                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackBuffer.getValue());
+                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackCounter.getValue());
         }
 
         recordBuffer.clear();
     }
 
-    private void attemptCommitBuffer(Counter whiteBuffer) {
+    private void attemptCommitBuffer(Counter whiteCounter) {
         try {
             dataStore.createRecords(recordBuffer);
         } catch (Exception e) {
@@ -169,15 +174,9 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
         List<String> ids = new ArrayList<>(recordBuffer.keySet());
         for (String id : ids) {
-            GenericRecord record = null;
-            try {
-                record = dataStore.findRecord(id);
-            } catch (Exception e) {
-                log.error("Error when finding record of id " + id);
-            }
-            if (record != null) {
+            if (dataStore.findRecord(id) != null) {
                 recordBuffer.remove(id);
-                whiteBuffer.increment(1);
+                whiteCounter.increment(1);
             }
         }
     }
@@ -198,15 +197,11 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     private void constructDataStore() {
-        // get the reflected schema for Entity
         Schema fabricSchema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
-
-        // add dynamo attributes
         String dynamoProp = DynamoUtil.constructAttributes(entityClass);
         if (dynamoProp != null) {
             fabricSchema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
-
         dataStore = new DynamoDataStoreImpl(client, repo, recordType, fabricSchema);
     }
 
