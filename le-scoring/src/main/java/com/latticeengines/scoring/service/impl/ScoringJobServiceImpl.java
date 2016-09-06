@@ -60,7 +60,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     public ApplicationId score(ScoringConfiguration scoringConfig) {
         validateScoringConfig(scoringConfig);
         Properties properties = generateCustomizedProperties(scoringConfig);
-        properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         return this.score(properties);
     }
 
@@ -112,6 +111,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
                 scoringConfig.getModelGuids());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
+        properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         return properties;
     }
 }
