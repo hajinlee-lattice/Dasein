@@ -1,8 +1,11 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -33,6 +36,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     private static final Log log = LogFactory.getLog(DynamoExportMapper.class);
     private static final int BUFFER_SIZE = 25;
+    private static final int MAX_RETRIES = 10;
 
     private String recordType;
     private String repo;
@@ -125,17 +129,52 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     private void commitBuffer(Counter whiteBuffer, Counter blackBuffer) {
+        int originalSize = recordBuffer.size();
+        int retry = 0;
+        int interval = 100;
+        Random random = new Random(System.currentTimeMillis());
+
+        while (retry++ < MAX_RETRIES && !recordBuffer.isEmpty()) {
+            try {
+                attemptCommitBuffer(whiteBuffer);
+                Thread.sleep(interval);
+            } catch (Exception e) {
+                log.warn("Attempt to commit buffer failed. (Attemp=" + retry + ")", e);
+            } finally {
+                interval = interval + random.nextInt(interval);
+            }
+        }
+
+        int finalSize = recordBuffer.size();
+        log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
+                + whiteBuffer.getValue());
+        if (!recordBuffer.isEmpty()) {
+            log.error("Failed to commit " + recordBuffer.size() + " records. Total failed  = "
+                    + blackBuffer.getValue());
+        }
+
+        recordBuffer.clear();
+    }
+
+    private void attemptCommitBuffer(Counter whiteBuffer) {
         try {
             dataStore.createRecords(recordBuffer);
-            whiteBuffer.increment(recordBuffer.size());
-            log.info("Committed " + recordBuffer.size() + " records to DynamoDB. Total committed  = "
-                    + whiteBuffer.getValue());
         } catch (Exception e) {
-            blackBuffer.increment(recordBuffer.size());
-            log.error("Failed to commit a buffer of size " + recordBuffer.size() + ". Total failed  = "
-                    + blackBuffer.getValue(), e);
-        } finally {
-            recordBuffer.clear();
+            log.error("Error when committing buffer.", e);
+        }
+
+        List<String> ids = new ArrayList<>(recordBuffer.keySet());
+        for (String id: ids) {
+            GenericRecord record = null;
+            try {
+                record = dataStore.findRecord(id);
+            } catch (Exception e) {
+                log.error("Error when finding record of id " + id);
+            }
+            if (record != null) {
+                recordBuffer.remove(id);
+                whiteBuffer.increment(1);
+            }
         }
     }
 
