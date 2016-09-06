@@ -5,10 +5,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class EmailSettings {
 
-
     public static final String PLS_NEW_INTERNAL_USER_EMAIL_MSG = "You have been added to the <strong>%s</strong> Lead Prioritization Tenant.";
     public static final String PLS_NEW_USER_SUBJECT = "Welcome to Lattice Predictive Insights";
-    public static final String PLS_NEW_EXTERNAL_USER_EMAIL_MSG = "Congratulations! You've been invited to use Lattice Predicative Insights. You can sign in for the first time using the temporary credentials listed below.\n";
+    public static final String PLS_NEW_EXTERNAL_USER_EMAIL_MSG = "Congratulations! You've been invited to use Lattice Predictive Insights. You can sign in for the first time using the temporary credentials listed below.\n";
     public static final String PLS_EXISTING_USER_SUBJECT = "Invitation to Access %s (Lattice Predictive Insights)";
     public static final String PLS_FORGET_PASSWORD_EMAIL_SUBJECT = "Password Reset for Lattice Predictive Insights";
     public static final String PD_NEW_USER_EMAIL_MSG = "You have been granted access to the Lattice Prospect Discovery.";
