@@ -1,6 +1,8 @@
 package com.latticeengines.monitor.alerts.service.impl;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -33,8 +35,16 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
     @Autowired
     private EmailService emailService;
 
+    private String localHost;
+
     public PagerDutyEmailServiceImpl() {
         this.pagerDutyEmailAddress = PAGERDUTY_EMAIL;
+        try {
+            localHost = InetAddress.getLocalHost().toString();
+        } catch (UnknownHostException e) {
+            localHost = NA;
+        }
+
     }
 
     @VisibleForTesting
@@ -60,7 +70,7 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
         return "success";
     }
 
-    private final static String EMAIL_CONTENT = "<Client>%s</Client>%n<ClientUrl>%s</ClientUrl>%n<DeDupKey>%s</DeDupKey>%n<Message>%s</Message>";
+    private final static String EMAIL_CONTENT = "<Host>%s</Host><Client>%s</Client>%n<ClientUrl>%s</ClientUrl>%n<DeDupKey>%s</DeDupKey>%n<Message>%s</Message>";
 
     private String getContent(String tenantId, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {
@@ -75,6 +85,7 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
         String detailStr = JsonUtils.serialize(detailsMap);
 
         String content = String.format(EMAIL_CONTENT, //
+                StringUtils.defaultString(localHost, NA), //
                 StringUtils.defaultString(MODULE_NAME, NA), //
                 StringUtils.defaultString(clientUrl, NA), //
                 StringUtils.defaultString(dedupKey, UUID.randomUUID().toString()), //
