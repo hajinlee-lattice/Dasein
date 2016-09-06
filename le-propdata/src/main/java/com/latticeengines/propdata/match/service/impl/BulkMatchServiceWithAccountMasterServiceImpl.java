@@ -106,7 +106,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .inputProperties() //
                 .targetTableName(input.getTableName() + "_match_target") //
                 .targetPath(targetPath) //
-                .partitions(16) // cascadingPartitions) //
+                .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties()) //
                 .engine("MR") //
                 .setBeanName("cascadingBulkMatchDataflow");
