@@ -153,6 +153,13 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
             "executeInternalWithTenantRegistrationLaterThanHdfsModelCreation", "downloadDetailsOnlyModelSummary" })
     public void modelDownloaderShouldSkipBadModel() throws Exception {
         System.out.println("executing modelDownloaderShouldSkipBadModel");
+
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        if (summaries.size() > 0) {
+            System.out.println(String.format("displayName: %s, construction time: %s, id: %s, lookupId: %s", summaries
+                    .get(0).getDisplayName(), summaries.get(0).getConstructionTime(), summaries.get(0).getId(),
+                    summaries.get(0).getLookupId()));
+        }
         ModelSummaryParser parser = Mockito.mock(ModelSummaryParser.class);
         Mockito.when(parser.parse(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException())
                 .thenCallRealMethod();
@@ -167,7 +174,12 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         Thread.sleep(1000L);
 
         setupSecurityContext(tenant);
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        summaries = modelSummaryEntityMgr.findAll();
+        if (summaries.size() > 0) {
+            System.out.println(String.format("displayName: %s, construction time: %s, id: %s, lookupId: %s", summaries
+                    .get(0).getDisplayName(), summaries.get(0).getConstructionTime(), summaries.get(0).getId(),
+                    summaries.get(0).getLookupId()));
+        }
         assertEquals(summaries.size(), 1, "One new summaries should have been created because the first model is bad.");
 
     }
