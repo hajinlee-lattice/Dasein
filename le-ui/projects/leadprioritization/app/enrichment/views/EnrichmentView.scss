@@ -77,6 +77,11 @@
                     padding: 10px;
                 }
             }
+            li.download {
+                a:hover {
+                    color: white;
+                }
+            }
         }
         &.fixed {
             position: fixed;
