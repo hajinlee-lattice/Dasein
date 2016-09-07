@@ -152,9 +152,10 @@ public class ScoringMapperPredictUtil {
         }
         return resultList;
     }
-    
-    public static List<ScoreOutput> processScoreFilesUsingScoreDerivation(ModelAndRecordInfo modelAndRecordInfo, Map<String, ScoreDerivation> scoreDerivationMap,
-            long recordFileThreshold) throws IOException, DecoderException {
+
+    public static List<ScoreOutput> processScoreFilesUsingScoreDerivation(ModelAndRecordInfo modelAndRecordInfo,
+            Map<String, ScoreDerivation> scoreDerivationMap, long recordFileThreshold) throws IOException,
+            DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
         // list of HashMap<leadId: score>
@@ -179,7 +180,8 @@ public class ScoringMapperPredictUtil {
             for (String key : keySet) {
                 List<Double> rawScoreList = scores.get(key);
                 for (Double rawScore : rawScoreList) {
-                    ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid), modelInfoMap.get(uuid).getModelGuid(), key, rawScore);
+                    ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid), modelInfoMap.get(uuid)
+                            .getModelGuid(), key, rawScore);
                     resultList.add(result);
                 }
             }
@@ -355,6 +357,8 @@ public class ScoringMapperPredictUtil {
 
         if (derivation.averageProbability != 0) {
             scoreOutput.setLift(score / derivation.averageProbability);
+        } else {
+            scoreOutput.setLift(null);
         }
 
         if (derivation.percentiles == null) {
