@@ -30,7 +30,7 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy implements Model
     public ResponseDocument<String> runModel(ModelRun modelRun, String tenant, String username,
             String encryptedPassword, String apiHostPort) {
         String url = constructUrl(
-                "/runmodel?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
+                "/modelruns?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
                 tenant, username, encryptedPassword, apiHostPort);
         return post("runModel", url, modelRun, ResponseDocument.class);
     }
@@ -78,9 +78,9 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy implements Model
     }
 
     @Override
-    public ResponseDocument<String> upsertDataSets(List<DataSet> datasets) {
+    public ResponseDocument<String> insertDataSet(DataSet dataset) {
         String url = constructUrl("/datasets");
-        return post("upsertDataSets", url, datasets, ResponseDocument.class);
+        return post("insertDataSet", url, dataset, ResponseDocument.class);
     }
 
     @Override
@@ -97,25 +97,25 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy implements Model
 
     @Override
     public ResponseDocument<List<PropData>> getPropDatas() {
-        String url = constructUrl("/propdatas");
+        String url = constructUrl("/propdataconfigs");
         return get("getPropDatas", url, ResponseDocument.class);
     }
 
     @Override
     public ResponseDocument<String> upsertPropDatas(List<PropData> propdatas) {
-        String url = constructUrl("/propdatas");
+        String url = constructUrl("/propdataconfigs");
         return post("upsertPropDatas", url, propdatas, ResponseDocument.class);
     }
 
     @Override
     public ResponseDocument<List<Sampling>> getSamplings() {
-        String url = constructUrl("/samplings");
+        String url = constructUrl("/samplingconfigs");
         return get("getSamplings", url, ResponseDocument.class);
     }
 
     @Override
     public ResponseDocument<String> upsertSamplings(List<Sampling> samplings) {
-        String url = constructUrl("/samplings");
+        String url = constructUrl("/samplingconfigs");
         return post("upsertSamplings", url, samplings, ResponseDocument.class);
     }
 
@@ -134,13 +134,13 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy implements Model
     @Override
     public ResponseDocument<String> uploadPipelineStepFile(String fileName,
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
-        String url = constructUrl("/pipelinestepfile?fileName={fileName}", fileName);
+        String url = constructUrl("/pipelines/pipelinestepfiles?fileName={fileName}", fileName);
         return post("uploadPipelineStepFile", url, requestEntity, ResponseDocument.class);
     }
 
     @Override
     public ResponseDocument<ModelRun> getModelRun(String modelRunId) {
-        String url = constructUrl("/modelrun/{modelRunId}", modelRunId);
+        String url = constructUrl("/modelruns/{modelRunId}", modelRunId);
         return get("getModelRun", url, ResponseDocument.class);
     }
 
