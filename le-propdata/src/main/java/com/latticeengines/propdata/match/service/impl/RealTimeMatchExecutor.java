@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.BulkMatchResponse;
 import com.latticeengines.propdata.match.metric.MatchResponse;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchFetcher;
@@ -51,7 +52,6 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
         for (MatchContext matchContext : matchContexts) {
             doPostProcessing(matchContext);
         }
-        generateOutputMetric(matchContexts);
         return matchContexts;
     }
 
@@ -66,12 +66,15 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     }
 
     @MatchStep
-    private void generateOutputMetric(final List<MatchContext> matchContexts) {
+    public void generateOutputMetric(final BulkMatchOutput bulkMatchOutput) {
         matchExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                for (MatchContext context : matchContexts) {
-                    generateMetric(context);
+                try {
+                    BulkMatchResponse response = new BulkMatchResponse(bulkMatchOutput);
+                    metricService.write(MetricDB.LDC_Match, response);
+                } catch (Exception e) {
+                    log.warn("Failed to extract output metric.", e);
                 }
             }
         });
@@ -79,8 +82,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     private void generateMetric(final MatchContext matchContext) {
         try {
-            MatchContext localContext = JsonUtils.deserialize(JsonUtils.serialize(matchContext), MatchContext.class);
-            MatchResponse response = new MatchResponse(localContext);
+            MatchResponse response = new MatchResponse(matchContext);
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
             log.warn("Failed to extract output metric.", e);

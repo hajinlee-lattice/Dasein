@@ -53,9 +53,14 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
     @Override
     @MatchStep(threshold = 0L)
     public BulkMatchOutput matchBulk(BulkMatchInput input) {
+        long startTime = System.currentTimeMillis();
         List<MatchContext> matchContexts = doPreProcessing(input);
         matchContexts = matchExecutor.executeBulk(matchContexts);
-        return doPostProcessing(input, matchContexts);
+        BulkMatchOutput bulkMatchOutput = doPostProcessing(input, matchContexts);
+        bulkMatchOutput.setTimeElapsed(System.currentTimeMillis() - startTime);
+        bulkMatchOutput.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
+        ((RealTimeMatchExecutor) matchExecutor).generateOutputMetric(bulkMatchOutput);
+        return bulkMatchOutput;
     }
 
     protected MatchContext prepare(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
