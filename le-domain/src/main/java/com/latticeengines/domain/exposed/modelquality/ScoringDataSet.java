@@ -28,6 +28,7 @@ public class ScoringDataSet implements HasName, HasPid {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
     
+    @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
     

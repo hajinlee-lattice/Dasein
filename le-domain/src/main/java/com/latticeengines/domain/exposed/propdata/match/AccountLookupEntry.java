@@ -114,7 +114,6 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         return builder.build();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public AccountLookupEntry fromFabricAvroRecord(GenericRecord record) {
         setId(record.get(LATTICE_ACCOUNT_ID).toString());

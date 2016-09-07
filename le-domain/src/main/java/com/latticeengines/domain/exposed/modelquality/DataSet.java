@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -71,6 +72,10 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "dataSet")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "dataSets")
+    @JsonIgnore
+    private List<AnalyticTest> analyticTests = new ArrayList<>();
 
     @Override
     @MetricTag(tag = "DataSetName")
@@ -163,6 +168,9 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
 
     public void setScoringDataSets(List<ScoringDataSet> scoringDataSets) {
         this.scoringDataSets = scoringDataSets;
+        for (ScoringDataSet scoringDataSet : scoringDataSets) {
+            scoringDataSet.setDataSet(this);
+        }
     }
 
     public void addScoringDataSet(ScoringDataSet scoringDataSet) {
