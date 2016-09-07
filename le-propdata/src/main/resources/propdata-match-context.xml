@@ -26,10 +26,12 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
     
+    <!-- It is okay to drop some/many metric data points during heavy load as 
+         sampled data is sufficient convey performance trend and slowness -->
     <task:executor id="matchExecutor"
-                   pool-size="2-6"
-                   queue-capacity="500"
-                   keep-alive="10"
-                   rejection-policy="CALLER_RUNS" />
+                   pool-size="1-2"
+                   queue-capacity="100"
+                   keep-alive="10000"
+                   rejection-policy="DISCARD" />
 
 </beans>
