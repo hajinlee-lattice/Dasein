@@ -9,6 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
-    private static Logger log = Logger.getLogger(ModelCopyServiceImpl.class);
+    private static Logger log = Logger.getLogger(ModelReplaceServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;
@@ -63,7 +64,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
         } catch (IOException e) {
-            log.error(e);
+            log.error(ExceptionUtils.getFullStackTrace(e));
             throw new RuntimeException(e);
         }
         return true;
@@ -113,24 +114,39 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
         List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, targetModelDirPath + "/enhancements");
         for (String path : paths) {
             String fileName = new Path(path).getName();
-            HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/enhancements/" + fileName, targetModelDirPath
-                    + "/enhancements/" + fileName + ".bak");
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/enhancements/" + fileName,
-                    targetModelDirPath + "/enhancements");
+            backupFileAndCopy(sourceModelLocalRoot + "/enhancements", targetModelDirPath + "/enhancements", fileName);
+//            HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/enhancements/" + fileName, targetModelDirPath
+//                    + "/enhancements/" + fileName + ".bak");
+//            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/enhancements/" + fileName,
+//                    targetModelDirPath + "/enhancements");
         }
+        backupFileAndCopy(sourceModelLocalRoot, targetModelDirPath, targetModelFileName);
+//        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/" + targetModelFileName, targetModelDirPath + "/"
+//                + targetModelFileName + ".bak");
+//        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/" + targetModelFileName,
+//                targetModelDirPath);
 
-        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/" + targetModelFileName, targetModelDirPath + "/"
-                + targetModelFileName + ".bak");
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/" + targetModelFileName,
-                targetModelDirPath);
+        backupFileAndCopy(sourceModelLocalRoot, targetModelDirPath, "rfpmml.xml");
+        
+//        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rfpmml.xml", targetModelDirPath
+//                + "/rfpmml.xml.bak");
+//        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rfpmml.xml", targetModelDirPath);
 
-        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rfpmml.xml", targetModelDirPath
-                + "/rfpmml.xml.bak");
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rfpmml.xml", targetModelDirPath);
-
-        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rf_model.txt", targetModelDirPath
-                + "/rf_model.txt.bak");
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rf_model.txt", targetModelDirPath);
+        backupFileAndCopy(sourceModelLocalRoot, targetModelDirPath, "rf_model.txt");
+        
+//        HdfsUtils.moveFile(yarnConfiguration, targetModelDirPath + "/rf_model.txt", targetModelDirPath
+//                + "/rf_model.txt.bak");
+//        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rf_model.txt", targetModelDirPath);
+    }
+    
+    void backupFileAndCopy(String sourceLocalPath, String targetDirPath, String fileName) throws IOException{
+        if(!HdfsUtils.fileExists(yarnConfiguration, targetDirPath + "/" + fileName + ".bak")){
+            HdfsUtils.moveFile(yarnConfiguration, targetDirPath + "/" + fileName, targetDirPath + "/" + fileName + ".bak");
+        }else{
+            HdfsUtils.rmdir(yarnConfiguration, targetDirPath + "/" + fileName);
+        }
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceLocalPath + "/" + fileName,
+                targetDirPath);
     }
 
     JsonNode constructNewModelSummary(String modelSummaryLocalPath, ModelSummary targetModelSummary) throws IOException {
@@ -157,12 +173,15 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             String targetEventTableName) throws IOException {
         String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 sourceCustomerRoot + "/data/", sourceEventTableName);
-        String targetStandardDataComposiitonPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+        String targetStandardDataCompositonPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 targetCustomerRoot + "/data/", targetEventTableName);
 
-        HdfsUtils.moveFile(yarnConfiguration, targetStandardDataComposiitonPath, targetStandardDataComposiitonPath
-                + ".bak");
-        HdfsUtils.copyFiles(yarnConfiguration, sourceStandardDataCompositionPath, targetStandardDataComposiitonPath);
+        if(!HdfsUtils.fileExists(yarnConfiguration, targetStandardDataCompositonPath + ".bak")){
+            HdfsUtils.moveFile(yarnConfiguration, targetStandardDataCompositonPath, targetStandardDataCompositonPath + ".bak");
+        }else{
+            HdfsUtils.rmdir(yarnConfiguration, targetStandardDataCompositonPath);
+        }
+        HdfsUtils.copyFiles(yarnConfiguration, sourceStandardDataCompositionPath, targetStandardDataCompositonPath);
     }
 
     String getModelFileName(String path, boolean isLocal) throws IllegalArgumentException, IOException {

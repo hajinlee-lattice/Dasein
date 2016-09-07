@@ -83,7 +83,7 @@ public class ModelReplaceServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testModelCopyInHdfs() throws IOException {
+    public void testModelReplaceInHdfs() throws IOException {
         ((ModelReplaceServiceImpl) modelReplaceService).processHdfsData(modelReplaceSourceTenant.getId(),
                 modelReplaceTargetTenant.getId(), sourceModelSummary, targetModelSummary);
 
