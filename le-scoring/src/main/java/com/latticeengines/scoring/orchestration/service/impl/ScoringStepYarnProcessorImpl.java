@@ -204,6 +204,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
                 modelGuids, Boolean.FALSE.booleanValue());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
+        properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.toString());
         return properties;
     }
 
