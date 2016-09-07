@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -19,8 +20,6 @@ import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionProgressDao;
-
-import reactor.util.CollectionUtils;
 
 @Component("ingestionProgressDao")
 public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress>
