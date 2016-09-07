@@ -41,9 +41,9 @@ import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 public class ScoringJobUtil {
 
     public static List<String> findModelUrlsToLocalize(Configuration yarnConfiguration, String tenant,
-            String customerBaseDir, List<String> modelGuids) {
+            String customerBaseDir, List<String> modelGuids, boolean useScoreDerivation) {
         List<String> modelFilePaths = findAllModelPathsInHdfs(yarnConfiguration, tenant, customerBaseDir);
-        return findModelUrlsToLocalize(yarnConfiguration, tenant, modelGuids, modelFilePaths);
+        return findModelUrlsToLocalize(yarnConfiguration, tenant, modelGuids, modelFilePaths, useScoreDerivation);
     }
 
     public static List<String> findAllModelPathsInHdfs(Configuration yarnConfiguration, String tenant,
@@ -74,7 +74,7 @@ public class ScoringJobUtil {
 
     @VisibleForTesting
     static List<String> findModelUrlsToLocalize(Configuration yarnConfiguration, String tenant,
-            List<String> modelGuids, List<String> modelFilePaths) {
+            List<String> modelGuids, List<String> modelFilePaths, boolean useScoreDerivation) {
         List<String> modelUrlsToLocalize = new ArrayList<>();
         label: for (String modelGuid : modelGuids) {
             String uuid = UuidUtils.extractUuid(modelGuid);
@@ -86,8 +86,10 @@ public class ScoringJobUtil {
                         throw new LedpException(LedpCode.LEDP_20021, new String[] { path, tenant });
                     }
                     modelUrlsToLocalize.add(path + "#" + uuid);
-                    modelUrlsToLocalize.add(new Path(path).getParent() + "/enhancements/scorederivation.json" + "#"
-                            + uuid + "_scorederivation");
+                    if (useScoreDerivation) {
+                        modelUrlsToLocalize.add(new Path(path).getParent() + "/enhancements/scorederivation.json" + "#"
+                                + uuid + "_scorederivation");
+                    }
                     continue label;
                 }
             }

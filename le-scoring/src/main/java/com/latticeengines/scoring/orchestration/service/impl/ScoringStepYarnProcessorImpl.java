@@ -92,7 +92,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Autowired
     private DbCreds scoringCreds;
-    
+
     @Autowired
     private ScoringJobService scoringJobService;
 
@@ -201,7 +201,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String tableName = scoringCommand.getTableName();
         List<String> modelGuids = metadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
                 ScoringDaemonService.MODEL_GUID);
-        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir, modelGuids);
+        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
+                modelGuids, Boolean.FALSE.booleanValue());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
         return properties;
     }

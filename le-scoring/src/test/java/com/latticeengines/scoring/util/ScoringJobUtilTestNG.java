@@ -76,7 +76,7 @@ public class ScoringJobUtilTestNG extends ScoringFunctionalTestNGBase {
         assertEquals(modelFilePaths.size(), 4);
         assertEquals(modelGuidsFromTable.size(), 2);
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, modelGuidsFromTable,
-                modelFilePaths);
+                modelFilePaths, false);
 
         assertEquals(modelUrls.size(), modelGuidsFromTable.size());
         List<String> retrievedUuids = new ArrayList<>();
@@ -98,7 +98,7 @@ public class ScoringJobUtilTestNG extends ScoringFunctionalTestNGBase {
                 constructModelGuid("0fc8614c-85ad-405c-8b1d-ff38f94ec741"), constructModelGuid(nonExistUuid) });
         try {
             modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, modelGuidsFromTable,
-                    modelFilePaths);
+                    modelFilePaths, false);
         } catch (LedpException e) {
             assertEquals(e.getCode(), LedpCode.LEDP_18007);
             assertTrue(e.getMessage().contains(nonExistUuid));

@@ -109,7 +109,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                scoringConfig.getModelGuids());
+                scoringConfig.getModelGuids(), Boolean.TRUE.booleanValue());
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
         properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         return properties;
