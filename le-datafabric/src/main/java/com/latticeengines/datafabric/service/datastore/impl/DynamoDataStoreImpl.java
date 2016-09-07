@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
@@ -51,6 +52,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private static final String REPO = "_REPO_";
     private static final String RECORD = "_RECORD_";
+    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
     // Default attributes for every table
     public final String ID = "Id";
@@ -151,6 +153,35 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             writeItems = writeItems.addItemToPut(item);
         }
 
+        int retries = 0;
+        long startTime = System.currentTimeMillis();
+        long interval = 500L;
+
+        while (System.currentTimeMillis() - startTime < TIMEOUT) {
+            try {
+                if (retries > 0) {
+                    log.info(String.format("Attempt %d to submit batch write item.", retries));
+                }
+                submitBatchWrite(dynamoDB, writeItems);
+                return;
+            } catch (NoSuchMethodError e) {
+                log.warn("If you see NoSuchMethodError on jackson json, "
+                        + "it might because 0 items is prcessed, due to exceeding provisioned capacity"
+                        + ", or the table name or key attributes are wrong.", e);
+                try {
+                    Thread.sleep(interval);
+                    interval *= 2;
+                    retries++;
+                } catch (Exception e1) {
+                    log.warn("Failed to sleep. Ignoring the error.", e1);
+                }
+            }
+        }
+
+        throw new RuntimeException("Failed to successfully finish batch write request within timeout.");
+    }
+
+    private void submitBatchWrite(DynamoDB dynamoDB, TableWriteItems writeItems) throws NoSuchMethodError {
         try {
             BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
             do {
@@ -163,9 +194,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
 
             } while (outcome.getUnprocessedItems().size() > 0);
-        } catch (NoSuchMethodError e) {
-            throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
-                    + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to batch create records " + tableName, e);
         }
