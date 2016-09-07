@@ -40,12 +40,12 @@ class RevenueColumnTransformStepTest(TrainingTestBase):
         self.assertEqual(len(columns), 5)
         self.assertTrue('Target' in columns)
         
-        self.assertEqual(dataFrame['Product_1_Revenue'][0], math.log(1 + 1))
+        self.assertEqual(dataFrame['Product_1_Revenue'][0], 1.0)
         self.assertTrue(np.isnan(dataFrame['Product_1_Revenue'][1]))
         self.assertTrue(np.isnan(dataFrame['Product_1_Revenue'][2]), math.log(2))
         self.assertTrue(np.isnan(dataFrame['Product_1_Revenue'][3]))
 
-        self.assertEqual(dataFrame['Product_1_RevenueMomentum3'][0], math.log(4 + 1))
+        self.assertEqual(dataFrame['Product_1_RevenueMomentum3'][0], 4)
         self.assertTrue(np.isnan(dataFrame['Product_1_RevenueMomentum3'][1]))
         self.assertTrue(np.isnan(dataFrame['Product_1_RevenueMomentum3'][2]))
-        self.assertEqual(dataFrame['Product_1_RevenueMomentum3'][3], -math.log(8))
+        self.assertEqual(dataFrame['Product_1_RevenueMomentum3'][3], -7)

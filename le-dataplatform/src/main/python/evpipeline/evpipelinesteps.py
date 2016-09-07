@@ -1,15 +1,17 @@
-import encoder
+from collections import OrderedDict
 import math
+import re
+
+from sklearn.decomposition import PCA
+
+import encoder
 import numpy as np
 import pandas as pd
-import random as rd
-import re
-  
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
-from sklearn.decomposition import PCA
-from collections import OrderedDict
-  
+import random as rd
+
+
 logger = get_logger("evpipeline")
     
 class EnumeratedColumnTransformStep(PipelineStep):
@@ -273,26 +275,26 @@ class RevenueColumnTransformStep(PipelineStep):
     def logRevenueColumnWithBooleanPositiveSimple(self, dataFrame, column):
         dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x <= 0 or x == None else x)
         dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x :  math.log(1.0 + x))
+        dataFrame[column] = dataFrame[column].apply(lambda x :  x)
         dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
     
     def logRevenueColumnWithBooleanNegativeSimple(self, dataFrame, column):
         dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x == 0 or x == None else x)
         dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x : np.log(1.0 + x) if x >= 0 else -math.log(1.0 - x))
+        dataFrame[column] = dataFrame[column].apply(lambda x : x)
         dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
     
     def logRevenueColumnWithBooleanPositive(self, dataFrame, column):
         dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x <= 0 or x == None else x)
         dataFrame['Trx_Boolean_Positive_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
         dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x :  math.log(1.0 + x))
+        dataFrame[column] = dataFrame[column].apply(lambda x :  x)
     
     def logRevenueColumnWithBooleanNegative(self, dataFrame, column):
         dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x == 0 or x == None else x)
         dataFrame['Trx_Boolean_Negative_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
         dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x : np.log(1.0 + x) if x >= 0 else -math.log(1.0 - x))
+        dataFrame[column] = dataFrame[column].apply(lambda x : x)
         
 class EVModelStep(PipelineStep):
     model = None
@@ -317,10 +319,10 @@ class EVModelStep(PipelineStep):
             outputFrame["PredictedRevenue"] = 0
             return outputFrame
           
-        revenueColumn = self.model.predict_regression(dataFrame[self.modelInputColumns])  
-        if (revenueColumn != None):      
+        revenueColumn = self.model.predict_regression(dataFrame[self.modelInputColumns])
+        if revenueColumn != None:
             outputFrame["PredictedRevenue"] = revenueColumn
-            outputFrame["PredictedRevenue"] = outputFrame["PredictedRevenue"].apply(lambda x : math.exp(x) - 1.0)
+            outputFrame["PredictedRevenue"] = outputFrame["PredictedRevenue"].apply(lambda x : x)
         else:
             outputFrame["PredictedRevenue"] = 0
         return outputFrame
