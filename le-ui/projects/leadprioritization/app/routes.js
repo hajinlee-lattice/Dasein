@@ -609,7 +609,7 @@ angular
             url: '/enrichment',
             params: {
                 pageIcon: 'ico-eloqua',
-                pageTitle: 'Eloqua Enrichments'
+                pageTitle: 'Eloqua Settings'
             }, 
             views: {
                 "summary@": {

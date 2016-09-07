@@ -21,7 +21,8 @@ angular.module('lp.enrichment.leadenrichment', [
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
-            premiumSelectError: 'Premium attribute limit reached',
+            premiumTotalSelectError: 'Premium attribute limit reached',
+            generalTotalSelectError: 'Attribute limit reached',
             no_results: 'No attributes were found',
             saved_alert: 'Your changes have been saved.',
             saving_alert: 'Your changes are being saved. <i class="fa fa-cog fa-spin fa-fw"></i>',
@@ -56,12 +57,24 @@ angular.module('lp.enrichment.leadenrichment', [
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
+        var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
+        if(selectedTotal > vm.generalSelectLimit) {
+            enrichment.IsSelected = false;
+            enrichment.IsDirty = false;
+            enrichment.button_select = vm.label.generalTotalSelectError;
+            enrichment.button_error = true;
+            $timeout(function(){
+                enrichment.button_select = vm.label.button_select;
+                enrichment.button_error = false;
+            }, 3000);
+            return false;
+        }
         if(enrichment.IsPremium) {
             var premiums = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
             if(premiums > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
-                enrichment.button_select = vm.label.premiumSelectError;
+                enrichment.button_select = vm.label.premiumTotalSelectError;
                 enrichment.button_error = true;
                 $timeout(function(){
                     enrichment.button_select = vm.label.button_select;
@@ -209,6 +222,7 @@ angular.module('lp.enrichment.leadenrichment', [
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
+        vm.generalSelectLimit = 100;
         vm.statusMessageBox = angular.element('.status-alert');
 
         angular.element($window).bind("scroll", scrolled);
