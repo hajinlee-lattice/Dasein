@@ -34,7 +34,7 @@ public interface ModelQualityInterface {
 
     ResponseDocument<List<DataSet>> getDataSets();
 
-    ResponseDocument<String> upsertDataSets(List<DataSet> datasets);
+    ResponseDocument<String> insertDataSet(DataSet dataset);
 
     ResponseDocument<List<Pipeline>> getPipelines();
 
