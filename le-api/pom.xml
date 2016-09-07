@@ -13,7 +13,6 @@
         <le.dataplatform.version>2.0.40-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>2.0.40-SNAPSHOT</le.domain.version>
         <le.monitor.version>2.0.40-SNAPSHOT</le.monitor.version>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <le.security.version>2.0.40-SNAPSHOT</le.security.version>
     </properties>
 

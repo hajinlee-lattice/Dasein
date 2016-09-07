@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>eai</component-name>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <camel.version>2.15.3</camel.version>
         <le.common.version>2.0.40-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.40-SNAPSHOT</le.domain.version>

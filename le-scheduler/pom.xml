@@ -8,7 +8,6 @@
 
     <properties>
         <component-name>scheduler</component-name>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
     </properties>
 
     <parent>

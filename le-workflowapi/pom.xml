@@ -9,8 +9,6 @@
 
     <properties>
         <component-name>workflowapi</component-name>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
-        <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <spring.security.oauth.version>2.0.10.RELEASE</spring.security.oauth.version>
         <le.baton.version>2.0.40-SNAPSHOT</le.baton.version>
         <le.common.version>2.0.40-SNAPSHOT</le.common.version>

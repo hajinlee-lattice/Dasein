@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.AllowedValues;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
@@ -43,6 +44,7 @@ public class ModelingMetadata {
 
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KV implements Map.Entry<String, Object> {
         private String key;
         private Object value;

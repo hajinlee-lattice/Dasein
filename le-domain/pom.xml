@@ -8,7 +8,6 @@
 
     <properties>
         <component-name>domain</component-name>
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <le.common.version>2.0.40-SNAPSHOT</le.common.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
