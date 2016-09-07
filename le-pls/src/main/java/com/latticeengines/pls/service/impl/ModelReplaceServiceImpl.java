@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
-import org.codehaus.plexus.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,16 +23,12 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelReplaceService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     private static Logger log = Logger.getLogger(ModelReplaceServiceImpl.class);
-
-    @Autowired
-    private TenantService tenantService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
