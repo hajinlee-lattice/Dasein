@@ -46,7 +46,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.score = Math.round($scope.score * 100);
     }
      
-    data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
+    //data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
     if (data.ExternalAttributes) {
         $scope.externalAttributes = data.ExternalAttributes.total;
         $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
