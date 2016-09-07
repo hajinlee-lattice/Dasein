@@ -66,8 +66,8 @@
             border-bottom-left-radius: 1px;
             margin-left: 1px;
             margin-right: 0;
-            margin-bottom: 1px;
-
+            margin-top: 0;
+            margin-bottom: 0;
             &.open {
                 background-color: #222;
                 color: #fff;
@@ -117,7 +117,8 @@
                 border-top-right-radius: 6px;
                 border-bottom-right-radius: 6px;
                 margin-left: 0;
-                
+                margin-top: 0;
+                margin-bottom: 0;
                 &.open {
                     background-color: #222;
                     border-color: #222;
@@ -195,7 +196,8 @@
             border-top-left-radius: 0;
             border-bottoim-left-radius: 0;
             margin-left: 0;
-            
+            margin-top: 0;
+            margin-bottom: 0;
             &.open {
                 background-color: #222;
                 color: #fff;
