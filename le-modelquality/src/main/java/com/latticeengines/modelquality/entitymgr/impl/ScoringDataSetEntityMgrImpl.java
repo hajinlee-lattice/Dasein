@@ -13,11 +13,11 @@ import com.latticeengines.modelquality.entitymgr.ScoringDataSetEntityMgr;
 public class ScoringDataSetEntityMgrImpl extends BaseEntityMgrImpl<ScoringDataSet> implements ScoringDataSetEntityMgr {
     
     @Autowired
-    private ScoringDataSetDao dataSetDao;
+    private ScoringDataSetDao scoringDataSetDao;
     
     @Override
     public BaseDao<ScoringDataSet> getDao() {
-        return dataSetDao;
+        return scoringDataSetDao;
     }
 
 }

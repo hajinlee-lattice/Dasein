@@ -28,7 +28,7 @@ public class ModelRunServiceImpl implements ModelRunService {
     public String run(ModelRun modelRun, Environment env) {
         SelectedConfig config = modelRun.getSelectedConfig();
         DataSetType dataSetType = config.getDataSet().getDataSetType();
-        if (dataSetType == DataSetType.SOURCETABLE) {
+        if (dataSetType == DataSetType.FILE) {
             return fileModelRunService.run(modelRun, env);
         } else {
             return eventTableModelRunService.run(modelRun, env);

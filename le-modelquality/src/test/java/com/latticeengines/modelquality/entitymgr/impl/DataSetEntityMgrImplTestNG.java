@@ -31,7 +31,7 @@ public class DataSetEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase
         dataSet.setName("DataSet1");
         dataSet.setIndustry("Industry1");
         dataSet.setTenant(new Tenant("Tenant1"));
-        dataSet.setDataSetType(DataSetType.SOURCETABLE);
+        dataSet.setDataSetType(DataSetType.FILE);
         dataSet.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
         
         ScoringDataSet scoringDataSet = new ScoringDataSet();
@@ -51,7 +51,7 @@ public class DataSetEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase
         assertEquals(retrievedDataSet.getName(), dataSet.getName());
         assertEquals(retrievedDataSet.getIndustry(), dataSet.getIndustry());
         assertEquals(retrievedDataSet.getTenant().getId(), dataSet.getTenant().getId());
-        assertEquals(retrievedDataSet.getDataSetType(), DataSetType.SOURCETABLE);
+        assertEquals(retrievedDataSet.getDataSetType(), DataSetType.FILE);
         
         List<ScoringDataSet> scoringDataSets = dataSet.getScoringDataSets();
         List<ScoringDataSet> retrievedScoringDataSets = retrievedDataSet.getScoringDataSets();

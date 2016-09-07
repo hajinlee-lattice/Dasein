@@ -56,7 +56,6 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     @Override
     protected void runModel(SelectedConfig config) {
-
         SourceFile sourceFile = uploadFile(config);
         resolveMetadata(config, sourceFile);
         String modelName = createModel(config, sourceFile);

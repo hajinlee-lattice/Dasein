@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +15,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.modelquality.entitymgr.SamplingEntityMgr;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "modelquality", description = "REST resource to get samplings parameters")
 @RestController
 public class SamplingResource {
@@ -27,9 +27,9 @@ public class SamplingResource {
 
     private static final Log log = LogFactory.getLog(SamplingResource.class);
 
-    @RequestMapping(value = "/samplings", method = RequestMethod.GET)
+    @RequestMapping(value = "/samplingconfigs", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get Samplings")
+    @ApiOperation(value = "Get Sampling Configs")
     public ResponseDocument<List<Sampling>> getSamplings() {
         try {
             List<Sampling> samplings = samplingEntityMgr.findAll();
@@ -40,9 +40,9 @@ public class SamplingResource {
         }
     }
 
-    @RequestMapping(value = "/samplings", method = RequestMethod.POST)
+    @RequestMapping(value = "/samplingconfigs", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Upsert Samplings")
+    @ApiOperation(value = "Upsert Sampling Configs")
     public ResponseDocument<String> upsertSamplings(@RequestBody List<Sampling> samplings) {
         try {
             samplingEntityMgr.deleteAll();

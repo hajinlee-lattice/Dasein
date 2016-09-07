@@ -238,7 +238,7 @@ public class ModelQualityDeploymentTestNGBase extends AbstractTestNGSpringContex
         dataSet.setName("DataSet1"); 
         dataSet.setIndustry("Industry1");
         dataSet.setTenant(new Tenant("Model_Quality_Test.Model_Quality_Test.Production"));
-        dataSet.setDataSetType(DataSetType.SOURCETABLE);
+        dataSet.setDataSetType(DataSetType.FILE);
         dataSet.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
         dataSet.setTrainingSetHdfsPath("/Pods/Default/Services/ModelQuality/Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv");
         ScoringDataSet scoringDataSet = new ScoringDataSet();

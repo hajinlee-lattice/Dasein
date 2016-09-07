@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to get DataSet parameters")
 @RestController
@@ -43,11 +43,10 @@ public class DataSetResource {
 
     @RequestMapping(value = "/datasets", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Upsert DataSets")
-    public ResponseDocument<String> upsertDataSets(@RequestBody List<DataSet> datasets) {
+    @ApiOperation(value = "Insert new DataSet")
+    public ResponseDocument<String> upsertDataSets(@RequestBody DataSet dataset) {
         try {
-            dataSetEntityMgr.deleteAll();
-            dataSetEntityMgr.createDataSets(datasets);
+            dataSetEntityMgr.create(dataset);
             return ResponseDocument.successResponse("OK");
         } catch (Exception e) {
             log.error("Failed on this API!", e);

@@ -71,7 +71,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         Tenant tenant = new Tenant();
         tenant.setId(env.tenant);
         tenant.setName(CustomerSpace.parse(env.tenant).getTenantId());
-        loginAndAttach(env.username, env.encryptedPassword, tenant);
+        loginAndAttach(env.username, env.password, tenant);
     }
 
     protected UserDocument loginAndAttach(String username, String password, Tenant tenant) {

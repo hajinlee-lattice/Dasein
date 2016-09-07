@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -19,25 +16,25 @@ import org.springframework.web.multipart.MultipartFile;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
-import com.latticeengines.modelquality.entitymgr.PipelineStepEntityMgr;
 import com.latticeengines.modelquality.service.PipelineService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to get Pipeline parameters")
 @RestController
+@RequestMapping("/pipelines")
 public class PipelineResource {
 
     @Autowired
     private PipelineEntityMgr pipelineEntityMgr;
 
     @Autowired
-    private PipelineStepEntityMgr pipelineStepEntityMgr;
-
-    @Autowired
     private PipelineService pipelineService;
 
     private static final Log log = LogFactory.getLog(PipelineResource.class);
 
-    @RequestMapping(value = "/pipelines", method = RequestMethod.GET)
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Pipelines")
     public ResponseDocument<List<Pipeline>> getPipelines() {
@@ -51,7 +48,7 @@ public class PipelineResource {
         }
     }
 
-    @RequestMapping(value = "/pipelines", method = RequestMethod.POST)
+    @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upsert Pipelines")
     public ResponseDocument<String> upsertPipelines(@RequestBody List<Pipeline> pipelines) {
@@ -67,7 +64,7 @@ public class PipelineResource {
         }
     }
 
-    @RequestMapping(value = "/pipelinestepfile", method = RequestMethod.POST)
+    @RequestMapping(value = "/pipelinestepfiles", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload custom python pipeline step file")
     public ResponseDocument<String> uploadPipelineStepFile(

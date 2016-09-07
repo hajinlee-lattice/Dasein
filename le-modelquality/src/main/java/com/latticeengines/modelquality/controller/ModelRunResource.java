@@ -36,19 +36,19 @@ public class ModelRunResource {
 
     private static final Log log = LogFactory.getLog(ModelRunResource.class);
 
-    @RequestMapping(value = "/runmodel", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelruns", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Run a Model")
     public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun, //
             @RequestParam("tenant") String tenant, //
             @RequestParam("username") String username, //
-            @RequestParam("password") String encryptedPassword, //
+            @RequestParam("password") String password, //
             @RequestParam("apiHostPort") String apiHostPort) {
         try {
             Environment env = new Environment();
             env.tenant = tenant;
             env.username = username;
-            env.encryptedPassword = encryptedPassword;
+            env.password = password;
             env.apiHostPort = apiHostPort;
             modelRunService.setEnvironment(env);
             String modelRunId = modelRunService.run(modelRun, env);
@@ -74,7 +74,7 @@ public class ModelRunResource {
         }
     }
 
-    @RequestMapping(value = "/modelrun/{modelRunId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelruns/{modelRunId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ModelRun")
     public ResponseDocument<ModelRun> getModelRun(@PathVariable String modelRunId) {

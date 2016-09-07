@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +15,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.entitymgr.PropDataEntityMgr;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "modelquality", description = "REST resource to get PropData parameters")
 @RestController
 public class PropdataResource {
@@ -27,7 +27,7 @@ public class PropdataResource {
 
     private static final Log log = LogFactory.getLog(PropdataResource.class);
 
-    @RequestMapping(value = "/propdatas", method = RequestMethod.GET)
+    @RequestMapping(value = "/propdataconfigs", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get PropDatas")
     public ResponseDocument<List<PropData>> getPropDatas() {
@@ -41,7 +41,7 @@ public class PropdataResource {
         }
     }
 
-    @RequestMapping(value = "/propdatas", method = RequestMethod.POST)
+    @RequestMapping(value = "/propdataconfigs", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upsert PropDatas")
     public ResponseDocument<String> upsertPropDatas(@RequestBody List<PropData> propDatas) {

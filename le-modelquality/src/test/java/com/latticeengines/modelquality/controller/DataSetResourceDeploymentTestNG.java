@@ -1,6 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.testng.Assert;
@@ -19,10 +18,10 @@ public class DataSetResourceDeploymentTestNG extends ModelQualityDeploymentTestN
     }
 
     @Test(groups = "deployment")
-    public void upsertDataSets() {
+    public void insertDataSet() {
         try {
-            DataSet dataSets = createDataSet();
-            ResponseDocument<String> response = modelQualityProxy.upsertDataSets(Arrays.asList(dataSets));
+            DataSet dataSet = createDataSet();
+            ResponseDocument<String> response = modelQualityProxy.insertDataSet(dataSet);
             Assert.assertTrue(response.isSuccess());
 
         } catch (Exception ex) {
@@ -31,7 +30,7 @@ public class DataSetResourceDeploymentTestNG extends ModelQualityDeploymentTestN
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertDataSets")
+    @Test(groups = "deployment", dependsOnMethods = "insertDataSet")
     public void getDataSets() {
         try {
             ResponseDocument<List<DataSet>> response = modelQualityProxy.getDataSets();

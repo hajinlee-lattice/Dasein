@@ -149,7 +149,7 @@
   "data_set": {
     "name": "MuleSoft",
     "industry": "Industry1",
-    "dataSetType": "SOURCETABLE",
+    "dataSetType": "FILE",
     "schemaInterpretation": "SalesforceLead",
     "tenant": {
       "Identifier": "Model_Quality_Test.Model_Quality_Test.Production",
@@ -169,10 +169,9 @@
   },
   "prop_data": {
     "name": "propData1",
-    "version": "",
+    "data_cloud_version": "",
     "exclude_propdata_columns": false,
-    "predefined_selection_name": null,
-    "metadata_version": "metadataVersion1"
+    "predefined_selection_name": null
   },
   "data_flow": {
     "name": "dataFlow1",
