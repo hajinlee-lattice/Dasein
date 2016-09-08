@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.persistence.Basic;
@@ -187,16 +186,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
-    public void deDuplicateAttribute() {
+    public void deduplicateAttributeNames() {
         Set<String> nameSet = new HashSet<String>();
         for (int i = 0; i < attributes.size(); i++) {
             Attribute attribute = attributes.get(i);
-            if (!nameSet.contains(attribute.getName())) {
-                nameSet.add(name);
-            } else {
-                String updatedName = name + UUID.randomUUID().toString();
-                log.info(String.format("Replacing %s with %s.", name, updatedName));
-                attribute.setName(updatedName);
+            String rootAttributeName = attribute.getName();
+            String possibleName = rootAttributeName;
+            int version = 0;
+            while (nameSet.contains(possibleName)) {
+                possibleName = String.format(rootAttributeName + "-%d", ++version);
+            }
+            nameSet.add(possibleName);
+            if (version > 0) {
+                attribute.setName(possibleName);
+                log.info(String.format("Replacing %s with %s.", rootAttributeName, possibleName));
             }
         }
     }

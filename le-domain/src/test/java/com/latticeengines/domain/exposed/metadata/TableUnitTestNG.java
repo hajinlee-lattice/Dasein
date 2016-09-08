@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.avro.Schema;
@@ -35,13 +36,21 @@ public class TableUnitTestNG {
     @Test(groups = "unit")
     public void getModelingMetadata() {
         ModelingMetadata metadata = table.getModelingMetadata();
-        assertEquals(metadata.getAttributeMetadata().size(), 4);
+        assertEquals(metadata.getAttributeMetadata().size(), 7);
     }
 
     @Test(groups = "unit")
     public void getAttribute() {
         Attribute unknown = table.getAttribute("foo");
         assertTrue(unknown == null);
+    }
+
+    @Test(groups = "unit")
+    public void testDeduplicateAttributeNames() {
+        table.deduplicateAttributeNames();
+        assertNotNull(table.getAttribute("avro_1_200"));
+        assertNotNull(table.getAttribute("avro_1_200-1"));
+        assertNotNull(table.getAttribute("avro_1_200-2"));
     }
 
     private Table createTable() {
@@ -109,10 +118,22 @@ public class TableUnitTestNG {
         activeRetirementParticipants.setTags(ModelingMetadata.EXTERNAL_TAG);
         activeRetirementParticipants.setDataSource("[DerivedColumns]");
 
+        Attribute duplicateAttribute1 = new Attribute();
+        duplicateAttribute1.setName("avro_1_200");
+
+        Attribute duplicateAttribute2 = new Attribute();
+        duplicateAttribute2.setName("avro_1_200");
+
+        Attribute duplicateAttribute3 = new Attribute();
+        duplicateAttribute3.setName("avro_1_200");
+
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);
         table.addAttribute(spamIndicator);
         table.addAttribute(activeRetirementParticipants);
+        table.addAttribute(duplicateAttribute1);
+        table.addAttribute(duplicateAttribute2);
+        table.addAttribute(duplicateAttribute3);
 
         return table;
     }
