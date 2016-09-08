@@ -77,6 +77,9 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
         if (context.getCounter(RecordExportCounter.ERROR_RECORDS).getValue() == 0) {
             context.getCounter(RecordExportCounter.ERROR_RECORDS).setValue(0);
         }
+        if (context.getCounter(RecordExportCounter.SCANNED_RECORDS).getValue() == 0) {
+            context.getCounter(RecordExportCounter.SCANNED_RECORDS).setValue(0);
+        }
     }
 
 }
