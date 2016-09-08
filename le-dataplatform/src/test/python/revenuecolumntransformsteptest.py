@@ -1,8 +1,6 @@
 import math
-import os
 from pandas import DataFrame as df
 import shutil
-import sys
 
 import numpy as np
 from trainingtestbase import TrainingTestBase
