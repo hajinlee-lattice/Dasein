@@ -17,6 +17,7 @@ angular
         var flags = FeatureFlagService.Flags();
         vm.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.ALLOW_PIVOT_FILE);
     });
+    ImportStore.ResetAdvancedSettings();
 
     angular.extend(vm, {
         importErrorMsg: '',
