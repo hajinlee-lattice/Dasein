@@ -38,6 +38,7 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         PipelineStep step = new PipelineStep();
         step.setName("StepName1");
         step.setScript("StepScript1");
+        step.setMainClassName("StepName1");
         List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
         PipelinePropertyDef pipelinePropertyDef = new PipelinePropertyDef();
         pipelinePropertyDef.setName("StepDef1");
@@ -55,7 +56,6 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void create() {
-
         pipelineEntityMgr.create(pipeline);
 
         List<Pipeline> pipelines = pipelineEntityMgr.findAll();

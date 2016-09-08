@@ -1,8 +1,5 @@
 package com.latticeengines.modelquality.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,14 +15,17 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "modelquality", description = "REST resource to get algorithms parameters")
 @RestController
 public class AlgorithmResource {
 
+    private static final Log log = LogFactory.getLog(AlgorithmResource.class);
+
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
-
-    private static final Log log = LogFactory.getLog(AlgorithmResource.class);
 
     @RequestMapping(value = "/algorithms", method = RequestMethod.GET)
     @ResponseBody
