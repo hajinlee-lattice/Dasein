@@ -114,7 +114,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         key.put("version", this.version);
         key.put("producer", producer);
         key.put("record", recordType);
-        key.put("Id", id);
+        key.put("id", id);
         key.put("customerSpace", "");
 
         return key;
