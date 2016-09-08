@@ -2,6 +2,7 @@ package com.latticeengines.scoring.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -58,7 +59,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
 
         uuid = UUID.randomUUID().toString();
         URL modelSummaryUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/sampleModel/Lattice-Relaunch-lead-20160906-1654_2016-09-06_20-12_model.json");
+                .getSystemResource("com/latticeengines/scoring/models/sampleModel/Hootsuite-lead-20160907-1516_2016-09-07_17-13_model.json");
         String modelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/" + uuid
                 + "/1429553747321_0004";
         HdfsUtils.mkdir(yarnConfiguration, modelPath);
@@ -71,7 +72,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
 
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + UUID.randomUUID() + "/scores";
         InputStream is = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/scoring/models/sampleModel/Lattice-Relaunch-lead-20160906-1654_2016-09-06_20-12_scored.txt");
+                .getSystemResourceAsStream("com/latticeengines/scoring/models/sampleModel/Hootsuite-lead-20160907-1516_2016-09-07_17-13_scored.txt");
         List<String> lines = IOUtils.readLines(is);
         for (String line : lines) {
             String[] arr = line.split(",");
@@ -100,16 +101,8 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
             assertNotNull(record.get(ScoreResultField.RawScore.name()));
             if (scores.containsKey(record.get(InterfaceName.Id.name()).toString())) {
                 assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-                // assertTrue(Math.abs(scores.get(record.get(InterfaceName.Id.name()).toString())
-                // - ((Double) (record.get(ScoreResultField.RawScore.name()))))
-                // < 0.000001);
-                if (Math.abs(scores.get(record.get(InterfaceName.Id.name()).toString())
-                        - ((Double) (record.get(ScoreResultField.RawScore.name())))) > 0.000001) {
-                    log.warn(String.format("Score for %s is %f in modeling and  %f in scoring",
-                            record.get(InterfaceName.Id.name()).toString(),
-                            scores.get(record.get(InterfaceName.Id.name()).toString()),
-                            record.get(ScoreResultField.RawScore.name())));
-                }
+                assertTrue(Math.abs(scores.get(record.get(InterfaceName.Id.name()).toString())
+                        - ((Double) (record.get(ScoreResultField.RawScore.name())))) < 0.000001);
             } else {
                 throw new Exception("missing id: " + record.get(InterfaceName.Id.name()));
             }
