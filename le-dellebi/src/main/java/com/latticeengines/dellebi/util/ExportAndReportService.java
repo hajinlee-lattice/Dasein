@@ -94,6 +94,7 @@ public class ExportAndReportService {
         String successFile = dellEbiFlowService.getOutputDir(context) + "/_SUCCESS";
         DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(DellEbiFlowService.LOG_ENTRY,
                 DellEbiExecutionLog.class);
+        Long startTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
         try {
@@ -151,7 +152,8 @@ public class ExportAndReportService {
             dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Exported.getStatus());
             dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
 
-            log.info("Finish exporting HDFS files to SQL server");
+            LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish exporting HDFS files to SQL server",
+                    startTime);
 
             try {
                 dellEbiFlowService.runStoredProcedure(context);
@@ -169,10 +171,12 @@ public class ExportAndReportService {
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {
-                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName, targetJdbcDb);
+                        report(context, "Dell EBI refresh successfully!", fileName, targetJdbcDb);
                         dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Completed.getStatus());
                         dellEbiExecutionLog.setEndDate(new Date());
                         dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
+                        LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Dell EBI refresh successfully!",
+                                dellEbiExecutionLog.getStartDate().getTime());
                         return true;
                     } else {
                         errorMsg = "Can not delete smbFile=" + fileName;

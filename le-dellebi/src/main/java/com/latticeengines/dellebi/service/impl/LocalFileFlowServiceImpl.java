@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
+import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,6 +86,8 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
                 context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_LOCAL);
 
+                LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Downloading job!",
+                        dellEbiExecutionLog.getStartDate().getTime());
             } catch (Exception ex) {
                 dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
             }

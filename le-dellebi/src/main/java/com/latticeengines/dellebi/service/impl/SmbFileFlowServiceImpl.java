@@ -1,9 +1,11 @@
 package com.latticeengines.dellebi.service.impl;
 
+import com.latticeengines.dellebi.util.LoggingUtils;
 import jcifs.smb.NtStatus;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -104,6 +106,9 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
                 context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_SMB);
+
+                LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Downloading job!",
+                        dellEbiExecutionLog.getStartDate().getTime());
             } catch (Exception ex) {
                 dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
             }

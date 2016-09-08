@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.dellebi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum DellEbiExecutionLogStatus {
 
     NewFile(1), //
@@ -11,6 +14,7 @@ public enum DellEbiExecutionLogStatus {
     Failed(-1);
 
     private int status;
+    private static Map<Integer, String> enumMap;
 
     DellEbiExecutionLogStatus(int status) {
         this.status = status;
@@ -20,4 +24,18 @@ public enum DellEbiExecutionLogStatus {
         return this.status;
     }
 
+    public static String getStatusNameByCode(int code) {
+        if (enumMap == null) {
+            initialMap();
+        }
+
+        return enumMap.get(code);
+    }
+
+    private static void initialMap() {
+        enumMap = new HashMap<Integer, String>();
+        for (DellEbiExecutionLogStatus accessor : DellEbiExecutionLogStatus.values()) {
+            enumMap.put(accessor.getStatus(), accessor.toString());
+        }
+    }
 }

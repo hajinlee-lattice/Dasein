@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,6 +168,9 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         } else {
             dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
         }
+
+        LoggingUtils.logErrorWithDuration(log, dellEbiExecutionLog, err, null,
+                dellEbiExecutionLog.getStartDate().getTime());
     }
 
     @Override

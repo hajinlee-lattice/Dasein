@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +109,7 @@ public class DailyFlow {
 
         log.info("Found new file, name=" + fileName);
         log.info("Start Cascading job!");
+        long startTime = System.currentTimeMillis();
 
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
@@ -147,7 +149,7 @@ public class DailyFlow {
         dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Transformed.getStatus());
         dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
 
-        log.info("Finished Cascading job!");
+        LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Cascading job!", startTime);
 
         context.setProperty(DellEbiFlowService.RESULT_KEY, true);
         return context;
