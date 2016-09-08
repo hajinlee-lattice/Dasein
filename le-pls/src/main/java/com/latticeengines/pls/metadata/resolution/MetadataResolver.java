@@ -166,7 +166,7 @@ public class MetadataResolver {
         if (lastModified == null) {
             result.metadata.setLastModifiedKey(null);
         }
-        result.metadata.deDuplicateAttribute();
+        result.metadata.deduplicateAttributeNames();
     }
 
     public List<FieldMapping> calculateBasedOnExistingMetadata(Table metadataTable) {

@@ -132,7 +132,7 @@ public class ScoringFileUploadResource {
                     attr.setTags(Tag.INTERNAL);
                     table.addAttribute(attr);
                 }
-                table.deDuplicateAttribute();
+                table.deduplicateAttributeNames();
                 sourceFile.setTableName(table.getName());
                 metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
             }
