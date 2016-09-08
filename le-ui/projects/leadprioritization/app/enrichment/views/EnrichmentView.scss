@@ -78,8 +78,15 @@
                 }
             }
             li.download {
-                a:hover {
-                    color: white;
+                a {
+                    &:hover {
+                        color: white;
+                    }
+                }
+            }
+            li.save {
+                button {
+                    padding: .75em 1em;
                 }
             }
         }
