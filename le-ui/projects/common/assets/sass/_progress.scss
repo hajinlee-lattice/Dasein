@@ -542,6 +542,65 @@ Wizard Steps
 		}
 	}
 }
+.open-nav {
+	.wizard {
+		@include media(">400px") {
+			li {
+				.load-data, .match-cloud, .building-model,
+				&.success .load-data, &.success .match-cloud, &.success .building-model,
+				&.error .load-data, &.error .match-cloud, &.error .building-model {
+					background-image: none;
+					padding-left: 0;
+				}
+			}
+		}
+		@include media(">1040px") {
+			li {
+				width: 31%;
+				margin-right: 2%;
+				&:last-child {
+					margin-right: 0;
+				}
+				.load-data, .match-cloud, .building-model,
+				&.success .load-data, &.success .match-cloud, &.success .building-model,
+				&.error .load-data, &.error .match-cloud, &.error .building-model {
+					padding-left: 40px;
+				}
+				.load-data {
+				    background-image: url("/assets/images/ico-status-process-file-inactive.png");
+				}
+				.match-cloud {
+				    background-image: url("/assets/images/ico-status-data-cloud-inactive.png");
+				}
+				.building-model {
+				    background-image: url("/assets/images/ico-status-building-model-inactive.png");
+				}
+				&.success {
+					.load-data {
+				        background-image: url("/assets/images/ico-status-process-file-success.png");
+				    }
+				    .match-cloud {
+				        background-image: url("/assets/images/ico-status-data-cloud-success.png");
+				    }
+				    .building-model {
+				        background-image: url("/assets/images/ico-status-building-model-success.png");
+				    }
+				}
+				&.error {
+					.load-data {
+				        background-image: url("/assets/images/ico-status-process-file-failed.png");
+				    }
+				    .match-cloud {
+				        background-image: url("/assets/images/ico-status-data-cloud-failed.png");
+				    }
+				    .building-model {
+				        background-image: url("/assets/images/ico-status-building-model-failed.png");
+				    }
+				}
+			}
+		}
+	}
+}
 
 /* Sliding Doors with Sprites
 1. Using CSS and Image Sliding Door Technique from 2001 or whenever. 
