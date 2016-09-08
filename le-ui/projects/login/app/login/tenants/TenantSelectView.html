@@ -205,7 +205,7 @@
                 </div>
                 <div class="text-center tenant-list-spinner" ng-if="vm.deactivated">
                     <section class="loading-spinner lattice show-spinner"> 
-                        <h2 class="text-center">Launching LP {{vm.selected.UIVersion}}</h2>
+                        <h2 class="text-center">Launching LP{{vm.selected.UIVersion == '2.0' ? ' 2.0' : 'I' }}</h2>
                         <div class="meter"><span class="indeterminate"></span></div> 
                     </section>
                 </div>
