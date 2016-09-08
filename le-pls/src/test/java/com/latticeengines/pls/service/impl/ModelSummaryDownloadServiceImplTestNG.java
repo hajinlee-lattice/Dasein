@@ -82,8 +82,8 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
             for (ModelSummary summary : summaries) {
                 modelSummaryEntityMgr.delete(summary);
             }
+            tenantService.discardTenant(newTenant());
         }
-        tenantService.discardTenant(newTenant());
     }
 
     @BeforeMethod(groups = "functional")
@@ -150,7 +150,9 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional", dependsOnMethods = {
             "executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation",
-            "executeInternalWithTenantRegistrationLaterThanHdfsModelCreation", "downloadDetailsOnlyModelSummary" })
+            "executeInternalWithTenantRegistrationLaterThanHdfsModelCreation",
+            "downloadDetailsOnlyModelSummary"
+    }, enabled = false)
     public void modelDownloaderShouldSkipBadModel() throws Exception {
         System.out.println("executing modelDownloaderShouldSkipBadModel");
 

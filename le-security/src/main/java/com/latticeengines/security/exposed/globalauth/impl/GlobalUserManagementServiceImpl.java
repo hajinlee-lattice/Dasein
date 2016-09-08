@@ -548,7 +548,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         List<GlobalAuthUser> userDatas = gaUserEntityMgr
                 .findByTenantIdJoinAuthenticationJoinUserTenantRight(tenantData.getPid());
         if (userDatas == null || userDatas.size() == 0) {
-            throw new Exception("Unable to find any user associated with the tenant requested.");
+            return userRightsList;
         }
         for (GlobalAuthUser userData : userDatas) {
             User user = new User();
