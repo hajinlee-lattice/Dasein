@@ -1,11 +1,8 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -36,7 +33,6 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     private static final Log log = LogFactory.getLog(DynamoExportMapper.class);
     private static final int BUFFER_SIZE = 25;
-    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
     private String recordType;
     private String repo;
@@ -96,12 +92,19 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     @Override
     public void map(AvroKey<GenericData.Record> key, NullWritable value, Context context)
             throws IOException, InterruptedException {
+        context.getCounter(RecordExportCounter.SCANNED_RECORDS).increment(1);
+
+        long totalCount = context.getCounter(RecordExportCounter.SCANNED_RECORDS).getValue();
+        if (totalCount % 10000L == 0) {
+            log.info("Already scanned " + totalCount + " records.");
+        }
+
         try {
             GenericData.Record record = key.datum();
             loadToBuffer(record);
         } catch (Exception e) {
             context.getCounter(RecordExportCounter.ERROR_RECORDS).increment(1);
-            log.error("Failed load record to buffer: " + key.datum(), e);
+            log.error("Failed to load record to buffer: " + key.datum(), e);
         }
 
         if (recordBuffer.size() >= BUFFER_SIZE) {
@@ -132,64 +135,12 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         try {
             dataStore.createRecords(recordBuffer);
             whiteCounter.increment(recordBuffer.size());
-            log.info("Committed " + recordBuffer.size() + " records to DynamoDB. Total committed  = "
-                    + whiteCounter.getValue());
         } catch (Exception e) {
             blackCounter.increment(recordBuffer.size());
             log.error("Failed to commit a buffer of size " + recordBuffer.size() + ". Total failed  = "
                     + blackCounter.getValue(), e);
         } finally {
             recordBuffer.clear();
-        }
-
-//        int originalSize = recordBuffer.size();
-//        int retry = 0;
-//        long interval = 1000L;
-//        long startTime = System.currentTimeMillis();
-//
-//        while (!recordBuffer.isEmpty() && System.currentTimeMillis() - startTime < TIMEOUT) {
-//            try {
-//                attemptCommitBuffer(whiteCounter);
-//                if (!recordBuffer.isEmpty()) {
-//                    log.info(String.format("Still remain %d records to write in the buffer. (Attempt=%d)",
-//                            recordBuffer.size(), retry));
-//                }
-//            } catch (Exception e) {
-//                log.error("Attempt to commit buffer failed. (Attempt=" + retry + ")", e);
-//            } finally {
-//                retry++;
-//                try {
-//                    Thread.sleep(interval);
-//                } catch (Exception e) {
-//                    // ignore
-//                }
-//                interval *= 2;
-//            }
-//        }
-//        int finalSize = recordBuffer.size();
-//        log.info("Committed " + (originalSize - finalSize) + " records to DynamoDB. Total committed  = "
-//                + whiteCounter.getValue());
-//        if (!recordBuffer.isEmpty()) {
-//            log.error(
-//                    "Failed to commit " + recordBuffer.size() + " records. Total failed  = " + blackCounter.getValue());
-//        }
-//
-//        recordBuffer.clear();
-    }
-
-    private void attemptCommitBuffer(Counter whiteCounter) {
-        try {
-            dataStore.createRecords(recordBuffer);
-        } catch (Exception e) {
-            log.error("Error when committing buffer.", e);
-        }
-
-        List<String> ids = new ArrayList<>(recordBuffer.keySet());
-        for (String id : ids) {
-            if (dataStore.findRecord(id) != null) {
-                recordBuffer.remove(id);
-                whiteCounter.increment(1);
-            }
         }
     }
 
