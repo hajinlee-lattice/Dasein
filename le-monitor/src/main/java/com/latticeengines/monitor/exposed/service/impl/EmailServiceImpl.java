@@ -422,8 +422,6 @@ public class EmailServiceImpl implements EmailService {
             }
             builder.replaceToken("{{jobtype}}", EmailSettings.PLS_CREATE_MODEL_EMAIL_JOB_TYPE);
             builder.replaceToken("{{modelname}}", modelName);
-            builder.replaceToken("{{errormsg}}", EmailSettings.PLS_CREATE_MODEL_ERROR_EMAIL_MSG);
-            builder.replaceToken("{{linkmsg}}", EmailSettings.PLS_ERROR_EMAIL_LINK_MSG);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
@@ -483,8 +481,6 @@ public class EmailServiceImpl implements EmailService {
             }
             builder.replaceToken("{{jobtype}}", EmailSettings.PLS_SCORE_EMAIL_JOB_TYPE);
             builder.replaceToken("{{modelname}}", modelName);
-            builder.replaceToken("{{errormsg}}", EmailSettings.PLS_SCORE_ERROR_EMAIL_MSG);
-            builder.replaceToken("{{linkmsg}}", EmailSettings.PLS_ERROR_EMAIL_LINK_MSG);
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
