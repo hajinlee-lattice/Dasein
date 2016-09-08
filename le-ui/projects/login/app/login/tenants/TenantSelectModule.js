@@ -47,7 +47,7 @@ angular.module('login.tenants', [
         }
 
         SessionTimeoutUtility.init();
-        
+
         vm.visible = true;
         
         $('[autofocus]').focus();
@@ -64,7 +64,7 @@ angular.module('login.tenants', [
             } else {
                 vm.deactivated = false;
                 vm.selected = null;
-                vm.showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
+                showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
             }
         });
     };

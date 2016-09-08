@@ -30,7 +30,7 @@ var mainApp = angular.module('mainApp', [
     if (loginDocument && mustUserChangePassword(loginDocument)) {
         window.open("/login", "_self");
     } else if (previousSession != null && !SessionTimeoutUtility.hasSessionTimedOut()) {
-        SessionTimeoutUtility.refreshPreviousSession(previousSession.Tenant);
+        //SessionTimeoutUtility.refreshPreviousSession(previousSession.Tenant);
     } else {
         window.open("/login", "_self");
     }
