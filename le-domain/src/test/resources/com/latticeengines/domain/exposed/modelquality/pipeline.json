@@ -1,0 +1,97 @@
+{
+  "columnTransformFiles": {
+    "RemediateDataRulesStep": {
+      "KeyWhenSortingByAscending": "1",
+      "Name": "remediatedatarulesstep",
+      "MainClassName": "RemediateDataRulesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "enabledRules": {
+            "PopulatedRowCountDS": [],
+            "UniqueValueCountDS": []
+        }
+      },
+      "ColumnTransformFilePath": "remediatedatarulesstep.py"
+    },
+    "PivotStep": {
+      "KeyWhenSortingByAscending": "2",
+      "Name": "pivotstep",
+      "MainClassName": "PivotStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columnsToPivot": "emptyDictionary",
+        "categoricalColumns": "categoricalColumns",
+        "dataprofile": "dataprofile",
+        "pvalueThreshold": 0.10,
+        "minCategoricalCount": 5,
+        "maxCategoricalCount": 10
+      },
+      "ColumnTransformFilePath": "pivotstep.py"
+    },
+    "EnumeratedColumnTransformStep": {
+      "KeyWhenSortingByAscending": "3",
+      "Name": "enumeratedcolumntransformstep",
+      "MainClassName": "EnumeratedColumnTransformStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Categorical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "categoricalColumns"
+      },
+      "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
+    },
+    "ColumnTypeConversionStep": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "columntypeconversionstep",
+      "MainClassName": "ColumnTypeConversionStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columnsToConvert": "columnsToTransform"
+      },
+      "ColumnTransformFilePath": "columntypeconversionstep.py"
+    },
+    "ImputationStep": {
+      "KeyWhenSortingByAscending": "5",
+      "Name": "imputationstep",
+      "MainClassName": "ImputationStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Numerical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "orderedDictContinuousColumns",
+        "imputationValues": "emptyDictionary",
+        "targetCol": "targetColumn"
+      },
+      "ColumnTransformFilePath": "imputationstep.py"
+    },
+    "ExportDataFrameStep": {
+      "KeyWhenSortingByAscending": "6",
+      "Name": "exportdfstep",
+      "MainClassName": "ExportDataFrameStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {},
+      "ColumnTransformFilePath": "exportdfstep.py"
+    },
+    "CustomProxyStep": {
+      "KeyWhenSortingByAscending": "8",
+      "Name": "customproxystep",
+      "MainClassName": "CustomProxyStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "targetName": "customtargetstep",
+        "targetMainClassName": "CustomTargetStep",
+        "targetFilePath": "/Pods/Default/Services/ModelQuality/customtargetstep.py"
+      },
+      "ColumnTransformFilePath": "customproxystep.py"
+    }
+  }
+}

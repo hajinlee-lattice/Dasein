@@ -425,12 +425,14 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.top30PercentLift = top30PercentLift;
     }
 
+    @Override
     @JsonProperty("ApplicationId")
     @Column(name = "APPLICATION_ID", nullable = true)
     public String getApplicationId() {
         return applicationId;
     }
 
+    @Override
     @JsonProperty("ApplicationId")
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
