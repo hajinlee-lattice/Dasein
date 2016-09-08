@@ -46,12 +46,29 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @Value("${propdata.match.num.fetchers:16}")
     private Integer numFetchers;
 
+    @Value("${propdata.match.realtime.fetchers.enable:false}")
+    private boolean enableFetchers;
+
     @Autowired
     @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
+    private boolean fetchersInitiated = false;
+
     @PostConstruct
     private void postConstruct() {
+        if (enableFetchers) {
+            initExecutors();
+        }
+    }
+
+    public void initExecutors() {
+        if (fetchersInitiated) {
+            // do nothing if fetcher executors are already started
+            return;
+        }
+
+        log.info("Initialize propdata fetcher executors.");
         executor = Executors.newFixedThreadPool(numFetchers);
         for (int i = 0; i < numFetchers; i++) {
             executor.submit(new Fetcher());
@@ -62,6 +79,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
                 scanQueue();
             }
         }, TimeUnit.SECONDS.toMillis(10));
+
+        fetchersInitiated = true;
     }
 
     @Override

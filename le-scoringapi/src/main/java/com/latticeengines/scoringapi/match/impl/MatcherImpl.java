@@ -11,9 +11,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,14 +51,16 @@ import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.propdata.match.service.RealTimeMatchService;
+import com.latticeengines.propdata.match.service.impl.RealTimeMatchFetcher;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
-@Component("matcher)")
-public class MatcherImpl implements Matcher {// , ApplicationContextAware {
+@Component("matcher")
+public class MatcherImpl implements Matcher, ApplicationContextAware {
 
     private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final Log log = LogFactory.getLog(MatcherImpl.class);
@@ -63,16 +68,15 @@ public class MatcherImpl implements Matcher {// , ApplicationContextAware {
     @Autowired
     private Warnings warnings;
 
-    // TODO - anoop - enable it for M5 Patch1
-    // private ApplicationContext applicationContext;
-    //
-    // @Autowired
-    // private RealTimeMatchFetcher realTimeMatchFetcher;
-    //
-    // @Value("${scoringapi.propdata.shortcircuit:true}")
-    // private boolean shouldShortcircuitPropdata;
-    //
-    // private List<RealTimeMatchService> realTimeMatchServiceList;
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private RealTimeMatchFetcher realTimeMatchFetcher;
+
+    @Value("${scoringapi.propdata.shortcircuit:false}")
+    private boolean shouldShortcircuitPropdata;
+
+    private List<RealTimeMatchService> realTimeMatchServiceList;
 
     @Autowired
     @Qualifier("matchProxyDeprecated")
@@ -106,20 +110,19 @@ public class MatcherImpl implements Matcher {// , ApplicationContextAware {
                             }
                         });
 
-        // TODO - anoop - enable it for M5 Patch1
-        // if (shouldShortcircuitPropdata) {
-        // Map<String, RealTimeMatchService> realTimeMatchServiceMap = //
-        // applicationContext//
-        // .getBeansOfType(RealTimeMatchService.class, //
-        // false, true);
-        // realTimeMatchServiceList = //
-        // new
-        // ArrayList<RealTimeMatchService>(realTimeMatchServiceMap.values());
-        // } else {
-        // // shutdown propdata fetchers which got started in scoringapi
-        // realTimeMatchFetcher.shutdownFeatchers();
-        // realTimeMatchFetcher = null;
-        // }
+        if (shouldShortcircuitPropdata) {
+            log.info("Initialize propdata fetcher executors as scoringapi-propdata shortcircuit is on.");
+            Map<String, RealTimeMatchService> realTimeMatchServiceMap = //
+                    applicationContext//
+                            .getBeansOfType(RealTimeMatchService.class, //
+                                    false, true);
+            realTimeMatchServiceList = //
+                    new ArrayList<RealTimeMatchService>(realTimeMatchServiceMap.values());
+            realTimeMatchFetcher.initExecutors();
+        } else {
+            log.info("Skip initialization of propdata fetcher executors "
+                    + "via scoringapi as scoringapi-propdata shortcircuit is off.");
+        }
     }
 
     private MatchInput buildMatchInput(CustomerSpace space, //
@@ -223,13 +226,11 @@ public class MatcherImpl implements Matcher {// , ApplicationContextAware {
 
         MatchOutput matchOutput = null;
 
-        // TODO - anoop - enable it for M5 Patch1
-        // if (shouldShortcircuitPropdata) {
-        // matchOutput =
-        // getRealTimeMatchService(matchInput.getDataCloudVersion()).match(matchInput);
-        // } else {
-        matchOutput = matchProxy.matchRealTime(matchInput);
-        // }
+        if (shouldShortcircuitPropdata) {
+            matchOutput = getRealTimeMatchService(matchInput.getDataCloudVersion()).match(matchInput);
+        } else {
+            matchOutput = matchProxy.matchRealTime(matchInput);
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
@@ -313,14 +314,12 @@ public class MatcherImpl implements Matcher {// , ApplicationContextAware {
 
             BulkMatchOutput matchOutput = null;
 
-            // TODO - anoop - enable it for M5 Patch1
-            // if (shouldShortcircuitPropdata) {
-            // matchOutput =
-            // getRealTimeMatchService(matchInput.getInputList().get(0).getDataCloudVersion())
-            // .matchBulk(matchInput);
-            // } else {
-            matchOutput = matchProxy.matchRealTime(matchInput);
-            // }
+            if (shouldShortcircuitPropdata) {
+                matchOutput = getRealTimeMatchService(matchInput.getInputList().get(0).getDataCloudVersion())
+                        .matchBulk(matchInput);
+            } else {
+                matchOutput = matchProxy.matchRealTime(matchInput);
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
@@ -491,22 +490,18 @@ public class MatcherImpl implements Matcher {// , ApplicationContextAware {
         return selectedLeadEnrichmentAttributes;
     }
 
-    // TODO - anoop - enable it for M5 Patch1
-    // private RealTimeMatchService getRealTimeMatchService(String matchVersion)
-    // {
-    // for (RealTimeMatchService handler : realTimeMatchServiceList) {
-    // if (handler.accept(matchVersion)) {
-    // return handler;
-    // }
-    // }
-    // throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion
-    // });
-    // }
-    //
-    // @Override
-    // public void setApplicationContext(ApplicationContext applicationContext)
-    // throws BeansException {
-    // this.applicationContext = applicationContext;
-    // }
+    private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
+        for (RealTimeMatchService handler : realTimeMatchServiceList) {
+            if (handler.accept(matchVersion)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
 }
