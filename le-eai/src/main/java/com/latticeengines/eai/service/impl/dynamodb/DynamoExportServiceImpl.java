@@ -105,6 +105,8 @@ public class DynamoExportServiceImpl extends ExportService {
         String targetHdfsPath = ctx.getProperty(ExportProperty.TARGETPATH, String.class);
         props.setProperty(MapReduceProperty.OUTPUT.name(), targetHdfsPath);
 
+        props.setProperty(ExportProperty.NUM_MAPPERS, ctx.getProperty(ExportProperty.NUM_MAPPERS, String.class));
+
         props.setProperty("eai.table.schema", JsonUtils.serialize(table));
 
         props.setProperty(DynamoExportJob.CONFIG_RECORD_TYPE,
