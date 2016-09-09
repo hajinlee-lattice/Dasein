@@ -20,11 +20,11 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        modelRunEntityMgr.deleteAll();
+        // modelRunEntityMgr.deleteAll();
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterCsvFile")
+    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterCsvFile")
     public void runModelAccountMaster(String dataSetName, String csvFile) {
         try {
             ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
@@ -68,16 +68,11 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
         return new Object[][] {
-        // { "MuleSoftAccountMaster",
-        // "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904.csv"
-        // }, //
-        { "QlikAccountMaster", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437.csv" }, //
-        // { "LatticeAccountMaster",
-        // "Lattice_Relaunch_LP3_ModelingLead_OneLeadPerDomain_20160520_161932.csv"
-        // }, //
-        // { "HootSuiteAccountMaster",
-        // "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv"
-        // }, //
+                { "MuleSoftAccountMaster", "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904.csv" }, //
+                { "QlikAccountMaster", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437.csv" }, //
+                { "LatticeAccountMaster", "Lattice_Relaunch_LP3_ModelingLead_OneLeadPerDomain_20160520_161932.csv" }, //
+                { "HootSuiteAccountMaster",
+                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv" }, //
         };
     }
 
