@@ -86,14 +86,13 @@ class UnifiedBucketer(Bucketer):
                     valCurr = xList[posCurr - stepSize + posTemp]
                 else:
                     numPtsCurr += stepSize
-            sp0.append(xListLen)
+        sp0.append(xListLen)
     
         # this code adjust the index in sp0 such that the same values go into the bucket
         # needs a separate function for this
         sp0Length = len(sp0)
         bucket = 1
         while bucket < sp0Length - 1:
-            print "%d, %d" % (sp0[bucket] - 1, sp0[bucket])
             if xList[sp0[bucket] - 1] == xList[sp0[bucket]]:
                 xListInBucket = xList[sp0[bucket - 1]:sp0[bucket]]
                 sp0[bucket] = sp0[bucket] - len([x for x in xListInBucket if x == xList[sp0[bucket]]])
@@ -164,7 +163,7 @@ class UnifiedBucketer(Bucketer):
             if len(xListToBucket) / rawBinNumber < minRegBucketSize:
                 rawBinNumber = int((len(xListToBucket)) / minRegBucketSize)
         
-            idxOrdered = self.orderedIndices(xListToBucket)
+            idxOrdered = self.orderedIndicies(xListToBucket)
         
             xListToBucket_ord = [xListToBucket[i] for i in idxOrdered]
         
@@ -259,6 +258,9 @@ class UnifiedBucketer(Bucketer):
 
         # find non-special buckets
         regularBuckets = sorted([(float(x[1:x.find(",")]), float(x[x.find(",") + 2:-1])) for x in set(buckets) if x[0] == '['])
+        if len(regularBuckets) <= 1:
+            return buckets
+
 
         # find the last bucket
         lastBucket = regularBuckets[-1]
