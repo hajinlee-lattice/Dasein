@@ -18,7 +18,8 @@ public class SqoopImporter {
 
     private static List<String> defaultHadoopArgs = Arrays.asList(
             "-Dmapreduce.task.timeout=600000",
-            "-Dmapreduce.job.running.map.limit=32"
+            "-Dmapreduce.job.running.map.limit=32",
+            "-Dmapreduce.tasktracker.map.tasks.maximum=32"
     );
 
     private String table;

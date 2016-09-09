@@ -108,6 +108,7 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
                 AvroKeyInputFormat.setMinInputSplitSize(mrJob, 104857600L);
                 AvroKeyInputFormat.setMaxInputSplitSize(mrJob, 10737418240L);
                 config.set("mapreduce.job.running.map.limit", String.valueOf(getNumMappers()));
+                config.set("mapreduce.tasktracker.map.tasks.maximum", String.valueOf(getNumMappers()));
             }
             config.setInt(MAPRED_MAP_TASKS_PROPERTY, getNumMappers());
             log.info("Set num mappers to " + getNumMappers());
