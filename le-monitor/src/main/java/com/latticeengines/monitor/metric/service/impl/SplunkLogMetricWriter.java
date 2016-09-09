@@ -53,6 +53,18 @@ public class SplunkLogMetricWriter implements MetricWriter {
     }
 
     @Override
+    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db,
+                                                            Collection<? extends Measurement<F, D>> measurements) {
+        if (enabled) {
+            for (Measurement<F, D> measurement : measurements) {
+                if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
+                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement));
+                }
+            }
+        }
+    }
+
+    @Override
     public void disable() {
         if (enabled) {
             log.info("Disable splunk log metric writer.");
@@ -72,11 +84,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
         @Override
         public void run() {
-            for (Measurement<F, D> measurement : measurements) {
-                if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                    log.info(logPrefix + "MetricDB=\"" + metricDb + "\" " + MetricUtils.toLogMessage(measurement));
-                }
-            }
+            writeSync(metricDb, measurements);
         }
     }
 

@@ -21,22 +21,34 @@ public class MetricServiceImpl implements MetricService {
     private List<MetricWriter> metricWriters;
 
     @Override
-    public <F extends Fact, D extends Dimension> void
-    write(MetricDB db, Measurement<F, D> measurement) {
+    public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
         write(db, Collections.singleton(measurement));
     }
 
     @Override
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
-        for (MetricWriter writer: metricWriters) {
+        for (MetricWriter writer : metricWriters) {
             writer.write(db, measurements);
         }
     }
 
     @Override
+    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db, Measurement<F, D> measurement) {
+        writeSync(db, Collections.singleton(measurement));
+    }
+
+    @Override
+    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db,
+            Collection<? extends Measurement<F, D>> measurements) {
+        for (MetricWriter writer : metricWriters) {
+            writer.writeSync(db, measurements);
+        }
+    }
+
+    @Override
     public void disable() {
-        for (MetricWriter writer: metricWriters) {
+        for (MetricWriter writer : metricWriters) {
             writer.disable();
         }
     }

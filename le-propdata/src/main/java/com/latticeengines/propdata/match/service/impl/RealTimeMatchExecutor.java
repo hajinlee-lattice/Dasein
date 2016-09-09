@@ -72,7 +72,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
             public void run() {
                 try {
                     BulkMatchResponse response = new BulkMatchResponse(bulkMatchOutput);
-                    metricService.write(MetricDB.LDC_Match, response);
+                    metricService.writeSync(MetricDB.LDC_Match, response);
                 } catch (Exception e) {
                     log.warn("Failed to extract output metric.", e);
                 }
@@ -83,7 +83,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     private void generateMetric(final MatchContext matchContext) {
         try {
             MatchResponse response = new MatchResponse(matchContext);
-            metricService.write(MetricDB.LDC_Match, response);
+            metricService.writeSync(MetricDB.LDC_Match, response);
         } catch (Exception e) {
             log.warn("Failed to extract output metric.", e);
         }

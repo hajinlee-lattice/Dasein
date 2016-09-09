@@ -11,6 +11,8 @@ public interface MetricWriter {
 
     <F extends Fact, D extends Dimension> void write(MetricDB db, Collection<? extends Measurement<F, D>> measurements);
 
+    <F extends Fact, D extends Dimension> void writeSync(MetricDB db, Collection<? extends Measurement<F, D>> measurements);
+
     void disable();
 
 }

@@ -125,6 +125,16 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     @Override
+    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db,
+            Collection<? extends Measurement<F, D>> measurements) {
+        if (enabled) {
+            executeWrite(db, measurements);
+        } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
+            postConstruct();
+        }
+    }
+
+    @Override
     public void disable() {
         if (enabled) {
             enabled = false;
@@ -195,6 +205,26 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 });
     }
 
+    private <F extends Fact, D extends Dimension> void executeWrite(MetricDB metricDb,
+            Collection<? extends Measurement<F, D>> measurements) {
+        boolean needToWrite = false;
+        for (Measurement<F, D> measurement : measurements) {
+            if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
+                needToWrite = true;
+                break;
+            }
+        }
+        if (needToWrite) {
+            try {
+                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
+                getInfluxDB().write(batchPoints);
+                log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
+            } catch (Exception e) {
+                log.error("Failed to write metric.", e);
+            }
+        }
+    }
+
     private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
 
         private MetricDB metricDb;
@@ -207,22 +237,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
         @Override
         public void run() {
-            boolean needToWrite = false;
-            for (Measurement<F, D> measurement : measurements) {
-                if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
-                    needToWrite = true;
-                    break;
-                }
-            }
-            if (needToWrite) {
-                try {
-                    BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-                    getInfluxDB().write(batchPoints);
-                    log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
-                } catch (Exception e) {
-                    log.error("Failed to write metric.", e);
-                }
-            }
+            executeWrite(metricDb, measurements);
         }
     }
 

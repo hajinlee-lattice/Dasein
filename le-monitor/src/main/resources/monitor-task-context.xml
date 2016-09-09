@@ -6,12 +6,12 @@
        http://www.springframework.org/schema/task
        http://www.springframework.org/schema/task/spring-task.xsd">
 
-    <task:scheduler id="monitorScheduler" pool-size="4"/>
+    <task:scheduler id="monitorScheduler" pool-size="2"/>
 
     <task:executor id="monitorExecutor"
                    pool-size="8-16"
                    queue-capacity="1000"
-                   keep-alive="1"
+                   keep-alive="10"
                    rejection-policy="CALLER_RUNS" />
 
 </beans>
