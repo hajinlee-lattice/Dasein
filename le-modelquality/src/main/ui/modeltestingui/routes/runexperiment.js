@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var util = require('util')
-var config = require('../public/resources/modelqualitybasic.json');
+var baseConfig = require('../public/resources/modelqualitybasic.json');
 var request = require("request")
 
 var WebHDFS = require('webhdfs');
@@ -9,20 +9,17 @@ var hdfs = WebHDFS.createClient({ user: process.env.USER, host: "10.41.1.185", p
 
 /* GET users listing. */
 router.post('/', function(req, res, next) {
-  str = config
-  //obj = JSON.parse(config)
+
  console.log("req.files" + util.inspect(req.body))
  console.log("req.files" + util.inspect(req.body))
  console.log("req.files" + util.inspect(req.files["datasetCSV"]))
  basePath = "/app/a/2.0.38/experiments/"
-var date = new Date()
+ var date = new Date()
  randomID = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" +  date.getDate() + "-" + parseInt(Math.random() * 10000000000)
  hdfsDatasetFile= basePath + randomID + "/dataset.csv"
  hdfsPipelineFile= basePath + randomID + "/pipeline.json"
  hdfsPipelineTarFile= basePath + randomID + "/lepipeline.tar.gz"
  
- console.log(hdfs)
- console.dir(hdfs)
  hdfs.mkdir(basePath + randomID, mode="0777", function(err, success) {
  hdfs.writeFile(hdfsDatasetFile, req.files["datasetCSV"].data, function (err, success) {
         if (err instanceof Error) { console.log(err); }
@@ -37,8 +34,12 @@ hdfs.writeFile(hdfsPipelineTarFile, req.files["pipelineTARGZ"].data, function (e
         console.log(success)
       }); 
 })
-  res.send("Done")
- return
+  //Read base-config
+  config = baseConfig
+  //Update config with path of Hadoop uploaded files
+  config["pipeline"]["pipeline_driver"] = hdfsPipelineFile
+  config["pipeline"]["pipeline_lib_script"] = hdfsPipelineTarFile
+  config["data_set"]["training_hdfs_path"] = hdfsDatasetFile
   // Send post request!
   var url = "https://admin-qa.lattice.local:8080/modelquality/runmodel/?tenant=ModelQualityExperiments.ModelQualityExperiments.Production&username=bnguyen@lattice-engines.com&password=tahoe&apiHostPort=https://bodcdevtca18.lattice.local:8081"
   var tenant="ModelQualityExperiments.ModelQualityExperiments.Production"
@@ -47,7 +48,7 @@ hdfs.writeFile(hdfsPipelineTarFile, req.files["pipelineTARGZ"].data, function (e
   var requestData = {
   "name":"NodeModelQualityExperiment",
    "description": "Use node to start model quality job",
-  "selectedConfig":str,
+  "selectedConfig":config,
   "status": "NEW"
   }
 
