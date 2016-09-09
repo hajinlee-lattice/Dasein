@@ -11,7 +11,7 @@ class FixedBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'fixedbucketer')
 
     @overrides(Bucketer)
-    def bucketColumn(self, columnSeries, params):
+    def bucketColumn(self, columnSeries, eventSeries, params):
         return [x for x in self.generateFixedBins(columnSeries, **params)]
 
     def generateFixedBins(self, columnSeries, numbins=10):

@@ -10,7 +10,7 @@ class FixedBucketerTest(TestBase, BucketerTestBase):
         params = {'maxBuckets': 10}
         bandsList = self.bucketColumns('fixed', params)
         for bands in bandsList:
-            self.assertTrue(len(bands) <= params['maxBuckets']+1)
+            self.assertTrue(len(bands) <= params['maxBuckets'] + 1)
             for band in bands:
                 self.assertTrue(band is not None)
 

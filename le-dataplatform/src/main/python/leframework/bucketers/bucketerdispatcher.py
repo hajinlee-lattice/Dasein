@@ -1,9 +1,11 @@
-import os
 import copy
+import os
 import sys
-import pkgutil as pkg
-from geometricbucketer import GeometricBucketer
+
 from bucketconsolidator import BucketConsolidator
+from geometricbucketer import GeometricBucketer
+import pkgutil as pkg
+
 
 class BucketerDispatcher(object):
 
@@ -57,7 +59,10 @@ class BucketerDispatcher(object):
                 ratioThreshold = copyParams.pop("ratioThreshold", ratioThreshold)
                 params = copyParams
 
-        bucketList = bucketer.bucketColumn(columnSeries, params)
+        bucketList = bucketer.bucketColumn(columnSeries, eventSeries, params)
 
-        bc = BucketConsolidator(maxBuckets, liftThreshold, ratioThreshold)
-        return bc.consolidateBins(columnSeries, eventSeries, bucketList)
+        if bucketer.doConsolidation():
+            bc = BucketConsolidator(maxBuckets, liftThreshold, ratioThreshold)
+            return bc.consolidateBins(columnSeries, eventSeries, bucketList)
+        
+        return bucketList

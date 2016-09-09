@@ -9,7 +9,10 @@ class Bucketer(object):
     def __init__(self): pass
 
     @abstractmethod
-    def bucketColumn(self, columnSeries, params): pass
+    def bucketColumn(self, columnSeries, eventSeries, params): pass
+    
+    def doConsolidation(self):
+        return True
 
     def getSubClasses():
         classList = []

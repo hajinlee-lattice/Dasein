@@ -11,7 +11,7 @@ class GeometricBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'geometricbucketer')
 
     @overrides(Bucketer)
-    def bucketColumn(self, columnSeries, params):
+    def bucketColumn(self, columnSeries, eventSeries, params):
         return [x for x in self.generateGeometricBins(columnSeries, **params)]
 
     @staticmethod

@@ -12,7 +12,7 @@ class LinearBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'linearbucketer')
 
     @overrides(Bucketer)
-    def bucketColumn(self, columnSeries, params):
+    def bucketColumn(self, columnSeries, eventSeries, params):
         return [x for x in self.generateLinearBins(columnSeries, **params)]
 
     def generateLinearBins(self, columnSeries, minValue, stepSize=None, minSamples=100, minFreq=0, maxPercentile=1, maxIteration=500):

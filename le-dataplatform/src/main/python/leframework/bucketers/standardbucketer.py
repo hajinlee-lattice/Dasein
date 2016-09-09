@@ -8,10 +8,10 @@ class StandardBucketer(Bucketer):
 
 
     def __init__(self):
-        self.logger = logging.getLogger(name = 'standardbucketer')
+        self.logger = logging.getLogger(name='standardbucketer')
     
     @overrides(Bucketer)
-    def bucketColumn(self, columnSeries, params):
+    def bucketColumn(self, columnSeries, eventSeris, params):
         
         return self.getStandardBins(columnSeries, **params)
 
@@ -37,7 +37,7 @@ class StandardBucketer(Bucketer):
         for i in range(numBins):
             if betterBins[i] == betterBins[i + 1]:
                 remainingRanges = np.linspace(0, 1, numBins - i)
-                betterBins[i+1:] = algos.quantile(populatedRows[populatedRows > betterBins[i]], remainingRanges)
+                betterBins[i + 1:] = algos.quantile(populatedRows[populatedRows > betterBins[i]], remainingRanges)
 
         betterBins[0] = -np.inf
         betterBins[-1] = np.inf
@@ -53,10 +53,10 @@ class StandardBucketer(Bucketer):
 
             if smallestIndex != 0:        
                 # if we're not the first item in the list then combine with prior bin 
-                binData[smallestIndex - 1] = ((binData[smallestIndex - 1][0][0], binData[smallestIndex][0][1]), binData[smallestIndex-1][1]+binData[smallestIndex][1])
+                binData[smallestIndex - 1] = ((binData[smallestIndex - 1][0][0], binData[smallestIndex][0][1]), binData[smallestIndex - 1][1] + binData[smallestIndex][1])
             else:
                 # if we're the first item in the list then combine with next bin
-                binData[smallestIndex + 1] = ((binData[smallestIndex][0][0], binData[smallestIndex + 1][0][1]), binData[smallestIndex+1][1]+binData[smallestIndex][1])
+                binData[smallestIndex + 1] = ((binData[smallestIndex][0][0], binData[smallestIndex + 1][0][1]), binData[smallestIndex + 1][1] + binData[smallestIndex][1])
 
             binData.remove(smallestBin)    
 
