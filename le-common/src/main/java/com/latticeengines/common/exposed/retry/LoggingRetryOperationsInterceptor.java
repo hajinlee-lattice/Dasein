@@ -23,7 +23,11 @@ public class LoggingRetryOperationsInterceptor implements MethodInterceptor {
 
                 if (invocation instanceof ProxyMethodInvocation) {
                     try {
-                        return ((ProxyMethodInvocation) invocation).invocableClone().proceed();
+                        Object retval = ((ProxyMethodInvocation) invocation).invocableClone().proceed();
+                        if (context.getRetryCount() > 0) {
+                            log.info("Operation succeeded after retry");
+                        }
+                        return retval;
                     } catch (Exception e) {
                         log.warn(String.format("Caught exception %s in retryable block (attempt %d) ", e.getMessage(),
                                 context.getRetryCount() + 1), e);
