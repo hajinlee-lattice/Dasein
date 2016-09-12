@@ -13,10 +13,8 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -123,7 +121,16 @@ public class WorkflowExecutionCache {
                     job.setErrorCode(errorDetails.getErrorCode());
                     job.setErrorMsg(errorDetails.getErrorMsg());
                 }
-                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+                try {
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                            .getApplicationId());
+                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+                    if (YarnUtils.FAILED_STATUS.contains(workflowJob.getStatus())) {
+                        job.setJobStatus(JobStatus.FAILED);
+                    }
+                } catch (Exception e) {
+                    // pass
+                }
             }
 
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {

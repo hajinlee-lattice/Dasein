@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -208,9 +207,22 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
         } else {
-            WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
+                    .getJobStatus(applicationId);
+            workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, yarnJobStatus);
+            job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
         }
         return job;
+    }
+
+    private JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status) {
+        if (YarnUtils.FAILED_STATUS.contains(status)) {
+            return JobStatus.FAILED;
+        } else if (status == FinalApplicationStatus.UNDEFINED || status == null) {
+            return JobStatus.PENDING;
+        } else {
+            return JobStatus.COMPLETED;
+        }
     }
 
     @Override
