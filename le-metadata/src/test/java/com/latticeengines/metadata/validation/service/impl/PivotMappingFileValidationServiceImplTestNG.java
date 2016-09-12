@@ -14,7 +14,7 @@ public class PivotMappingFileValidationServiceImplTestNG extends MetadataFunctio
     private String hdfsPath = "/tmp/artifact";
 
     @Test(groups = "functional")
-    public void test() throws IOException {
+    public void testPivotMappingFile() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, ClassLoader.getSystemResource(RESOURCE_BASE + "/pivot.csv")

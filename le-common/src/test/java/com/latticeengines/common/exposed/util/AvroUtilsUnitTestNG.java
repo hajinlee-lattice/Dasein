@@ -89,6 +89,16 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("BINARY"), Type.BYTES);
     }
 
+    @Test(groups = "unit")
+    public void isAvroFriendlyFieldName() throws Exception {
+        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("abc"));
+        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("_abc"));
+        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("1abc"));
+        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("+abc"));
+        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("/abc"));
+        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("-abc"));
+    }
+
     @DataProvider(name = "avscFileProvider")
     public Object[][] getAvscFile() {
         return new Object[][] { { "aps.avsc" }, //

@@ -91,6 +91,9 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         if (builder.getSourceSchemaInterpretation() != null) {
             props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
         }
+        if (builder.getTable() != null) {
+            props.add("Event_Table_Name=" + builder.getEventTableTable());
+        }
         return StringUtils.join(props, " ");
     }
 

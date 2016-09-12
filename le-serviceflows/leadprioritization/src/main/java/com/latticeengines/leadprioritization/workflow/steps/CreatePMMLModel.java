@@ -8,27 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.transform.sax.SAXSource;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
-import org.dmg.pmml.Model;
 import org.dmg.pmml.OpType;
-import org.dmg.pmml.PMML;
-import org.jpmml.model.ImportFilter;
-import org.jpmml.model.JAXBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLFilter;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -43,15 +32,15 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
+import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
+import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PMMLModelingServiceExecutor;
-import com.latticeengines.leadprioritization.workflow.steps.pmml.PmmlField;
-import com.latticeengines.leadprioritization.workflow.steps.pmml.SkipFilter;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -88,7 +77,10 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
 
     protected PMMLModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             CreatePMMLModelConfiguration modelStepConfiguration) throws Exception {
-        List<PmmlField> pmmlFields = getPmmlFields();
+        String pmmlPath = configuration.getPmmlArtifactPath();
+        InputStream pmmlStream = HdfsUtils.getInputStream(yarnConfiguration, pmmlPath);
+        List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(pmmlStream);
+
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration,
                 configuration.getPivotArtifactPath());
 
@@ -322,50 +314,6 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         default:
             return FieldType.STRING;
         }
-    }
-
-    @VisibleForTesting
-    final List<PmmlField> getPmmlFields() throws Exception {
-        String pmmlPath = configuration.getPmmlArtifactPath();
-
-        InputStream pmmlStream = HdfsUtils.getInputStream(yarnConfiguration, pmmlPath);
-        InputSource source = new InputSource(pmmlStream);
-
-        XMLReader reader = XMLReaderFactory.createXMLReader();
-        XMLFilter importFilter = new ImportFilter(reader);
-        XMLFilter skipSegmentationFilter = new SkipFilter(reader, "Segmentation");
-        skipSegmentationFilter.setParent(importFilter);
-        XMLFilter skipExtensionFilter = new SkipFilter(reader, "Extension");
-        skipExtensionFilter.setParent(skipSegmentationFilter);
-        SAXSource transformedSource = new SAXSource(skipExtensionFilter, source);
-
-        PMML pmml = JAXBUtil.unmarshalPMML(transformedSource);
-        Map<String, DataField> dataFields = getDataFields(pmml);
-
-        Model model = pmml.getModels().get(0);
-        List<MiningField> miningFields = model.getMiningSchema().getMiningFields();
-
-        List<PmmlField> pmmlFields = new ArrayList<>();
-        for (MiningField miningField : miningFields) {
-            DataField f = dataFields.get(miningField.getName().getValue());
-
-            if (f == null && miningField.getUsageType() != FieldUsageType.PREDICTED) {
-                continue;
-            }
-            pmmlFields.add(new PmmlField(miningField, f));
-        }
-
-        return pmmlFields;
-    }
-
-    private Map<String, DataField> getDataFields(PMML pmml) {
-        DataDictionary dataDictionary = pmml.getDataDictionary();
-        List<DataField> dataFields = dataDictionary.getDataFields();
-        Map<String, DataField> map = new HashMap<>();
-        for (DataField dataField : dataFields) {
-            map.put(dataField.getName().getValue(), dataField);
-        }
-        return map;
     }
 
 }

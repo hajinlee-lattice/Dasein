@@ -4,12 +4,15 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -20,12 +23,12 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
+import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
-import com.latticeengines.leadprioritization.workflow.steps.pmml.PmmlField;
-
+import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 
 public class CreatePMMLModelUnitTestNG {
 
@@ -61,7 +64,8 @@ public class CreatePMMLModelUnitTestNG {
     @Test(groups = "unit")
     public void getPmmlFields() throws Exception {
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, config.getPivotArtifactPath());
-        List<PmmlField> fields = createPMMLModel.getPmmlFields();
+        InputStream inputStream = FileUtils.openInputStream(new File(config.getPmmlArtifactPath()));
+        List<PmmlField> fields = PmmlModelUtils.getPmmlFields(inputStream);
         assertEquals(fields.size(), 117);
         String[] features = createPMMLModel.getFeaturesAndTarget(fields, pivotValues).getKey();
 
@@ -80,7 +84,8 @@ public class CreatePMMLModelUnitTestNG {
     @Test(groups = "unit")
     public void getMetadataContents() throws Exception {
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, config.getPivotArtifactPath());
-        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        InputStream inputStream = FileUtils.openInputStream(new File(config.getPmmlArtifactPath()));
+        List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(inputStream);
 
         String metadataStr = createPMMLModel.getMetadataContents(pmmlFields, pivotValues);
         ModelingMetadata modelingMetadata = JsonUtils.deserialize(metadataStr, ModelingMetadata.class);
@@ -98,7 +103,8 @@ public class CreatePMMLModelUnitTestNG {
     @Test(groups = "unit")
     public void getDataCompositionContents() throws Exception {
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, config.getPivotArtifactPath());
-        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        InputStream inputStream = FileUtils.openInputStream(new File(config.getPmmlArtifactPath()));
+        List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(inputStream);
         String datacompositionStr = createPMMLModel.getDataCompositionContents(pmmlFields, pivotValues);
         DataComposition datacomposition = JsonUtils.deserialize(datacompositionStr, DataComposition.class);
         assertNotNull(datacomposition);
@@ -110,7 +116,8 @@ public class CreatePMMLModelUnitTestNG {
     @Test(groups = "unit")
     public void getAvroSchema() throws Exception {
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, config.getPivotArtifactPath());
-        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        InputStream inputStream = FileUtils.openInputStream(new File(config.getPmmlArtifactPath()));
+        List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(inputStream);
         String avroSchemaStr = createPMMLModel.getAvroSchema(pmmlFields, pivotValues);
         Schema schema = new Schema.Parser().parse(avroSchemaStr);
         assertNotNull(schema);
@@ -135,7 +142,8 @@ public class CreatePMMLModelUnitTestNG {
     @Test(groups = "unit")
     public void getFeaturesAndTarget() throws Exception {
         PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration, config.getPivotArtifactPath());
-        List<PmmlField> pmmlFields = createPMMLModel.getPmmlFields();
+        InputStream inputStream = FileUtils.openInputStream(new File(config.getPmmlArtifactPath()));
+        List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(inputStream);
         Map.Entry<String[], String> featuresAndTarget = createPMMLModel.getFeaturesAndTarget(pmmlFields, pivotValues);
         assertNotNull(featuresAndTarget.getValue());
 

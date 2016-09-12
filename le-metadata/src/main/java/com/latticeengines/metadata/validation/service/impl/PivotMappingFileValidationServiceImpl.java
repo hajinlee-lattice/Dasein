@@ -41,27 +41,24 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
     @Override
     public String validate(String filePath) {
         try {
-            try {
-                if (StringUtils.isEmpty(filePath) || !HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                    throw new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() });
-                }
-                try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(
-                        yarnConfiguration, //
-                        filePath)), "UTF-8")) {
-                    try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
-                        validateHeader(parser.getHeaderMap().keySet());
-                        validateSourceColumn(parser.iterator());
-                    }
-                }
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_10008);
+            if (StringUtils.isEmpty(filePath) || !HdfsUtils.fileExists(yarnConfiguration, filePath)) {
+                return new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() })
+                        .getMessage();
             }
-            return "";
-        } catch (Exception e) {
+            try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
+                    filePath)), "UTF-8")) {
+                try (CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
+                    validateHeader(parser.getHeaderMap().keySet());
+                    validateSourceColumn(parser.iterator());
+                }
+            }
+        } catch (LedpException leException) {
+            return leException.getMessage();
+        } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
-            return e.getMessage();
+            return LedpCode.LEDP_10008.getMessage();
         }
-
+        return "";
     }
 
     private void validateHeader(Set<String> headers) {

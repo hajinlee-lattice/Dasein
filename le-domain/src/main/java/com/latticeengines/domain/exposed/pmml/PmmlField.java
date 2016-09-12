@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.steps.pmml;
+package com.latticeengines.domain.exposed.pmml;
 
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.MiningField;

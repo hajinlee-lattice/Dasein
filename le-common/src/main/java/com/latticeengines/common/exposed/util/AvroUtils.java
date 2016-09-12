@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -322,6 +324,18 @@ public class AvroUtils {
 
     public static String getAvroFriendlyString(String value) {
         return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
+    }
+
+    public static boolean isAvroFriendlyFieldName(String fieldName) {
+        try {
+            Method m = Schema.class.getDeclaredMethod("validateName", String.class);
+            m.setAccessible(true);
+            m.invoke(null, fieldName);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getRootCauseMessage(e));
+            return false;
+        }
+        return true;
     }
 
     public static Class<?> getJavaType(Type avroType) {
