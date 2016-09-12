@@ -129,7 +129,7 @@ public class WorkflowExecutionCache {
                         job.setJobStatus(JobStatus.FAILED);
                     }
                 } catch (Exception e) {
-                    log.warn("Not able to find job status from yarn with appid: " + job.getApplicationId());
+                    // pass
                 }
             }
 
