@@ -33,7 +33,6 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
                     + "{\"name\":\"duns\",\"type\":[\"string\",\"null\"]}" + "]}",
             RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID);
 
-
     @Id
     String id = null;
 
@@ -116,9 +115,9 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
 
     @Override
     public AccountLookupEntry fromFabricAvroRecord(GenericRecord record) {
-        setId(record.get(LATTICE_ACCOUNT_ID).toString());
-        setDomain(record.get(DOMAIN).toString());
-        setDuns(record.get(DUNS).toString());
+        setLatticeAccountId(record.get(LATTICE_ACCOUNT_ID) == null ? null : record.get(LATTICE_ACCOUNT_ID).toString());
+        setDomain(record.get(DOMAIN) == null ? null : record.get(DOMAIN).toString());
+        setDuns(record.get(DUNS) == null ? null : record.get(DUNS).toString());
         return this;
     }
 
