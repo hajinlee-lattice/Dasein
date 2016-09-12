@@ -1,4 +1,4 @@
-package com.latticeengines.scoring.orchestration.mbean;
+package com.latticeengines.scoring.orchestration.qbean;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -15,7 +15,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerCallable;

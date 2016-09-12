@@ -118,7 +118,6 @@
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="plsModelSummaryDownload"/>
-        <ref bean="plsSourceFilePurge"/>
         <ref bean="dataplatformDLOrchestration"/>
         <ref bean="dataplatformJobWatchdog"/>
         <ref bean="dellebiDailyJob1"/>

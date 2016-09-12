@@ -24,9 +24,6 @@ public class DataplatformCheckMBean {
     @Autowired
     private HTTPFSAccessMBean httpFSMBean;
 
-    @Autowired
-    private QuartzJobMBean quartzJobMBean;
-
     @ManagedOperation(description = "Check Dataplatform")
     public String checkDataplatform() {
         StringBuilder sb = new StringBuilder();
@@ -39,8 +36,6 @@ public class DataplatformCheckMBean {
         checkRes.add(hdfsAcMBean.checkHDFSAccess());
         checkRes.add(hdfsRcMBean.checkHDFSResource());
         checkRes.add(httpFSMBean.checkHttpAccess());
-        checkRes.add(quartzJobMBean.checkDLQuartzJob());
-        checkRes.add(quartzJobMBean.checkQuartzJob());
 
         for (String res : checkRes) {
             if (checkFailure(res))

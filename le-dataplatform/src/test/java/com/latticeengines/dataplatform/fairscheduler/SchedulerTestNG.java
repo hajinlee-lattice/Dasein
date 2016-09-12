@@ -49,7 +49,6 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
  * @author rgonzalez
  *
  */
-@ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired

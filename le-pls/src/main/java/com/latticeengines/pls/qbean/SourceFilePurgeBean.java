@@ -1,4 +1,4 @@
-package com.latticeengines.pls.mbean;
+package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.impl.SourceFilePurgeCallable;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("sourceFilePurge")

@@ -21,7 +21,5 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
     
     <import resource="classpath:dataplatform-context.xml"/>
-    <import resource="classpath:dataplatform-quartz-${DPQUARTZ_ENABLED:enabled}-context.xml"/>
-    <import resource="classpath:dataplatform-dlorchestration-quartz-${DPDL_QUARTZ_ENABLED:enabled}-context.xml"/>
     
 </beans>

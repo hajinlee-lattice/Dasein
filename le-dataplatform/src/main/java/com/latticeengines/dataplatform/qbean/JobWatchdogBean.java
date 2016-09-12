@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.mbean;
+package com.latticeengines.dataplatform.qbean;
 
 import java.util.concurrent.Callable;
 
@@ -12,7 +12,7 @@ import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogCallable;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("jobWatchdog")
 public class JobWatchdogBean implements QuartzJobBean {

@@ -1,4 +1,4 @@
-package com.latticeengines.dellebi.mbean;
+package com.latticeengines.dellebi.qbean;
 
 import java.util.concurrent.Callable;
 
@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.impl.DellEbiDailyJobCallable;
 import com.latticeengines.dellebi.util.ExportAndReportService;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
-@Component("dellEbiDailyJob3")
-public class DellEbiDailyJob3Bean implements QuartzJobBean {
-
+@Component("dellEbiDailyJob2")
+public class DellEbiDailyJob2Bean implements QuartzJobBean {
+    
     @Autowired
     private DailyFlow dailyFlow;
     
     @Autowired
     private ExportAndReportService exportAndReportService;
     
-    @Value("${dellebi.fileTypes.dellebiManagerJob3}")
+    @Value("${dellebi.fileTypes.dellebiManagerJob2}")
     private String fileTypesList;
 
     @Override

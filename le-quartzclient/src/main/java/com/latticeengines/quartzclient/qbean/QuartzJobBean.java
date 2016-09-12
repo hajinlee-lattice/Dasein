@@ -1,4 +1,4 @@
-package com.latticeengines.quartzclient.mbean;
+package com.latticeengines.quartzclient.qbean;
 
 import java.util.concurrent.Callable;
 

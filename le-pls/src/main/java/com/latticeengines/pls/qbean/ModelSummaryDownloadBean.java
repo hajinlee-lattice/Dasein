@@ -1,4 +1,4 @@
-package com.latticeengines.pls.mbean;
+package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.pls.mbean.TimeStampContainer;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.impl.FeatureImportanceParser;
 import com.latticeengines.pls.service.impl.ModelSummaryDownloadCallable;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("modelSummaryDownload")

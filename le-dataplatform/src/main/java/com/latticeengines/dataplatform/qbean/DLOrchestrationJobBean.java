@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.mbean;
+package com.latticeengines.dataplatform.qbean;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,7 +24,7 @@ import com.latticeengines.dataplatform.service.impl.dlorchestration.DLOrchestrat
 import com.latticeengines.dataplatform.service.impl.dlorchestration.DebugProcessorImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("dlOrchestrationQuartzJob")
 public class DLOrchestrationJobBean implements QuartzJobBean {

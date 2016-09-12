@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.quartz.PredefinedJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.core.BaseJobHistoryEntityMgr;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.quartzclient.service.QuartzJobService;
 
 @ComponentScan({ "com.latticeengines.quartzclient.dao", "com.latticeengines.quartzclient.entitymanager.core",

@@ -8,9 +8,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { //
-        "classpath:dataplatform-dlorchestration-quartz-context.xml", //
-        "classpath:dataplatform-quartz-context.xml" })
 public class DataplatformCheckMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired

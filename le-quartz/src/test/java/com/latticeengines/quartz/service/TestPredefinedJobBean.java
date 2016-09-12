@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Configuration
 @Component("testPredefinedJob")

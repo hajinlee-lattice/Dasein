@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.propdata.madison.service.impl.MadisonLogicDownloadCallable;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("madisonLogicDownload")
 public class MadisonLogicDownloadJobBean implements QuartzJobBean {

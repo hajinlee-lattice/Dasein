@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.propdata.madison.service.impl.MadisonLogicUploadCallable;
-import com.latticeengines.quartzclient.mbean.QuartzJobBean;
+import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("madisonLogicUpload")
 public class MadisonLogicUploadJobBean implements QuartzJobBean {
