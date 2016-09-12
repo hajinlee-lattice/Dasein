@@ -169,6 +169,12 @@ public class MatcherImpl implements Matcher, ApplicationContextAware {
         unionSelections.setPredefinedSelections(predefinedSelections);
         if (modelSummary != null) {
             matchInput.setDataCloudVersion(modelSummary.getDataCloudVersion());
+
+            if (modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.")) {
+                // TODO - work with Lei to fis RTS version to 2.0 during AM
+                // based model creation
+                predefinedSelections.put(modelSummary.getPredefinedSelection(), "2.0");
+            }
         }
 
         if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
