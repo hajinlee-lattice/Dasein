@@ -51,10 +51,10 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
         StringBuilder sb = new StringBuilder();
         for (PmmlField pmmlField : pmmlFields) {
             if (!AvroUtils.isAvroFriendlyFieldName(pmmlField.miningField.getName().getValue())) {
-                sb.append("MiningField:").append(pmmlField.miningField.getName()).append(" has invalid value.\n");
+                sb.append("MiningField: ").append(pmmlField.miningField.getName()).append(" has invalid value.\n");
             }
             if (!AvroUtils.isAvroFriendlyFieldName(pmmlField.miningField.getName().getValue())) {
-                sb.append("DataField:").append(pmmlField.miningField.getName()).append(" has invalid value.\n");
+                sb.append("DataField: ").append(pmmlField.miningField.getName()).append(" has invalid value.\n");
             }
         }
         return sb.toString();
