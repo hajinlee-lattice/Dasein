@@ -19,7 +19,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
 
     public ColumnMetadataProxy() {
-        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport") + "/match/metadata");
+        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport"), "/match/metadata");
     }
 
     @SuppressWarnings({ "unchecked" })

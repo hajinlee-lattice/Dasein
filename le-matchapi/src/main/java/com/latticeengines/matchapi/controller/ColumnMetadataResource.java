@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,11 +12,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
-import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 
 import io.swagger.annotations.Api;
@@ -31,10 +28,6 @@ public class ColumnMetadataResource implements ColumnMetadataInterface {
 
     @Resource(name = "columnMetadataServiceDispatch")
     private ColumnMetadataService columnMetadataService;
-
-    @Autowired
-    @Qualifier("columnSelectionService")
-    private ColumnSelectionService columnSelectionService;
 
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

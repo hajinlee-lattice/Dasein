@@ -15,7 +15,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
 
     public MatchProxy() {
-        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport") + "/match/matches");
+        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport"), "/match/matches");
     }
 
     @Override

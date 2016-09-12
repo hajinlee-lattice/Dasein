@@ -12,7 +12,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class MatchInternalProxy extends BaseRestApiProxy implements MatchInternalInterface {
 
     public MatchInternalProxy() {
-        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport") + "/match/internal");
+        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport"), "/match/internal");
     }
 
     @Override
