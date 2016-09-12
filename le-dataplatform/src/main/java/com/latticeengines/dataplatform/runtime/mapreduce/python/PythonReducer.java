@@ -64,7 +64,7 @@ public class PythonReducer extends Reducer<Text, Text, NullWritable, NullWritabl
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_12011, e, new String[] { targetFile + " aggregation failed" });
         }
-        log.info(targetFile + "Aggregation completed");
+        log.info(targetFile + " aggregation completed");
     }
 
     private List<String> localizeFiles(String targetfile, Iterable<Text> values) {
