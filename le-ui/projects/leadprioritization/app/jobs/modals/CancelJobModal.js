@@ -9,7 +9,6 @@ angular.module('lp.jobs.modals.cancelmodal', [
             var scope = $rootScope.$new();
             scope.jobId = jobId;
             scope.opts = opts || {};
-            scope.callback = callback;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -27,31 +26,19 @@ angular.module('lp.jobs.modals.cancelmodal', [
         });
     };
 })
-.controller('CancelJobController', function ($scope, $rootScope, $state, $stateParams, ResourceUtility, JobsService,  ImportStore) {
+.controller('CancelJobController', function ($scope, $state, $rootScope, ResourceUtility, JobsService,  ImportStore) {
+    
     $scope.ResourceUtility = ResourceUtility;
-
+    
     $scope.cancelJobClickConfirm = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        updateAsCancelledJob($scope.jobId);
-        if(typeof $scope.callback === 'function') {
-            $scope.callback();
-        }
-    };
-
-    function updateAsCancelledJob(jobId) {
-        JobsService.cancelJob(jobId);
         $("#modalContainer").modal('hide');
-    }
+        $rootScope.$broadcast("updateAsCancelledJob", $scope.jobId);
+    };
 
     $scope.cancelClick = function () {
-        $("#modalContainer").modal('hide');
-    };
-
-    $scope.resetImport = function() {
-        ImportStore.ResetAdvancedSettings();
-        $state.go('home.models.import');
         $("#modalContainer").modal('hide');
     };
 

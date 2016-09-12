@@ -71,10 +71,18 @@ angular
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-                $scope.cancelClicked = true;
-                $scope.cancelling[job.id] = true;
                 CancelJobModal.show(job.id);
+                console.log(job.id);
             };
+
+            $scope.$on("updateAsCancelledJob", function(event, args){
+
+                console.log(args);
+
+                JobsService.cancelJob(args);
+                $scope.cancelClicked = true;
+                $scope.cancelling[args] = true;
+            });
 
             $scope.downloadErrorLogClick = function($event){
 
