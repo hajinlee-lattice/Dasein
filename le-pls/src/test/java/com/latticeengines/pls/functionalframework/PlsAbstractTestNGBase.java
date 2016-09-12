@@ -44,7 +44,7 @@ import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
 
-//@Listeners({ GlobalAuthCleanupTestListener.class })
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
