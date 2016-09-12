@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
@@ -37,6 +36,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
 @Component("workflowContainerService")
@@ -197,32 +197,20 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setUser(workflowJob.getUserId());
 
         String applicationId = workflowJob.getApplicationId();
+        job.setApplicationId(applicationId);
+
         // get state first from database
         if (workflowJob.getStatus() != null
                 && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
             job.setJobStatus(JobStatus.FAILED);
-            job.setApplicationId(applicationId);
 
             if (workflowJob.getStartTimeInMillis() != null) {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
         } else {
-            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
-                    .getJobStatus(applicationId);
-            workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, yarnJobStatus);
-            job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
+            WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
         }
         return job;
-    }
-
-    private JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status) {
-        if (YarnUtils.FAILED_STATUS.contains(status)) {
-            return JobStatus.FAILED;
-        } else if (status == FinalApplicationStatus.UNDEFINED || status == null) {
-            return JobStatus.PENDING;
-        } else {
-            return JobStatus.COMPLETED;
-        }
     }
 
     @Override
