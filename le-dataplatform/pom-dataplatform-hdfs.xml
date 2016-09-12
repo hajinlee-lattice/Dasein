@@ -61,7 +61,7 @@
                                     </location>
                                 </source>
                                 <source>
-                                    <location>../le-datacloud/target/le-datacloud-yarn-${le.rpm.version}-shaded.jar
+                                    <location>../le-datacloud/yarn/target/le-datacloud-yarn-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>
                             </sources>
