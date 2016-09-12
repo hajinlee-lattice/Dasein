@@ -290,7 +290,7 @@ Use this structure for angled buttons:
     }
     &.active {
         padding-bottom: 2px;
-        margin-bottom: 0px;
+        margin-bottom: -1px;
         background: #fff;
         z-index: 2;
         pointer-events: none;
