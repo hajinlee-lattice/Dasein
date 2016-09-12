@@ -16,17 +16,19 @@ public class WorkflowUtils {
      */
     public static void updateJobFromYarn(Job job, WorkflowJob workflowJob, JobProxy jobProxy,
             WorkflowJobEntityMgr workflowJobEntityMgr) {
-        if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
-            try {
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
-                        .getApplicationId());
-                workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
-            } catch (Exception e) {
-                // pass
+        if (job.getApplicationId() != null) {
+            if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
+                try {
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                            .getApplicationId());
+                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+                } catch (Exception e) {
+                    // pass
+                }
             }
-        }
 
-        job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
+            job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
+        }
     }
 
     private static JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status) {
