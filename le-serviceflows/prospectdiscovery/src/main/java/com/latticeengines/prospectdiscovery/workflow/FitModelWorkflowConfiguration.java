@@ -6,7 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTableConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.RunAttributeLevelSummaryDataFlowsConfiguration;

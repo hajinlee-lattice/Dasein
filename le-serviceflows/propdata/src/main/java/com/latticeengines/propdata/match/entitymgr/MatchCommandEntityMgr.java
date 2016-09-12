@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.match.entitymgr;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 
 public interface MatchCommandEntityMgr {
 

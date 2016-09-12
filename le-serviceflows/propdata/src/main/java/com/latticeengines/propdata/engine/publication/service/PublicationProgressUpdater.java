@@ -2,8 +2,8 @@ package com.latticeengines.propdata.engine.publication.service;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 
 public interface PublicationProgressUpdater {
 

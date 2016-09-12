@@ -25,9 +25,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;

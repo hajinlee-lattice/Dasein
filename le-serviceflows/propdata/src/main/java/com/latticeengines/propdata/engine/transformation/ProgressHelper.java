@@ -3,8 +3,8 @@ package com.latticeengines.propdata.engine.transformation;
 import org.apache.commons.logging.Log;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;

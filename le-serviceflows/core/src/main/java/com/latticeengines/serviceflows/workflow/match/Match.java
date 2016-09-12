@@ -10,15 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.CommandParameter;
+import com.latticeengines.domain.exposed.datacloud.Commands;
+import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
+import com.latticeengines.domain.exposed.datacloud.MatchStatusResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.CommandParameter;
-import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
-import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
-import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
-import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("match")

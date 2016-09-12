@@ -14,16 +14,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
-import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
-import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.propdata.match.dao.MatchBlockDao;
 import com.latticeengines.propdata.match.entitymgr.MatchBlockEntityMgr;
 

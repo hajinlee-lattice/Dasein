@@ -17,8 +17,8 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.propdata.engine.publication.service.PublicationService;
 import com.latticeengines.security.exposed.InternalResourceBase;

@@ -20,8 +20,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndClea
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
-import com.latticeengines.domain.exposed.propdata.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {

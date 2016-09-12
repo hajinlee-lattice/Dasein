@@ -22,9 +22,9 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedF
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.dataflow.AccountMasterSeedRebuildFlowParameter;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedRebuildFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 
 
 @Component("accountMasterSeedRebuildFlow")

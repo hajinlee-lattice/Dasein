@@ -21,7 +21,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.propdata.DataSourcePool;
+import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceConnection;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 

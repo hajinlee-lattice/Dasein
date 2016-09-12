@@ -7,8 +7,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
-import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.propdata.madison.dao.MadisonLogicDailyProgressDao;
 
 public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDailyProgress> implements

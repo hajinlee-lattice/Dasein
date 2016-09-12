@@ -21,6 +21,10 @@ alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld
 alias pddplnobld='hadoop fs -rm -r /app/propdata || true && hadoop fs -mkdir -p /app/propdata/lib && hadoop fs -copyFromLocal $WSHOME/le-propdata/target/le-propdata*shaded.jar /app/propdata/lib && hdfs dfs -put $WSHOME/le-propdata/conf/env/dev/propdata.properties /app/propdata'
 alias pddpl='pushd $WSHOME/le-propdata && mvn -Pshaded-yarn -DskipTests clean install && popd && pddplnobld'
 
+alias dcbld='pushd $WSHOME/le-datacloud && mvn -T4 -DskipTests clean install && popd'
+alias dcdplnobld='hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib'
+alias dcdpl='dcbld && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded-yarn -DskipTests clean install && popd && dcdplnobld'
+
 alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/conf/env/dev/dataplatform.properties /app/dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
 alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
 
@@ -98,6 +102,7 @@ alias runjettymds='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:
 alias runjettydfapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -DargLine="" -DexcludeArtifactIds=jetty-servlets,jetty-continuation clean jetty:run'
 alias runjettyscoringapi='bash -c "rm -f /var/log/ledp/le-scoringapi*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4004,server=y,suspend=n -Xmx4048m -XX:MaxPermSize=512m" mvn -Djetty.port=8073 jetty:run'
 alias runjettyjobpd='source $WSHOME/le-dev/latticerc && cd $WSHOME/le-job && bash -c "rm -f /var/log/ledp/le-job*.log" && CLASSPATH=$HADOOP_CONF_DIR:$TEZ_CONF_DIR:$HADOOP_COMMON_JAR JOB_MODULE=propdata PROPDATA_MADISON_QUARTZ_ENABLED=enabled PROPDATA_COLLECTION_QUARTZ_ENABLED=enabled mvn -Ptest jetty:run'
+alias runjettymatchapi='runtest matchapi -p jetty -c jetty:run'
 
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
 

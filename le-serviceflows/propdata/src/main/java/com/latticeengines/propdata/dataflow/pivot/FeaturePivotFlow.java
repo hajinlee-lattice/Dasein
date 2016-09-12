@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.PivotDataFlowParameters;
 
 @Component("featurePivotFlow")
 public class FeaturePivotFlow extends PivotFlow {

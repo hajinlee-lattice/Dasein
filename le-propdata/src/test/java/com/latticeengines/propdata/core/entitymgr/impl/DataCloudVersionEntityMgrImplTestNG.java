@@ -10,7 +10,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;
 

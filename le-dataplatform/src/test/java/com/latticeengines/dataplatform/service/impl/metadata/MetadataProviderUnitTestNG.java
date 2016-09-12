@@ -4,8 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.propdata.MatchClient;
-import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchClient;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 
 public class MetadataProviderUnitTestNG {
 

@@ -70,7 +70,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     @Override
     @Trace(dispatcher = true)
     public Boolean call() throws Exception {
-        log.info("ModelDownloader is ready to pick up models.");
+        log.debug("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();
 
         if (log.isDebugEnabled()) {
@@ -106,7 +106,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     private Boolean partialDownload() {
-        log.info("Perform partial download!");
+        log.debug("Perform partial download!");
         List<ModelSummaryDownloadFlag> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
         if (waitingFlags != null && waitingFlags.size() > 0) {
             HashSet<String> tenantIds = new HashSet<> ();

@@ -1,8 +1,8 @@
 package com.latticeengines.propdata.workflow.engine;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.common.EngineConstants;

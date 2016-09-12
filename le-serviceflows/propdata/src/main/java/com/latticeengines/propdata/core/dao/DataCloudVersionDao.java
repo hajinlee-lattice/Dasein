@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.core.dao;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 public interface DataCloudVersionDao extends BaseDao<DataCloudVersion>  {
 

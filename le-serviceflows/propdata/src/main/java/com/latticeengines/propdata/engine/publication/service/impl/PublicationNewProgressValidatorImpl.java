@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DerivedSource;

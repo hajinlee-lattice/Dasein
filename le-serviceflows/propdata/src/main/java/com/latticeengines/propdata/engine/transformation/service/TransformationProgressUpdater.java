@@ -2,7 +2,7 @@ package com.latticeengines.propdata.engine.transformation.service;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 
 public interface TransformationProgressUpdater {
 

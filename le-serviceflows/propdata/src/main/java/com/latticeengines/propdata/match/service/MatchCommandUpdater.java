@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.match.service;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 
 public interface MatchCommandUpdater {
     

@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.DataSourcePool;
+import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceConnection;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.datasource.DataSourceUtils;

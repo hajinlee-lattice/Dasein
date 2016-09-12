@@ -5,9 +5,9 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.domain.exposed.propdata.manage.Progress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Progress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;
 

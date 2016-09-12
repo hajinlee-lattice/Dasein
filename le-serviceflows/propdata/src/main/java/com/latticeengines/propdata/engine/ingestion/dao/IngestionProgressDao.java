@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionProgressDao extends BaseDao<IngestionProgress> {
 

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.propdata.core.dao.DataCloudVersionDao;
 import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 

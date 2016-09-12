@@ -8,8 +8,8 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 
 import cascading.tuple.coerce.Coercions.Coerce;
 

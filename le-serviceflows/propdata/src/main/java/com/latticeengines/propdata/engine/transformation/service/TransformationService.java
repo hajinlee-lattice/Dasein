@@ -2,7 +2,7 @@ package com.latticeengines.propdata.engine.transformation.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 

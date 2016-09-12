@@ -3,8 +3,8 @@ package com.latticeengines.propdata.engine.publication.service;
 import java.io.IOException;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 
 public interface PublicationProgressService {
 

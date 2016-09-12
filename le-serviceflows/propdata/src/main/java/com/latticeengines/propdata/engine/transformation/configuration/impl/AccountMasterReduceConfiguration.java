@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 

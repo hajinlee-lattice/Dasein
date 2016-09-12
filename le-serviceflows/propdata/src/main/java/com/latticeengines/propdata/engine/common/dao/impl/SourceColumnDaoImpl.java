@@ -7,7 +7,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.propdata.engine.common.dao.SourceColumnDao;
 
 @Component

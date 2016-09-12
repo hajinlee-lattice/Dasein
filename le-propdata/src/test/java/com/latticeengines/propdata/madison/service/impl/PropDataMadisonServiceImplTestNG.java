@@ -16,8 +16,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
-import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;

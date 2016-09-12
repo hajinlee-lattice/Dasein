@@ -9,8 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionNewProgressValidator;
 

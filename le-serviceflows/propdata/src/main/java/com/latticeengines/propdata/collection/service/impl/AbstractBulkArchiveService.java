@@ -6,12 +6,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 
-import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.core.source.BulkSource;
-import com.latticeengines.domain.exposed.propdata.StageServer;
+import com.latticeengines.domain.exposed.datacloud.StageServer;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
 public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBase<ArchiveProgress>

@@ -12,12 +12,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.Publication.MaterialType;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
-import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;

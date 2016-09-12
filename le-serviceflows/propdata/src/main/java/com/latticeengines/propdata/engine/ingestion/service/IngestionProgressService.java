@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.propdata.engine.ingestion.service.impl.IngestionProgressServiceImpl.IngestionProgressUpdaterImpl;
 
 public interface IngestionProgressService {

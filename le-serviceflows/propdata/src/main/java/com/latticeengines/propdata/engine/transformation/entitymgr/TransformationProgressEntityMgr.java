@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.entitymgr;
 
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
 
 public interface TransformationProgressEntityMgr {

@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.publication.dao.PublicationDao;
 import com.latticeengines.propdata.engine.publication.dao.PublicationProgressDao;

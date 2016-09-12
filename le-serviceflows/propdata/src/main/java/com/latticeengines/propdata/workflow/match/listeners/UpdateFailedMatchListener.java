@@ -18,9 +18,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;

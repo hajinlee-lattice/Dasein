@@ -2,7 +2,7 @@ package com.latticeengines.propdata.core.datasource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.latticeengines.domain.exposed.propdata.DataSourcePool;
+import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 
 import java.util.List;
 

@@ -21,7 +21,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaIndustryBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentDataFlowParameters;
 
 @Component("alexaRefreshFlow")
 public class AlexaRefreshFlow extends MostRecentFlow {

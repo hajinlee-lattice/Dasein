@@ -2,9 +2,9 @@ package com.latticeengines.propdata.workflow.engine.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class IngestionStepConfiguration extends BaseStepConfiguration {

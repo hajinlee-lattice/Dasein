@@ -3,11 +3,11 @@ package com.latticeengines.proxy.exposed.matchapi;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.BulkMatchInput;
-import com.latticeengines.domain.exposed.propdata.match.BulkMatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 

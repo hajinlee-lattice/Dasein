@@ -2,8 +2,8 @@ package com.latticeengines.network.exposed.propdata;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 
 public interface TransformationInterface {
 

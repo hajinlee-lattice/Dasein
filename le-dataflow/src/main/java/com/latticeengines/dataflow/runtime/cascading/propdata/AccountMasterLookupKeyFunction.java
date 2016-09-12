@@ -1,6 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import com.latticeengines.domain.exposed.propdata.match.AccountLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

@@ -16,12 +16,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
@@ -29,13 +29,9 @@ import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component
 public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
-
-    @Autowired
-    private MatchProxy matchProxy;
 
     private static final String avroDir = "/tmp/MatchResourceDeploymentTestNG";
     private static final String fileName = "SourceFile_csv.avro";
@@ -75,7 +71,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testBulkMatchWithSchema() throws Exception {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
@@ -86,7 +82,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
-        uploadDataCsv(avroDir, fileName, "com/latticeengines/matchapi/BulkMatchInput.csv", fieldTypes, "ID");
+        uploadDataCsv(avroDir, fileName, "matchinput/BulkMatchInput.csv", fieldTypes, "ID");
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
 
@@ -123,7 +119,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() throws InterruptedException {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -137,7 +133,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         // mimic one block failed
         while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(100L);
+            Thread.sleep(1000L);
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
@@ -178,7 +174,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private void uploadTestAVro(String avroDir, String fileName) {
         try {
             HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration,
-                    "com/latticeengines/matchapi/SourceFile_csv.avro", avroDir + "/" + fileName);
+                    "matchinput/SourceFile_csv.avro", avroDir + "/" + fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }

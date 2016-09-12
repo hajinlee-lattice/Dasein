@@ -7,8 +7,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 

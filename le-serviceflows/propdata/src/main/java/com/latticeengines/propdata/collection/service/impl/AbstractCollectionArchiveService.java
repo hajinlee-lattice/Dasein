@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;

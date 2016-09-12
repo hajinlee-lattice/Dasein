@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.match.entitymgr;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 
 public interface MatchBlockEntityMgr {
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.mail.MethodNotSupportedException;
 
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 
 public interface TransformationConfiguration {
     String getSourceName();

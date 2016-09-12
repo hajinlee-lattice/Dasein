@@ -2,7 +2,7 @@ package com.latticeengines.propdata.collection.service;
 
 import java.util.Date;
 
-import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.propdata.core.source.DataImportedFromDB;
 
 public interface ArchiveService {

@@ -29,15 +29,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.util.MatchUtils;
-import com.latticeengines.proxy.exposed.propdata.InternalProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("parallelBlockExecution")
@@ -50,7 +50,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";
 
     @Autowired
-    private InternalProxy internalProxy;
+    private MatchInternalProxy matchInternalProxy;
 
     @Autowired
     private MatchCommandService matchCommandService;
@@ -67,7 +67,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private Long progressUpdated;
     private MatchOutput matchOutput;
     private Random random = new Random(System.currentTimeMillis());
-    private List<PropDataJobConfiguration> jobConfigurations = new ArrayList<>();
+    private List<DataCloudJobConfiguration> jobConfigurations = new ArrayList<>();
 
     @Override
     public void execute() {
@@ -80,8 +80,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 @SuppressWarnings("rawtypes")
                 List list = (List) listObj;
                 for (Object configObj : list) {
-                    if (configObj instanceof PropDataJobConfiguration) {
-                        jobConfigurations.add((PropDataJobConfiguration) configObj);
+                    if (configObj instanceof DataCloudJobConfiguration) {
+                        jobConfigurations.add((DataCloudJobConfiguration) configObj);
                     }
                 }
             }
@@ -96,12 +96,12 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
     }
 
-    private void submitMatchBlocks(List<PropDataJobConfiguration> jobConfigurations) {
+    private void submitMatchBlocks(List<DataCloudJobConfiguration> jobConfigurations) {
         applicationIds = new ArrayList<>();
         executionContext.put(BulkMatchContextKey.APPLICATION_IDS, applicationIds);
-        for (PropDataJobConfiguration jobConfiguration : jobConfigurations) {
+        for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
             ApplicationId appId = ConverterUtils
-                    .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
             applicationIds.add(appId);
 
@@ -267,10 +267,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         String blockUid = blockUuidMap.get(appId.toString());
         if (matchCommandService.blockIsRetriable(blockUid)) {
             log.info(errorMsg + ". Retry the block.");
-            for (PropDataJobConfiguration jobConfiguration : jobConfigurations) {
+            for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
                 if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
                     ApplicationId newAppId = ConverterUtils
-                            .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                            .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);

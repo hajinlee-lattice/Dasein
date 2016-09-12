@@ -13,7 +13,7 @@
 
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="propDataManage"/>
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.manage"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${propdata.manage.dialect}</prop>

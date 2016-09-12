@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.madison.entitymanager;
 
-import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
 
 public interface PropDataMadisonEntityMgr {
 

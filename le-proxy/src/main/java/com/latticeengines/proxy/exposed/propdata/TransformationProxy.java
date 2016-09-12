@@ -7,8 +7,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 

@@ -14,7 +14,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 
 public class SftpUtils {
 

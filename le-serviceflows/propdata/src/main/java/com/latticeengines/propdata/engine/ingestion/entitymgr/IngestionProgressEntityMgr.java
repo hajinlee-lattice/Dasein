@@ -3,8 +3,8 @@ package com.latticeengines.propdata.engine.ingestion.entitymgr;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionProgressEntityMgr {
 

@@ -9,9 +9,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component
 public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -19,7 +19,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testPredefined() {
         for (Predefined predefined: Predefined.values()) {
             List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined, null);
@@ -32,7 +32,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
         }
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testLeadEnrichment() {
         List<ColumnMetadata> columnMetadataList =
                 columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, null);

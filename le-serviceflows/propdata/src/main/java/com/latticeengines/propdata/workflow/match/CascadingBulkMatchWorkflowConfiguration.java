@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.propdata.dataflow.CascadingBulkMatchDataflowParameters;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.propdata.workflow.match.steps.CascadingBulkMatchStepConfiguration;

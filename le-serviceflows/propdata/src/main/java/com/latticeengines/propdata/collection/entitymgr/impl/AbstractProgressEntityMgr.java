@@ -6,8 +6,8 @@ import org.apache.commons.logging.Log;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.propdata.manage.Progress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.Progress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
 import com.latticeengines.propdata.collection.entitymgr.ProgressEntityMgr;
 import com.latticeengines.propdata.core.source.Source;

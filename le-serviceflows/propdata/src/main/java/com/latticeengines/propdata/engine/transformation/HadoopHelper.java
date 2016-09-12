@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.propdata.manage.Progress;
+import com.latticeengines.domain.exposed.datacloud.manage.Progress;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 

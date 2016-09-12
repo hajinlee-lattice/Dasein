@@ -2,7 +2,7 @@ package com.latticeengines.propdata.engine.ingestion.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.ingestion.FileCheckStrategy;
+import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 
 public interface IngestionVersionService {
     public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion);

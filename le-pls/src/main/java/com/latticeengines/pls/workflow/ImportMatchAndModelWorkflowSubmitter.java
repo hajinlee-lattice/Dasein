@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -31,9 +34,6 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
-import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.DataRuleUtils;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
@@ -42,7 +42,7 @@ import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflo
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.PivotMappingFileUtils;
-import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionProgressDao;
 

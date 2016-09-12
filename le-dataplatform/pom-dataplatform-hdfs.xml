@@ -60,6 +60,10 @@
                                     <location>../le-propdata/target/le-propdata-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>
+                                <source>
+                                    <location>../le-datacloud/target/le-datacloud-yarn-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

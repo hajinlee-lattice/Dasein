@@ -1,8 +1,14 @@
 package com.latticeengines.matchapi.testframework;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.Path;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -16,13 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
@@ -31,6 +33,9 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected MatchProxy matchProxy;
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
@@ -109,6 +114,25 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
             uploadAvroData(data, fieldNames, fieldTypes, avroDir, fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
+        }
+    }
+
+    protected List<String> getFieldNamesFromCSVFile(String csvFile) {
+        try {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(csvFile);
+            if (url == null) {
+                throw new RuntimeException("Cannot find resource file=" + csvFile);
+            }
+            CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT.withHeader());
+            Map<String, Integer> columnMap = parser.getHeaderMap();
+            List<String> fieldNames = new ArrayList<>();
+            for (String key : columnMap.keySet()) {
+                fieldNames.add(key);
+            }
+            return fieldNames;
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to get field names.", ex);
         }
     }
 

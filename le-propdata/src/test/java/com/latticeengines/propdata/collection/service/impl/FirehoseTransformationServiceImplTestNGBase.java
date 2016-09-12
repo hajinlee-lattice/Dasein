@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
 public abstract class FirehoseTransformationServiceImplTestNGBase extends TransformationServiceImplTestNGBase {

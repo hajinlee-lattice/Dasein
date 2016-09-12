@@ -1,9 +1,9 @@
 package com.latticeengines.network.exposed.propdata;
 
-import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
-import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
-import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
+import com.latticeengines.domain.exposed.datacloud.Commands;
+import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchStatusResponse;
 
 public interface MatchCommandInterface {
     MatchStatusResponse getMatchStatus(Long commandID, String clientName);

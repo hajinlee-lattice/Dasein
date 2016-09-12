@@ -2,9 +2,9 @@ package com.latticeengines.propdata.engine.publication.entitymgr;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
-import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 
 public interface PublicationProgressEntityMgr {
 

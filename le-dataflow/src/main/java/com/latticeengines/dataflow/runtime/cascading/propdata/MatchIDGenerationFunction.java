@@ -10,7 +10,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-import com.latticeengines.domain.exposed.propdata.match.AccountLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 
 @SuppressWarnings("rawtypes")
 public class MatchIDGenerationFunction extends BaseOperation implements Function {

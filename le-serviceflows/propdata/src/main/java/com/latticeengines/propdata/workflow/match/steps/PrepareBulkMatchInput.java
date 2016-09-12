@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
@@ -59,7 +59,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         Long count = AvroUtils.count(yarnConfiguration, avroGlobs);
         schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlobs);
         Integer[] blocks = determineBlockSizes(count);
-        List<PropDataJobConfiguration> configurations = readAndSplitInputAvro(blocks);
+        List<DataCloudJobConfiguration> configurations = readAndSplitInputAvro(blocks);
         executionContext.put(BulkMatchContextKey.YARN_JOB_CONFIGS, configurations);
         executionContext.put(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
         matchCommandService.update(getConfiguration().getRootOperationUid()) //
@@ -94,9 +94,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         return blocks;
     }
 
-    private List<PropDataJobConfiguration> readAndSplitInputAvro(Integer[] blocks) {
+    private List<DataCloudJobConfiguration> readAndSplitInputAvro(Integer[] blocks) {
         Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroGlobs);
-        List<PropDataJobConfiguration> configurations = new ArrayList<>();
+        List<DataCloudJobConfiguration> configurations = new ArrayList<>();
 
         int blockIdx = 0;
         for (Integer blockSize : blocks) {
@@ -106,16 +106,16 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 blockOperationUid = getConfiguration().getRootOperationUid();
             }
 
-            PropDataJobConfiguration jobConfiguration = generateJobConfiguration();
+            DataCloudJobConfiguration jobConfiguration = generateJobConfiguration();
             jobConfiguration.setBlockSize(blockSize);
             jobConfiguration.setBlockOperationUid(blockOperationUid);
             String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
                     jobConfiguration.getBlockOperationUid()).toString();
             jobConfiguration.setAvroPath(targetFile);
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
-            jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block(%d/%d)[%s]~%s",
-                    getConfiguration().getRootOperationUid(), blockIdx, blocks.length, blockOperationUid,
-                    getConfiguration().getCustomerSpace().toString()));
+            String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid()).getApplicationId();
+            jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block[%d/%d]~%s",
+                    appId, blockIdx, blocks.length, getConfiguration().getCustomerSpace().toString()));
             configurations.add(jobConfiguration);
 
             List<GenericRecord> data = new ArrayList<>();
@@ -134,8 +134,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         return configurations;
     }
 
-    private PropDataJobConfiguration generateJobConfiguration() {
-        PropDataJobConfiguration jobConfiguration = new PropDataJobConfiguration();
+    private DataCloudJobConfiguration generateJobConfiguration() {
+        DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(getConfiguration().getHdfsPodId());
         jobConfiguration.setReturnUnmatched(getConfiguration().getReturnUnmatched());
         jobConfiguration.setName("PropDataMatchBlock");

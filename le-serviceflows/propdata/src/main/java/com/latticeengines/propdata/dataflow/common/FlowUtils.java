@@ -16,7 +16,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.StringTruncateFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 
 public class FlowUtils {
 

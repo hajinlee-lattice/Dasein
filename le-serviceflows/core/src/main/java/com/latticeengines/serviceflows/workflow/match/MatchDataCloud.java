@@ -5,27 +5,26 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
-import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("matchDataCloud")
@@ -35,7 +34,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     static final String LDC_MATCH = "DataCloudMatch";
 
     @Autowired
-    @Qualifier("matchProxyDeprecated")
     private MatchProxy matchProxy;
 
     @Autowired
@@ -85,7 +83,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             matchInput.setPredefinedSelection(predefined);
             String version = getConfiguration().getPredefinedSelectionVersion();
             if (StringUtils.isEmpty(version)) {
-                version = columnMetadataProxy.selectionCurrentVersion(predefined);
+                version = "1.0";
                 getConfiguration().setPredefinedSelectionVersion(version);
             }
             matchInput.setPredefinedVersion(version);

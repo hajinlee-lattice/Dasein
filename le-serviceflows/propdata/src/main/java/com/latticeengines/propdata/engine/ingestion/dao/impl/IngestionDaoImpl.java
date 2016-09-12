@@ -8,7 +8,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionDao;
 
 @Component("ingestionDao")

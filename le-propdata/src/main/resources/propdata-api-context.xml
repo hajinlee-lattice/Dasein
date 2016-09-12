@@ -8,7 +8,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.propdata.api.controller.*" />
     </context:component-scan>
 
-    <import resource="classpath:propdata-match-context.xml" />
     <import resource="classpath:propdata-collection-context.xml" />
 
 </beans>

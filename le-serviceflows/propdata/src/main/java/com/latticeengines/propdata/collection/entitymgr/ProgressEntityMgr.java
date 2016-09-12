@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.collection.entitymgr;
 
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.core.source.Source;
 
 public interface ProgressEntityMgr<P> {

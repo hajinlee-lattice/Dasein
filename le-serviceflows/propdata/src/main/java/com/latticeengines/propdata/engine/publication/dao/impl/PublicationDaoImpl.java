@@ -6,7 +6,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.propdata.engine.publication.dao.PublicationDao;
 
 public class PublicationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Publication>

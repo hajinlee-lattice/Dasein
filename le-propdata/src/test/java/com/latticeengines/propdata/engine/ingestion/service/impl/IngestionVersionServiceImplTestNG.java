@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.ingestion.FileCheckStrategy;
+import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 import com.latticeengines.propdata.core.IngestionNames;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionVersionService;
 import com.latticeengines.propdata.engine.testframework.PropDataEngineFunctionalTestNGBase;

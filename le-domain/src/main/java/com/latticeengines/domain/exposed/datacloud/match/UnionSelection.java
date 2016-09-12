@@ -1,0 +1,32 @@
+package com.latticeengines.domain.exposed.datacloud.match;
+
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+
+public class UnionSelection {
+
+    @JsonProperty("PredefinedSelections")
+    private Map<Predefined, String> predefinedSelections;
+
+    @JsonProperty("CustomSelection")
+    private ColumnSelection customSelection;
+
+    public Map<Predefined, String> getPredefinedSelections() {
+        return predefinedSelections;
+    }
+
+    public void setPredefinedSelections(Map<Predefined, String> predefinedSelections) {
+        this.predefinedSelections = predefinedSelections;
+    }
+
+    public ColumnSelection getCustomSelection() {
+        return customSelection;
+    }
+
+    public void setCustomSelection(ColumnSelection customSelection) {
+        this.customSelection = customSelection;
+    }
+}

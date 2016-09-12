@@ -8,9 +8,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion.IngestionType;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.propdata.engine.testframework.PropDataEngineFunctionalTestNGBase;
 

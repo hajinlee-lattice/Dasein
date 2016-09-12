@@ -35,6 +35,7 @@
         <module>core</module>
         <module>etl</module>
         <module>match</module>
+        <module>yarn</module>
     </modules>
 
 </project>

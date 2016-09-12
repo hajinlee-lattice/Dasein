@@ -1,6 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,8 +23,8 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
 
     private static final Log log  = LogFactory.getLog(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
 
-    private static final String TENANT_ID = "LETest1461982161361.LETest1461982161361.Production";
-    private static final String MODEL_ID = "ms__2e42399e-571a-48e9-b98f-9b40b269ef04-SelfServ";
+    private static final String TENANT_ID = "LETest1473667385248.LETest1473667385248.Production";
+    private static final String MODEL_ID = "ms__18ff920a-ece0-4016-af78-fc5de2a081b5-SelfServ";
 
     private static final int NUM_RECORDS_TO_SCORE = 100;
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
@@ -47,7 +48,7 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
             tenant.setName(CustomerSpace.parse(TENANT_ID).getTenantId());
             tenantService.registerTenant(tenant);
         }
-        tenant.setRegisteredTime(12345L);
+        tenant.setRegisteredTime(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(365));
         tenantService.updateTenant(tenant);
 
         log.info("wait 10 sec for model to be downloaded.");
@@ -58,7 +59,7 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     public void teardown() throws Exception {
     }
 
-    @Test(groups = "deployment.lp", enabled = false)
+    @Test(groups = "deployment.lp", enabled = true)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
         SSLUtils.turnOffSslChecking();
         String pathToModelInputCsv = RESOURCE_BASE + "/" + fileName;

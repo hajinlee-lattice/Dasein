@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.propdata.engine.publication.dao.PublicationDao;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 

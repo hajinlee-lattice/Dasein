@@ -79,21 +79,21 @@ public class QuartzJobServiceImpl implements QuartzJobService {
                     if (jobHistory != null) {
                         jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
                         jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                        log.info("Updated job status to success");
+                        log.debug("Updated job status to success");
                     } else {
-                        // incase the job finished too soon.
+                        // in case the job finished too soon.
                         Thread.sleep(3000);
                         jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName, jobId);
                         if (jobHistory != null) {
                             jobHistory.setTriggeredJobStatus(TriggeredJobStatus.SUCCESS);
                             jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                            log.info("Updated job status to success");
+                            log.debug("Updated job status to success");
                         }
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
-                log.info("Quartz task complete!");
+                log.debug("Quartz task complete!");
             }
 
             @Override
@@ -106,7 +106,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
                         jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
                         jobHistory.setErrorMessage(t.getMessage());
                         jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                        log.info("Updated job status to fail");
+                        log.debug("Updated job status to fail");
                     } else {
                         // incase the job finished too soon.
                         Thread.sleep(3000);
@@ -115,7 +115,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
                             jobHistory.setTriggeredJobStatus(TriggeredJobStatus.FAIL);
                             jobHistory.setErrorMessage(t.getMessage());
                             jobHistoryEntityMgr.updateJobHistory(jobHistory);
-                            log.info("Updated job status to fail");
+                            log.debug("Updated job status to fail");
                         }
                     }
                 } catch (Exception e) {

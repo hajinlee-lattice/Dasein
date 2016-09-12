@@ -16,7 +16,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentDataFlowParameters;
 
 @Component("orbIntelligenceRefreshFlow")
 public class OrbIntelligenceRefreshFlow extends MostRecentFlow {

@@ -1,9 +1,9 @@
 package com.latticeengines.propdata.workflow.engine;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.propdata.ingestion.ProviderConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.common.EngineConstants;

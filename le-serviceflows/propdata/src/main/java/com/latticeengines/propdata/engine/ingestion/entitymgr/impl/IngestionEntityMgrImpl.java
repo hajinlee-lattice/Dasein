@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionDao;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionEntityMgr;
 

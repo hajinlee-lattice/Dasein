@@ -3,9 +3,9 @@ package com.latticeengines.propdata.match.service;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
-import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 public interface MatchCommandService {
 

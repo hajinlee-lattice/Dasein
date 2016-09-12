@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.ingestion.IngestionRequest;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.network.exposed.propdata.IngestionInterface;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
 import com.latticeengines.security.exposed.InternalResourceBase;

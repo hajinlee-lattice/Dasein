@@ -18,11 +18,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
-import com.latticeengines.domain.exposed.propdata.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.propdata.ingestion.SqlToTextConfiguration;
-import com.latticeengines.domain.exposed.propdata.manage.Ingestion;
-import com.latticeengines.domain.exposed.propdata.manage.IngestionProgress;
-import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionProgressEntityMgr;

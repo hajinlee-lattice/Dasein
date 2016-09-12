@@ -11,8 +11,8 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.propdata.dataflow.SingleBaseSourceRefreshDataFlowParameter;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.dataflow.SingleBaseSourceRefreshDataFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 
 @Component("dnbCacheSeedCleanFlow")
 public class DnbCacheSeedCleanFlow extends TypesafeDataFlowBuilder<SingleBaseSourceRefreshDataFlowParameter> {

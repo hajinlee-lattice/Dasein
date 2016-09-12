@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.core.entitymgr;
 
-import com.latticeengines.domain.exposed.propdata.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 public interface DataCloudVersionEntityMgr {
 

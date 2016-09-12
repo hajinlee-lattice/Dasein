@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.engine.common.dao.SourceColumnDao;
 import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;

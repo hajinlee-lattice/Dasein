@@ -1,0 +1,15 @@
+package com.latticeengines.datacloud.match.exposed.service;
+
+import java.util.List;
+
+import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+
+public interface MetadataColumnService<E> {
+
+    List<E> findByColumnSelection(Predefined selectName);
+
+    E getMetadataColumn(String columnId);
+
+    void loadCache();
+
+}

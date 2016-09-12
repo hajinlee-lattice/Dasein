@@ -23,9 +23,9 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.dataflow.DepivotDataFlowParameters;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DepivotDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.propdata.core.IngestionNames;
 
 import cascading.operation.Function;
