@@ -23,7 +23,7 @@ public class AccountMasterReduceFlow extends TypesafeDataFlowBuilder<AccountMast
 
         Node filtered = accountMaster.filter("Domain != null", new FieldList("Domain"));
 
-        Node reduced = filtered.groupByAndLimit(new FieldList("Domain"), 1);
+        Node reduced = filtered.groupByAndLimit(new FieldList("Domain", "DUNS"), 1);
 
         Node stamped = reduced.addTimestamp(parameters.getTimestampField());
 
