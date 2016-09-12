@@ -22,7 +22,7 @@ alias pddplnobld='hadoop fs -rm -r /app/propdata || true && hadoop fs -mkdir -p 
 alias pddpl='pushd $WSHOME/le-propdata && mvn -Pshaded-yarn -DskipTests clean install && popd && pddplnobld'
 
 alias dcbld='pushd $WSHOME/le-datacloud && mvn -T4 -DskipTests clean install && popd'
-alias dcdplnobld='hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib'
+alias dcdplnobld='hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib'
 alias dcdpl='dcbld && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded-yarn -DskipTests clean install && popd && dcdplnobld'
 
 alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/conf/env/dev/dataplatform.properties /app/dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
