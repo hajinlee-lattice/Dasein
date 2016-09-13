@@ -76,6 +76,7 @@ public class MarketoCredentialResource {
         MARKETO_MATCH_FIELD_4.setMarketoFieldName(MARKETO_FIELD_NAME_4);
         MARKETO_MATCH_FIELD_4.setEnrichment(ENRICHMENT);
         ENRICHMENT.setId(ENRICHMENT_ID);
+        ENRICHMENT.setTenantCredentialGUID(ENRICHMENT_TENENT_CREDENTIAL_GUID);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
