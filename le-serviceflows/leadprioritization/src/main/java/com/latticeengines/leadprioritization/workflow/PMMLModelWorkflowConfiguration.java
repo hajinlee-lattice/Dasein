@@ -80,6 +80,11 @@ public class PMMLModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder moduleName(String moduleName) {
+            model.setModuleName(moduleName);
+            return this;
+        }
+
         public PMMLModelWorkflowConfiguration build() {
             configuration.add(model);
             return configuration;

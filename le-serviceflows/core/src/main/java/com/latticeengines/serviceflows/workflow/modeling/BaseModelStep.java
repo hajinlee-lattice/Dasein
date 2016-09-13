@@ -154,6 +154,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
                 .transformationGroupName(getTransformationGroupName()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
+                .moduleName(configuration.getModuleName()) //
                 .productType(configuration.getProductType()) //
                 .setModelSummaryProvenance(configuration.getModelSummaryProvenance()) //
                 .dataCloudVersion(configuration.getDataCloudVersion()) //

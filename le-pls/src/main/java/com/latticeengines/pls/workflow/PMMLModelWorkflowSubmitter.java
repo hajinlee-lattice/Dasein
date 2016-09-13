@@ -65,6 +65,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .displayName(modelDisplayName) //
                 .pmmlArtifactPath(pmmlArtifact.getPath()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
+                .moduleName(moduleName != null ? moduleName : null) //
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(schemaInterpretation.name()) //

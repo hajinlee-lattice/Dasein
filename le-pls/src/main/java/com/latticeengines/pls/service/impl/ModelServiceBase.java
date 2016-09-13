@@ -95,7 +95,11 @@ public abstract class ModelServiceBase implements ModelService {
         FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelDirPath, ".");
 
+//        if (StringUtils.isNotEmpty(modelSummary.getModuleName())){
+//            
+//        }else{
         String newPivotFilePath = ModelingHdfsUtils.copyPivotMappingFile(yarnConfiguration, modelSummary, targetTenantId);
+        //}
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
                 cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newPivotFilePath);

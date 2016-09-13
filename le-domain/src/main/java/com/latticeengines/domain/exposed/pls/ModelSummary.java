@@ -94,6 +94,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String modelType;
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
     private String dataCloudVersion;
+    private String moduleName;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -526,6 +527,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     public void addModelSummaryProvenanceProperty(ModelSummaryProvenanceProperty modelSummaryProvenanceProperty) {
         this.modelSummaryProvenanceProperties.add(modelSummaryProvenanceProperty);
+    }
+
+    @JsonProperty("ArtifactModule")
+    @Column(name = "MODULE_NAME", nullable = true)
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     @Transient

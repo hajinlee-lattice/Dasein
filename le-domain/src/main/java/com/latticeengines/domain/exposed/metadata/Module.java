@@ -60,7 +60,7 @@ public class Module implements HasName, HasPid, HasTenantId {
     private Tenant tenant;
     
     @JsonIgnore
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "module")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "module")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Artifact> artifacts = new ArrayList<>();
 

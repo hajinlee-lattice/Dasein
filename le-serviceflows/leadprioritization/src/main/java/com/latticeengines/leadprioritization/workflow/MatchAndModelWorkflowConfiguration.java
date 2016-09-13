@@ -170,7 +170,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used.
-         *
+         * 
          * @param customizedColumnSelection
          * @return
          */
@@ -183,12 +183,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         *
+         * 
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
-                String selectionVersion) {
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;
@@ -211,6 +210,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder isDefaultDataRules(boolean isDefaultDataRules) {
             model.setDefaultDataRuleConfiguration(isDefaultDataRules);
+            return this;
+        }
+
+        public Builder moduleName(String moduleName) {
+            model.setModelName(moduleName);
             return this;
         }
 

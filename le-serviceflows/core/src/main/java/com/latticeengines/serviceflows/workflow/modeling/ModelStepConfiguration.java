@@ -49,6 +49,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String dataCloudVersion;
 
+    private String moduleName;
+
     @JsonProperty
     public List<DataRule> getDataRules() {
         return dataRules;
@@ -189,5 +191,14 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
+    }
+
+    @JsonProperty
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 }

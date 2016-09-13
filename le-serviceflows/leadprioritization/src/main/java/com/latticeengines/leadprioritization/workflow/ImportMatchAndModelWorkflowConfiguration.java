@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
@@ -164,7 +165,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used.
-         *
+         * 
          * @param customizedColumnSelection
          * @return
          */
@@ -177,12 +178,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
          * You can provide a full column selection object or the name of a
          * predefined selection. When both are present, predefined one will be
          * used. If selectionVersion is empty, will use current version.
-         *
+         * 
          * @param predefinedColumnSelection
          * @return
          */
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection,
-                String selectionVersion) {
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;
@@ -248,6 +248,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder pivotArtifactPath(String pivotArtifactPath) {
             model.setPivotArtifactPath(pivotArtifactPath);
+            return this;
+        }
+
+        public Builder moduleName(String moduleName) {
+            model.setModuleName(moduleName);
             return this;
         }
 

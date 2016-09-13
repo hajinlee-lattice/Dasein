@@ -94,6 +94,9 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         if (builder.getTable() != null) {
             props.add("Event_Table_Name=" + builder.getEventTableTable());
         }
+        if (builder.getModuleName() != null){
+            props.add("Module_Name=" + builder.getModuleName());
+        }
         return StringUtils.join(props, " ");
     }
 

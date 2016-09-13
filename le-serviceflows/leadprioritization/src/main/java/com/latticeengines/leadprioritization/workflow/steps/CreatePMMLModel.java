@@ -107,6 +107,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
                 .avroSchema(avroSchema) //
                 .metadataArtifacts(getMetadataArtifacts()) //
                 .sourceSchemaInterpretation(configuration.getSourceSchemaInterpretation()) //
+                .moduleName(configuration.getModuleName()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .yarnConfiguration(yarnConfiguration);
         if (configuration.getDisplayName() != null) {

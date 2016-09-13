@@ -10,18 +10,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
+import com.latticeengines.network.exposed.metadata.ModuleInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
 public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
-        RuleResultInterface {
+        RuleResultInterface, ModuleInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -139,6 +141,12 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     public List<Artifact> getArtifacts(String customerSpace, String moduleName) {
         String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
         return get("getArtifacts", url, List.class);
+    }
+
+    @Override
+    public Module getModule(String customerSpace, String moduleName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
+        return get("getModule", url, Module.class);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
