@@ -2,7 +2,6 @@ package com.latticeengines.pls.dao.impl;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.security.Tenant;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ModelSummaryDao;
 
 @Component("modelSummaryDao")
@@ -70,7 +70,8 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> getAllByTenant(Tenant tenant) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where tenantId = :tenantId and status != :statusId", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where tenantId = :tenantId and status != :statusId",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("tenantId", tenant.getPid());
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
@@ -148,6 +149,23 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         Query query = session.createQuery(queryStr);
         query.setString("modelId", modelId);
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (ModelSummary) list.get(0);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public ModelSummary getByModelNameInTenant(String modelName, Tenant tenant) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where name = :modelName AND tenantId = :tenantId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("modelName", modelName);
+        query.setLong("tenantId", tenant.getPid());
         List list = query.list();
         if (list.size() == 0) {
             return null;

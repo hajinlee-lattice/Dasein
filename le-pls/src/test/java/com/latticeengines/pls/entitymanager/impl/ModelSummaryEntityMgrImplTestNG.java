@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -134,6 +135,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         s1p3.setUncertaintyCoefficient(0.171911);
         s1p3.setUsedForBuyerInsights(false);
         summary1.addPredictor(s1p3);
+        summary1.setModelType(ModelType.PYTHONMODEL.getModelType());
 
         PredictorElement s1el1 = new PredictorElement();
         s1el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
@@ -192,6 +194,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         s2p1.setFundamentalType("");
         s2p1.setUncertaintyCoefficient(0.151911);
         summary2.addPredictor(s2p1);
+        summary2.setModelType(ModelType.PYTHONMODEL.getModelType());
 
         PredictorElement s2el1 = new PredictorElement();
         s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
@@ -276,6 +279,21 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1);
         assertEquals(summaries.get(0).getName(), summary2.getName());
+    }
+
+    @Test(groups = "functional")
+    public void testGetByModelNameInTenant() {
+        setupSecurityContext(summary1);
+        Tenant tenant = tenantService.findByTenantId("TENANT1");
+        ModelSummary summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant);
+        assertNotNull(summary);
+        assertEquals(summary.getId(), summary1.getId());
+        assertEquals(summary.getName(), summary1.getName());
+        summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant);
+        assertNull(summary);
+        tenant = tenantService.findByTenantId("TENANT2");
+        summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant);
+        assertNull(summary);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "findByModelId", "findAll" })

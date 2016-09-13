@@ -15,10 +15,11 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     ModelSummary findValidByModelId(String modelId);
 
-    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
-            boolean validOnly);
+    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
 
     ModelSummary findByApplicationId(String applicationId);
+
+    ModelSummary getByModelNameInTenant(String modelName, Tenant tenant);
 
     void deleteByModelId(String modelId);
 
@@ -32,8 +33,7 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     int findTotalCount(long lastUpdateTime, boolean considerAllStatus);
 
-    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus,
-            int offset, int maximum);
+    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
 
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
 

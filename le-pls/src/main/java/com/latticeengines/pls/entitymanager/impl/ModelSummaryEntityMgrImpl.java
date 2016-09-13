@@ -175,8 +175,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             if (provenance != null) {
                 if (provenance.has("Predefined_ColumnSelection_Name")) {
                     String predefinedSelectionName = provenance.get("Predefined_ColumnSelection_Name").asText();
-                    Predefined predefined = Predefined
-                            .fromName(predefinedSelectionName);
+                    Predefined predefined = Predefined.fromName(predefinedSelectionName);
                     summary.setPredefinedSelection(predefined);
                     if (provenance.has("Predefined_ColumnSelection_Version")) {
                         String predefinedSelectionVersion = provenance.get("Predefined_ColumnSelection_Version")
@@ -187,7 +186,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
                     ColumnSelection selection = objectMapper.treeToValue(provenance.get("Customized_ColumnSelection"),
                             ColumnSelection.class);
                     summary.setCustomizedColumnSelection(selection);
-                } 
+                }
                 if (provenance.has("Data_Cloud_Version")) {
                     String dataCloudVersion = provenance.get("Data_Cloud_Version").asText();
                     summary.setDataCloudVersion(dataCloudVersion);
@@ -480,6 +479,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             }
         }
         return missingNameList;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary getByModelNameInTenant(String modelName, Tenant tenant) {
+        return modelSummaryDao.getByModelNameInTenant(modelName, tenant);
     }
 
 }

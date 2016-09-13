@@ -26,4 +26,6 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
 
+    ModelSummary getByModelNameInTenant(String modelName, Tenant tenant);
+
 }
