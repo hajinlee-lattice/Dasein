@@ -19,7 +19,7 @@ import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 
 @DisallowConcurrentExecution
-public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
+public class JobWatchdogServiceImpl implements JobWatchdogService {
 
     private ModelingJobService modelingJobService;
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
@@ -28,11 +28,6 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     private JobEntityMgr jobEntityMgr;
     private int retryWaitTime = 30000;
     private Map<String, WatchdogPlugin> plugins = WatchdogPlugin.getPlugins();
-
-    @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        run(context);
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
