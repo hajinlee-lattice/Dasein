@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component("accountMasterColumnService")
 public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {

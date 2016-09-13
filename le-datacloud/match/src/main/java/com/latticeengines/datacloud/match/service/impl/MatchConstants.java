@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public final class MatchConstants {
     static final String CACHE_TABLE = "DerivedColumnsCache";

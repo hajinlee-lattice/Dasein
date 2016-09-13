@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public interface ColumnSelectionService {
 

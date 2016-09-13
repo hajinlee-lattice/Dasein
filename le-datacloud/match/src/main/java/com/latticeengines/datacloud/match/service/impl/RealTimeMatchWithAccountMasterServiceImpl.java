@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component("realTimeMatchWithAccountMasterService")
 public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWithDerivedColumnCacheServiceImpl {

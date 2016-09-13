@@ -13,9 +13,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 

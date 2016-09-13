@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 

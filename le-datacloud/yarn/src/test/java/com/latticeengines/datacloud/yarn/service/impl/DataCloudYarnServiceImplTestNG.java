@@ -21,9 +21,9 @@ import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component
 public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestNGBase {

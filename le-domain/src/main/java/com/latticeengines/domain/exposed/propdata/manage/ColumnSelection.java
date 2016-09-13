@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.manage;
+package com.latticeengines.domain.exposed.propdata.manage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnSelection {

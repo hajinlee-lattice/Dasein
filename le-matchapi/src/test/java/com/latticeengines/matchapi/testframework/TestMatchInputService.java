@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component("testMatchInputService")
 public class TestMatchInputService {

@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component
 public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
