@@ -1,7 +1,7 @@
 angular.module('lp.marketo.enrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility){ //, EnrichmentData){
+.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility, EnrichmentData){
     var vm = this;
 
     angular.extend(vm, {
@@ -12,7 +12,8 @@ angular.module('lp.marketo.enrichment', [
         marketo_fields: null,
         required_fields: [],
         selected_fields: {},
-        match_fields: {}
+        match_fields: {},
+        pagesize: 5,
     });
 
     vm.webhook_name = 'name';
@@ -27,31 +28,31 @@ angular.module('lp.marketo.enrichment', [
         email_or_website: {
             label: 'Email or Website',
             required: true,
-            options: {
-                foo: 'foo',
-                bar: 'bar'
-            }
+            options: [
+                'email@mail.me',
+                'http://www.website.me'
+            ]
         },
         company: {
             label: 'Company',
-            options: {
-                foo: 'blah',
-                bar: 'fum'
-            }
+            options: [
+                'Company, LLC',
+                'Alone, INC.'
+            ]
         },
         state: {
             label: 'State',
-            options: {
-                foo: 'fe',
-                bar: 'fi'
-            }
+            options: [
+                'Graceland',
+                'Eldorado'
+            ]
         },
         country: {
             label: 'Country',
-            options: {
-                foo: 'fo',
-                bar: 'fum'
-            }
+            options: [
+                'Elviso',
+                'USA'
+            ]
         }
     }
 
@@ -109,14 +110,25 @@ angular.module('lp.marketo.enrichment', [
         }
     }
 
+    vm.fieldType = function(fieldType){
+        var fieldType = fieldType.replace(/[0-9]+/g, '*');
+        var fieldTypes = {
+            'default':'Text/String',
+            'NVARCHAR(*)':'Text/String',
+            'FLOAT':'Number/Float',
+            'INT':'Number/Int',
+            'BOOLEAN':'Boolean'
+        }
+        return fieldTypes[fieldType] || fieldTypes.default;
+    }
+
     vm.init = function() {
         _.each(vm.match_fields, function(field, key){
             if(field.required && vm.required_fields.indexOf(key) == -1) {
                 vm.required_fields.push(key);
             }
         });
-        //vm.enrichments = EnrichmentData.data;
-        //console.log(vm.enrichments);
+        vm.enrichments = EnrichmentData.data;
     }
 
     vm.init();

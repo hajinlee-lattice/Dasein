@@ -1,4 +1,4 @@
-<div class="container" data-ng-controller="MarketoEnrichmentController">
+<div class="container" data-x-controller="MarketoEnrichmentController">
     <section id="main-content" class="container">
         <section class="step step-1" ng-class="{active: (!vm.step || !vm.saved || vm.step == 1), ready: true}">
             <h2 ng-click="vm.open({event: $event})"><strong>Step 1:</strong> Matching Fields<span ng-if="vm.step == 1">: <em>Email or Website</em></span></h2>
@@ -64,16 +64,18 @@
                 <hr />
                 <div class="settings">
                     <div class="setting col">
-                        <div class="custom-header">
-                            Header
-                            <div class="custom-header-value">
-                                {{vm.custom_header_type}}
+                        <div class="custom-headers">
+                            <div class="custom-header">
+                                <h5>Header</h5>
+                                <div class="custom-header-value">
+                                    {{vm.custom_header_type}}
+                                </div>
                             </div>
-                        </div>
-                        <div class="custom-header">
-                            Value
-                            <div class="custom-header-value">
-                                {{vm.custom_header_value}}
+                            <div class="custom-header">
+                                <h5>Value</h5>
+                                <div class="custom-header-value">
+                                    {{vm.custom_header_value}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,6 +108,37 @@
                         <p>
                             You can edit available lattice attributes on <a ui-sref="home.enrichment">Enrichment</a> page.
                         </p>
+
+                        <ul class="enrichments">
+                            <li class="box" 
+                                ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                                | filter: vm.query
+                                | orderBy: SortOrder
+                                | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
+                                | startFrom: (vm.current - 1) * vm.pagesize 
+                                | limitTo: vm.pagesize" 
+                                ng-class="{'active': enrichment.IsSelected}">
+                                <div class="box-inner">
+                                    <h6>
+                                        <strong>{{enrichment.DisplayName}}</strong>
+                                        <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                                    </h6>
+                                    <p>{{enrichment.Description}}</p>
+                                </div>
+                            </li>
+                            <li ng-show="!filteredList.length">
+                              <h2>No enrichments</h2>
+                            </li>
+                        </ul>
+                        <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
+                            <div class="twelve columns">
+                                <pd-pagination-controls 
+                                        current="vm.current" 
+                                        max="vm.max = filteredList.length / vm.pagesize">
+                                </pd-pagination-controls>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="setting col">
                         <h4>Help:</h4>

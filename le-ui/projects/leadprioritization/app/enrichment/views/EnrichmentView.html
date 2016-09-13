@@ -67,8 +67,7 @@
             | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
             | startFrom: (vm.metadata.current - 1) * vm.pagesize 
             | limitTo: vm.pagesize" 
-            ng-class="{'active': enrichment.IsSelected}" 
-            ng-click="vm.showData(enrichment)">
+            ng-class="{'active': enrichment.IsSelected}">
                 <div 
                     class="box-inner">
                     <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
