@@ -18,6 +18,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
@@ -36,6 +37,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
             ) //
@@ -52,6 +55,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
@@ -72,6 +76,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
@@ -94,6 +100,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS, //
