@@ -144,7 +144,11 @@ public class WorkflowExecutionCache {
         for (final WorkflowExecutionId workflowId : workflowIds) {
             callables.add(new Callable<Job>() {
                 public Job call() throws Exception {
-                    return getJob(workflowId);
+                    try {
+                        return getJob(workflowId);
+                    } catch (Exception e) {
+                        return null;
+                    }
                 }
             });
         }
@@ -152,7 +156,9 @@ public class WorkflowExecutionCache {
         List<Future<Job>> futures = executorService.invokeAll(callables);
         for (Future<Job> future : futures) {
             Job job = future.get();
-            missingJobs.add(job);
+            if (job != null) {
+                missingJobs.add(job);
+            }
         }
 
         return missingJobs;
