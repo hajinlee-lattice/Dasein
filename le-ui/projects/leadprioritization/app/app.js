@@ -11,6 +11,7 @@ var mainApp = angular.module('mainApp', [
     'common.modules',
     'pd.navigation',
     'lp.jobs',
+    'lp.marketo',
     'lp.apiconsole',
     'lp.models.list',
     'lp.models.review',
