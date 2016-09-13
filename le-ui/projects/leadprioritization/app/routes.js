@@ -453,11 +453,9 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    /*
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                    -- ben::bookmark
-                    */
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
@@ -466,6 +464,42 @@ angular
                             .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
                     template: '<div id="sureshot_iframe_container"></div>'
+                }   
+            }
+        })
+        .state('home.marketosettings.enrichment', {
+            url: '/enrichment/{id}',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings > Enrichment',
+            },
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_APIKEY';
+                        }
+                    },
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": {
+                    resolve: {
+                        EnrichmentData: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getEnrichments().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                    },
+                    controller: 'MarketoEnrichmentController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/marketo/views/MarketoEnrichmentView.html'
                 }   
             }
         })
@@ -482,11 +516,9 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
-                    /*
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                    -- ben::bookmark
-                    */
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {

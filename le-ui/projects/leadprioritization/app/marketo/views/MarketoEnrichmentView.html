@@ -1,0 +1,129 @@
+<div class="container" data-ng-controller="MarketoEnrichmentController">
+    <section id="main-content" class="container">
+        <section class="step step-1" ng-class="{active: (!vm.step || !vm.saved || vm.step == 1), ready: true}">
+            <h2 ng-click="vm.open({event: $event})"><strong>Step 1:</strong> Matching Fields<span ng-if="vm.step == 1">: <em>Email or Website</em></span></h2>
+            <div class="body">
+                <h3>
+                    Please select Marketo fields that will be used to match to companies in the Lattice Data Cloud.<br /> 
+                    <strong>*Either Email or Website is required.</strong> Company name, State and Country are optional.
+                </h3>
+                <form class="match-fields">
+                    <div class="field">
+                        <span class="col match">
+                            Match Fields
+                        </span>
+                        <span class="col marketo">
+                            Marketo Fields
+                        </span>
+                    </div>
+                    <div class="field" ng-repeat="(type, field) in vm.match_fields" ng-class="{required: field.required}">
+                        <label class="col match" for="{{type}}">{{field.label}}</label>
+                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="value as value for (key, value) in field.options" ng-required="field.required">
+                            <option value="">Select Value</option>
+                        </select>
+                    </div>
+                </form>
+                <div class="buttons">
+                    <button class="button gray-button ng-binding" ui-sref="home.marketosettings.apikey">
+                        Back to Credentials
+                    </button>
+                    <button class="button orange-button ng-binding" ng-disabled="!vm.save_ready" ng-click="vm.save()">
+                        Save &amp; Continue
+                    </button>
+                </div>
+            </div>
+        </section>
+        <section class="step step-2" ng-class="{active: vm.saved && vm.step == 2, ready: vm.saved}">
+            <h2 ng-click="vm.open({event: $event})"><strong>Step 2:</strong> Webhook Settings</h2>
+            <div class="body">
+                <h3>Create a webhook in Marketo with the following settings. This webhook can be called in a smart campaign to enrich a lead in Marketo.</h3>
+                <div class="settings">
+                    <div class="setting col">
+                        <h4>Settings:</h4>
+                        <h5>Webhook Name:</h5>
+                        <div class="attribute dashed">{{vm.webhook_name}}</div>
+                        <h5>URL:</h5>
+                        <div class="attribute dashed">{{vm.webhook_url}}</div>
+                        <h5>Request Type:</h5>
+                        <div class="attribute">{{vm.webhook_request_type}}</div>
+                        <h5>Template:</h5>
+                        <div class="attribute dashed"><pre>{{vm.selected_fields | json}}</pre></div>
+                        <h5>Request Token Encodeing:</h5>
+                        <div class="attribute">{{vm.webhook_request_token}}</div>
+                        <h5>Request Type:</h5>
+                        <div class="attribute">{{vm.webhook_response_type}}</div>
+                    </div>
+                    <div class="setting col">
+                        <h4>Help:</h4>
+                        <p>
+                            You can create a new webhook by loggin in to your Marketo account and going to: Admin &gt; Webhooks &gt; New Webhook
+                        </p>
+                        <div class="instructions-image step-2-1"></div>
+                    </div>
+                </div>
+                <hr />
+                <div class="settings">
+                    <div class="setting col">
+                        <div class="custom-header">
+                            Header
+                            <div class="custom-header-value">
+                                {{vm.custom_header_type}}
+                            </div>
+                        </div>
+                        <div class="custom-header">
+                            Value
+                            <div class="custom-header-value">
+                                {{vm.custom_header_value}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting col">
+                        <p>
+                            You can set a Custom Header by going to Admin &gt; Webhooks &gt; Webhook Actions &gt; Set Custom Header. Click Add and enter the header and value provided.
+                        </p>
+                        <div class="instructions-image step-2-2"></div>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="button gray-button ng-binding" ui-sref="home.marketosettings.apikey">
+                        Back to Credentials
+                    </button>
+                    <button class="button orange-button ng-binding" ng-disabled="!vm.saved" ng-click="vm.open({step: 3})">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </section>
+        <section class="step step-3" ng-class="{active: vm.saved && vm.step == 3, ready: vm.saved}">
+            <h2 ng-click="vm.open({event: $event})"><strong>Step 3:</strong> Webhook Reponse Attributes</h2>
+            <div class="body">
+                <h3>
+                    Use the list of field names below to setup the reponse attibutes for the webhook. Reponse attibutes are the attibutes that you want to write to a field in Marketo. You only need to map the attibutes you want to use in Marketo.
+                </h3>
+                <div class="settings">
+                    <div class="setting col">
+                        <h4>Attributes:</h4>
+                        <p>
+                            You can edit available lattice attributes on <a ui-sref="home.enrichment">Enrichment</a> page.
+                        </p>
+                    </div>
+                    <div class="setting col">
+                        <h4>Help:</h4>
+                        <p>
+                            You can edit response mappings by going to Admin > Webhooks &gt;  Response Mappings &gt; Edit
+                        </p>
+                        <p>
+                            Select ‘Add’ and in ‘Response Attribute’ write an attibute provided to you in Attributes section (left section of this window). Under ‘Marketo Field’ map the added attribute to a provided matching Marketo field.  
+                        </p>
+                        <div class="instructions-image step-3-1"></div>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="button orange-button ng-binding" ui-sref="home.marketosettings.apikey">
+                        Back to Credentials
+                    </button>
+                </div>
+          </div>
+      </section>
+  </section>
+</div>

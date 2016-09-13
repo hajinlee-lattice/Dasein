@@ -1,0 +1,159 @@
+[data-ng-controller="MarketoEnrichmentController"] {
+    padding: 10px;
+    section.step {
+        padding: 18px 0;
+        border-radius: 4px;
+        border: solid 1px #d0d0d0;
+        box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
+        opacity: .5;
+        & > h2 {
+            margin: 0 50px;
+            padding: 0;
+            position: relative;
+            &:after {
+                @include font-awesome-inline("\f102");
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+            strong {
+                font-weight: bold;
+            }
+            em {
+                color: #d22027;
+            }
+        }
+        .body {
+                display: none;
+                h3 {
+                    text-transform: none;
+                    font-weight: normal;
+                    font-size: 16px;
+                    margin: 0 50px;
+                    margin-top: 20px;
+                    margin-bottom: 16px;
+                    color: #6d6d6d;
+                    strong {
+                        font-weight: bold;
+                    }
+                }
+                p {
+                    margin: 20px 0;
+                }
+                hr {
+                    position: relative;
+                    top: 0;
+                    margin: 0 auto;
+                    width: 50%;
+                    border: 0;
+                    height: 0;
+                    border-top: 1px solid #bbb;
+                }
+                .settings {
+                    @include flex-container;
+                    //border-top: 1px solid #f1f1f1;
+                    //border-bottom: 1px solid #f1f1f1;
+                    margin-top: -1px;
+                    .setting {
+                        &.col {
+                            @include flex-item(0 1 50%);
+                        }
+                        padding: 0 50px;
+                        padding-top: 16px;
+                        padding-bottom: 33px;
+                        background: #f7f7f7;
+                        &:nth-child(2) {
+                            background: #f1f1f1;
+                        }
+                        h4 {
+                            margin-bottom: 20px;
+                        }
+                        h5 {
+                            font-size: 16px;
+                        }
+                        .attribute {
+                            padding: 5px 10px;
+                            border: 1px solid #3989c4;
+                            font-size: 15px;
+                            background: #fff;
+                            &.dashed {
+                                border-style: dashed;
+                            }
+                        }
+                        .instructions-image {
+                            background-position: center center;
+                            background-repeat: no-repeat;
+                            background-size: contain;
+                            &.step-2-1 {
+                                width: 480px;
+                                height: 554px;
+                                background-image: url(/assets/images/enrichments/marketo/step-2-instructions-1.png);
+                            }
+                            &.step-2-2 {
+                                width: 480px;
+                                height: 173px;
+                                background-image: url(/assets/images/enrichments/marketo/step-2-instructions-2.png);
+                            }
+                            &.step-3-1 {
+                                width: 480px;
+                                height: 358px;
+                                background-image: url(/assets/images/enrichments/marketo/step-3-instructions-1.png);
+                            }
+                        }
+                    }
+                }
+        }
+        &.active {
+            h2 {
+                &:after {
+                    @include font-awesome-inline("\f103");
+                }
+            }
+            .body {
+                display: block;
+            }
+        }
+        &.ready {
+            opacity: 1;
+        }
+        .buttons {
+            margin: 0 50px;
+            margin-top: 33px;
+            min-height: 40px;
+            button:last-child {
+                float: right;
+            }
+        }
+        .match-fields {
+            .field {
+                @include flex-container;
+                margin: 5px 0;
+                padding: 0 40px;
+                &:nth-child(even) {
+                    background: #fafafa;
+                    border-top: 1px solid #f1f1f1;
+                    border-bottom: 1px solid #f1f1f1;
+                }
+                &:first-child {
+                    color: #bbb;
+                }
+                .col {
+                    @include flex-item(1 1 auto);
+                    width: 50%;
+                    margin: 10px;
+                    &:nth-child(odd) {
+                        text-align: right;
+                    }
+                }
+                &.required {
+                    .match {
+                        font-weight: bold;
+                        &:after {
+                            content: '*';
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
