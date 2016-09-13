@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,12 +40,15 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -66,18 +70,22 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
-    private static final Log log = LogFactory
-            .getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
     public static final String MODEL_DISPLAY_NAME = "Self Service Modeling Test Display Name";
+    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Autowired
     private WorkflowProxy workflowProxy;
+
+    @Autowired
+    private ScoreCorrectnessService scoreCompareService;
 
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
+    private ModelSummary clonedModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
 
@@ -87,7 +95,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
         log.info("Test environment setup finished.");
-
+        saveAttributeSelection(CustomerSpace.parse(tenantToAttach.getName()));
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
     }
 
@@ -102,11 +110,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map,
-                headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/uploadfile/unnamed?displayName=%s",
-                        getRestAPIHostPort(), "SelfServiceModeling Test File.csv"), //
+                String.format("%s/pls/models/uploadfile/unnamed?displayName=%s", getRestAPIHostPort(),
+                        "SelfServiceModeling Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -133,9 +140,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void resolveMetadata() {
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s",
-                        getRestAPIHostPort(), sourceFile.getName(), schemaInterpretation.name()),
-                ResponseDocument.class);
+                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
+                        sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
 
@@ -156,16 +162,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
         restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
-                        getRestAPIHostPort(), sourceFile.getName()),
-                mappings, Void.class);
+                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
+                        sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
         ModelingParameters parameters = new ModelingParameters();
-        parameters.setName(
-                "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
+        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDisplayName(MODEL_DISPLAY_NAME);
         parameters.setDescription("Test");
         parameters.setFilename(sourceFile.getName());
@@ -179,10 +183,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private void model(ModelingParameters parameters) {
         ResponseDocument response;
         response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getRestAPIHostPort(), parameters.getName()),
-                parameters, ResponseDocument.class);
-        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(),
-                String.class);
+                String.format("%s/pls/models/%s", getRestAPIHostPort(), parameters.getName()), parameters,
+                ResponseDocument.class);
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         waitForWorkflowStatus(modelingWorkflowApplicationId, true);
@@ -190,8 +193,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         boolean thrown = false;
         try {
             response = restTemplate.postForObject(
-                    String.format("%s/pls/models/%s", getRestAPIHostPort(), UUID.randomUUID()),
-                    parameters, ResponseDocument.class);
+                    String.format("%s/pls/models/%s", getRestAPIHostPort(), UUID.randomUUID()), parameters,
+                    ResponseDocument.class);
         } catch (Exception e) {
             thrown = true;
         }
@@ -205,8 +208,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = true)
     public void retrieveReport() {
         Job job = restTemplate.getForObject( //
-                String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(),
-                        modelingWorkflowApplicationId), //
+                String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), modelingWorkflowApplicationId), //
                 Job.class);
         assertNotNull(job);
         List<Report> reports = job.getReports();
@@ -233,15 +235,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     JsonNode tags = predictor.get("Tags");
                     assertEquals(tags.size(), 1);
                     assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(),
-                            ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-                    assertNotEquals(predictor.get("Name"),
-                            "Activity_Count_Interesting_Moment_Webinar");
+                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                    assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);
-                    assertEquals(approvedUsages.get(0).textValue(),
-                            ApprovedUsage.MODEL_ALLINSIGHTS.toString());
+                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
                 }
             }
         }
@@ -254,9 +253,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = restTemplate
-                .exchange(String.format("%s/pls/fileuploads/%s/import/errors", getRestAPIHostPort(),
-                        sourceFile.getName()), HttpMethod.GET, entity, byte[].class);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                String.format("%s/pls/fileuploads/%s/import/errors", getRestAPIHostPort(), sourceFile.getName()),
+                HttpMethod.GET, entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());
         assertTrue(errors.length() > 0);
@@ -265,9 +264,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
     public void cloneAndRemodel() {
         @SuppressWarnings("unchecked")
-        List<Object> rawFields = restTemplate
-                .getForObject(String.format("%s/pls/modelsummaries/metadata/%s",
-                        getRestAPIHostPort(), originalModelSummary.getId()), List.class);
+        List<Object> rawFields = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), originalModelSummary.getId()),
+                List.class);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Object rawField : rawFields) {
             VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
@@ -292,12 +291,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
 
         ResponseDocument<?> response;
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),
+        response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),
                 parameters, ResponseDocument.class);
 
-        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(),
-                String.class);
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
@@ -306,11 +303,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
-    public void retrieveModelSummaryForClonedModel() throws InterruptedException {
-        ModelSummary found = getModelSummary(modelName);
-        assertNotNull(found);
-        assertJobExistsWithModelIdAndModelName(found.getId());
-        List<Predictor> predictors = found.getPredictors();
+    public void retrieveModelSummaryForClonedModel() throws InterruptedException, IOException {
+        clonedModelSummary = getModelSummary(modelName);
+        assertNotNull(clonedModelSummary);
+        assertJobExistsWithModelIdAndModelName(clonedModelSummary.getId());
+        List<Predictor> predictors = clonedModelSummary.getPredictors();
         assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
             @Override
             public boolean apply(@Nullable Predictor predictor) {
@@ -319,10 +316,132 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(found.getSourceSchemaInterpretation(),
-                SchemaInterpretation.SalesforceLead.toString());
-        String foundFileTableName = found.getTrainingTableName();
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
+        String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
+
+        @SuppressWarnings("unchecked")
+        List<Object> rawFields = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), clonedModelSummary.getId()),
+                List.class);
+        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
+            @Override
+            public boolean apply(@Nullable Object raw) {
+                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+                return metadataField.getColumnName().equals("Phone_Entropy")
+                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }));
+        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
+            @Override
+            public boolean apply(@Nullable Object raw) {
+                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+                return metadataField.getColumnName().equals("Activity_Count_Click_Email")
+                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }));
+
+        scoreCompareService.analyzeScores(tenantToAttach.getId(), RESOURCE_BASE + "/" + fileName,
+                clonedModelSummary.getId(), 843);
+    }
+
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
+    public void scoreTrainingDataOfClonedModel() throws InterruptedException, IOException {
+        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
+                getRestAPIHostPort(), clonedModelSummary.getId()));
+        String applicationId = getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE", getRestAPIHostPort(),
+                        clonedModelSummary.getId()), //
+                null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score training data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+        testJobIsListed("rtsBulkScoreWorkflow", clonedModelSummary.getId(), applicationId);
+    }
+
+    private void testJobIsListed(final String jobType, final String modelId, String applicationId) {
+        boolean any = false;
+        while (true) {
+            @SuppressWarnings("unchecked")
+            List<Object> raw = getRestTemplate().getForObject(
+                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Job> jobs = JsonUtils.convertList(raw, Job.class);
+            any = Iterables.any(jobs, new Predicate<Job>() {
+
+                @Override
+                public boolean apply(@Nullable Job job) {
+                    String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+                    String jobModelName = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
+                    return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId)
+                            && SelfServiceModelingEndToEndDeploymentTestNG.MODEL_DISPLAY_NAME.equals(jobModelName);
+                }
+            });
+
+            if (any) {
+                break;
+            }
+            sleep(500);
+        }
+
+        assertTrue(any);
+
+        JobStatus terminal;
+        while (true) {
+            Job job = getRestTemplate().getForObject(
+                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
+            assertNotNull(job);
+            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
+                terminal = job.getJobStatus();
+                break;
+            }
+            sleep(1000);
+        }
+        assertEquals(terminal, JobStatus.COMPLETED);
+    }
+
+    private void sleep(long msec) {
+        try {
+            Thread.sleep(msec);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveAttributeSelection(CustomerSpace customerSpace) {
+        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
+                getRestAPIHostPort());
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        System.out.println(selectedAttributeMap.getDeselectedAttributes());
+        System.out.println(selectedAttributeMap.getSelectedAttributes());
+        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+    }
+
+    private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, false);
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
+        List<String> selectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setSelectedAttributes(selectedAttributes);
+        List<String> deselectedAttributes = new ArrayList<>();
+        selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
+        int premiumSelectCount = 2;
+        int selectCount = 1;
+
+        for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
+            if (attr.getIsPremium()) {
+                if (premiumSelectCount > 0) {
+                    premiumSelectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            } else {
+                if (selectCount > 0) {
+                    selectCount--;
+                    selectedAttributes.add(attr.getFieldName());
+                }
+            }
+        }
+
+        return selectedAttributeMap;
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {
@@ -333,8 +452,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             List<Object> summaries = restTemplate.getForObject( //
                     String.format("%s/pls/modelsummaries", getRestAPIHostPort()), List.class);
             for (Object rawSummary : summaries) {
-                ModelSummary summary = new ObjectMapper().convertValue(rawSummary,
-                        ModelSummary.class);
+                ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
                 if (summary.getName().contains(modelName)) {
                     found = summary;
                 }
@@ -347,9 +465,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(found.getStatus(), ModelSummaryStatus.INACTIVE);
 
         @SuppressWarnings("unchecked")
-        List<Object> predictors = restTemplate
-                .getForObject(String.format("%s/pls/modelsummaries/predictors/all/%s",
-                        getRestAPIHostPort(), found.getId()), List.class);
+        List<Object> predictors = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/predictors/all/%s", getRestAPIHostPort(), found.getId()),
+                List.class);
         assertTrue(Iterables.any(predictors, new Predicate<Object>() {
 
             @Override
@@ -361,8 +479,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         // Look up the model summary with details
         Object rawSummary = restTemplate.getForObject(
-                String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), found.getId()),
-                Object.class);
+                String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), found.getId()), Object.class);
         return JsonUtils.convertValue(rawSummary, ModelSummary.class);
     }
 
@@ -404,14 +521,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             @Override
             public boolean apply(@Nullable Job job) {
                 return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
-                        && job.getInputs()
-                                .get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
+                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
+                                .equals(MODEL_DISPLAY_NAME);
             }
         }));
     }
 
-    public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName)
-            throws InterruptedException {
+    public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName) throws InterruptedException {
         if (!StringUtils.isBlank(fileName)) {
             this.fileName = fileName;
         }

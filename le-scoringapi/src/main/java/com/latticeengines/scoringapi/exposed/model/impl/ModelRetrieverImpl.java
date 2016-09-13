@@ -271,8 +271,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 eventTableDataComposition, dataScienceDataComposition);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
-        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType)
-                .getScoreDerivation(hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
+        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType).getScoreDerivation(
+                hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
@@ -372,8 +372,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
-                throw new LedpException(LedpCode.LEDP_31007,
-                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
+                throw new LedpException(LedpCode.LEDP_31007, new String[] { modelSummary.getId(),
+                        JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
@@ -520,12 +520,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
                 if (!StringUtils.isBlank(localPathToPersist)) {
-                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0),
-                            localPathToPersist + MODEL_JSON);
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
+                            + MODEL_JSON);
                 }
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_31002,
-                        new String[] { modelJsonHdfsPath.get(0), localModelJsonCacheDir });
+                throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
+                        localModelJsonCacheDir });
             }
         } else if (modelJsonHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31003, new String[] { hdfsScoreArtifactBaseDir });
@@ -545,8 +545,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, //
             String modelId) {
-        return scoreArtifactCache
-                .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
+        return scoreArtifactCache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace,
+                modelId));
     }
 
     private void instantiateCache() {
@@ -573,9 +573,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String determineIdFieldName(Map<String, //
-    FieldSchema> fieldSchemas) {
+            FieldSchema> fieldSchemas) {
         // find ID field
-        String idFieldName = "";
+        String idFieldName = null;
         for (String fieldName : fieldSchemas.keySet()) {
             FieldSchema fieldSchema = fieldSchemas.get(fieldName);
             if (fieldSchema.interpretation == FieldInterpretation.Id) {
