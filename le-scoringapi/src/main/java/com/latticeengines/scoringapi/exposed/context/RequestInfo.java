@@ -15,4 +15,6 @@ public interface RequestInfo {
     void logSummary(Map<String, String> stopWatchSplits);
 
     Map<String, String> getStopWatchSplits();
+
+    void remove(String key);
 }

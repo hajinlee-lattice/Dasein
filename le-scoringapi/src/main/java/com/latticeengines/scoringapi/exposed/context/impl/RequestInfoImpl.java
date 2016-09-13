@@ -57,8 +57,7 @@ public class RequestInfoImpl implements RequestInfo {
     @SuppressWarnings("unchecked")
     private Map<String, String> getOrCreate() {
         Map<String, String> context = null;
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                .getRequestAttributes();
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Object attribute = attributes.getRequest().getAttribute(CONTEXT_KEY);
         if (attribute == null) {
             context = new LinkedHashMap<>();
@@ -67,6 +66,12 @@ public class RequestInfoImpl implements RequestInfo {
             context = (Map<String, String>) attribute;
         }
         return context;
+    }
+
+    @Override
+    public void remove(String key) {
+        Map<String, String> context = getOrCreate();
+        context.remove(key);
     }
 
 }

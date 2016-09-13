@@ -290,8 +290,10 @@ public abstract class BaseScoring {
                 requestInfo.logSummary(stopWatchSplits);
             } else {
                 requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
+                Map<String, String> totalDurationStopWatchSplits = new HashMap<>();
 
-                processDurationMSForLogging(responseList, stopWatchSplits);
+                processDurationMSForLogging(responseList, stopWatchSplits, totalDurationStopWatchSplits);
+                logTotalDurationSummary(totalDurationStopWatchSplits);
 
                 int idx = 0;
                 for (RecordScoreResponse resp : responseList) {
@@ -302,12 +304,15 @@ public abstract class BaseScoring {
                         Double score = scoreTuple.getScore();
                         String error = scoreTuple.getError();
                         String errorDesc = scoreTuple.getErrorDescription();
+                        String recordId = record.getRecordId();
                         List<Warning> warningList = new ArrayList<>();
                         requestInfo.put(WARNINGS, null);
                         if (!CollectionUtils.isEmpty(resp.getWarnings())) {
-                            for (Warning warning : warnings.getWarnings()) {
-                                if (warning.getDescription().contains(modelId)) {
-                                    warningList.add(warning);
+                            if (!CollectionUtils.isEmpty(warnings.getWarnings(recordId))) {
+                                for (Warning warning : warnings.getWarnings(recordId)) {
+                                    if (warning.getDescription().contains(modelId)) {
+                                        warningList.add(warning);
+                                    }
                                 }
                             }
 
@@ -350,8 +355,15 @@ public abstract class BaseScoring {
         }
     }
 
+    private void logTotalDurationSummary(Map<String, String> totalDurationStopWatchSplits) {
+        requestInfo.logSummary(totalDurationStopWatchSplits);
+        for (String totalDurationKey : totalDurationStopWatchSplits.keySet()) {
+            requestInfo.remove(totalDurationKey);
+        }
+    }
+
     private void processDurationMSForLogging(List<RecordScoreResponse> responseList,
-            Map<String, String> stopWatchSplits) {
+            Map<String, String> stopWatchSplits, Map<String, String> totalDurationStopWatchSplits) {
         if (stopWatchSplits.get(REQUEST_DURATION_MS) != null) {
             Map<String, String> originalStopWatchSplits = new HashMap<>(stopWatchSplits);
 
@@ -362,7 +374,7 @@ public abstract class BaseScoring {
                 int avgTimeTaken = new Float(totalTimeTaken * 1.0 / responseList.size()).intValue();
 
                 stopWatchSplits.put(timeKey, String.valueOf(avgTimeTaken));
-                stopWatchSplits.put(TOTAL_TIME_PREFIX + timeKey, String.valueOf(totalTimeTaken));
+                totalDurationStopWatchSplits.put(TOTAL_TIME_PREFIX + timeKey, String.valueOf(totalTimeTaken));
             }
         }
     }
