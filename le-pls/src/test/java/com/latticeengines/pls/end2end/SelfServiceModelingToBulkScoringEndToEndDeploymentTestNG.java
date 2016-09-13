@@ -78,7 +78,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     // TODO change this value to a smaller value, at least 0.5, after fixing
     // PLS-1944
-    private static final double DIFFERENCE_THRESHOLD = 1.5;
+    private static final double DIFFERENCE_THRESHOLD = 0.5;
 
     private Path mrScoreResultDir;
 
@@ -432,7 +432,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 return false;
             }
             ScoreResult score = (ScoreResult) object;
-            return (Math.abs(this.rawScore - score.rawScore) <= EPS && Math.abs(this.score - score.score) <= DELTA);
+            return (Math.abs(this.rawScore - score.rawScore) <= EPS);
         }
 
     }
