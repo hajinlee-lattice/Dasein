@@ -134,7 +134,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 //                + "/rf_model.txt.bak");
 //        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot + "/rf_model.txt", targetModelDirPath);
     }
-    
+
     void backupFileAndCopy(String sourceLocalPath, String targetDirPath, String fileName) throws IOException{
         if(!HdfsUtils.fileExists(yarnConfiguration, targetDirPath + "/" + fileName + ".bak")){
             HdfsUtils.moveFile(yarnConfiguration, targetDirPath + "/" + fileName, targetDirPath + "/" + fileName + ".bak");

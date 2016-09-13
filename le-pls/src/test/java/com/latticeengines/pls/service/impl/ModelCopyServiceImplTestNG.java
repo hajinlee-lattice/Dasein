@@ -1,13 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
-
+import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +15,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.ModelCopyService;
-import com.latticeengines.pls.service.impl.ModelCopyServiceImpl;
+import com.latticeengines.pls.util.ModelingHdfsUtils;
 
 public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -30,7 +26,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ModelCopyService modelCopyService;
+    private PythonScriptModelService pythonScriptModelService;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
@@ -62,27 +58,17 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
-        ((ModelCopyServiceImpl) modelCopyService).processHdfsData(modelCopySourceTenant.getId(),
-                modelCopyTargetTenant.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork", "AccountModel",
-                "cpTrainingTable", "cpEventTable", "some model display name");
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
-                customerBase + modelCopyTargetTenant.getId() + "/models/cpEventTable", new HdfsUtils.HdfsFileFilter() {
+        ModelSummary modelSummary = new ModelSummary();
+        modelSummary.setId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
+        modelSummary.setDisplayName("some model display name");
+        pythonScriptModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
+                "AccountModel", "cpTrainingTable", "cpEventTable", modelSummary);
+        String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, customerBase
+                + modelCopyTargetTenant.getId() + "/models/cpEventTable");
+        assertNotNull(path);
+        String uuid = UuidUtils.parseUuid(path);
 
-                    @Override
-                    public boolean accept(FileStatus file) {
-                        if (file == null) {
-                            return false;
-                        }
-                        String name = file.getPath().getName().toString();
-                        return name.equals("modelsummary.json");
-                    }
-
-                });
-        assertTrue(paths.size() == 1);
-        String modelSummaryPath = paths.get(0);
-        String uuid = UuidUtils.parseUuid(modelSummaryPath);
-
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelSummaryPath);
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
         JsonNode detail = json.get("ModelDetails");
@@ -94,12 +80,11 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(provenance.get("TrainingTableName").asText(), "cpTrainingTable");
         assertEquals(provenance.get("EventTableName").asText(), "cpEventTable");
 
-        System.out.println(new Path(modelSummaryPath).getParent().getParent().toString());
-        paths = HdfsUtils.getFilesForDir(yarnConfiguration, new Path(modelSummaryPath).getParent().getParent()
-                .toString(), ".*.model.json");
-        assertTrue(paths.size() == 1);
-        String modelPath = paths.get(0);
-        contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
+        System.out.println(new Path(path).getParent().getParent().toString());
+        path = ModelingHdfsUtils.getModelFilePath(yarnConfiguration, new Path(path).getParent().getParent()
+                .toString());
+        assertNotNull(path);
+        contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         json = objectMapper.readTree(contents);
         assertEquals(json.get("Summary").get("ModelID").asText(), "ms__" + uuid + "-PLSModel");
     }

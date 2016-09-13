@@ -12,12 +12,12 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.RequiredColumnsExtractor;
+import com.latticeengines.domain.exposed.pls.ModelService;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
-import com.latticeengines.pls.service.impl.metadata.GetRequiredColumns;
 import com.latticeengines.pls.util.MetadataUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -33,8 +33,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    private RequiredColumnsExtractor getRequiredColumnsExtractor(String modelId) {
-        return GetRequiredColumns.getRequiredColumnsExtractor(modelId, modelSummaryEntityMgr);
+    private ModelService getRequiredColumnsExtractor(String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, true);
+        String modelTypeStr = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType(); 
+        return ModelServiceBase.getModelService(modelTypeStr);
     }
 
     @Override

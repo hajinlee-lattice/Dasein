@@ -34,8 +34,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
-import com.latticeengines.pls.service.impl.metadata.PmmlModelRequiredColumnsExtractor;
-
 
 public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
     
@@ -58,7 +56,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
     private ModelMetadataService modelMetadataService;
     
     @Autowired
-    private PmmlModelRequiredColumnsExtractor pmmlModelRequiredColumnsExtractor;
+    private PmmlModelService pmmlModelService;
     
     private ModelSummary summary = null;
     
@@ -94,7 +92,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummaryEntityMgr mockedModelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
         when(mockedModelSummaryEntityMgr.findByModelId(anyString(), anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(summary);
         ReflectionTestUtils.setField(modelMetadataService, "modelSummaryEntityMgr", mockedModelSummaryEntityMgr);
-        ReflectionTestUtils.setField(pmmlModelRequiredColumnsExtractor, "modelSummaryEntityMgr", mockedModelSummaryEntityMgr);
+        ReflectionTestUtils.setField(pmmlModelService, "modelSummaryEntityMgr", mockedModelSummaryEntityMgr);
     }
 
     @Test(groups = "functional")
