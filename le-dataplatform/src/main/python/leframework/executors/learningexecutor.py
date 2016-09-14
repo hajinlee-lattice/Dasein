@@ -85,26 +85,11 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
         training = parser.createList(trainingFile, postProcessClf)
-        test= parser.createList(testFile, postProcessClf)
+        test = parser.createList(testFile, postProcessClf)
         return (training, test)
 
     @overrides(Executor)
     def writeToHdfs(self, hdfs, params):
-        metadataFile = params["metadataFile"]
-        modelLocalDir = params["modelLocalDir"]
-        modelEnhancementsLocalDir = params["modelEnhancementsLocalDir"]
-        modelEnhancementsHdfsDir = params["modelEnhancementsHdfsDir"]
-
-        hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
-        if os.path.exists(metadataFile):
-            shutil.copy2(metadataFile, modelLocalDir + "metadata.avsc")
-
-        # Copy the enhanced model data files from local to hdfs
-        hdfs.mkdir(modelEnhancementsHdfsDir)
-        (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
-        for filename in filter(lambda e: self.accept(e), filenames):
-            hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
-
         super(LearningExecutor, self).writeToHdfs(hdfs, params)
 
     @overrides(Executor)

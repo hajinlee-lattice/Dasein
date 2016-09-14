@@ -105,29 +105,10 @@ class Launcher(object):
         script = self.stripPath(schema["python_script"])
         progressReporter.nextStateForPreStateMachine(0, 0.1, 2)
 
-        # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"
-
-        if not os.path.exists(modelLocalDir):
-            os.mkdir(modelLocalDir)
-
-        # Create directory for model enhancements
         modelEnhancementsLocalDir = modelLocalDir + "enhancements/"
-
-        if not os.path.exists(modelEnhancementsLocalDir):
-            os.mkdir(modelEnhancementsLocalDir)
-
-        # Create directory for pipeline
         pipelineLocalDir = modelLocalDir + "pipeline/"
-
-        if not os.path.exists(pipelineLocalDir):
-            os.mkdir(pipelineLocalDir)
-
-        # Create directory for datarules
         dataRulesLocalDir = modelLocalDir + "datarules/"
-        if not os.path.exists(dataRulesLocalDir):
-            os.mkdir(dataRulesLocalDir)
-
 
         # Execute the packaged script from the client and get the returned file
         # that contains the generated model data
@@ -145,12 +126,16 @@ class Launcher(object):
         params["modelLocalDir"] = modelLocalDir
         params["modelEnhancementsLocalDir"] = modelEnhancementsLocalDir
         params["pipelineLocalDir"] = pipelineLocalDir
+        params["dataRulesLocalDir"] = dataRulesLocalDir
         params["modelHdfsDir"] = modelHdfsDir
+        params["metadataFile"] = metadataFile
         params["schema"] = schema
         params["parser"] = parser
         params["pipelineScript"] = self.stripPath(schema["python_pipeline_script"])
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
+
+        executor.setupLocalDirectory(params)
 
         try:
             schema["pipeline_driver"] = self.stripPath(schema["pipeline_driver"])
@@ -168,6 +153,7 @@ class Launcher(object):
         params["training"] = self.training
         params["test"] = self.test
         params["idColumn"] = self.selectIdColumn(self.training)
+
 
         allColumnsPreTransform = self.getColumnNames(self.training, self.test)
         (self.training, self.test) = executor.preTransformData(self.training, self.test, params)
@@ -209,40 +195,8 @@ class Launcher(object):
             webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
             hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
 
-            # Copy the model data files from local to hdfs
-            hdfs.mkdir(modelHdfsDir)
-            if not os.path.exists(modelLocalDir + "diagnostics.json"):
-                hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
-                if os.path.exists(metadataFile):
-                    shutil.copy2(metadataFile, modelLocalDir + "metadata.avsc")
-            (_, _, filenames) = os.walk(modelLocalDir).next()
-            for filename in filter(lambda e: executor.accept(e), filenames):
-                hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
+            executor.writeToHdfs(hdfs, params)
 
-            # Copy the enhanced model data files from local to hdfs
-            # Get hdfs model enhancements dir
-            modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
-
-            hdfs.mkdir(modelEnhancementsHdfsDir)
-            (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
-            for filename in filter(lambda e: executor.accept(e), filenames):
-                hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
-
-            # Get hdfs pipeline dir
-            pipelineHdfsDir = modelHdfsDir + "pipeline/"
-
-            hdfs.mkdir(pipelineHdfsDir)
-            (_, _, filenames) = os.walk(pipelineLocalDir).next()
-            for filename in filter(lambda e: executor.accept(e), filenames):
-                hdfs.copyFromLocal(pipelineLocalDir + filename, "%s%s" % (pipelineHdfsDir, filename))
-
-            # Copy the data rules files from local to hdfs
-            dataRulesHdfsDir = modelHdfsDir + "datarules/"
-
-            hdfs.mkdir(dataRulesHdfsDir)
-            (_, _, filenames) = os.walk(dataRulesLocalDir).next()
-            for filename in filter(lambda e: executor.accept(e), filenames):
-                hdfs.copyFromLocal(dataRulesLocalDir + filename, "%s%s" % (dataRulesHdfsDir, filename))
 
     def selectIdColumn(self, dataFrame):
         if dataFrame is None or hasattr(dataFrame, 'columns') == False:

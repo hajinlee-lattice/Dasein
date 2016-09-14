@@ -1,6 +1,8 @@
 import os
 import fastavro as avro
 from abc import ABCMeta, abstractmethod
+import shutil
+
 
 class Executor(object):
     '''
@@ -28,14 +30,67 @@ class Executor(object):
     def loadData(self):
         return True, True
 
+    def setupLocalDirectory(self, params):
+        modelLocalDir = params["modelLocalDir"]
+        modelEnhancementsLocalDir = params["modelEnhancementsLocalDir"]
+        dataRulesLocalDir = params["dataRulesLocalDir"]
+        pipelineLocalDir = params["pipelineLocalDir"]
+
+        if not os.path.exists(modelLocalDir):
+            os.mkdir(modelLocalDir)
+
+        if not os.path.exists(modelEnhancementsLocalDir):
+            os.mkdir(modelEnhancementsLocalDir)
+
+        if not os.path.exists(pipelineLocalDir):
+            os.mkdir(pipelineLocalDir)
+
+        if not os.path.exists(dataRulesLocalDir):
+            os.mkdir(dataRulesLocalDir)
+
     def writeToHdfs(self, hdfs, params):
         # Copy the model data files from local to hdfs
         modelLocalDir = params["modelLocalDir"]
         modelHdfsDir = params["modelHdfsDir"]
+        metadataFile = params["metadataFile"]
+        modelEnhancementsLocalDir = params["modelEnhancementsLocalDir"]
+        pipelineLocalDir = params["pipelineLocalDir"]
+        dataRulesLocalDir = params["dataRulesLocalDir"]
+
+        # Copy the model data files from local to hdfs
         hdfs.mkdir(modelHdfsDir)
+        if not os.path.exists(modelLocalDir + "diagnostics.json"):
+            hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
+            if os.path.exists(metadataFile):
+                shutil.copy2(metadataFile, modelLocalDir + "metadata.avsc")
         (_, _, filenames) = os.walk(modelLocalDir).next()
         for filename in filter(lambda e: self.accept(e), filenames):
             hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
+
+        # Copy the enhanced model data files from local to hdfs
+        # Get hdfs model enhancements dir
+        modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
+
+        hdfs.mkdir(modelEnhancementsHdfsDir)
+        (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
+        for filename in filter(lambda e: self.accept(e), filenames):
+            hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
+
+        # Get hdfs pipeline dir
+        pipelineHdfsDir = modelHdfsDir + "pipeline/"
+
+        hdfs.mkdir(pipelineHdfsDir)
+        (_, _, filenames) = os.walk(pipelineLocalDir).next()
+        for filename in filter(lambda e: self.accept(e), filenames):
+            hdfs.copyFromLocal(pipelineLocalDir + filename, "%s%s" % (pipelineHdfsDir, filename))
+
+        # Copy the data rules files from local to hdfs
+        dataRulesHdfsDir = modelHdfsDir + "datarules/"
+
+        hdfs.mkdir(dataRulesHdfsDir)
+        (_, _, filenames) = os.walk(dataRulesLocalDir).next()
+        for filename in filter(lambda e: self.accept(e), filenames):
+            hdfs.copyFromLocal(dataRulesLocalDir + filename, "%s%s" % (dataRulesHdfsDir, filename))
 
     @abstractmethod
     def getModelDirPath(self, schema): pass
