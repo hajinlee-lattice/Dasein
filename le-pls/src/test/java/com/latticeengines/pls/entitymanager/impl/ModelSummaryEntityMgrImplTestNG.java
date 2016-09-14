@@ -292,7 +292,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant);
         assertNull(summary);
         tenant = tenantService.findByTenantId("TENANT2");
-        summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant);
+        summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant);
         assertNull(summary);
     }
 
