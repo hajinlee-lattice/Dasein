@@ -170,8 +170,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         Assert.assertEquals(files.size(), 1);
         Assert.assertNotNull(HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0)));
         // assert the ordering of the header
-        try (CSVReader reader = new CSVReader(new InputStreamReader(
-                HdfsUtils.getInputStream(yarnConfiguration, files.get(0)))) ) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
+                files.get(0))))) {
             String[] header = reader.readNext();
             System.out.println(Arrays.toString(header));
             Assert.assertEquals(header[header.length - 4], "Score");
@@ -183,7 +183,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private void score(String modelId, String tableToScore) throws Exception {
         RTSBulkScoreWorkflowConfiguration rtsBulkScoreWorkflowConfig = rtsBulkScoreWorkflowSubmitter
-                .generateConfiguration(modelId, tableToScore, tableToScore, true);
+                .generateConfiguration(modelId, tableToScore, tableToScore, true, false);
         WorkflowExecutionId workflowId = workflowService.start(rtsBulkScoreWorkflow.name(), rtsBulkScoreWorkflowConfig);
         waitForCompletion(workflowId);
     }

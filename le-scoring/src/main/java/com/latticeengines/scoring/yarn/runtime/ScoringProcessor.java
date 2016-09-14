@@ -97,6 +97,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean useInternalId = false;
 
+    private boolean isEnableDebug = false;
+
     private Map<String, Long> idToInternalIdMap = new HashMap<>();
 
     @Override
@@ -117,7 +119,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info(String.format("The extract path is: %s", path));
         Map<String, Schema.Type> leadEnrichmentAttributeMap = null;
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
-
+        isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
         if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
             leadEnrichmentAttributeMap = new HashMap<>();
             leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -185,8 +187,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         long startTime = System.currentTimeMillis();
         log.info(String.format("Sending internal bulk score request with %d records for tenant %s", scoreRequest
                 .getRecords().size(), customerSpace));
-        List<RecordScoreResponse> recordScoreResponse = internalScoringApiProxy.scorePercentileAndProbabilityRecords(
-                scoreRequest, customerSpace);
+        List<RecordScoreResponse> recordScoreResponse = null;
+        if (isEnableDebug) {
+            log.info("Score in the debug mode");
+            recordScoreResponse = internalScoringApiProxy.scorePercentileAndProbabilityRecords(scoreRequest,
+                    customerSpace);
+        } else {
+            recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest, customerSpace);
+        }
         long endTime = System.currentTimeMillis();
         long oneBatchTime = endTime - startTime;
         log.info(String.format("Bulk score request with %d records took %d sec", scoreRequest.getRecords().size(),
@@ -255,7 +263,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             String idStr = null;
             if (!useInternalId) {
                 idStr = avroRecord.get(InterfaceName.Id.toString()).toString();
-                idToInternalIdMap.put(idStr, Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
+                idToInternalIdMap.put(idStr,
+                        Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
             } else {
                 idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
             }
@@ -334,15 +343,17 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         scoreAttr.setDisplayName(ScoreResultField.Percentile.displayName);
         scoreAttr.setSourceLogicalDataType("");
         scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
-        Attribute rawScoreAttr = new Attribute();
-        rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
-        rawScoreAttr.setDisplayName(ScoreResultField.RawScore.displayName);
-        rawScoreAttr.setSourceLogicalDataType("");
-        rawScoreAttr.setPhysicalDataType(Type.DOUBLE.name());
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
-        outputTable.addAttribute(rawScoreAttr);
+        if (isEnableDebug) {
+            Attribute rawScoreAttr = new Attribute();
+            rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
+            rawScoreAttr.setDisplayName(ScoreResultField.RawScore.displayName);
+            rawScoreAttr.setSourceLogicalDataType("");
+            rawScoreAttr.setPhysicalDataType(Type.DOUBLE.name());
+            outputTable.addAttribute(rawScoreAttr);
+        }
 
         if (leadEnrichmentAttributeMap != null) {
             Iterator<Entry<String, Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
@@ -394,13 +405,16 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (score != null && (score > 99 || score < 5)) {
                     throw new LedpException(LedpCode.LEDP_20037);
                 }
-                Double rawScore = tuple.getProbability();
-                if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
-                    throw new LedpException(LedpCode.LEDP_20038);
-                }
+
                 builder.set(ScoringDaemonService.MODEL_ID, modelId);
                 builder.set(ScoreResultField.Percentile.displayName, score);
-                builder.set(ScoreResultField.RawScore.displayName, rawScore);
+                if (isEnableDebug) {
+                    Double rawScore = tuple.getProbability();
+                    if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
+                        throw new LedpException(LedpCode.LEDP_20038);
+                    }
+                    builder.set(ScoreResultField.RawScore.displayName, rawScore);
+                }
 
                 writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());
 

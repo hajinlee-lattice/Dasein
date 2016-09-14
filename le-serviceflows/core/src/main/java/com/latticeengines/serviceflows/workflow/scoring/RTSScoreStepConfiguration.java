@@ -12,6 +12,8 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean enableLeadEnrichment;
 
+    private boolean enableDebug;
+
     public String getModelId() {
         return modelId;
     }
@@ -42,6 +44,14 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setRegisterScoredTable(Boolean registerScoredTable) {
         this.registerScoredTable = registerScoredTable;
+    }
+
+    public void setEnableDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
+    }
+
+    public boolean getEnableDebug() {
+        return this.enableDebug;
     }
 
 }

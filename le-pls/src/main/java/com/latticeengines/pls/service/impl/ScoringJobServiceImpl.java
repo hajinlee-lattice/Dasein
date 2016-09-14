@@ -67,21 +67,19 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public List<Job> getJobs(String modelId) {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
-                + tenantWithPid.getPid() + " and model " + modelId);
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid()
+                + " and model " + modelId);
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
-            if (job.getJobType().equals("scoreWorkflow")
-                    || job.getJobType().equals("importMatchAndScoreWorkflow")
+            if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")
                     || job.getJobType().equals("rtsBulkScoreWorkflow")
                     || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
                 String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
                 ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
                 String jobModelName = modelSummary != null ? modelSummary.getDisplayName() : null;
                 if (jobModelId != null && jobModelId.equals(modelId)) {
-                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                            jobModelName);
+                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, jobModelName);
                     ret.add(job);
                 }
             }
@@ -106,8 +104,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         try {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir,
-                    filePrefix + ".*");
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
             if (CollectionUtils.isEmpty(paths)) {
                 throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
             }
@@ -138,46 +135,44 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String scoreTestingData(String modelId, String fileName, Boolean useRts,
-            Boolean performEnrichment) {
+    public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment,
+            Boolean debug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
         boolean useRtsApi = false;
-        boolean enableLeadEnrichment = performEnrichment == null ? false
-                : performEnrichment.booleanValue();
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+        boolean enableDebug = debug == null ? false : debug.booleanValue();
 
-        if (enableLeadEnrichment
-                || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
             useRtsApi = true;
         }
 
         if (useRtsApi) {
-            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment);
+            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
         }
         return scoreTestingData(modelId, fileName);
     }
 
     @Override
-    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment) {
+    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment, Boolean debug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
         boolean useRtsApi = false;
-        boolean enableLeadEnrichment = performEnrichment == null ? false
-                : performEnrichment.booleanValue();
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+        boolean enableDebug = debug == null ? false : debug.booleanValue();
 
-        if (enableLeadEnrichment
-                || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
             useRtsApi = true;
         }
 
         if (useRtsApi) {
-            return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment);
+            return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
 
         }
         return scoreTrainingData(modelSummary);
@@ -198,10 +193,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
         }
 
-        return scoreWorkflowSubmitter
-                .submit(modelSummary.getId(), modelSummary.getTrainingTableName(), "Training Data",
-                        TransformationGroup.fromName(transformationGroupName))
-                .toString();
+        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                "Training Data", TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     private String scoreTestingData(String modelId, String fileName) {
@@ -210,26 +203,23 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         if (transformationGroupName == null) {
             throw new LedpException(LedpCode.LEDP_18108, new String[] { modelId });
         }
-        return importMatchAndScoreWorkflowSubmitter
-                .submit(modelId, fileName, TransformationGroup.fromName(transformationGroupName))
-                .toString();
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
+                TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
-    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary,
-            boolean enableLeadEnrichment) {
+    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment, boolean debug) {
         if (modelSummary.getTrainingTableName() == null) {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
 
-        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(),
-                modelSummary.getTrainingTableName(), enableLeadEnrichment, "Training Data")
-                .toString();
+        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                enableLeadEnrichment, "Training Data", debug).toString();
     }
 
     private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName,
-            boolean enableLeadEnrichment) {
-        return importAndRTSBulkScoreWorkflowSubmitter
-                .submit(modelSummary.getId(), fileName, enableLeadEnrichment).toString();
+            boolean enableLeadEnrichment, boolean debug) {
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment,
+                debug).toString();
     }
 
     @Override

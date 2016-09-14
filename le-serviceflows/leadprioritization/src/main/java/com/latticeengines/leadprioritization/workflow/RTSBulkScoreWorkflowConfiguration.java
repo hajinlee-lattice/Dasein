@@ -103,5 +103,10 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
 
             return configuration;
         }
+
+        public Builder enableDebug(boolean enableDebug) {
+            score.setEnableDebug(enableDebug);
+            return this;
+        }
     }
 }

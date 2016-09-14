@@ -27,8 +27,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component
 public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
-    private static final Logger log = Logger
-            .getLogger(ImportAndRTSBulkScoreWorkflowSubmitter.class);
+    private static final Logger log = Logger.getLogger(ImportAndRTSBulkScoreWorkflowSubmitter.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -39,58 +38,51 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment) {
+    public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
         if (sourceFile == null) {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
         }
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                sourceFile.getTableName()) == null) {
-            throw new LedpException(LedpCode.LEDP_18098,
-                    new String[] { sourceFile.getTableName() });
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName()) == null) {
+            throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId,
-                MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
         if (hasRunningWorkflow(sourceFile)) {
-            throw new LedpException(LedpCode.LEDP_18081,
-                    new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
-        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile,
-                sourceFile.getDisplayName(), enableLeadEnrichment);
+        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
+                enableLeadEnrichment, enableDebug);
 
-        log.info(String.format(
-                "Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
-                modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
-                sourceFile.getDisplayName()));
+        log.info(String
+                .format("Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
+                        modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
+                        sourceFile.getDisplayName()));
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
         return applicationId;
     }
 
-    public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId,
-            SourceFile sourceFile, String sourceDisplayName, boolean enableLeadEnrichment) {
+    public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
+            String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
-                "importAndRTSBulkScoreWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importAndRTSBulkScoreWorkflow");
         if (modelSummary != null) {
-            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    modelSummary.getDisplayName());
+            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
 
-        String sourceFileDisplayName = sourceFile.getDisplayName() != null
-                ? sourceFile.getDisplayName() : "unnamed";
+        String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
 
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -103,10 +95,13 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
-                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
+                        "/"
+                                + StringUtils.substringBeforeLast(
+                                        sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv") + "_scored_"
+                                + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
+                .enableDebug(enableDebug) //
                 .internalResourcePort(internalResourceHostPort) //
                 .build();
     }

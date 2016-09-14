@@ -32,28 +32,26 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     private ModelSummaryService modelSummaryService;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
-            String sourceDisplayName) {
+            String sourceDisplayName, boolean enableDebug) {
         log.info(String.format(
                 "Submitting rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
                 modelId, tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        RTSBulkScoreWorkflowConfiguration configuration = generateConfiguration(modelId,
-                tableToScore, sourceDisplayName, enableLeadEnrichment);
+        RTSBulkScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore,
+                sourceDisplayName, enableLeadEnrichment, enableDebug);
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                tableToScore) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId,
-                MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
         return workflowJobService.submit(configuration);
     }
 
-    public RTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId,
-            String tableToScore, String sourceDisplayName, boolean enableLeadEnrichment) {
+    public RTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
+            String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
 
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
 
@@ -62,8 +60,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "rtsBulkScoreWorkflow");
         if (modelSummary != null) {
-            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    modelSummary.getDisplayName());
+            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
 
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
@@ -74,10 +71,12 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
-                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
+                        "/"
+                                + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
+                                        ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
+                .enableDebug(enableDebug) //
                 .build();
     }
 }

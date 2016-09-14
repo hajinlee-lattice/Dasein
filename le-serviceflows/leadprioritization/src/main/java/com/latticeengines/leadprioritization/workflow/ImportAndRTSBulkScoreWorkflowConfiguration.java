@@ -104,5 +104,10 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return configuration;
         }
 
+        public Builder enableDebug(boolean enableDebug) {
+            rtsBulkScoreWorkflowConfigurationBuilder.enableDebug(enableDebug);
+            return this;
+        }
+
     }
 }

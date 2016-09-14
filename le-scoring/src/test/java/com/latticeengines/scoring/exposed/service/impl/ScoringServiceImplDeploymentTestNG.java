@@ -125,6 +125,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         targetDir = TEST_INPUT_DATA_DIR + tableName;
         rtsBulkScoringConfig.setTargetResultDir(targetDir);
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
+        rtsBulkScoringConfig.setEnableDebug(false);
         rtsBulkScoringConfig.setInternalResourceHostPort(plsApiHostPort);
         ApplicationId appId = scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
         assertNotNull(appId);
@@ -145,7 +146,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
             Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-            Assert.assertNotNull(record.get(ScoreResultField.RawScore.displayName));
+            Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
             System.out.println(record);
         }
         Assert.assertEquals(list.size(), 20);
@@ -157,8 +158,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
         Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
         Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
-        Assert.assertEquals(fields.get(3).name(), ScoreResultField.RawScore.displayName);
-        Assert.assertEquals(fields.size(), 7);
+        Assert.assertEquals(fields.size(), 6);
 
         List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");
         Assert.assertNotNull(csvfiles);

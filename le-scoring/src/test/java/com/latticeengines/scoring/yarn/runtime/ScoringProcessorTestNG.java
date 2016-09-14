@@ -204,12 +204,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
             Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
             Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
-            Assert.assertEquals(fields.get(3).name(), ScoreResultField.RawScore.displayName);
             System.out.println(record.get(0));
             System.out.println(record.get(1));
             System.out.println(record.get(2));
             System.out.println(record.get(3));
-            System.out.println(record.get(4));
             for (GenericRecord ele : list) {
                 Assert.assertNotNull(ele.get("attr1"));
                 Assert.assertNotNull(ele.get("attr2"));
@@ -286,11 +284,9 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple1 = new ScoreModelTuple();
         tuple1.setModelId("model1");
         tuple1.setScore(99.0);
-        tuple1.setProbability(0.9);
         ScoreModelTuple tuple2 = new ScoreModelTuple();
         tuple2.setModelId("model2");
         tuple2.setScore(98.0);
-        tuple2.setProbability(0.7);
         scores1.add(tuple1);
         scores1.add(tuple2);
 
@@ -298,7 +294,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple3 = new ScoreModelTuple();
         tuple3.setModelId("model1");
         tuple3.setScore(8.0);
-        tuple3.setProbability(0.1);
         scores2.add(tuple3);
 
         ScoreModelTuple tuple4 = new ScoreModelTuple();

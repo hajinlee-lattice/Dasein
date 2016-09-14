@@ -16,6 +16,8 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private boolean enableLeadEnrichment;
 
+    private boolean enableDebug;
+
     private String internalResourceHostPort;
 
     private List<String> modelGuids = new ArrayList<>();
@@ -52,6 +54,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.enableLeadEnrichment = enableLeadEnrichment;
     }
 
+    @JsonProperty("enable_debug")
+    public void setEnableDebug(boolean enableDebug) {
+        this.enableDebug = enableDebug;
+    }
+
+    @JsonProperty("enable_debug")
+    public boolean isEnableDebug() {
+        return this.enableDebug;
+    }
+
     @JsonProperty("target_result_dir")
     public String getTargetResultDir() {
         return targetResultDir;
@@ -86,5 +98,4 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
 }

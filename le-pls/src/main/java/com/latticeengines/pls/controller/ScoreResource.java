@@ -35,11 +35,12 @@ public class ScoreResource {
             @PathVariable String modelId, //
             @RequestParam(value = "fileName") String fileName, //
             @RequestParam(value = "performEnrichment", required = false) Boolean performEnrichment, //
-            @RequestParam(value = "useRtsApi", required = false) Boolean useRtsApi) {
+            @RequestParam(value = "useRtsApi", required = false) Boolean useRtsApi, //
+            @RequestParam(value = "debug", required = false) Boolean debug) {
         log.info(String.format("Scoring testing file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreTestingData(modelId, fileName, useRtsApi, performEnrichment)));
+                scoringJobService.scoreTestingData(modelId, fileName, useRtsApi, performEnrichment, debug)));
 
     }
 
@@ -49,10 +50,11 @@ public class ScoreResource {
     public String scoreTrainingData(//
             @PathVariable String modelId, //
             @RequestParam(value = "performEnrichment", required = false) Boolean performEnrichment, //
-            @RequestParam(value = "useRtsApi", required = false) Boolean useRtsApi) {
+            @RequestParam(value = "useRtsApi", required = false) Boolean useRtsApi, //
+            @RequestParam(value = "debug", required = false) Boolean debug) {
         log.info(String.format("Scoring training file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreTrainingData(modelId, useRtsApi, performEnrichment)));
+                scoringJobService.scoreTrainingData(modelId, useRtsApi, performEnrichment, debug)));
     }
 }

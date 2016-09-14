@@ -127,11 +127,11 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 600000)
     public void testScoreTrainingDataUsingRTS() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
+        System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
                 getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE", getRestAPIHostPort(),
-                        modelId), //
+                String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
+                        getRestAPIHostPort(), modelId), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
@@ -158,10 +158,11 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 600000)
     public void testScoreTestingDataUsingRTS() throws Exception {
         uploadTestingDataFile();
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
-                getRestAPIHostPort(), modelId, sourceFile.getName()));
+        System.out.println(String.format(
+                "%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE", getRestAPIHostPort(),
+                modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE",
+                String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
                         getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
