@@ -229,4 +229,15 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getActiveStack() {
+        try {
+            String url = constructUrl("pls/internal/currentstack");
+            return restTemplate.getForObject(url, Map.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
 }
