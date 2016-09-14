@@ -136,13 +136,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return post("createArtifact", url, artifact, Boolean.class);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Artifact> getArtifacts(String customerSpace, String moduleName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
-        return get("getArtifacts", url, List.class);
-    }
-
     @Override
     public Module getModule(String customerSpace, String moduleName) {
         String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);

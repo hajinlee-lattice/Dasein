@@ -1,9 +1,6 @@
 package com.latticeengines.metadata.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,17 +41,6 @@ public class ArtifactResource {
             HttpServletRequest request) {
         artifactService.createArtifact(customerSpace, moduleName, artifactName, artifact);
         return true;
-    }
-
-    @RequestMapping(value = "/modules/{moduleName}", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of artifacts")
-    public List<Artifact> getArtifacts(@PathVariable String customerSpace, //
-            @PathVariable String moduleName, //
-            HttpServletRequest request) {
-        return artifactService.findAll(customerSpace, moduleName);
     }
 
     @RequestMapping(value = "/artifacttype/{artifactType}", //

@@ -62,7 +62,7 @@ public class MetadataFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
                 requestEntity, ResponseDocument.class);
         assertTrue(((String) result.getBody().getResult()).endsWith("/Metadata/module1/PMMLFiles/abc.xml"));
 
-        assertEquals(metadataProxy.getArtifacts(mainTestTenant.getId(), "module1").size(), 1);
+        assertEquals(metadataProxy.getModule(mainTestTenant.getId(), "module1").getArtifacts().size(), 1);
     }
 
     @Test(groups = "deployment")
