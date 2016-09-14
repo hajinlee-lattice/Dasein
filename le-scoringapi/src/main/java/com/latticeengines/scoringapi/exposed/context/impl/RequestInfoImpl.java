@@ -74,4 +74,11 @@ public class RequestInfoImpl implements RequestInfo {
         context.remove(key);
     }
 
+    @Override
+    public void logAggregateSummary(Map<String, String> aggregateDurationStopWatchSplits) {
+        Map<String, String> context = getOrCreate();
+        putAll(aggregateDurationStopWatchSplits);
+        log.info(JsonUtils.serialize(context));
+    }
+
 }

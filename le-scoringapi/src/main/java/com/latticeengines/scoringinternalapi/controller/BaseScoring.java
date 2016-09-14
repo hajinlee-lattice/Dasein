@@ -356,7 +356,7 @@ public abstract class BaseScoring {
     }
 
     private void logTotalDurationSummary(Map<String, String> totalDurationStopWatchSplits) {
-        requestInfo.logSummary(totalDurationStopWatchSplits);
+        requestInfo.logAggregateSummary(totalDurationStopWatchSplits);
         for (String totalDurationKey : totalDurationStopWatchSplits.keySet()) {
             requestInfo.remove(totalDurationKey);
         }

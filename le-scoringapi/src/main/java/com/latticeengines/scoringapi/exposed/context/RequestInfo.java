@@ -17,4 +17,6 @@ public interface RequestInfo {
     Map<String, String> getStopWatchSplits();
 
     void remove(String key);
+
+    void logAggregateSummary(Map<String, String> aggregateDurationStopWatchSplits);
 }
