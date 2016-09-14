@@ -109,6 +109,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         } else {
             if (useDnBFlagFromZK()) {
                 predefinedSelection = Predefined.DNB;
+                parameters.setExcludePublicDomains(true);
             }
         }
 
