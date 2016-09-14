@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.metadata.Module;
 
 public interface ModuleService {
 
-    Module getModuleByName(String name);
+    Module getModuleByName(String customerSpace, String name);
 
 }

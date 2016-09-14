@@ -20,7 +20,7 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
     @Autowired
     private TableTypeHolder tableTypeHolder;
 
@@ -35,6 +35,11 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ArtifactEntityMgrImpl.*(..))")
     public void allArtifactMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ModuleEntityMgrImpl.*(..))")
+    public void allModuleMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

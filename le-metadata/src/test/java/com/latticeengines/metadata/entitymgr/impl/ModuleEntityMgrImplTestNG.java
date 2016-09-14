@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -49,13 +50,18 @@ public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         module.addArtifact(pivotFile);
 
         artifactService.createArtifact(CUSTOMERSPACE1, "M1", pmmlFile.getName(), pmmlFile);
-        module = moduleService.getModuleByName("M1");
+        module = moduleService.getModuleByName(CUSTOMERSPACE1, "M1");
         assertNotNull(module);
         assertEquals(module.getArtifacts().size(), 1);
 
         artifactService.createArtifact(CUSTOMERSPACE1, "M1", pivotFile.getName(), pivotFile);
-        module = moduleService.getModuleByName("M1");
+        module = moduleService.getModuleByName(CUSTOMERSPACE1, "M1");
         assertNotNull(module);
         assertEquals(module.getArtifacts().size(), 2);
+
+        Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
+        MultiTenantContext.setTenant(t2);
+        module = moduleService.getModuleByName(CUSTOMERSPACE2, "M1");
+        assertNull(module);
     }
 }

@@ -23,22 +23,27 @@ public class SetTenantAspect {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace.toString());
     }
-    
+
     @Before("execution(* com.latticeengines.metadata.service.impl.ArtifactServiceImpl.*(..))")
     public void allMethodsArtifactService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace);
     }
-    
+
+    @Before("execution(* com.latticeengines.metadata.service.impl.ModuleServiceImpl.*(..))")
+    public void allMethodsModuleService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace);
+    }
+
     private void setSecurityContext(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant == null) {
-            throw new RuntimeException(
-                    String.format("No tenant found with id %s", customerSpace.toString()));
+            throw new RuntimeException(String.format("No tenant found with id %s", customerSpace.toString()));
         }
         setSecurityContext(tenant);
     }
-    
+
     public void setSecurityContext(Tenant tenant) {
         SecurityContext securityCtx = SecurityContextHolder.createEmptyContext();
         securityCtx.setAuthentication(new TenantToken(tenant));

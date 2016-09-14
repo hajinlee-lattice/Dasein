@@ -14,7 +14,7 @@ public class ModuleServiceImpl implements ModuleService {
     private ModuleEntityMgr moduleEntityMgr;
 
     @Override
-    public Module getModuleByName(String name) {
+    public Module getModuleByName(String customerSpace, String name) {
         return moduleEntityMgr.findByName(name);
     }
 

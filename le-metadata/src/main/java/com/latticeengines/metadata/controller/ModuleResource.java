@@ -30,6 +30,6 @@ public class ModuleResource {
     public Module getModule(@PathVariable String customerSpace, //
             @PathVariable String moduleName, //
             HttpServletRequest request) {
-        return moduleService.getModuleByName(moduleName);
+        return moduleService.getModuleByName(customerSpace, moduleName);
     }
 }

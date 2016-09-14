@@ -17,7 +17,7 @@ public class ResourceAspect {
 
     @Autowired
     private TableTypeHolder tableTypeHolder;
-    
+
     private InternalResourceBase internalResourceBase = new InternalResourceBase();
 
     @Before("execution(* com.latticeengines.metadata.controller.ImportTableResource.*(..))")
@@ -25,21 +25,26 @@ public class ResourceAspect {
         checkHeader(joinPoint);
         setTableType(joinPoint, TableType.IMPORTTABLE);
     }
-    
+
     @Before("execution(* com.latticeengines.metadata.controller.TableResource.*(..))")
     public void allMethodsForTableResource(JoinPoint joinPoint) {
         checkHeader(joinPoint);
         setTableType(joinPoint, TableType.DATATABLE);
     }
-    
+
     @Before("execution(* com.latticeengines.metadata.controller.ArtifactResource.*(..))")
     public void allMethodsForArtifactResource(JoinPoint joinPoint) {
         checkHeader(joinPoint);
     }
 
+    @Before("execution(* com.latticeengines.metadata.controller.ModuleResource.*(..))")
+    public void allMethodsForModuleResource(JoinPoint joinPoint) {
+        checkHeader(joinPoint);
+    }
+
     private void checkHeader(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
-        
+
         for (Object arg : args) {
             if (arg instanceof HttpServletRequest) {
                 internalResourceBase.checkHeader((HttpServletRequest) arg);
@@ -50,12 +55,12 @@ public class ResourceAspect {
     private void setTableType(JoinPoint joinPoint, TableType tableType) {
         tableTypeHolder.setTableType(tableType);
         Object[] args = joinPoint.getArgs();
-        
+
         for (Object arg : args) {
             if (arg instanceof Table) {
                 ((Table) arg).setTableType(tableType);
             }
         }
     }
-    
+
 }
