@@ -56,6 +56,10 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         Properties jobProperties = new Properties();
         jobProperties.put("mapreduce.job.reduces", "8");
         jobProperties.put("mapreduce.job.running.map.limit", "64");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress", "true");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
+        jobProperties.put("mapreduce.output.fileoutputformat.compress.codec",
+                "org.apache.hadoop.io.compress.SnappyCodec");
 
         return jobProperties;
     }
