@@ -153,7 +153,9 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var jobs = response.data;
+                var jobs = _.reject(response.data, function(job) {
+                    job.jobType.toLowerCase() === 'bulkmatchworkflow';
+                });
                 result = {
                     success: true,
                     resultObj: null
