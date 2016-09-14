@@ -30,36 +30,35 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-
 @Entity
 @Table(name = "METADATA_MODULE", //
-    uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Module implements HasName, HasPid, HasTenantId {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-    
+
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
-    
-    @JsonIgnore
+
+    @JsonProperty("artifacts")
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "module")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Artifact> artifacts = new ArrayList<>();
@@ -112,7 +111,7 @@ public class Module implements HasName, HasPid, HasTenantId {
     public void setArtifacts(List<Artifact> artifacts) {
         this.artifacts = artifacts;
     }
-    
+
     public void addArtifact(Artifact artifact) {
         artifacts.add(artifact);
         artifact.setModule(this);

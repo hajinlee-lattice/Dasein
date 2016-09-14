@@ -21,10 +21,10 @@ public class ModuleEntityMgrImpl extends BaseEntityMgrImpl<Module> implements Mo
     public BaseDao<Module> getDao() {
         return moduleDao;
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public Module findByName(String name){
+    public Module findByName(String name) {
         return moduleDao.findByField("NAME", name);
     }
 
