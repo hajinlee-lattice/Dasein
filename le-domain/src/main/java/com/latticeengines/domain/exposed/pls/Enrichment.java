@@ -40,6 +40,7 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     private Tenant tenant;
     private List<MarketoMatchField> marketoMatchFields;
     private String tenantCredentialGUID;
+    private String webhookUrl;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,7 +73,7 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -81,20 +82,20 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
         return tenantId;
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
@@ -111,14 +112,23 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     }
 
     @Transient
-    @JsonProperty("tenantCredentialGUID")
+    @JsonProperty("TenantCredentialGUID")
     public String getTenantCredentialGUID() {
         return tenantCredentialGUID;
     }
 
-    @JsonProperty("tenantCredentialGUID")
     public void setTenantCredentialGUID(String tenantCredentialGUID) {
         this.tenantCredentialGUID = tenantCredentialGUID;
+    }
+
+    @Transient
+    @JsonProperty("WebhookUrl")
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
+
+    public void setWebhookUrl(String webhookUrl) {
+        this.webhookUrl = webhookUrl;
     }
 
 }

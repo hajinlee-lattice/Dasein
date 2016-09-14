@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,13 @@ public class MarketoCredentialResource {
 
     private static final Logger log = Logger.getLogger(ModelSummaryResource.class);
 
-    private static final MarketoCredential MARKETO_CREDENTIAL = new MarketoCredential();
+    @Value("${pls.marketo.enrichment.webhook.url}")
+    private static String enrichmentWebhookUrl;
+
+    // @Autowired
+    // private MarketoCredentialService marketoCredentialService;
+
+    public static final MarketoCredential MARKETO_CREDENTIAL = new MarketoCredential();
     private static final Enrichment ENRICHMENT = new Enrichment();
 
     private static final String NAME = "TEST MARKETO CREDENTIAL";
@@ -77,6 +84,7 @@ public class MarketoCredentialResource {
         MARKETO_MATCH_FIELD_4.setEnrichment(ENRICHMENT);
         ENRICHMENT.setId(ENRICHMENT_ID);
         ENRICHMENT.setTenantCredentialGUID(ENRICHMENT_TENENT_CREDENTIAL_GUID);
+        ENRICHMENT.setWebhookUrl(enrichmentWebhookUrl);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -117,10 +125,10 @@ public class MarketoCredentialResource {
 
     }
 
-    @RequestMapping(value = "/enrichment/{enrichmentId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Updates a enrichment mathcing fields")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
-    public void updateEnrichment(@PathVariable String enrichmentId, @RequestBody Enrichment enrichment) {
+    public void updateEnrichment(@RequestBody List<MarketoMatchField> marketoMatchFields) {
 
     }
 

@@ -54,7 +54,7 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -63,25 +63,25 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
         return tenantId;
     }
 
     @Override
-    @JsonProperty
+    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    @JsonProperty
+    @JsonProperty("MarketoMatchFieldName")
     @Column(name = "MARKETO_MATCH_FIELD_NAME", nullable = false)
     public MarketoMatchFieldName getMarketoMatchFieldName() {
         return marketoMatchFieldName;
@@ -91,7 +91,7 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
         this.marketoMatchFieldName = marketoMatchFieldName;
     }
 
-    @JsonProperty
+    @JsonProperty("MarketoFieldName")
     @Column(name = "MARKETO_FIELD_NAME", nullable = false)
     public String getMarketoFieldName() {
         return marketoFieldName;
