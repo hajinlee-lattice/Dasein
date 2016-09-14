@@ -173,7 +173,7 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
 
     @Override
     public String createDataSet(DataSet dataset) {
-        String url = constructUrl("/datasets");
+        String url = constructUrl("/datasets/");
         return post("createDataSet", url, dataset, String.class);
     }
 
