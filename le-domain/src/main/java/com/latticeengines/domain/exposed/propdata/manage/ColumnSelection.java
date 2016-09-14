@@ -109,6 +109,7 @@ public class ColumnSelection {
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
+        DNB("DNB"), //
         RTS("RTS");
 
         private final String name;
