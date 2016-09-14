@@ -9,9 +9,9 @@
     <task:scheduler id="monitorScheduler" pool-size="2"/>
 
     <task:executor id="monitorExecutor"
-                   pool-size="8-16"
+                   pool-size="1-4"
                    queue-capacity="1000"
-                   keep-alive="10"
-                   rejection-policy="CALLER_RUNS" />
+                   keep-alive="1000"
+                   rejection-policy="DISCARD" />
 
 </beans>
