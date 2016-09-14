@@ -16,7 +16,7 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
 
     @BeforeClass(groups = "manual")
     public void setup() throws Exception {
-        cleanup();
+        cleanupDb();
         modelRun1 = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
         modelRun2 = createModelRun(AlgorithmFactory.ALGORITHM_NAME_LR);
     }

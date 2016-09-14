@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.modelquality.PipelinePropertyDef;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
-import com.latticeengines.modelquality.entitymgr.PipelineStepEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
@@ -24,13 +23,9 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
     @Autowired
     private PipelineEntityMgr pipelineEntityMgr;
 
-    @Autowired
-    private PipelineStepEntityMgr pipelineStepEntityMgr;
-
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        List<Pipeline> oldPipelines = pipelineEntityMgr.findAll();
-        pipelineEntityMgr.deletePipelines(oldPipelines);
+        super.cleanupDb();
         
         pipeline = new Pipeline();
         pipeline.setName("Pipeline1");
@@ -76,10 +71,10 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         PipelinePropertyDef pipelinePropertyDef = pipelineStep.getPipelinePropertyDefs().get(0);
 
         assertEquals(retrievedPipelinePropertyDef.getName(), pipelinePropertyDef.getName());
-        assertEquals(retrievedPipelinePropertyDef.getPipelinePropertyValues().size(), pipelinePropertyDef
-                .getPipelinePropertyValues().size());
-        assertEquals(retrievedPipelinePropertyDef.getPipelinePropertyValues().get(0).getValue(), pipelinePropertyDef
-                .getPipelinePropertyValues().get(0).getValue());
+        assertEquals(retrievedPipelinePropertyDef.getPipelinePropertyValues().size(), //
+                pipelinePropertyDef.getPipelinePropertyValues().size());
+        assertEquals(retrievedPipelinePropertyDef.getPipelinePropertyValues().get(0).getValue(), //
+                pipelinePropertyDef.getPipelinePropertyValues().get(0).getValue());
 
     }
 }

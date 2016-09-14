@@ -1,13 +1,11 @@
 package com.latticeengines.modelquality.controller;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
@@ -19,26 +17,14 @@ public class PropDataResourceDeploymentTestNG extends ModelQualityDeploymentTest
     }
 
     @Test(groups = "deployment")
-    public void upsertPropDatas() {
-        try {
-            PropData propDatas = createPropData();
-            ResponseDocument<String> response = modelQualityProxy.upsertPropDatas(Arrays.asList(propDatas));
-            Assert.assertTrue(response.isSuccess());
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Assert.fail(ex.getMessage());
-        }
+    public void createPropDataConfigFromProduction() {
+        PropData propDataConfig = modelQualityProxy.createPropDataConfigFromProduction();
+        Assert.assertNotNull(propDataConfig);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertPropDatas")
+    @Test(groups = "deployment", dependsOnMethods = "createPropDataConfigFromProduction")
     public void getPropDatas() {
-        try {
-            ResponseDocument<List<PropData>> response = modelQualityProxy.getPropDatas();
-            Assert.assertTrue(response.isSuccess());
-            Assert.assertEquals(response.getResult().size(), 1);
-        } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
-        }
+        List<PropData> configs = modelQualityProxy.getPropDataConfigs();
+        Assert.assertEquals(configs.size(), 1);
     }
 }

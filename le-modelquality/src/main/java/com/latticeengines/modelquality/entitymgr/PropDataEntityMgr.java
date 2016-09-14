@@ -9,4 +9,6 @@ public interface PropDataEntityMgr extends BaseEntityMgr<PropData> {
 
     void createPropDatas(List<PropData> propDatas);
 
+    PropData findByName(String propDataConfigName);
+
 }

@@ -1,7 +1,5 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,26 +48,8 @@ public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void createSamplings(List<Sampling> samplings) {
-        for (Sampling sampling : samplings) {
-            setupSampling(sampling);
-            samplingDao.create(sampling);
-        }
-    }
-
-    private void setupSampling(Sampling sampling) {
-        List<SamplingPropertyDef> defs = sampling.getSamplingPropertyDefs();
-        if (defs != null) {
-            for (SamplingPropertyDef def : defs) {
-                List<SamplingPropertyValue> values = def.getSamplingPropertyValues();
-                if (values != null) {
-                    for (SamplingPropertyValue value : values) {
-                        value.setSamplingPropertyDef(def);
-                    }
-                }
-                def.setSampling(sampling);
-            }
-        }
+    public Sampling findByName(String samplingConfigName) {
+        return samplingDao.findByField("NAME", samplingConfigName);
     }
 
 }

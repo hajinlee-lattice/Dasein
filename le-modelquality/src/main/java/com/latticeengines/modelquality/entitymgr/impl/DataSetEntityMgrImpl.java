@@ -32,5 +32,10 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
         super.create(dataSet);
     }
 
+    @Override
+    public DataSet findByName(String name) {
+        return dataSetDao.findByField("NAME", name);
+    }
+
 
 }

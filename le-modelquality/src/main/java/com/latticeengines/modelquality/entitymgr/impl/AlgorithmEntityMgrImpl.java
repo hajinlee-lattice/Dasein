@@ -1,7 +1,5 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,27 +46,8 @@ public class AlgorithmEntityMgrImpl extends BaseEntityMgrImpl<Algorithm> impleme
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void createAlgorithms(List<Algorithm> algorithms) {
-        for (Algorithm algorithm : algorithms) {
-            setupAlgorithm(algorithm);
-            algorithmDao.create(algorithm);
-        }
-    }
-
-    private void setupAlgorithm(Algorithm algorithm) {
-        List<AlgorithmPropertyDef> defs = algorithm.getAlgorithmPropertyDefs();
-        if (defs != null) {
-            for (AlgorithmPropertyDef def : defs) {
-                List<AlgorithmPropertyValue> values = def.getAlgorithmPropertyValues();
-                if (values != null) {
-                    for (AlgorithmPropertyValue value : values) {
-                        value.setAlgorithmPropertyDef(def);
-                    }
-                }
-                def.setAlgorithm(algorithm);
-            }
-        }
+    public Algorithm findByName(String algorithmName) {
+        return algorithmDao.findByField("NAME", algorithmName);
     }
 
 }

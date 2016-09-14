@@ -1,13 +1,12 @@
 package com.latticeengines.modelquality.controller;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
@@ -19,26 +18,18 @@ public class DataFlowResourceDeploymentTestNG extends ModelQualityDeploymentTest
     }
 
     @Test(groups = "deployment")
-    public void upsertDataFlows() {
-        try {
-            DataFlow dataFlows = createDataFlow();
-            ResponseDocument<String> response = modelQualityProxy.upsertDataFlows(Arrays.asList(dataFlows));
-            Assert.assertTrue(response.isSuccess());
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Assert.fail(ex.getMessage());
-        }
+    public void createDataFlowFromProduction() {
+        DataFlow dataFlow = modelQualityProxy.createDataFlowFromProduction();
+        Assert.assertNotNull(dataFlow);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "upsertDataFlows")
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment", dependsOnMethods = "createDataFlowFromProduction")
     public void getDataFlows() {
-        try {
-            ResponseDocument<List<DataFlow>> response = modelQualityProxy.getDataFlows();
-            Assert.assertTrue(response.isSuccess());
-            Assert.assertEquals(response.getResult().size(), 1);
-        } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
-        }
+        List<DataFlow> dataFlows = modelQualityProxy.getDataFlows();
+        Assert.assertEquals(dataFlows.size(), 1);
+        String name = ((Map<String, String>) dataFlows.get(0)).get("name");
+        Assert.assertTrue(name.startsWith("PRODUCTION-"));
     }
+    
 }

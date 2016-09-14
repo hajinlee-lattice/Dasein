@@ -5,54 +5,84 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
+import com.latticeengines.modelquality.service.AlgorithmService;
+import com.latticeengines.network.exposed.modelquality.ModelQualityAlgorithmInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to get algorithms parameters")
 @RestController
-public class AlgorithmResource {
+@RequestMapping("/algorithms")
+public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudInterface<Algorithm> {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AlgorithmResource.class);
+    
+    @Autowired
+    private AlgorithmService algorithmService;
 
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
 
-    @RequestMapping(value = "/algorithms", method = RequestMethod.GET)
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Algorithms")
-    public ResponseDocument<List<Algorithm>> getAlgorithms() {
-        try {
-
-            List<Algorithm> algorithms = algorithmEntityMgr.findAll();
-            return ResponseDocument.successResponse(algorithms);
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+    public List<Algorithm> getAlgorithms() {
+        return getAll();
     }
 
-    @RequestMapping(value = "/algorithms", method = RequestMethod.POST)
+    @Override
+    @RequestMapping(value = "/latest", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upsert Algorithms")
-    public ResponseDocument<String> upsertAlgorithms(@RequestBody List<Algorithm> algorithms) {
-        try {
-            algorithmEntityMgr.deleteAll();
-            algorithmEntityMgr.createAlgorithms(algorithms);
-            return ResponseDocument.successResponse("OK");
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+    public Algorithm createAlgorithmFromProduction() {
+        return createForProduction();
+    }
+    
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Create Algorithm")
+    public String createAlgorithm(Algorithm algorithm) {
+        return create(algorithm);
+    }
+    
+    @Override
+    @RequestMapping(value = "/{algorithmName}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get Algorithm by name")
+    public Algorithm getAlgorithmByName(String algorithmName) {
+        return getByName(algorithmName);
+    }
+
+    @Override
+    public Algorithm createForProduction() {
+        return algorithmService.createLatestProductionAlgorithm();
+    }
+
+    @Override
+    public Algorithm getByName(String name) {
+        return algorithmEntityMgr.findByName(name);
+    }
+
+    @Override
+    public List<Algorithm> getAll() {
+        return algorithmEntityMgr.findAll();
+    }
+
+    @Override
+    public String create(Algorithm config, Object... params) {
+        algorithmEntityMgr.create(config);
+        return config.getName();
     }
 
 }

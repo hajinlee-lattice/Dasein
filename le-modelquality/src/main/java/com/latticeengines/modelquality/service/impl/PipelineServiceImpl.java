@@ -1,39 +1,173 @@
 package com.latticeengines.modelquality.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.modelquality.Pipeline;
+import com.latticeengines.domain.exposed.modelquality.PipelineStep;
+import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
+import com.latticeengines.domain.exposed.modelquality.PipelineToPipelineSteps;
+import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
+import com.latticeengines.modelquality.entitymgr.PipelineStepEntityMgr;
+import com.latticeengines.modelquality.entitymgr.PipelineToPipelineStepsEntityMgr;
 import com.latticeengines.modelquality.service.PipelineService;
 
 @Component("pipelineService")
-public class PipelineServiceImpl implements PipelineService {
+public class PipelineServiceImpl extends BaseServiceImpl implements PipelineService {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PipelineServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Value("${modelquality.file.upload.hdfs.dir}")
-    private String hdfsDir;
-
+    
+    @Autowired
+    private PipelineEntityMgr pipelineEntityMgr;
+    
+    @Autowired
+    private PipelineStepEntityMgr pipelineStepEntityMgr;
+    
+    @Autowired
+    private PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
+    
     @Override
-    public String uploadFile(String fileName, MultipartFile file) {
+    public Pipeline createLatestProductionPipeline() {
+        Pipeline pipeline = new Pipeline();
+        String version = getVersion();
+        pipeline.setName("PRODUCTION-" + version);
+        String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
+        setPipelineProperties(pipeline, pipelineJson);
+        
         try {
-            InputStream inputStream = file.getInputStream();
-            String hdfsPath = hdfsDir + "/" + fileName;
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, hdfsPath);
-            return hdfsPath;
+            String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
+            pipeline.addStepsFromPipelineJson(pipelineContents);
+            pipelineEntityMgr.create(pipeline);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return pipeline;
+    }
+    
+    @Override
+    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String extension, boolean isMetadata) {
+        try {
+            String fileName = "metadata";
+            
+            if (!isMetadata) {
+                fileName = stepName;
+            }
+            HdfsUtils.mkdir(yarnConfiguration, getHdfsDir() + "/steps/" + stepName);
+            String tplPath = "%s/steps/%s/%s.%s";
+            String path = String.format(tplPath, getHdfsDir(), stepName, fileName, extension);
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, path);
+            return path;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
+
+    @Override
+    public Pipeline createPipeline(String pipelineName, List<PipelineStepOrFile> pipelineSteps) {
+        Pipeline pipeline = new Pipeline();
+        pipeline.setName(pipelineName);
+        pipelineEntityMgr.create(pipeline);
+        int i = 1;
+        for (PipelineStepOrFile psof : pipelineSteps) {
+            PipelineToPipelineSteps p = new PipelineToPipelineSteps();
+            p.setPipeline(pipeline);
+            p.setOrder(i++);
+            PipelineStep step = null;
+            if (psof.pipelineStepName != null) {
+                step = pipelineStepEntityMgr.findByName(psof.pipelineStepName);
+                
+                if (step == null) {
+                    throw new RuntimeException(String.format("Pipeline step with name %s does not exist", psof.pipelineStepName));
+                }
+            } else if (psof.pipelineStepDir != null) {
+                try {
+                    String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
+                            psof.pipelineStepDir + "/metadata.json");
+                    String pipelineStepPythonScript = getPythonScript(psof.pipelineStepDir);
+                    step = JsonUtils.deserialize(pipelineStepMetadata, PipelineStep.class);
+                    step.setScript(pipelineStepPythonScript);
+                    pipelineStepEntityMgr.create(step);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            p.setPipelineStep(step);
+            pipelineToPipelineStepsEntityMgr.create(p);
+        }
+
+        Pipeline p = pipelineEntityMgr.findByName(pipelineName);
+        try {
+            String pipelineJsonHdfsPath = createPipelineInHdfs(p);
+            setPipelineProperties(p, pipelineJsonHdfsPath);
+            pipelineEntityMgr.update(p);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        
+        return p;
+    }
+    
+    private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
+        String version = getVersion();
+        String pythonLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz", version);
+        String pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py", version);
+
+        pipeline.setPipelineLibScript(pythonLibScript);
+        pipeline.setPipelineDriver(pipelineJson);
+        pipeline.setPipelineScript(pipelineScript);
+    }
+    
+    private String createPipelineInHdfs(Pipeline pipeline) throws IOException {
+        List<PipelineStep> steps = pipeline.getPipelineSteps();
+        Map<String, PipelineStep> stepsMap = new HashMap<>();
+        for (int i = 1; i <= steps.size(); i++) {
+            PipelineStep s = steps.get(i - 1);
+            s.setSortKey(i);
+            stepsMap.put(s.getMainClassName(), s);
+        }
+        String pipelineContents = JsonUtils.serialize(stepsMap);
+        String pipelineName = pipeline.getName();
+        HdfsUtils.mkdir(yarnConfiguration, getHdfsDir() + "/pipelines/" + pipelineName);
+        String tplPath = "%s/pipelines/%s/pipeline.json";
+        String path = String.format(tplPath, getHdfsDir(), pipelineName);
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, new ByteArrayInputStream(pipelineContents.getBytes()), path);
+        return path;
+    }
+    
+    private String getPythonScript(String hdfsPath) {
+        try {
+            List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, new HdfsUtils.HdfsFilenameFilter() {
+                
+                @Override
+                public boolean accept(String filename) {
+                    return filename.endsWith(".py");
+                }
+            });
+            
+            if (pythonFiles.size() != 1) {
+                throw new RuntimeException("Must have exactly one python file for a pipeline step.");
+            }
+            return Path.getPathWithoutSchemeAndAuthority(new Path(pythonFiles.get(0))).toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

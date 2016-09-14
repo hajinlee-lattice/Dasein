@@ -32,4 +32,9 @@ public class PropDataEntityMgrImpl extends BaseEntityMgrImpl<PropData> implement
         }
     }
 
+    @Override
+    public PropData findByName(String propDataConfigName) {
+        return propDataDao.findByField("NAME", propDataConfigName);
+    }
+
 }

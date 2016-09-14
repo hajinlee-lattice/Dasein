@@ -1,5 +1,7 @@
 package com.latticeengines.modelquality.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "modelquality", description = "REST resource for analytic tests")
 @RestController
 @RequestMapping("/analytictests")
-public class AnalyticTestResource {
+public class AnalyticTestResource implements CrudInterface<AnalyticTest> {
 
     
     @RequestMapping(value = "/", method = RequestMethod.POST)
@@ -32,6 +34,34 @@ public class AnalyticTestResource {
     @ResponseBody
     @ApiOperation(value = "Execute analytic test")
     public ResponseDocument<String> runAnalyticTest(@PathVariable String analyticTestId) {
+        return null;
+    }
+
+
+    @Override
+    public AnalyticTest createForProduction() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public AnalyticTest getByName(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public List<AnalyticTest> getAll() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public String create(AnalyticTest config, Object... params) {
+        // TODO Auto-generated method stub
         return null;
     }
 

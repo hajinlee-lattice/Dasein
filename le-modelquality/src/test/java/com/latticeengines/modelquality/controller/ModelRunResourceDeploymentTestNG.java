@@ -21,7 +21,8 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-//        modelRunEntityMgr.deleteAll();
+        super.cleanupDb();
+        super.cleanupHdfs();
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 

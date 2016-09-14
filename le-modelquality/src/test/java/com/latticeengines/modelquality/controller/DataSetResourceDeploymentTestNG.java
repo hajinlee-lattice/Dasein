@@ -6,7 +6,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
@@ -18,26 +17,15 @@ public class DataSetResourceDeploymentTestNG extends ModelQualityDeploymentTestN
     }
 
     @Test(groups = "deployment")
-    public void insertDataSet() {
-        try {
-            DataSet dataSet = createDataSet();
-            ResponseDocument<String> response = modelQualityProxy.insertDataSet(dataSet);
-            Assert.assertTrue(response.isSuccess());
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Assert.fail(ex.getMessage());
-        }
+    public void createDataset() {
+        DataSet dataSet = super.createDataSet();
+        String response = modelQualityProxy.createDataSet(dataSet);
+        Assert.assertEquals(response, "DataSet1");
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "insertDataSet")
+    @Test(groups = "deployment", dependsOnMethods = "createDataset")
     public void getDataSets() {
-        try {
-            ResponseDocument<List<DataSet>> response = modelQualityProxy.getDataSets();
-            Assert.assertTrue(response.isSuccess());
-            Assert.assertEquals(response.getResult().size(), 1);
-        } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
-        }
+        List<DataSet> dataSets = modelQualityProxy.getDataSets();
+        Assert.assertEquals(dataSets.size(), 1);
     }
 }

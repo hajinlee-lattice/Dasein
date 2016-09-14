@@ -11,46 +11,66 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
+import com.latticeengines.network.exposed.modelquality.ModelQualityDataSetInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to get DataSet parameters")
 @RestController
-public class DataSetResource {
+@RequestMapping("/datasets")
+public class DataSetResource implements ModelQualityDataSetInterface, CrudInterface<DataSet> {
+
+    @SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(DataSetResource.class);
 
     @Autowired
     private DataSetEntityMgr dataSetEntityMgr;
 
-    private static final Log log = LogFactory.getLog(DataSetResource.class);
-
-    @RequestMapping(value = "/datasets", method = RequestMethod.GET)
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get DataSets")
-    public ResponseDocument<List<DataSet>> getDataSets() {
-        try {
-            List<DataSet> dataSets = dataSetEntityMgr.findAll();
-            return ResponseDocument.successResponse(dataSets);
-
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+    public List<DataSet> getDataSets() {
+        return getAll();
     }
 
-    @RequestMapping(value = "/datasets", method = RequestMethod.POST)
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert new DataSet")
-    public ResponseDocument<String> upsertDataSets(@RequestBody DataSet dataset) {
-        try {
-            dataSetEntityMgr.create(dataset);
-            return ResponseDocument.successResponse("OK");
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.successResponse("OK");
-        }
+    public String createDataSet(@RequestBody DataSet dataSet) {
+        return create(dataSet);
+    }
+    
+    @Override
+    @RequestMapping(value = "/{dataSetName}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get DataSet by name")
+    public DataSet getDataSetByName(String dataSetName) {
+        return getByName(dataSetName);
+    }
+
+    @Override
+    public DataSet createForProduction() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public DataSet getByName(String name) {
+        return dataSetEntityMgr.findByName(name);
+    }
+
+    @Override
+    public List<DataSet> getAll() {
+        return dataSetEntityMgr.findAll();
+    }
+
+    @Override
+    public String create(DataSet config, Object... params) {
+        dataSetEntityMgr.create(config);
+        return config.getName();
     }
 }

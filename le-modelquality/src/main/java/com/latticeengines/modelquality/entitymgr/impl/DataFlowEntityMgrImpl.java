@@ -32,4 +32,9 @@ public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implement
         }
     }
 
+    @Override
+    public DataFlow findByName(String dataFlowName) {
+        return dataFlowDao.findByField("NAME", dataFlowName);
+    }
+
 }

@@ -1,0 +1,13 @@
+{
+  "Name": "assignconversionratetoallcategoricalvalues",
+  "MainClassName": "AssignConversionRateToAllCategoricalValues",
+  "UniqueColumnTransformName": "",
+  "OperatesOnColumns": [
+    "Categorical"
+  ],
+  "NamedParameterListToInit": {
+    "columnsToTransform": "categoricalColumns",
+    "targetColumn": "targetColumn"
+  },
+  "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
+}
