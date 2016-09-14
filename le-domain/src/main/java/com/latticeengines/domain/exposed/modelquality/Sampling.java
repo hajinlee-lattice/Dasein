@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_SAMPLING")
+@Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Sampling implements HasName, HasPid, Fact, Dimension {
 

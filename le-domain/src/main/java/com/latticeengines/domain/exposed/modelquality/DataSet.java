@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -31,7 +32,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MODELQUALITY_DATASET")
+@Table(name = "MODELQUALITY_DATASET", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
 
@@ -138,10 +139,12 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
         return schemaInterpretation.name();
     }
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }

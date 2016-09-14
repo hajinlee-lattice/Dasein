@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.modelquality;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -11,23 +13,25 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_PIPELINE")
+@Table(name = "MODELQUALITY_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Pipeline implements HasName, HasPid, Fact, Dimension {
+public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable {
+
+    private static final long serialVersionUID = 1391478020765752403L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,12 +55,9 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PIPELINE_DRIVER", nullable = true)
     private String pipelineDriver;
 
-    @JsonProperty("pipeline_steps")
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
-    @JoinTable(name = "MODELQUALITY_PIPELINE_PIPELINE_STEP", //
-    joinColumns = { @JoinColumn(name = "PIPELINE_ID") }, //
-    inverseJoinColumns = { @JoinColumn(name = "PIPELINE_STEP_ID") })
-    private List<PipelineStep> pipelineSteps = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pk.pipeline")
+    private List<PipelineToPipelineSteps> pipelineSteps = new ArrayList<>();
 
     @Override
     public String getName() {
@@ -102,16 +103,42 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension {
         this.pipelineDriver = pipelineDriver;
     }
 
+    @JsonProperty("pipeline_steps")
     public List<PipelineStep> getPipelineSteps() {
-        return pipelineSteps;
+        List<PipelineStep> steps = new ArrayList<>();
+        for (PipelineToPipelineSteps p : pipelineSteps) {
+            steps.add(p.getPipelineStep());
+        }
+        return steps;
     }
 
+    @JsonProperty("pipeline_steps")
     public void setPipelineSteps(List<PipelineStep> pipelineSteps) {
-        this.pipelineSteps = pipelineSteps;
+        for (PipelineStep step : pipelineSteps) {
+            addPipelineStep(step);
+        }
     }
 
     public void addPipelineStep(PipelineStep pipelineStep) {
-        pipelineSteps.add(pipelineStep);
-        pipelineStep.addPipeline(this);
+        PipelineToPipelineSteps p = new PipelineToPipelineSteps();
+        p.setPipeline(this);
+        p.setPipelineStep(pipelineStep);
+        pipelineStep.addPipelineToPipelineStep(p);
+        pipelineSteps.add(p);
+    }
+    
+    public void addStepsFromPipelineJson(String pipelineContents) {
+        PipelineJson json = JsonUtils.deserialize(pipelineContents, PipelineJson.class);
+        Map<String, PipelineStep> steps = json.getSteps();
+        
+        for (Map.Entry<String, PipelineStep> entry : steps.entrySet()) {
+            addPipelineStep(entry.getValue());
+        }
+        
+    }
+    
+    @JsonIgnore
+    public List<PipelineToPipelineSteps> getPipelineToPipelineSteps() {
+        return pipelineSteps;
     }
 }

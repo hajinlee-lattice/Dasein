@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,7 +23,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_ANALYTIC_TEST")
+@Table(name = "MODELQUALITY_ANALYTIC_TEST", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AnalyticTest implements HasName, HasPid {
 

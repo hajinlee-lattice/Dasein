@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.modelquality;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +14,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Fetch;
@@ -39,9 +40,11 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  *
  */
 @Entity
-@Table(name = "MODELQUALITY_PIPELINE_STEP")
+@Table(name = "MODELQUALITY_PIPELINE_STEP", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class PipelineStep implements HasName, HasPid {
+public class PipelineStep implements HasName, HasPid, Serializable {
+
+    private static final long serialVersionUID = 1597877363806777532L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,10 +67,10 @@ public class PipelineStep implements HasName, HasPid {
     @JsonProperty("ColumnTransformFilePath")
     @Column(name = "SCRIPT", unique = true, nullable = false)
     private String script;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pipelineSteps")
+    
     @JsonIgnore
-    private List<Pipeline> pipelines = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.pipelineStep")
+    private List<PipelineToPipelineSteps> pipelines = new ArrayList<>();
 
     @JsonProperty("pipeline_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "pipelineStep")
@@ -114,14 +117,6 @@ public class PipelineStep implements HasName, HasPid {
         this.pid = pid;
     }
 
-    public void addPipeline(Pipeline pipeline) {
-        pipelines.add(pipeline);
-    }
-
-    public List<Pipeline> getPipelines() {
-        return pipelines;
-    }
-
     public List<PipelinePropertyDef> getPipelinePropertyDefs() {
         return pipelinePropertyDefs;
     }
@@ -133,10 +128,6 @@ public class PipelineStep implements HasName, HasPid {
     public void addPipelinePropertyDef(PipelinePropertyDef pipelinePropertyDef) {
         pipelinePropertyDefs.add(pipelinePropertyDef);
         pipelinePropertyDef.setPipelineStep(this);
-    }
-
-    public void setPipeline(List<Pipeline> pipelines) {
-        this.pipelines = pipelines;
     }
 
     public String getMainClassName() {
@@ -171,7 +162,7 @@ public class PipelineStep implements HasName, HasPid {
         this.sortKey = sortKey;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @JsonProperty("NamedParameterListToInit")
     public Map<String, Object> getNamedParameterListToInit() {
         if (namedParameterListToInit == null) {
@@ -183,6 +174,18 @@ public class PipelineStep implements HasName, HasPid {
     @JsonProperty("NamedParameterListToInit")
     public void setNamedParameterListToInit(Map<String, Object> namedParameterListToInit) {
         this.namedParameterListToInit = JsonUtils.serialize(namedParameterListToInit);
+    }
+
+    public List<PipelineToPipelineSteps> getPipelines() {
+        return pipelines;
+    }
+
+    public void setPipelines(List<PipelineToPipelineSteps> pipelines) {
+        this.pipelines = pipelines;
+    }
+
+    public void addPipelineToPipelineStep(PipelineToPipelineSteps p) {
+        pipelines.add(p);
     }
 
 }
