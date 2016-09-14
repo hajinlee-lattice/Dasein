@@ -1,7 +1,7 @@
 angular.module('lp.marketo.enrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility, EnrichmentData){
+.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility, EnrichmentData, MarketoCredentials){
     var vm = this;
 
     angular.extend(vm, {
@@ -13,16 +13,20 @@ angular.module('lp.marketo.enrichment', [
         required_fields: [],
         selected_fields: {},
         match_fields: {},
-        pagesize: 5,
+        enrichments: EnrichmentData.data,
+        pagesize: 5
     });
 
-    vm.webhook_name = 'name';
+    var marketoData = MarketoCredentials.resultObj[0];
+    //console.log(marketoData);
+
+    vm.webhook_name = 'Lattice Lead Enrichment';
     vm.webhook_url = 'url';
-    vm.webhook_request_type = 'type';
-    vm.webhook_request_token = 'token';
-    vm.webhook_response_type = 'type';
-    vm.custom_header_type = 'type';
-    vm.custom_header_value = 'value';
+    vm.webhook_request_type = 'POST';
+    vm.webhook_request_token = 'JSON';
+    vm.webhook_response_type = 'JSON';
+    vm.custom_header_type = 'Content-Type';
+    vm.custom_header_value = 'application/json';
 
     vm.match_fields = {
         email_or_website: {
@@ -128,7 +132,7 @@ angular.module('lp.marketo.enrichment', [
                 vm.required_fields.push(key);
             }
         });
-        vm.enrichments = EnrichmentData.data;
+        console.log()
     }
 
     vm.init();

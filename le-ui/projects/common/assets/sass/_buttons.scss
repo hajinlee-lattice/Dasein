@@ -293,7 +293,9 @@ Use this structure for angled buttons:
         margin-bottom: -1px;
         background: #fff;
         z-index: 2;
-        pointer-events: none;
+        &:not(.clickable) {
+          pointer-events: none;
+        }
         span {
             color: #333;
         }

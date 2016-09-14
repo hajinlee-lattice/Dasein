@@ -8,19 +8,19 @@
         </div>
         <div class="subheader-container">
             <ul class="subheader">
-                <li class="categories">
-                    <select class="form-control" ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory(); vm.metadata.current = 1;">
-                        <option value="">{{vm.category ? vm.label.categories_see_all : vm.label.categories_select_all}}</option>
-                    </select>
-                </li>
                 <li class="query">
                     <div class="ng-search">
-                        <input type="text" class="form-control" placeholder="Search" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
+                        <input type="text" class="form-control" placeholder="Search all {{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                         <a class="button icon-button white-button" ng-click="vm.query.length ? vm.query = null : ''">
                             <span class="fa fa-search" ng-show="!vm.query.length"></span>
                             <span class="fa fa-times" ng-show="vm.query.length"></span>
                         </a>
                     </div>
+                </li>
+                <li class="categories">
+                    <select class="form-control" ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory(); vm.metadata.current = 1;">
+                        <option value="">{{vm.category ? vm.label.categories_see_all : vm.label.categories_select_all}}</option>
+                    </select>
                 </li>
                 <li class="menu" ng-click="vm.clickPaginate()">
                     <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
@@ -31,6 +31,7 @@
                     </a>
                 </li>
             </ul>
+            <!--
             <ul class="subheader"  ng-animate-children="true">
                 <li class="totals">
                     <ul>
@@ -49,6 +50,7 @@
                     <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
             </ul>
+            -->
         </div>
         <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
             <div class="twelve columns">
@@ -68,20 +70,34 @@
             | startFrom: (vm.metadata.current - 1) * vm.pagesize 
             | limitTo: vm.pagesize" 
             ng-class="{'active': enrichment.IsSelected}">
-                <div 
-                    class="box-inner">
-                    <div data-corner-ribbon="premium" ng-if="enrichment.IsPremium"><strong>premium</strong></div>
-                    <div class="ico-container"><span class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></span></div>
-                    <h2>
-                        <em>{{vm.fieldType(enrichment.FieldType)}}</em>
-                        <strong>{{enrichment.DisplayName}}</strong>
-                    </h2>
-                    <p>{{enrichment.Description}}</p>
-                    <button class="button" 
-                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty}" 
-                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
-                        <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
-                    </button>
+                <div class="box-inner">
+                    <div class="header">
+                        <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></div>
+                        <ul class="categories">
+                            <li ng-if="enrichment.Category">{{enrichment.Category}}</li>
+                            <li>Sub Category</li>
+                        </ul>
+                        <ul class="tags">
+                            <li ng-if="enrichment.IsPremium" class="premium">premium</li>
+                        </ul>
+                        <h2>
+                            <strong>{{enrichment.DisplayName}}</strong>
+                        </h2>
+                    </div>
+                    <p class="description">{{enrichment.Description}}</p>
+                    <div class="controls">
+                        <div class="field-type">
+                            <strong>Field Type</strong>
+                            <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                        </div>
+                        <div class="toggle">
+                            <button class="button" 
+                                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty, 'selected': enrichment.IsSelected}" 
+                                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+                                <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </li>
             <li ng-show="!filteredList.length">

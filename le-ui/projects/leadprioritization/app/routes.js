@@ -109,7 +109,7 @@ angular
                     ModelStore.getModels(true).then(function(result) {
                         deferred.resolve(result);
                     });
-
+                    
                     return deferred.promise;
                 }
             },
@@ -496,6 +496,15 @@ angular
 
                             return deferred.promise;
                         },
+                        MarketoCredentials: function($q, MarketoService) {
+                            var deferred = $q.defer();
+
+                            MarketoService.GetMarketoCredentials().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
                     },
                     controller: 'MarketoEnrichmentController',
                     controllerAs: 'vm',

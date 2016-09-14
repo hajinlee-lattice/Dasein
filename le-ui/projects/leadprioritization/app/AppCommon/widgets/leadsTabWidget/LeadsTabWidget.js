@@ -9,7 +9,6 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
 ])
 .controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, TenantIdParsingUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, NavUtility) {
     $scope.ResourceUtility = ResourceUtility;
-
     var clientSession = BrowserStorageUtility.getClientSession();
     var flags = FeatureFlagService.Flags();
     $scope.showAdminLink = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
