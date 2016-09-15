@@ -148,9 +148,8 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * BEGIN: Verify main test tenant
-     * ==================================================
+     * ================================================== BEGIN: Verify main
+     * test tenant ==================================================
      */
 
     // ==================================================
@@ -191,15 +190,13 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * END: Verify main test tenant
-     * ==================================================
+     * ================================================== END: Verify main test
+     * tenant ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant creation methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant creation
+     * methods ==================================================
      */
 
     private void provisionEndToEndTestTenants() {
@@ -267,8 +264,8 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         // Modeling
         SerializableDocumentDirectory modelingConfig = serviceService
-                        .getDefaultServiceConfig(ModelingComponent.componentName);
-                modelingConfig.setRootPath("/" + ModelingComponent.componentName);
+                .getDefaultServiceConfig(ModelingComponent.componentName);
+        modelingConfig.setRootPath("/" + ModelingComponent.componentName);
 
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
@@ -294,15 +291,13 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * END: Tenant creation methods
-     * ==================================================
+     * ================================================== END: Tenant creation
+     * methods ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant verification methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant
+     * verification methods ==================================================
      */
     private void verifyZKState() {
         ExecutorService executor = Executors.newFixedThreadPool(6);
@@ -323,8 +318,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                             || (jamsSkipped && component.equals(BardJamsComponent.componentName))
                             || component.equals(EaiComponent.componentName)
                             || component.equals(MetadataComponent.componentName)
-                            || component.equals(ModelingComponent.componentName)
-                            ) {
+                            || component.equals(ModelingComponent.componentName)) {
                         return BootstrapState.constructOKState(1);
                     } else {
                         return waitUntilStateIsNotInitial(contractId, tenantId, component, 600);
@@ -411,15 +405,13 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ==================================================
-     * END: Tenant verification methods
-     * ==================================================
+     * ================================================== END: Tenant
+     * verification methods ==================================================
      */
 
     /**
-     * ==================================================
-     * BEGIN: Tenant clean up methods
-     * ==================================================
+     * ================================================== BEGIN: Tenant clean up
+     * methods ==================================================
      */
     public void cleanup() throws Exception {
         try {
@@ -437,11 +429,13 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         try {
+            log.info(String.format("Begin deleting the PLS tenant %s", tenantId));
             plsComponentDeploymentTestNG.deletePLSTestTenant(PLSTenantId);
             // let GA recover from error deletion
             Thread.sleep(5000L);
+            log.info(String.format("Deleted the PLS tenant %s", tenantId));
         } catch (Exception e) {
-            log.warn("Deleting PLSTestTenant " + tenantId + " encountered an exception.", e);
+            log.error("Deleting PLSTestTenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
@@ -449,26 +443,29 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private void deleteVisiDBDLTenants() {
         visiDBDLComponentDeploymentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenantId);
         try {
+            log.info(String.format("Begin deleting the VDB/DL tenant %s", tenantId));
             visiDBDLComponentDeploymentTestNG.deleteVisiDBDLTenantWithRetry(tenantId);
+            log.info(String.format("Deleted VDB/DL tenant %s", tenantId));
         } catch (Exception e) {
-            log.warn("Deleting VDB/DL tenant " + tenantId + " encountered an exception.", e);
+            log.error("Deleting VDB/DL tenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
 
     private void deleteBardJamesTenant() throws IOException, InterruptedException {
         try {
+            log.info(String.format("Begin deleting the BardJams for tenant %s", tenantId));
             BardJamsTenant jamsTenant = bardJamsEntityMgr.findByTenant(tenantId);
             bardJamsEntityMgr.delete(jamsTenant);
+            log.info(String.format("Deleted the BardJams for tenant %s", tenantId));
         } catch (Exception e) {
-            log.warn("Deleting BardJams tenant " + tenantId + " encountered an exception.", e);
+            log.error("Deleting BardJams tenant " + tenantId + " encountered an exception.", e);
             // ignore
         }
     }
 
     /**
-     * ==================================================
-     * END: Tenant clean up methods
-     * ==================================================
+     * ================================================== END: Tenant clean up
+     * methods ==================================================
      */
 }

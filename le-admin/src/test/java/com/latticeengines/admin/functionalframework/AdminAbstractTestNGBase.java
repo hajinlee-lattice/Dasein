@@ -115,8 +115,10 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected void deleteTenant(String contractId, String tenantId) throws Exception {
+        log.info(String.format("Begin deleting the tenant %s", tenantId));
         String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
         restTemplate.delete(url, new HashMap<>());
+        log.info(String.format("Successfully deleted the tenant %s", tenantId));
     }
 
     protected void createTenant(String contractId, String tenantId) throws Exception {
