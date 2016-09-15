@@ -302,6 +302,15 @@ public enum LedpCode {
     LEDP_21025("Problem getting query result data via DataLoader REST: {0}"), //
     LEDP_21026("Problem getting source table metadata via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21027("Problem getting source table metadata via DataLoader REST: {0}"), //
+    LEDP_21028("Invalid Marketo REST Identity endpoint: {0}"), //
+    LEDP_21029("Problem communicating with Marketo REST Identity endpoint: {0}"), //
+    LEDP_21030("Invalid Marketo REST clientId or clientSecret: {0} {1}"), //
+    LEDP_21031("Invalid Marketo REST endpoint: {0}"), //
+    LEDP_21032("Problem communicating with Marketo REST endpoint: {0}"), //
+    LEDP_21033("Problem with Marketo REST endpoint: {0}"), //
+    LEDP_21034("Invalid Marketo SOAP endpoint: {0}"), //
+    LEDP_21035("Problem communicating with Marketo SOAP endpoint: {0}"), //
+    LEDP_21036("Invalid Marketo SOAP User ID or Encryption Key: {0} {1}"), //
 
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //
