@@ -143,12 +143,20 @@ public enum GrantedRight implements GrantedAuthority {
     }, //
     VIEW_PLS_MARKETO_CREDENTIAL {
         @Override
-        public String getAuthority() { return "View_PLS_MarketoCredential"; }
+        public String getAuthority() {
+            return "View_PLS_MarketoCredential";
+        }
     }, //
     EDIT_PLS_MARKETO_CREDENTIAL {
         @Override
         public String getAuthority() {
             return "Edit_PLS_MarketoCredential";
+        }
+    }, //
+    VIEW_PLS_SURESHOT {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Sureshot";
         }
     };
 

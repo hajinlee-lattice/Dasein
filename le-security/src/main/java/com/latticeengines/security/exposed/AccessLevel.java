@@ -6,8 +6,8 @@ import java.util.List;
 public enum AccessLevel {
     THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
             GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
-            GrantedRight.EDIT_PLS_CRMCREDENTIAL //
-            )), //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
+            GrantedRight.VIEW_PLS_SURESHOT)), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
@@ -20,7 +20,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS //
-            ) //
+    ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -39,9 +39,10 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.VIEW_PLS_SURESHOT, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
-            ) //
+    ) //
     ), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -55,9 +56,9 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
-            GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.VIEW_PLS_QUOTAS //
-            ) //
+    ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -78,10 +79,11 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.VIEW_PLS_SURESHOT, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
-            )), //
+    )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_DATA, //
@@ -102,11 +104,12 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIAL, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIAL, //
+            GrantedRight.VIEW_PLS_SURESHOT, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
-            )); //
+    )); //
 
     private List<GrantedRight> grantedRights;
 

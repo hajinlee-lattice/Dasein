@@ -28,79 +28,72 @@ public class MarketoCredential extends Credential {
     private String restClientSecret;
     private Enrichment enrichment;
 
-    @JsonProperty("SoapEndpoint")
+    @JsonProperty("soap_endpoint")
     @Column(name = "SOAP_ENDPOINT", nullable = false)
     public String getSoapEndpoint() {
         return soapEndpoint;
     }
 
-    @JsonProperty("SoapEndpoint")
     public void setSoapEndpoint(String soapEndpoint) {
         this.soapEndpoint = soapEndpoint;
     }
 
-    @JsonProperty("SoapUserId")
+    @JsonProperty("soap_user_id")
     @Column(name = "SOAP_USER_ID", nullable = false)
     public String getSoapUserId() {
         return soapUserId;
     }
 
-    @JsonProperty("SoapUserId")
     public void setSoapUserId(String soapUserId) {
         this.soapUserId = soapUserId;
     }
 
-    @JsonProperty("SoapEncrytionKey")
+    @JsonProperty("soap_encrytion_key")
     @Column(name = "SOAP_ENCRYTION_KEY", nullable = false)
     public String getSoapEncrytionKey() {
         return soapEncrytionKey;
     }
 
-    @JsonProperty("SoapEncrytionKey")
     public void setSoapEncrytionKey(String soapEncrytionKey) {
         this.soapEncrytionKey = soapEncrytionKey;
     }
 
-    @JsonProperty("RestEndpoint")
+    @JsonProperty("rest_endpoint")
     @Column(name = "REST_ENDPOINT", nullable = false)
     public String getRestEndpoint() {
         return restEndpoint;
     }
 
-    @JsonProperty("RestEndpoint")
     public void setRestEndpoint(String restEndpoint) {
         this.restEndpoint = restEndpoint;
     }
 
-    @JsonProperty("RestIdentityEndpoint")
+    @JsonProperty("rest_identity_endpoint")
     @Column(name = "REST_IDENTITY_ENDPOINT", nullable = false)
     public String getRestIdentityEnpoint() {
         return restIdentityEnpoint;
     }
 
-    @JsonProperty("RestIdentityEndpoint")
     public void setRestIdentityEnpoint(String restIdentityEnpoint) {
         this.restIdentityEnpoint = restIdentityEnpoint;
     }
 
-    @JsonProperty("RestClientId")
+    @JsonProperty("rest_client_id")
     @Column(name = "REST_CLIENT_ID", nullable = false)
     public String getRestClientId() {
         return restClientId;
     }
 
-    @JsonProperty("RestClientId")
     public void setRestClientId(String restClientId) {
         this.restClientId = restClientId;
     }
 
-    @JsonProperty("RestClientSecret")
+    @JsonProperty("rest_client_secret")
     @Column(name = "REST_CLIENT_SECRET", nullable = false)
     public String getRestClientSecret() {
         return restClientSecret;
     }
 
-    @JsonProperty("RestClientSecret")
     public void setRestClientSecret(String restClientSecret) {
         this.restClientSecret = restClientSecret;
     }
@@ -108,12 +101,11 @@ public class MarketoCredential extends Credential {
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_ENRICHMENT_ID", nullable = false)
-    @JsonProperty("Enrichment")
+    @JsonProperty("enrichment")
     public Enrichment getEnrichment() {
         return enrichment;
     }
 
-    @JsonProperty("Enrichment")
     public void setEnrichment(Enrichment enrichment) {
         this.enrichment = enrichment;
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -17,13 +18,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -32,13 +31,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "ENRICHMENT")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId {
+public class Enrichment implements HasPid, HasTenant, HasTenantId {
 
     private Long pid;
-    private String id;
     private Long tenantId;
     private Tenant tenant;
-    private List<MarketoMatchField> marketoMatchFields;
+    private List<MarketoMatchField> marketoMatchFields = new ArrayList<>();
     private String tenantCredentialGUID;
     private String webhookUrl;
 
@@ -56,20 +54,6 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
-    }
-
-    @Override
-    @JsonProperty("Id")
-    @Column(name = "ENRICHMENT_ID", unique = true, nullable = false)
-    @Index(name = "ENRICHMENT_ID_IDX")
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    @JsonProperty("Id")
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override
@@ -102,7 +86,7 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
 
     @OneToMany(cascade = CascadeType.MERGE, mappedBy = "enrichment", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("MarketoMatchFields")
+    @JsonProperty("marketo_match_fields")
     public List<MarketoMatchField> getMarketoMatchFields() {
         return marketoMatchFields;
     }
@@ -111,8 +95,12 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
         this.marketoMatchFields = marketoMatchFields;
     }
 
+    public void addMarketoMatchField(MarketoMatchField marketoMatchField) {
+        this.marketoMatchFields.add(marketoMatchField);
+    }
+
     @Transient
-    @JsonProperty("TenantCredentialGUID")
+    @JsonProperty("tenant_credential_guid")
     public String getTenantCredentialGUID() {
         return tenantCredentialGUID;
     }
@@ -122,7 +110,7 @@ public class Enrichment implements HasPid, HasId<String>, HasTenant, HasTenantId
     }
 
     @Transient
-    @JsonProperty("WebhookUrl")
+    @JsonProperty("webhook_url")
     public String getWebhookUrl() {
         return webhookUrl;
     }

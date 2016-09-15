@@ -4,6 +4,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -81,7 +83,8 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
         this.tenantId = tenantId;
     }
 
-    @JsonProperty("MarketoMatchFieldName")
+    @JsonProperty("marketo_match_field_name")
+    @Enumerated(EnumType.STRING)
     @Column(name = "MARKETO_MATCH_FIELD_NAME", nullable = false)
     public MarketoMatchFieldName getMarketoMatchFieldName() {
         return marketoMatchFieldName;
@@ -91,8 +94,8 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
         this.marketoMatchFieldName = marketoMatchFieldName;
     }
 
-    @JsonProperty("MarketoFieldName")
-    @Column(name = "MARKETO_FIELD_NAME", nullable = false)
+    @JsonProperty("marketo_field_name")
+    @Column(name = "MARKETO_FIELD_NAME", nullable = true)
     public String getMarketoFieldName() {
         return marketoFieldName;
     }
