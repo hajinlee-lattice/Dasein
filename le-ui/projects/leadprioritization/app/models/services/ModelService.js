@@ -464,14 +464,13 @@ angular.module('mainApp.models.services.ModelService', [
         if (sampleLeads == null) {
             return null;
         }
-        
         var toReturn = [];
         for (var i = 0; i < sampleLeads.length; i++) {
             var lead = sampleLeads[i];
             
             var leadToDisplay = {
                 Company: lead.Company,
-                Contact: lead.FirstName + " " + lead.LastName,
+                Contact: lead.Contact || (lead.FirstName + " " + lead.LastName),
                 Converted: lead.Converted,
                 Score: lead.Score
             };
