@@ -25,17 +25,20 @@ public class WorkflowUtils {
                 // pass
             }
         }
-
-        job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
+        // We only trust the WorkflowJob status if it is non-null
+        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus());
+        if (status != null) {
+            job.setJobStatus(getJobStatusFromFinalApplicationStatus(workflowJob.getStatus()));
+        }
     }
 
     private static JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status) {
         if (YarnUtils.FAILED_STATUS.contains(status)) {
             return JobStatus.FAILED;
-        } else if (status == FinalApplicationStatus.UNDEFINED || status == null) {
+        } else if (status == FinalApplicationStatus.UNDEFINED) {
             return JobStatus.PENDING;
         } else {
-            return JobStatus.COMPLETED;
+            return null;
         }
     }
 }

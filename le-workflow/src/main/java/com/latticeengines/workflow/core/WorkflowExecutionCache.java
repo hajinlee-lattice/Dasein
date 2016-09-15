@@ -13,10 +13,8 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -29,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -43,6 +40,7 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
