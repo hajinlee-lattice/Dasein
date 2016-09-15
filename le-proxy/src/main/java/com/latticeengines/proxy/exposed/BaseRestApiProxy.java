@@ -12,6 +12,7 @@ import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
@@ -43,7 +44,11 @@ public abstract class BaseRestApiProxy {
         this.hostport = hostport;
         this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        setErrorHandler(new GetResponseErrorHandler());
+    }
+
+    protected void setErrorHandler(ResponseErrorHandler handler) {
+        restTemplate.setErrorHandler(handler);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {

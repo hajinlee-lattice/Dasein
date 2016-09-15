@@ -1,15 +1,25 @@
 package com.latticeengines.proxy.exposed.scoringapi;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResponseErrorHandler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -25,6 +35,29 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("internalScoringApiProxy")
 public class InternalScoringApiProxy extends BaseRestApiProxy implements InternalScoringApiInterface {
+
+    private static class ScoringErrorHandler implements ResponseErrorHandler {
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            return response.getStatusCode() != HttpStatus.OK;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IOUtils.copy(response.getBody(), baos);
+            String body = new String(baos.toByteArray());
+            try {
+                JsonNode node = new ObjectMapper().readTree(body);
+            } catch (Exception e) {
+                // Throw a non-LedpException to allow for retries
+                throw new RuntimeException(String.format("Received status code %s from scoring api (%s)",
+                        response.getStatusCode(), body));
+            }
+            throw new RemoteLedpException(null, response.getStatusCode(), LedpCode.LEDP_00002, body);
+        }
+    }
+
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String UTC = "UTC";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
@@ -35,6 +68,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     public InternalScoringApiProxy() {
         super(PropertyUtils.getProperty("proxy.scoringapi.rest.endpoint.hostport"), "/scoreinternal/score");
+        setErrorHandler(new ScoringErrorHandler());
     }
 
     @Override
