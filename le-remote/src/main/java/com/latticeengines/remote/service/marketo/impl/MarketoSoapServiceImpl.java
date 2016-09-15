@@ -64,8 +64,9 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
             if (!fieldMetadata.isIsReadonly() && INCLUDED_DATATYPES.contains(fieldMetadata.getDataType().toLowerCase())) {
                 LeadField field = new LeadField();
                 field.setDataType(fieldMetadata.getDataType().toLowerCase());
-                field.setDisplayName(fieldMetadata.getSourceObject() + " " + fieldMetadata.getDisplayName());
+                field.setDisplayName(fieldMetadata.getDisplayName());
                 field.setApiName(fieldMetadata.getSourceObject() + "." + fieldMetadata.getDisplayName());
+                field.setSourceObject(fieldMetadata.getSourceObject());
                 fields.add(field);
             }
         }
@@ -131,6 +132,7 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
 
         new MarketoSoapServiceImpl().validateMarketoSoapCredentials(soapEndPoint, userId, encryptionKey);
         List<LeadField> fields = new MarketoSoapServiceImpl().getLeadFields(soapEndPoint, userId, encryptionKey);
+        System.out.println(JsonUtils.serialize(fields));
 
         List<String> displayNamesOnly = new ArrayList<>();
         for (LeadField leadField : fields) {

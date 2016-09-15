@@ -5,6 +5,7 @@ public class LeadField {
     private String apiName;
     private String displayName;
     private String dataType;
+    private String sourceObject;
 
     public String getApiName() {
         return apiName;
@@ -23,5 +24,11 @@ public class LeadField {
     }
     public void setDataType(String dataType) {
         this.dataType = dataType;
+    }
+    public String getSourceObject() {
+        return sourceObject;
+    }
+    public void setSourceObject(String sourceObject) {
+        this.sourceObject = sourceObject;
     }
 }
