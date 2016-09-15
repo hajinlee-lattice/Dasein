@@ -138,7 +138,7 @@ public class ColumnSelection {
             return getName() + "_" + version + ".json";
         }
 
-        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS);
+        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, DNB);
 
         public static Predefined getLegacyDefaultSelection() {
             return DerivedColumns;
