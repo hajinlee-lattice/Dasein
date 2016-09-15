@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to get samplings parameters")
 @RestController
-public class SamplingResource implements ModelQualitySamplingInterface {
+public class SamplingResource implements ModelQualitySamplingInterface, CrudInterface<Sampling> {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(SamplingResource.class);
 
@@ -37,7 +37,7 @@ public class SamplingResource implements ModelQualitySamplingInterface {
     @ResponseBody
     @ApiOperation(value = "Get list of sampling configurations")
     public List<Sampling> getSamplingConfigs() {
-        return samplingEntityMgr.findAll();
+        return getAll();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class SamplingResource implements ModelQualitySamplingInterface {
     @ResponseBody
     @ApiOperation(value = "Get list of sampling configurations")
     public Sampling getSamplingConfigByName(@PathVariable String samplingConfigName) {
-        return samplingEntityMgr.findByName(samplingConfigName);
+        return getByName(samplingConfigName);
     }
 
     @Override
@@ -53,8 +53,7 @@ public class SamplingResource implements ModelQualitySamplingInterface {
     @ResponseBody
     @ApiOperation(value = "Create sampling configuration")
     public String createSamplingConfig(@RequestBody Sampling samplingConfig) {
-        samplingEntityMgr.create(samplingConfig);
-        return samplingConfig.getName();
+        return create(samplingConfig);
     }
 
     @Override
@@ -62,7 +61,28 @@ public class SamplingResource implements ModelQualitySamplingInterface {
     @ResponseBody
     @ApiOperation(value = "Create production sampling config")
     public Sampling createSamplingFromProduction() {
+        return createForProduction();
+    }
+
+    @Override
+    public Sampling createForProduction() {
         return samplingService.createLatestProductionSamplingConfig();
+    }
+
+    @Override
+    public Sampling getByName(String name) {
+        return samplingEntityMgr.findByName(name);
+    }
+
+    @Override
+    public List<Sampling> getAll() {
+        return samplingEntityMgr.findAll();
+    }
+
+    @Override
+    public String create(Sampling config, Object... params) {
+        samplingEntityMgr.create(config);
+        return config.getName();
     }
 
 }

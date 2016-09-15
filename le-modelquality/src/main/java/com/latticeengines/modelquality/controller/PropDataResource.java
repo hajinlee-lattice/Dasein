@@ -38,7 +38,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Get PropData configurations")
     public List<PropData> getPropDataConfigs() {
-        return propDataEntityMgr.findAll();
+        return getAll();
     }
 
     @Override
@@ -46,8 +46,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Create PropData configuration")
     public String createPropDataConfig(@RequestBody PropData propDataConfig) {
-        propDataEntityMgr.create(propDataConfig);
-        return propDataConfig.getName();
+        return create(propDataConfig);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Create PropData configuration from production")
     public PropData createPropDataConfigFromProduction() {
-        return propDataService.createLatestProductionPropData();
+        return createForProduction();
     }
     
     @Override
@@ -63,31 +62,28 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Get PropData configuration by name")
     public PropData getPropDataConfigByName(String propDataConfigName) {
-        return propDataEntityMgr.findByName(propDataConfigName);
+        return getByName(propDataConfigName);
     }
 
     @Override
     public PropData createForProduction() {
-        // TODO Auto-generated method stub
-        return null;
+        return propDataService.createLatestProductionPropData();
     }
 
     @Override
     public PropData getByName(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        return propDataEntityMgr.findByName(name);
     }
 
     @Override
     public List<PropData> getAll() {
-        // TODO Auto-generated method stub
-        return null;
+        return propDataEntityMgr.findAll();
     }
 
     @Override
     public String create(PropData config, Object... params) {
-        // TODO Auto-generated method stub
-        return null;
+        propDataEntityMgr.create(config);
+        return config.getName();
     }
     
 }
