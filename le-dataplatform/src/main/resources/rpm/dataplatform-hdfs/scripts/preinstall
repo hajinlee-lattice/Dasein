@@ -14,7 +14,6 @@ fi
 
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
-rm -rf /tmp/datascientist
 
 if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
     VERSION=${STACK_NAME}/${VERSION}
@@ -34,7 +33,6 @@ hdfs dfs -rm -f -r /app/$VERSION/workflowapi || true
 hdfs dfs -rm -f -r /app/$VERSION/propdata || true
 hdfs dfs -rm -f -r /app/$VERSION/proxy || true
 hdfs dfs -rm -f -r /app/$VERSION/monitor || true
-hdfs dfs -rm -f -r /datascientist
 
 hdfs dfs -mkdir -p /app/$VERSION/dataflowapi/lib
 hdfs dfs -mkdir -p /app/$VERSION/dataplatform/lib
@@ -49,4 +47,3 @@ hdfs dfs -mkdir -p /app/$VERSION/propdata/lib
 hdfs dfs -mkdir -p /app/$VERSION/datacloud/lib
 hdfs dfs -mkdir -p /app/$VERSION/proxy
 hdfs dfs -mkdir -p /app/$VERSION/monitor
-hdfs dfs -mkdir -p /datascientist
