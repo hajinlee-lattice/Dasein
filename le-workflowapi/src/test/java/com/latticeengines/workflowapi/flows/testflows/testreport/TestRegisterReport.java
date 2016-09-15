@@ -17,7 +17,7 @@ public class TestRegisterReport extends BaseReportStep<BaseReportStepConfigurati
 
     @Override
     protected ObjectNode getJson() {
-        putOutputValue("Some", "Output");
+        saveOutputValue("Some", "Output");
 
         ObjectNode node = new ObjectMapper().createObjectNode();
         node.put("foo", "bar");

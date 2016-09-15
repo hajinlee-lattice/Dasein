@@ -15,8 +15,8 @@ public class RunScoreTableDataFlow extends RunDataFlow<RunScoreTableDataFlowConf
     public void execute() {
         setupDataFlow();
         super.execute();
-        executionContext.putString(EVENT_TABLE, configuration.getTargetTableName());
-        executionContext.putString(ATTR_LEVEL_TYPE, "AVG");
+        putStringValueInContext(EVENT_TABLE, configuration.getTargetTableName());
+        putStringValueInContext(ATTR_LEVEL_TYPE, "AVG");
     }
     
     private void setupDataFlow() {

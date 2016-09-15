@@ -9,7 +9,7 @@ public abstract class CreateSummaryWorkflow<T extends RunAttributeLevelSummaryDa
     private RunAttributeLevelSummaryDataFlow runAttributeLevelSummaryDataFlow;
 
     protected String getEventTable() {
-        return executionContext.getString(EVENT_TABLE);
+        return getStringValueFromContext(EVENT_TABLE);
     }
 
     protected Object[] createReportParams(String aggregationType, String[] attrs) {

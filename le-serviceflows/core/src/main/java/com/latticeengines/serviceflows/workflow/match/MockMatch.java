@@ -35,7 +35,7 @@ public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
     public void execute() {
         log.info("Inside MockMatch execute()");
 
-        DbCreds dbCreds = JsonUtils.deserialize(executionContext.getString(DB_CREDS), DbCreds.class);
+        DbCreds dbCreds = getObjectFromContext(DB_CREDS, DbCreds.class);
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
@@ -53,7 +53,7 @@ public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
                copyTables.execute();
                connection.commit();
 
-               executionContext.putLong(MATCH_COMMAND_ID, MATCH_COMMAND_ID_NUMBER);
+               putLongValueInContext(MATCH_COMMAND_ID, MATCH_COMMAND_ID_NUMBER);
                ensureHDFSFilesAreDeleted();
            } catch (SQLException exp) {
                log.warn(String.format("Exception opening a connection with jdbcUrl: %s", dbCreds.getJdbcUrl()), exp);

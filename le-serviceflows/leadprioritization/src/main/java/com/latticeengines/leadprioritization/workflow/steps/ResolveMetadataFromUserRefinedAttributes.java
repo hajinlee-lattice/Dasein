@@ -25,12 +25,12 @@ public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<R
     @Override
     public void execute() {
         List<Attribute> userRefinedAttributes = configuration.getUserRefinedAttributes();
-        Table eventTable = JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
+        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         log.info("from user:" + JsonUtils.serialize(userRefinedAttributes));
         log.info("from event table:" + eventTable);
         eventTable = mergeUserRefinedAttributes(userRefinedAttributes, eventTable);
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
-        putObjectInContext(EVENT_TABLE, JsonUtils.serialize(eventTable));
+        putObjectInContext(EVENT_TABLE, eventTable);
     }
 
     public Table mergeUserRefinedAttributes(List<Attribute> userRefinedAttributes, Table eventTable){

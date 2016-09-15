@@ -30,7 +30,7 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
     @Override
     public void execute() {
         log.info("Inside MockProfileAndModel execute()");
-        Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
 
         Map<String, String> modelApplicationIdToEventColumn;
         try {
@@ -39,7 +39,7 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
             throw new LedpException(LedpCode.LEDP_28007, e, new String[] { eventTable.getName() });
         }
 
-        executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
+        putObjectInContext(MODEL_APP_IDS, modelApplicationIdToEventColumn);
 
     }
 

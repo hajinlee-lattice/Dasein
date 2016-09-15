@@ -33,11 +33,13 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
@@ -83,6 +85,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Autowired
     protected JobProxy jobProxy;
+
+    @Autowired
+    protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
@@ -163,7 +168,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         List<DataRule> dataRules = null;
         if (executionContext.containsKey(DATA_RULES)) {
-            dataRules = (List<DataRule>) executionContext.get(DATA_RULES);
+            dataRules = (List<DataRule>) getObjectFromContext(DATA_RULES, List.class);
         } else {
             dataRules = modelStepConfiguration.getDataRules();
         }
@@ -194,7 +199,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     @SuppressWarnings("unchecked")
-    protected void putOutputValue(String key, String val) {
+    private void putOutputValue(String key, String val) {
         Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
         if (map == null) {
             map = new HashMap<>();
@@ -203,12 +208,31 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         putObjectInContext(WorkflowContextConstants.OUTPUTS, map);
     }
 
-    @SuppressWarnings("unchecked")
+    protected void saveOutputValue(String key, String val) {
+        putOutputValue(key, val);
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
+        workflowJob.setOutputContextValue(key, val);
+        workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+    }
+
+    protected void saveReport(Map<String, String> map) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            workflowJob.setReportName(entry.getKey(), entry.getValue());
+        }
+        workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+    }
+
     protected <V> V getObjectFromContext(String key, Class<V> clazz) {
-        return (V) executionContext.get(key);
+        String strValue = getStringValueFromContext(key);
+        return JsonUtils.deserialize(strValue, clazz);
     }
 
     protected <V> void putObjectInContext(String key, V val) {
+        executionContext.putString(key, JsonUtils.serialize(val));
+    }
+
+    protected void putStringValueInContext(String key, String val) {
         executionContext.put(key, val);
     }
 
@@ -235,13 +259,15 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     protected void registerReport(CustomerSpace customerSpace, Report report) {
         @SuppressWarnings("unchecked")
-        Map<ReportPurpose, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
+        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
 
         if (map == null) {
-            map = new HashMap<ReportPurpose, String>();
+            map = new HashMap<String, String>();
         }
 
-        map.put(report.getPurpose(), report.getName());
+        map.put(report.getPurpose().getKey(), report.getName());
+
+        saveReport(map);
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
 
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
@@ -251,13 +277,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     protected Report retrieveReport(CustomerSpace space, ReportPurpose purpose) {
         @SuppressWarnings("unchecked")
-        Map<ReportPurpose, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
+        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
 
         if (map == null) {
             return null;
         }
 
-        String name = map.get(purpose);
+        String name = map.get(purpose.getKey());
         if (name == null) {
             return null;
         }
@@ -272,6 +298,22 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         } catch (ClassCastException e) {
             return null;
         }
+    }
+
+    protected void putDoubleValueInContext(String key, Double val) {
+        executionContext.putDouble(key, val);
+    }
+
+    protected Long getLongValueFromContext(String key) {
+        try {
+            return executionContext.getLong(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    protected void putLongValueInContext(String key, Long val) {
+        executionContext.putLong(key, val);
     }
 
 }

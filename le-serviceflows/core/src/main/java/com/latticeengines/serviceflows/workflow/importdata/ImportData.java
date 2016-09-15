@@ -42,7 +42,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
     private void importData() {
         ImportConfiguration importConfig = setupImportConfig();
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
-        putObjectInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
+        putStringValueInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
         waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
         if (getConfiguration().getSourceType() == SourceType.FILE) {
             updateSourceFile();
@@ -79,7 +79,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
         Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 sourceFile.getTableName());
-        putObjectInContext(SOURCE_IMPORT_TABLE, JsonUtils.serialize(table));
+        putObjectInContext(SOURCE_IMPORT_TABLE, table);
     }
 
     private Table retrieveMetadata(SourceFile sourceFile) {

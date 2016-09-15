@@ -44,8 +44,8 @@ public class RunAttributeLevelSummaryDataFlows extends
             
             registerAttributeLevelSummaryReport.execute(name, createReportParams(params.aggregationType, attrs));
         }
-        executionContext.putString(ATTR_LEVEL_TYPE, "COUNT");
-        executionContext.putString(EVENT_TABLE, getMatchTable());
+        putStringValueInContext(ATTR_LEVEL_TYPE, "COUNT");
+        putStringValueInContext(EVENT_TABLE, getMatchTable());
     }
 
 }

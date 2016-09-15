@@ -19,12 +19,9 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -32,7 +29,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
@@ -55,7 +51,7 @@ public class WorkflowExecutionCache {
     private ExecutorService executorService;
 
     @Autowired
-    private JobExplorer jobExplorer;
+    private LEJobExecutionRetriever leJobExecutionRetriever;
 
     @Autowired
     private JobProxy jobProxy;
@@ -99,7 +95,7 @@ public class WorkflowExecutionCache {
         log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
 
         try {
-            JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
+            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
             JobInstance jobInstance = jobExecution.getJobInstance();
             WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
             WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
@@ -110,8 +106,8 @@ public class WorkflowExecutionCache {
             job.setStartTimestamp(workflowStatus.getStartTime());
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
-            job.setReports(getReports(jobExecution));
-            job.setOutputs(getOutputs(jobExecution));
+            job.setReports(getReports(workflowJob));
+            job.setOutputs(getOutputs(workflowJob));
             if (workflowJob != null) {
                 job.setInputs(workflowJob.getInputContext());
                 job.setApplicationId(workflowJob.getApplicationId());
@@ -177,62 +173,26 @@ public class WorkflowExecutionCache {
         return steps;
     }
 
-    @SuppressWarnings("rawtypes")
-    private List<Report> getReports(JobExecution jobExecution) {
-        ExecutionContext context = jobExecution.getExecutionContext();
-        Object contextObj = context.get(WorkflowContextConstants.REPORTS);
+    private List<Report> getReports(WorkflowJob workflowJob) {
         List<Report> reports = new ArrayList<>();
-        if (contextObj == null) {
-            return reports;
-        }
-        if (contextObj instanceof Map) {
-            for (Object obj : ((Map) contextObj).values()) {
-                if (obj instanceof String) {
-                    Report report = reportService.getReportByName((String) obj);
-                    if (report != null) {
-                        reports.add(report);
-                    }
-                } else {
-                    throw new RuntimeException("Failed to convert context object.");
-                }
+        Map<String, String> reportContext = workflowJob.getReportContext();
+        for (String reportPurpose : reportContext.keySet()) {
+            Report report = reportService.getReportByName(reportContext.get(reportPurpose));
+            if (report != null) {
+                reports.add(report);
             }
-        } else if (contextObj instanceof Set) {
-            for (Object obj : (Set) contextObj) {
-                if (obj instanceof String) {
-                    Report report = reportService.getReportByName((String) obj);
-                    if (report != null) {
-                        reports.add(report);
-                    }
-                } else {
-                    throw new RuntimeException("Failed to convert context object.");
-                }
-            }
-        } else {
-            throw new RuntimeException("Failed to convert context object.");
         }
         return reports;
     }
 
-    private Map<String, String> getOutputs(JobExecution jobExecution) {
-        ExecutionContext context = jobExecution.getExecutionContext();
-        Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
+    private Map<String, String> getOutputs(WorkflowJob workflowJob) {
         Map<String, String> outputs = new HashMap<>();
-        if (contextObj == null) {
-            return outputs;
-        }
-        if (contextObj instanceof Map) {
-            for (Map.Entry<?, ?> entry : ((Map<?, ?>) contextObj).entrySet()) {
-                if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
-                    outputs.put((String) entry.getKey(), (String) entry.getValue());
-                } else {
-                    throw new RuntimeException("Failed to convert context object to Map<String, String>.");
-                }
-            }
-        } else {
-            throw new RuntimeException("Failed to convert context object to Map<String, String>.");
+        Map<String, String> outputContext = workflowJob.getOutputContext();
+
+        for (String key : outputContext.keySet()) {
+            outputs.put(key, outputContext.get(key));
         }
         return outputs;
-
     }
 
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {

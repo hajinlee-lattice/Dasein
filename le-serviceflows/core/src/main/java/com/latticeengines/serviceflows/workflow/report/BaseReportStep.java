@@ -1,7 +1,6 @@
 package com.latticeengines.serviceflows.workflow.report;
 
 import java.util.UUID;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;

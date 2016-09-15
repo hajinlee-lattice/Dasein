@@ -29,14 +29,14 @@ public class Sample extends BaseModelStep<ModelStepConfiguration> {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28006, e, new String[] { eventTable.getName() });
         }
-        executionContext.putString(EXPORT_TABLE_NAME, eventTable.getName());
+        putStringValueInContext(EXPORT_TABLE_NAME, eventTable.getName());
         String inputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
                 + eventTable.getName() + "/samples";
-        executionContext.putString(EXPORT_INPUT_PATH, inputPath);
+        putStringValueInContext(EXPORT_INPUT_PATH, inputPath);
 
         String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
                 + eventTable.getName() + "/csv_files/postMatchEventTable";
-        executionContext.putString(EXPORT_OUTPUT_PATH, outputPath);
+        putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
     }
 
     private void sample(Table eventTable) throws Exception {

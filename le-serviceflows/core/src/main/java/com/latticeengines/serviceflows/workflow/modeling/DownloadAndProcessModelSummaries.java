@@ -33,19 +33,20 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
 
-        Map<String, String> modelApplicationIdToEventColumn = JsonUtils
-                .deserialize(executionContext.getString(MODEL_APP_IDS), Map.class);
+        Map<String, String> modelApplicationIdToEventColumn = getObjectFromContext(MODEL_APP_IDS, Map.class);
         if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
         }
-        Map<String, String> eventToModelId = waitForDownloadedModelSummaries
-                .retrieveModelIds(configuration, modelApplicationIdToEventColumn);
+        Map<String, String> eventToModelId = waitForDownloadedModelSummaries.retrieveModelIds(configuration,
+                modelApplicationIdToEventColumn);
 
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
         for (String modelId : eventToModelId.values()) {
             proxy.updateModelSummary(modelId, attrMap);
-            putOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
+
+            saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID.toString(), modelId);
+
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);

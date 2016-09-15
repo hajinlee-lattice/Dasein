@@ -61,7 +61,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         Integer[] blocks = determineBlockSizes(count);
         List<DataCloudJobConfiguration> configurations = readAndSplitInputAvro(blocks);
         executionContext.put(BulkMatchContextKey.YARN_JOB_CONFIGS, configurations);
-        executionContext.put(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
+        putStringValueInContext(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
         matchCommandService.update(getConfiguration().getRootOperationUid()) //
                 .status(MatchStatus.MATCHING) //
                 .progress(0.05f) //

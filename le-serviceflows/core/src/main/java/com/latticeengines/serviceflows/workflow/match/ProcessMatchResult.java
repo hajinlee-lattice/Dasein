@@ -39,8 +39,8 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
             isAccountMaster = true;
         }
 
-        Table matchResultTable = JsonUtils.deserialize(executionContext.getString(MATCH_RESULT_TABLE), Table.class);
-        Table preMatchTable = JsonUtils.deserialize(executionContext.getString(PREMATCH_EVENT_TABLE), Table.class);
+        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+        Table preMatchTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
         resultTableName = matchResultTable.getName();
         String eventTableName = resultTableName;
         if (!isAccountMaster) {
@@ -64,7 +64,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
     public void onExecutionCompleted() {
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
-        executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
+        putObjectInContext(EVENT_TABLE, eventTable);
         if (!isAccountMaster) {
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
         }

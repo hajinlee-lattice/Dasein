@@ -29,7 +29,7 @@ public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfig
     @Override
     protected ObjectNode getJson() {
         try {
-            String applicationId = getObjectFromContext(IMPORT_DATA_APPLICATION_ID, String.class);
+            String applicationId = getStringValueFromContext(IMPORT_DATA_APPLICATION_ID);
             if (applicationId == null) {
                 throw new RuntimeException(
                         "Could not generate report.  Application ID for import has not been saved in context");

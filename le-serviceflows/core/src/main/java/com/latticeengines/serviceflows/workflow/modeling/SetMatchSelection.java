@@ -25,10 +25,10 @@ public class SetMatchSelection extends BaseModelStep<ModelStepConfiguration> {
                 // ignore
             }
             if (sourceSummary.getPredefinedSelection() != null) {
-                executionContext.put(MATCH_PREDEFINED_SELECTION, sourceSummary.getPredefinedSelection());
-                executionContext.put(MATCH_PREDEFINED_SELECTION_VERSION, sourceSummary.getPredefinedSelectionVersion());
+                putStringValueInContext(MATCH_PREDEFINED_SELECTION, sourceSummary.getPredefinedSelection().getName());
+                putStringValueInContext(MATCH_PREDEFINED_SELECTION_VERSION, sourceSummary.getPredefinedSelectionVersion());
             } else {
-                executionContext.put(MATCH_CUSTOMIZED_SELECTION, sourceSummary.getCustomizedColumnSelection());
+                putObjectInContext(MATCH_CUSTOMIZED_SELECTION, sourceSummary.getCustomizedColumnSelection());
             }
         }
     }

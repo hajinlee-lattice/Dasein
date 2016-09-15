@@ -17,7 +17,7 @@ public class RunImportSummaryDataFlow extends RunDataFlow<RunImportSummaryDataFl
     private static final Log log = LogFactory.getLog(RunImportSummaryDataFlow.class);
 
     private Table getEventTable() {
-        String eventTableJson = executionContext.getString(EVENT_TABLE);
+        String eventTableJson = getStringValueFromContext(EVENT_TABLE);
         Table eventTable = JsonUtils.deserialize(eventTableJson, Table.class);
         return eventTable;
     }

@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("updateFailedMatchListener")
@@ -78,7 +79,7 @@ public class UpdateFailedMatchListener extends LEJobListener {
     }
 
     private void killChildrenApplications(JobExecution jobExecution) {
-        List<?> list = (List<?>) jobExecution.getExecutionContext().get(BulkMatchContextKey.APPLICATION_IDS);
+        List<?> list = (List<?>) JsonUtils.deserialize(jobExecution.getExecutionContext().getString(BulkMatchContextKey.APPLICATION_IDS), List.class);
         List<ApplicationId> applicationIds = new ArrayList<>();
         for (Object obj : list) {
             if (obj instanceof ApplicationId) {

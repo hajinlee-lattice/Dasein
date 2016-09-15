@@ -39,7 +39,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
     private void exportData() {
         ExportConfiguration exportConfig = setupExportConfig();
         AppSubmission submission = eaiProxy.createExportDataJob(exportConfig);
-        putObjectInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
+        putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
         waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
         saveToContext();
     }
@@ -69,7 +69,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
     }
 
     private String getTableName() {
-        String tableName = executionContext.getString(EXPORT_TABLE_NAME);
+        String tableName = getStringValueFromContext(EXPORT_TABLE_NAME);
         if (tableName == null) {
             tableName = configuration.getTableName();
         }
@@ -78,12 +78,12 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
 
     private void saveToContext() {
         if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
-            putOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
+            saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
                     getStringValueFromContext(EXPORT_OUTPUT_PATH));
         } else {
             Map<String, String> properties = configuration.getProperties();
             if (properties.containsKey(ExportProperty.TARGET_FILE_NAME)) {
-                putOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, PathBuilder
+                saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, PathBuilder
                         .buildDataFileExportPath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace())
                         .append(properties.get(ExportProperty.TARGET_FILE_NAME)).toString());
             }

@@ -72,6 +72,12 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Type(type = "text")
     private String errorDetailsString;
 
+    @Column(name = "REPORT_CONTEXT", length = 4000)
+    private String reportContextString;
+
+    @Column(name = "OUTPUT_CONTEXT", length = 4000)
+    private String outputContextString;
+
     @Override
     public Long getPid() {
         return pid;
@@ -171,6 +177,76 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setInputContextString(String inputContextString) {
         this.inputContextString = inputContextString;
+    }
+
+    @Transient
+    public Map<String, String> getReportContext() {
+        if (reportContextString == null) {
+            setReportContext(new HashMap<String, String>());
+        }
+        Map<?, ?> raw = JsonUtils.deserialize(reportContextString, Map.class);
+        return JsonUtils.convertMap(raw, String.class, String.class);
+    }
+
+    @Transient
+    public void setReportContext(Map<String, String> reportContext) {
+        this.reportContextString = JsonUtils.serialize(reportContext);
+    }
+
+    @Transient
+    public String getReportName(String reportPurpose) {
+        Map<String, String> context = getReportContext();
+        return context.get(reportPurpose);
+    }
+
+    @Transient
+    public void setReportName(String reportPurpose, String reportName) {
+        Map<String, String> context = getReportContext();
+        context.put(reportPurpose, reportName);
+        setReportContext(context);
+    }
+
+    public String getReportContextString() {
+        return reportContextString;
+    }
+
+    public void setReportContextString(String reportContextString) {
+        this.reportContextString = reportContextString;
+    }
+
+    @Transient
+    public Map<String, String> getOutputContext() {
+        if (outputContextString == null) {
+            setOutputContext(new HashMap<String, String>());
+        }
+        Map<?, ?> raw = JsonUtils.deserialize(outputContextString, Map.class);
+        return JsonUtils.convertMap(raw, String.class, String.class);
+    }
+
+    @Transient
+    public void setOutputContext(Map<String, String> outContext) {
+        this.outputContextString = JsonUtils.serialize(outContext);
+    }
+
+    @Transient
+    public String getOutputContextValue(String key) {
+        Map<String, String> context = getOutputContext();
+        return context.get(key);
+    }
+
+    @Transient
+    public void setOutputContextValue(String key, String value) {
+        Map<String, String> context = getOutputContext();
+        context.put(key, value);
+        setOutputContext(context);
+    }
+
+    public String getOutputContextString() {
+        return outputContextString;
+    }
+
+    public void setOutputContextString(String outputContextString) {
+        this.outputContextString = outputContextString;
     }
 
     public FinalApplicationStatus getStatus() {

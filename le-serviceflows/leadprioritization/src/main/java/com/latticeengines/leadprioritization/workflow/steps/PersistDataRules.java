@@ -36,7 +36,7 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
     @Override
     public void execute() {
         @SuppressWarnings("unchecked")
-        Map<String, String> eventToModelId = (Map<String, String>) executionContext.get(EVENT_TO_MODELID);
+        Map<String, String> eventToModelId = getObjectFromContext(EVENT_TO_MODELID, Map.class);
         log.info("Persisting rule results");
         persistReviewResults(eventToModelId);
 
@@ -44,16 +44,16 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
             log.info("No datarules in configuration, nothing to do.");
         } else {
             @SuppressWarnings("unchecked")
-            List<DataRule> dataRules = (List<DataRule>) executionContext.get(DATA_RULES);
+            List<DataRule> dataRules = (List<DataRule>) getObjectFromContext(DATA_RULES, List.class);
             if (configuration.isDefaultDataRuleConfiguration()) {
                 setResultsOnDefaultRules(dataRules);
             }
 
             log.info("Persisting datarules: " + JsonUtils.serialize(dataRules));
-            Table eventTable = JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
+            Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
             eventTable.setDataRules(dataRules);
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
-            putObjectInContext(EVENT_TABLE, JsonUtils.serialize(eventTable));
+            putObjectInContext(EVENT_TABLE, eventTable);
         }
     }
 
@@ -63,8 +63,7 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
                 List<String> columnNames = new ArrayList<>();
 
                 @SuppressWarnings("unchecked")
-                Map<String, List<ColumnRuleResult>> eventToColumnResults = (Map<String, List<ColumnRuleResult>>) executionContext
-                        .get(COLUMN_RULE_RESULTS);
+                Map<String, List<ColumnRuleResult>> eventToColumnResults = (Map<String, List<ColumnRuleResult>>) getObjectFromContext(COLUMN_RULE_RESULTS, Map.class);
                 Iterator<List<ColumnRuleResult>> iter = eventToColumnResults.values().iterator();
                 if (iter.hasNext()) {
                     List<ColumnRuleResult> results = iter.next();
@@ -86,10 +85,8 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
 
     @SuppressWarnings("unchecked")
     private void persistReviewResults(Map<String, String> eventToModelId) {
-        Map<String, List<ColumnRuleResult>> eventToColumnResults = (Map<String, List<ColumnRuleResult>>) executionContext
-                .get(COLUMN_RULE_RESULTS);
-        Map<String, List<RowRuleResult>> eventToRowResults = (Map<String, List<RowRuleResult>>) executionContext
-                .get(ROW_RULE_RESULTS);
+        Map<String, List<ColumnRuleResult>> eventToColumnResults = getObjectFromContext(COLUMN_RULE_RESULTS, Map.class);
+        Map<String, List<RowRuleResult>> eventToRowResults = getObjectFromContext(ROW_RULE_RESULTS, Map.class);
         if (eventToColumnResults == null || eventToRowResults == null || eventToColumnResults.isEmpty()
                 || eventToRowResults.isEmpty()) {
             log.warn("COLUMN_RULE_RESULTS or ROW_RULE_RESULTS is empty");

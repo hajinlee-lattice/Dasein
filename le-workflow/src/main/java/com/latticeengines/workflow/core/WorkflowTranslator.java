@@ -97,6 +97,7 @@ public class WorkflowTranslator {
                         validateConfiguration(step);
                     }
 
+                    step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
                     step.execute();
                     step.onExecutionCompleted();
                 }

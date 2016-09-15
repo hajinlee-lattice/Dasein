@@ -68,7 +68,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             String appId = executor.model();
             Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
             modelApplicationIdToEventColumn.put(appId, builder.getTargets()[0]);
-            executionContext.put(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
+            putObjectInContext(MODEL_APP_IDS, modelApplicationIdToEventColumn);
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_28019, new String[] { configuration.getPmmlArtifactPath() });

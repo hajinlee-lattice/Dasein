@@ -35,11 +35,11 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
     @Override
     public void execute() {
         log.info("Inside Match execute()");
-        Table preMatchEventTable = JsonUtils.deserialize(executionContext.getString(PREMATCH_EVENT_TABLE), Table.class);
+        Table preMatchEventTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
 
         Long matchCommandId = match(preMatchEventTable);
 
-        executionContext.putLong(MATCH_COMMAND_ID, matchCommandId);
+        putLongValueInContext(MATCH_COMMAND_ID, matchCommandId);
     }
 
     private Long match(Table preMatchEventTable) {

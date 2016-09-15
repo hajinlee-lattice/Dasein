@@ -40,7 +40,7 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
             }
         }
 
-        executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
+        putObjectInContext(MODEL_APP_IDS, modelApplicationIdToEventColumn);
     }
 
 }

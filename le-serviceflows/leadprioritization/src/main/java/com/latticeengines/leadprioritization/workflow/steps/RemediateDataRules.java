@@ -38,14 +38,14 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
         } else {
             List<DataRule> dataRules = new ArrayList<>(configuration.getDataRules());
             log.info("Remediating datarules: " + JsonUtils.serialize(dataRules));
-            Table eventTable = JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
+            Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
             eventTable = remediateAttributes(dataRules, eventTable, configuration.isDefaultDataRuleConfiguration());
             eventTable.setDataRules(dataRules);
             if (configuration.isDefaultDataRuleConfiguration()) {
                 metadataProxy
                         .updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
             }
-            putObjectInContext(EVENT_TABLE, JsonUtils.serialize(eventTable));
+            putObjectInContext(EVENT_TABLE, eventTable);
             putObjectInContext(DATA_RULES, dataRules);
         }
     }
@@ -58,8 +58,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                 List<String> columnNames = new ArrayList<>();
                 if (isDefault) {
                     @SuppressWarnings("unchecked")
-                    Map<String, List<ColumnRuleResult>> eventToColumnResults = (Map<String, List<ColumnRuleResult>>) executionContext
-                            .get(COLUMN_RULE_RESULTS);
+                    Map<String, List<ColumnRuleResult>> eventToColumnResults = getObjectFromContext(COLUMN_RULE_RESULTS, Map.class);
                     Iterator<List<ColumnRuleResult>> iter = eventToColumnResults.values().iterator();
                     if (iter.hasNext()) {
                         List<ColumnRuleResult> results = iter.next();

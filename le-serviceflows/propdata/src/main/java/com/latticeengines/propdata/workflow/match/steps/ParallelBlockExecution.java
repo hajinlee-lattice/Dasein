@@ -87,7 +87,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
 
-            rootOperationUid = (String) executionContext.get(BulkMatchContextKey.ROOT_OPERATION_UID);
+            rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
             submitMatchBlocks(jobConfigurations);
             waitForMatchBlocks();
             finalizeMatch();
@@ -98,7 +98,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private void submitMatchBlocks(List<DataCloudJobConfiguration> jobConfigurations) {
         applicationIds = new ArrayList<>();
-        executionContext.put(BulkMatchContextKey.APPLICATION_IDS, applicationIds);
+        putObjectInContext(BulkMatchContextKey.APPLICATION_IDS, applicationIds);
         for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
             ApplicationId appId = ConverterUtils
                     .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));

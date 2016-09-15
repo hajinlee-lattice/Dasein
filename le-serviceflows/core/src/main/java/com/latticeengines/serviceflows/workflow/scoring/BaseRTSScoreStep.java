@@ -44,7 +44,8 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         RTSBulkScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
         String appId = scoringProxy.submitBulkScoreJob(scoringConfig).getApplicationIds().get(0);
         waitForAppId(appId, configuration.getMicroServiceHostPort());
-        putOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
+
+        saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
                 scoringConfig.getTargetResultDir() + "/error.csv");
         if (configuration.isRegisterScoredTable()) {
             try {
@@ -105,7 +106,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         Table eventTable = MetadataConverter.getTable(yarnConfiguration, targetDir, null, null);
         eventTable.setName(tableName);
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), tableName, eventTable);
-        executionContext.putString(SCORING_RESULT_TABLE_NAME, tableName);
+        putStringValueInContext(SCORING_RESULT_TABLE_NAME, tableName);
     }
 
 }

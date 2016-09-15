@@ -9,8 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -32,7 +30,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
     protected Table getEventTable() {
         if (executionContext.containsKey(EVENT_TABLE)) {
-            return JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+            return getObjectFromContext(EVENT_TABLE, Table.class);
         } else {
             return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getEventTableName());
@@ -40,15 +38,15 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
     }
 
     protected Predefined getPredefinedSelection() {
-        return (Predefined) executionContext.get(MATCH_PREDEFINED_SELECTION);
+        return Predefined.fromName(getStringValueFromContext(MATCH_PREDEFINED_SELECTION));
     }
 
     protected String getPredefinedSelectionVersion() {
-        return executionContext.getString(MATCH_PREDEFINED_SELECTION_VERSION);
+        return getStringValueFromContext(MATCH_PREDEFINED_SELECTION_VERSION);
     }
 
     protected ColumnSelection getCustomizedSelection() {
-        return (ColumnSelection) executionContext.get(MATCH_CUSTOMIZED_SELECTION);
+        return getObjectFromContext(MATCH_CUSTOMIZED_SELECTION, ColumnSelection.class);
     }
 
     protected String getTransformationGroupName() {

@@ -48,11 +48,11 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     public void execute() {
         log.info("Inside MatchDataCloud execute()");
         Table preMatchEventTable = preMatchEventTable();
-        executionContext.putString(PREMATCH_EVENT_TABLE, JsonUtils.serialize(preMatchEventTable));
+        putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTable);
         match(preMatchEventTable);
-        executionContext.putString(MATCH_ROOT_UID, matchCommand.getRootOperationUid());
+        putStringValueInContext(MATCH_ROOT_UID, matchCommand.getRootOperationUid());
         Table matchResultTable = createMatchResultTable();
-        executionContext.putString(MATCH_RESULT_TABLE, JsonUtils.serialize(matchResultTable));
+        putObjectInContext(MATCH_RESULT_TABLE, matchResultTable);
     }
 
     private Table preMatchEventTable() {
@@ -88,14 +88,14 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             }
             matchInput.setPredefinedVersion(version);
 
-            executionContext.put(MATCH_PREDEFINED_SELECTION, predefined);
-            executionContext.putString(MATCH_PREDEFINED_SELECTION_VERSION, version);
+            putStringValueInContext(MATCH_PREDEFINED_SELECTION, predefined.getName());
+            putStringValueInContext(MATCH_PREDEFINED_SELECTION_VERSION, version);
 
             log.info("Using predefined column selection " + predefined + " at version " + version);
         } else {
             matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
 
-            executionContext.put(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
+            putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
 
         }
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());

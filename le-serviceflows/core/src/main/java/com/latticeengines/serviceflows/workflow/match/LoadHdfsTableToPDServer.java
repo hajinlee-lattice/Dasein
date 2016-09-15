@@ -41,8 +41,8 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
         AbstractMap.SimpleEntry<Table, DbCreds> preMatchEventTableAndCreds = loadHdfsTableToPDServer();
 
-        executionContext.putString(PREMATCH_EVENT_TABLE, JsonUtils.serialize(preMatchEventTableAndCreds.getKey()));
-        executionContext.putString(DB_CREDS, JsonUtils.serialize(preMatchEventTableAndCreds.getValue()));
+        putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTableAndCreds.getKey());
+        putObjectInContext(DB_CREDS, preMatchEventTableAndCreds.getValue());
     }
 
     private AbstractMap.SimpleEntry<Table, DbCreds> loadHdfsTableToPDServer() {

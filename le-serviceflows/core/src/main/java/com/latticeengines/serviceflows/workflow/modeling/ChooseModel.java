@@ -41,8 +41,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         log.info("Inside ChooseModel execute()");
 
         @SuppressWarnings("unchecked")
-        Map<String, String> modelApplicationIdToEventColumn = JsonUtils.deserialize(
-                executionContext.getString(MODEL_APP_IDS), Map.class);
+        Map<String, String> modelApplicationIdToEventColumn = getObjectFromContext(MODEL_APP_IDS, Map.class);
         if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
         }
@@ -55,10 +54,10 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
         String modelId = bestModelIdAndEventColumn.getKey();
-        executionContext.putString(ACTIVATE_MODEL_IDS,
-                JsonUtils.serialize(Arrays.<String> asList(new String[] { modelId })));
-        executionContext.putString(SCORING_MODEL_ID, modelId);
-        executionContext.putString(EVENT_COLUMN, bestModelIdAndEventColumn.getValue());
+        putObjectInContext(ACTIVATE_MODEL_IDS,
+                Arrays.<String> asList(new String[] { modelId }));
+        putStringValueInContext(SCORING_MODEL_ID, modelId);
+        putStringValueInContext(EVENT_COLUMN, bestModelIdAndEventColumn.getValue());
 
         TargetMarket targetMarket = proxy.findTargetMarketByName(configuration.getTargetMarket().getName(),
                 configuration.getCustomerSpace().toString());
@@ -119,7 +118,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         if (chosenModel != null) {
             double avgProbability = (double) chosenModel.getTotalConversionCount()
                     / (double) chosenModel.getTotalRowCount();
-            executionContext.putDouble(MODEL_AVG_PROBABILITY, avgProbability);
+            putDoubleValueInContext(MODEL_AVG_PROBABILITY, avgProbability);
         }
         if (chosenModelIdAndEventColumn == null) {
             chosenModelIdAndEventColumn = Maps.immutableEntry(chosenModel.getId(),

@@ -20,11 +20,13 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     protected ExecutionContext executionContext;
     protected T configuration;
+    protected Long jobId;
 
     private boolean dryRun = false;
     private boolean runAgainWhenComplete = false;
     private Class<T> configurationClass;
     private JobParameters jobParameters;
+
 
     public abstract void execute();
 
@@ -106,5 +108,9 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     public void setExecutionContext(ExecutionContext executionContext) {
         this.executionContext = executionContext;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
     }
 }

@@ -4,6 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
-@Component("createPreMatchEventTable ")
+@Component("createPreMatchEventTable")
 public class CreatePreMatchEventTable extends RunDataFlow<CreatePreMatchEventTableConfiguration> {
 }

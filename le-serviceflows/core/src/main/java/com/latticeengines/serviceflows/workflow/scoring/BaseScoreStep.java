@@ -64,7 +64,8 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
                     HdfsUtils.copyFiles(yarnConfiguration, importErrorPath, targetDir);
-                    putOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(), targetDir
+
+                    saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(), targetDir
                             + "/error.csv");
                 }
             } catch (IOException e) {
@@ -80,7 +81,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         Table eventTable = MetadataConverter.getTable(yarnConfiguration, targetDir, null, null);
         eventTable.setName(tableName);
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), tableName, eventTable);
-        executionContext.putString(SCORING_RESULT_TABLE_NAME, tableName);
+        putStringValueInContext(SCORING_RESULT_TABLE_NAME, tableName);
     }
 
     private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {

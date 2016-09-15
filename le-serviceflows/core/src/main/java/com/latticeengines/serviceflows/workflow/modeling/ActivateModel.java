@@ -30,16 +30,15 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
         Collection<String> modelIds;
-        if (executionContext.get(ACTIVATE_MODEL_IDS) == null) {
-            Map<String, String> modelApplicationIdToEventColumn = JsonUtils.deserialize(
-                    executionContext.getString(MODEL_APP_IDS), Map.class);
+        if (executionContext.getString(ACTIVATE_MODEL_IDS) == null) {
+            Map<String, String> modelApplicationIdToEventColumn = getObjectFromContext(MODEL_APP_IDS, Map.class);
             if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
-            modelIds = waitForDownloadedModelSummaries.retrieveModelIds(configuration,
-                    modelApplicationIdToEventColumn).values();
+            modelIds = waitForDownloadedModelSummaries.retrieveModelIds(configuration, modelApplicationIdToEventColumn)
+                    .values();
         } else {
-            modelIds = JsonUtils.deserialize(executionContext.getString(ACTIVATE_MODEL_IDS), List.class);
+            modelIds = getObjectFromContext(ACTIVATE_MODEL_IDS, List.class);
         }
 
         AttributeMap attrMap = new AttributeMap();

@@ -56,6 +56,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateWorkflowJob(WorkflowJob workflowJob) {
+        workflowJobDao.update(workflowJob);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {

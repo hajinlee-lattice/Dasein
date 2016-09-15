@@ -46,9 +46,9 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
     public void execute() {
         log.info("Inside CreateEventTableFromMatchResult execute()");
 
-        Long matchCommandId = executionContext.getLong(MATCH_COMMAND_ID);
-        Table preMatchEventTable = JsonUtils.deserialize(executionContext.getString(PREMATCH_EVENT_TABLE), Table.class);
-        DbCreds dbCreds = JsonUtils.deserialize(executionContext.getString(DB_CREDS), DbCreds.class);
+        Long matchCommandId = getLongValueFromContext(MATCH_COMMAND_ID);
+        Table preMatchEventTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
+        DbCreds dbCreds = getObjectFromContext(DB_CREDS, DbCreds.class);
 
         Table eventTable = null;
         try {
@@ -68,8 +68,8 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
             }
         }
 
-        executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
-        executionContext.putString(MATCH_TABLE, eventTable.getName());
+        putObjectInContext(EVENT_TABLE, eventTable);
+        putStringValueInContext(MATCH_TABLE, eventTable.getName());
     }
 
     private boolean deleteEventTableFromMatchDB(Table preMatchEventTable, DbCreds dbCreds) throws Exception {
