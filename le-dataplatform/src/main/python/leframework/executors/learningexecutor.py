@@ -29,6 +29,7 @@ from leframework.model.states.scorederivationgenerator import ScoreDerivationGen
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
+from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -75,7 +76,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(ScoreDerivationGenerator(), 19)
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(EnhancedSummaryGenerator(), 21)
-        stateMachine.addState(Finalize(), 22)
+        stateMachine.addState(ModelPredictorGenerator(), 22)
+        stateMachine.addState(Finalize(), 23)
         return stateMachine
 
     @overrides(Executor)

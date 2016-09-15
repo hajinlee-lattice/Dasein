@@ -33,6 +33,7 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -78,6 +79,7 @@ class AggregationExecutor(Executor):
         stateMachine.addState(RevenueModelQualityGenerator(), 21)
         stateMachine.addState(RevenueModelImportanceSortingGenerator(), 22)
         stateMachine.addState(EnhancedSummaryGenerator(), 23)
+        stateMachine.addState(ModelPredictorGenerator(), 24)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 

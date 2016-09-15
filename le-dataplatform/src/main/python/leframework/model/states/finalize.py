@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import csv
 import json
 import logging
 import os
@@ -66,9 +67,17 @@ class Finalize(State):
             json.dump(jsonDict, fp)
 
     def invokeModelPredictorsExtraction(self, mediator):
-        modelJSONFilePath = mediator.modelLocalDir + mediator.name + "_model.json"
-        csvFilePath = mediator.modelLocalDir + mediator.name + "_model.csv"
-        subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath, 'metadata.avsc'])
+        modelPredictor = mediator.modelPredictor
+        with open(mediator.modelLocalDir + mediator.name + "_model.csv", 'wb') as modelPredictorFile:
+            modelPredictorWriter = csv.DictWriter(modelPredictorFile, fieldnames=modelPredictor['colnames'])
+            modelPredictorWriter.writeheader()
+            for row in modelPredictor['rows']:
+                rowmap = {}
+                i = 0
+                for col in modelPredictor['colnames']:
+                    rowmap[col] = row[i]
+                    i += 1
+                modelPredictorWriter.writerow(rowmap)
 
     def writeReadoutSample(self, mediator):
         csvFilePath = mediator.modelLocalDir + mediator.name + "_readoutsample.csv"

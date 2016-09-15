@@ -29,7 +29,6 @@
         <yarn:hdfs path="$$PYTHONSCRIPT$$" />
         <yarn:hdfs path="$$PYTHONPIPELINESCRIPT$$" />
         <yarn:hdfs path="$$PYTHONPIPELINELIBFQDN$$" type="ARCHIVE"/>
-        <yarn:hdfs path="/datascientist/modelpredictorextraction.py" />
     </yarn:localresources>
 
     <yarn:environment>

@@ -137,19 +137,6 @@
                                 </source>
                             </sources>
                         </mapping>
-                        <mapping>
-                            <directory>/tmp/datascientist</directory>
-                            <filemode>644</filemode>
-                            <username>${mapping.username}</username>
-                            <groupname>${mapping.groupname}</groupname>
-                            <sources>
-                                <source>
-                                    <location>
-                                        src/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py
-                                    </location>
-                                </source>
-                            </sources>
-                        </mapping>
                     </mappings>
                     <preinstallScriptlet>
                         <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/${pre.install.script}</scriptFile>

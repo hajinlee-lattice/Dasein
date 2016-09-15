@@ -33,7 +33,8 @@ public class PythonMRUtils {
         return setupCacheFiles(paths, classifier, version);
     }
 
-    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets, String dependencyCacheFiles, String version) {
+    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets,
+            String dependencyCacheFiles, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(dependencyCacheFiles);
         paths.add(classifier.getDataProfileHdfsPath());
@@ -58,7 +59,6 @@ public class PythonMRUtils {
         paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/rulefwk.py", version));
-        paths.add("/datascientist/modelpredictorextraction.py");
         paths.add(classifier.getTestDataHdfsPath());
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());

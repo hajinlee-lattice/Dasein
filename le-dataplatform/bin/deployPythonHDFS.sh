@@ -32,7 +32,6 @@ cp src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json /tmp
 cp src/main/python/datarules/rulepipeline.json /tmp/app/dataplatform/scripts
 cp src/main/python/evpipeline/evpipeline.py /tmp/app/playmaker/evmodel
 cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
-cp src/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py /tmp/datascientist
 
 
 
