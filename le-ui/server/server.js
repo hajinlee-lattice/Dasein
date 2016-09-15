@@ -11,9 +11,12 @@ const request   = require('request');
 const morgan    = require('morgan');
 const fs        = require('fs');
 const helmet    = require('helmet');
-//const session   = require('express-session');
 const compress  = require('compression');
 const chalk     = require('chalk');
+const proxy     = require('express-http-proxy');
+/*
+const session   = require('express-session');
+*/
 
 class Server {
     constructor(express, app, options) {
@@ -129,7 +132,7 @@ class Server {
     trustProxy(WHITELIST) {
         this.app.set('trust proxy', ip => {
             const ips = WHITELIST.split(',');
-            
+
             ips.forEach(current_ip => {
                 if (current_ip === ip) {
                     return true;
@@ -142,6 +145,8 @@ class Server {
 
     // forward API requests for dev
     createApiProxy(API_URL, API_PATH) {
+        // check if internal IP
+
         if (API_URL) {
             var API_PATH = API_PATH || '/pls';
             
@@ -176,9 +181,42 @@ class Server {
         }
     }
 
+    createFileProxy(API_URL, API_PATH, PATH) {
+        if (API_URL) {
+            var API_PATH = API_PATH || '/pls',
+                PATH = PATH || '/pls';
+
+            console.log(chalk.white('>') + ' FILE PROXY:', API_PATH, ' -> ', API_URL+PATH);
+            
+            this.app.use('/files', proxy(API_URL, {
+                forwardPath: function(req, res) {
+                    return '/pls' + require('url').parse(req.url).path;
+                },
+                decorateRequest: function(proxyReq, originalReq) {
+                    const url = API_URL + PATH + originalReq.url;
+                    
+                    if (originalReq.query) {
+                        if (originalReq.query.Authorization) {
+                            // Since the token was in the URL, +'s got converted to spaces
+                            let token = originalReq.query.Authorization.replace(/ /g,'+');
+                            proxyReq.headers["Authorization"] = token || '';
+                        }
+                        
+                        if (originalReq.query.TenantId) {
+                            let tenant = originalReq.query.TenantId;
+                            proxyReq.headers["TenantId"] = tenant || '';
+                        }
+                    }
+
+                    return proxyReq;
+                }
+            }));
+        }
+    }
+
     // this is needed so that the browser can download files
     // that need to be hidden behind the Authorization token
-    createFileProxy(API_URL, API_PATH, PATH) {
+    createFileProxyBAK(API_URL, API_PATH, PATH) {
         if (API_URL) {
             var API_PATH = API_PATH || '/pls',
                 PATH = PATH || '/pls';
@@ -246,6 +284,7 @@ class Server {
                 var html5mode = route.html5mode == true;
                 Object.keys(route.pages).forEach(page => {
                     //console.log('\t'+route.pages[page]+'\t->',page);
+                    // if !internal ip && page == '/admin'
                     this.app.get(
                         page + (html5mode ? '*' : ''), 
                         (req, res) => res.render(dir + '/' + route.pages[page])
