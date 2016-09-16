@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.CommandParameter;
 import com.latticeengines.domain.exposed.datacloud.Commands;
 import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
