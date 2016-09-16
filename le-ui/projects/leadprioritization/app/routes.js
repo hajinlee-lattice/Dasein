@@ -459,11 +459,24 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    controller: function(urls) {
-                        $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                    // controller: function(urls) {
+                    //     $('#sureshot_iframe_container')
+                    //         .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                    // },
+                    // template: '<div id="sureshot_iframe_container"></div>'
+                    resolve: {
+                        MarketoCredentials: function($q, MarketoService) {
+                            var deferred = $q.defer();
+
+                            MarketoService.GetMarketoCredentials().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    controller: 'ModelsSetupController',
+                    templateUrl: 'app/marketo/views/ModelsSetupView.html'
                 }   
             }
         })

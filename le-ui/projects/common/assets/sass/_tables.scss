@@ -18,7 +18,6 @@
     }
 }
 
-
 table {    
     background: #fff;
     color: $dark-gray;
@@ -80,6 +79,67 @@ table {
 }
 
 
+/* An Andrej Table */
+.table {
+    border: #d4d4d4 solid 1px;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0px 0px 14px #f6f8f9;
+    .header {
+        padding: 26px 20px 0px;
+        &:after {
+            display: table;
+            content: "";
+            clear: both;
+        }
+    }
+    table {
+        margin-bottom: 0;
+        thead {
+            tr {
+                th {
+                    padding: 12px 0 12px 20px;
+                    color: #848484;
+                    font-weight: normal;
+                }
+            }
+        }
+        tbody {
+            border-bottom: none;
+            tr {
+                td {
+                    border-color: #ddd;
+                    border-style: solid;
+                    border-width: 1px 1px 0 0;
+                    padding: 4px 0 4px 20px;
+                    font-weight: bold;
+                    &:nth-child(3) {
+                        width: 100px;
+                        padding-right: 20px;
+                    }
+                    &:last-child {
+                        width: 30px;
+                        padding-left: 10px;
+                        border-right: none;
+                        padding-right: 10px;
+                    }
+                }
+                &:odd {
+                    td {
+                        background: #fafafa;
+                    }
+                }
+            }
+        }
+        th {
+            border-bottom: none;
+        }
+    }
+    .trash-can {
+        color: #bbb;
+        font-size: 22px;
+    }
+}
 
 
 /* Mobile */

@@ -1,9 +1,71 @@
 <section class="container">
     
     <div class="row">
-      <div class="six columns offset-three">
-          Models list here
-      </div><!-- End .six.columns -->
+      <div class="eight columns">
+          <div class="table">
+          	<div class="header">
+          		<h2 class="pull-left">Marketo Credentials</h2>
+          		<button 
+          			type="button" 
+          			class="button orange-button pull-right"
+          			data-ng-click="createCredentialClick()">
+          			Add New
+          		</button>
+          	</div>
+          	<table>
+          		<thead>
+          			<tr>
+	          			<th>Display Name</th>
+	          			<th>REST Endpoint</th>
+	          			<th>Enrichment</th>
+	          			<th>&nbsp;</th>
+	          		</tr>
+          		</thead>
+          		<tbody>
+          			<tr ng-repeat="credential in credentials">
+	          			<td><a ui-sref="javascript:void(0)" data-ng-click="editCredentialClick()">{{credential.name}}</a></td>
+	          			<td>{{credential.RestEndpoint}}</td>
+	          			<td>
+	          				<button 
+	          					type="button"
+	          					data-ng-if="!credentialIsSetup" 
+	          					data-ng-click="editCredentialClick()"
+	          					class="button green-button small-button block-button">
+	          					View / Edit
+	          				</button>
+	          				<button 
+	          					type="button"
+	          					data-ng-if="credentialIsSetup" 
+	          					data-ng-click="setupCredentialClick()"
+	          					class="button blue-button small-button block-button">
+	          					Setup
+	          				</button>
+	          			</td>
+	          			<td>
+	          				<button 
+	          					type="button" 
+	          					class="button icon-button link-button"
+	          					data-ng-click="deleteCredentialClick()">
+	          					<i class="fa fa-trash-o trash-can" aria-hidden="true"></i>
+	          				</button>
+	          			</td>
+	          		</tr>
+          		</tbody>
+          	</table>
+          </div>
+      </div><!-- End .eight.columns -->
+      <div class="four columns">
+      	
+      	<div class="content-panel">
+	      	<div class="panel-header">
+	      		Help
+	      	</div>
+	      	<div class="panel-body">
+	      		<p>I'm in a glass case of emotion</p>
+	      	</div>	      	
+      	</div>
+
+      </div><!-- End .eight.columns -->
     </div><!-- End .row -->
 
 </section>

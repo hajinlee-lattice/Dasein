@@ -87,6 +87,20 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 			color: $pearl-white; 
 		}
 	}
+  &.green-button {
+    background-color: #6fbe4a;
+    border: #679e4c solid 1px;
+    color: $pearl-white;
+    &:hover {
+      background-color: #6fbe4a;
+    }
+    &:active {
+      background-color: #6fbe4a;
+    }
+    &:focus {
+      color: $pearl-white; 
+    }
+  }
 	&.white-button {
 		color: $black-titanium;
 		background-color: $pearl-white;
@@ -98,7 +112,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 			background-color: $palladium;
 		}
 	}
-  	&.gray-button {
+  &.gray-button {
 		color: $black;
 		background-color: $white-gold;
 		border-color: $silver;
@@ -121,6 +135,10 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 			background-color: $jet;
 		}
 	}
+  &.small-button {
+    padding: 0px 12px;
+    border-radius: 2px;
+  }
 	&.block-button {
 		display: block;
 		width: 100%;
