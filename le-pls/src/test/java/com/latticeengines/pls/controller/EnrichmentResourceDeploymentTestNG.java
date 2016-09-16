@@ -43,7 +43,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     @SuppressWarnings("unchecked")
