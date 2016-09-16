@@ -214,7 +214,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder moduleName(String moduleName) {
-            model.setModelName(moduleName);
+            model.setModuleName(moduleName);
             return this;
         }
 
