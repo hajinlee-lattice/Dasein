@@ -15,7 +15,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
         from launcher import Launcher
-        
+
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         profilinglauncher = Launcher("metadata-profile.json")
@@ -23,7 +23,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         learningExecutor = LearningExecutor()
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertIsNotNone(results)
-        
+
         # Dynamically import launcher to make sure globals() is clean in launcher
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
@@ -34,14 +34,14 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         self.assertIsNotNone(jsonDict)
         self.assertModelOutput(results[0], jsonDict)
-        
+
     def assertModelOutput(self, metadataInProfile, modelDict):
         self.assertTrue(modelDict.has_key("AverageProbability"))
         self.assertTrue(modelDict.has_key("Model"))
         self.assertTrue(modelDict.has_key("Name"))
         self.assertTrue(len(modelDict["Buckets"]) > 0)
         self.assertTrue(len(modelDict["InputColumnMetadata"]) > 0)
-        
+
         self.assertTrue(modelDict["Summary"].has_key("SchemaVersion"))
         self.assertTrue(modelDict["Summary"].has_key("DLEventTableData"))
         self.assertTrue(modelDict["Summary"].has_key("ConstructionInfo"))
@@ -50,13 +50,13 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         self.assertTrue(len(modelDict["NormalizationBuckets"]) > 0)
         predictors = modelDict["Summary"]["Predictors"]
         self.assertTrue(len(predictors) > 0)
-        
+
         columnsInPredictors = set()
         columnsInProfile = set(metadataInProfile.keys())
         for predictor in predictors:
             columnsInPredictors.add(predictor["Name"])
         self.assertEqual(columnsInProfile, columnsInPredictors)
-        
+
         configMetadataFile = "metadata.avsc"
         configMetadata = json.loads(open(configMetadataFile, "rb").read())["Metadata"]
         columnsInMetadata = set()
@@ -65,13 +65,13 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
             if isinstance(u, list) and u[0] == "None":
                 columnsInMetadata.add(c["ColumnName"])
         self.assertEqual(len(columnsInMetadata.intersection(columnsInPredictors)), 0)
-                         
+
     def tearDown(self):
         super(TrainingTestBase, self).tearDown()
         # Remove launcher module to restore its globals()
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
-        
+
 class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteMuleSoftProfilingThenTrainTest, self).executeProfilingThenTrain()
@@ -201,14 +201,6 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
             if row['Attribute Name'] == 'Open Source Adoption':
                 binarySet.add(row['Attribute Value'])
 
-        from modelpredictorextraction import columnNames
-        csvFile.seek(0);
-        predictorElementRow = csvDictReader.next()
-        for columnName in predictorElementRow:
-            if columnName in columnNames:
-                columnNames.remove(columnName)
-        self.assertTrue(len(columnNames) == 0)
-
         self.assertTrue(count == 9)
         self.assertTrue(hasOther)
 
@@ -218,7 +210,7 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Docusign"
-    
+
 class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteTenant1ProfilingThenTrainTest, self).executeProfilingThenTrain()
@@ -259,7 +251,7 @@ class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["Company"]) == 0 else 0), bottomSample, 0), 0)
         self.assertEqual(reduce(lambda acc, e: acc + (0 if isinstance(e["Score"], int) else 1), bottomSample, 0), 0)
         self.assertEqual(len(set([e["Company"] for e in bottomSample])), 1)
-        
+
         #Check for Model details
         templateVersion = summary["ModelDetails"]["TemplateVersion"]
         self.assertEqual(templateVersion, "v1.0")
@@ -267,7 +259,7 @@ class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "Tenant1"
-    
+
 class SuiteTenant2ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteTenant2ProfilingThenTrainTest, self).executeProfilingThenTrain()
