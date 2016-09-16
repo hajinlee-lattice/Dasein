@@ -124,7 +124,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     private Properties getJobProperties() {
         Properties jobProperties = new Properties();
-        jobProperties.put("mapred.reduce.tasks", "16");
+        jobProperties.put("mapred.reduce.tasks", "1");
         jobProperties.put("cascading.spill.map.threshold", "100000");
         jobProperties.put("mapreduce.job.running.map.limit", "100");
         return jobProperties;
