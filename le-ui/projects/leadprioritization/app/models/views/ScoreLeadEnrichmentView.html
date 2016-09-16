@@ -24,10 +24,17 @@
 
         <div data-ng-hide="saveInProgress">
             <div class="modal-body">
-                <form action="">
-                    <input type="radio" name="enableLeadEnrichment" checked data-ng-click="disableLeadEnrichmentClicked()"> Score <br>
-                    <input type="radio" name="enableLeadEnrichment" data-ng-click="enableLeadEnrichmentClicked()"> Score &amp; Enrich
-                </form>
+                <div class="row">
+                    <div class="six columns">
+                        <form action="">
+                            <input type="radio" name="enableLeadEnrichment" checked data-ng-click="disableLeadEnrichmentClicked()"> Score <br>
+                            <input type="radio" name="enableLeadEnrichment" data-ng-click="enableLeadEnrichmentClicked()" data-ng-disabled="noEnrichmentsSelected"> <span data-ng-class="{ 'gray-text': noEnrichmentsSelected}">Score &amp; Enrich</span>
+                        </form>
+                    </div>
+                    <div class="six columns" ng-if="noEnrichmentsSelected">
+                        You can't score with attributes until you enable some on the <a ui-sref="home.enrichment" data-ng-click="cancelClicked()">Enrichment</a> page.
+                    </div>
+                </div>
             </div>
         </div>
 
