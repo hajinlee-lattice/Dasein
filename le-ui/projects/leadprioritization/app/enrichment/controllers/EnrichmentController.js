@@ -1,4 +1,3 @@
-// green msg after save, 3s
 // grid view multple of 12, dynamic across
 angular.module('lp.enrichment.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
@@ -63,12 +62,7 @@ angular.module('lp.enrichment.leadenrichment', [
         if(selectedTotal > vm.generalSelectLimit) {
             enrichment.IsSelected = false;
             enrichment.IsDirty = false;
-            enrichment.button_select = vm.label.generalTotalSelectError;
-            enrichment.button_error = true;
-            $timeout(function(){
-                enrichment.button_select = vm.label.button_select;
-                enrichment.button_error = false;
-            }, 3000);
+            vm.statusMessage(vm.label.generalTotalSelectError);
             return false;
         }
         if(enrichment.IsPremium) {
@@ -76,12 +70,7 @@ angular.module('lp.enrichment.leadenrichment', [
             if(premiums > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
-                enrichment.button_select = vm.label.premiumTotalSelectError;
-                enrichment.button_error = true;
-                $timeout(function(){
-                    enrichment.button_select = vm.label.button_select;
-                    enrichment.button_error = false;
-                }, 3000);
+                vm.statusMessage(vm.label.premiumTotalSelectError);
                 return false;
             }
         }
