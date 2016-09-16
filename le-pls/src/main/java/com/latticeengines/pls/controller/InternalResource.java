@@ -475,11 +475,44 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes) {
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
+            @RequestParam(value = "offset", required = false) //
+            Integer offset, //
+            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
+            @RequestParam(value = "max", required = false) //
+            Integer max //
+    ) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                onlySelectedAttributes, offset, max);
+    }
+
+    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/" + "count" + "/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get lead enrichment")
+    public int getLeadEnrichmentAttributesCount(HttpServletRequest request, //
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Get attributes with display name containing specified " //
+                    + "text (case insensitive) for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
+            String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
+            String category, //
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes //
+    ) {
+        checkHeader(request);
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
                 onlySelectedAttributes);
     }
 
@@ -541,9 +574,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
-                                        @PathVariable("tenantId") String tenantId,
-                                        @RequestBody AdditionalEmailInfo emailInfo,
-                                        HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
+            HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String modelName = emailInfo.getModelId();
         if (modelName != null && !modelName.isEmpty()) {
@@ -553,9 +585,11 @@ public class InternalResource extends InternalResourceBase {
                     if (result.equals("COMPLETED")) {
                         if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                 || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName, true);
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                    true);
                         } else {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName, false);
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                    false);
                         }
                     } else {
                         if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
@@ -574,10 +608,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
-    public void sendPlsScoreEmail(@PathVariable("result") String result,
-                                  @PathVariable("tenantId") String tenantId,
-                                  @RequestBody AdditionalEmailInfo emailInfo,
-                                  HttpServletRequest request) {
+    public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+            @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String modelId = emailInfo.getModelId();
         if (modelId != null && !modelId.isEmpty()) {
@@ -590,9 +622,11 @@ public class InternalResource extends InternalResourceBase {
                         if (result.equals("COMPLETED")) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                     || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName, true);
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        true);
                             } else {
-                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName, false);
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        false);
                             }
                         } else {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())

@@ -52,7 +52,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, false);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, false, null,
+                null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -88,8 +89,39 @@ public class EnrichmentResource {
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get list of attributes with selection flag")
+    @ApiOperation(value = "Get list of attributes with specified query parameters")
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request,
+            @ApiParam(value = "Get attributes with name containing specified " //
+                    + "text for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
+            String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
+            String category, //
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
+            @RequestParam(value = "offset", required = false) //
+            Integer offset, //
+            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
+            @RequestParam(value = "max", required = false) //
+            Integer max //
+    ) {
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
+                categoryEnum, onlySelectedAttributes, offset, max);
+    }
+
+    @RequestMapping(value = "/count", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get count of attributes with specified query parameters")
+    public int getLeadEnrichmentAttributesCount(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false) //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
@@ -104,7 +136,7 @@ public class EnrichmentResource {
             Boolean onlySelectedAttributes) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
+        return internalResourceRestApiProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, onlySelectedAttributes);
     }
 

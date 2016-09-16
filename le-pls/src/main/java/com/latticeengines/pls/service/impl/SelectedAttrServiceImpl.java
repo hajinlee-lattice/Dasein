@@ -61,7 +61,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
         int additionalPremiumAttrCount = 0;
-        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, false);
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, false, null, null);
 
         List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
@@ -101,7 +101,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
-            Category category, Boolean onlySelectedAttributes) {
+            Category category, Boolean onlySelectedAttributes, Integer offset, Integer max) {
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         List<String> selectedAttributeInternalNames = getselectedAttributeInternalNames(selectedAttributes);
@@ -110,8 +110,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         // get metadata about only these names
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
 
-        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category,
-                onlySelectedAttributes);
+        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, onlySelectedAttributes,
+                offset, max);
+    }
+
+    @Override
+    public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category category,
+            Boolean onlySelectedAttributes) {
+        // TODO - update this to use efficient way to get count
+        List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant, attributeDisplayNameFilter, category,
+                onlySelectedAttributes, null, null);
+        return (matchingAttr == null) ? 0 : matchingAttr.size();
     }
 
     private List<String> getselectedAttributeInternalNames(List<SelectedAttribute> selectedAttributes) {
@@ -146,7 +155,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
-        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, isSelected);
+        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, isSelected,
+                null, null);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
                 getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
@@ -197,7 +207,12 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
             List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes) {
+            Boolean onlySelectedAttributes, Integer offset, Integer max) {
+        if ((offset != null && offset < 0) || (max != null && max <= 0)) {
+            // TODO - throw LEDP exception
+            throw new RuntimeException("Invalid pagination option");
+        }
+
         List<String> selectedAttributeNames = new ArrayList<>();
 
         for (SelectedAttribute selectedAttribute : selectedAttributes) {
@@ -228,7 +243,26 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             addAttrInFinalList(selectedAttributeNames, superimposedList, column);
         }
 
-        return superimposedList;
+        return extractPage(superimposedList, offset, max);
+    }
+
+    private List<LeadEnrichmentAttribute> extractPage(List<LeadEnrichmentAttribute> superimposedList, Integer offset,
+            Integer max) {
+        if (offset == null && max == null) {
+            return superimposedList;
+        } else {
+            if (offset != null && offset >= superimposedList.size()) {
+                return new ArrayList<LeadEnrichmentAttribute>();
+            }
+
+            int effectiveStartIndex = offset == null ? 0 : offset;
+            int effectiveEndIndex = max == null ? superimposedList.size() : effectiveStartIndex + max;
+            if (effectiveEndIndex > superimposedList.size()) {
+                effectiveEndIndex = superimposedList.size();
+            }
+
+            return superimposedList.subList(effectiveStartIndex, effectiveEndIndex);
+        }
     }
 
     private void addAttrInFinalList(List<String> selectedAttributeNames, List<LeadEnrichmentAttribute> superimposedList,

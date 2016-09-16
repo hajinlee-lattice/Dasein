@@ -49,8 +49,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
-                null, false);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, false, null,
+                null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -70,8 +70,7 @@ public class EnrichmentResource {
             @ApiParam(value = "Update lead enrichment selection", required = true) //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        selectedAttrService.save(attributes, tenant,
-                getLeadEnrichmentPremiumAttributesLimitation(request));
+        selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request));
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //
@@ -91,11 +90,42 @@ public class EnrichmentResource {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes) {
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
+            @RequestParam(value = "offset", required = false) //
+            Integer offset, //
+            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
+            @RequestParam(value = "max", required = false) //
+            Integer max //
+    ) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                onlySelectedAttributes, offset, max);
+    }
+
+    @RequestMapping(value = LEAD_ENRICH_PATH + "/count", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of attributes with selection flag")
+    public int getLeadEnrichmentAttributesCount(HttpServletRequest request,
+            @ApiParam(value = "Get attributes with name containing specified " //
+                    + "text for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
+            String attributeDisplayNameFilter, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
+            String category, //
+            @ApiParam(value = "Should get only selected attribute", //
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
+            Boolean onlySelectedAttributes//
+    ) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
                 onlySelectedAttributes);
     }
 
@@ -109,10 +139,9 @@ public class EnrichmentResource {
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        String fileName = onlySelectedAttributes ? "selectedEnrichmentAttributes.csv"
-                : "enrichmentAttributes.csv";
-        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName,
-                tenant, onlySelectedAttributes);
+        String fileName = onlySelectedAttributes ? "selectedEnrichmentAttributes.csv" : "enrichmentAttributes.csv";
+        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName, tenant,
+                onlySelectedAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/premiumattributeslimitation", //
@@ -120,8 +149,7 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(
-            HttpServletRequest request) {
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
@@ -146,8 +174,8 @@ public class EnrichmentResource {
         return selectedAttrService.getSelectedAttributePremiumCount(tenant);
     }
 
-    private boolean containsAtleastOneAttributeForCategory(
-            List<LeadEnrichmentAttribute> allAttributes, Category category) {
+    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
+            Category category) {
         if (!CollectionUtils.isEmpty(allAttributes)) {
             for (LeadEnrichmentAttribute attr : allAttributes) {
                 if (category.toString().equals(attr.getCategory())) {

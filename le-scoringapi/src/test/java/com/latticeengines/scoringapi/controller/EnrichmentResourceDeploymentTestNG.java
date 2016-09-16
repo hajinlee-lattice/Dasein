@@ -374,6 +374,96 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     }
 
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentAttributesWithParamsAfterSecondSave" })
+    public void testPagination() throws IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
+        Assert.assertNotNull(combinedAttributeList);
+        Assert.assertFalse(combinedAttributeList.isEmpty());
+
+        int fullSize = getLeadEnrichmentAttributeListCount(false, null, null);
+
+        Assert.assertEquals(fullSize, combinedAttributeList.size());
+
+        List<LeadEnrichmentAttribute> fullPageAttributeList = getLeadEnrichmentAttributeList(false, null, null, 0,
+                fullSize);
+        Assert.assertNotNull(fullPageAttributeList);
+        Assert.assertFalse(fullPageAttributeList.isEmpty());
+        Assert.assertEquals(fullPageAttributeList.size(), fullSize);
+
+        for (int i = 0; i < fullSize; i++) {
+            LeadEnrichmentAttribute withoutPageAttr = combinedAttributeList.get(i);
+            LeadEnrichmentAttribute withPageAttr = fullPageAttributeList.get(i);
+
+            Assert.assertEquals(withoutPageAttr.getFieldName(), withPageAttr.getFieldName());
+            Assert.assertEquals(withoutPageAttr.getDisplayName(), withPageAttr.getDisplayName());
+            Assert.assertEquals(withoutPageAttr.getCategory(), withPageAttr.getCategory());
+            Assert.assertEquals(withoutPageAttr.getIsSelected(), withPageAttr.getIsSelected());
+        }
+
+        int offset = 5;
+        int max = fullSize - offset - 10;
+
+        List<LeadEnrichmentAttribute> partialPageAttributeList = getLeadEnrichmentAttributeList(false, null, null,
+                offset, max);
+        Assert.assertNotNull(partialPageAttributeList);
+        Assert.assertFalse(partialPageAttributeList.isEmpty());
+        Assert.assertEquals(partialPageAttributeList.size(), max);
+
+        for (int i = offset; i < offset + max; i++) {
+            LeadEnrichmentAttribute withoutPageAttr = combinedAttributeList.get(i);
+            LeadEnrichmentAttribute withPageAttr = partialPageAttributeList.get(i - offset);
+
+            Assert.assertEquals(withoutPageAttr.getFieldName(), withPageAttr.getFieldName());
+            Assert.assertEquals(withoutPageAttr.getDisplayName(), withPageAttr.getDisplayName());
+            Assert.assertEquals(withoutPageAttr.getCategory(), withPageAttr.getCategory());
+            Assert.assertEquals(withoutPageAttr.getIsSelected(), withPageAttr.getIsSelected());
+        }
+
+        List<LeadEnrichmentAttribute> combinedAttributeListSelected = getLeadEnrichmentAttributeList(true);
+        Assert.assertNotNull(combinedAttributeListSelected);
+        Assert.assertFalse(combinedAttributeListSelected.isEmpty());
+
+        int fullSizeSelected = getLeadEnrichmentAttributeListCount(true, null, null);
+
+        Assert.assertEquals(fullSizeSelected, combinedAttributeListSelected.size());
+
+        List<LeadEnrichmentAttribute> fullPageAttributeListSelected = getLeadEnrichmentAttributeList(true, null, null,
+                0, fullSizeSelected);
+        Assert.assertNotNull(fullPageAttributeListSelected);
+        Assert.assertFalse(fullPageAttributeListSelected.isEmpty());
+        Assert.assertEquals(fullPageAttributeListSelected.size(), fullSizeSelected);
+
+        for (int i = 0; i < fullSizeSelected; i++) {
+            LeadEnrichmentAttribute withoutPageAttr = combinedAttributeListSelected.get(i);
+            LeadEnrichmentAttribute withPageAttr = fullPageAttributeListSelected.get(i);
+
+            Assert.assertEquals(withoutPageAttr.getFieldName(), withPageAttr.getFieldName());
+            Assert.assertEquals(withoutPageAttr.getDisplayName(), withPageAttr.getDisplayName());
+            Assert.assertEquals(withoutPageAttr.getCategory(), withPageAttr.getCategory());
+            Assert.assertEquals(withoutPageAttr.getIsSelected(), withPageAttr.getIsSelected());
+        }
+
+        int offsetSelected = 1;
+        int maxSelected = fullSizeSelected - offsetSelected - 1;
+
+        List<LeadEnrichmentAttribute> partialPageAttributeListSelected = getLeadEnrichmentAttributeList(true, null,
+                null, offsetSelected, maxSelected);
+        Assert.assertNotNull(partialPageAttributeListSelected);
+        Assert.assertFalse(partialPageAttributeListSelected.isEmpty());
+        Assert.assertEquals(partialPageAttributeListSelected.size(), maxSelected);
+
+        for (int i = offsetSelected; i < offsetSelected + maxSelected; i++) {
+            LeadEnrichmentAttribute withoutPageAttr = combinedAttributeListSelected.get(i);
+            LeadEnrichmentAttribute withPageAttr = partialPageAttributeListSelected.get(i - offsetSelected);
+
+            Assert.assertEquals(withoutPageAttr.getFieldName(), withPageAttr.getFieldName());
+            Assert.assertEquals(withoutPageAttr.getDisplayName(), withPageAttr.getDisplayName());
+            Assert.assertEquals(withoutPageAttr.getCategory(), withPageAttr.getCategory());
+            Assert.assertEquals(withoutPageAttr.getIsSelected(), withPageAttr.getIsSelected());
+        }
+    }
+
     private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
@@ -425,9 +515,15 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
             String attributeDisplayNameFilter, Category category)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        return getLeadEnrichmentAttributeList(onlySelectedAttr, attributeDisplayNameFilter, category, null, null);
+    }
+
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
+            String attributeDisplayNameFilter, Category category, Integer offset, Integer max)
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = apiHostPort + "/score/enrichment";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
-                || category != null) {
+        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
+                || offset != null || max != null) {
             url += "?";
         }
         if (onlySelectedAttr) {
@@ -438,6 +534,12 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
         if (category != null) {
             url += "category=" + category.toString() + "&";
+        }
+        if (offset != null) {
+            url += "offset=" + offset.intValue() + "&";
+        }
+        if (max != null) {
+            url += "max=" + max.intValue() + "&";
         }
 
         if (url.endsWith("&")) {
@@ -458,6 +560,32 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
 
         return combinedAttributeList;
+    }
+
+    private int getLeadEnrichmentAttributeListCount(boolean onlySelectedAttr, String attributeDisplayNameFilter,
+            Category category) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        String url = apiHostPort + "/score/enrichment/count";
+        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+                || category != null) {
+            url += "?";
+        }
+        if (onlySelectedAttr) {
+            url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
+        }
+        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+            url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
+        }
+        if (category != null) {
+            url += "category=" + category.toString() + "&";
+        }
+
+        if (url.endsWith("&")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        System.out.println("Using URL: " + url);
+
+        return oAuth2RestTemplate.getForObject(url, Integer.class);
     }
 
     private void checkSelection(List<LeadEnrichmentAttribute> enrichmentList,

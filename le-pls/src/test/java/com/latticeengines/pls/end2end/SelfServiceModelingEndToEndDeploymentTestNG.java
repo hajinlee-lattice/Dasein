@@ -139,8 +139,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         sourceFile.setSchemaInterpretation(schemaInterpretation);
-        ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
+        ResponseDocument response = restTemplate
+                .getForObject(String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
                         sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
@@ -161,9 +161,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
-        restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
-                        sourceFile.getName()), mappings, Void.class);
+        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
+                getRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -316,7 +315,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceLead.toString());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -363,8 +363,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = getRestTemplate()
+                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -514,15 +514,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void assertJobExistsWithModelIdAndModelName(final String jobModelId) {
         log.info(String.format("The model_id is: %s", jobModelId));
         @SuppressWarnings("unchecked")
-        List<Object> rawJobs = restTemplate
-                .getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
+        List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
+                List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
-                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
-                                .equals(MODEL_DISPLAY_NAME);
+                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
+                        .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
             }
         }));
     }
