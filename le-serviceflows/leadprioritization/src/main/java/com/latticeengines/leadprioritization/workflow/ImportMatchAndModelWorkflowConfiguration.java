@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
