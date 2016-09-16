@@ -43,7 +43,7 @@ angular
     }
 
     vm.changeMappingOption = function(mapping, selectedOption) {
-        mapping.mappedToLatticeField = false;
+        mapping.mappedToLatticeField = mapping.mappedToLatticeField || false;
         delete mapping.ignored;
 
         switch (selectedOption.id) {
