@@ -98,7 +98,7 @@ public class MarketoCredential extends Credential {
         this.restClientSecret = restClientSecret;
     }
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_ENRICHMENT_ID", nullable = false)
     @JsonProperty("enrichment")

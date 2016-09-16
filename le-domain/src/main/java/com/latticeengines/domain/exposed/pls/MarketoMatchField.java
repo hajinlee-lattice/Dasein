@@ -27,8 +27,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MARKETO_MATCH_FIELD", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "TENANT_ID", "MARKETO_MATCH_FIELD_NAME" }) })
+@Table(name = "MARKETO_MATCH_FIELD")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
 
