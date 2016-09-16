@@ -3,9 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.pls.service.MarketoCredentialService;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,7 +98,8 @@ public class MarketoCredentialResource {
     @ResponseBody
     public MarketoCredential find(@PathVariable String credentialName) {
         return MARKETO_CREDENTIAL;
-        // return marketoCredentialService.findMarketoCredentialByName(credentialName);
+        // return
+        // marketoCredentialService.findMarketoCredentialByName(credentialName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -122,7 +121,8 @@ public class MarketoCredentialResource {
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
     public void update(@PathVariable String credentialName,
             @RequestBody MarketoCredential credential) {
-        // marketoCredentialService.updateMarketoCredentialByName(credentialName, credential);
+        // marketoCredentialService.updateMarketoCredentialByName(credentialName,
+        // credential);
     }
 
     @RequestMapping(value = "/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
