@@ -14,7 +14,9 @@ angular.module('lp.enrichment.leadenrichment', [
         label: {
             total: 'Total',
             premium: 'Premium',
-            button_save: 'Save',
+            button_download: 'Download All',
+            button_download_selected: 'Download Selected',
+            button_save: 'Save Changes',
             button_select: 'Disabled',
             button_selected: 'Enabled',
             button_deselect: 'Enabled',
@@ -175,10 +177,10 @@ angular.module('lp.enrichment.leadenrichment', [
     var _scrolled = function() {
         var el = document.querySelector('.subheader-container'),
             $el = angular.element(el),
-            watched_el = document.querySelector('.summary .nav'),
+            watched_el = document.querySelector('#mainContentView'),
             $watched_el = angular.element(watched_el),
-            top = watched_el.getBoundingClientRect().top + $watched_el.height(),
-            enrichments_list = document.querySelector('.enrichments');
+            top = watched_el.getBoundingClientRect().top,
+            enrichments_list = document.querySelector('.filters-enrichments');
 
         if(top < 0) {
             $el.addClass('fixed');

@@ -6,8 +6,16 @@ angular.module('lp.enrichment.leadenrichment')
     this.selectedCount = null;
     this.premiumSelectMaximum = null;
     this.metadata = {
-        selectedToggle: false,
-        current: 1
+        current: 1,
+        toggle: {
+            show: {
+                selected: false,
+                premium: false
+            },
+            hide: {
+                premium: false
+            }
+        }
     };
 
     this.getMetadata = function(name) {
@@ -15,7 +23,22 @@ angular.module('lp.enrichment.leadenrichment')
     }
 
     this.setMetadata = function(name, value) {
-        return this.metadata[name] = value;
+        function assignProperty(obj, path, value) {
+            var props = path.split(".")
+            , i = 0
+            , prop;
+
+            for(; i < props.length - 1; i++) {
+                prop = props[i];
+                obj = obj[prop];
+            }
+            obj[props[i]] = value;
+        }
+        if(name.includes('.')) {
+            return assignProperty(this.metadata, name, value);
+        } else {
+            return this.metadata[name] = value;
+        }
     }
 
     this.getPremiumSelectMaximum = function(){

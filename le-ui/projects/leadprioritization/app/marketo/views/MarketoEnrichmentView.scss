@@ -113,6 +113,8 @@
                                     background: #f6f6f6;
                                     padding: 5px 10px;
                                     color: #747474;
+                                    pointer-events: none;
+                                    @include user-select(none);
                                     em {
                                         float: right;
                                     }

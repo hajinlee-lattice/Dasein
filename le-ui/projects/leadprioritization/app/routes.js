@@ -903,6 +903,7 @@ angular
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
+                /*
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -917,12 +918,13 @@ angular
                             }
                         });
                         $scope.selectToggle = function(bool) {
-                            EnrichmentStore.setMetadata('selectedToggle', bool);
+                            EnrichmentStore.setMetadata('toggle.show.selected', bool);
                             EnrichmentStore.setMetadata('current', 1);
                         }
                     },
                     templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
+                */
                 "main@": {
                     resolve: {
                         EnrichmentData: function($q, EnrichmentStore) {

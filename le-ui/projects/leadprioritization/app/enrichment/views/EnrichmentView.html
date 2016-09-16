@@ -10,11 +10,11 @@
             <ul class="subheader">
                 <li class="query">
                     <div class="ng-search">
-                        <input type="text" class="form-control" placeholder="Search all {{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                         <a class="button icon-button white-button" ng-click="vm.query.length ? vm.query = null : ''">
                             <span class="fa fa-search" ng-show="!vm.query.length"></span>
                             <span class="fa fa-times" ng-show="vm.query.length"></span>
                         </a>
+                        <input type="text" class="form-control" placeholder="Search all {{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
                 <li class="categories">
@@ -31,86 +31,104 @@
                     </a>
                 </li>
             </ul>
-            <!--
-            <ul class="subheader"  ng-animate-children="true">
-                <li class="totals">
-                    <ul>
-                        <li>
-                            {{vm.label.total}} <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}} / {{vm.generalSelectLimit}}</em>
+        </div>
+        <div class="filters-enrichments">
+            <div class="filters-container">
+                <div class="side">
+                    <h4>Enabled Attributes</h4>
+                    <ul class="info">
+                        <li class="premiums">
+                            <span class="fa fa-star"></span> {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}} / {{vm.premiumSelectLimit}}</em>
                         </li>
-                        <li>
-                            {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}} / {{vm.premiumSelectLimit}}</em>
+                        <li class="totals">
+                            <span class="fa fa-bars"></span> {{vm.label.total}} <em class="badge">{{(vm.selectedTotal = vm.enrichments | filter: {'IsSelected': true}).length}} / {{vm.generalSelectLimit}}</em>
                         </li>
                     </ul>
-                </li>
-                <li class="download">
-                    <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes={{vm.metadata.selectedToggle}}&Authorization={{vm.authToken}}" class="button icon-button blue-button"><span class="fa fa-download"></span></a>
-                </li>
-                <li class="save">
-                    <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
-                </li>
-            </ul>
-            -->
-        </div>
-        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
-            <div class="twelve columns">
-                <pd-pagination-controls 
-                        ng-click="vm.clickPaginate()"
-                        current="vm.metadata.current" 
-                        max="vm.max = filteredList.length / vm.pagesize">
-                </pd-pagination-controls>
+                    <ul class="actions">
+                        <li class="save">
+                            <button class="button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
+                        </li>
+                        </ul>
+                    </ul>
+                    <h4>Filter</h4>
+                    <ul class="filters">
+                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
+                        <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
+                        <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
+                    </ul>
+                    <h4>Download Attributes</h4>
+                    <ul class="actions">
+                        <li class="download">
+                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization={{vm.authToken}}">{{vm.label.button_download}}</a>
+                        </li>
+                        <li class="download">
+                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization={{vm.authToken}}">{{vm.label.button_download_selected}}</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
-            <li class="box category-{{vm.categoryClass(enrichment.Category)}} ngAnimate" 
-            ng-repeat="enrichment in (filteredList = (vm.enrichments 
-            | filter: vm.query
-            | orderBy: SortOrder
-            | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
-            | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-            | limitTo: vm.pagesize" 
-            ng-class="{'active': enrichment.IsSelected}">
-                <div class="box-inner">
-                    <div class="header">
-                        <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></div>
-                        <ul class="categories">
-                            <li ng-if="enrichment.Category">{{enrichment.Category}}</li>
-                            <li>Sub Category</li>
-                        </ul>
-                        <ul class="tags">
-                            <li ng-if="enrichment.IsPremium" class="premium">premium</li>
-                        </ul>
-                        <h2>
-                            <strong>{{enrichment.DisplayName}}</strong>
-                        </h2>
-                    </div>
-                    <p class="description">{{enrichment.Description}}</p>
-                    <div class="controls">
-                        <div class="field-type">
-                            <strong>Field Type</strong>
-                            <em>{{vm.fieldType(enrichment.FieldType)}}</em>
-                        </div>
-                        <div class="toggle">
-                            <button class="button" 
-                                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty, 'selected': enrichment.IsSelected}" 
-                                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
-                                <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
-                            </button>
-                        </div>
+            <div class="enrichments-container">
+                <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+                    <div class="twelve columns">
+                        <pd-pagination-controls 
+                                ng-click="vm.clickPaginate()"
+                                current="vm.metadata.current" 
+                                max="vm.max = filteredList.length / vm.pagesize">
+                        </pd-pagination-controls>
                     </div>
                 </div>
-            </li>
-            <li ng-show="!filteredList.length">
-              <h2>{{vm.label.no_results}}</h2>
-            </li>
-        </ul>
-        <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
-            <div class="twelve columns">
-                <pd-pagination-controls 
-                        ng-click="vm.clickPaginate()"
-                        current="vm.metadata.current" 
-                        max="vm.max = filteredList.length / vm.pagesize">
-                </pd-pagination-controls>
+                <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
+                    <li class="box category-{{vm.categoryClass(enrichment.Category)}} ngAnimate" 
+                    ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                    | filter: vm.query
+                    | orderBy: SortOrder
+                    | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false) })) 
+                    | startFrom: (vm.metadata.current - 1) * vm.pagesize 
+                    | limitTo: vm.pagesize" 
+                    ng-class="{'active': enrichment.IsSelected}">
+                        <div class="box-inner">
+                            <div class="header">
+                                <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></div>
+                                <ul class="categories">
+                                    <li ng-if="enrichment.Category">{{enrichment.Category}}</li>
+                                    <li ng-if="enrichment.SubCategory">{{enrichment.SubCategory}}</li>
+                                </ul>
+                                <ul class="tags">
+                                    <li ng-if="enrichment.IsPremium" class="premium">premium</li>
+                                </ul>
+                                <h2>
+                                    <strong>{{enrichment.DisplayName}}</strong>
+                                </h2>
+                            </div>
+                            <p class="description">{{enrichment.Description}}</p>
+                            <div class="controls">
+                                <div class="field-type">
+                                    <strong>Field Type</strong>
+                                    <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                                </div>
+                                <div class="toggle">
+                                    <button class="button" 
+                                            ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty, 'selected': enrichment.IsSelected}" 
+                                            ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+                                        <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li ng-show="!filteredList.length">
+                      <h2>{{vm.label.no_results}}</h2>
+                    </li>
+                </ul>
+                <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+                    <div class="twelve columns">
+                        <pd-pagination-controls 
+                                ng-click="vm.clickPaginate()"
+                                current="vm.metadata.current" 
+                                max="vm.max = filteredList.length / vm.pagesize">
+                        </pd-pagination-controls>
+                    </div>
+                </div>
             </div>
         </div>
 
