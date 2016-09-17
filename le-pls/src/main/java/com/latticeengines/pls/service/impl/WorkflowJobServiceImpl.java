@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -17,11 +15,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -153,7 +153,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private Boolean getJobSourceFileExists(String applicationId) {
-        if (applicationId == null && applicationId.isEmpty()) {
+        if (applicationId == null || applicationId.isEmpty()) {
             return false;
         }
 
