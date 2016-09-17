@@ -161,11 +161,17 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         for (PipelineStep step : sourcePipeline.getPipelineSteps()) {
             PipelineStepOrFile p = new PipelineStepOrFile();
 
-            if (!step.getMainClassName().equals("EnumeratedColumnTransformStep")) {
+            // add the new step type immediately after
+            if (step.getMainClassName().equals("EnumeratedColumnTransformStep")) {
                 p.pipelineStepName = step.getName();
-            } else {
+                pipelineSteps.add(p);
+                p = new PipelineStepOrFile();
                 Path path = new Path(hdfsDir + "/steps/assigncategorical");
                 p.pipelineStepDir = path.toString();
+                pipelineSteps.add(p);
+                continue;
+            } else {
+                p.pipelineStepName = step.getName();
             }
             
             pipelineSteps.add(p);
@@ -222,7 +228,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                 break;
             }
             if (modelRun.getStatus().equals(ModelRunStatus.FAILED)) {
-                Assert.fail("Faield due to= " + modelRun.getErrorMessage());
+                Assert.fail("Failed due to= " + modelRun.getErrorMessage());
                 break;
             }
             System.out.println("Waiting for modelRunId=" + modelRunId + " Status:" + modelRun.getStatus().toString());

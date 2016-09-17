@@ -1,6 +1,6 @@
 {
-  "Name": "assignconversionratetoallcategoricalvalues",
-  "MainClassName": "AssignConversionRateToAllCategoricalValues",
+  "Name": "assigncategorical",
+  "MainClassName": "AssignCategorical",
   "UniqueColumnTransformName": "",
   "OperatesOnColumns": [
     "Categorical"
