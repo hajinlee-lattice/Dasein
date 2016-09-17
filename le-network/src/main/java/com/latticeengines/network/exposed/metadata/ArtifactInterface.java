@@ -1,7 +1,5 @@
 package com.latticeengines.network.exposed.metadata;
 
-import java.util.List;
-
 import com.latticeengines.domain.exposed.metadata.Artifact;
 
 public interface ArtifactInterface {
