@@ -72,7 +72,7 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.pipelineStep")
     private List<PipelineToPipelineSteps> pipelines = new ArrayList<>();
 
-    @JsonProperty("pipeline_property_defs")
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "pipelineStep")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SELECT)
@@ -88,6 +88,10 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     
     @Column(name = "NAMED_PARAMS_TO_INIT")
     private String namedParameterListToInit;
+    
+    @JsonProperty("LoadFromHdfs")
+    @Column(name = "LOAD_FROM_HDFS", nullable = true)
+    private boolean loadFromHdfs = false;
 
     @Override
     public String getName() {
@@ -186,6 +190,14 @@ public class PipelineStep implements HasName, HasPid, Serializable {
 
     public void addPipelineToPipelineStep(PipelineToPipelineSteps p) {
         pipelines.add(p);
+    }
+
+    public boolean getLoadFromHdfs() {
+        return loadFromHdfs;
+    }
+
+    public void setLoadFromHdfs(boolean loadFromHdfs) {
+        this.loadFromHdfs = loadFromHdfs;
     }
 
 }

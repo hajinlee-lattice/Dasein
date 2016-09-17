@@ -21,8 +21,7 @@ public class ModelFactory {
         }
         try {
             log.info("Model Config=" + runTimeParams.get(MODEL_CONFIG));
-            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG),
-                    com.latticeengines.domain.exposed.modelquality.SelectedConfig.class);
+            SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG), SelectedConfig.class);
             return selectedConfig;
         } catch (Exception ex) {
             log.warn("Failed to get model config!", ex);

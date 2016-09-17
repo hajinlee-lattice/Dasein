@@ -29,11 +29,11 @@ public class PipelineFactory extends ModelFactory {
         if (pipeline == null) {
             return;
         }
-        configPipelne(algo, pipeline);
+        configPipeline(algo, pipeline);
         log.info("Successfully configured the Pipeline");
     }
 
-    private static void configPipelne(Algorithm algo, Pipeline pipeline) {
+    private static void configPipeline(Algorithm algo, Pipeline pipeline) {
        
         if (StringUtils.isNotEmpty(pipeline.getPipelineScript())) {
             algo.setPipelineScript(pipeline.getPipelineScript());
