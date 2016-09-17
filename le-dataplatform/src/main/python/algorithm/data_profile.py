@@ -9,12 +9,14 @@ from pandas.core.common import isnull
 from sklearn.metrics.cluster.supervised import entropy
 import sys
 
+from scipy import stats
+
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
 import pandas as pd
-from scipy import stats
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')

@@ -27,6 +27,7 @@
         <yarn:hdfs path="$$DATAPROFILE$$" />
         <yarn:hdfs path="$$CONFIGMETADATA$$" />
         <yarn:hdfs path="$$PYTHONSCRIPT$$" />
+        <yarn:hdfs path="$$PIPELINEDRIVER$$" />
         <yarn:hdfs path="$$PYTHONPIPELINESCRIPT$$" />
         <yarn:hdfs path="$$PYTHONPIPELINELIBFQDN$$" type="ARCHIVE"/>
     </yarn:localresources>

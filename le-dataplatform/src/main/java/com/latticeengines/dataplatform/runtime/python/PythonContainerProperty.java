@@ -7,6 +7,7 @@ public enum PythonContainerProperty {
     PYTHONPIPELINELIBFQDN, //
     PYTHONPIPELINELIB, //
     PYTHONPIPELINESCRIPT, //
+    PIPELINEDRIVER, //
     TRAINING, //
     TEST, //
     SCHEMA, //

@@ -3,12 +3,15 @@ Contains all column tranformation functions, whether to apply to categorical or 
 The actual function to apply are taken from model.json file
 '''
 
-import os
+from collections import OrderedDict
+import imp
 import json
 import logging
+import os
+import pwd
 
-import imp
-from collections import OrderedDict
+from urlparse import urlparse
+from leframework.webhdfs import WebHDFS
 
 logger = logging.getLogger(name='columntransform')
 
@@ -89,6 +92,9 @@ class ColumnTransform(object):
         except Exception:
             logger.exception("Caught Exception while checking Configurable Pipeline JSON for correctness")
             return False
+    
+    def stripPath(self, fileName):
+        return fileName[fileName.rfind('/') + 1:len(fileName)]
 
     def buildPipelineFromFile(self, pipelinePath="./lepipeline.tar.gz",
                                        stringColumns=None,
@@ -114,7 +120,15 @@ class ColumnTransform(object):
                 logger.info("Couldn't validate JSON file %s for configurable pipeline." % jsonToProcess)
                 return pipelineAsArrayOfTransformClasses
 
+            webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
+            hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+
             for _, value in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
+                if "LoadFromHdfs" in value and value["LoadFromHdfs"] == True:
+                    f = value["ColumnTransformFilePath"]
+                    f = self.stripPath(f)
+                    hdfs.copyToLocal(value["ColumnTransformFilePath"], "./%s" % f)
+
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
                 columnTransformObject = {}
@@ -124,7 +138,7 @@ class ColumnTransform(object):
                 columnTransformObject[self.columnTransformFilePathKey] = sourceFilePathLowerCased
 
                 logger.info("Configurable Pipeline Current Path: %s" % str(os.getcwd()))
-                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, [pipelinePath])
+                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, [pipelinePath, os.getcwd()])
                 columnTransformObject[self.loadedModuleKey] = imp.load_module(uniqueColumnTransformName, fileObject, pathname, description)
                 logger.info("Loaded %s for Configurable Pipeline " % uniqueColumnTransformName)
 

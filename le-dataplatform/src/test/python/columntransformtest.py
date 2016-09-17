@@ -9,7 +9,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def testPipelineColumnTransform(self):
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
-        colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
+        colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()[1]
 
         self.assertLengthOfPipeline(pipeline)
@@ -19,7 +19,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         self.assertSortingOfTransform(pipeline)
 
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
-        colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
+        colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()[1]
 
         self.assertLengthOfEVPipeline(pipeline)
@@ -34,13 +34,13 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 7, "Pipeline should have 8 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
                 , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
-        colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
+        colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
 
         with open(pipelineFilePath[0]) as pipelineFile:
             pipelineFileAsJSON = json.load(pipelineFile)
@@ -60,7 +60,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 mainClassName = value["MainClassName"]
                 args = []
                 namedParameterList = value["NamedParameterListToInit"]
-                kwargs = colTransform.buildKwArgs(namedParameterList = namedParameterList, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
+                kwargs = colTransform.buildKwArgs(namedParameterList=namedParameterList, stringColumns=None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
                 self.aTestBuildKwArgs(namedParameterList)
 
                 try:
@@ -89,17 +89,20 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 uniqueColumnTransformName = value["Name"]
                 columnTransformObject = {}
 
-                try:
-                    columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
-                                                                            "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
-                except Exception as e:
-                    print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
-                    raise
+                if "LoadFromHdfs" not in value or value["LoadFromHdfs"] == False:
+                    try:
+                        columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
+                                                                                "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
+                    except Exception as e:
+                        print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
+                        raise
+                else:
+                    columnTransformObject["LoadedModule"] = None
 
                 mainClassName = value["MainClassName"]
                 args = []
                 namedParameterList = value["NamedParameterListToInit"]
-                kwargs = colTransform.buildKwArgs(namedParameterList = namedParameterList, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
+                kwargs = colTransform.buildKwArgs(namedParameterList=namedParameterList, stringColumns=None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
                 if kwargs.has_key("enabled"):
                     del kwargs["enabled"]
                 self.aTestBuildKwArgs(namedParameterList)

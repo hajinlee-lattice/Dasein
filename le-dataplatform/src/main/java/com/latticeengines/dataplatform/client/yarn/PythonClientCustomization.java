@@ -77,6 +77,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
+            properties.put(PythonContainerProperty.PIPELINEDRIVER.name(), classifier.getPipelineDriver());
 
 
             properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));

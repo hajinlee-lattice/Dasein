@@ -251,6 +251,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 + "/dataplatform/scripts/lepipeline.tar.gz");
         classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName)
                 + "/dataplatform/scripts/pipeline.py");
+        classifier.setPipelineDriver("/app/" + versionManager.getCurrentVersionInStack(stackName)
+                + "/dataplatform/scripts/pipeline.json");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 

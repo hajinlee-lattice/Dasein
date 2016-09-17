@@ -78,20 +78,6 @@
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {},
       "ColumnTransformFilePath": "exportdfstep.py"
-    },
-    "CustomProxyStep": {
-      "KeyWhenSortingByAscending": "8",
-      "Name": "customproxystep",
-      "MainClassName": "CustomProxyStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "params": "params",
-        "targetName": "customtargetstep",
-        "targetMainClassName": "CustomTargetStep",
-        "targetFilePath": "/Pods/Default/Services/ModelQuality/customtargetstep.py"
-      },
-      "ColumnTransformFilePath": "customproxystep.py"
     }
   }
 }

@@ -2,7 +2,6 @@ import logging
 import os
 from pandas.core.frame import DataFrame
 import pwd
-import shutil
 import sys
 from urlparse import urlparse
 
