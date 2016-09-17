@@ -3,22 +3,21 @@ package com.latticeengines.modelquality.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
+import com.latticeengines.domain.exposed.modelquality.PipelineStep;
+import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
 public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
@@ -53,23 +52,42 @@ public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTest
     }
 
     @Test(groups = "deployment")
-    public void uploadPipelineStepFile() throws Exception {
-        try {
-            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-            Resource resource = new ClassPathResource("com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues.py");
-            map.add("file", resource);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-            String fileName = "assignconversionratetoallcategoricalvalues.py";
-            
-            String step = modelQualityProxy.uploadPipelineStepPythonScript(fileName, "assigncategorical", requestEntity);
-            assertEquals(step, hdfsDir + "/steps/assigncategorical/assigncategorical.py");
-            assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
-
-            
-        } catch (Exception ex) {
-            Assert.fail("Failed!", ex);
-        }
+    public void uploadPipelineStepPythonFile() throws Exception {
+        String step = super.uploadPipelineStepFile("py");
+        assertEquals(step, hdfsDir + "/steps/assigncategorical/assigncategorical.py");
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "uploadPipelineStepPythonFile")
+    public void uploadPipelineStepMetadataFile() throws Exception {
+        String step = super.uploadPipelineStepFile("json");
+        assertEquals(step, hdfsDir + "/steps/assigncategorical/metadata.json");
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
+    }    
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment", dependsOnMethods = "uploadPipelineStepMetadataFile")
+    public void createPipelineFromSteps() throws Exception {
+        List<Pipeline> pipelines = modelQualityProxy.getPipelines();
+        String str = JsonUtils.serialize((Map) pipelines.get(0));
+        Pipeline pipeline = JsonUtils.deserialize(str, Pipeline.class);
+        List<PipelineStepOrFile> pipelineSteps = new ArrayList<>();
+        
+        for (PipelineStep step : pipeline.getPipelineSteps()) {
+            PipelineStepOrFile p = new PipelineStepOrFile();
+
+            if (!step.getMainClassName().equals("EnumeratedColumnTransformStep")) {
+                p.pipelineStepName = step.getName();
+            } else {
+                Path path = new Path(hdfsDir + "/steps/assigncategorical");
+                p.pipelineStepDir = path.toString();
+            }
+            
+            pipelineSteps.add(p);
+        }
+        
+        String pipelineName = modelQualityProxy.createPipeline("P1", pipelineSteps);
+        Assert.assertEquals(pipelineName, "P1");
+    }
+
 }

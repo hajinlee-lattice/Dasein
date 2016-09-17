@@ -3,11 +3,19 @@ package com.latticeengines.modelquality.functionalframework;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +29,8 @@ import com.latticeengines.domain.exposed.modelquality.ModelConfig;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
+import com.latticeengines.domain.exposed.modelquality.PipelineStep;
+import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.domain.exposed.modelquality.ScoringDataSet;
@@ -30,6 +40,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
@@ -65,25 +77,32 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         deploymentTestBed.switchToSuperAdmin(mainTestTenant);
     }
 
-    protected ModelRun createModelRun(String algoName) {
-        SelectedConfig selectedConfig = getSelectedConfig(algoName);
-        ModelRun modelRun = new ModelRun();
-        modelRun.setName("modelRun1");
-        modelRun.setStatus(ModelRunStatus.NEW);
-        modelRun.setSelectedConfig(selectedConfig);
+    protected List<ModelRun> createModelRuns() {
+        List<SelectedConfig> selectedConfigs = getSelectedConfigs();
+        List<ModelRun> modelRuns = new ArrayList<>();
+        int i = 1;
+        for (SelectedConfig selectedConfig : selectedConfigs) {
+            ModelRun modelRun = new ModelRun();
+            modelRun.setName("modelRun" + i++);
+            modelRun.setStatus(ModelRunStatus.NEW);
+            modelRun.setSelectedConfig(selectedConfig);
+            modelRuns.add(modelRun);
+        }
+        
 
-        return modelRun;
+        return modelRuns;
     }
 
     protected ModelConfig createModelConfig(String algoName) {
-        SelectedConfig selectedConfig = getSelectedConfig(algoName);
+        SelectedConfig selectedConfig = getSelectedConfigs().get(0);
         ModelConfig modelConfig = new ModelConfig();
         modelConfig.setName("modelConfig1");
         modelConfig.setSelectedConfig(selectedConfig);
         return modelConfig;
     }
 
-    protected SelectedConfig getSelectedConfig(String algoName) {
+    @SuppressWarnings("unchecked")
+    protected List<SelectedConfig> getSelectedConfigs() {
         Algorithm algo = createAlgorithm();
         DataSet dataSet = createDataSet();
         DataFlow dataFlow = createDataFlow();
@@ -91,14 +110,68 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         Pipeline pipeline = createPipeline();
         Sampling sampling = createSampling();
 
-        SelectedConfig selectedConfig = new SelectedConfig();
-        selectedConfig.setAlgorithm(algo);
-        selectedConfig.setDataFlow(dataFlow);
-        selectedConfig.setDataSet(dataSet);
-        selectedConfig.setPipeline(pipeline);
-        selectedConfig.setPropData(propData);
-        selectedConfig.setSampling(sampling);
-        return selectedConfig;
+        SelectedConfig selectedConfig1 = new SelectedConfig();
+        selectedConfig1.setAlgorithm(algo);
+        selectedConfig1.setDataFlow(dataFlow);
+        selectedConfig1.setDataSet(dataSet);
+        selectedConfig1.setPipeline(pipeline);
+        selectedConfig1.setPropData(propData);
+        selectedConfig1.setSampling(sampling);
+
+        SelectedConfig selectedConfig2 = new SelectedConfig();
+        selectedConfig2.setAlgorithm(algo);
+        selectedConfig2.setDataFlow(dataFlow);
+        selectedConfig2.setDataSet(dataSet);
+        selectedConfig2.setPipeline(createNewDataPipeline(pipeline));
+        selectedConfig2.setPropData(propData);
+        selectedConfig2.setSampling(sampling);
+        
+        return Arrays.asList(new SelectedConfig[] { selectedConfig1, selectedConfig2 });
+    }
+    
+    protected String uploadPipelineStepFile(String extension) throws Exception {
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+
+        org.springframework.core.io.Resource resource = new ClassPathResource(
+                "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues." + extension);
+        map.add("file", resource);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+        String fileName = "assignconversionratetoallcategoricalvalues" + extension;
+
+        if (extension.equals("py")) {
+            return modelQualityProxy.uploadPipelineStepPythonScript(fileName, "assigncategorical", requestEntity);
+        } else if (extension.equals("json")) {
+            return modelQualityProxy.uploadPipelineStepMetadata(fileName, "assigncategorical", requestEntity);
+        }
+        return null;
+    }
+    
+    protected Pipeline createNewDataPipeline(Pipeline sourcePipeline) {
+        try {
+            uploadPipelineStepFile("py");
+            uploadPipelineStepFile("json");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+        List<PipelineStepOrFile> pipelineSteps = new ArrayList<>();
+        
+        for (PipelineStep step : sourcePipeline.getPipelineSteps()) {
+            PipelineStepOrFile p = new PipelineStepOrFile();
+
+            if (!step.getMainClassName().equals("EnumeratedColumnTransformStep")) {
+                p.pipelineStepName = step.getName();
+            } else {
+                Path path = new Path(hdfsDir + "/steps/assigncategorical");
+                p.pipelineStepDir = path.toString();
+            }
+            
+            pipelineSteps.add(p);
+        }
+        String newPipelineName = modelQualityProxy.createPipeline("P1", pipelineSteps);
+        return modelQualityProxy.getPipelineByName(newPipelineName);
     }
 
     protected Sampling createSampling() {

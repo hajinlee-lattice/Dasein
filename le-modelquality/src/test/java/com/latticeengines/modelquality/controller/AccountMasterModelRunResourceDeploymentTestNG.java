@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -27,7 +26,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterCsvFile")
     public void runModelAccountMaster(String dataSetName, String csvFile) {
         try {
-            ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
+            ModelRun modelRun = createModelRuns().get(0);
             modelRun.getSelectedConfig().getDataSet().setName(dataSetName);
             modelRun.getSelectedConfig().getDataSet().setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
@@ -48,7 +47,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @Test(groups = "deployment", enabled = false, dataProvider = "getDerivedColumnCsvFile")
     public void runModelDerivedColumn(String dataSetName, String csvFile) {
         try {
-            ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
+            ModelRun modelRun = createModelRuns().get(0);
             modelRun.getSelectedConfig().getDataSet().setName(dataSetName);
             modelRun.getSelectedConfig().getDataSet().setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);

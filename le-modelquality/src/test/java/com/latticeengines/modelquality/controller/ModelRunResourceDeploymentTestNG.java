@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -29,19 +28,21 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment")
     public void runModelMuleSoft() {
         try {
-            ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
-            modelRun.getSelectedConfig().getDataSet().setName("MuleSoft");
-            modelRun.getSelectedConfig() //
-                    .getDataSet() //
-                    .setTrainingSetHdfsPath( //
-                            "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
-            
-            ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
-                    mainTestTenant.getId(), user, password, plsDeployedHostPort);
-            Assert.assertTrue(response.isSuccess());
-            
-            String modelRunId = response.getResult();
-            waitAndCheckModelRun(modelRunId);
+            List<ModelRun> modelRuns = createModelRuns();
+            for (ModelRun modelRun : modelRuns) {
+                modelRun.getSelectedConfig().getDataSet().setName("MuleSoft");
+                modelRun.getSelectedConfig() //
+                        .getDataSet() //
+                        .setTrainingSetHdfsPath( //
+                                "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
+                
+                ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
+                        mainTestTenant.getId(), user, password, plsDeployedHostPort);
+                Assert.assertTrue(response.isSuccess());
+                
+                String modelRunId = response.getResult();
+                waitAndCheckModelRun(modelRunId);
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Failed", ex);
@@ -51,7 +52,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment", dependsOnMethods = "runModelMuleSoft", enabled = false)
     public void runModelAlfresco() {
         try {
-            ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
+            ModelRun modelRun = createModelRuns().get(0);
             modelRun.getSelectedConfig().getDataSet().setName("Alfresco");
             modelRun.getSelectedConfig()
                     .getDataSet()
@@ -74,7 +75,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment", dependsOnMethods = "runModelAlfresco", enabled = false)
     public void runModelNGINX() {
         try {
-            ModelRun modelRun = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
+            ModelRun modelRun = createModelRuns().get(0);
             modelRun.getSelectedConfig().getDataSet().setName("NGINX");
             modelRun.getSelectedConfig()
                     .getDataSet()

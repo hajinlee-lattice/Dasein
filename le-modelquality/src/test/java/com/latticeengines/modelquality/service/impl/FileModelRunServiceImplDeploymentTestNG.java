@@ -1,11 +1,13 @@
 package com.latticeengines.modelquality.service.impl;
 
+import java.util.List;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
@@ -16,9 +18,13 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
 
     @BeforeClass(groups = "manual")
     public void setup() throws Exception {
-        cleanupDb();
-        modelRun1 = createModelRun(AlgorithmFactory.ALGORITHM_NAME_RF);
-        modelRun2 = createModelRun(AlgorithmFactory.ALGORITHM_NAME_LR);
+        super.cleanupDb();
+        super.cleanupHdfs();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+
+        List<ModelRun> modelRuns = createModelRuns();
+        modelRun1 = modelRuns.get(0);
+        modelRun2 = modelRuns.get(1);
     }
 
     @Test(groups = "manual")

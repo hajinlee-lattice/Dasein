@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
+import com.latticeengines.domain.exposed.modelquality.PipelineJson;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PipelineToPipelineSteps;
@@ -142,11 +143,12 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             s.setSortKey(i);
             stepsMap.put(s.getMainClassName(), s);
         }
-        String pipelineContents = JsonUtils.serialize(stepsMap);
+        PipelineJson pipelineJson = new PipelineJson(stepsMap);
+        String pipelineContents = JsonUtils.serialize(pipelineJson);
         String pipelineName = pipeline.getName();
         HdfsUtils.mkdir(yarnConfiguration, getHdfsDir() + "/pipelines/" + pipelineName);
-        String tplPath = "%s/pipelines/%s/pipeline.json";
-        String path = String.format(tplPath, getHdfsDir(), pipelineName);
+        String tplPath = "%s/pipelines/%s/pipeline-%d.json";
+        String path = String.format(tplPath, getHdfsDir(), pipelineName, System.currentTimeMillis());
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, new ByteArrayInputStream(pipelineContents.getBytes()), path);
         return path;
     }
