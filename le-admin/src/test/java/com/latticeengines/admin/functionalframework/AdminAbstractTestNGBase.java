@@ -59,7 +59,6 @@ import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestI
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AdminAbstractTestNGBase.class);
 
     protected static final String ADTesterUsername = "testuser1";
