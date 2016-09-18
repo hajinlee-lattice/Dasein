@@ -107,7 +107,10 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
     public List<PipelineStep> getPipelineSteps() {
         List<PipelineStep> steps = new ArrayList<>();
         for (PipelineToPipelineSteps p : pipelineSteps) {
-            steps.add(p.getPipelineStep());
+            PipelineStep step = p.getPipelineStep();
+            step.setSortKey(p.getOrder());
+            steps.add(step);
+            
         }
         return steps;
     }
