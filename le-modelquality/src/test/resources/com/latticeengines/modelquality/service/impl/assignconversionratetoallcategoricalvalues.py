@@ -1,14 +1,16 @@
-from pipelinefwk import get_logger
-from pipelinefwk import create_column
-from pipelinefwk import PipelineStep
 '''
 Description:
 If the choice is made to assign a categorical variable to numeric values, the choice should be the conversion rate for that specitic categorical value.
 For example, category A has 0% conversion, B has 1% conversion, and C has 8% conversion in the training set.  Reassign A,B, and C to 0,.01 and .08, respectively
 '''
+from pipelinefwk import PipelineStep
+from pipelinefwk import create_column
+from pipelinefwk import get_logger
+
+
 logger = get_logger("pipeline")
 
-class AssignConversionRateToAllCategoricalValues(PipelineStep):
+class AssignCategorical(PipelineStep):
 
     columnList = []
     categoricalColumnMapping = None
@@ -56,17 +58,17 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
             if self.targetColumn in dataFrame and len(dataFrame[column]) == len(dataFrame[self.targetColumn]):
                 logger.info("AssignConversionRate training phase. Converting column: " + column)
                 allKeys = set(dataFrame[column])
-                listOfValues=[x for x in enumerate(dataFrame[column])]
-                totalPositiveEventCount=float(sum(dataFrame[self.targetColumn]))
-                meanConversionRate=round(totalPositiveEventCount/(len(dataFrame[self.targetColumn])),2)
+                listOfValues = [x for x in enumerate(dataFrame[column])]
+                totalPositiveEventCount = float(sum(dataFrame[self.targetColumn]))
+                meanConversionRate = round(totalPositiveEventCount / (len(dataFrame[self.targetColumn])), 2)
                 keyConversionRate = {}
                 for key in allKeys:
-                    ind=[i for i,x in listOfValues if x==key]
-                    count=len(ind)
+                    ind = [i for i, x in listOfValues if x == key]
+                    count = len(ind)
                     if count > 0:
-                        totalPositives=sum([dataFrame[self.targetColumn].iloc[i] for i in ind])
+                        totalPositives = sum([dataFrame[self.targetColumn].iloc[i] for i in ind])
                         if totalPositives >= self.totalPositiveThreshold:
-                            perc=round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind])*1.0/count, 2)
+                            perc = round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind]) * 1.0 / count, 2)
                             keyConversionRate[key] = perc
                         else:
                             keyConversionRate[key] = meanConversionRate

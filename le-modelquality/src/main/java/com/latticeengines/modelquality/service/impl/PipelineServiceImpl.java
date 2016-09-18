@@ -104,6 +104,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                     String pipelineStepPythonScript = getPythonScript(psof.pipelineStepDir);
                     step = JsonUtils.deserialize(pipelineStepMetadata, PipelineStep.class);
                     step.setScript(pipelineStepPythonScript);
+                    step.setLoadFromHdfs(true);
                     pipelineStepEntityMgr.create(step);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
