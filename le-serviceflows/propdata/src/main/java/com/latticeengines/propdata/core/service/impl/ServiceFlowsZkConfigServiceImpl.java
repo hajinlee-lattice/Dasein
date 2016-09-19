@@ -92,6 +92,7 @@ public class ServiceFlowsZkConfigServiceImpl implements ServiceFlowsZkConfigServ
                 return defaultCron;
             }
         } catch (Exception e) {
+            log.error("Failed to check cron expression for " + source.getSourceName() + " in ZK.", e);
             return null;
         }
     }
