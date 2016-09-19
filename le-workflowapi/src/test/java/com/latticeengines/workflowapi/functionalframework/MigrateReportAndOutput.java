@@ -1,9 +1,13 @@
 package com.latticeengines.workflowapi.functionalframework;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobExecution;
@@ -12,6 +16,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -33,12 +40,15 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
     private ReportService reportService;
 
     @Test(groups = "functional")
-    public void migrate() {
+    public void migrate() throws JsonProcessingException, IOException {
         List<WorkflowJob> jobs = workflowJobEntityMgr.findAll();
         for (int i = 0; i < jobs.size(); i++) {
             WorkflowJob job = jobs.get(i);
             Long workflowId = job.getWorkflowId();
-            if (workflowId == null || job.getUserId().equals("DEFAULT_USER")) {
+
+            if (workflowId == null || job.getUserId().equals("DEFAULT_USER")
+                    || !StringUtils.isEmpty(job.getOutputContextString())
+                    || !StringUtils.isEmpty(job.getReportContextString())) {
                 log.info("No workflowId, so skipping: " + job.getPid());
                 continue;
             }
@@ -51,7 +61,7 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    private void getReports(JobExecution jobExecution, WorkflowJob workflowJob) {
+    private void getReports(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException, IOException {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.REPORTS);
 
@@ -81,11 +91,18 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
                 }
             }
         } else {
-            throw new RuntimeException("Failed to convert context object.");
+            JsonNode json = new ObjectMapper().readTree(String.valueOf(contextObj));
+            Iterator<Entry<String, JsonNode>> iterator =  json.fields();
+            Entry<String, JsonNode> entry = null;
+            for(; iterator.hasNext(); ){
+                entry = iterator.next();
+                workflowJob.setReportName(entry.getKey(), entry.getValue().asText());
+            }
+            
         }
     }
 
-    private void getOutputs(JobExecution jobExecution, WorkflowJob workflowJob) {
+    private void getOutputs(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException, IOException {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
 
@@ -101,7 +118,14 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
                 }
             }
         } else {
-            throw new RuntimeException("Failed to convert context object to Map<String, String>.");
+            JsonNode json = new ObjectMapper().readTree(String.valueOf(contextObj));
+            Iterator<Entry<String, JsonNode>> iterator =  json.fields();
+            Entry<String, JsonNode> entry = null;
+            for(; iterator.hasNext(); ){
+                entry = iterator.next();
+                workflowJob.setOutputContextValue(entry.getKey(), entry.getValue().asText());
+            }
+            
         }
 
     }
