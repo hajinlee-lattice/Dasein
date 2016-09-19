@@ -11,16 +11,19 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public class TestMatchInputUtils {
 
-    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData) {
-        return prepareSimpleMatchInput(mockData, true);
+    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
+        return prepareSimpleMatchInput(mockData, resolveKeyMap, false);
     }
 
-    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
+    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap, boolean withDuns) {
         MatchInput input = new MatchInput();
         input.setReturnUnmatched(true);
         input.setPredefinedSelection(Predefined.RTS);
         input.setTenant(new Tenant("PD_Test"));
         List<String> fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");
+        if (withDuns) {
+            fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country", "DUNS");
+        }
         input.setFields(fields);
         if (resolveKeyMap) {
             input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
@@ -30,11 +33,15 @@ public class TestMatchInputUtils {
     }
 
     public static MatchInput prepareSimpleMatchInput(Object[][] data) {
+        return prepareSimpleMatchInput(data, false);
+    }
+
+    public static MatchInput prepareSimpleMatchInput(Object[][] data, boolean withDuns) {
         List<List<Object>> mockData = new ArrayList<>();
         for (Object[] row : data) {
             mockData.add(Arrays.asList(row));
         }
-        return prepareSimpleMatchInput(mockData);
+        return prepareSimpleMatchInput(mockData, true, withDuns);
     }
 
     public static List<List<Object>> getGoodInputData() {

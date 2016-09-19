@@ -63,6 +63,7 @@ public class ProgressOrchestrator {
                     if (source.equals(archiveService.getSource())) {
                         archiveServiceMap.put((DataImportedFromDB) source, archiveService);
                         executorMap.put(source.getSourceName(), new ArchiveExecutor(archiveService));
+                        log.info("Added archive service and executor for " + source.getSourceName());
                     }
                 }
             } else if (source instanceof DerivedSource) {
@@ -70,6 +71,7 @@ public class ProgressOrchestrator {
                     if (source.equals(refreshService.getSource())) {
                         refreshServiceMap.put((DerivedSource) source, refreshService);
                         executorMap.put(source.getSourceName(), new RefreshExecutor(refreshService));
+                        log.info("Added refresh service and executor for " + source.getSourceName());
                     }
                 }
             }
@@ -99,6 +101,18 @@ public class ProgressOrchestrator {
                         log.error("Failed to purge old versions of " + source.getSourceName(), e);
                     }
                 }
+            } else {
+                try {
+                    if (source instanceof DataImportedFromDB) {
+                        ArchiveProgress progress = findArchiveProgressToProceed((DataImportedFromDB) source);
+                        log.info("Found Archive Progresses to proceed for " + source.getSourceName() + " : " + progress);
+                    } else if (source instanceof DerivedSource) {
+                        RefreshProgress progress = findRefreshProgressToProceed((DerivedSource) source);
+                        log.info("Found Refresh Progresses to proceed for " + source.getSourceName() + " : " + progress);
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
+                }
             }
         }
     }
@@ -121,12 +135,18 @@ public class ProgressOrchestrator {
     @SuppressWarnings("unchecked")
     ArchiveProgress findArchiveProgressToProceed(DataImportedFromDB source) {
         ArchiveService archiveService = archiveServiceMap.get(source);
+        if (archiveService == null) {
+            throw new RuntimeException("Cannot find the archive service for source " + source.getSourceName());
+        }
         return (ArchiveProgress) findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) archiveService);
     }
 
     @SuppressWarnings("unchecked")
     RefreshProgress findRefreshProgressToProceed(DerivedSource source) {
         RefreshService refreshService = refreshServiceMap.get(source);
+        if (refreshService == null) {
+            throw new RuntimeException("Cannot find the refresh service for source " + source.getSourceName());
+        }
         return (RefreshProgress) findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) refreshService);
     }
 

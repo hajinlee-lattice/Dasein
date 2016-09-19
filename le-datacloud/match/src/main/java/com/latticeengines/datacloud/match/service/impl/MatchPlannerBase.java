@@ -23,17 +23,17 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.newrelic.api.agent.Trace;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
@@ -280,7 +280,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             try {
                 String cleanDuns = null;
                 for (Integer dunsPos : dunsPosList) {
-                    String originalDuns = (String) inputRecord.get(dunsPos);
+                    String originalDuns = String.valueOf(inputRecord.get(dunsPos));
                     if (StringUtils.isNotEmpty(originalDuns)) {
                         cleanDuns = originalDuns;
                         break;
