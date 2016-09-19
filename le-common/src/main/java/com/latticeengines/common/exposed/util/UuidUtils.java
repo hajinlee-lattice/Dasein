@@ -1,11 +1,33 @@
 package com.latticeengines.common.exposed.util;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.base.Strings;
 
+/**
+ * Pack/unpack uses pipe | as delimiter.
+ *
+ */
 public class UuidUtils {
+
+    private static final String DELIMITER = "|";
+
+    public static String packUuid(String... args) {
+        return TokenUtils.joinAndEncrypt(DELIMITER, args);
+    }
+
+    public static Pair<String, String> unpackPairUuid(String uuid) {
+        List<String> unpacked = unpackListUuid(uuid);
+        return Pair.of(unpacked.get(0), unpacked.get(1));
+    }
+
+    public static List<String> unpackListUuid(String uuid) {
+        return TokenUtils.decryptAndSplit(DELIMITER, uuid);
+    }
 
     public static String extractUuid(String modelGuid) {
         if (Strings.isNullOrEmpty(modelGuid)) {

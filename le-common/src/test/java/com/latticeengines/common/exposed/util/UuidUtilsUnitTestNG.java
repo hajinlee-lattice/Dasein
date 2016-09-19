@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertTrue;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -36,4 +37,18 @@ public class UuidUtilsUnitTestNG {
             assertTrue(e instanceof IllegalArgumentException);
         }
     }
+
+    @Test(groups = "unit")
+    public void testPackUnpack() throws Exception {
+        String tenantId = "Customer.Customer.Production";
+        String credentialId = "123456";
+
+        String uuid = UuidUtils.packUuid(tenantId, credentialId);
+        System.out.println("uuid:" + uuid);
+        Pair<String, String> unpacked = UuidUtils.unpackPairUuid(uuid);
+
+        Assert.assertEquals(unpacked.getKey(), tenantId);
+        Assert.assertEquals(unpacked.getValue(), credentialId);
+    }
+
 }

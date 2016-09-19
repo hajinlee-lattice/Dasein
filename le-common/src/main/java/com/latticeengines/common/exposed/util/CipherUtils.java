@@ -12,6 +12,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.codec.binary.Base64;
+import org.bitcoinj.core.Base58;
 
 public class CipherUtils {
     public static final String ENCRYPTED = "encrypted";
@@ -47,6 +48,29 @@ public class CipherUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static String encryptBase58(final String str) {
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
+            return Base58.encode(cipher.doFinal(str.getBytes(CHARSET_UTF8)));
+//            return Base64.encodeBase64String(cipher.doFinal(str.getBytes(CHARSET_UTF8)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String decryptBase58(final String str) {
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+            return new String(cipher.doFinal(Base58.decode(str)), CHARSET_UTF8);
+//            return new String(cipher.doFinal(Base64.decodeBase64(str)), CHARSET_UTF8);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * This function is run to set the secret key for both encryption and
