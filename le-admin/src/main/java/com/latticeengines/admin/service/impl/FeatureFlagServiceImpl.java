@@ -118,6 +118,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         useAccountMasterProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> useDnbRtsAndModelingProdSet = new HashSet<LatticeProduct>();
         useDnbRtsAndModelingProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> enableLatticeMarketoCredentialPageProdSet = new HashSet<LatticeProduct>();
+        enableLatticeMarketoCredentialPageProdSet.add(LatticeProduct.LPA3);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -150,6 +152,10 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition useDnbRtsAndModelingFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(),
                 LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getDocumentation(), useDnbRtsAndModelingProdSet, true);
+        FeatureFlagDefinition enableLatticeMarketoCredentialPageFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
+                LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getDocumentation(),
+                enableLatticeMarketoCredentialPageProdSet, true);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -167,6 +173,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName(), useAccountMasterFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(),
                 useDnbRtsAndModelingFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
+                enableLatticeMarketoCredentialPageFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,

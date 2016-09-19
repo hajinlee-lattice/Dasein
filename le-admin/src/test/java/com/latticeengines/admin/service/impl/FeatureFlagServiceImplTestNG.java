@@ -85,6 +85,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName());
         Assert.assertNotNull(useDnbRtsAndModelingFeatureFlag);
 
+        FeatureFlagDefinition enableLatticeMarketoCredentialPageFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName());
+        Assert.assertNotNull(enableLatticeMarketoCredentialPageFeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -137,6 +141,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && useDnbRtsAndModelingFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && useDnbRtsAndModelingFeatureFlag.getDisplayName() != null
                 && useDnbRtsAndModelingFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(enableLatticeMarketoCredentialPageFeatureFlag.getConfigurable()
+                && enableLatticeMarketoCredentialPageFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
+                && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
 
     }
 

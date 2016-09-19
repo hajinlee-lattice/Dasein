@@ -67,7 +67,7 @@
       "displayName": "PD_${TENANT}",
       "description": "A PD solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSetting\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"UseAccountMaster\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSetting\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"UseAccountMaster\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false,\"EnableLatticeMarketoCredentialPage\":false}"
   },
   "TenantInfo": {
     "properties": {
