@@ -2,10 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import com.latticeengines.pls.service.MarketoCredentialService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
+import com.latticeengines.pls.service.MarketoCredentialService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -26,9 +25,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class MarketoCredentialResource {
 
     private static final Logger log = Logger.getLogger(ModelSummaryResource.class);
-
-    @Value("${pls.marketo.enrichment.webhook.url}")
-    private String enrichmentWebhookUrl;
 
     @Autowired
     private MarketoCredentialService marketoCredentialService;
@@ -70,11 +66,12 @@ public class MarketoCredentialResource {
         marketoCredentialService.updateMarketoCredentialById(credentialId, credential);
     }
 
-    @RequestMapping(value = "/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{credentialId}/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Updates a enrichment mathcing fields")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
-    public void updateEnrichment(@RequestBody List<MarketoMatchField> marketoMatchFields) {
-
+    public void updateEnrichment(@PathVariable String credentialId,
+            @RequestBody List<MarketoMatchField> marketoMatchFields) {
+        marketoCredentialService.updateCredentialMatchFields(credentialId, marketoMatchFields);
     }
 
 }

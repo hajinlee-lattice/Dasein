@@ -33,16 +33,26 @@ public class MarketoMatchFieldEntityMgrImpl extends BaseEntityMgrImpl<MarketoMat
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public MarketoMatchField createMatchFieldWithNameAndEnrichment(
-            MarketoMatchFieldName marketoMatchFieldName, Enrichment enrichment) {
+    public MarketoMatchField createMatchFieldWithNameValueAndEnrichment(
+            MarketoMatchFieldName marketoMatchFieldName, String marketoValue,
+            Enrichment enrichment) {
         MarketoMatchField marketoMatchField = new MarketoMatchField();
 
         marketoMatchField.setMarketoMatchFieldName(marketoMatchFieldName);
+        marketoMatchField.setMarketoFieldName(marketoValue);
         populateMatchFieldWithTenant(marketoMatchField);
         marketoMatchField.setEnrichment(enrichment);
         marketoMatchFieldDao.create(marketoMatchField);
 
         return marketoMatchField;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateMarketoMatchFieldValue(MarketoMatchFieldName matchFieldName,
+            String marketoValue, Enrichment enrichment) {
+        marketoMatchFieldDao.deleteMarketoMatchField(matchFieldName, enrichment);
+        createMatchFieldWithNameValueAndEnrichment(matchFieldName, marketoValue, enrichment);
     }
 
     private void populateMatchFieldWithTenant(MarketoMatchField marketoMatchField) {

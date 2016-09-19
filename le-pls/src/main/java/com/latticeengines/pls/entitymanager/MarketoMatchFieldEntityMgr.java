@@ -7,7 +7,11 @@ import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
 
 public interface MarketoMatchFieldEntityMgr extends BaseEntityMgr<MarketoMatchField> {
 
-    MarketoMatchField createMatchFieldWithNameAndEnrichment(
-            MarketoMatchFieldName marketoMatchFieldName, Enrichment enrichment);
+    MarketoMatchField createMatchFieldWithNameValueAndEnrichment(
+            MarketoMatchFieldName marketoMatchFieldName, String marketoValue,
+            Enrichment enrichment);
+
+    void updateMarketoMatchFieldValue(MarketoMatchFieldName matchFieldName, String marketoValue,
+            Enrichment enrichment);
 
 }

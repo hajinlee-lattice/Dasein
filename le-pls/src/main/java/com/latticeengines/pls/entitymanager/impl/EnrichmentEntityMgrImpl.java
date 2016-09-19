@@ -43,13 +43,13 @@ public class EnrichmentEntityMgrImpl extends BaseEntityMgrImpl<Enrichment>
         populateEnrichmentWithTenant(enrichment);
         enrichmentDao.create(enrichment);
         MarketoMatchField domainMatchField = marketoMatchFieldEntityMgr
-                .createMatchFieldWithNameAndEnrichment(MarketoMatchFieldName.Domain, enrichment);
+                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.Domain, null, enrichment);
         MarketoMatchField companyMatchField = marketoMatchFieldEntityMgr
-                .createMatchFieldWithNameAndEnrichment(MarketoMatchFieldName.Company, enrichment);
+                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.Company, null, enrichment);
         MarketoMatchField stateMatchField = marketoMatchFieldEntityMgr
-                .createMatchFieldWithNameAndEnrichment(MarketoMatchFieldName.State, enrichment);
+                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.State, null, enrichment);
         MarketoMatchField countryMatchField = marketoMatchFieldEntityMgr
-                .createMatchFieldWithNameAndEnrichment(MarketoMatchFieldName.Country, enrichment);
+                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.Country, null, enrichment);
         enrichment.addMarketoMatchField(domainMatchField);
         enrichment.addMarketoMatchField(companyMatchField);
         enrichment.addMarketoMatchField(stateMatchField);

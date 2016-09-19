@@ -3,6 +3,7 @@ package com.latticeengines.pls.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
+import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 
 public interface MarketoCredentialService {
 
@@ -15,5 +16,8 @@ public interface MarketoCredentialService {
     List<MarketoCredential> findAllMarketoCredentials();
 
     void updateMarketoCredentialById(String credentialId, MarketoCredential marketoCredential);
+
+    void updateCredentialMatchFields(String credentialId,
+            List<MarketoMatchField> marketoMatchFields);
 
 }
