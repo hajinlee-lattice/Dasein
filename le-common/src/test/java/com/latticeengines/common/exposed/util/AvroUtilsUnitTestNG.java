@@ -97,6 +97,7 @@ public class AvroUtilsUnitTestNG {
         Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("+abc"));
         Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("/abc"));
         Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("-abc"));
+        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(""));
     }
 
     @DataProvider(name = "avscFileProvider")
