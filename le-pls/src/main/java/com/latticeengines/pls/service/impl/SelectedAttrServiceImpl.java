@@ -35,6 +35,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 public class SelectedAttrServiceImpl implements SelectedAttrService {
     private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description", "Data Type",
             "Status", "Premium");
+    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
 
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
@@ -61,7 +62,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
         int additionalPremiumAttrCount = 0;
-        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null);
 
         List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
@@ -101,7 +102,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
-            Category category, Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         List<String> selectedAttributeInternalNames = getselectedAttributeInternalNames(selectedAttributes);
@@ -110,16 +111,16 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         // get metadata about only these names
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
 
-        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                offset, max);
+        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
+                onlySelectedAttributes, offset, max);
     }
 
     @Override
     public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes) {
+            String subcategory, Boolean onlySelectedAttributes) {
         // TODO - update this to use efficient way to get count
         List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant, attributeDisplayNameFilter, category,
-                onlySelectedAttributes, null, null);
+                subcategory, onlySelectedAttributes, null, null);
         return (matchingAttr == null) ? 0 : matchingAttr.size();
     }
 
@@ -155,8 +156,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, null);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
-        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, isSelected,
-                null, null);
+        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, null,
+                isSelected, null, null);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
                 getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
@@ -207,7 +208,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
             List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
         if ((offset != null && offset < 0) || (max != null && max <= 0)) {
             // TODO - throw LEDP exception
             throw new RuntimeException("Invalid pagination option");
@@ -230,6 +231,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
             if (category != null) {
                 if (column.getCategory() != category) {
+                    continue;
+                }
+
+                if (column.getSubcategory() == null) {
+                    // TODO - remove this once backend support for subcategory
+                    // is implemented
+                    column.setSubcategory(DUMMY_SUBCATEGORY);
+                }
+
+                if (subcategory != null && column.getSubcategory() != null
+                        && !subcategory.equals(column.getSubcategory())) {
                     continue;
                 }
             }

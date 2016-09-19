@@ -16,9 +16,9 @@ public interface SelectedAttrService {
     void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap);
 
     List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes, Integer offset, Integer max);
+            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max);
 
-    int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category categoryEnum,
+    int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category categoryEnum, String subcategory,
             Boolean onlySelectedAttributes);
 
     Integer getSelectedAttributeCount(Tenant tenant);

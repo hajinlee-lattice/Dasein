@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnMetadata {
 
-
     private String columnId;
     private String columnName;
     private String description;
@@ -21,6 +20,7 @@ public class ColumnMetadata {
     private String javaClass;
     private String displayName;
     private Category category;
+    private String subcategory;
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
     private String approvedUsage;
@@ -193,7 +193,9 @@ public class ColumnMetadata {
     @JsonIgnore
     public void setApprovedUsageList(List<ApprovedUsage> approvedUsages) {
         List<String> tokens = new ArrayList<>();
-        if (approvedUsages == null) { approvedUsages = new ArrayList<>(); }
+        if (approvedUsages == null) {
+            approvedUsages = new ArrayList<>();
+        }
         for (ApprovedUsage usage : approvedUsages) {
             tokens.add(usage.getName());
         }
@@ -252,13 +254,23 @@ public class ColumnMetadata {
         this.category = category;
     }
 
+    @JsonProperty("Subcategory")
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    @JsonProperty("Subcategory")
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+
     @JsonProperty("Tags")
     public List<Tag> getTagList() {
         List<Tag> tags = new ArrayList<>();
         if (StringUtils.isEmpty(this.tags)) {
             return tags;
         }
-        for (String tagName: Arrays.asList(this.tags.split(","))) {
+        for (String tagName : Arrays.asList(this.tags.split(","))) {
             if (Tag.availableNames().contains(tagName)) {
                 tags.add(Tag.fromName(tagName));
             }
@@ -269,7 +281,9 @@ public class ColumnMetadata {
     @JsonProperty("Tags")
     public void setTagList(List<Tag> tags) {
         List<String> tokens = new ArrayList<>();
-        if (tags == null) { tags = new ArrayList<>(); }
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
         for (Tag tag : tags) {
             tokens.add(tag.getName());
         }

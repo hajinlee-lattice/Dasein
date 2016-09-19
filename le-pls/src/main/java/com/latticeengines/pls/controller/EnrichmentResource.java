@@ -35,6 +35,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/enrichment")
 @PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class EnrichmentResource {
+    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
+
     public static final String LEAD_ENRICH_PATH = "/lead";
 
     @Autowired
@@ -49,8 +51,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, false, null,
-                null);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
+                null, null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -59,6 +61,19 @@ public class EnrichmentResource {
             }
         }
         return categoryStrList;
+    }
+
+    @RequestMapping(value = LEAD_ENRICH_PATH + "/subcategories", method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of subcategories for a given category")
+    public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
+            @ApiParam(value = "Category", required = true) //
+            @RequestParam String category) {
+        List<String> subcategories = new ArrayList<String>();
+        subcategories.add(DUMMY_SUBCATEGORY);
+        // once backend support is there, use that for getting subcategories
+        return subcategories;
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //
@@ -87,6 +102,10 @@ public class EnrichmentResource {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -100,7 +119,7 @@ public class EnrichmentResource {
     ) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, offset, max);
     }
 
@@ -118,6 +137,10 @@ public class EnrichmentResource {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -125,7 +148,7 @@ public class EnrichmentResource {
     ) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes);
     }
 

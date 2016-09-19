@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/enrichment")
 public class EnrichmentResource {
+    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
 
     @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;
@@ -52,8 +53,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, false, null,
-                null);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
+                null, null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -62,6 +63,19 @@ public class EnrichmentResource {
             }
         }
         return categoryStrList;
+    }
+
+    @RequestMapping(value = "/subcategories", method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of subcategories for a given category")
+    public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
+            @ApiParam(value = "Category", required = true) //
+            @RequestParam String category) {
+        List<String> subcategories = new ArrayList<String>();
+        subcategories.add(DUMMY_SUBCATEGORY);
+        // once backend support is there, use that for getting subcategories
+        return subcategories;
     }
 
     // NOTE - anoop - based on discussion with Jeff, we'enable put operation if
@@ -99,6 +113,10 @@ public class EnrichmentResource {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -113,7 +131,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
-                categoryEnum, onlySelectedAttributes, offset, max);
+                categoryEnum, subcategory, onlySelectedAttributes, offset, max);
     }
 
     @RequestMapping(value = "/count", //
@@ -130,6 +148,10 @@ public class EnrichmentResource {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -137,7 +159,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
-                categoryEnum, onlySelectedAttributes);
+                categoryEnum, subcategory, onlySelectedAttributes);
     }
 
     @RequestMapping(value = "/premiumattributeslimitation", //

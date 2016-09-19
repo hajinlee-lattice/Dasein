@@ -45,7 +45,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         LeadEnrichmentAttributesOperationMap deselectedAttributeMap = createDeselectionMap(existingSelection);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
         List<LeadEnrichmentAttribute> freshSelection = internalResourceRestApiProxy
-                .getLeadEnrichmentAttributes(customerSpace, null, null, true);
+                .getLeadEnrichmentAttributes(customerSpace, null, null, null, true);
         Assert.assertNotNull(freshSelection);
         Assert.assertTrue(freshSelection.size() == 0);
     }
@@ -385,7 +385,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
         Assert.assertEquals(fullSize, combinedAttributeList.size());
 
-        List<LeadEnrichmentAttribute> fullPageAttributeList = getLeadEnrichmentAttributeList(false, null, null, 0,
+        List<LeadEnrichmentAttribute> fullPageAttributeList = getLeadEnrichmentAttributeList(false, null, null, null, 0,
                 fullSize);
         Assert.assertNotNull(fullPageAttributeList);
         Assert.assertFalse(fullPageAttributeList.isEmpty());
@@ -404,7 +404,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         int offset = 5;
         int max = fullSize - offset - 10;
 
-        List<LeadEnrichmentAttribute> partialPageAttributeList = getLeadEnrichmentAttributeList(false, null, null,
+        List<LeadEnrichmentAttribute> partialPageAttributeList = getLeadEnrichmentAttributeList(false, null, null, null,
                 offset, max);
         Assert.assertNotNull(partialPageAttributeList);
         Assert.assertFalse(partialPageAttributeList.isEmpty());
@@ -429,7 +429,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(fullSizeSelected, combinedAttributeListSelected.size());
 
         List<LeadEnrichmentAttribute> fullPageAttributeListSelected = getLeadEnrichmentAttributeList(true, null, null,
-                0, fullSizeSelected);
+                "DUMMY_STR_FOR_NOW", 0, fullSizeSelected);
         Assert.assertNotNull(fullPageAttributeListSelected);
         Assert.assertFalse(fullPageAttributeListSelected.isEmpty());
         Assert.assertEquals(fullPageAttributeListSelected.size(), fullSizeSelected);
@@ -448,7 +448,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         int maxSelected = fullSizeSelected - offsetSelected - 1;
 
         List<LeadEnrichmentAttribute> partialPageAttributeListSelected = getLeadEnrichmentAttributeList(true, null,
-                null, offsetSelected, maxSelected);
+                null, "DUMMY_STR_FOR_NOW", offsetSelected, maxSelected);
         Assert.assertNotNull(partialPageAttributeListSelected);
         Assert.assertFalse(partialPageAttributeListSelected.isEmpty());
         Assert.assertEquals(partialPageAttributeListSelected.size(), maxSelected);
@@ -515,11 +515,11 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
             String attributeDisplayNameFilter, Category category)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        return getLeadEnrichmentAttributeList(onlySelectedAttr, attributeDisplayNameFilter, category, null, null);
+        return getLeadEnrichmentAttributeList(onlySelectedAttr, attributeDisplayNameFilter, category, null, null, null);
     }
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
-            String attributeDisplayNameFilter, Category category, Integer offset, Integer max)
+            String attributeDisplayNameFilter, Category category, String subcategory, Integer offset, Integer max)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = apiHostPort + "/score/enrichment";
         if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
@@ -534,6 +534,9 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
         if (category != null) {
             url += "category=" + category.toString() + "&";
+            if (!StringUtils.objectIsNullOrEmptyString(subcategory)) {
+                url += "subcategory=" + subcategory + "&";
+            }
         }
         if (offset != null) {
             url += "offset=" + offset.intValue() + "&";

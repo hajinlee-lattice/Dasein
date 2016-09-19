@@ -153,17 +153,24 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                null, null);
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, null,
+                onlySelectedAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            String attributeDisplayNameFilter, Category category, //
+            String attributeDisplayNameFilter, Category category, String subcategory, //
+            Boolean onlySelectedAttributes) {
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, subcategory,
+                onlySelectedAttributes, null, null);
+    }
+
+    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+            String attributeDisplayNameFilter, Category category, String subcategory, //
             Boolean onlySelectedAttributes, Integer offset, Integer max) {
         try {
             String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                    offset, max);
+            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
+                    onlySelectedAttributes, offset, max);
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
@@ -183,11 +190,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
-            Category category, Boolean onlySelectedAttributes) {
+            Category category, String subcategory, Boolean onlySelectedAttributes) {
         try {
             String url = constructUrl("pls/internal/enrichment/lead/count", customerSpace.toString());
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                    null, null);
+            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
+                    onlySelectedAttributes, null, null);
 
             log.debug("Get from " + url);
             return restTemplate.getForObject(url, Integer.class);
@@ -257,7 +264,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
-            Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
         url += "?" + "onlySelectedAttributes" + "="
                 + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true : false);
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
@@ -265,6 +272,9 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
         if (category != null) {
             url += "&" + "category" + "=" + category.toString();
+            if (!StringUtils.isEmpty(subcategory)) {
+                url += "&" + "subcategory" + "=" + subcategory.trim();
+            }
         }
         if (offset != null) {
             url += "&" + "offset" + "=" + offset.intValue();

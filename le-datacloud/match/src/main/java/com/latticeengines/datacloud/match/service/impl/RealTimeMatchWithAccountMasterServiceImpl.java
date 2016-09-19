@@ -58,14 +58,15 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         if (request.getIds().size() < lookupRequestPairs.size()) {
             // TODO anoop - in M6 - add the logic for external lookup based on
             // namelocation from DnB matcher
-            doNameLocationBasedLookup();
+            doNameLocationBasedLookup(input, matchContext, lookupRequestPairs);
         }
 
         // TODO - anoop - currently assuming happy path - handle other scenarios
         // in next txn
         List<LatticeAccount> matchedResults = accountLookupService.batchLookup(request);
 
-        MatchOutput output = createMatchOutput(input, matchContext, receivedAt, rootOperationUID, matchedResults);
+        MatchOutput output = createMatchOutput(input, matchContext, receivedAt, rootOperationUID, matchedResults,
+                lookupRequestPairs);
 
         return output;
     }
@@ -102,7 +103,7 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
             }
 
             Pair<InternalOutputRecord, AccountLookupRequest> accountLookupRequestPair = new MutablePair<>(record,
-                    accountLookupRequest);
+                    shouldCallExternalMatch ? null : accountLookupRequest);
             lookupRequestPairs.add(accountLookupRequestPair);
         }
 
@@ -110,21 +111,28 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
     }
 
     private MatchOutput createMatchOutput(MatchInput input, MatchContext matchContext, Date receivedAt,
-            String rootOperationUID, List<LatticeAccount> matchedResults) {
+            String rootOperationUID, List<LatticeAccount> matchedResults,
+            List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs) {
         List<OutputRecord> outputRecords = new ArrayList<>();
         MatchOutput output = matchContext.getOutput();
         output.setResult(outputRecords);
         ColumnSelection columnSelection = matchContext.getColumnSelection();
         List<Column> selectedColumns = columnSelection.getColumns();
+        int index = 0;
 
-        for (LatticeAccount result : matchedResults) {
+        for (Pair<InternalOutputRecord, AccountLookupRequest> pair : lookupRequestPairs) {
+            if (pair.getValue() == null) {
+                outputRecords.add(pair.getKey());
+            } else {
+                LatticeAccount result = matchedResults.get(index++);
 
-            OutputRecord outputRecord = new OutputRecord();
-            outputRecord.setMatched(result != null);
-            outputRecord.setOutput(
-                    outputRecord.isMatched() ? getAttributeValues(selectedColumns, result.getAttributes()) : null);
+                OutputRecord outputRecord = pair.getKey();
+                outputRecord.setMatched(result != null);
+                outputRecord.setOutput(
+                        outputRecord.isMatched() ? getAttributeValues(selectedColumns, result.getAttributes()) : null);
 
-            outputRecords.add(outputRecord);
+                outputRecords.add(outputRecord);
+            }
         }
 
         return output;
@@ -149,8 +157,21 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         return attributeValues;
     }
 
-    private void doNameLocationBasedLookup() {
-        // TODO - need to be implemented by Anoop by M6
-        throw new NotImplementedException("Impl of name location based lookup is yet to be implemented");
+    private void doNameLocationBasedLookup(MatchInput input, MatchContext matchContext,
+            List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs) {
+        // TODO - need to be implemented by M7
+
+        if (input.getReturnUnmatched()) {
+            for (Pair<InternalOutputRecord, AccountLookupRequest> pair : lookupRequestPairs) {
+                if (pair.getValue() == null) {
+                    InternalOutputRecord record = pair.getKey();
+                    record.setOutput(record.getInput());
+                    record.setMatched(false);
+                }
+            }
+
+        } else {
+            throw new NotImplementedException("Impl of name location based lookup is yet to be implemented");
+        }
     }
 }

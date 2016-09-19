@@ -472,6 +472,10 @@ public class InternalResource extends InternalResourceBase {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -486,7 +490,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, offset, max);
     }
 
@@ -504,6 +508,10 @@ public class InternalResource extends InternalResourceBase {
                     + "with specified category", required = false) //
             @RequestParam(value = "category", required = false) //
             String category, //
+            @ApiParam(value = "Get attributes " //
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
+            String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
@@ -512,7 +520,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes);
     }
 
