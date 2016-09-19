@@ -1,5 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -125,6 +126,21 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr.count(..))")
     public void countEnrichmentAttrs(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.update*(..))")
+    public void updateMarketoCredentialByName(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.find*(..))")
+    public void findMarketoCredentialByName(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.delete*(..))")
+    public void deleteMarketoCredentialByName(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

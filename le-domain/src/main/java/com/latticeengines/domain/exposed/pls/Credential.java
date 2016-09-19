@@ -33,7 +33,7 @@ public abstract class Credential implements HasPid, HasTenant, HasTenantId, HasN
     protected String name;
 
     @Override
-    @JsonIgnore
+    @JsonProperty("credential_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)

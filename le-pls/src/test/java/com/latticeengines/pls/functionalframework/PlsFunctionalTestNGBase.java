@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
@@ -51,6 +53,9 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
+
+    @Autowired
+    private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")
     private String hostPort;
@@ -115,7 +120,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     }
 
     /**
-     * the LedpResponseErrorHandler bound to the testbed's restTemplate. Can be used to assert http errors.
+     * the LedpResponseErrorHandler bound to the testbed's restTemplate. Can be
+     * used to assert http errors.
      *
      * @throws Exception
      */
@@ -127,12 +133,13 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbUsingDefaultTenantIds(true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2)
+            throws Exception {
         setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
-            boolean createSegments) throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2,
+            boolean createSummaries, boolean createSegments) throws Exception {
         marketoTenant = testTenants().get(0);
         eloquaTenant = testTenants().get(1);
         testBed.setMainTestTenant(eloquaTenant);
@@ -145,8 +152,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbWithMarketoSMB(tenant, true, true);
     }
 
-    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
-            throws Exception {
+    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries,
+            boolean createSegments) throws Exception {
 
         ModelSummary summary1 = null;
         if (createSummaries) {
@@ -156,7 +163,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             summary1.setLookupId(String.format("%s|%s|%s", tokens[0], tokens[1], tokens[2]));
 
             String modelId = summary1.getId();
-            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            ModelSummary summary = modelSummaryEntityMgr
+                    .retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
                 setupSecurityContext(summary);
                 modelSummaryEntityMgr.deleteByModelId(summary.getId());
@@ -187,8 +195,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbWithEloquaSMB(tenant, true, true);
     }
 
-    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
-            throws Exception {
+    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries,
+            boolean createSegments) throws Exception {
         ModelSummary summary2 = null;
         if (createSummaries) {
             summary2 = getDetails(tenant, "eloqua");
@@ -223,7 +231,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             s2p1.addPredictorElement(s2el2);
 
             String modelId = summary2.getId();
-            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+            ModelSummary summary = modelSummaryEntityMgr
+                    .retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
                 setupSecurityContext(summary);
                 modelSummaryEntityMgr.deleteByModelId(summary.getId());
@@ -270,6 +279,13 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         }
     }
 
+    protected void cleanupMarketoCredentialsDB() {
+        List<MarketoCredential> marketoCredentials = marketoCredentialEntityMgr.findAll();
+        for (MarketoCredential marketoCredential : marketoCredentials) {
+            marketoCredentialEntityMgr.delete(marketoCredential);
+        }
+    }
+
     protected void cleanupProspectDiscoveryOptionDB() {
         setupSecurityContext(mainTestTenant);
         List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr
@@ -280,7 +296,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected ModelSummary getDetails(Tenant tenant, String suffix) throws IOException {
-        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s-token.json", suffix);
+        String file = String.format(
+                "com/latticeengines/pls/functionalframework/modelsummary-%s-token.json", suffix);
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
         String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
         String uuid = UUID.randomUUID().toString();

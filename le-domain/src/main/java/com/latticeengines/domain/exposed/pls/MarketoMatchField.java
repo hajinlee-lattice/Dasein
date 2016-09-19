@@ -48,7 +48,6 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -63,7 +62,6 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
@@ -76,7 +74,6 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
@@ -92,7 +89,6 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
         this.marketoMatchFieldName = marketoMatchFieldName;
     }
 
-    @JsonProperty("marketo_field_name")
     @Column(name = "MARKETO_FIELD_NAME", nullable = true)
     public String getMarketoFieldName() {
         return marketoFieldName;
@@ -109,8 +105,8 @@ public class MarketoMatchField implements HasPid, HasTenant, HasTenantId {
         return this.enrichment;
     }
 
-    @JsonIgnore
     public void setEnrichment(Enrichment enrichment) {
         this.enrichment = enrichment;
     }
+
 }

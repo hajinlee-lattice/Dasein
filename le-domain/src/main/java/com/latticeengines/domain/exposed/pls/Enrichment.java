@@ -42,7 +42,7 @@ public class Enrichment implements HasPid, HasTenant, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("enrichment_id")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     @Override
@@ -51,7 +51,6 @@ public class Enrichment implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -66,7 +65,6 @@ public class Enrichment implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
@@ -79,7 +77,6 @@ public class Enrichment implements HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }

@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "sureshotmarketo", description = "REST resource for providing SureShot with Marketo Credentials")
 @RestController
-@RequestMapping(value = "/sureshotmarketo")
+@RequestMapping(value = "/sureshot/marketo")
 @PreAuthorize("hasRole('View_PLS_Sureshot')")
 public class SureShotMarketoResource {
 
@@ -25,6 +25,7 @@ public class SureShotMarketoResource {
 
     private static final MarketoCredential MARKETO_CREDENTIAL = new MarketoCredential();
 
+    private static final Long ID = 1L;
     private static final String NAME = "TEST MARKETO CREDENTIAL";
     private static final String SOAP_ENDPOINT = "https://948-IYP-205.mktoapi.com/soap/mktows/2_9";
     private static final String SOAP_USER_ID = "latticeengines1_511435204E14C09D06A6E8";
@@ -35,6 +36,7 @@ public class SureShotMarketoResource {
     private static final String REST_CLIENT_SECRET = "1R0LCTlmNd7G2PGh9ZJj8SIKSjEVZ8Ik";
 
     static {
+        MARKETO_CREDENTIAL.setPid(ID);
         MARKETO_CREDENTIAL.setName(NAME);
         MARKETO_CREDENTIAL.setSoapEndpoint(SOAP_ENDPOINT);
         MARKETO_CREDENTIAL.setSoapUserId(SOAP_USER_ID);
@@ -45,10 +47,10 @@ public class SureShotMarketoResource {
         MARKETO_CREDENTIAL.setRestClientSecret(REST_CLIENT_SECRET);
     }
 
-    @RequestMapping(value = "/{credentialName}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Get marketo credential by name")
+    @RequestMapping(value = "/{credentialId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get marketo credential by id")
     @ResponseBody
-    public MarketoCredential find(@PathVariable String credentialName) {
+    public MarketoCredential find(@PathVariable String credentialId) {
         return MARKETO_CREDENTIAL;
     }
 
