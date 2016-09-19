@@ -2,6 +2,7 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,8 +16,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEn
 
 @Component("globalAuthUserTenantRightEntityMgr")
 public class GlobalAuthUserTenantRightEntityMgrImpl extends
-        BaseEntityMgrImpl<GlobalAuthUserTenantRight> implements
-        GlobalAuthUserTenantRightEntityMgr {
+        BaseEntityMgrImpl<GlobalAuthUserTenantRight> implements GlobalAuthUserTenantRightEntityMgr {
 
     @Autowired
     private GlobalAuthUserTenantRightDao gaUserTenantRightDao;
@@ -30,6 +30,12 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId) {
         return gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUser> findUsersByTenantId(Long tenantId) {
+        return gaUserTenantRightDao.findUsersByTenantId(tenantId);
     }
 
     @Override

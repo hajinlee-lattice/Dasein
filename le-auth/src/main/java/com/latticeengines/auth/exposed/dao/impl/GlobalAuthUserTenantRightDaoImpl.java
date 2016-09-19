@@ -3,6 +3,7 @@ package com.latticeengines.auth.exposed.dao.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -15,8 +16,7 @@ import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
 
 @Component("globalAuthUserTenantRightDao")
 public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUserTenantRight>
-        implements
-        GlobalAuthUserTenantRightDao {
+        implements GlobalAuthUserTenantRightDao {
 
     private static final Log log = LogFactory.getLog(GlobalAuthUserTenantRightDaoImpl.class);
 
@@ -49,6 +49,29 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         } catch (Exception e) {
             log.error(String.format("Find tenant right by userId: %d, tenantId: %d failed.", userId, tenantId));
             throw e;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public List<GlobalAuthUser> findUsersByTenantId(Long tenantId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s where Tenant_ID = %d",
+                entityClz.getSimpleName(),
+                tenantId);
+        Query query = session.createQuery(queryStr);
+        List list = query.list();
+        List<GlobalAuthUser> users = new ArrayList<GlobalAuthUser>();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            for (int i = 0; i < list.size(); i++) {
+                GlobalAuthUserTenantRight gaTenantRight = (GlobalAuthUserTenantRight) list.get(i);
+                users.add(gaTenantRight.getGlobalAuthUser());
+            }
+            return users;
         }
     }
 
