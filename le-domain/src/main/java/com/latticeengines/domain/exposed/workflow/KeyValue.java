@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -89,17 +88,13 @@ public class KeyValue implements HasTenantId, HasPid {
         if (getData() == null) {
             return null;
         }
-        
+
         String uncompressedData = new String(CompressionUtils.decompressByteArray(getData()));
-        try {
-            if (StringUtils.isNotEmpty(uncompressedData)) {
-                JsonNode root = new ObjectMapper().readValue(uncompressedData, JsonNode.class);
-                return root.toString();
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize payload [" + uncompressedData + "]", e);
+        if (StringUtils.isNotEmpty(uncompressedData)) {
+            JsonNode root = JsonUtils.deserialize(uncompressedData, JsonNode.class);
+            return root.toString();
+        } else {
+            return null;
         }
     }
 

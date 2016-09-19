@@ -19,7 +19,7 @@ public class JsonUtils {
         if (object == null) {
             return null;
         }
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = getObjectMapper();
         StringWriter writer = new StringWriter();
         try {
             objectMapper.writeValue(writer, object);
@@ -33,7 +33,8 @@ public class JsonUtils {
         if (jsonStr == null) {
             return null;
         }
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = getObjectMapper();
+
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
@@ -47,8 +48,9 @@ public class JsonUtils {
         if (jsonStr == null) {
             return null;
         }
-        ObjectMapper objectMapper = new ObjectMapper();
-        if(allowUnquotedFieldName == true)
+        ObjectMapper objectMapper = getObjectMapper();
+
+        if (allowUnquotedFieldName == true)
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         T deserializedSchema;
@@ -64,7 +66,8 @@ public class JsonUtils {
         if (jsonStr == null) {
             return null;
         }
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = getObjectMapper();
+
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);
@@ -74,14 +77,15 @@ public class JsonUtils {
         return deserializedSchema;
     }
 
-    public static <T> T deserialize(String jsonStr, TypeReference<T> typeRef, Boolean allowSingleQuotes) {
+    public static <T> T deserialize(String jsonStr, TypeReference<T> typeRef, boolean allowSingleQuotes) {
         if (jsonStr == null) {
             return null;
         }
-        ObjectMapper objectMapper = new ObjectMapper();
-        if(allowSingleQuotes == true)
-            objectMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
+        ObjectMapper objectMapper = getObjectMapper();
 
+        if (allowSingleQuotes) {
+            objectMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
+        }
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);
@@ -95,7 +99,8 @@ public class JsonUtils {
         if (node == null) {
             return defaultValue;
         }
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = getObjectMapper();
+
         try {
             return mapper.treeToValue(node, targetClass);
         } catch (JsonProcessingException e) {
@@ -103,8 +108,14 @@ public class JsonUtils {
         }
     }
 
+    public static ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+        return mapper;
+    }
+
     public static <T> T convertValue(Object rawField, Class<T> clazz) {
-        return new ObjectMapper().convertValue(rawField, clazz);
+        return getObjectMapper().convertValue(rawField, clazz);
     }
 
     public static <T> List<T> convertList(List<?> raw, Class<T> elementClazz) {
@@ -128,7 +139,7 @@ public class JsonUtils {
 
     public static <T> String pprint(T object) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = getObjectMapper();
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch (JsonProcessingException e) {
             return object.toString();
