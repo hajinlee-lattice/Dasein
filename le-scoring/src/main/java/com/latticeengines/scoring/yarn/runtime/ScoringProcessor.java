@@ -391,7 +391,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 throw new LedpException(LedpCode.LEDP_20035);
             }
             for (ScoreModelTuple tuple : scoreModelTupleList) {
-                log.info("tuple is: " + tuple);
+                log.debug("tuple is: " + tuple);
                 if (!useInternalId) {
                     builder.set(InterfaceName.Id.toString(), id);
                 } else {
