@@ -48,7 +48,7 @@
   "scripts": {
     "install": "npm run InstallDev",
     "postinstall": "npm run build",
-    "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD && npm run InstallAdmin",
+    "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD",
     "InstallDev": "concurrent \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevLP\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\"",
     "dev": "npm run sass &&    concurrent -kr \"grunt dev\"    \"npm run sentry\"",
     "devb": "npm run sass &&    concurrent -kr \"grunt devb\"   \"npm run sentry\"",

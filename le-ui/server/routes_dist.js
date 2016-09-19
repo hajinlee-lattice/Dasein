@@ -61,9 +61,7 @@ module.exports = {
             '/index.html': 'index.html'
         },
         folders: {
-            '/app': '/app',
-            '/assets': '/assets',
-            '/lib': '/lib',
+            '/': '/',
         }
     }]
 };
