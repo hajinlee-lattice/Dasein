@@ -46,9 +46,7 @@ public interface DellEbiConfigEntityMgr {
 
     int getPriority(String type);
 
-    DellEbiConfig getConfigByBean(String bean);
-
-    String getTypeByBean(String bean);
+    String getFileTypesByQuartzJob(String beanName);
 
     DellEbiConfig getConfigByFileName(String fileName);
 

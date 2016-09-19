@@ -12,24 +12,13 @@ import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("dellEbiDailyJob3")
-public class DellEbiDailyJob3Bean implements QuartzJobBean {
+public class DellEbiDailyJob3Bean extends DellEbiDailyJobBean {
 
-    @Autowired
-    private DailyFlow dailyFlow;
-    
-    @Autowired
-    private ExportAndReportService exportAndReportService;
-    
-    @Value("${dellebi.fileTypes.dellebiManagerJob3}")
-    private String fileTypesList;
+    private final String quartzJob = "dellEbiDailyJob3";
 
     @Override
     public Callable<Boolean> getCallable() {
-        DellEbiDailyJobCallable.Builder builder = new DellEbiDailyJobCallable.Builder();
-        builder.dailyFlow(dailyFlow)
-                .exportAndReportService(exportAndReportService)
-                .fileTypesList(fileTypesList);
-        return new DellEbiDailyJobCallable(builder);
+        super.setQuartzJob(quartzJob);
+        return super.getCallable();
     }
-
 }

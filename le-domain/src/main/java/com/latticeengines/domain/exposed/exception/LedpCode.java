@@ -423,6 +423,7 @@ public enum LedpCode {
     LEDP_29005("The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
     LEDP_29006(
             "The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
+    LEDP_29007("Cannot get the bean name. Did you change the quartz bean name for Dell ebi"), //
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //

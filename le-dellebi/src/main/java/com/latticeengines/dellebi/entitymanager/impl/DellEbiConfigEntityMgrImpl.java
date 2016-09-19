@@ -1,6 +1,7 @@
 package com.latticeengines.dellebi.entitymanager.impl;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dellEbiConfigEntityMgrImpl")
-public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>implements DellEbiConfigEntityMgr {
+public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig> implements DellEbiConfigEntityMgr {
 
     @Autowired
     private DellEbiConfigDao dellEbiConfigDao;
@@ -112,16 +113,19 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
         return null;
     }
 
-    @Override
-    public DellEbiConfig getConfigByBean(String bean) {
-
+    private List<DellEbiConfig> getConfigsByQuartzJob(String quartzJob) {
+        List<DellEbiConfig> subConfigs = new ArrayList<>();
         for (DellEbiConfig config : configs) {
-            if (config.getBean().equalsIgnoreCase(bean)) {
-                return config;
+            if (config.getQuartzJob().equalsIgnoreCase(quartzJob)) {
+                subConfigs.add(config);
             }
         }
 
-        throw new LedpException(LedpCode.LEDP_29005, new String[] { bean });
+        if (subConfigs.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_29005, new String[] { quartzJob });
+        }
+
+        return subConfigs;
     }
 
     @Override
@@ -233,17 +237,6 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
     }
 
     @Override
-    public String getTypeByBean(String bean) {
-        if (bean == null) {
-            throw new LedpException(LedpCode.LEDP_29001);
-        }
-
-        DellEbiConfig config = getConfigByBean(bean);
-
-        return config.getType();
-    }
-
-    @Override
     public String getTypeByFileName(String fileName) {
         if (fileName == null) {
             throw new LedpException(LedpCode.LEDP_29001);
@@ -264,4 +257,21 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
 
         return config.getPostStoreProcedure();
     }
+
+    @Override
+    public String getFileTypesByQuartzJob(String quartzJob) {
+        List<String> strs = new ArrayList<>();
+        for (DellEbiConfig config : getConfigsByQuartzJob(quartzJob)) {
+            strs.add(config.getType());
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String str : strs) {
+            sb.append(str);
+            sb.append(",");
+        }
+
+        return sb.substring(0, sb.length()-1).toString();
+    }
+
 }
