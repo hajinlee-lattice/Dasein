@@ -1,0 +1,55 @@
+<table class="readonly-table" ng-if="readonly && !isObject">
+    <td class="readonly-label">
+        <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+        <span class="node">{{ config.Node }} :</span>
+    </td>
+    <td>
+        <span ng-show="!isList && !isPassword">{{ config.Data }}</span>
+        <span ng-show="isList">{{ listData }}</span>
+        <span ng-show="isPassword" class="text-muted">encrypted</span>
+    </td>
+</table>
+
+<form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>
+    <div ng-if="!readonly">
+        <label class="control-label">
+            <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
+        </label>
+        <input ng-if="isReadonly || isDerived" type="{{ inputType }}" class="form-control" ng-model="config.Data" disabled />
+        <label ng-if="isDerived" class="control-label text-muted">[derived]</label>
+        <input ng-if="isInput" class="form-control"
+               type="{{ inputType }}" ng-model="config.Data"
+               ng-model-options="{ debounce: 200 }" placeholder="{{ placeholder }}"
+               ng-change="validateInput()" ng-required="required" />
+
+        <input ng-if="isBoolean" class="checkbox"
+               type="checkbox" ng-model="config.Data"
+               ng-change="validateInput()" />
+
+        <select ng-if="isSelect" class="form-control"
+                ng-options="option for option in options"
+                ng-model="config.Data"
+                ng-change="validateInput()"></select>
+
+        <label ng-if="showError" class="control-label">
+            <span class="text-danger">{{ errorMsg }}</span>
+        </label>
+    </div>
+</form>
+
+<list-entry ng-if="isList" is-valid="isValid" readonly="readonly" config="config"></list-entry>
+
+<accordion-group ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
+    <accordion-heading class="accordion-heading" is-open="isOpen">
+        <p class="readonly-config-entry">
+            <i class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            <span ng-class="{node: readonly}">{{ config.Node }}</span>
+            <span class="text-muted">[JSON]</span>
+        </p>
+    </accordion-heading>
+    <p class="readonly-config-entry" ng-if="readonly" ng-repeat="(key, value) in jsonData">
+        <span class="node">{{ key }}</span> : <span>{{ value }}</span>
+    </p>
+    <object-entry ng-if="!readonly" key="key" value="value" json="jsonData" is-valid="isValid" updater="objectUpdater()" ng-repeat="(key, value) in jsonData"></object-entry>
+</accordion-group>

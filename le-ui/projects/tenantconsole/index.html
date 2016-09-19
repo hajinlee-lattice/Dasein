@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html ng-app="TenantConsoleApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
+    <title>Tenant Console</title>
+
+    <!-- build:template:dist
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/main.min.css?v<%= versionString %>"/>
+    /build -->
+    <!-- build:remove:dist -->
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
+
+    <link rel="stylesheet" type="text/css" href="assets/css/kendo.compiled.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/main.compiled.css"/>
+    <!-- /build -->
+</head>
+<body>
+<div ui-view></div>
+
+<!-- build:remove:dist -->
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = 'lib/js/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+<script src="lib/js/jquery.js"></script>
+<script src="lib/js/angular.js"></script>
+<script src="lib/js/angular-sanitize.js"></script>
+<script src="lib/js/angular-local-storage.js"></script>
+<script src="lib/js/angular-ui-router.js"></script>
+<script src="lib/js/ui-bootstrap.js"></script>
+<script src="lib/js/ui-bootstrap-tpls.js"></script>
+<script src="lib/js/jquery.qtip.js"></script>
+<script src="lib/js/underscore.js"></script>
+<script src="lib/js/bootstrap.js"></script>
+<script src="lib/js/kendo.all.min.js"></script>
+<script src="lib/js/le-common.js"></script>
+
+<script src="app/core/util/RecursionCompiler.js"></script>
+<script src="app/core/util/SessionUtility.js"></script>
+<script src="app/core/directive/MainNavDirective.js"></script>
+<script src="app/core/directive/FileDownloaderDirective.js"></script>
+<script src="app/login/service/LoginService.js"></script>
+<script src="app/login/controller/LoginCtrl.js"></script>
+<script src="app/services/service/ServiceService.js"></script>
+<script src="app/tenants/util/CamilleConfigUtility.js"></script>
+<script src="app/tenants/util/TenantUtility.js"></script>
+<script src="app/tenants/service/TenantService.js"></script>
+<script src="app/tenants/directive/FeatureFlagDirective.js"></script>
+<script src="app/tenants/directive/ObjectEntryDirective.js"></script>
+<script src="app/tenants/directive/ListEntryDirective.js"></script>
+<script src="app/tenants/directive/CamilleConfigDirective.js"></script>
+<script src="app/tenants/controller/TenantConfigCtrl.js"></script>
+<script src="app/tenants/controller/TenantListCtrl.js"></script>
+<script src="app/app.js"></script>
+<!-- /build -->
+<!-- build:template:dist
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/<%= version.webfont %>/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/<%= version.jquery %>/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-sanitize.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-local-storage/<%= version["angular-local-storage"] %>/angular-local-storage.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/<%= version["angular-ui-router"] %>/angular-ui-router.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/<%= version.underscore %>/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js"></script>
+<script src="//kendo.cdn.telerik.com/<%= version.kendo %>/js/kendo.all.min.js"></script>
+<script src="assets/js/app.min.js?v<%= versionString %>"></script>
+/build -->
+
+</body>
+</html>

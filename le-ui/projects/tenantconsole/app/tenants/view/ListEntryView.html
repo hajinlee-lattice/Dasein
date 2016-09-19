@@ -1,0 +1,22 @@
+<form name="configform" class="form-inline list-entry-form" ng-class='{"has-error": showError}' novalidate>
+    <div ng-if="!readonly">
+        <label class="control-label">
+            <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            {{ config.Node }}
+        </label>
+
+        <div class="input-group" ng-repeat="item in list">
+            <input type="text" class="form-control" ng-model="item.value" ng-model-options="{ debounce: 50 }"
+                   ng-change="syncData()" />
+            <div class="input-group-addon"><a href="" ng-click="deleteItem($index)"><i class="fa fa-trash-o text-danger"></i></a></div>
+        </div>
+
+        <label class="control-label">
+            <a class="btn btn-primary" href="" ng-click="addItem()"><i class="fa fa-plus"></i></a>
+        </label>
+
+        <label ng-if="showError" class="control-label">
+            <span class="text-danger">{{ errorMsg }}</span>
+        </label>
+    </div>
+</form>

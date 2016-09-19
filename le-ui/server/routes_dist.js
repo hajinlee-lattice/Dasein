@@ -1,7 +1,7 @@
 "use strict";
 
-module.exports = [
-    {
+module.exports = {
+    leui: [{
         path: '/projects/common',
         folders: {
             '/app/modules/': '/app/modules/',
@@ -52,5 +52,18 @@ module.exports = [
         folders: {
             '/demo/js': '/js'
         }
-    }
-];
+    }],
+    leadmin: [{
+        path: '/projects/tenantconsole/dist',
+        pages: {
+            '/': 'index.html',
+            '/index': 'index.html',
+            '/index.html': 'index.html'
+        },
+        folders: {
+            '/app': '/app',
+            '/assets': '/assets',
+            '/lib': '/lib',
+        }
+    }]
+};

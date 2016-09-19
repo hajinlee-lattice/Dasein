@@ -1,0 +1,10 @@
+<config-entry ng-if="!hasChildren"
+              is-valid="isValid" expandable="false" readonly="readonly"
+              class="config-entry" config="config"></config-entry>
+
+<accordion-group ng-if="hasChildren" ng-init="isOpen = !readonly" is-open="isOpen">
+    <accordion-heading class="accordion-heading" is-open="isOpen">
+        <config-entry expandable="true" is-valid="isValid" is-open="isOpen" readonly="readonly" config="config"></config-entry>
+    </accordion-heading>
+    <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in config.Children"></camille-config>
+</accordion-group>

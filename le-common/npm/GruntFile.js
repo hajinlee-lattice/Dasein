@@ -1,4 +1,11 @@
 module.exports = function(grunt) {
+    var msgs = [
+        '[WARN] This project is moving to /ledp/le-ui/projects/tenantconsole'
+        ];
+    var msg = grunt.log.wordlist(msgs, {color: 'yellow'});
+    grunt.log.writeln(msg);
+    grunt.log.writeln(msg);
+
     // Configurable paths for the application
     var appConfig = {
         dir:  'src',
