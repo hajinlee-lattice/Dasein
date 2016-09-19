@@ -18,7 +18,8 @@ angular.module('login.tenants', [
         SortDirection: '-',
         deactivated: false,
         selected: null,
-        visible: false
+        visible: false,
+        version: '3.0'
     });
 
     vm.init = function() {
