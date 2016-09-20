@@ -28,13 +28,13 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 /**
- * 
+ *
  * @startuml
  *
  */
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM_PROPERTY_DEF")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AlgorithmPropertyDef implements HasName, HasPid {
 
     @Id
@@ -46,7 +46,7 @@ public class AlgorithmPropertyDef implements HasName, HasPid {
 
     @Column(name = "NAME", nullable = false)
     public String name;
-    
+
     @ManyToOne
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
     @JsonIgnore
@@ -57,9 +57,10 @@ public class AlgorithmPropertyDef implements HasName, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<AlgorithmPropertyValue> algorithmPropertyValues = new ArrayList<>();
-    
-    public AlgorithmPropertyDef() {}
-    
+
+    public AlgorithmPropertyDef() {
+    }
+
     public AlgorithmPropertyDef(String name) {
         setName(name);
     }
@@ -68,12 +69,12 @@ public class AlgorithmPropertyDef implements HasName, HasPid {
     public String getName() {
         return name;
     }
-    
+
     @Override
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public Algorithm getAlgorithm() {
         return algorithm;
     }
@@ -98,8 +99,11 @@ public class AlgorithmPropertyDef implements HasName, HasPid {
 
     public void setAlgorithmPropertyValues(List<AlgorithmPropertyValue> algorithmPropertyValues) {
         this.algorithmPropertyValues = algorithmPropertyValues;
+        for (AlgorithmPropertyValue algorithmPropertyValue : algorithmPropertyValues) {
+            algorithmPropertyValue.setAlgorithmPropertyDef(this);
+        }
     }
-    
+
     public void addAlgorithmPropertyValue(AlgorithmPropertyValue algorithmPropertyValue) {
         algorithmPropertyValues.add(algorithmPropertyValue);
         algorithmPropertyValue.setAlgorithmPropertyDef(this);

@@ -28,12 +28,12 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 /**
- * 
+ *
  * @startuml
- * 
+ *
  */
 @Entity
-@Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Algorithm implements HasName, HasPid, Fact, Dimension {
 
@@ -91,6 +91,9 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension {
 
     public void setAlgorithmPropertyDefs(List<AlgorithmPropertyDef> algorithmPropertyDefs) {
         this.algorithmPropertyDefs = algorithmPropertyDefs;
+        for (AlgorithmPropertyDef algorithmPropertyDef : algorithmPropertyDefs) {
+            algorithmPropertyDef.setAlgorithm(this);
+        }
     }
 
     public void addAlgorithmPropertyDef(AlgorithmPropertyDef algorithmPropertyDef) {

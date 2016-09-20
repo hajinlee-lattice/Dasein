@@ -5,6 +5,7 @@
 # $Rev$
 #
 
+from .algorithm      import Algorithm
 from .dataflow       import Dataflow
 from .dataset        import Dataset
 from .envconfig      import EnvConfig
