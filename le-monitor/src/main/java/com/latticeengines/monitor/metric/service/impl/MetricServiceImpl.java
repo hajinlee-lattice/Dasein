@@ -34,19 +34,6 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db, Measurement<F, D> measurement) {
-        writeSync(db, Collections.singleton(measurement));
-    }
-
-    @Override
-    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db,
-            Collection<? extends Measurement<F, D>> measurements) {
-        for (MetricWriter writer : metricWriters) {
-            writer.writeSync(db, measurements);
-        }
-    }
-
-    @Override
     public void disable() {
         for (MetricWriter writer : metricWriters) {
             writer.disable();

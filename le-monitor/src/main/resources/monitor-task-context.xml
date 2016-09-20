@@ -9,7 +9,7 @@
     <task:scheduler id="monitorScheduler" pool-size="2"/>
 
     <task:executor id="monitorExecutor"
-                   pool-size="1-4"
+                   pool-size="2-4"
                    queue-capacity="1000"
                    keep-alive="1000"
                    rejection-policy="DISCARD" />

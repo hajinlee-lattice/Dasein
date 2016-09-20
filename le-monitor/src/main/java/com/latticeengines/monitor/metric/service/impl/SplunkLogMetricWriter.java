@@ -19,7 +19,6 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.monitor.metric.service.MetricWriter;
 
 @Component("splunkLogMetricWriter")
@@ -53,18 +52,6 @@ public class SplunkLogMetricWriter implements MetricWriter {
     }
 
     @Override
-    public <F extends Fact, D extends Dimension> void writeSync(MetricDB db,
-                                                            Collection<? extends Measurement<F, D>> measurements) {
-        if (enabled) {
-            for (Measurement<F, D> measurement : measurements) {
-                if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement));
-                }
-            }
-        }
-    }
-
-    @Override
     public void disable() {
         if (enabled) {
             log.info("Disable splunk log metric writer.");
@@ -84,7 +71,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
         @Override
         public void run() {
-            writeSync(metricDb, measurements);
+            write(metricDb, measurements);
         }
     }
 

@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -14,8 +13,8 @@ import com.latticeengines.datacloud.match.metric.BulkMatchResponse;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchFetcher;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 @Component("realTimeMatchExecutor")
 class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
@@ -25,10 +24,6 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     @Autowired
     @Qualifier("realTimeMatchFetcher")
     private MatchFetcher fetcher;
-
-    @Autowired
-    @Qualifier("matchExecutor")
-    private ThreadPoolTaskExecutor matchExecutor;
 
     @Override
     @MatchStep
@@ -57,33 +52,19 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     @MatchStep
     private void generateOutputMetric(final MatchContext matchContext) {
-        matchExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                generateMetric(matchContext);
-            }
-        });
+        try {
+            MatchResponse response = new MatchResponse(matchContext);
+            metricService.write(MetricDB.LDC_Match, response);
+        } catch (Exception e) {
+            log.warn("Failed to extract output metric.", e);
+        }
     }
 
     @MatchStep
     public void generateOutputMetric(final BulkMatchOutput bulkMatchOutput) {
-        matchExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    BulkMatchResponse response = new BulkMatchResponse(bulkMatchOutput);
-                    metricService.writeSync(MetricDB.LDC_Match, response);
-                } catch (Exception e) {
-                    log.warn("Failed to extract output metric.", e);
-                }
-            }
-        });
-    }
-
-    private void generateMetric(final MatchContext matchContext) {
         try {
-            MatchResponse response = new MatchResponse(matchContext);
-            metricService.writeSync(MetricDB.LDC_Match, response);
+            BulkMatchResponse response = new BulkMatchResponse(bulkMatchOutput);
+            metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
             log.warn("Failed to extract output metric.", e);
         }
