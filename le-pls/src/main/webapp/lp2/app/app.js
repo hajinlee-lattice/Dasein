@@ -226,6 +226,12 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
       config.headers = config.headers || {};
       if (BrowserStorageUtility.getTokenDocument()) {
         config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+
+        var ClientSession = BrowserStorageUtility.getClientSession();
+
+        if (ClientSession && ClientSession.Tenant) {
+            config.headers.TenantId = ClientSession.Tenant.Identifier;
+        }
       }
       return config;
     },
