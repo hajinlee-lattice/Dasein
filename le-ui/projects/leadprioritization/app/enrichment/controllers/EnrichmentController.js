@@ -47,8 +47,16 @@ angular.module('lp.enrichment.leadenrichment', [
         view: 'list'
     });
 
-    vm.changeCategory = function(){
-        vm.category = vm.categoryOption;
+    vm.changeCategory = function(opts){
+        var opts = opts || {},
+            category = opts.category || vm.categoryOption || '',
+            event = opts.event || '',
+            remove = opts.remove || false;
+
+        if(event && event.target && event.target.tagName === 'A') {
+            event.preventDefault();
+        }
+        vm.category = (remove ? '' : category);
     }
     vm.categoryClass = function(category){
         var category = category.toLowerCase().replace(' ','-');
@@ -163,6 +171,60 @@ angular.module('lp.enrichment.leadenrichment', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
+    vm.categoriesDropdown = function($event){
+        vm.show_categories = !vm.show_categories;
+
+        var parent_selector = '.dropdown-categories';
+            parent = angular.element(parent_selector);
+
+        if(!vm.show_categoires) {
+            parent.find('.show-subcategory').removeClass('show-subcategory');
+        }
+
+        if($event && $event.target) {
+            var sub_targets = parent.find('.subcategory-toggle'),
+                categories = parent.find('ul').first();
+
+
+            categories.css({minWidth: parent.width(), top: parent.height() - 1});
+
+            sub_targets.each(function(key, value){
+                var target = angular.element(value),
+                    subcategories = target.parent().siblings('ul');
+
+                if(subcategories.length) {
+                    target.unbind('click');
+                    target.click(function(){
+                        var add = true,
+                            subcategories_width = subcategories.outerWidth(),
+                            subcategories_top = parent.find('h4').first().outerHeight();
+
+                        if(subcategories.hasClass('show-subcategory')) {
+                            add = false;
+                        }
+                        parent.find('.show-subcategory, .subcategory-toggle').removeClass('show-subcategory');
+                        if(add) {
+                            subcategories.siblings('.category').find('.subcategory-toggle').addClass('show-subcategory');
+                            subcategories.addClass('show-subcategory').css({left: -(subcategories_width), top: -(subcategories_top)});
+                        } 
+                    });
+                }
+            });
+
+            var click = function($event){
+                var clicked = angular.element($event.target),
+                inside = clicked.closest(parent).length;
+                if(!inside) {
+                    parent.find('.show-subcategory').removeClass('show-subcategory');
+                    $scope.vm.show_categories = false;
+                    $scope.$digest();
+                    $document.unbind('click', click);
+                }
+            }
+            $document.bind('click', click);
+        }
+    }
+
     var _scrolled = function() {
         var el = document.querySelector('.subheader-container'),
             $el = angular.element(el),
@@ -212,6 +274,9 @@ angular.module('lp.enrichment.leadenrichment', [
         _resized();
         vm.enrichments = EnrichmentData.data;
         vm.categories = EnrichmentCategories.data;
+        vm.subcategories = {};
+        vm.subcategories['Technology Profile'] = [1,2,3,4,5,6,7];
+        vm.subcategories['Website Profile'] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
         vm.statusMessageBox = angular.element('.status-alert');

@@ -16,11 +16,27 @@
                         </a>
                         <input type="text" class="form-control" placeholder="Search all {{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
+                    <div class="tag" ng-if="vm.category" ng-click="vm.changeCategory({category: ''});">{{vm.category}}</div>
                 </li>
                 <li class="categories">
-                    <select class="form-control" ng-model="vm.categoryOption" ng-options="value as value for (key, value) in vm.categories" ng-change="vm.changeCategory(); vm.metadata.current = 1;">
-                        <option value="">{{vm.category ? vm.label.categories_see_all : vm.label.categories_select_all}}</option>
-                    </select>
+                    <div class="dropdown-categories" ng-class="{active: vm.show_categories}">
+                        <h4 ng-click="vm.categoriesDropdown($event)">Search and browse by category</h4>
+                        <ul ng-class="{active: vm.show_categories}">
+                            <li ng-repeat="(key, value) in vm.categories">
+                                <div class="category" ng-class="{active: vm.category == value}">
+                                    <span class="subcategory-arrow" ng-class="{'subcategory-toggle': vm.subcategories[value]}"></span>
+                                    <span class="category-name" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});">
+                                        <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(value)}}"></div>
+                                        {{value}}
+                                    </span>
+                                    <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});" ng-class="{active: vm.category == value}"></span>
+                                </div>                                
+                                <ul ng-if="vm.subcategories[value]">
+                                    <li ng-repeat="(key, value) in vm.subcategories[value]">{{value}}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 <li class="menu" ng-click="vm.clickPaginate()">
                     <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
@@ -52,7 +68,7 @@
                     </ul>
                     <h4>Filter</h4>
                     <ul class="filters">
-                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
+                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-checked="vm.metadata.toggle.show.selecte"d /> <label for="enabled">Enabled only</label></li>
                         <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
                         <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
                     </ul>
