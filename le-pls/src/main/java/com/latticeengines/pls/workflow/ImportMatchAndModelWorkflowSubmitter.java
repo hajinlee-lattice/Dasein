@@ -106,11 +106,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             if (predefinedSelection == null) {
                 throw new IllegalArgumentException("Cannot parse column selection named " + predefinedSelectionName);
             }
-        } else {
-            if (useDnBFlagFromZK()) {
-                predefinedSelection = Predefined.DNB;
-                parameters.setExcludePublicDomains(true);
-            }
         }
 
         String moduleName = parameters.getModuleName();
