@@ -1,0 +1,5 @@
+{
+    "endpoint":"https://admin-qa.lattice.local:8080/modelquality/",
+    "apiHostPort":"https://bodcdevtca18.lattice.local:8081",
+    "verify":"False"
+}
