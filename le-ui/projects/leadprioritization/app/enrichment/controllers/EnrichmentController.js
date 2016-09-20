@@ -174,7 +174,7 @@ angular.module('lp.enrichment.leadenrichment', [
     vm.categoriesDropdown = function($event){
         vm.show_categories = !vm.show_categories;
 
-        var parent_selector = '.dropdown-categories';
+        var parent_selector = '.dropdown-categories',
             parent = angular.element(parent_selector);
 
         if(!vm.show_categoires) {
@@ -184,7 +184,6 @@ angular.module('lp.enrichment.leadenrichment', [
         if($event && $event.target) {
             var sub_targets = parent.find('.subcategory-toggle'),
                 categories = parent.find('ul').first();
-
 
             categories.css({minWidth: parent.width(), top: parent.height() - 1});
 

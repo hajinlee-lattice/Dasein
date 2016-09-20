@@ -98,7 +98,11 @@
                     ng-repeat="enrichment in (filteredList = (vm.enrichments 
                     | filter: vm.query
                     | orderBy: SortOrder
-                    | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false) })) 
+                    | filter: { 
+                                'Category': vm.category || '', 
+                                'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
+                                'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false) 
+                                })) 
                     | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                     | limitTo: vm.pagesize" 
                     ng-class="{'active': enrichment.IsSelected}">
