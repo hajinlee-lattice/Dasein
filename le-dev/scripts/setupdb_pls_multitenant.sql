@@ -8,4 +8,5 @@ USE `PLS_MultiTenant`;
 
 source WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
 
-INSERT INTO QUARTZ_JOBACTIVE(IsActive, JobName, TenantId) VALUES (1, 'modelSummaryDownload', 'PredefinedJobs'); 
+INSERT INTO QUARTZ_JOBACTIVE(IsActive, JobName, TenantId) VALUES (1, 'modelSummaryDownload', 'PredefinedJobs');
+INSERT INTO QUARTZ_JOBACTIVE(IsActive, JobName, TenantId) VALUES (0, 'dataCloudRefresh', 'PredefinedJobs');

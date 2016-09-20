@@ -76,34 +76,14 @@
         <property name="jobTimeout" value="${quartz.dellebi.dailyjob3.job.timeout:3600}" />
     </bean>
 
-    <bean name="propdataRefreshHeartBeat" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="propdataRefreshHeartBeat" />
-        <property name="cronTrigger" value="0 0 0 1 1 ? 1900" />
-        <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.propdata.predefined.job.query.api:}" />
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;refreshHeartBeat&quot;}" />
-        <property name="jobTimeout" value="${quartz.propdata.refreshheartbeat.job.timeout:3600}" />
-    </bean>
-
-    <bean name="propdataMadisonLogicDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="madisonLogicDownload" />
-        <property name="cronTrigger" value="0 0 * * * ?" />
-        <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.propdata.predefined.job.query.api:}" />
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;madisonLogicDownload&quot;}" />
-        <property name="jobTimeout" value="${quartz.propdata.madisonlogicdownload.job.timeout:3600}" />
-    </bean>
-
-    <bean name="propdataMadisonLogicUpload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="madisonLogicUpload" />
-        <property name="cronTrigger" value="0 0 4/8 * * ?" />
-        <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.propdata.predefined.job.query.api:}" />
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;madisonLogicUpload&quot;}" />
-        <property name="jobTimeout" value="${quartz.propdata.madisonlogicupload.job.timeout:3600}" />
+    <bean name="dataCloudRefresh" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="dataCloudRefresh" />
+        <property name="cronTrigger" value="${quartz.propdata.refresh.job.cron}" />
+        <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url}" />
+        <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url}" />
+        <property name="queryApi" value="${quartz.propdata.predefined.job.query.api}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dataCloudRefresh&quot;}" />
+        <property name="jobTimeout" value="${quartz.propdata.refresh.job.timeout:3600}" />
     </bean>
 
     <bean name="scoringManagerJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
@@ -123,9 +103,7 @@
         <ref bean="dellebiDailyJob1"/>
         <ref bean="dellebiDailyJob2"/>
         <ref bean="dellebiDailyJob3"/>
-        <ref bean="propdataRefreshHeartBeat"/>
-        <ref bean="propdataMadisonLogicDownload"/>
-        <ref bean="propdataMadisonLogicUpload"/>
+        <ref bean="dataCloudRefresh"/>
         <ref bean="scoringManagerJob"/>
     </util:list>
 
