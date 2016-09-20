@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.ParsePosition;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,6 +36,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.springframework.format.number.NumberFormatter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -278,14 +277,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @VisibleForTesting
     Number parseStringToNumber(String inputStr) throws ParseException {
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
-        ParsePosition parsePosition = new ParsePosition(0);
-        Number number = numberFormat.parse(inputStr, parsePosition);
-
-        if (parsePosition.getIndex() != inputStr.length() || parsePosition.getErrorIndex() != -1) {
-            throw new ParseException("Invalid input", parsePosition.getIndex());
-        }
-        return number;
+        NumberFormatter numberFormatter = new NumberFormatter();
+        return numberFormatter.parse(inputStr, Locale.getDefault());
     }
 
     @Override
