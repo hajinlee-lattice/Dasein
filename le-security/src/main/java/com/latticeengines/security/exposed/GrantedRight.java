@@ -152,12 +152,6 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "Edit_PLS_MarketoCredential";
         }
-    }, //
-    VIEW_PLS_SURESHOT {
-        @Override
-        public String getAuthority() {
-            return "View_PLS_Sureshot";
-        }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();

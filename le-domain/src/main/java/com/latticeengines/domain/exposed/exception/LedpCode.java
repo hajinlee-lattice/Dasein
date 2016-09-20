@@ -213,6 +213,8 @@ public enum LedpCode {
     LEDP_18113("Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
     LEDP_18114("Saving of lead enrichment selection failed, field name {0} is invalid."), //
     LEDP_18115("File Validation Failed due to: {0}"), //
+    LEDP_18116("Failed to Authenticate Marketo REST Credentials due to: {0}"), //
+    LEDP_18117("Failed to Authenticate Marketo SOAP Credentials due to: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

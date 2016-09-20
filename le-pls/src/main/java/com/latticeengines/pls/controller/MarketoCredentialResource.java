@@ -2,7 +2,10 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
+import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +27,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_MarketoCredential')")
 public class MarketoCredentialResource {
 
-    private static final Logger log = Logger.getLogger(ModelSummaryResource.class);
+    private static final Log log = LogFactory.getLog(ModelSummaryResource.class);
 
     @Autowired
     private MarketoCredentialService marketoCredentialService;

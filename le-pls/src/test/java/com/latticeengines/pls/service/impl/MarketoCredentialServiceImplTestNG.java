@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -8,18 +10,24 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MarketoCredentialService;
+import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
+import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -56,6 +64,10 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     @Autowired
     private TenantService tenantService;
 
+    private MarketoRestValidationService mockedRestValidationService = Mockito
+            .mock(MarketoRestValidationService.class);
+    private MarketoSoapService mockedSoapService = Mockito.mock(MarketoSoapService.class);
+
     @Value("${pls.marketo.enrichment.webhook.url}")
     private String enrichmentWebhookUrl;
 
@@ -76,6 +88,15 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     public void setup() throws Exception {
         setupTenant(TENANT1);
         cleanupMarketoCredentialsDB();
+
+        ReflectionTestUtils.setField(marketoCredentialService, "marketoRestValidationService",
+                mockedRestValidationService);
+        ReflectionTestUtils.setField(marketoCredentialService, "marketoSoapService",
+                mockedSoapService);
+        when(mockedRestValidationService.validateMarketoRestCredentials(anyString(), anyString(),
+                anyString(), anyString())).thenReturn(true);
+        when(mockedSoapService.validateMarketoSoapCredentials(anyString(), anyString(),
+                anyString())).thenReturn(true);
     }
 
     @Test(groups = "functional")
@@ -213,6 +234,65 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
             MARKETO_MATCH_FIELD_NAMES.contains(marketoMatchField.getMarketoMatchFieldName());
             TEST_FIELD_VALUES.contains(marketoMatchField.getMarketoFieldName());
         }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    public void updateCredential_restValidationFailed_assertCorrectErrorReturned() {
+        MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
+                .get(0);
+
+        when(mockedRestValidationService.validateMarketoRestCredentials(anyString(), anyString(),
+                anyString(), anyString())).thenThrow(new LedpException(LedpCode.LEDP_21031))
+                        .thenReturn(true);
+        try {
+            marketoCredentialService.updateMarketoCredentialById(
+                    Long.toString(marketoCredential.getPid()), marketoCredential);
+            assertFalse(true,
+                    "update marketo credential with wrong rest credential should have thrown exception");
+        } catch (Exception e) {
+            assertTrue(true, "");
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18116);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    public void updateCredential_soapValidationFailed_assertCorrectErrorReturned() {
+        MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
+                .get(0);
+
+        when(mockedSoapService.validateMarketoSoapCredentials(anyString(), anyString(),
+                anyString())).thenThrow(new LedpException(LedpCode.LEDP_21034));
+        try {
+            marketoCredentialService.updateMarketoCredentialById(
+                    Long.toString(marketoCredential.getPid()), marketoCredential);
+            assertFalse(true,
+                    "update marketo credential with wrong soap credential should have thrown exception");
+        } catch (Exception e) {
+            assertTrue(true, "");
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18117);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    public void findMarketoCredentialById_assertTheRightCredentialIsReturned() {
+        MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
+                .get(0);
+
+        MarketoCredential marketoCredential1 = marketoCredentialService
+                .findMarketoCredentialById(Long.toString(marketoCredential.getPid()));
+
+        assertEquals(marketoCredential1.getPid(), marketoCredential.getPid());
+        assertEquals(marketoCredential1.getName(), marketoCredential.getName());
+        assertEquals(marketoCredential1.getRestClientId(), marketoCredential.getRestClientId());
+        assertEquals(marketoCredential1.getRestClientSecret(),
+                marketoCredential.getRestClientSecret());
+        assertEquals(marketoCredential1.getRestEndpoint(), marketoCredential.getRestEndpoint());
+        assertEquals(marketoCredential1.getSoapEncrytionKey(),
+                marketoCredential.getSoapEncrytionKey());
+        assertEquals(marketoCredential1.getSoapEndpoint(), marketoCredential.getSoapEndpoint());
+        assertEquals(marketoCredential1.getSoapUserId(), marketoCredential.getSoapUserId());
+        assertEquals(marketoCredential1.getEnrichment().getPid(),
+                marketoCredential.getEnrichment().getPid());
     }
 
 }

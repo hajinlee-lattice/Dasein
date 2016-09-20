@@ -143,4 +143,15 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void deleteMarketoCredentialByName(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.EnrichmentEntityMgr.delete*(..))")
+    public void deleteEnrichmentById(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr.update*(..))")
+    public void updateMarketoMatchFieldValue(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
 }
