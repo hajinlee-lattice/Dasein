@@ -49,7 +49,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     private static final String TEST_STATE_FIELD = "Test State";
     private static final String TEST_COUNTRY_FIELD = "Test Country";
     private static final List<String> TEST_FIELD_VALUES = Arrays.asList(TEST_DOMAIN_FIELD,
-            TEST_COMPANY_FIELD, TEST_STATE_FIELD, TEST_COMPANY_FIELD);
+            TEST_COMPANY_FIELD, TEST_STATE_FIELD, TEST_COUNTRY_FIELD);
     private static final List<MarketoMatchFieldName> MARKETO_MATCH_FIELD_NAMES = Arrays.asList(
             MarketoMatchFieldName.Domain, MarketoMatchFieldName.Company,
             MarketoMatchFieldName.State, MarketoMatchFieldName.Country);
@@ -217,7 +217,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         MARKETO_MATCH_FIELD_1.setMarketoFieldName(TEST_DOMAIN_FIELD);
         MARKETO_MATCH_FIELD_2.setMarketoFieldName(TEST_COMPANY_FIELD);
         MARKETO_MATCH_FIELD_3.setMarketoFieldName(TEST_STATE_FIELD);
-        MARKETO_MATCH_FIELD_4.setMarketoFieldName(TEST_STATE_FIELD);
+        MARKETO_MATCH_FIELD_4.setMarketoFieldName(TEST_COUNTRY_FIELD);
 
         marketoCredentialService.updateCredentialMatchFields(
                 Long.toString(marketoCredential.getPid()), Arrays.asList(MARKETO_MATCH_FIELD_1,

@@ -24,7 +24,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "marketo", description = "REST resource for marketo credentials")
 @RestController
 @RequestMapping("/marketo/credentials")
-@PreAuthorize("hasRole('View_PLS_MarketoCredential')")
+@PreAuthorize("hasRole('View_PLS_MarketoCredentials_Simplified')")
 public class MarketoCredentialResource {
 
     private static final Log log = LogFactory.getLog(ModelSummaryResource.class);
@@ -33,9 +33,8 @@ public class MarketoCredentialResource {
     private MarketoCredentialService marketoCredentialService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
     @ApiOperation(value = "Create a marketo credential")
-    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void create(@RequestBody MarketoCredential marketoCredential) {
         marketoCredentialService.createMarketoCredential(marketoCredential);
     }
@@ -43,6 +42,7 @@ public class MarketoCredentialResource {
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get marketo credential by id")
     @ResponseBody
+    @PreAuthorize("hasRole('View_PLS_MarketoCredentials')")
     public MarketoCredential find(@PathVariable String credentialId) {
         return marketoCredentialService.findMarketoCredentialById(credentialId);
     }
@@ -50,8 +50,29 @@ public class MarketoCredentialResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get all marketo credentials")
     @ResponseBody
+    @PreAuthorize("hasRole('View_PLS_MarketoCredentials')")
     public List<MarketoCredential> findAll() {
         return marketoCredentialService.findAllMarketoCredentials();
+    }
+
+    @RequestMapping(value = "/simplified/{credentialId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get marketo credential by id")
+    @ResponseBody
+    public MarketoCredential findSimplified(@PathVariable String credentialId) {
+        MarketoCredential marketoCredential = marketoCredentialService.findMarketoCredentialById(credentialId);
+        marketoCredential.setEnrichment(null);
+        return marketoCredential;
+    }
+
+    @RequestMapping(value = "/simplified", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get all marketo credentials")
+    @ResponseBody
+    public List<MarketoCredential> findAllSimplified() {
+        List<MarketoCredential> marketoCredentials = marketoCredentialService.findAllMarketoCredentials();
+        for (MarketoCredential marketoCredential : marketoCredentials) {
+            marketoCredential.setEnrichment(null);
+        }
+        return marketoCredentials;
     }
 
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -63,7 +84,7 @@ public class MarketoCredentialResource {
 
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Updates a marketo credential")
-    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void update(@PathVariable String credentialId,
             @RequestBody MarketoCredential credential) {
         marketoCredentialService.updateMarketoCredentialById(credentialId, credential);
@@ -71,7 +92,7 @@ public class MarketoCredentialResource {
 
     @RequestMapping(value = "/{credentialId}/enrichment", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Updates a enrichment mathcing fields")
-    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void updateEnrichment(@PathVariable String credentialId,
             @RequestBody List<MarketoMatchField> marketoMatchFields) {
         marketoCredentialService.updateCredentialMatchFields(credentialId, marketoMatchFields);
