@@ -7,11 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -24,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.remote.marketo.LeadField;
@@ -123,28 +119,6 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
         }
 
         return result;
-    }
-
-    public static void main(String[] args) {
-        String soapEndPoint = "https://548-NPP-225.mktoapi.com/soap/mktows/2_9";
-        String userId = "latticedev1_51452907527AB5250FC168";
-        String encryptionKey = "5355338341004080552277AABB55226700FFCD724863";
-
-        new MarketoSoapServiceImpl().validateMarketoSoapCredentials(soapEndPoint, userId, encryptionKey);
-        List<LeadField> fields = new MarketoSoapServiceImpl().getLeadFields(soapEndPoint, userId, encryptionKey);
-        System.out.println(JsonUtils.serialize(fields));
-
-        List<String> displayNamesOnly = new ArrayList<>();
-        for (LeadField leadField : fields) {
-            displayNamesOnly.add(leadField.getDisplayName());
-        }
-
-        Collections.sort(displayNamesOnly, String.CASE_INSENSITIVE_ORDER);
-        System.out.println(JsonUtils.serialize(displayNamesOnly));
-        System.out.println(fields.size());
-
-        Set<String> uniqueDisplayNamesOnly = new HashSet<>(displayNamesOnly);
-        System.out.println(uniqueDisplayNamesOnly.size());
     }
 
 }
