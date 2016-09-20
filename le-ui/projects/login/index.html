@@ -12,14 +12,25 @@
         <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
         <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
     </head>
+    <style>
+        body {
+            opacity: 0;
+            transition: opacity 166ms ease;
+        }
+        body.initialized {
+            opacity: 1;
+        }
+    </style>
     <body data-ng-controller="MainController" class="blue-background">
         <div id="mainView">
             <div ui-view="info" id="mainInfoView"></div>
             <div ui-view="main" id="mainContentView"></div>
         </div>
     </body>
+    
     <script src="/assets/vendor.min.js"></script>
     <script src="/assets/lattice.min.js"></script>
+
     <!-- build:js app.js -->
     <script src="app/app.js"></script>
     <script src="app/login/frame/LatticeFrameModule.js"></script>

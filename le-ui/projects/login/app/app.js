@@ -94,7 +94,6 @@ var mainApp = angular.module('mainApp', [
             views: {
                 "main": {
                     controller: function(LoginService) {
-                        console.log('hi');
                         LoginService.Logout();
                     },
                     template: ''

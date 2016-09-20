@@ -7,26 +7,36 @@ angular.module('login.frame', [
     'mainApp.core.services.ResourceStringsService'
 ])
 .controller('LatticeFrameController', function(
-    $scope, $state, ResourceUtility, LoginService, LoginStore, LoginDocument, ClientSession
+    $scope, $state, $timeout, ResourceUtility, LoginService, SessionTimeoutUtility, 
+    LoginStore, LoginDocument, ClientSession
 ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.login = LoginStore.login;
     $scope.state = $state;
 
+    console.log('timedout:', SessionTimeoutUtility.hasSessionTimedOut(), LoginDocument.UserName);
+    if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
+        return LoginService.Logout();
+    } else {
+        switch($state.current.name) {
+            case 'login.form': 
+                if (LoginDocument.UserName) {
+                    $state.go('login.tenants');
+                }
+                break;
+            case 'login.tenants':
+                if (!LoginDocument.UserName) {
+                    $state.go('login.form');
+                }
+                break;
+        }
+    }
+
     LoginStore.set(LoginDocument, ClientSession);
 
-    switch($state.current.name) {
-        case 'login.form': 
-            if ($scope.login.username) {
-                $state.go('login.tenants');
-            }
-            break;
-        case 'login.tenants':
-            if (!$scope.login.username) {
-                $state.go('login.form');
-            }
-            break;
-    }
+    $timeout(function() {
+        angular.element('body').addClass('initialized');
+    },1)
 
     $scope.clickLogout = function ($event) {
         if ($event != null) {

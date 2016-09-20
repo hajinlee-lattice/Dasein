@@ -43,7 +43,7 @@ angular.module('login.form', [
 })
 .controller('LoginViewController', function (
     $templateCache, $http, $rootScope, $compile, $state, ResourceUtility, TimestampIntervalUtility,
-    BrowserStorageUtility, LoginService, ResourceStringsService, LoginStore
+    BrowserStorageUtility, LoginService, ResourceStringsService, LoginStore, SessionTimeoutUtility
 ) {
     var vm = this;
 
@@ -92,7 +92,7 @@ angular.module('login.form', [
             vm.loginMessage = null;
             if (result != null && result.Success === true) {
                 $rootScope.$broadcast("LoggedIn");
-
+                SessionTimeoutUtility.refreshSessionLastActiveTimeStamp();
                 $state.go('login.tenants');
             } else {
                 // Need to fail gracefully if we get no service response at all

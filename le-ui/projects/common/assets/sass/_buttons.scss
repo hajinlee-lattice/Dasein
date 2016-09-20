@@ -65,6 +65,15 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	&.default-button {
 		border: $black-titanium solid 1px;
 	}
+	&.green-button {
+		background-color: $jade;
+		&:hover {
+			background-color: $jade-two;
+		}
+		&:active {
+			background-color: $jade-three;
+		}
+	}
 	&.blue-button {
 		background-color: $saphire;
 		&:hover {
