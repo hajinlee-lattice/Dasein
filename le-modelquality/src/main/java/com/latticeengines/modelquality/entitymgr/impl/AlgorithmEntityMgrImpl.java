@@ -46,6 +46,7 @@ public class AlgorithmEntityMgrImpl extends BaseEntityMgrImpl<Algorithm> impleme
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Algorithm findByName(String algorithmName) {
         return algorithmDao.findByField("NAME", algorithmName);
     }

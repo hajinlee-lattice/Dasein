@@ -17,13 +17,13 @@ import com.latticeengines.modelquality.entitymgr.SamplingEntityMgr;
 
 @Component("qualitySamplingEntityMgr")
 public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implements SamplingEntityMgr {
-    
+
     @Autowired
     private SamplingDao samplingDao;
-    
+
     @Autowired
     private SamplingPropertyDefDao samplingPropertyDefDao;
-    
+
     @Autowired
     private SamplingPropertyValueDao samplingPropertyValueDao;
 
@@ -36,10 +36,10 @@ public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implement
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(Sampling sampling) {
         samplingDao.create(sampling);
-        
+
         for (SamplingPropertyDef propertyDef : sampling.getSamplingPropertyDefs()) {
             samplingPropertyDefDao.create(propertyDef);
-            
+
             for (SamplingPropertyValue propertyValue : propertyDef.getSamplingPropertyValues()) {
                 samplingPropertyValueDao.create(propertyValue);
             }
@@ -47,7 +47,7 @@ public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Sampling findByName(String samplingConfigName) {
         return samplingDao.findByField("NAME", samplingConfigName);
     }

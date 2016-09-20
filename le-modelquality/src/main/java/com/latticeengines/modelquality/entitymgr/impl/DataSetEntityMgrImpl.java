@@ -17,12 +17,12 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
 
     @Autowired
     private DataSetDao dataSetDao;
-    
+
     @Override
     public BaseDao<DataSet> getDao() {
         return dataSetDao;
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(DataSet dataSet) {
@@ -33,9 +33,9 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataSet findByName(String name) {
         return dataSetDao.findByField("NAME", name);
     }
-
 
 }

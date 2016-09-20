@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,7 +30,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
 
     @Autowired
     private PropDataEntityMgr propDataEntityMgr;
-    
+
     @Autowired
     private PropDataService propDataService;
 
@@ -56,12 +57,12 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     public PropData createPropDataConfigFromProduction() {
         return createForProduction();
     }
-    
+
     @Override
     @RequestMapping(value = "/{propDataConfigName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get PropData configuration by name")
-    public PropData getPropDataConfigByName(String propDataConfigName) {
+    public PropData getPropDataConfigByName(@PathVariable String propDataConfigName) {
         return getByName(propDataConfigName);
     }
 
@@ -85,5 +86,5 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
         propDataEntityMgr.create(config);
         return config.getName();
     }
-    
+
 }

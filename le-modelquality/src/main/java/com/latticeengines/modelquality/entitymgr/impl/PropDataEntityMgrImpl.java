@@ -33,6 +33,7 @@ public class PropDataEntityMgrImpl extends BaseEntityMgrImpl<PropData> implement
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PropData findByName(String propDataConfigName) {
         return propDataDao.findByField("NAME", propDataConfigName);
     }

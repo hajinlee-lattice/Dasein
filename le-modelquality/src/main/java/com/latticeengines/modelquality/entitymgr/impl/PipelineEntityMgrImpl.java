@@ -22,10 +22,10 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
 
     @Autowired
     private PipelineDao pipelineDao;
-    
+
     @Autowired
     private PipelineToPipelineStepsDao pipelineToPipelineStepsDao;
-    
+
     @Autowired
     private PipelineStepDao pipelineStepDao;
 
@@ -33,7 +33,7 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     public BaseDao<Pipeline> getDao() {
         return pipelineDao;
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(Pipeline pipeline) {
@@ -46,7 +46,7 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Pipeline findByName(String name) {
         return pipelineDao.findByField("NAME", name);
     }

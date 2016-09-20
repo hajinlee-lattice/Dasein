@@ -23,7 +23,7 @@ public class PipelineStepEntityMgrImpl extends BaseEntityMgrImpl<PipelineStep> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PipelineStep findByName(String stepName) {
         return pipelineStepDao.findByField("NAME", stepName);
     }

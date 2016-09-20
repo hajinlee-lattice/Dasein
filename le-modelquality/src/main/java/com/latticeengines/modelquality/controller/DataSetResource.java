@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,12 +45,12 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     public String createDataSet(@RequestBody DataSet dataSet) {
         return create(dataSet);
     }
-    
+
     @Override
     @RequestMapping(value = "/{dataSetName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get DataSet by name")
-    public DataSet getDataSetByName(String dataSetName) {
+    public DataSet getDataSetByName(@PathVariable String dataSetName) {
         return getByName(dataSetName);
     }
 

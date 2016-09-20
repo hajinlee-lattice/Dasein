@@ -15,7 +15,7 @@ import com.latticeengines.modelquality.entitymgr.DataFlowEntityMgr;
 
 @Component("dataFlowEntityMgr")
 public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implements DataFlowEntityMgr {
-    
+
     @Autowired
     private DataFlowDao dataFlowDao;
 
@@ -33,6 +33,7 @@ public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implement
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFlow findByName(String dataFlowName) {
         return dataFlowDao.findByField("NAME", dataFlowName);
     }

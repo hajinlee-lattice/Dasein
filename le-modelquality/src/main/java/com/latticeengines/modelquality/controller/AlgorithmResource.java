@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,7 +26,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AlgorithmResource.class);
-    
+
     @Autowired
     private AlgorithmService algorithmService;
 
@@ -47,7 +48,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     public Algorithm createAlgorithmFromProduction() {
         return createForProduction();
     }
-    
+
     @Override
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
@@ -55,12 +56,12 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     public String createAlgorithm(Algorithm algorithm) {
         return create(algorithm);
     }
-    
+
     @Override
     @RequestMapping(value = "/{algorithmName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Algorithm by name")
-    public Algorithm getAlgorithmByName(String algorithmName) {
+    public Algorithm getAlgorithmByName(@PathVariable String algorithmName) {
         return getByName(algorithmName);
     }
 
