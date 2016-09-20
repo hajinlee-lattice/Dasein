@@ -51,14 +51,6 @@
                                     <location>leadprioritization/target/le-serviceflows-leadprioritization-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/tmp</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
-                            <sources>
                                 <source>
                                     <location>../le-swlib/target/le-swlib-${le.rpm.version}-shaded.jar</location>
                                 </source>
