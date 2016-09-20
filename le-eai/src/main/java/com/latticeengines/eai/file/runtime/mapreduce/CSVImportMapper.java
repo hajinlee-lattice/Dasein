@@ -5,13 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
@@ -36,6 +39,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -231,17 +236,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         try {
             switch (avroType) {
             case DOUBLE:
-                return Double.valueOf(fieldCsvValue);
+                return new Double(parseStringToNumber(fieldCsvValue).doubleValue());
             case FLOAT:
-                return Float.valueOf(fieldCsvValue);
+                return new Float(parseStringToNumber(fieldCsvValue).floatValue());
             case INT:
-                return Integer.valueOf(fieldCsvValue);
+                return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     LOG.info("Date value from csv: " + fieldCsvValue);
                     return TimeStampConvertUtils.convertToLong(fieldCsvValue);
                 } else {
-                    return Long.valueOf(fieldCsvValue);
+                    return new Long(parseStringToNumber(fieldCsvValue).longValue());
                 }
             case STRING:
                 return fieldCsvValue;
@@ -269,6 +274,18 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
                     fieldCsvValue, attr.getDisplayName()));
         }
+    }
+
+    @VisibleForTesting
+    Number parseStringToNumber(String inputStr) throws ParseException {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
+        ParsePosition parsePosition = new ParsePosition(0);
+        Number number = numberFormat.parse(inputStr, parsePosition);
+
+        if (parsePosition.getIndex() != inputStr.length() || parsePosition.getErrorIndex() != -1) {
+            throw new ParseException("Invalid input", parsePosition.getIndex());
+        }
+        return number;
     }
 
     @Override
