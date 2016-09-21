@@ -5,15 +5,9 @@ $HADOOP_HOME/bin/hadoop fs -mkdir /app/dataplatform
 $HADOOP_HOME/bin/hadoop fs -rm -f -r /app/playmaker
 $HADOOP_HOME/bin/hadoop fs -mkdir -p /app/playmaker/evmodel
 
-$HADOOP_HOME/bin/hadoop fs -rm -f -r /datascientist
-$HADOOP_HOME/bin/hadoop fs -mkdir /datascientist
-
 rm -rf /tmp/app
-rm -rf /tmp/datascientist
 mkdir -p /tmp/app/dataplatform/scripts/algorithm
 
-
-mkdir -p /tmp/datascientist
 mkdir -p /tmp/app/dataplatform/lib
 mkdir -p /tmp/app/playmaker/evmodel
 
@@ -36,4 +30,3 @@ cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
 
 
 $HADOOP_HOME/bin/hadoop fs -copyFromLocal /tmp/app /
-$HADOOP_HOME/bin/hadoop fs -copyFromLocal /tmp/datascientist /
