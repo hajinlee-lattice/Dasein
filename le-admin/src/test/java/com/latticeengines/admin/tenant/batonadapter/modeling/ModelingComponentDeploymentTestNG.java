@@ -24,9 +24,6 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     private int userFeaturesThreshold = 10;
     private int defaultFeaturesThreshold = -1;
 
-    private boolean enableEncryptData = true;
-    private boolean defaultEnableEncryptData = false;
-
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException, IOException {
         bootstrap(batonService.getDefaultConfiguration(ModelingComponent.componentName));
@@ -39,12 +36,10 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
                 getServiceName());
         SerializableDocumentDirectory.Node node = configured.getNodeAtPath("/FeaturesThreshold");
         Assert.assertEquals(Integer.parseInt(node.getData()), defaultFeaturesThreshold);
-        node = configured.getNodeAtPath("/EncryptData");
-        Assert.assertEquals(Boolean.getBoolean(node.getData()), defaultEnableEncryptData);
 
         // idempotent test
         Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
-                tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, getServiceName());
+                tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, ModelingComponent.componentName);
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
         } catch (Exception e) {
@@ -58,17 +53,6 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         } catch (AssertionError e) {
             Assert.fail("Idempotent test failed.", e);
         }
-        configured = tenantService.getTenantServiceConfig(contractId, tenantId, getServiceName());
-        node = configured.getNodeAtPath("/FeaturesThreshold");
-        Assert.assertEquals(Integer.parseInt(node.getData()), userFeaturesThreshold);
-        node = configured.getNodeAtPath("/EncryptData");
-
-        String data = node.getData();
-        System.out.println("After boostrapping, EncryptData is " + data);
-        for (int i = 0; i < data.length(); i++) {
-            System.out.println(data.charAt(i));
-        }
-        Assert.assertEquals(Boolean.parseBoolean(node.getData()), enableEncryptData);
     }
 
     @Override
@@ -77,14 +61,12 @@ public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     }
 
     public DocumentDirectory getModelingDocumentDirectory() {
-        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(ModelingComponent.componentName);
         confDir.makePathsLocal();
 
         // modify the default config
         DocumentDirectory.Node node = confDir.get(new Path("/FeaturesThreshold"));
         node.getDocument().setData(String.valueOf(userFeaturesThreshold));
-        node = confDir.get(new Path("/EncryptData"));
-        node.getDocument().setData(String.valueOf(enableEncryptData));
 
         return confDir;
     }

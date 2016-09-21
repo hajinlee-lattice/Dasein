@@ -1,1 +1,1 @@
-{"RootPath":"/","Nodes":[{"Node":"EncryptData","Data":"false","Metadata":{"Type":"boolean"}},{"Node":"FeaturesThreshold","Data":"-1","Metadata":{"Type":"number","Required":false}}]}
+{"RootPath":"/","Nodes":[{"Node":"FeaturesThreshold","Data":"-1","Metadata":{"Type":"number","Required":false}}]}

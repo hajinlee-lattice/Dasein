@@ -1,7 +1,6 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "EncryptData", "Data": false },
     { "Node": "FeaturesThreshold", "Data": "-1" }
   ]
 }
