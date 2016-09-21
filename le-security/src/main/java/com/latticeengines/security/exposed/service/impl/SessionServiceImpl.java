@@ -63,7 +63,7 @@ public class SessionServiceImpl implements SessionService {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
-                        + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
+                        + " from GA - retried " + retries + " out of " + MAX_RETRY + " times");
             }
             try {
                 retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
@@ -121,7 +121,7 @@ public class SessionServiceImpl implements SessionService {
             }
             LOGGER.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead",
                     GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
-                    session.getAccessLevel()), e);
+                    session.getAccessLevel()));
         }
     }
 

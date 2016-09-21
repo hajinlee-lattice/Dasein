@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
             try {
                 globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
             } catch (Exception e) {
-                LOGGER.warn("Error creating admin user.", e);
+                LOGGER.warn("Error creating admin user.");
             }
         }
 
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
                 globalUserManagementService.registerUser(user, creds);
                 userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
             } catch (Exception e) {
-                LOGGER.warn("Error creating admin user.", e);
+                LOGGER.warn("Error creating admin user.");
                 globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.deleteUser(user.getEmail());
             }
@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
                 LOGGER.warn(
-                        String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), e);
+                        String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
             }
         }
@@ -148,9 +148,7 @@ public class UserServiceImpl implements UserService {
                 }
             } catch (Exception e) {
                 LOGGER.warn(
-                        String.format("Error resigning access level %s from user %s.",
-                                accessLevel.name(), username),
-                        e);
+                        String.format("Error resigning access level %s from user %s.", accessLevel.name(), username));
             }
         }
         return success;
