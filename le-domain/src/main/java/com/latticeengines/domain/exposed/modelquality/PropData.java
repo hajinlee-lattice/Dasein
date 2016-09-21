@@ -103,8 +103,9 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     }
 
     @MetricTag(tag = "ExcludePublicDomains")
-    public boolean isExcludePublicDomains() {
-        return excludePublicDomains;
+    @JsonIgnore
+    public String isExcludePublicDomains() {
+        return "" + excludePublicDomains;
     }
 
     public void setExcludePublicDomains(boolean excludePublicDomains) {
