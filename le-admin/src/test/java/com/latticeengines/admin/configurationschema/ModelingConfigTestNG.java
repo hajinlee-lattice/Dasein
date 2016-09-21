@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 public class ModelingConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
-    @BeforeMethod(groups = {"unit", "functional"})
+    @BeforeMethod(groups = { "unit", "functional" })
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
@@ -24,16 +24,21 @@ public class ModelingConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "unit")
-    public void testUnitMainFlow() { runUnitMainFlow(); }
+    public void testUnitMainFlow() {
+        runUnitMainFlow();
+    }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFuncational() {
+        runFunctionalMainFlow();
+    }
 
     /*
-    ================================================================================
-        Test how you want to use the configuration
-    ================================================================================
-    */
+     * ==========================================================================
+     * ====== Test how you want to use the configuration
+     * ========================
+     * ========================================================
+     */
 
     /**
      * this test demonstrate how to get configuration using DocumentDirectory
@@ -52,6 +57,17 @@ public class ModelingConfigTestNG extends ConfigurationSchemaTestNGBase {
         featuresThreshold = dir.get("/FeaturesThreshold").getDocument().getData();
 
         Assert.assertEquals(featuresThreshold, "10");
+
+        String enableEncryptData = dir.get("/EncryptData").getDocument().getData();
+
+        Assert.assertEquals(enableEncryptData, "false");
+
+        node = dir.get("/EncryptData");
+        node.getDocument().setData("true");
+
+        enableEncryptData = dir.get("/EncryptData").getDocument().getData();
+
+        Assert.assertEquals(enableEncryptData, "true");
     }
 
 }
