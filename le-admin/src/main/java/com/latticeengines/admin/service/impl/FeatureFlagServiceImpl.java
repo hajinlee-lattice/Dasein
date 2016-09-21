@@ -120,8 +120,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         useDnbRtsAndModelingProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> enableLatticeMarketoCredentialPageProdSet = new HashSet<LatticeProduct>();
         enableLatticeMarketoCredentialPageProdSet.add(LatticeProduct.LPA3);
-        Set<LatticeProduct> enableDataEncryptionProdSet = new HashSet<LatticeProduct>();
-        enableDataEncryptionProdSet.add(LatticeProduct.LPA3);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -158,9 +156,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
                 LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getDocumentation(),
                 enableLatticeMarketoCredentialPageProdSet, true);
-        FeatureFlagDefinition enableDataEncryptionFeatureFlag = createDefaultFeatureFlag(
-                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(),
-                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, true);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -180,8 +175,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 useDnbRtsAndModelingFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
                 enableLatticeMarketoCredentialPageFeatureFlag);
-        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(),
-                enableDataEncryptionFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,
