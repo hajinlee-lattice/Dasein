@@ -41,8 +41,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         System.out.println(defaultFeatureFlagMap.keySet());
         Assert.assertTrue(defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags");
-        Assert.assertTrue(defaultFeatureFlagMap.size() <= LatticeFeatureFlag.values().length
-                + PlsFeatureFlag.values().length, "Should have at most LatticeFeatureFlags and PlsFeatureFlags");
+        Assert.assertTrue(defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length
+                + PlsFeatureFlag.values().length, "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
         FeatureFlagDefinition danteFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.DANTE.getName());
         Assert.assertNotNull(danteFeatureFlag);
 
