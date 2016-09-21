@@ -1,10 +1,10 @@
-angular
+    angular
 .module('lp.marketo', [])
 .service('MarketoService', function($http, $q) {
     this.GetMarketoCredentials = function() {
         var deferred = $q.defer();
         var result;
-        var url = '/pls/marketocredentials/';
+        var url = '/pls/marketo/credentials/';
 
         $http({
             method: 'GET',
@@ -19,6 +19,7 @@ angular
                     resultObj: response.data
                 };
                 deferred.resolve(result);
+
             }, function onError(response) {
 
             }

@@ -7,11 +7,9 @@ angular.module('lp.marketo.setup', [
     $scope.credentialIsSetup = false;
     $scope.credentials = MarketoCredentials.resultObj;
 
-    console.log($scope.credentials);
-
-	// $scope.createCredentialClick = function($event){
+	$scope.createCredentialClick = function($event){
 		
-	// }
+	}
 
 	// $scope.editCredentialClick = function($event){
 		

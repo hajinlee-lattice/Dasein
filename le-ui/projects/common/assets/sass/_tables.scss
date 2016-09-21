@@ -79,7 +79,10 @@ table {
 }
 
 
-/* An Andrej Table */
+/* 
+An Andrej Table
+An example can be seen on the Marketo Settings page
+====================================================== */
 .table {
     border: #d4d4d4 solid 1px;
     border-radius: 3px;
@@ -133,6 +136,9 @@ table {
         }
         th {
             border-bottom: none;
+        }
+        a {
+            
         }
     }
     .trash-can {

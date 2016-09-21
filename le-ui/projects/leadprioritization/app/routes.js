@@ -480,6 +480,26 @@ angular
                 }   
             }
         })
+        .state('home.marketosettings.create', {
+            url: '/create',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_APIKEY';
+                        }
+                    },
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": {
+                    controller: 'ModelsSetupController',
+                    templateUrl: 'app/marketo/views/AddCredentialFormView.html'
+                }   
+            }
+        })
         .state('home.marketosettings.enrichment', {
             url: '/enrichment/{id}',
             params: {
