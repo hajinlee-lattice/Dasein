@@ -7,11 +7,10 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 
-
 public class PropDataFactory {
 
     private static final Log log = LogFactory.getLog(PropDataFactory.class);
-    
+
     public static final String PROPDATA_NAME_KEY = "propdata.name";
 
     public static void configPropData(SelectedConfig config, ModelingParameters parameters) {
@@ -27,7 +26,8 @@ public class PropDataFactory {
             parameters.setDataCloudVersion(propData.getDataCloudVersion());
         }
         parameters.setExcludePropDataColumns(propData.isExcludePropDataColumns());
-        
+        parameters.setExcludePublicDomains(propData.isExcludePublicDomains());
+
         log.info("Successfully configured the propData");
     }
 

@@ -95,6 +95,8 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
     private String dataCloudVersion;
     private String moduleName;
+    private Double crossValidatedMean;
+    private Double crossValidatedStd;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -607,24 +609,26 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedMean() {
-        return getSummaryFieldDoubleValue("CrossValidatedMeanOfModelAccuracy");
+        return crossValidatedMean;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setCrossValidatedMean(Double crossValidatedMean) {
+        this.crossValidatedMean = crossValidatedMean;
     }
 
     @Transient
     @JsonIgnore
     @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedStd() {
-        return getSummaryFieldDoubleValue("CrossValidatedStdOfModelAccuracy");
+        return crossValidatedStd;
     }
 
-    private Double getSummaryFieldDoubleValue(String field) {
-        if (getDetails() == null || getDetails().getPayload() == null) {
-            return null;
-        }
-        String rawModelSummary = getDetails().getPayload();
-        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode std = modelSummaryJson.get(field);
-        return std != null ? std.asDouble() : 0D;
+    @Transient
+    @JsonIgnore
+    public void setCrossValidatedStd(Double crossValidatedStd) {
+        this.crossValidatedStd = crossValidatedStd;
     }
 
     @Transient

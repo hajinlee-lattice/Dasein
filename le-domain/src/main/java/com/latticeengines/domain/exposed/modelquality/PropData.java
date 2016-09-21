@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_PROPDATA", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_PROPDATA", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PropData implements HasName, HasPid, Fact, Dimension {
 
@@ -36,7 +36,7 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @JsonProperty("exclude_propdata_columns")
     @Column(name = "EXCLUDE_PROPDATA_COLUMNS", nullable = true)
     private boolean excludePropDataColumns = false;
-    
+
     @JsonProperty("predefined_selection_name")
     @Column(name = "PREDEFINED_SELECTION_NAME", nullable = true)
     private String predefinedSelectionName;
@@ -44,6 +44,10 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @JsonProperty("data_cloud_version")
     @Column(name = "DATA_CLOUD_VERSION", nullable = false)
     private String dataCloudVersion;
+
+    @JsonProperty("exclude_public_domains")
+    @Column(name = "EXCLUDE_PUBLIC_DOMAINS", nullable = true)
+    private boolean excludePublicDomains;
 
     @Override
     public String getName() {
@@ -84,11 +88,11 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     public String isExcludePropDataColumnsStrValue() {
         return "" + excludePropDataColumns;
     }
-    
+
     public void setExcludePropDataColumns(boolean excludePropDataColumns) {
         this.excludePropDataColumns = excludePropDataColumns;
     }
-    
+
     @MetricTag(tag = "PredefinedSelectionName")
     public String getPredefinedSelectionName() {
         return predefinedSelectionName;
@@ -97,4 +101,14 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     public void setPredefinedSelectionName(String predefinedSelectionName) {
         this.predefinedSelectionName = predefinedSelectionName;
     }
+
+    @MetricTag(tag = "ExcludePublicDomains")
+    public boolean isExcludePublicDomains() {
+        return excludePublicDomains;
+    }
+
+    public void setExcludePublicDomains(boolean excludePublicDomains) {
+        this.excludePublicDomains = excludePublicDomains;
+    }
+
 }

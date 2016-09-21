@@ -192,6 +192,17 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
                     summary.setDataCloudVersion(dataCloudVersion);
                 }
             }
+            JsonNode meanNode = details.get("CrossValidatedMeanOfModelAccuracy");
+            if (meanNode != null) {
+                Double crossValidatedMean = meanNode.asDouble();
+                summary.setCrossValidatedMean(crossValidatedMean);
+            }
+            JsonNode stdNode = details.get("CrossValidatedStdOfModelAccuracy");
+            if (stdNode != null) {
+                Double crossValidatedStd = stdNode.asDouble();
+                summary.setCrossValidatedStd(crossValidatedStd);
+            }
+
         } catch (IOException e) {
             log.error("Failed to parse model details KeyValue", e);
         }

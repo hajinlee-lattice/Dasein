@@ -1,7 +1,9 @@
 package com.latticeengines.modelquality.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -14,12 +16,14 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
+    private static Log log = LogFactory.getLog(AccountMasterModelRunResourceDeploymentTestNG.class);
+
     private String user = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
     private String password = TestFrameworkUtils.GENERAL_PASSWORD;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeMethod(groups = "deployment")
     public void setup() throws Exception {
-        // modelRunEntityMgr.deleteAll();
+        super.cleanupDb();
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
@@ -31,7 +35,9 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
             modelRun.getSelectedConfig().getDataSet().setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
             modelRun.getSelectedConfig().getPropData().setDataCloudVersion("2.0.0");
+            modelRun.getSelectedConfig().getPropData().setExcludePublicDomains(true);
 
+            log.info("Tenant=" + user + " Dataset=" + dataSetName);
             ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
                     mainTestTenant.getId(), user, password, plsDeployedHostPort);
             Assert.assertTrue(response.isSuccess());
@@ -51,7 +57,9 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
             modelRun.getSelectedConfig().getDataSet().setName(dataSetName);
             modelRun.getSelectedConfig().getDataSet().setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
+            modelRun.getSelectedConfig().getPropData().setExcludePublicDomains(true);
 
+            log.info("Tenant=" + user + " Dataset=" + dataSetName);
             ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
                     mainTestTenant.getId(), user, password, plsDeployedHostPort);
             Assert.assertTrue(response.isSuccess());
@@ -67,16 +75,22 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
         return new Object[][] {
-                { "MuleSoftAccountMaster", "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904.csv" }, //
-                { "QlikAccountMaster", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437.csv" }, //
-                { "LatticeAccountMaster", "Lattice_Relaunch_LP3_ModelingLead_OneLeadPerDomain_20160520_161932.csv" }, //
-                { "HootSuiteAccountMaster",
-                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv" }, //
+                { "Mulesoft_doman_derived",
+                        "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904_domain.csv" }, //
+                { "Qlik_doman_derived", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437_domain.csv" }, //
+                { "HootSuite_domain_derived",
+                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631_domain.csv" }, //
+                { "CornerStone_domain_derived", "CornerStone_domain.csv" }, //
+                { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
+                { "Tek_domain_derived", "Tek_domain.csv" }, //
+                { "Tenable_domain", "Tenable_domain.csv" }, //
+                { "bams_domain", "bams_domain.csv" }, //
+
         };
     }
 
     @DataProvider(name = "getDerivedColumnCsvFile")
-    public Object[][] getAccountDerivedColumnCsvFile() {
+    public Object[][] getAccountDerivedColumnCsvFile2() {
         return new Object[][] {
                 { "MuleSoftDerivedColumn", "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904.csv" }, //
                 { "QlikDerivedColumn", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437.csv" }, //
@@ -85,4 +99,22 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
                         "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv" }, //
         };
     }
+
+    @DataProvider(name = "getDerivedColumnCsvFile")
+    public Object[][] getAccountDerivedColumnCsvFile() {
+        return new Object[][] {
+                { "Mulesoft_doman_derived",
+                        "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904_domain.csv" }, //
+                { "Qlik_doman_derived", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437_domain.csv" }, //
+                { "HootSuite_domain_derived",
+                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631_domain.csv" }, //
+                { "CornerStone_domain_derived", "CornerStone_domain.csv" }, //
+                { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
+                { "Tek_domain_derived", "Tek_domain.csv" }, //
+                { "Tenable_domain", "Tenable_domain.csv" }, //
+                { "bams_domain", "bams_domain.csv" }, //
+
+        };
+    }
+
 }
