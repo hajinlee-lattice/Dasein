@@ -198,7 +198,7 @@
     </security:http>
 
     <security:http use-expressions="true"
-                   pattern="/pls/marketocredentials/**"
+                   pattern="/pls/marketo/credentials/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
