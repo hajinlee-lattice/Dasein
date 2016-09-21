@@ -9,7 +9,7 @@ const path      = require('path');
 const exphbs    = require('express-handlebars');
 const request   = require('request');
 const morgan    = require('morgan');
-const fs        = require('fs');
+const fs        = require('graceful-fs');
 const helmet    = require('helmet');
 const compress  = require('compression');
 const chalk     = require('chalk');
@@ -181,7 +181,7 @@ class Server {
         }
     }
 
-    createFileProxy(API_URL, API_PATH, PATH) {
+    createFileProxyBAK(API_URL, API_PATH, PATH) {
         if (API_URL) {
             var API_PATH = API_PATH || '/pls',
                 PATH = PATH || '/pls';
@@ -216,7 +216,7 @@ class Server {
 
     // this is needed so that the browser can download files
     // that need to be hidden behind the Authorization token
-    createFileProxyBAK(API_URL, API_PATH, PATH) {
+    createFileProxy(API_URL, API_PATH, PATH) {
         if (API_URL) {
             var API_PATH = API_PATH || '/pls',
                 PATH = PATH || '/pls';
