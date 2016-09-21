@@ -19,7 +19,8 @@ public enum LatticeFeatureFlag {
     USE_ACCOUNT_MASTER("UseAccountMaster", "Use Account Master"), //
     USE_DNB_RTS_AND_MODELING("UseDnbRtsAndModeling", "User DNB RTS and Modeling"), //
     ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE("EnableLatticeMarketoCredentialPage",
-            "Enable Lattice Marketo Credential Page");
+            "Enable Lattice Marketo Credential Page"), //
+    ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable Data Encryption");
 
     private String name;
     private String documentation;

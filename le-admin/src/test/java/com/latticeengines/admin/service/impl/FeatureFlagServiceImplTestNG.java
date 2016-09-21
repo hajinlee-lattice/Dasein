@@ -89,6 +89,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName());
         Assert.assertNotNull(enableLatticeMarketoCredentialPageFeatureFlag);
 
+        FeatureFlagDefinition enableDataEncryptionFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName());
+        Assert.assertNotNull(enableDataEncryptionFeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -146,6 +150,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableLatticeMarketoCredentialPageFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(enableDataEncryptionFeatureFlag.getConfigurable()
+                && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enableDataEncryptionFeatureFlag.getDisplayName() != null
+                && enableDataEncryptionFeatureFlag.getDocumentation() != null);
 
     }
 
