@@ -42,4 +42,10 @@ angular.module('lp.jobs.modals.cancelmodal', [
         $("#modalContainer").modal('hide');
     };
 
+    $scope.resetImport = function() {
+        ImportStore.ResetAdvancedSettings();
+        $state.go('home.models.import');
+        $("#modalContainer").modal('hide');
+    };
+
 });
