@@ -1,12 +1,13 @@
 angular
 .module('lp.jobs')
-.run(function($timeout, $interval, JobsStore) {
+.run(function($timeout, $interval, $stateParams, JobsStore) {
     $timeout(function() {
         JobsStore.getJobs();
     }, 1000); // FIXME: we wont need this soon, this is for switching tenants fix hack
 
     $interval(function() {
-        JobsStore.getJobs();
+        var modelId = $stateParams.modelId || '';
+        JobsStore.getJobs(null, modelId);
     }, 15 * 1000); // 15 seconds
 })
 .service('JobsStore', function($q, JobsService) {
@@ -64,8 +65,11 @@ angular
                     JobsStore.addJobMap(job.id, job);
                     JobsStore.addJob(job, modelId);
                 }
-
-                deferred.resolve(JobsStore.data.jobs);
+                if(modelId){
+                    deferred.resolve(JobsStore.data.jobs);
+                } else {
+                    deferred.resolve(JobsStore.data.jobs);
+                }
             });
         }
 
