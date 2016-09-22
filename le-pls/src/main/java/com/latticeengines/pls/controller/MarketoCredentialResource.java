@@ -2,8 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
-import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
+import com.latticeengines.domain.exposed.remote.marketo.LeadField;
 import com.latticeengines.pls.service.MarketoCredentialService;
+import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -31,6 +31,9 @@ public class MarketoCredentialResource {
 
     @Autowired
     private MarketoCredentialService marketoCredentialService;
+
+    @Autowired
+    private MarketoSoapService marketoSoapService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Create a marketo credential")
@@ -59,7 +62,8 @@ public class MarketoCredentialResource {
     @ApiOperation(value = "Get marketo credential by id")
     @ResponseBody
     public MarketoCredential findSimplified(@PathVariable String credentialId) {
-        MarketoCredential marketoCredential = marketoCredentialService.findMarketoCredentialById(credentialId);
+        MarketoCredential marketoCredential = marketoCredentialService
+                .findMarketoCredentialById(credentialId);
         marketoCredential.setEnrichment(null);
         return marketoCredential;
     }
@@ -68,11 +72,22 @@ public class MarketoCredentialResource {
     @ApiOperation(value = "Get all marketo credentials")
     @ResponseBody
     public List<MarketoCredential> findAllSimplified() {
-        List<MarketoCredential> marketoCredentials = marketoCredentialService.findAllMarketoCredentials();
+        List<MarketoCredential> marketoCredentials = marketoCredentialService
+                .findAllMarketoCredentials();
         for (MarketoCredential marketoCredential : marketoCredentials) {
             marketoCredential.setEnrichment(null);
         }
         return marketoCredentials;
+    }
+
+    @RequestMapping(value = "/matchfields", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get list of marketo match fields")
+    @ResponseBody
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    public List<LeadField> getMatchFieldForMarketoCredential(
+            @RequestBody MarketoCredential marketoCredential) {
+        return marketoSoapService.getLeadFields(marketoCredential.getSoapEndpoint(),
+                marketoCredential.getSoapUserId(), marketoCredential.getSoapEncryptionKey());
     }
 
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
