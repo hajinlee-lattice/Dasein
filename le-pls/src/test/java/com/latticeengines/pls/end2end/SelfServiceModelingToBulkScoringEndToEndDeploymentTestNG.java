@@ -112,7 +112,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, trainingFileName);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, timeOut = 600000)
+    @Test(groups = "deployment.lp", enabled = true, timeOut = 1200000)
     public void testScoreTrainingDataUsingMR() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
@@ -125,7 +125,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         testScoreMRTrainingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 600000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 1200000)
     public void testScoreTrainingDataUsingRTS() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
                 getRestAPIHostPort(), modelId));
@@ -140,7 +140,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         testScoreRTSTrainingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingRTS", enabled = true, timeOut = 600000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingRTS", enabled = true, timeOut = 1200000)
     public void testScoreTestingDataUsingMR() throws Exception {
         uploadTestingDataFile();
         System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
@@ -155,7 +155,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         testScoreMRTestingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 600000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingDataUsingMR", enabled = true, timeOut = 1200000)
     public void testScoreTestingDataUsingRTS() throws Exception {
         uploadTestingDataFile();
         System.out.println(String.format(
