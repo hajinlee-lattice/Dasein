@@ -460,11 +460,26 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
+                /*
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    */
+                    resolve: {
+                        MarketoCredentials: function($q, MarketoService) {
+                            var deferred = $q.defer();
+
+                            MarketoService.GetMarketoCredentials().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'MarketoCredentialsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/marketo/views/MarketoCredentialsView.html'
                 }   
             }
         })
@@ -483,7 +498,8 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    controller: 'ModelsSetupController',
+                    controller: 'MarketoCredentialSetupController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/AddCredentialFormView.html'
                 }   
             }
