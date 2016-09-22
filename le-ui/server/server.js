@@ -59,7 +59,7 @@ class Server {
         this.setMiddleware();
 
         process.on('uncaughtException', err => {
-            console.log(chalk.red(this.getTimestamp() + ':uncaughtException>'), err);
+            console.log(chalk.red(this.getTimestamp() + ':uncaughtException>')+'\n', err);
             //this.app.close();
         });
         
@@ -117,7 +117,7 @@ class Server {
             });
             
             this.app.use(morgan(
-                map[options.LOGGING_LEVEL], 
+                map[this.options.LOGGING_LEVEL], 
                 { 
                     stream: accessLogStream 
                 }

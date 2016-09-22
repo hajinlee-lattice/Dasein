@@ -140,9 +140,10 @@
     }
 </style>
 <form class="form form-tenant-select" name="tenant-select-form" ng-if="vm.visible">
-    <div class="messaging error-messaging" data-ng-show="vm.showTenantError">
-        <button class="button link-button close-button" data-ng-click="vm.showTenantError = false;"><i class="fa fa-times"></i></button>
-        <span><i class="fa fa-exclamation-circle"></i> {{vm.tenantErrorMessage}}</span>
+    <div class="messaging error-messaging" ng-if="vm.showTenantError">
+        <button id="close-button" type="button" class="close" ng-click="vm.showTenantError = false;">x</button>
+        <ico class="fa fa-warning"></ico>
+        <span>{{vm.tenantErrorMessage}}</span>
     </div>
     <div class="tenant-select-header row">
         <h4 class="tenant-header">{{vm.ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>

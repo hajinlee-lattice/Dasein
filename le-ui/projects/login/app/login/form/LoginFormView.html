@@ -3,8 +3,9 @@
 </div>
 
 <div class="messaging error-messaging" ng-if="vm.showLoginError">
-    <button class="button link-button close-button" ng-click="vm.showLoginError = false;"><i class="fa fa-times"></i></button>
-    <span><i class="fa fa-exclamation-circle"></i> {{vm.loginErrorMessage}}</span>
+    <button id="close-button" type="button" class="close" ng-click="vm.showLoginError = false;">x</button>
+    <ico class="fa fa-warning"></ico>
+    <span>{{vm.loginErrorMessage}}</span>
 </div>
 <form class="form form-signin" name="login-form" ng-if="vm.visible">
     <div class="form-group">
