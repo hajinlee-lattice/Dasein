@@ -5,10 +5,10 @@ import java.util.Map;
 
 public enum TransformationGroup {
 
-    STANDARD("STANDARD"), //
-    NONE("NONE"), //
-    POC("POC"), //
-    ALL("ALL"); //
+    STANDARD("standard"), //
+    NONE("none"), //
+    POC("poc"), //
+    ALL("all"); //
 
     private final String name;
     private static Map<String, TransformationGroup> nameMap;
@@ -28,7 +28,6 @@ public enum TransformationGroup {
         return this.name;
     }
 
-    @Override
     public String toString() {
         return this.name;
     }
