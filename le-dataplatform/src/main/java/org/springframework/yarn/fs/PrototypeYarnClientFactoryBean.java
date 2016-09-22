@@ -18,9 +18,9 @@ public class PrototypeYarnClientFactoryBean extends YarnClientFactoryBean
 
     private ApplicationContext applicationContext;
     
-    public PrototypeYarnClientFactoryBean() {
-        super.setClientClass(CustomYarnClient.class);
-    }
+//    public PrototypeYarnClientFactoryBean() {
+//        super.setClientClass(CustomYarnClient.class);
+//    }
 
     @Override
     public boolean isSingleton() {

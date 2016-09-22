@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +35,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
-    private HashMap<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
+    private Map<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
 
     public ThrottleLongHangingJobs() {
         register(this);

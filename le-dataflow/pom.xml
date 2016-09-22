@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-dataflow</artifactId>
@@ -128,6 +128,7 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-core</artifactId>
             <version>${spring.data.version}</version>
+            <classifier>ledp</classifier>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -153,6 +154,10 @@
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.data</groupId>
+                    <artifactId>spring-yarn-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

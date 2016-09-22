@@ -163,6 +163,7 @@
                                     <excludes>
                                         <exclude>org/springframework/yarn/batch/am/BatchAppmaster*</exclude>
                                         <exclude>org/springframework/yarn/batch/support/YarnJobLauncher*</exclude>
+                                        <!-- exclude>org/springframework/yarn/rpc/YarnRpcAccessor*</exclude-->
                                     </excludes>
                                 </filter>
                             </filters>

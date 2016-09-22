@@ -25,6 +25,8 @@
         yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
         yarn.resourcemanager.webapp.address=${dataplatform.yarn.resourcemanager.webapp.address}
         yarn.nodemanager.remote-app-log-dir=${dataplatform.yarn.nodemanager.remote-app-log-dir}
+        yarn.client.failover-sleep-base-ms=${dataplatform.yarn.client.failover-sleep-base-ms}
+        yarn.client.failover-sleep-max-ms=${dataplatform.yarn.client.failover-sleep-max-ms}
     </yarn:configuration>
       
 </beans>
