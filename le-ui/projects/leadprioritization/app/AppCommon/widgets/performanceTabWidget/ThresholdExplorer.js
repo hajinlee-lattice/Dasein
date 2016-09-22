@@ -87,47 +87,45 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             // Append Lower Area (With Gradient)
             //==================================================
-            svg.append("linearGradient")
-                .attr("id", "lower-gradient")
-                .attr("x1", "0%")
-                .attr("y1", "0%")
-                .attr("x2", "0%")
-                .attr("y2", "100%")
-                .attr("spreadMethod", "pad")
-                .selectAll("stop")
-                .data([{offset: "0%", color: "#6aa9ff", opacity: 0.6},
-                    {offset: "100%", color: "#6aa9ff", opacity: 0.1}])
-                .enter().append("stop")
-                .attr("offset", function(d) { return d.offset; })
-                .attr("stop-color", function(d) { return d.color; })
-                .attr("stop-opacity", function(d) { return d.opacity; });
+            // svg.append("linearGradient")
+            //     .attr("id", "lower-gradient")
+            //     .attr("x1", "0%").attr("y1", "0%")
+            //     .attr("x2", "0%").attr("y2", "100%")
+            //     .attr("spreadMethod", "pad")
+            //     .selectAll("stop")
+            //     .data([{offset: "0%", color: "#6aa9ff", opacity: 0.6},{offset: "100%", color: "#6aa9ff", opacity: 0.1}])
+            //     .enter().append("stop")
+            //     .attr("offset", function(d) { return d.offset; })
+            //     .attr("stop-color", function(d) { return d.color; })
+            //     .attr("stop-opacity", function(d) { return d.opacity; });
 
             svg.append("path")
                 .datum(data)
-                .style("fill", "url(#lower-gradient)")
+                // .style("fill", "url(#lower-gradient)")
+                .style("fill", "rgba(106, 169, 255, 0.3)")
                 .attr("d", lowerArea);
 
             //==================================================
             // Append Upper Area (With Gradient)
             //==================================================
-            svg.append("linearGradient")
-                .attr("id", "upper-gradient")
-                .attr("x1", "0%")
-                .attr("y1", "0%")
-                .attr("x2", "100%")
-                .attr("y2", "100%")
-                .attr("spreadMethod", "pad")
-                .selectAll("stop")
-                .data([{offset: "0%", color: "#f2f4f8", opacity: 1.0},
-                    {offset: "100%", color: "#f2f4f8", opacity: 1.0}])
-                .enter().append("stop")
-                .attr("offset", function(d) { return d.offset; })
-                .attr("stop-color", function(d) { return d.color; })
-                .attr("stop-opacity", function(d) { return d.opacity; });
+            // svg.append("linearGradient")
+            //     .attr("id", "upper-gradient")
+            //     .attr("x1", "0%")
+            //     .attr("y1", "0%")
+            //     .attr("x2", "100%")
+            //     .attr("y2", "100%")
+            //     .attr("spreadMethod", "pad")
+            //     .selectAll("stop")
+            //     .data([{offset: "0%", color: "#f2f4f8", opacity: 1.0},
+            //         {offset: "100%", color: "#f2f4f8", opacity: 1.0}])
+            //     .enter().append("stop")
+            //     .attr("offset", function(d) { return d.offset; })
+            //     .attr("stop-color", function(d) { return d.color; })
+            //     .attr("stop-opacity", function(d) { return d.opacity; });
 
             svg.append("path")
                 .datum(data)
-                .style("fill", "url(#upper-gradient)")
+                .style("fill", "#f2f4f8")
                 .attr("d", upperArea);
 
             //==================================================
