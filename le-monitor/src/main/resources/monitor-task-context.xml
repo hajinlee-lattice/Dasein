@@ -11,7 +11,7 @@
     <task:executor id="monitorExecutor"
                    pool-size="1-4"
                    queue-capacity="1000"
-                   keep-alive="1000"
+                   keep-alive="100"
                    rejection-policy="DISCARD" />
 
 </beans>

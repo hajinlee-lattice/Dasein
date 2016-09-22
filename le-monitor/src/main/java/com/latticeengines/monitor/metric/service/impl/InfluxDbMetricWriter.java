@@ -116,9 +116,29 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
     @Override
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
-                                                            Collection<? extends Measurement<F, D>> measurements) {
+            Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            monitorExecutor.execute(new MetricRunnable<>(db, measurements));
+            boolean needToWrite = false;
+            for (Measurement<F, D> measurement : measurements) {
+                if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
+                    needToWrite = true;
+                    break;
+                }
+            }
+            if (needToWrite) {
+                try {
+                    final BatchPoints batchPoints = generateBatchPoints(db, measurements);
+                    monitorExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            getInfluxDB().write(batchPoints);
+                            log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
+                        }
+                    });
+                } catch (Exception e) {
+                    log.error("Failed to write metric.", e);
+                }
+            }
         } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
             postConstruct();
         }
@@ -227,42 +247,6 @@ public class InfluxDbMetricWriter implements MetricWriter {
             policies.add(policy);
         }
         return policies;
-    }
-
-    private <F extends Fact, D extends Dimension> void executeWrite(MetricDB metricDb,
-                                                                    Collection<? extends Measurement<F, D>> measurements) {
-        boolean needToWrite = false;
-        for (Measurement<F, D> measurement : measurements) {
-            if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
-                needToWrite = true;
-                break;
-            }
-        }
-        if (needToWrite) {
-            try {
-                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-                getInfluxDB().write(batchPoints);
-                log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
-            } catch (Exception e) {
-                log.error("Failed to write metric.", e);
-            }
-        }
-    }
-
-    private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
-
-        private MetricDB metricDb;
-        private Collection<? extends Measurement<F, D>> measurements;
-
-        MetricRunnable(MetricDB metricDb, Collection<? extends Measurement<F, D>> measurements) {
-            this.metricDb = metricDb;
-            this.measurements = measurements;
-        }
-
-        @Override
-        public void run() {
-            executeWrite(metricDb, measurements);
-        }
     }
 
     private JsonNode queryInfluxDb(String query, String dbName) {
