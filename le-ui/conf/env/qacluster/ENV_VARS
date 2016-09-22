@@ -12,4 +12,5 @@ export HTTPS_CRT=/etc/pki/tls/star.lattice.local.crt
 export HTTPS_PASS=Lattice1
 export WHITELIST=${OUTSIDE_TOMCAT}
 export LOGGING=/var/log/ledp
+export LOG_LEVEL=verbose
 export STACK_ENV=${LE_STACK}

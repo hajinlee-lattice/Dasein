@@ -39,6 +39,12 @@ angular
         .state('home', {
             url: '/tenant/:tenantName',
             resolve: {
+                ClientSession: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getClientSession();
+                },
+                Tenant: function(ClientSession) {
+                    return ClientSession.Tenant;
+                },
                 WidgetConfig: function($q, ConfigService) {
                     var deferred = $q.defer();
 
@@ -57,21 +63,14 @@ angular
                     
                     return deferred.promise;
                 },
-                ResourceStrings: function($q, BrowserStorageUtility, ResourceStringsService) {
-                    var deferred = $q.defer(),
-                        session = BrowserStorageUtility.getClientSession();
+                ResourceStrings: function($q, ResourceStringsService, ClientSession) {
+                    var deferred = $q.defer();
 
-                    ResourceStringsService.GetInternalResourceStringsForLocale(session.Locale).then(function(result) {
+                    ResourceStringsService.GetInternalResourceStringsForLocale(ClientSession.Locale).then(function(result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
-                },
-                ClientSession: function(BrowserStorageUtility) {
-                    return BrowserStorageUtility.getClientSession();
-                },
-                Tenant: function(ClientSession) {
-                    return ClientSession.Tenant;
                 }
             },
             views: {
@@ -109,7 +108,7 @@ angular
                     ModelStore.getModels(true).then(function(result) {
                         deferred.resolve(result);
                     });
-                    
+
                     return deferred.promise;
                 }
             },
@@ -453,30 +452,19 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $state) {
-                        $scope.state = $state.current.name;
-                    },
+                    /*
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    // controller: function(urls) {
-                    //     $('#sureshot_iframe_container')
-                    //         .html('<iframe src="' + urls.creds_url + '"></iframe>');
-                    // },
-                    // template: '<div id="sureshot_iframe_container"></div>'
-                    resolve: {
-                        MarketoCredentials: function($q, MarketoService) {
-                            var deferred = $q.defer();
-
-                            MarketoService.GetMarketoCredentials().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
-                    controller: 'ModelsSetupController',
-                    templateUrl: 'app/marketo/views/ModelsSetupView.html'
+                    template: '<div id="sureshot_iframe_container"></div>'
                 }   
             }
         })
@@ -558,9 +546,11 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
-                    controller: function($scope, $state) {
-                        $scope.state = $state.current.name;
-                    },
+                    /*
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    -- ben::bookmark
+                    */
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
@@ -923,7 +913,6 @@ angular
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
-                /*
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -938,13 +927,12 @@ angular
                             }
                         });
                         $scope.selectToggle = function(bool) {
-                            EnrichmentStore.setMetadata('toggle.show.selected', bool);
+                            EnrichmentStore.setMetadata('selectedToggle', bool);
                             EnrichmentStore.setMetadata('current', 1);
                         }
                     },
                     templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
-                */
                 "main@": {
                     resolve: {
                         EnrichmentData: function($q, EnrichmentStore) {

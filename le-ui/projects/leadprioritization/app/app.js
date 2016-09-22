@@ -50,7 +50,12 @@ var mainApp = angular.module('mainApp', [
             
             if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
                 config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
-                config.headers.TenantId = $rootScope.tenantId;
+            }
+
+            var ClientSession = BrowserStorageUtility.getClientSession();
+
+            if (ClientSession && ClientSession.Tenant) {
+                config.headers.TenantId = ClientSession.Tenant.Identifier;
             }
             
             return config;

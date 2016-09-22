@@ -1,8 +1,9 @@
 "use strict";
 
 /*
-            Lattice Engines Express Server
-    See Gruntfile.js to define environment variables
+                Lattice Engines Express Server
+    See Gruntfile.js to define LOCAL environment variables
+    See /conf/env for setting SERVER environment variables
 */
 
 const path      = require('path');
@@ -13,8 +14,8 @@ const fs        = require('graceful-fs');
 const helmet    = require('helmet');
 const compress  = require('compression');
 const chalk     = require('chalk');
-const proxy     = require('express-http-proxy');
 /*
+const proxy     = require('express-http-proxy');
 const session   = require('express-session');
 */
 
@@ -95,8 +96,15 @@ class Server {
         let logDirectory = log_path;
 
         try {
-            var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
+            var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {
+                flags: 'a'
+            });
             
+            var map = {
+                default:':datetime> :method :url :status :response-time ms - :res[content-length]',
+                verbose:':utctime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+            };
+
             morgan.token("datetime", function getDateTime() {
                 const ts = new Date();
                 
@@ -109,14 +117,14 @@ class Server {
             });
             
             this.app.use(morgan(
-                ':utctime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', 
+                map[options.LOGGING_LEVEL], 
                 { 
                     stream: accessLogStream 
                 }
             ));
 
             this.app.use(morgan(
-                ':datetime> :method :url :status :response-time ms - :res[content-length]', 
+                map['default'], 
                 { 
                     skip: function (req, res) { 
                         return res.statusCode < 400
@@ -181,44 +189,11 @@ class Server {
         }
     }
 
-    createFileProxyBAK(API_URL, API_PATH, PATH) {
-        if (API_URL) {
-            var API_PATH = API_PATH || '/pls',
-                PATH = PATH || '/pls';
-
-            console.log(chalk.white('>') + ' FILE PROXY:', API_PATH, ' -> ', API_URL+PATH);
-            
-            this.app.use('/files', proxy(API_URL, {
-                forwardPath: function(req, res) {
-                    return '/pls' + require('url').parse(req.url).path;
-                },
-                decorateRequest: function(proxyReq, originalReq) {
-                    const url = API_URL + PATH + originalReq.url;
-                    
-                    if (originalReq.query) {
-                        if (originalReq.query.Authorization) {
-                            // Since the token was in the URL, +'s got converted to spaces
-                            let token = originalReq.query.Authorization.replace(/ /g,'+');
-                            proxyReq.headers["Authorization"] = token || '';
-                        }
-                        
-                        if (originalReq.query.TenantId) {
-                            let tenant = originalReq.query.TenantId;
-                            proxyReq.headers["TenantId"] = tenant || '';
-                        }
-                    }
-
-                    return proxyReq;
-                }
-            }));
-        }
-    }
-
     // this is needed so that the browser can download files
     // that need to be hidden behind the Authorization token
     createFileProxy(API_URL, API_PATH, PATH) {
         if (API_URL) {
-            var API_PATH = API_PATH || '/pls',
+            var API_PATH = API_PATH || '/files',
                 PATH = PATH || '/pls';
 
             console.log(chalk.white('>') + ' FILE PROXY:', API_PATH, ' -> ', API_URL+PATH);
@@ -336,7 +311,7 @@ class Server {
 
         //if (options.NODE_ENV == 'development') {
         //    console.log(chalk.yellow('> TLS:') + ' Allow Unauthorized in Development Mode')
-        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
         //}
 
         console.log(chalk.white('>') + ' SERVER SETTINGS:');

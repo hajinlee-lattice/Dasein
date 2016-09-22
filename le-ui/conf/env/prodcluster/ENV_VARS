@@ -3,6 +3,7 @@ export API_URL=https://${OUTSIDE_TOMCAT}:8081
 export APICON_URL=https://${INSIDE_TOMCAT}:8073
 export COMPRESSED=true
 export LOGGING=/var/log/ledp
+export LOG_LEVEL=verbose
 export WHITELIST=${OUTSIDE_TOMCAT}
 export HTTP_PORT=false
 export HTTPS_PORT=3000

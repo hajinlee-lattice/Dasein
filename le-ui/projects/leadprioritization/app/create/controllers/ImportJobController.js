@@ -12,18 +12,22 @@ angular.module('lp.create.import.job', [
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
     var REFRESH_PERFORM_CALC_ID; 
-    var TIME_BETWEEN_JOB_REFRESH = 500;
+    var TIME_BETWEEN_JOB_REFRESH = 1000;
 
     getJobStatusFromAppId();
 
     REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppId, TIME_BETWEEN_JOB_REFRESH);
 
     $scope.jobStepsRunningStates = {
-        load_data: false, generate_insights: false, create_global_target_market: false
+        load_data: false, 
+        generate_insights: false, 
+        create_global_target_market: false
     };
 
     $scope.jobStepsCompletedStates = {
-        load_data: false, generate_insights: false, create_global_target_market: false
+        load_data: false, 
+        generate_insights: false, 
+        create_global_target_market: false
     };
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
@@ -91,27 +95,30 @@ angular.module('lp.create.import.job', [
                 $scope.compress_percent = value;
                 $scope.jobStatus = job.jobStatus;
                 initialized = true;
+                updateStatesBasedOnJobStatus(job);
             };
         });
     };
 
     REFRESH_PERFORM_CALC_ID = $interval(performCalc, TIME_BETWEEN_JOB_REFRESH);
 
-    function updateStatesBasedOnJobStatus(jobStatus) {
-        $scope.startTimestamp = jobStatus.startTimestamp;
-        for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
-            $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
-            $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
+    function updateStatesBasedOnJobStatus(job) {
+        console.log('running:', $scope.jobStepsRunningStates)
+        console.log('completed:', $scope.jobStepsCompletedStates)
+        $scope.startTimestamp = job.startTimestamp;
+        for (var i = 0; i < job.stepsCompleted.length; i++) {
+            $scope.jobStepsCompletedStates[job.stepsCompleted[i]] = true;
+            $scope.jobStepsRunningStates[job.stepsCompleted[i]] = false;
         }
 
-        if (jobStatus.jobStatus == "Running") {
-            $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
-            $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
+        if (job.jobStatus == "Running") {
+            $scope.jobStepsRunningStates[job.stepRunning] = true;
+            $scope.jobStepsCompletedStates[job.stepRunning] = false;
         }
 
-        $scope.stepsCompletedTimes = jobStatus.completedTimes;
+        $scope.stepsCompletedTimes = job.completedTimes;
 
-        var stepFailed = jobStatus.stepFailed;
+        var stepFailed = job.stepFailed;
         if (stepFailed) {
             $scope.jobStepsRunningStates[stepFailed] = false;
             $scope.jobStepsCompletedStates[stepFailed] = false;
@@ -122,12 +129,12 @@ angular.module('lp.create.import.job', [
             }
         }
 
-        if (jobStatus.jobStatus == "Completed") {
+        if (job.jobStatus == "Completed") {
             $scope.jobRunning = false;
             $scope.jobCompleted = true;
             $scope.compress_percent = 100;
-            $scope.jobStatus = jobStatus.jobStatus;
-        } else if (jobStatus.jobStatus == "Failed" || jobStatus.jobStatus == "Cancelled") {
+            $scope.jobStatus = job.jobStatus;
+        } else if (job.jobStatus == "Failed" || job.jobStatus == "Cancelled") {
             $scope.jobRunning = false;
             for (var jobState in $scope.jobStepsRunningStates) {
                 $scope.jobStepsRunningStates[jobState] = false;
