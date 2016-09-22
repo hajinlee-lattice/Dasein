@@ -48,6 +48,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class AvroUtils {
 
+    private static final String SQLSERVER_TYPE_INT = "int";
     private static Log log = LogFactory.getLog(AvroUtils.class);
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
@@ -440,6 +441,11 @@ public class AvroUtils {
                 throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
             }
         } else {
+            // we need to handle SQLSERVER type INT separately as it is not
+            // covered by java.sql.Types
+            if (SQLSERVER_TYPE_INT.equalsIgnoreCase(typeStr)) {
+                return Type.INT;
+            }
             throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
         }
     }

@@ -45,8 +45,8 @@ public class AvroUtilsUnitTestNG {
     @SuppressWarnings("deprecation")
     @Test(groups = "unit", dataProvider = "avscFileProvider", enabled = true)
     public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
-        URL url = ClassLoader.getSystemResource(String.format(
-                "com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
+        URL url = ClassLoader.getSystemResource(
+                String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
         File avscFile = new File(url.getFile());
         Schema schema = Schema.parse(avscFile);
         String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", schema);
@@ -73,9 +73,8 @@ public class AvroUtilsUnitTestNG {
     @Test(groups = "unit")
     public void testGetType() throws Exception {
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"Field1\",\"type\":\"int\"},"
-                + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Field1\",\"type\":\"int\"}," + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}]}");
         for (Schema.Field field : schema.getFields()) {
             Assert.assertEquals(AvroUtils.getType(field), Schema.Type.INT);
         }
@@ -87,6 +86,7 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("NVARCHAR(255)"), Type.STRING);
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("date"), Type.LONG);
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("BINARY"), Type.BYTES);
+        Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("INT"), Type.INT);
     }
 
     @Test(groups = "unit")
