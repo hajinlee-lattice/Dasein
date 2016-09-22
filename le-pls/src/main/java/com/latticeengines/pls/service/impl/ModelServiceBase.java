@@ -98,11 +98,11 @@ public abstract class ModelServiceBase implements ModelService {
 //        if (StringUtils.isNotEmpty(modelSummary.getModuleName())){
 //            
 //        }else{
-        String newPivotFilePath = ModelingHdfsUtils.copyPivotMappingFile(yarnConfiguration, modelSummary, targetTenantId);
+        //String newPivotFilePath = ModelingHdfsUtils.copyPivotMappingFile(yarnConfiguration, modelSummary, targetTenantId);
         //}
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newPivotFilePath);
+                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName());
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
         JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"

@@ -104,7 +104,7 @@ public class ModelingHdfsUtils {
     }
 
     public static JsonNode constructNewModelSummary(String contents, String targetTenantId, String cpTrainingTableName,
-            String cpEventTableName, String uuid, String modelDisplayName, String newPivotMappingFilePath) throws IOException {
+            String cpEventTableName, String uuid, String modelDisplayName) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
 
@@ -117,9 +117,6 @@ public class ModelingHdfsUtils {
         ObjectNode provenance = (ObjectNode) json.get("EventTableProvenance");
         provenance.put("TrainingTableName", cpTrainingTableName);
         provenance.put("EventTableName", cpEventTableName);
-        if(StringUtils.isNotEmpty(newPivotMappingFilePath)){
-            provenance.put("Pivot_Artifact_Path", newPivotMappingFilePath);
-        }
         return json;
     }
 
