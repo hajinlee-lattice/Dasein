@@ -186,36 +186,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
-    public void testGetJobReportByUser() throws Exception {
-        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
-
-        Properties containerProperties = createContainerPropertiesForYarnJob();
-
-        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
-                containerProperties);
-        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
-        assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        jobService.killJob(applicationId);
-        status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
-        assertNotNull(status);
-        assertTrue(status.equals(FinalApplicationStatus.KILLED));
-
-        ApplicationReport app = jobService.getJobReportById(applicationId);
-
-        List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
-        int numJobs = reports.size();
-        assertTrue(numJobs > 0);
-
-        applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
-
-        status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
-        assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        reports = jobService.getJobReportByUser(app.getUser());
-        assertTrue(reports.size() > numJobs);
-        jobService.killJob(applicationId);
-    }
-
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testCheckJobName() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
@@ -259,8 +229,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         Properties containerProperties = createContainerPropertiesForYarnJob();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 
-        ApplicationId applicationId = jobService.submitYarnJob("pythonClient", appMasterProperties,
-                containerProperties);
+        ApplicationId applicationId = jobService
+                .submitYarnJob("pythonClient", appMasterProperties, containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -294,8 +264,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        properties.setProperty(
+                MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
+                        versionManager.getCurrentVersionInStack(stackName)));
         mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
         applicationId = jobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
@@ -318,9 +290,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         Map<String, CounterGroup> counterGroups = counters.getAllCounterGroups();
         assertTrue(counterGroups.containsKey(FileSystemCounter.class.getCanonicalName()));
         assertTrue(counterGroups.containsKey(JobCounter.class.getCanonicalName()));
-        assertTrue(counterGroups.get(JobCounter.class.getCanonicalName()).getCounter(JobCounter.TOTAL_LAUNCHED_MAPS.name()).getValue() > 0);
+        assertTrue(counterGroups.get(JobCounter.class.getCanonicalName())
+                .getCounter(JobCounter.TOTAL_LAUNCHED_MAPS.name()).getValue() > 0);
         assertTrue(counterGroups.containsKey(TaskCounter.class.getCanonicalName()));
-        assertTrue(counterGroups.get(TaskCounter.class.getCanonicalName()).getCounter(TaskCounter.MAP_INPUT_RECORDS.name()).getValue() > 0);
+        assertTrue(counterGroups.get(TaskCounter.class.getCanonicalName())
+                .getCounter(TaskCounter.MAP_INPUT_RECORDS.name()).getValue() > 0);
     }
 
     // @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -332,8 +306,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "{Dell}");
         properties.setProperty(MapReduceProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        properties.setProperty(
+                MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
+                        versionManager.getCurrentVersionInStack(stackName)));
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));
         String newDir = ClassLoader.getSystemResource(
