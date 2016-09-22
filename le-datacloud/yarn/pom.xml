@@ -24,18 +24,6 @@
             <artifactId>le-datacloud-match</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-swlib</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-propdata</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
 </project>
