@@ -28,14 +28,14 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
         });
     };
 })
-.controller('CopyModelToTenantModalController', function ($scope, $rootScope, $stateParams, ResourceUtility, NavUtility, ModelService, CopyModelToTenantModal) {
+.controller('CopyModelToTenantModalController', function ($scope, $rootScope, $stateParams, 
+    ResourceUtility, NavUtility, ModelService, CopyModelToTenantModal, BrowserStorageUtility) {
     var vm = this;
     //angular.extend(vm, {});
     $scope.vm = vm;
 
     vm.ResourceUtility = ResourceUtility;
-
-    vm.asTenantName = $stateParams.tenantName;
+    vm.asTenantName = $stateParams.tenantName || BrowserStorageUtility.getClientSession().Tenant.DisplayName;
     vm.current_tenant = {};
     vm.current_model = $scope.model;
     vm.copying = false;
@@ -45,7 +45,7 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
         copied: false,
         error: false
     }
-
+    
     _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
     vm.tenants = _tenants.filter(function(o) { 
         return o.DisplayName !== vm.asTenantName; 
