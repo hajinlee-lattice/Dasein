@@ -19,6 +19,7 @@ const commonOptions = {
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || false,
     LOGGING:    process.env.LOGGING     || './server/log',
+    LOG_LEVEL:  process.env.LOG_LEVEL   || 'verbose',
     STACK_ENV:  process.env.STACK_ENV   || 'none',
     TIMESTAMP:  (ts.getMonth()+1)+'/'+ts.getDate()+'/'+ts.getFullYear()+' '+
                 ts.getHours()+':'+ts.getMinutes()+':'+ts.getSeconds(),
