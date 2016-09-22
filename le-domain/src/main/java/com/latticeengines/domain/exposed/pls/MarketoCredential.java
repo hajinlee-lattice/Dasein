@@ -21,7 +21,7 @@ public class MarketoCredential extends Credential {
 
     private String soapEndpoint;
     private String soapUserId;
-    private String soapEncrytionKey;
+    private String soapEncryptionKey;
     private String restEndpoint;
     private String restIdentityEnpoint;
     private String restClientId;
@@ -48,14 +48,14 @@ public class MarketoCredential extends Credential {
         this.soapUserId = soapUserId;
     }
 
-    @JsonProperty("soap_encrytion_key")
+    @JsonProperty("soap_encryption_key")
     @Column(name = "SOAP_ENCRYTION_KEY", nullable = false)
-    public String getSoapEncrytionKey() {
-        return soapEncrytionKey;
+    public String getSoapEncryptionKey() {
+        return soapEncryptionKey;
     }
 
-    public void setSoapEncrytionKey(String soapEncrytionKey) {
-        this.soapEncrytionKey = soapEncrytionKey;
+    public void setSoapEncryptionKey(String soapEncryptionKey) {
+        this.soapEncryptionKey = soapEncryptionKey;
     }
 
     @JsonProperty("rest_endpoint")

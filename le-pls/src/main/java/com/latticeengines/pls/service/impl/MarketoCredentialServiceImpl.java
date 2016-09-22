@@ -83,7 +83,7 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
         try {
             soapValidationResult = marketoSoapService.validateMarketoSoapCredentials(
                     marketoCredential.getSoapEndpoint(), marketoCredential.getSoapUserId(),
-                    marketoCredential.getSoapEncrytionKey());
+                    marketoCredential.getSoapEncryptionKey());
         } catch (LedpException e) {
             throw new LedpException(LedpCode.LEDP_18117, new String[] { e.getMessage() });
         }

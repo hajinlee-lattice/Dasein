@@ -105,7 +105,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         marketoCredential.setName(NAME);
         marketoCredential.setSoapEndpoint(SOAP_ENDPOINT);
         marketoCredential.setSoapUserId(SOAP_USER_ID);
-        marketoCredential.setSoapEncrytionKey(SOAP_ENCRYPTION_KEY);
+        marketoCredential.setSoapEncryptionKey(SOAP_ENCRYPTION_KEY);
         marketoCredential.setRestEndpoint(REST_ENDPOINT);
         marketoCredential.setRestIdentityEnpoint(REST_IDENTITY_ENDPOINT);
         marketoCredential.setRestClientId(REST_CLIENT_ID);
@@ -120,7 +120,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getName(), NAME);
         assertEquals(marketoCredential1.getSoapEndpoint(), SOAP_ENDPOINT);
         assertEquals(marketoCredential1.getSoapUserId(), SOAP_USER_ID);
-        assertEquals(marketoCredential1.getSoapEncrytionKey(), SOAP_ENCRYPTION_KEY);
+        assertEquals(marketoCredential1.getSoapEncryptionKey(), SOAP_ENCRYPTION_KEY);
         assertEquals(marketoCredential1.getRestEndpoint(), REST_ENDPOINT);
         assertEquals(marketoCredential1.getRestIdentityEnpoint(), REST_IDENTITY_ENDPOINT);
         assertEquals(marketoCredential1.getRestClientId(), REST_CLIENT_ID);
@@ -138,7 +138,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         marketoCredential.setName(NAME_1);
         marketoCredential.setSoapEndpoint(SOAP_ENDPOINT);
         marketoCredential.setSoapUserId(SOAP_USER_ID);
-        marketoCredential.setSoapEncrytionKey(SOAP_ENCRYPTION_KEY);
+        marketoCredential.setSoapEncryptionKey(SOAP_ENCRYPTION_KEY);
         marketoCredential.setRestEndpoint(REST_ENDPOINT);
         marketoCredential.setRestIdentityEnpoint(REST_IDENTITY_ENDPOINT);
         marketoCredential.setRestClientId(REST_CLIENT_ID);
@@ -160,7 +160,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         marketoCredential.setName(NAME);
         marketoCredential.setSoapEndpoint(SOAP_ENDPOINT);
         marketoCredential.setSoapUserId(SOAP_USER_ID);
-        marketoCredential.setSoapEncrytionKey(SOAP_ENCRYPTION_KEY);
+        marketoCredential.setSoapEncryptionKey(SOAP_ENCRYPTION_KEY);
         marketoCredential.setRestEndpoint(REST_ENDPOINT);
         marketoCredential.setRestIdentityEnpoint(REST_IDENTITY_ENDPOINT);
         marketoCredential.setRestClientId(REST_CLIENT_ID);
@@ -287,8 +287,8 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getRestClientSecret(),
                 marketoCredential.getRestClientSecret());
         assertEquals(marketoCredential1.getRestEndpoint(), marketoCredential.getRestEndpoint());
-        assertEquals(marketoCredential1.getSoapEncrytionKey(),
-                marketoCredential.getSoapEncrytionKey());
+        assertEquals(marketoCredential1.getSoapEncryptionKey(),
+                marketoCredential.getSoapEncryptionKey());
         assertEquals(marketoCredential1.getSoapEndpoint(), marketoCredential.getSoapEndpoint());
         assertEquals(marketoCredential1.getSoapUserId(), marketoCredential.getSoapUserId());
         assertEquals(marketoCredential1.getEnrichment().getPid(),
