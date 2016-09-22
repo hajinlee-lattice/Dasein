@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.monitor.metric.service.MetricWriter;
 
 @Component("splunkLogMetricWriter")
@@ -51,6 +52,17 @@ public class SplunkLogMetricWriter implements MetricWriter {
         }
     }
 
+    private <F extends Fact, D extends Dimension> void writeInternal(MetricDB db,
+                                                                     Collection<? extends Measurement<F, D>> measurements) {
+        if (enabled) {
+            for (Measurement<F, D> measurement : measurements) {
+                if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
+                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement));
+                }
+            }
+        }
+    }
+
     @Override
     public void disable() {
         if (enabled) {
@@ -71,14 +83,13 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
         @Override
         public void run() {
-            write(metricDb, measurements);
+            writeInternal(metricDb, measurements);
         }
     }
 
     private static String getHostName() {
         try {
-            InetAddress addr;
-            addr = InetAddress.getLocalHost();
+            InetAddress addr = InetAddress.getLocalHost();
             return addr.getHostName();
         } catch (UnknownHostException ex) {
             log.error("Hostname can not be resolved");
