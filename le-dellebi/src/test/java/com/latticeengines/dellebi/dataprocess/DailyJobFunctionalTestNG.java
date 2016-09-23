@@ -66,9 +66,6 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
         Configuration configuration = new Configuration();
         HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
-
-        FileUtils.deleteDirectory(new File(localInboxPath));
-        FileUtils.forceMkdir(new File(localInboxPath));
     }
 
     @Test(groups = "functional", dataProvider = "fileDataProvider")
