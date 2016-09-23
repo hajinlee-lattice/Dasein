@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -83,6 +85,9 @@ public class ModelResource {
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
+    @Autowired
+    private SourceFileEntityMgr sourceFileEntityMgr;
+
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microserviceEndpoint;
 
@@ -114,6 +119,17 @@ public class ModelResource {
 
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(parameters
                 .getSourceModelSummaryId());
+
+        SourceFile sourceFile = sourceFileEntityMgr.findByTableName(modelSummary.getTrainingTableName());
+        if (sourceFile != null) {
+            sourceFile.setPid(null);
+            sourceFile.setTableName(clone.getName());
+            sourceFile.setName("file_" + clone.getName());
+            sourceFileEntityMgr.create(sourceFile);
+        } else {
+            log.warn("Unable to find source file for model summary:" + modelSummary.getName());
+        }
+
         Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
                 modelSummary.getEventTableName());
         List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
