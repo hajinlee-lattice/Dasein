@@ -1,6 +1,8 @@
 import argparse
 import boto3
+import sys
 import time
+
 
 def main():
     args = parse_args()
@@ -41,6 +43,8 @@ def find_service(client, cluster, service):
             print "Found ecs service " + s
             return cluster_arn, s
 
+    sys.stdout.flush()
+
     raise Exception("Cannot find the ecs service named " + service)
 
 
@@ -51,6 +55,7 @@ def count_tasks_in_service(client, cluster, service):
 
 def update_tasks_count(client, cluster, service, target_count):
     print "Changing task count to %d" % target_count
+    sys.stdout.flush()
     client.update_service(cluster=cluster, service=service, desiredCount=target_count)
     count = count_tasks_in_service(client, cluster, service)
     t1 = time.clock()
