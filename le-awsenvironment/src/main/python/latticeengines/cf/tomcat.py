@@ -72,6 +72,8 @@ def tomcat_task(profile_vars):
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
+    task.add_volume(ledp)
+    task.add_volume(scoringcache)
     return task
 
 def provision_cli(args):
