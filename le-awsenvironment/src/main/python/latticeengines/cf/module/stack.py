@@ -122,14 +122,12 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, extra_elbs=(), use_external_elb=True, use_asgroup=True, instances=1, ips=()):
+    def __init__(self, description, use_asgroup=True, instances=1, ips=()):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
-        self._elbs = [ PARAM_ELB_NAME ] if use_external_elb else []
-        self._elbs += list(extra_elbs)
 
         if use_asgroup:
-            self._ecscluster, self._asgroup = self._construct(self._elbs)
+            self._ecscluster, self._asgroup = self._construct()
         else:
             self._asgroup = None
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, ips=ips)
@@ -172,13 +170,13 @@ class ECSStack(Stack):
         self.add_resources(ec2s)
         return ec2s
 
-    def _construct(self, elbs):
+    def _construct(self):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        asgroup = self._create_asgroup(ecscluster, elbs, PARAM_ECS_INSTANCE_PROFILE)
+        asgroup = self._create_asgroup(ecscluster, PARAM_ECS_INSTANCE_PROFILE)
         return ecscluster, asgroup
 
-    def _create_asgroup(self, ecscluster, elbs, instance_profile):
+    def _create_asgroup(self, ecscluster, instance_profile):
         assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
 
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
@@ -187,7 +185,7 @@ class ECSStack(Stack):
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)
-        asgroup.attach_elbs(elbs)
+        asgroup.attach_tgrp(PARAM_TARGET_GROUP)
         self.add_resources([asgroup, launchconfig])
         return asgroup
 
@@ -278,7 +276,7 @@ class ECSStack(Stack):
         }
 
     @staticmethod
-    def provision(environment, s3cfpath, stackname, elb, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
+    def provision(environment, s3cfpath, stackname, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
         if not elb_not_busy(elb):
             return
 
@@ -307,7 +305,7 @@ class ECSStack(Stack):
             PARAM_INSTANCE_TYPE.config(instance_type),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
-            PARAM_ELB_NAME.config(elb),
+            PARAM_TARGET_GROUP.config(tgrp),
             PARAM_CAPACITY.config(str(init_cap)),
             PARAM_MAX_CAPACITY.config(str(max_cap))
         ]

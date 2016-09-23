@@ -77,10 +77,10 @@ def tomcat_task(profile_vars):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.elb, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
+    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
 
 
-def provision(environment, app, stackname, elb, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
+def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -95,7 +95,9 @@ def provision(environment, app, stackname, elb, profile, instance_type, tag="lat
     extra_params.append(PARAM_DOCKER_IMAGE.config(app))
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
 
-    ECSStack.provision(environment, s3_path(stackname), stackname, elb, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
+    tgrp_arn = find_tgrp_arn(tgrp)
+
+    ECSStack.provision(environment, s3_path(stackname), stackname, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
 def teardown_cli(args):
     teardown(args.stackname)
@@ -129,6 +131,17 @@ def parse_profile(profile, profile_vars):
                         params.append(profile_vars[key].config(value))
 
     return params
+
+def find_tgrp_arn(name):
+    client = boto3.client('elbv2')
+    response = client.describe_target_groups()
+    for tgrp in response['TargetGroups']:
+        if tgrp['TargetGroupName'] == name:
+            tgrp_arn = tgrp['TargetGroupArn']
+            print "Found target group " + tgrp_arn
+            return tgrp_arn
+    raise Exception("Cannot find target group named "+ name)
+
 
 def update_xmx_by_type(catalina_opts, instance_type):
     max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 300
@@ -165,7 +178,7 @@ def parse_args():
     parser1.add_argument('-a', dest='app', type=str, required=True, help='application name (same as docker image name)')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
-    parser1.add_argument('-b', dest='elb', type=str, required=True, help='name of the elastic load balancer')
+    parser1.add_argument('-g', dest='tgrp', type=str, required=True, help='name of the target group for load balancer')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
     parser1.add_argument('--catalina-opts', dest='copts', type=str, default='', help='CATALINA_OPTS')

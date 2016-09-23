@@ -65,6 +65,19 @@ class AutoScalingGroup(Resource):
             self.attache_elb(elb)
         return self
 
+    def attach_tgrp(self, targetgroup):
+        assert isinstance(targetgroup, ArnParameter)
+        if "TargetGroupARNs" not in self._template["Properties"]:
+            self._template["Properties"]["TargetGroupARNs"] = []
+        self._template["Properties"]["TargetGroupARNs"].append(targetgroup.ref())
+        return self
+
+    def attach_tgrps(self, tgrps):
+        for tgrp in tgrps:
+            self.attach_tgrp(tgrp)
+        return self
+
+
 class LaunchConfiguration(Resource):
     def __init__(self, logicalId, instance_type_ref="InstanceType"):
         Resource.__init__(self, logicalId)
