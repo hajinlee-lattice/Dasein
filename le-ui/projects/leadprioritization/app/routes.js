@@ -452,6 +452,9 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
                     /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
@@ -485,6 +488,10 @@ angular
         })
         .state('home.marketosettings.create', {
             url: '/create',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings > Create New Marketo Credential'
+            },
             views: {
                 "summary@": {
                     resolve: { 

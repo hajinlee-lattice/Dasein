@@ -1,6 +1,7 @@
 angular.module('lp.marketo', [
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.core.utilities.NavUtility'
 ])
 .controller('MarketoCredentialSetupController', ['$scope', '$state', '$stateParams', 'BrowserStorageUtility', 'ResourceUtility', 'MarketoService',
 	function($scope, $state, $stateParams, BrowserStorageUtility, ResourceUtility, MarketoService){
@@ -33,25 +34,40 @@ angular.module('lp.marketo', [
 		};
 
 		MarketoService.CreateMarketoCredential(credential);
+
+		$state.go('home.marketosettings.apikey');
+
 	};
 
-	// $scope.editCredentialClick = function($event){
-		
-	// }
-
-	// $scope.setupCredentialClick = function($event){
-		
-	// }
-
-	// $scope.deleteCredentialClick = function($event){
-
-	// }
+	vm.cancelCredentialCreate = function(){
+		$state.go('home.marketosettings.apikey');		
+	};
 	
 }])
 .controller('MarketoCredentialsController', ['MarketoCredentials', function(MarketoCredentials) {
     var vm = this;
 
     angular.extend(vm, {
-		credentials: MarketoCredentials
+		credentials: MarketoCredentials,
+		credentialIsSetup: false
     });
+
+    angular.forEach(vm.credentials, function(value, key){
+		if(value.enrichment.marketo_match_fields[0].marketoFieldName != null){
+			vm.credentialIsSetup = true;
+		};
+   	});
+
+    vm.setupCredentialClick = function($event){
+		$rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
+	}
+
+	vm.editCredentialClick = function($event){
+		console.log("edit credential");	
+	}
+
+	vm.deleteCredentialClick = function($event){
+		MarketoService.DeleteMarketoCredential(credentials.id);
+	}
+
 }]);
