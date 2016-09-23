@@ -7,7 +7,7 @@ import boto3
 import os
 
 from .module.ec2 import ec2_defn
-from .module.ecs import ContainerDefinition, TaskDefinition
+from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 
@@ -64,6 +64,11 @@ def tomcat_task(profile_vars):
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
+
+    ledp = Volume("ledp", "/etc/ledp")
+    scoringcache = Volume("scoringcache", "/var/cache/scoringapi")
+
+    container = container.mount("/etc/ledp", ledp).mount("/var/cache/scoringapi", scoringcache)
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)

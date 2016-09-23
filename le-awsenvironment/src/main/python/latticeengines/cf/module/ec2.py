@@ -73,6 +73,15 @@ def ecs_metadata(ec2, ecscluster):
                             "/etc/init.d/newrelic-sysmond start"
                         ] ] }
                     },
+                    "03_le_dirs" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "mkdir -p /etc/ledp",
+                            "chmod 777 /etc/ledp",
+                            "mkdir -p /var/cache/scoringapi",
+                            "chmod 777 /var/cache/scoringapi"
+                        ] ] }
+                    },
                     "10_add_instance_to_cluster" : {
                         "command" : { "Fn::Join": [ "", [
                             "#!/bin/bash\n",

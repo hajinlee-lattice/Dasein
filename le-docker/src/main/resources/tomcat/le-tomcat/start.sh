@@ -3,8 +3,12 @@
 export CATALINA_HOME=/usr/local/tomcat
 export JAVA_HOME=/usr/lib/jvm/java-8-oracle
 
-echo LE_ENVIRONMENT=${LE_ENVIRONMENT}
-export LE_PROPDIR=/etc/ledp/${LE_ENVIRONMENT}
+if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
+    echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
+    cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
+fi
+
+export LE_PROPDIR=/etc/ledp
 
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"
