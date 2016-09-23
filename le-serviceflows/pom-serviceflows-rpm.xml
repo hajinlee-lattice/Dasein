@@ -33,7 +33,7 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp</directory>
+                            <directory>/tmp/swlib</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
