@@ -68,9 +68,10 @@
                     </ul>
                     <h4>Filter</h4>
                     <ul class="filters">
-                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-checked="vm.metadata.toggle.show.selecte"d /> <label for="enabled">Enabled only</label></li>
+                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
                         <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
                         <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
+                        <li><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-checked="vm.metadata.toggle.show.internal" /> <label for="enabled">Include Internal Attributes</label></li>
                     </ul>
                     <h4>Download Attributes</h4>
                     <ul class="actions">
@@ -101,7 +102,7 @@
                     | filter: { 
                                 'Category': vm.category || '', 
                                 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
-                                'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false) 
+                                'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
                                 })) 
                     | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                     | limitTo: vm.pagesize" 
@@ -137,7 +138,10 @@
                         </div>
                     </li>
                     <li ng-show="!filteredList.length">
-                      <h2>{{vm.label.no_results}}</h2>
+                        <div ng-show="!vm.enrichments_loaded">
+                            <div class="loader"> </div>
+                        </div>       
+                        <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                     </li>
                 </ul>
                 <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">

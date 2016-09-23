@@ -101,7 +101,6 @@ angular.module('mainApp.models.leadenrichment', [
 
     vm.init = function() {
         EnrichmentService.getSelectedCount().then(function(response){
-            console.log(response.data);
             if(response.data === 0){
                 $scope.noEnrichmentsSelected = true;
             }

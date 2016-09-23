@@ -2,8 +2,8 @@
 angular.module('lp.enrichment.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('EnrichmentController', function($scope, $filter, $timeout, $window, $document, BrowserStorageUtility,
-    EnrichmentStore, EnrichmentService, EnrichmentData, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+.controller('EnrichmentController', function($scope, $filter, $timeout, $interval, $window, $document, $q, BrowserStorageUtility,
+    EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this,
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
@@ -30,6 +30,7 @@ angular.module('lp.enrichment.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
+        enrichments_loaded: false,
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -43,10 +44,30 @@ angular.module('lp.enrichment.leadenrichment', [
         initialized: false,
         status_alert: {},
         enrichments: [],
+        subcategories: [],
+        categories: [],
         enable_grid: true,
         view: 'list'
     });
 
+    var getEnrichmentData = function(opts) {
+        var deferred = $q.defer();
+        EnrichmentStore.getEnrichments(opts).then(function(result) {
+            if (result != null && result.status === 200) {
+                vm.enrichments_loaded = true;
+                vm.enrichments = result.data;
+            }
+        });
+    }
+
+    var getEnrichmentSubcategories = function(category) {
+        if(category) {
+            EnrichmentStore.getSubcategories(category).then(function(result) {
+                vm.subcategories[category] = result.data;
+            });
+        }
+    }
+    
     vm.changeCategory = function(opts){
         var opts = opts || {},
             category = opts.category || vm.categoryOption || '',
@@ -99,6 +120,7 @@ angular.module('lp.enrichment.leadenrichment', [
             vm.selectDisabled = 1;
         }
     }
+
     var status_timer;
     vm.statusMessage = function(message, opts, callback) {
         var opts = opts || {},
@@ -193,7 +215,7 @@ angular.module('lp.enrichment.leadenrichment', [
 
                 if(subcategories.length) {
                     target.unbind('click');
-                    target.click(function(){
+                    var open_subcategory = function(){
                         var add = true,
                             subcategories_width = subcategories.outerWidth(),
                             subcategories_top = parent.find('h4').first().outerHeight();
@@ -206,7 +228,15 @@ angular.module('lp.enrichment.leadenrichment', [
                             subcategories.siblings('.category').find('.subcategory-toggle').addClass('show-subcategory');
                             subcategories.addClass('show-subcategory').css({left: -(subcategories_width), top: -(subcategories_top)});
                         } 
+                    }
+                    target.on('click', function(){
+                        open_subcategory();
                     });
+                    /*
+                    target.on('mouseover', function(){
+                        open_subcategory();
+                    });
+                    */
                 }
             });
 
@@ -271,11 +301,12 @@ angular.module('lp.enrichment.leadenrichment', [
 
     vm.init = function() {
         _resized();
-        vm.enrichments = EnrichmentData.data;
+        getEnrichmentData({max: 50});
         vm.categories = EnrichmentCategories.data;
-        vm.subcategories = {};
-        vm.subcategories['Technology Profile'] = [1,2,3,4,5,6,7];
-        vm.subcategories['Website Profile'] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+        _.each(vm.categories, function(value, key){
+            var subcategory = getEnrichmentSubcategories(value);
+        });
+
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
         vm.statusMessageBox = angular.element('.status-alert');

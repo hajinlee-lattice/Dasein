@@ -3,6 +3,7 @@ angular.module('lp.enrichment.leadenrichment')
     var EnrichmentStore = this;
     this.enrichments = null;
     this.categories = null;
+    this.subcategories = null;
     this.selectedCount = null;
     this.premiumSelectMaximum = null;
     this.metadata = {
@@ -18,27 +19,37 @@ angular.module('lp.enrichment.leadenrichment')
         }
     };
 
+    var getObj = function(path, obj) {
+        return path.split('.').reduce(function(obj, i) {
+            return obj[i];
+        }, obj);
+    }
+
+    var setObj = function (path, value, scope) {
+        var levels = path.split('.'),
+            max_level = levels.length - 1,
+            target = scope;
+
+        levels.some(function (level, i) {
+            if (typeof level === 'undefined') {
+                return true;
+            }
+            if (i === max_level) {
+                target[level] = value;
+            } else {
+                var obj = target[level] || {};
+                target[level] = obj;
+                  target = obj;
+            }
+        });
+    }
+
     this.getMetadata = function(name) {
-        return this.metadata[name];
+        return getObj(name, this.metadata);
     }
 
     this.setMetadata = function(name, value) {
-        function assignProperty(obj, path, value) {
-            var props = path.split(".")
-            , i = 0
-            , prop;
-
-            for(; i < props.length - 1; i++) {
-                prop = props[i];
-                obj = obj[prop];
-            }
-            obj[props[i]] = value;
-        }
-        if(name.includes('.')) {
-            return assignProperty(this.metadata, name, value);
-        } else {
-            return this.metadata[name] = value;
-        }
+        setObj(name, value, this.metadata);
     }
 
     this.getPremiumSelectMaximum = function(){
@@ -75,16 +86,29 @@ angular.module('lp.enrichment.leadenrichment')
         this.categories = item;
     }
 
-    this.getEnrichments = function(){
+    this.getSubcategories = function(category){
         var deferred = $q.defer();
-        if (this.enrichments) {
-            deferred.resolve(this.enrichments);
+        if (this.subcategories) {
+            deferred.resolve(this.categories);
         } else {
-            EnrichmentService.getEnrichments().then(function(response){
-                EnrichmentStore.setEnrichments(response);
+            EnrichmentService.getSubcategories(category).then(function(response){
+                EnrichmentStore.setSubcategories(response);
                 deferred.resolve(response);
             });
         }
+        return deferred.promise;
+    }
+
+    this.setSubcategories = function(item){
+        this.subcategories = item;
+    }
+
+    this.getEnrichments = function(opts){
+        var deferred = $q.defer();
+        EnrichmentService.getEnrichments(opts).then(function(response){
+            EnrichmentStore.setEnrichments(response);
+            deferred.resolve(response);
+        });
         return deferred.promise;
     }
 
@@ -140,11 +164,32 @@ angular.module('lp.enrichment.leadenrichment')
         return deferred.promise;
     }
 
-    this.getEnrichments = function(){
+    this.getSubcategories = function(category){
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead'
+            url: '/pls/enrichment/lead/subcategories',
+            params: {
+                category: category
+            }
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
+    this.getEnrichments = function(opts){
+        var deferred = $q.defer();
+        var opts = opts || {},
+            offset = opts.offset || 0,
+            max = opts.max || 20;
+        $http({
+            method: 'get',
+            url: '/pls/enrichment/lead',
+            params: {
+                offset: offset,
+                max: max
+            }
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -158,7 +203,7 @@ angular.module('lp.enrichment.leadenrichment')
             url: '/pls/enrichment/lead',
             data: data
         }).then(function(response){
-            deferred.resolve(response);
+            deferred.resolve(response.data);
         });
         return deferred.promise;
     }

@@ -1,10 +1,11 @@
 angular
 .module('lp.marketo')
 .service('MarketoService', function($http, $q, $state) {
-    this.GetMarketoCredentials = function() {
+    this.GetMarketoCredentials = function(id) {
         var deferred = $q.defer();
         var result;
-        var url = '/pls/marketo/credentials/';
+        var id = id || '';
+        var url = '/pls/marketo/credentials/' + id;
 
         $http({
             method: 'GET',

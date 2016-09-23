@@ -531,19 +531,21 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        EnrichmentData: function($q, EnrichmentStore) {
+                        EnrichmentData: function($q, $stateParams, EnrichmentStore) {
                             var deferred = $q.defer();
+                            var id = $stateParams.id;
 
-                            EnrichmentStore.getEnrichments().then(function(result) {
+                            EnrichmentStore.getEnrichments(id).then(function(result) {
                                 deferred.resolve(result);
                             });
 
                             return deferred.promise;
                         },
-                        MarketoCredentials: function($q, MarketoService) {
+                        MarketoCredentialsData: function($q, $stateParams, MarketoService) {
                             var deferred = $q.defer();
+                            var id = '';//$stateParams.id;
 
-                            MarketoService.GetMarketoCredentials().then(function(result) {
+                            MarketoService.GetMarketoCredentials(id).then(function(result) {
                                 deferred.resolve(result);
                             });
 
@@ -950,7 +952,7 @@ angular
                             }
                         });
                         $scope.selectToggle = function(bool) {
-                            EnrichmentStore.setMetadata('selectedToggle', bool);
+                            EnrichmentStore.setMetadata('toggle.show.selected', bool);
                             EnrichmentStore.setMetadata('current', 1);
                         }
                     },
@@ -958,15 +960,6 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        EnrichmentData: function($q, EnrichmentStore) {
-                            var deferred = $q.defer();
-
-                            EnrichmentStore.getEnrichments().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        },
                         EnrichmentCategories: function($q, EnrichmentStore) {
                             var deferred = $q.defer();
 
