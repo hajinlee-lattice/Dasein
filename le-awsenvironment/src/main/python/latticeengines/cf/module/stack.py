@@ -277,8 +277,8 @@ class ECSStack(Stack):
 
     @staticmethod
     def provision(environment, s3cfpath, stackname, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
-        if not elb_not_busy(elb):
-            return
+        #if not elb_not_busy(elb):
+        #    return
 
         config = AwsEnvironment(environment)
         client = boto3.client('cloudformation')
