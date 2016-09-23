@@ -16,14 +16,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -47,7 +44,6 @@ import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
@@ -57,14 +53,8 @@ import com.latticeengines.scoringapi.transform.RecordTransformer;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 @Component("scoreRequestProcessor")
-public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
+public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implements ScoreRequestProcessor {
     private static final Log log = LogFactory.getLog(ScoreRequestProcessorImpl.class);
-
-    @Autowired
-    private HttpStopWatch httpStopWatch;
-
-    @Autowired
-    private Matcher matcher;
 
     @Autowired
     private ModelRetriever modelRetriever;
@@ -76,15 +66,10 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private Warnings warnings;
 
     @Autowired
-    private RequestInfo requestInfo;
-
-    @Autowired
     private List<ModelJsonTypeHandler> modelJsonTypeHandlers;
 
     @Autowired
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
-
-    private DateTimeFormatter timestampFormatter = ISODateTimeFormat.dateTime();
 
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
@@ -294,17 +279,6 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         Map<RecordModelTuple, Map<String, Object>> map = new HashMap<>();
         for (RecordModelTuple tuple : partiallyOrderedBadRecordList) {
             map.put(tuple, null);
-        }
-        return map;
-    }
-
-    private Map<String, Object> extractMap(Map<String, Map<String, Object>> matchedRecordEnrichmentMap, String key) {
-        Map<String, Object> map = new HashMap<>();
-        if (matchedRecordEnrichmentMap.get(key) != null) {
-            Map<String, Object> dataMap = matchedRecordEnrichmentMap.get(key);
-            if (dataMap != null) {
-                map = dataMap;
-            }
         }
         return map;
     }
@@ -674,13 +648,6 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
         }
         return value;
-    }
-
-    private void split(String key) {
-        httpStopWatch.split(key);
-        if (log.isInfoEnabled()) {
-            log.info(key);
-        }
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(

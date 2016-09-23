@@ -2,13 +2,11 @@ package com.latticeengines.domain.exposed.scoringapi;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ScoreResponse {
+public class ScoreResponse extends BaseResponse {
     @JsonProperty("id")
     @ApiModelProperty(value = "Record ID", required = true)
     private String id = "";
@@ -24,13 +22,6 @@ public class ScoreResponse {
     @JsonProperty("enrichmentAttributeValues")
     @ApiModelProperty(value = "Enrichment attribute values")
     private Map<String, Object> enrichmentAttributeValues;
-
-    @JsonProperty("warnings")
-    private List<Warning> warnings = new ArrayList<>();
-
-    @JsonProperty("timestamp")
-    @ApiModelProperty(value = "The UTC timestamp of this score in ISO8601 format", required = true)
-    private String timestamp = "";
 
     public String getId() {
         return id;
@@ -64,19 +55,4 @@ public class ScoreResponse {
         this.enrichmentAttributeValues = enrichmentAttributeValues;
     }
 
-    public List<Warning> getWarnings() {
-        return warnings;
-    }
-
-    public void setWarnings(List<Warning> warnings) {
-        this.warnings = warnings;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 }

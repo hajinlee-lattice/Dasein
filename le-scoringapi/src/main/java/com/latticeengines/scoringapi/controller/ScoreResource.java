@@ -1,11 +1,13 @@
 package com.latticeengines.scoringapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.text.ParseException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -23,22 +27,14 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 import com.wordnik.swagger.annotations.ApiParam;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
 @RequestMapping("")
 public class ScoreResource extends BaseScoring {
-
-    @Autowired
-    private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

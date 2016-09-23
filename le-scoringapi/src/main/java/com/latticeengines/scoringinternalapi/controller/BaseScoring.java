@@ -27,6 +27,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
+import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
@@ -39,6 +41,8 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.scoringapi.enrich.EnrichRequestProcessor;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.context.RequestMetrics;
 import com.latticeengines.scoringapi.exposed.context.SingleRecordMeasurement;
@@ -87,6 +91,8 @@ public abstract class BaseScoring {
 
     private static final String GET_TENANT_FROM_OAUTH = "getTenantFromOAuth";
 
+    private static final String CREDENTIAL_ID = "credentialId";
+
     protected static final int MAX_ALLOWED_RECORDS = 200;
 
     private static final String TOTAL_TIME_PREFIX = "total_";
@@ -100,6 +106,9 @@ public abstract class BaseScoring {
     private static final String UTC = "UTC";
 
     @Autowired
+    protected OAuthUserEntityMgr oAuthUserEntityMgr;
+
+    @Autowired
     private HttpStopWatch httpStopWatch;
 
     @Autowired
@@ -107,6 +116,9 @@ public abstract class BaseScoring {
 
     @Autowired
     private ModelRetriever modelRetriever;
+
+    @Autowired
+    private EnrichRequestProcessor enrichRequestProcessor;
 
     @Autowired
     private ScoreRequestProcessor scoreRequestProcessor;
@@ -233,6 +245,35 @@ public abstract class BaseScoring {
         return metrics;
     }
 
+    protected EnrichResponse enrichRecord(HttpServletRequest request, EnrichRequest enrichRequest,
+            CustomerSpace customerSpace, String credentialId) {
+        requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
+        requestInfo.put(CREDENTIAL_ID, credentialId);
+        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            httpStopWatch.split("parseUuid");
+            if (log.isInfoEnabled()) {
+                log.info(JsonUtils.serialize(enrichRequest));
+            }
+            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest);
+            if (warnings.hasWarnings()) {
+                response.setWarnings(warnings.getWarnings());
+                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
+            }
+            if (log.isInfoEnabled()) {
+                log.info(JsonUtils.serialize(response));
+            }
+
+            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings()));
+            requestInfo.put(HAS_ERROR, Boolean.toString(false));
+            requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
+            requestInfo.put(IS_ENRICHMENT_REQUESTED, Boolean.toString(true));
+
+            requestInfo.logSummary(requestInfo.getStopWatchSplits());
+
+            return response;
+        }
+    }
+
     private int getSplit(Map<String, String> splits, String key) {
         return Integer.valueOf(splits.get(key));
     }
@@ -256,7 +297,7 @@ public abstract class BaseScoring {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
-                            new Integer(MAX_ALLOWED_RECORDS).toString(),
+                    new Integer(MAX_ALLOWED_RECORDS).toString(),
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 
