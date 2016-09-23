@@ -42,7 +42,7 @@ angular.module('lp.marketo', [
 	};
 	
 }])
-.controller('MarketoCredentialsController', ['MarketoCredentials', function(MarketoCredentials) {
+.controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', function(MarketoCredentials, MarketoService) {
     var vm = this;
 
     angular.extend(vm, {
@@ -50,7 +50,7 @@ angular.module('lp.marketo', [
     });
 
     vm.setupCredentialClick = function($event){
-		$rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
+		console.log("jump into Ben's flow");
 	}
 
 	vm.editCredentialClick = function($event){
@@ -58,22 +58,33 @@ angular.module('lp.marketo', [
 	}
 
 	vm.deleteCredentialClick = function($event){
-		MarketoService.DeleteMarketoCredential(credentials.id);
-	}
+		vm.credId = vm.credential.credential_id;
+		MarketoService.DeleteMarketoCredential(vm.credId).then(function(result){
+            if(result.Success) {
+                
+                $state.go('home.marketosettings.apikey', {}, { reload: true });
 
+            } else {
+                
+                console.log("error");
+            }
+        });
+	}
 
 	vm.init = function() {
         _.each(vm.credentials, function(value, key){
+
+        	vm.credential = value;
+
 			if(value.enrichment.marketo_match_fields[0].marketoFieldName == null){
 				vm.credentialIsSetup = false;
 			} else {
 				vm.credentialIsSetup = true;
 			}
+
 	   	});
     }
 
     vm.init();
-
-
 
 }]);
