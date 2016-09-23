@@ -20,6 +20,14 @@ def ecs_metadata(ec2, ecscluster):
                 "reload": [ "install" ]
             },
             "install" : {
+                "packages": {
+                    "rpm": {
+                        "newrelic": "http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm"
+                    },
+                    "yum" : {
+                        "newrelic-sysmond": []
+                    }
+                },
                 "files" : {
                     "/etc/cfn/cfn-hup.conf" : {
                         "content" : { "Fn::Join" : ["", [
@@ -53,6 +61,16 @@ def ecs_metadata(ec2, ecscluster):
                             "echo $ADDR >> /etc/internaladdr.txt",
                             "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
                             "echo $PUBADDR >> /etc/externaladdr.txt"
+                        ] ] }
+                    },
+                    "02_newrelic" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "usermod -a -G docker newrelic",
+                            "nrsysmond-config --set license_key=a0ae1b9e8030099c9f5152c81bd3853bfe42ec4c",
+                            "echo hostname=$HOSTNAME >> /etc/newrelic/nrsysmond.cfg",
+                            "echo cgroup_root=\"/cgroup\" >> /etc/newrelic/nrsysmond.cfg",
+                            "/etc/init.d/newrelic-sysmond start"
                         ] ] }
                     },
                     "10_add_instance_to_cluster" : {
