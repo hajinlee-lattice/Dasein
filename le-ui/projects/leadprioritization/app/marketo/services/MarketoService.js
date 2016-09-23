@@ -1,6 +1,6 @@
 angular
 .module('lp.marketo')
-.service('MarketoService', function($http, $q) {
+.service('MarketoService', function($http, $q, $state) {
     this.GetMarketoCredentials = function() {
         var deferred = $q.defer();
         var result;
@@ -79,6 +79,7 @@ angular
             function onSuccess(response) {
                 result = response.data;
                 deferred.resolve(result);
+                $state.go('home.marketosettings.apikey');
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
