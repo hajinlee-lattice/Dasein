@@ -131,7 +131,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
      **/
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        tenantId = testContract + tenantId;
+        tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
 
         loginAD();
@@ -142,9 +142,12 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         // TODO: skip Dante until it becomes idempotent
         danteSkipped = true;
 
-        cleanup();
-
         provisionEndToEndTestTenants();
+    }
+
+    @BeforeClass(groups = "deployment")
+    public void tearDown() throws Exception {
+        cleanup();
     }
 
     /**
