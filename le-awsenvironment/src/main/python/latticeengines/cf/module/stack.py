@@ -338,7 +338,7 @@ class ECSStack(Stack):
         )
         print 'Got StackId: %s' % response['StackId']
         wait_for_stack_creation(client, stackname)
-        toggle_healtch_check(elb)
+        # toggle_healtch_check(elb)
 
 def toggle_healtch_check(elb):
     """
