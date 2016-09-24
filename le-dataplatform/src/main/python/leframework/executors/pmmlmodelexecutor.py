@@ -9,6 +9,7 @@ from leframework.model.statemachine import StateMachine
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 from leframework.model.states.initialize import Initialize
+from leframework.model.states.pmmlsummarygenerator import PmmlSummaryGenerator
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.pmmlcolumnmetadatagenerator import PmmlColumnMetadataGenerator
@@ -40,11 +41,12 @@ class PmmlModelExecutor(Executor):
         stateMachine.addState(PmmlModelSkeletonGenerator(), 3)
         stateMachine.addState(PmmlCopyFile(), 4)
         stateMachine.addState(ModelDetailGenerator(), 5)
-        stateMachine.addState(NameGenerator(), 6)
-        stateMachine.addState(ProvenanceGenerator(), 7)
-        stateMachine.addState(DataCompositionGenerator(), 8)
-        stateMachine.addState(EnhancedSummaryGenerator(), 9)
-        stateMachine.addState(PmmlFinalize(), 10)
+        stateMachine.addState(PmmlSummaryGenerator(), 6)
+        stateMachine.addState(NameGenerator(), 7)
+        stateMachine.addState(ProvenanceGenerator(), 8)
+        stateMachine.addState(DataCompositionGenerator(), 9)
+        stateMachine.addState(EnhancedSummaryGenerator(), 10)
+        stateMachine.addState(PmmlFinalize(), 11)
         return stateMachine
 
 

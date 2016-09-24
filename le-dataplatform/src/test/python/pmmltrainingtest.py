@@ -17,3 +17,6 @@ class PmmlTrainingTest(TrainingTestBase):
 
         jsonDict = json.loads(open(glob.glob("./results/enhancements/modelsummary.json")[0]).read())
         self.assertEquals(jsonDict["ModelDetails"]["ModelType"], "PmmlModel")
+
+        jsonDict = json.loads(open(glob.glob("./results/*_model.json")[0]).read())
+        self.assertTrue(jsonDict["Summary"]["ModelID"].startswith('ms__'))
