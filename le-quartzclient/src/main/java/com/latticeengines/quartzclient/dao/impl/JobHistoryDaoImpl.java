@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Component("jobHistoryDao")
@@ -30,12 +31,13 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);
         query.setString("jobName", jobName);
+        query.setMaxResults(displayCount);
         List list = query.list();
         List<JobHistory> jobHistories = new ArrayList<JobHistory>();
         if (list.size() == 0) {
             return null;
         } else {
-            int historyCount = list.size() > displayCount ? displayCount : list.size();
+            int historyCount = list.size();
             for (int i = 0; i < historyCount; i++) {
                 jobHistories.add((JobHistory) list.get(i));
             }
@@ -46,6 +48,30 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
     @Override
     public void saveJobHistory(JobHistory jobHistory) {
         super.createOrUpdate(jobHistory);
+    }
+
+    @Override
+    public void createJobHistory(JobHistory jobHistory) {
+        super.create(jobHistory);
+    }
+
+    @Override
+    public void deleteOldJobHistory(int retainingDays) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<JobHistory> entityClz = getEntityClass();
+        String queryStr = String
+                .format("delete from %s where TriggeredTime < :date and TriggeredJobStatus in (:jobStatus)",
+                        entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -(retainingDays));
+        query.setCalendarDate("date", calendar);
+        List<Integer> statusCode = new ArrayList<>();
+        statusCode.add(TriggeredJobStatus.FAIL.getValue());
+        statusCode.add(TriggeredJobStatus.SUCCESS.getValue());
+        statusCode.add(TriggeredJobStatus.TIMEOUT.getValue());
+        query.setParameterList("jobStatus", statusCode);
+        query.executeUpdate();
     }
 
     @Override
@@ -70,6 +96,7 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         statusCode.add(TriggeredJobStatus.START.getValue());
         statusCode.add(TriggeredJobStatus.TRIGGERED.getValue());
         query.setParameterList("jobStatus", statusCode);
+        query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -92,6 +119,7 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         query.setString("tenantId", tenantId);
         query.setString("jobName", jobName);
         query.setString("jobHandle", triggeredJobHandle);
+        query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -112,6 +140,7 @@ public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHis
         Query query = session.createQuery(queryStr);
         query.setString("tenantId", tenantId);
         query.setString("jobName", jobName);
+        query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
             return null;

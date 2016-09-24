@@ -18,4 +18,8 @@ public interface JobHistoryDao extends BaseDao<JobHistory> {
 
     void saveJobHistory(JobHistory jobHistory);
 
+    void createJobHistory(JobHistory jobHistory);
+
+    void deleteOldJobHistory(int retainingDays);
+
 }
