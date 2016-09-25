@@ -13,7 +13,7 @@ angular
                     templateUrl: 'app/navigation/summary/ModelCreateView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/create/views/CSVImportView.html'
+                    templateUrl: 'app/create/csvform/CSVFormView.html'
                 }   
             }
         })
@@ -28,7 +28,7 @@ angular
                     templateUrl: 'app/navigation/summary/PMMLCreateView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/create/views/PMMLImportView.html'
+                    templateUrl: 'app/create/pmmlform/PMMLFormView.html'
                 }
             }
         })
@@ -66,7 +66,7 @@ angular
                     },
                     controllerAs: 'vm',
                     controller: 'CustomFieldsController',
-                    templateUrl: 'app/create/views/CustomFieldsView.html'
+                    templateUrl: 'app/create/customfields/CustomFieldsView.html'
                 }   
             }
         })
@@ -82,7 +82,7 @@ angular
                 },
                 "main@": {
                     controller: 'ImportJobController',
-                    templateUrl: 'app/create/views/ImportJobView.html'
+                    templateUrl: 'app/create/buildprogress/BuildProgressView.html'
                 }
             }
         })
@@ -98,7 +98,7 @@ angular
                 },
                 "main@": {
                     controller: 'ImportJobController',
-                    templateUrl: 'app/create/views/ImportJobView.html'
+                    templateUrl: 'app/create/buildprogress/BuildProgressView.html'
                 }
             }
         });

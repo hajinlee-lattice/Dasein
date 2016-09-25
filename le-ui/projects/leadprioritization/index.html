@@ -94,7 +94,6 @@
         <script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
         <script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
         <script src="app/AppCommon/services/WidgetService.js"></script>
-        <!-- <script src="app/AppCommon/services/PlayTileService.js"></script> // was removed in r:77610 -->
         <script src="app/AppCommon/services/TopPredictorService.js"></script>
         <script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
         <script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
@@ -119,14 +118,17 @@
         <script src="app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidget.js"></script>
         <script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
         <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
-        <script src="app/create/controllers/CSVImportController.js"></script>
-        <script src="app/create/controllers/CSVReportController.js"></script>
-        <script src="app/create/controllers/CustomFieldsController.js"></script>
-        <script src="app/create/controllers/PMMLImportController.js"></script>
-        <script src="app/create/controllers/ImportJobController.js"></script>
+        
+        <script src="app/create/csvform/CSVFormController.js"></script>
+        <script src="app/create/pmmlform/PMMLFormController.js"></script>
+        <script src="app/create/customfields/CustomFieldsController.js"></script>
+        <script src="app/create/buildprogress/BuildProgressController.js"></script>
+        <script src="app/create/jobreport/JobReportController.js"></script>
+        <script src="app/create/fileuploader/FileUploaderDirective.js"></script>
+        <script src="app/create/scorefile/ScoreFileController.js"></script>
         <script src="app/create/CreateRoutes.js"></script>
-        <script src="app/create/services/ImportService.js"></script>
-        <script src="app/create/directives/FileUploaderDirective.js"></script>
+        <script src="app/create/CreateService.js"></script>
+        
         <script src="app/navigation/NavigationController.js"></script>
         <script src="app/navigation/header/controllers/MainHeaderController.js"></script>
         <script src="app/navigation/summary/OneLineController.js"></script>
@@ -134,32 +136,33 @@
         <script src="app/navigation/pagination/PaginationController.js"></script>
         <script src="app/navigation/table/TableController.js"></script>
         <script src="app/navigation/sidebar/RootController.js"></script>
+
         <script src="app/jobs/controllers/ListController.js"></script>
         <script src="app/jobs/controllers/RowController.js"></script>
         <script src="app/jobs/services/JobsService.js"></script>
         <script src="app/jobs/services/JobsStore.js"></script>
-        <script src="app/jobs/JobsRoutes.js"></script>
         <script src="app/jobs/modals/CancelJobModal.js"></script>
+        <script src="app/jobs/JobsRoutes.js"></script>
+
         <script src="app/login/controllers/LoginController.js"></script>
         <script src="app/login/controllers/UpdatePasswordController.js"></script>
         <script src="app/login/modals/TenantSelectionModal.js"></script>
-        <!--
-        <script src="app/config/controllers/ManageCredentialsController.js"></script>
-        <script src="app/config/modals/EnterCredentialsModal.js"></script>
-        -->
+
         <script src="app/config/services/ConfigService.js"></script>
+
         <script src="app/enrichment/controllers/EnrichmentController.js"></script>
         <script src="app/enrichment/services/EnrichmentService.js"></script>
+
         <script src="app/marketo/controllers/MarketoEnrichmentController.js"></script>
         <script src="app/marketo/controllers/MarketoCredentialsController.js"></script>
         <script src="app/marketo/services/MarketoService.js"></script>
+
         <script src="app/models/controllers/ModelListController.js"></script>
         <script src="app/models/controllers/ModelReviewController.js"></script>
         <script src="app/models/controllers/ModelDetailController.js"></script>
         <script src="app/models/controllers/AdminInfoController.js"></script>
         <script src="app/models/controllers/ModelCreationHistoryController.js"></script>
         <script src="app/models/controllers/ActivateModelController.js"></script>
-        <script src="app/models/controllers/BulkUploadController.js"></script>
         <script src="app/models/modals/RefineModelThresholdModal.js"></script>
         <script src="app/models/modals/DeleteModelModal.js"></script>
         <script src="app/models/modals/DeactivateModelModal.js"></script>
@@ -171,32 +174,22 @@
         <script src="app/models/modals/ScoreLeadEnrichmentModal.js"></script>
         <script src="app/models/services/ModelService.js"></script>
         <script src="app/models/services/ModelReviewService.js"></script>
+
         <script src="app/userManagement/controllers/UserManagementController.js"></script>
         <script src="app/userManagement/modals/AddUserModal.js"></script>
         <script src="app/userManagement/modals/DeleteUserModal.js"></script>
         <script src="app/userManagement/modals/EditUserModal.js"></script>
         <script src="app/userManagement/services/UserManagementService.js"></script>
+
         <script src="app/sfdc/controllers/SFDCCredentialsController.js"></script>
+
         <script src="app/setup/controllers/ManageFieldsController.js"></script>
-        <!--
-        <script src="app/setup/controllers/SetupController.js"></script>
-        <script src="app/setup/controllers/DeploymentWizardController.js"></script>
-        <script src="app/setup/controllers/CredentialsController.js"></script>
-        <script src="app/setup/controllers/ImportAndEnrichDataController.js"></script>
-        <script src="app/setup/controllers/LeadEnrichmentController.js"></script>
-        <script src="app/setup/modals/LeadEnrichmentAttributesDetailsModel.js"></script>
-        <script src="app/setup/modals/CancelDeploymentStepModel.js"></script>
-        <script src="app/setup/modals/ClearDeploymentModel.js"></script>
-        -->
         <script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
         <script src="app/setup/modals/UpdateFieldsModal.js"></script>
         <script src="app/setup/modals/FieldMappingSettingsModal.js"></script>
         <script src="app/setup/utilities/SetupUtility.js"></script>
-        <!--
-        <script src="app/setup/services/TenantDeploymentService.js"></script>
-        <script src="app/setup/services/LeadEnrichmentService.js"></script>
-        -->
         <script src="app/setup/services/MetadataService.js"></script>
+
         <script src="app/apiConsole/controllers/APIConsoleController.js"></script>
         <script src="app/apiConsole/controllers/ScoringRequestController.js"></script>
         <script src="app/apiConsole/controllers/ScoringResponseController.js"></script>

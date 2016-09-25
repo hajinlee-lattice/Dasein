@@ -112,7 +112,7 @@ angular
                 },
                 "main@": {
                     controller: 'CSVReportController',
-                    templateUrl: 'app/create/views/ValidateImportView.html'
+                    templateUrl: 'app/create/jobreport/JobReportView.html'
                 }   
             }
         });

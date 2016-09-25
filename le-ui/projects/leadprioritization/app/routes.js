@@ -322,7 +322,7 @@ angular
                     },
                     controller: 'csvBulkUploadController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/models/views/BulkScoringImportData.html'
+                    templateUrl: 'app/create/scorefile/ScoreFileView.html'
                 }   
             }
         })
