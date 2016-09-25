@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.pls.service.ModelingFileMetadataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -15,6 +17,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,6 +68,9 @@ public class ScoringFileUploadResource {
     private ModelMetadataService modelMetadataService;
 
     @Autowired
+    private ModelingFileMetadataService modelingFileMetadataService;
+
+    @Autowired
     private ModelSummaryService modelSummary;
 
     @Autowired
@@ -72,6 +78,77 @@ public class ScoringFileUploadResource {
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
+
+    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Upload a file")
+    public ResponseDocument<SourceFile> uploadFileNew( //
+                                                    @RequestParam(value = "displayName", required = true) String displayName, //
+                                                    @RequestParam(value = "modelId") String modelId, //
+                                                    @RequestParam(value = "compressed", required = false) boolean compressed, //
+                                                    @RequestParam("file") MultipartFile file) {
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        try {
+            if (file.getSize() >= maxUploadSize) {
+                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
+            }
+
+            InputStream stream = file.getInputStream();
+            if (compressed) {
+                stream = GzipUtils.decompressStream(stream);
+            }
+
+            SourceFile sourceFile = null;
+            ModelSummary summary = modelSummary.getModelSummaryByModelId(modelId);
+            if (summary.getModelType().equals(ModelType.PYTHONMODEL.getModelType())) {
+                stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, displayName);
+
+                sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                        SchemaInterpretation.TestingData, displayName, stream);
+            } else {
+                if (!stream.markSupported()) {
+                    stream = new BufferedInputStream(stream);
+                }
+                stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+                Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+                try {
+                    stream.reset();
+                } catch (IOException e) {
+                    log.error(e);
+                    throw new LedpException(LedpCode.LEDP_00002, e);
+                }
+                sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                        SchemaInterpretation.TestingData, displayName, stream);
+                Table table = new Table();
+                table.setPrimaryKey(null);
+                table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+                table.setDisplayName(sourceFile.getDisplayName());
+                for (String header : headers) {
+                    Attribute attr = new Attribute();
+                    attr.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
+                    attr.setDisplayName(header);
+                    attr.setPhysicalDataType(FieldType.STRING.avroTypes()[0]);
+                    attr.setNullable(true);
+                    attr.setTags(Tag.INTERNAL);
+                    table.addAttribute(attr);
+                }
+                table.deduplicateAttributeNames();
+                sourceFile.setTableName(table.getName());
+                metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
+
+                sourceFileService.update(sourceFile);
+            }
+            return ResponseDocument.successResponse(sourceFile);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
+        } finally {
+            try {
+                closeableResourcePool.close();
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
+            }
+        }
+    }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -99,7 +176,6 @@ public class ScoringFileUploadResource {
                 List<Attribute> requiredColumns = modelMetadataService.getRequiredColumns(modelId);
                 stream = scoringFileMetadataService.validateHeaderFields(stream, requiredColumns,
                         closeableResourcePool, displayName);
-
                 sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, displayName, stream);
 
@@ -135,8 +211,9 @@ public class ScoringFileUploadResource {
                 table.deduplicateAttributeNames();
                 sourceFile.setTableName(table.getName());
                 metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
+
+                sourceFileService.update(sourceFile);
             }
-            sourceFileService.update(sourceFile);
             return ResponseDocument.successResponse(sourceFile);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
@@ -148,4 +225,30 @@ public class ScoringFileUploadResource {
             }
         }
     }
+
+    @RequestMapping(value = "/fieldmappings", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Takes a file and get first round of field mappings through best effort")
+    public ResponseDocument<FieldMappingDocument> getFieldMappings( //
+                                                                    @RequestParam(value = "displayName", required = true) String csvFileName, //
+                                                                    @RequestParam(value = "modelId", required = true) String modelId) {
+        return ResponseDocument.successResponse(scoringFileMetadataService.mapRequiredFieldsWithFileHeaders(csvFileName, modelId));
+    }
+
+    @RequestMapping(value="fieldmappings/resolve", method = RequestMethod.POST)
+    @ApiOperation(value = "Take user input and resolve required field mappings for scoring")
+    public void saveFieldMappingDocument( //
+                                          @RequestParam(value = "displayName", required = true) String csvFileName,
+                                          @RequestParam(value = "modelId", required = true) String modelId,
+                                          @RequestBody FieldMappingDocument fieldMappingDocument) {
+        scoringFileMetadataService.saveFieldMappingDocument(csvFileName, modelId, fieldMappingDocument);
+    }
+
+    @RequestMapping(value = "/headerfields", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Returns the header fields for a uploaded file")
+    public ResponseDocument<Set<String>> getHeaderFields(@RequestParam(value = "displayName", required = true) String csvFileName) {
+        return ResponseDocument.successResponse(scoringFileMetadataService.getHeaderFields(csvFileName));
+    }
+
 }

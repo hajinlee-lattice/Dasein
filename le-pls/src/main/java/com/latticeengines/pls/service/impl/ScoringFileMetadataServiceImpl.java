@@ -3,17 +3,25 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.xml.transform.Source;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.service.SourceFileService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +62,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Autowired
     private ModelMetadataService modelMetadataService;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFields,
@@ -125,4 +136,152 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
         return table;
     }
+
+    @Override
+    public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
+        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
+
+        Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
+        List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
+        Iterator<Attribute> requiredAttributesIterator = requiredAttributes.iterator();
+        while (requiredAttributesIterator.hasNext()) {
+            Attribute requiredAttribute = requiredAttributesIterator.next();
+            Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
+
+            FieldMapping fieldMapping = new FieldMapping();
+            while (scoringHeaderFieldsIterator.hasNext()) {
+                String scoringHeaderField = scoringHeaderFieldsIterator.next();
+                if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, requiredAttribute)) {
+                    fieldMapping.setUserField(scoringHeaderField);
+                    fieldMapping.setMappedField(requiredAttribute.getName());
+                    fieldMapping.setMappedToLatticeField(true);
+                    fieldMappingDocument.getFieldMappings().add(fieldMapping);
+
+                    scoringHeaderFieldsIterator.remove();
+                    requiredAttributesIterator.remove();
+                    break;
+                }
+            }
+        }
+
+        for (Attribute requiredAttribute : requiredAttributes) {
+            FieldMapping fieldMapping = new FieldMapping();
+            fieldMapping.setMappedField(requiredAttribute.getName());
+            fieldMapping.setMappedToLatticeField(true);
+            fieldMappingDocument.getFieldMappings().add(fieldMapping);
+        }
+
+        for (String scoringHeaderField : scoringHeaderFields) {
+            fieldMappingDocument.getIgnoredFields().add(scoringHeaderField);
+        }
+
+        return fieldMappingDocument;
+    }
+
+    @Override
+    public void saveFieldMappingDocument(String csvFileName, String modelId, FieldMappingDocument fieldMappingDocument) {
+        List<Attribute> modelAttributes = modelMetadataService.getRequiredColumns(modelId);
+
+        SourceFile sourceFile = sourceFileService.findByName(csvFileName);
+        resolveModelAttributeBasedOnFieldMapping(modelAttributes, fieldMappingDocument);
+        Table table = createTableFromMetadata(modelAttributes, sourceFile);
+        Tenant tenant = MultiTenantContext.getTenant();
+        metadataProxy.createTable(tenant.getId(), table.getName(), table);
+
+        sourceFile.setTableName(table.getName());
+        sourceFileService.update(sourceFile);
+    }
+
+    @Override
+    public Set<String> getHeaderFields(String csvFileName) {
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        String filePath = sourceFileService.findByName(csvFileName).getPath();
+        try {
+            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
+            InputStream is = fs.open(new Path(filePath));
+            return ValidateFileHeaderUtils.getCSVHeaderFields(is, closeableResourcePool);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        } finally {
+            try {
+                closeableResourcePool.close();
+            } catch (IOException e) {
+                throw new RuntimeException("Problem when closing the pool", e);
+            }
+        }
+    }
+
+    private void resolveModelAttributeBasedOnFieldMapping(List<Attribute> modelAttributes, FieldMappingDocument fieldMappingDocument) {
+        Iterator<Attribute> attrIterator = modelAttributes.iterator();
+        while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                if (fieldMapping.isMappedToLatticeField()) {
+                    // if (fieldMapping.getMappedField().equals(attribute.getName())) {
+                    if (isScoringFieldMatchedWithModelAttribute(fieldMapping.getMappedField(), attribute)) {
+                        attribute.setDisplayName(fieldMapping.getUserField());
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (String unmappedScoringHeader : fieldMappingDocument.getIgnoredFields()) {
+            for (Attribute modelAttribute : modelAttributes) {
+                if (modelAttribute.getName().equals(unmappedScoringHeader) || modelAttribute.getDisplayName().equals(unmappedScoringHeader)) {
+                    unmappedScoringHeader = unmappedScoringHeader.concat("_1");
+                }
+            }
+            modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader));
+        }
+    }
+
+    private Attribute getAttributeFromFieldName(String fieldName) {
+        Attribute attribute = new Attribute();
+
+        attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
+        attribute.setPhysicalDataType(FieldType.STRING.toString().toLowerCase());
+        attribute.setDisplayName(fieldName);
+        attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+        attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        attribute.setFundamentalType(ModelingMetadata.FT_ALPHA);
+        attribute.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);
+        attribute.setNullable(true);
+        attribute.setTags(ModelingMetadata.INTERNAL_TAG);
+
+        return attribute;
+    }
+
+    private Table createTableFromMetadata(List<Attribute> attributes, SourceFile sourceFile) {
+        Table table = new Table();
+
+        table.setPrimaryKey(null);
+        table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        table.setDisplayName(sourceFile.getDisplayName());
+        table.setAttributes(attributes);
+        Attribute lastModified = table.getAttribute(InterfaceName.LastModifiedDate);
+        if (lastModified == null) {
+            table.setLastModifiedKey(null);
+        }
+        table.deduplicateAttributeNames();
+
+        return table;
+    }
+
+    private boolean isScoringFieldMatchedWithModelAttribute(String scoringField, Attribute modelAttribute) {
+        List<String> allowedDisplayNames = modelAttribute.getAllowedDisplayNames();
+        if (allowedDisplayNames != null) {
+            for (int i = 0; i < modelAttribute.getAllowedDisplayNames().size(); i++) {
+                if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField)) {
+                    return true;
+                }
+            }
+        }
+
+        if (modelAttribute.getDisplayName().equalsIgnoreCase(scoringField)) {
+            return true;
+        }
+        return false;
+    }
+
 }
