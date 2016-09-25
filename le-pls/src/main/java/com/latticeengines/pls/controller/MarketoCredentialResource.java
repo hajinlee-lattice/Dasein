@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -85,9 +86,11 @@ public class MarketoCredentialResource {
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
     public List<LeadField> getMatchFieldForMarketoCredential(
-            @RequestBody MarketoCredential marketoCredential) {
-        return marketoSoapService.getLeadFields(marketoCredential.getSoapEndpoint(),
-                marketoCredential.getSoapUserId(), marketoCredential.getSoapEncryptionKey());
+            @RequestParam(value = "marketoSoapEndpoint", required = true) String marketoSoapEndpoint,
+            @RequestParam(value = "marketoSoapUserId", required = true) String marketoSoapUserId,
+            @RequestParam(value = "marketoSoapEncryptionKey", required = true) String marketoSoapEncryptionKey) {
+        return marketoSoapService.getLeadFields(marketoSoapEndpoint, marketoSoapUserId,
+                marketoSoapEncryptionKey);
     }
 
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
