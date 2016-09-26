@@ -68,7 +68,7 @@ def ecs_metadata(ec2, ecscluster):
                             "#!/bin/bash",
                             "usermod -a -G docker newrelic",
                             "nrsysmond-config --set license_key=a0ae1b9e8030099c9f5152c81bd3853bfe42ec4c",
-                            {"Fn::Join", "" ["echo hostname=$HOSTNAME-", { "Ref" : "AWS::StackName" }, " >> /etc/newrelic/nrsysmond.cfg"]},
+                            {"Fn::Join", "", ["echo hostname=$HOSTNAME-", { "Ref" : "AWS::StackName" }, " >> /etc/newrelic/nrsysmond.cfg"]},
                             "echo cgroup_root=\"/cgroup\" >> /etc/newrelic/nrsysmond.cfg",
                             "/etc/init.d/newrelic-sysmond start"
                         ] ] }
