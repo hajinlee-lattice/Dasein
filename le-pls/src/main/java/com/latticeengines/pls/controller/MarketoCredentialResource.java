@@ -84,7 +84,7 @@ public class MarketoCredentialResource {
     @RequestMapping(value = "/matchfields", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get list of marketo match fields")
     @ResponseBody
-    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public List<LeadField> getMatchFieldForMarketoCredential(
             @RequestParam(value = "marketoSoapEndpoint", required = true) String marketoSoapEndpoint,
             @RequestParam(value = "marketoSoapUserId", required = true) String marketoSoapUserId,
@@ -95,7 +95,7 @@ public class MarketoCredentialResource {
 
     @RequestMapping(value = "/{credentialId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "Delete a marketo credential")
-    @PreAuthorize("hasRole('Edit_PLS_MarketoCredential')")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
     public void delete(@PathVariable String credentialId) {
         marketoCredentialService.deleteMarketoCredentialById(credentialId);
     }
