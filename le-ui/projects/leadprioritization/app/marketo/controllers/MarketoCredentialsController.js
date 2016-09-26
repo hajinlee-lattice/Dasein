@@ -1,7 +1,8 @@
 angular.module('lp.marketo', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.NavUtility'
+    'mainApp.core.utilities.NavUtility',
+    'mainApp.marketo.modals.DeleteCredentialModal'
 ])
 .controller('MarketoCredentialSetupController', ['$scope', '$state', '$stateParams', 'BrowserStorageUtility', 'ResourceUtility', 'MarketoService',
 	function($scope, $state, $stateParams, BrowserStorageUtility, ResourceUtility, MarketoService){
@@ -42,8 +43,10 @@ angular.module('lp.marketo', [
 	};
 	
 }])
-.controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', function(MarketoCredentials, MarketoService) {
+.controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
     var vm = this;
+
+    credId = vm.credential.credential_id;
 
     angular.extend(vm, {
 		credentials: MarketoCredentials
@@ -58,23 +61,18 @@ angular.module('lp.marketo', [
 	}
 
 	vm.deleteCredentialClick = function($event){
-		vm.credId = vm.credential.credential_id;
-		MarketoService.DeleteMarketoCredential(vm.credId).then(function(result){
-            if(result.Success) {
-                
-                $state.go('home.marketosettings.apikey', {}, { reload: true });
-
-            } else {
-                
-                console.log("error");
-            }
-        });
+		if ($event != null) {
+            $event.stopPropagation();
+        }
+        DeleteCredentialModal.show(credId);
 	}
 
 	vm.init = function() {
         _.each(vm.credentials, function(value, key){
 
         	vm.credential = value;
+
+        	console.log(vm.credential.credential_id);
 
 			if(value.enrichment.marketo_match_fields[0].marketoFieldName == null){
 				vm.credentialIsSetup = false;
