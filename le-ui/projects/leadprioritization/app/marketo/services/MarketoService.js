@@ -175,9 +175,9 @@ angular
             method: 'GET',
             url: url,
             params: {
-                'marketoSoapEndpoint': credential.soapEndpoint,
-                'marketoSoapUserId': credential.soapUserId,
-                'marketoSoapEncryptionKey': credential.soapEncryptionKey
+                'marketoSoapEndpoint': credential.soap_endpoint,
+                'marketoSoapUserId': credential.soap_user_id,
+                'marketoSoapEncryptionKey': credential.soap_encryption_key
             },
             headers: { 'Content-Type': 'application/json' }
         }).then(

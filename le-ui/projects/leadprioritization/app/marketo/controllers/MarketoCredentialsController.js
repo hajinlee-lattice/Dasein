@@ -82,6 +82,10 @@ angular.module('lp.marketo', [
 		});
 	}
 
+	vm.cancelCredentialCreate = function(){
+		$state.go('home.marketosettings.apikey');
+	};
+
 }])
 .controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
     var vm = this;

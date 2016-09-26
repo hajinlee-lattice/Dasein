@@ -1,7 +1,7 @@
 angular.module('lp.marketo.enrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility, EnrichmentData, MarketoCredentialsData){
+.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, BrowserStorageUtility, MarketoCredential, MarketoMatchFields) {
     var vm = this;
 
     angular.extend(vm, {
@@ -13,12 +13,12 @@ angular.module('lp.marketo.enrichment', [
         required_fields: [],
         selected_fields: {},
         match_fields: {},
-        enrichments: EnrichmentData.data,
+        enrichments: MarketoCredential.enrichment,
+        marketoMatchFields: MarketoMatchFields,
         pagesize: 5
     });
 
     var marketoData = [];
-    console.log(MarketoCredentialsData);
 
     vm.webhook_name = 'Lattice Lead Enrichment';
     vm.webhook_url = 'url';

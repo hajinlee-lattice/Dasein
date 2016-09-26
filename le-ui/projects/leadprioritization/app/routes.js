@@ -578,7 +578,7 @@ angular
 
                             return deferred.promise;
                         },
-                        MarketoMatchFields: function($q, MarketoCredential) {
+                        MarketoMatchFields: function($q, MarketoService, MarketoCredential) {
                             var deferred = $q.defer();
 
                             MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
