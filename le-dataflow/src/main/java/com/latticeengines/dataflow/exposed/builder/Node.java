@@ -5,11 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-import cascading.operation.buffer.FirstNBuffer;
-import cascading.pipe.Pipe;
-
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -17,6 +12,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.BitEncodeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
@@ -34,10 +30,16 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStr
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+
+import cascading.operation.Buffer;
+import cascading.operation.Function;
+import cascading.operation.buffer.FirstNBuffer;
+import cascading.pipe.Pipe;
 
 public class Node {
     private String identifier;
@@ -53,7 +55,8 @@ public class Node {
         return new Node(builder.addJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType), builder);
     }
 
-    public Node coGroup(FieldList lhsFields, List<Node> groupNodes, List<FieldList> groupFieldLists, JoinType joinType) {
+    public Node coGroup(FieldList lhsFields, List<Node> groupNodes, List<FieldList> groupFieldLists,
+            JoinType joinType) {
 
         List<String> identifiers = new ArrayList<>();
         List<FieldList> fieldLists = new ArrayList<>();
@@ -124,8 +127,10 @@ public class Node {
     }
 
     public Node groupByAndLimit(FieldList groupByFieldList, int count) {
-        return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
-                new FirstNBuffer(count))), builder);
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, new FirstNBuffer(count))),
+                builder);
     }
 
     public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending,
@@ -134,13 +139,14 @@ public class Node {
     }
 
     @SuppressWarnings("rawtypes")
-    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending) {
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
+            boolean descending) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
     }
 
     @SuppressWarnings("rawtypes")
-    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
-            boolean descending, boolean caseInsensitive) {
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending,
+            boolean caseInsensitive) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
                 sortFieldList, buffer, descending, caseInsensitive)), builder);
     }
@@ -153,8 +159,10 @@ public class Node {
 
     @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas) {
-        return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer,
-                fieldMetadatas)), builder);
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer, fieldMetadatas)),
+                builder);
     }
 
     public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
@@ -190,14 +198,16 @@ public class Node {
     }
 
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField)), builder);
+        return new Node(
+                builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply, targetField)),
+                builder);
     }
 
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField,
             FieldList outputFields) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField, outputFields)), builder);
+        return new Node(builder.register(
+                new FunctionOperation(opInput(identifier), expression, fieldsToApply, targetField, outputFields)),
+                builder);
     }
 
     public Node renameBooleanField(String booleanField, BooleanType type) {
@@ -220,19 +230,23 @@ public class Node {
             return this;
         }
 
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, new FieldList(
-                booleanField), fm)), builder);
+        return new Node(
+                builder.register(
+                        new FunctionOperation(opInput(identifier), expression, new FieldList(booleanField), fm)),
+                builder);
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
-                targetField)), builder);
+        return new Node(
+                builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply, targetField)),
+                builder);
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
             FieldList outputFields) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
-                targetFields, outputFields)), builder);
+        return new Node(builder.register(
+                new FunctionOperation(opInput(identifier), function, fieldsToApply, targetFields, outputFields)),
+                builder);
     }
 
     public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
@@ -299,23 +313,33 @@ public class Node {
     }
 
     public Node addTimestamp(String timestampField, int mode) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField, mode))), builder);
+        return new Node(
+                builder.register(
+                        new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, mode))),
+                builder);
     }
 
     public Node addTimestamp(String timestampField) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField))), builder);
+        return new Node(
+                builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField))),
+                builder);
     }
 
     public Node addTimestamp(String timestampField, Date timestamp) {
-        return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(
-                timestampField, timestamp))), builder);
+        return new Node(builder.register(
+                new AddFieldOperation(opInput(identifier), new AddTimestampStrategy(timestampField, timestamp))),
+                builder);
     }
 
     public Node addUUID(String uuidField) {
         return new Node(builder.register(new AddFieldOperation(opInput(identifier), new AddUUIDStrategy(uuidField))),
                 builder);
+    }
+
+    public Node bitEncode(String[] groupbyFields, String keyField, String valueField, String encodedField,
+            BitCodeBook codeBook) {
+        return new Node(builder.register(new BitEncodeOperation(opInput(identifier), groupbyFields, keyField,
+                valueField, encodedField, codeBook)), builder);
     }
 
     public Table getSourceSchema() {
@@ -366,6 +390,7 @@ public class Node {
     }
 
     public Node hashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
-        return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType), builder);
+        return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType),
+                builder);
     }
 }

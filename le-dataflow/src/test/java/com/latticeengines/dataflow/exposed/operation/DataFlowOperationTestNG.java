@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
@@ -44,6 +45,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -255,6 +257,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
+
 
     private void prepareAddRowId(String avroDir, String fileName) {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
@@ -592,6 +595,49 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
+    @Test(groups = "functional")
+    public void testBitEncode() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+        prepareBitEncodeData(avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node node = addSource("Feature");
+                String[] groupbyFields = new String[] { "Domain" };
+                BitCodeBook codeBook = new BitCodeBook(BitCodeBook.Algorithm.KEY_EXISTS);
+                Map<String, Integer> bitPosMap = new HashMap<>();
+                bitPosMap.put("f1", 0);
+                bitPosMap.put("f2", 1);
+                bitPosMap.put("f3", 2);
+                codeBook.setBitsPosMap(bitPosMap);
+                return node.bitEncode(groupbyFields, "Feature", null, "Encoded", codeBook);
+            }
+        });
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record : output) {
+            System.out.println(record);
+            String encoded = record.get("Encoded").toString();
+            boolean[] bits = BitCodecUtils.decode(encoded, new int[]{0, 1, 2, 3});
+            String domain = record.get("Domain").toString();
+            if ("dom1.com".equals(domain)) {
+                Assert.assertTrue(bits[0]);
+                Assert.assertTrue(bits[1]);
+                Assert.assertTrue(bits[2]);
+                Assert.assertFalse(bits[3]);
+            } else if ("dom1.com".equals(domain)) {
+                Assert.assertFalse(bits[0]);
+                Assert.assertTrue(bits[1]);
+                Assert.assertTrue(bits[2]);
+                Assert.assertFalse(bits[3]);
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
     private void prepareSimplePivotData(String avroDir, String fileName) {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
@@ -624,6 +670,18 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L } };
 
         uploadDepivotAvro(data, avroDir, fileName);
+    }
+
+    private void prepareBitEncodeData(String avroDir, String fileName) {
+        Object[][] data = new Object[][] {
+                { "dom1.com", "f1", 1, 123L }, //
+                { "dom1.com", "f2", 2, 125L }, //
+                { "dom1.com", "f3", 3, 124L }, //
+                { "dom2.com", "f2", 4, 101L }, //
+                { "dom2.com", "f3", 2, 102L }
+        };
+
+        uploadAvro(data, avroDir, fileName);
     }
 
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {

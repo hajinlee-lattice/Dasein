@@ -9,12 +9,12 @@ public class BitCodecUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testEncodeDecode() throws IOException {
-        int[] trueBits = new int[] { 2, 4, 6, 8, 1000, 9999, 99999 };
+        int[] trueBits = new int[] { 2, 4, 6, 8, 1000, 9999, 99990 };
         String encoded = BitCodecUtils.encode(trueBits);
 
         Assert.assertTrue(encoded.length() < 4000);
 
-        boolean[] values = BitCodecUtils.decode(encoded, new int[]{ 0, 1, 2, 3, 4, 5, 6, 1000, 9999, 99999 });
+        boolean[] values = BitCodecUtils.decode(encoded, new int[]{ 0, 1, 2, 3, 4, 5, 6, 1000, 9999, 99990, 99999 });
 
         Assert.assertTrue(values[2]);
         Assert.assertTrue(values[6]);
@@ -24,6 +24,7 @@ public class BitCodecUtilsUnitTestNG {
 
         Assert.assertFalse(values[0]);
         Assert.assertFalse(values[5]);
+        Assert.assertFalse(values[10]);
     }
 
 }
