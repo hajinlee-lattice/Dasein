@@ -60,10 +60,11 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create new pipeline from a list of either existing pipeline steps or uploaded files")
-    public String createPipeline(@RequestParam("pipelineName") String pipelineName, @RequestBody List<PipelineStepOrFile> pipelineSteps) {
+    public String createPipeline(@RequestParam("pipelineName") String pipelineName,
+            @RequestBody List<PipelineStepOrFile> pipelineSteps) {
         return create(null, pipelineName, pipelineSteps);
     }
-    
+
     @Override
     @RequestMapping(value = "/{pipelineName}", method = RequestMethod.GET)
     @ResponseBody
@@ -100,8 +101,9 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
         }
     }
 
-    // Methods below are just to satisfy the interface but not exposed as part of the REST API
-    
+    // Methods below are just to satisfy the interface but not exposed as part
+    // of the REST API
+
     @Override
     public String uploadPipelineStepPythonScript(String fileName, String stepName,
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
@@ -114,7 +116,6 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
         return null;
     }
 
-    @Override
     public Pipeline createForProduction() {
         return pipelineService.createLatestProductionPipeline();
     }

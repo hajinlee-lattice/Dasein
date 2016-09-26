@@ -1,7 +1,9 @@
 package com.latticeengines.modelquality.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,6 +11,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
+import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
+import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
+import com.latticeengines.modelquality.service.AnalyticPipelineService;
+import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticPipelineInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,49 +22,73 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "modelquality", description = "REST resource for analytic pipelines")
 @RestController
 @RequestMapping("/analyticpipelines")
-public class AnalyticPipelineResource implements CrudInterface<AnalyticPipeline> {
+public class AnalyticPipelineResource
+        implements ModelQualityAnalyticPipelineInterface, CrudInterface<AnalyticPipelineEntityNames> {
 
-    
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @Autowired
+    private AnalyticPipelineService analyticPipelineService;
+
+    @Autowired
+    private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
+
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Create analytic pipeline")
-    public Boolean createAnalyticPipeline(@RequestBody AnalyticPipeline analyticPipeline) {
-        return true;
+    @ApiOperation(value = "Get AnalyticPipelines")
+    public List<AnalyticPipelineEntityNames> getAnalyticPipelines() {
+        return getAll();
     }
-    
-    
+
+    @Override
     @RequestMapping(value = "/latest", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create analytic pipeline for production")
-    public AnalyticPipeline createAnalyticPipelineFromProduction() {
-        return null;
+    public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
+        return createForProduction();
     }
 
-
     @Override
-    public AnalyticPipeline createForProduction() {
-        // TODO Auto-generated method stub
-        return null;
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Create analytic pipeline")
+    public String createAnalyticPipeline(@RequestBody AnalyticPipelineEntityNames analyticPipelineEntityNames) {
+        return create(analyticPipelineEntityNames);
     }
 
-
     @Override
-    public AnalyticPipeline getByName(String name) {
-        // TODO Auto-generated method stub
-        return null;
+    @RequestMapping(value = "/{analyticPipelineName}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get AnalyticPipeline by name")
+    public AnalyticPipelineEntityNames getAnalyticPipelineByName(String analyticPipelineName) {
+        return getByName(analyticPipelineName);
     }
 
-
-    @Override
-    public List<AnalyticPipeline> getAll() {
-        // TODO Auto-generated method stub
-        return null;
+    public AnalyticPipelineEntityNames createForProduction() {
+        AnalyticPipeline ap = analyticPipelineService.createLatestProductionAnalyticPipeline();
+        AnalyticPipelineEntityNames apnames = new AnalyticPipelineEntityNames(ap);
+        return apnames;
     }
 
+    @Override
+    public AnalyticPipelineEntityNames getByName(String name) {
+        AnalyticPipeline ap = analyticPipelineEntityMgr.findByName(name);
+        AnalyticPipelineEntityNames apnames = new AnalyticPipelineEntityNames(ap);
+        return apnames;
+    }
 
     @Override
-    public String create(AnalyticPipeline config, Object... params) {
-        // TODO Auto-generated method stub
-        return null;
+    public String create(AnalyticPipelineEntityNames config, Object... params) {
+        AnalyticPipeline ap = analyticPipelineService.createAnalyticPipeline(config);
+        return ap.getName();
+    }
+
+    @Override
+    public List<AnalyticPipelineEntityNames> getAll() {
+        List<AnalyticPipelineEntityNames> result = new ArrayList<>();
+        for (AnalyticPipeline ap : analyticPipelineEntityMgr.findAll()) {
+            AnalyticPipelineEntityNames apnames = new AnalyticPipelineEntityNames(ap);
+            result.add(apnames);
+        }
+        return result;
     }
 }

@@ -24,13 +24,13 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/dataflows")
 public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInterface<DataFlow> {
-    
+
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowResource.class);
 
     @Autowired
     private DataFlowEntityMgr dataFlowEntityMgr;
-    
+
     @Autowired
     private DataFlowService modelQualityDataFlowService;
 
@@ -41,7 +41,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     public List<DataFlow> getDataFlows() {
         return getAll();
     }
-    
+
     @Override
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
@@ -49,7 +49,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     public String createDataFlow(@RequestBody DataFlow dataFlow) {
         return create(dataFlow);
     }
-    
+
     @Override
     @RequestMapping(value = "/{dataFlowName}", method = RequestMethod.GET)
     @ResponseBody
@@ -66,7 +66,6 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
         return createForProduction();
     }
 
-    @Override
     public DataFlow createForProduction() {
         return modelQualityDataFlowService.createLatestProductionDataFlow();
     }

@@ -66,7 +66,6 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
         return getByName(propDataConfigName);
     }
 
-    @Override
     public PropData createForProduction() {
         return propDataService.createLatestProductionPropData();
     }

@@ -28,7 +28,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
 
     @Autowired
     private SamplingEntityMgr samplingEntityMgr;
-    
+
     @Autowired
     private SamplingService samplingService;
 
@@ -64,7 +64,6 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
         return createForProduction();
     }
 
-    @Override
     public Sampling createForProduction() {
         return samplingService.createLatestProductionSamplingConfig();
     }

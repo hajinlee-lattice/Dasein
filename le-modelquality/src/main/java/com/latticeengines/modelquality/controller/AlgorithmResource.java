@@ -2,8 +2,6 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,9 +22,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/algorithms")
 public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudInterface<Algorithm> {
-
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AlgorithmResource.class);
 
     @Autowired
     private AlgorithmService algorithmService;
@@ -66,7 +61,6 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
         return getByName(algorithmName);
     }
 
-    @Override
     public Algorithm createForProduction() {
         return algorithmService.createLatestProductionAlgorithm();
     }
