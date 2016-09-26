@@ -4,7 +4,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.utilities.ServiceErrorUtility',
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.login.services.LoginService',
@@ -15,7 +14,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
+.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility,
                                          BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService) {
 
     $("body").addClass("login-body");
@@ -37,14 +36,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.showForgotPassword = false;
     $scope.forgotPasswordUsername = "";
     $scope.forgotPasswordErrorMessage = "";
-
-    // Initialize Evergage as an anonymous user
-    EvergageUtility.Initialize({
-        userID: null,
-        title: null,
-        datasetPrefix: "pls",
-        company: null
-    });
 
     // Controller methods
     $scope.loginClick = function () {
@@ -96,14 +87,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.getSessionDocument = function (tenant) {
         LoginService.GetSessionDocument(tenant).then(function(data) {
             if (data != null && data.Success === true) {
-                //Initialize Evergage
-                EvergageUtility.Initialize({
-                    userID: data.Result.User.Identifier,
-                    title: data.Result.User.Title,
-                    datasetPrefix: "pls",
-                    company: data.Ticket.Tenants[0].DisplayName
-                });
-
                 $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
             } else {
                 $scope.showLoginHeaderMessage(ResourceUtility.getString("LOGIN_UNKNOWN_ERROR"));

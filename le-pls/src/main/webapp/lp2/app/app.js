@@ -1,7 +1,6 @@
 //Initial load of the application    
 var mainApp = angular.module('mainApp', [
     'ui.bootstrap',
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
@@ -28,7 +27,7 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
     
@@ -69,14 +68,6 @@ var mainApp = angular.module('mainApp', [
             // Success
             function (data, status) {
                 if (data && data.Success === true) {
-                    //Initialize Evergage
-                    EvergageUtility.Initialize({
-                        userID: data.Result.User.Identifier, 
-                        title: data.Result.User.Title,
-                        datasetPrefix: "pls",
-                        company: data.Ticket.Tenants[0].DisplayName
-                    });
-                    
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
                     
                     startObservingUserActivtyThroughMouseAndKeyboard();

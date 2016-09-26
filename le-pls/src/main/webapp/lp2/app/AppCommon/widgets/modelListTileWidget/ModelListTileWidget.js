@@ -1,5 +1,4 @@
 angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.TrackingConstantsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
@@ -12,7 +11,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.models.modals.StaleModelModal'
 ])
 .controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, FeatureFlagService) {
+    TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal, StaleModelModal, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
