@@ -19,8 +19,11 @@ class EntityBase(object):
     def getEntityResource(self):
         return self._entityresource
 
+    def getConfig(self):
+        return self._config
+
     def printConfig(self):
         print json.dumps(self._config, indent=4)
 
-    def save(self):
+    def install(self):
         return self.getEntityResource().create(self._config)

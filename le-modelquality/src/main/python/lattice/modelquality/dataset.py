@@ -37,7 +37,8 @@ class Dataset(EntityBase):
         for scoring_data_set in config['scoring_data_sets']:
             ds.appendScoringDataset(scoring_data_set)
         ds.setTrainingHDFSPath(config['training_hdfs_path'])
-        ds.setTestHDFSPath(config['test_hdfs_path'])
+        if 'test_hdfs_path' in config:
+            ds.setTestHDFSPath(config['test_hdfs_path'])
         return ds
 
     def __init__(self, name):
@@ -47,8 +48,9 @@ class Dataset(EntityBase):
         self._config['customer_space'] = 'Unknown customer'
         self._config['industry'] = 'Unknown industry'
         self._config['dataSetType'] = 'FILE'
-        self._config['schemaInterpretation'] = 'SalesforceAccount'
+        self._config['schemaInterpretation'] = 'SalesforceLead'
         self._config['scoring_data_sets'] = []
+        self._config['training_hdfs_path'] = '/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv'
 
     def setName(self, name):
         self._config['name'] = name
