@@ -49,8 +49,8 @@ public class TableUnitTestNG {
     public void testDeduplicateAttributeNames() {
         table.deduplicateAttributeNames();
         assertNotNull(table.getAttribute("avro_1_200"));
-        assertNotNull(table.getAttribute("avro_1_200-1"));
-        assertNotNull(table.getAttribute("avro_1_200-2"));
+        assertNotNull(table.getAttribute("avro_1_200_1"));
+        assertNotNull(table.getAttribute("avro_1_200_2"));
     }
 
     private Table createTable() {

@@ -194,7 +194,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             String possibleName = rootAttributeName;
             int version = 0;
             while (nameSet.contains(possibleName)) {
-                possibleName = String.format(rootAttributeName + "-%d", ++version);
+                possibleName = String.format(rootAttributeName + "_%d", ++version);
             }
             nameSet.add(possibleName);
             if (version > 0) {
