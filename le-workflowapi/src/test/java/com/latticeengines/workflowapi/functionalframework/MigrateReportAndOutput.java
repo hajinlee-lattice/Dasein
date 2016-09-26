@@ -39,29 +39,35 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
     @Autowired
     private ReportService reportService;
 
-    @Test(groups = "functional")
-    public void migrate() throws JsonProcessingException, IOException {
+    @Test(groups = "manual")
+    public void migrate() {
         List<WorkflowJob> jobs = workflowJobEntityMgr.findAll();
         for (int i = 0; i < jobs.size(); i++) {
             WorkflowJob job = jobs.get(i);
             Long workflowId = job.getWorkflowId();
-
+            // 20122
             if (workflowId == null || job.getUserId().equals("DEFAULT_USER")
-                    || !StringUtils.isEmpty(job.getOutputContextString())
-                    || !StringUtils.isEmpty(job.getReportContextString())) {
+                    || StringUtils.isNotEmpty(job.getOutputContextString())
+                    || StringUtils.isNotEmpty(job.getReportContextString())) {
                 log.info("No workflowId, so skipping: " + job.getPid());
                 continue;
             }
             log.info(job.getPid());
-            JobExecution jobExecution = jobExplorer.getJobExecution(workflowId);
-            getReports(jobExecution, job);
-            getOutputs(jobExecution, job);
+
+            try {
+                JobExecution jobExecution = jobExplorer.getJobExecution(workflowId);
+                getReports(jobExecution, job);
+                getOutputs(jobExecution, job);
+            } catch (Exception e) {
+                log.error(e);
+            }
             workflowJobEntityMgr.update(job);
         }
     }
 
     @SuppressWarnings("rawtypes")
-    private void getReports(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException, IOException {
+    private void getReports(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException,
+            IOException {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.REPORTS);
 
@@ -92,17 +98,18 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
             }
         } else {
             JsonNode json = new ObjectMapper().readTree(String.valueOf(contextObj));
-            Iterator<Entry<String, JsonNode>> iterator =  json.fields();
+            Iterator<Entry<String, JsonNode>> iterator = json.fields();
             Entry<String, JsonNode> entry = null;
-            for(; iterator.hasNext(); ){
+            for (; iterator.hasNext();) {
                 entry = iterator.next();
                 workflowJob.setReportName(entry.getKey(), entry.getValue().asText());
             }
-            
+
         }
     }
 
-    private void getOutputs(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException, IOException {
+    private void getOutputs(JobExecution jobExecution, WorkflowJob workflowJob) throws JsonProcessingException,
+            IOException {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
 
@@ -119,13 +126,13 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
             }
         } else {
             JsonNode json = new ObjectMapper().readTree(String.valueOf(contextObj));
-            Iterator<Entry<String, JsonNode>> iterator =  json.fields();
+            Iterator<Entry<String, JsonNode>> iterator = json.fields();
             Entry<String, JsonNode> entry = null;
-            for(; iterator.hasNext(); ){
+            for (; iterator.hasNext();) {
                 entry = iterator.next();
                 workflowJob.setOutputContextValue(entry.getKey(), entry.getValue().asText());
             }
-            
+
         }
 
     }
