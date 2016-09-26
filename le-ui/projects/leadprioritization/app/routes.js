@@ -511,6 +511,43 @@ angular
                 }   
             }
         })
+        .state('home.marketosettings.edit', {
+            url: '/edit/{id}',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings > Edit Credential',
+            },
+            views: {
+                "summary@": {
+                    resolve: {
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_APIKEY';
+                        }
+                    },
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": {
+                    resolve: {
+                        MarketoCredential: function($q, $stateParams, MarketoService) {
+                            var deferred = $q.defer();
+                            var id = $stateParams.id;
+
+                            MarketoService.GetMarketoCredentials(id).then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'MarketoCredentialsEditController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/marketo/views/AddCredentialFormView.html'
+                }
+            }
+        })
         .state('home.marketosettings.enrichment', {
             url: '/enrichment/{id}',
             params: {
@@ -531,22 +568,21 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        EnrichmentData: function($q, $stateParams, EnrichmentStore) {
+                        MarketoCredential: function($q, $stateParams, MarketoService) {
                             var deferred = $q.defer();
                             var id = $stateParams.id;
 
-                            EnrichmentStore.getEnrichments(id).then(function(result) {
+                            MarketoService.GetMarketoCredentials(id).then(function(result) {
                                 deferred.resolve(result);
                             });
 
                             return deferred.promise;
                         },
-                        MarketoCredentialsData: function($q, $stateParams, MarketoService) {
+                        MarketoMatchFields: function($q, MarketoCredential) {
                             var deferred = $q.defer();
-                            var id = '';//$stateParams.id;
 
-                            MarketoService.GetMarketoCredentials(id).then(function(result) {
-                                deferred.resolve(result);
+                            MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
+                                deferred.resolve(result.data);
                             });
 
                             return deferred.promise;

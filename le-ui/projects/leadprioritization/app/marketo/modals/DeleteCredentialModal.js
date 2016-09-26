@@ -28,28 +28,20 @@ angular.module('mainApp.marketo.modals.DeleteCredentialModal', [
     };
 })
 .controller('DeleteCredentialController', function ($scope, $rootScope, $state, ResourceUtility, MarketoService) {
-    var vm = this;
-    vm.ResourceUtility = ResourceUtility;
+    $scope.ResourceUtility = ResourceUtility;
 
-    vm.deleteCredentialClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-        updateAsDeletedCredential(credentialId);
-    };
-
-    function updateAsDeletedCredential(credentialId) {
+    $scope.deleteCredentialClick = function () {
         $("#deleteModelError").hide();
-        MarketoService.DeleteMarketoCredential(credentialId).then(function(result) {
+        MarketoService.DeleteMarketoCredential($scope.credentialId).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
                 $state.go('home.marketosettings.apikey', {}, { reload: true } );
             } else {
-                // $scope.deleteCredentialErrorMessage = result.ResultErrors;
+                $scope.deleteCredentialErrorMessage = result.ResultErrors;
                 $("#deleteModelError").fadeIn();
             }
         });
-    }
+    };
 
     $scope.cancelClick = function () {
         $("#modalContainer").modal('hide');

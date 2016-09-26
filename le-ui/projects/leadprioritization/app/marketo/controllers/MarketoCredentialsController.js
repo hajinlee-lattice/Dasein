@@ -17,7 +17,8 @@ angular.module('lp.marketo', [
 		restEndpoint: '',
 		restIdentityEndpoint: '',
 		restClientId: '',
-		restClientSecret: ''
+		restClientSecret: '',
+		state: 'create'
     });
     // $scope.credentialIsSetup = false;
     // $scope.credentials = MarketoCredentials.resultObj;
@@ -43,36 +44,60 @@ angular.module('lp.marketo', [
 	};
 	
 }])
+.controller('MarketoCredentialsEditController', ['MarketoCredential', 'MarketoService', '$state', '$stateParams', function(MarketoCredential, MarketoService, $state, $stateParams) {
+
+    var vm = this;
+    angular.extend(vm, {
+		credential: MarketoCredential,
+    	credentialId: $stateParams.id,
+		credentialName: MarketoCredential.name,
+		soapEndpoint: MarketoCredential.soap_endpoint,
+		soapUserId: MarketoCredential.soap_user_id,
+		soapEncryptionKey: MarketoCredential.soap_encryption_key,
+		restEndpoint: MarketoCredential.rest_endpoint,
+		restIdentityEndpoint: MarketoCredential.rest_identity_endpoint,
+		restClientId: MarketoCredential.rest_client_id,
+		restClientSecret: MarketoCredential.rest_client_secret,
+		state: 'edit'
+    });
+
+	vm.saveCredentialClicked = function() {
+		var credential = {
+            credentialName: vm.credentialName,
+            soapEndpoint: vm.soapEndpoint,
+            soapUserId: vm.soapUserId,
+            soapEncryptionKey: vm.soapEncryptionKey,
+            restEndpoint: vm.restEndpoint,
+            restIdentityEndpoint: vm.restIdentityEndpoint,
+            restClientId: vm.restClientId,
+            restClientSecret: vm.restClientSecret
+		};
+
+		MarketoService.UpdateMarketoCredential(vm.credentialId, credential).then(function(result) {
+			if (result.success) {
+				$state.go('home.marketosettings.apikey');
+			} else {
+
+			}
+		});
+	}
+
+}])
 .controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
     var vm = this;
-
-    credId = vm.credential.credential_id;
 
     angular.extend(vm, {
 		credentials: MarketoCredentials
     });
 
-    vm.setupCredentialClick = function($event){
-		console.log("jump into Ben's flow");
-	}
-
-	vm.editCredentialClick = function($event){
-		console.log("edit credential");	
-	}
-
-	vm.deleteCredentialClick = function($event){
-		if ($event != null) {
-            $event.stopPropagation();
-        }
-        DeleteCredentialModal.show(credId);
+	vm.deleteCredentialClicked = function(credentialId) {
+        DeleteCredentialModal.show(credentialId);
 	}
 
 	vm.init = function() {
         _.each(vm.credentials, function(value, key){
 
         	vm.credential = value;
-
-        	console.log(vm.credential.credential_id);
 
 			if(value.enrichment.marketo_match_fields[0].marketoFieldName == null){
 				vm.credentialIsSetup = false;

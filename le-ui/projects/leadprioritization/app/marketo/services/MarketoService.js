@@ -78,7 +78,10 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
-                result = response.data;
+                var result = {
+                    data: response.data,
+                    success: true
+                };
                 deferred.resolve(result);
                 $state.go('home.marketosettings.apikey');
             }, function onError(response) {
@@ -96,7 +99,7 @@ angular
 
     this.DeleteMarketoCredential = function(credentialId) {
         var deferred = $q.defer(),
-            result,
+            result = {},
             url = '/pls/marketo/credentials/' + credentialId;
 
         $http({
@@ -107,7 +110,10 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
+                result = {
+                    data: response.data,
+                    success: true
+                };
                 deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
@@ -122,16 +128,17 @@ angular
         return deferred.promise;
     }
 
-    this.UpdateMarketoCredential = function(credentialId, marketoCredential) {
+    this.UpdateMarketoCredential = function(credentialId, credential) {
         var deferred = $q.defer(),
             data = {
-                soapEndpoint: credential.soapEndpoint,
-                soapUserId: credential.soapUserId,
-                soapEncryptionKey: credential.soapEncryptionKey,
-                restEndpoint: credential.restEndpoint,
-                restIdentityEndpoint: credential.restIdentityEndpoint,
-                restClientId: credential.restClientId,
-                restClientSecret: credential.restClientSecret
+                name: credential.credentialName,
+                soap_endpoint: credential.soapEndpoint,
+                soap_user_id: credential.soapUserId,
+                soap_encryption_key: credential.soapEncryptionKey,
+                rest_endpoint: credential.restEndpoint,
+                rest_identity_endpoint: credential.restIdentityEndpoint,
+                rest_client_id: credential.restClientId,
+                rest_client_secret: credential.restClientSecret
             };
 
         $http({
@@ -141,7 +148,44 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
-                result = response.data;
+                var result = {
+                    data: response.data,
+                    success: true
+                };
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        )
+
+        return deferred.promise;
+    }
+
+    this.GetMarketoMatchFields = function(credential) {
+        var deferred = $q.defer(),
+            result = {},
+            url = '/pls/marketo/credentials/matchfields';
+
+        $http({
+            method: 'GET',
+            url: url,
+            params: {
+                'marketoSoapEndpoint': credential.soapEndpoint,
+                'marketoSoapUserId': credential.soapUserId,
+                'marketoSoapEncryptionKey': credential.soapEncryptionKey
+            },
+            headers: { 'Content-Type': 'application/json' }
+        }).then(
+            function onSuccess(response) {
+                var result = {
+                    data: response.data,
+                    success: true
+                };
                 deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
