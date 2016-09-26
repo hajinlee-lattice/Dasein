@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.ScoringFieldMappingDocument;
 
 public interface ScoringFileMetadataService {
 
@@ -18,10 +17,10 @@ public interface ScoringFileMetadataService {
 
     Table registerMetadataTable(SourceFile sourceFile, String modelId);
 
-    FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName,
-            String modelId);
+    FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId);
 
-    void saveFieldMappingDocument(String csvFileName, String modelId, FieldMappingDocument fieldMappingDocument);
+    void saveFieldMappingDocument(String csvFileName, String modelId,
+            FieldMappingDocument fieldMappingDocument);
 
     Set<String> getHeaderFields(String csvFileName);
 
