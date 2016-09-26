@@ -100,6 +100,9 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
 
     public void setSamplingPropertyDefs(List<SamplingPropertyDef> samplingPropertyDefs) {
         this.samplingPropertyDefs = samplingPropertyDefs;
+        for (SamplingPropertyDef samplingPropertyDef: samplingPropertyDefs) {
+            samplingPropertyDef.setSampling(this);
+        }
     }
 
     public void addSamplingPropertyDef(SamplingPropertyDef samplingPropertyDef) {

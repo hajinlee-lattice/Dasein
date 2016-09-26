@@ -95,6 +95,9 @@ public class SamplingPropertyDef implements HasName, HasPid {
 
     public void setSamplingPropertyValues(List<SamplingPropertyValue> samplingPropertyValues) {
         this.samplingPropertyValues = samplingPropertyValues;
+        for (SamplingPropertyValue samplingPropertyValue : samplingPropertyValues) {
+            samplingPropertyValue.setSamplingPropertyDef(this);
+        }
     }
 
     public void addSamplingPropertyValue(SamplingPropertyValue samplingPropertyValue) {

@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_ANALYTIC_TEST", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_ANALYTIC_TEST", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AnalyticTest implements HasName, HasPid {
 
@@ -41,19 +41,19 @@ public class AnalyticTest implements HasName, HasPid {
     @JsonProperty("data_sets")
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", //
-    joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, //
-    inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
+            joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, //
+            inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
     private List<DataSet> dataSets = new ArrayList<>();
 
     @JsonProperty("match_type")
     @Column(name = "MATCH_TYPE", nullable = false)
     private PropDataMatchType propDataMatchType;
-    
+
     @JsonProperty("analytic_pipelines")
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", //
-    joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, //
-    inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+            joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, //
+            inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
     private List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
 
     @Override
@@ -92,5 +92,12 @@ public class AnalyticTest implements HasName, HasPid {
         this.propDataMatchType = propDataMatchType;
     }
 
-    
+    public List<AnalyticPipeline> getAnalyticPipelines() {
+        return this.analyticPipelines;
+    }
+
+    public void setAnalyticPipelines(List<AnalyticPipeline> analyticPipelines) {
+        this.analyticPipelines = analyticPipelines;
+    }
+
 }
