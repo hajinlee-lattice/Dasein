@@ -3,22 +3,22 @@ package com.latticeengines.scoringapi.exposed.context;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 
-public class SingleRecordMeasurement extends BaseMeasurement<RequestMetrics, RequestMetrics>
-implements Measurement<RequestMetrics, RequestMetrics> {
+public class SingleRecordMeasurement extends BaseMeasurement<ScoreRequestMetrics, ScoreRequestMetrics> implements
+        Measurement<ScoreRequestMetrics, ScoreRequestMetrics> {
 
-    private RequestMetrics requestMetrics;
+    private ScoreRequestMetrics requestMetrics;
 
-    public SingleRecordMeasurement(RequestMetrics requestMetrics) {
+    public SingleRecordMeasurement(ScoreRequestMetrics requestMetrics) {
         this.requestMetrics = requestMetrics;
     }
 
     @Override
-    public RequestMetrics getDimension() {
+    public ScoreRequestMetrics getDimension() {
         return requestMetrics;
     }
 
     @Override
-    public RequestMetrics getFact() {
+    public ScoreRequestMetrics getFact() {
         return requestMetrics;
     }
 

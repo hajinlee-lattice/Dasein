@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -27,8 +26,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
-import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
@@ -39,27 +36,20 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreMod
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
-import com.latticeengines.domain.exposed.scoringapi.Warnings;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.scoringapi.enrich.EnrichRequestProcessor;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
-import com.latticeengines.scoringapi.exposed.context.RequestMetrics;
+import com.latticeengines.scoringapi.exposed.context.ScoreRequestMetrics;
 import com.latticeengines.scoringapi.exposed.context.SingleRecordMeasurement;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
-public abstract class BaseScoring {
+public abstract class BaseScoring extends CommonBase {
 
-    private static final String REQUEST_DURATION_MS = "requestDurationMS";
+    private static final Log log = LogFactory.getLog(BaseScoring.class);
 
     private static final String SOURCE = "Source";
 
     private static final String TOTAL_RECORDS = "TotalRecords";
-
-    private static final String IS_BULK_REQUEST = "IsBulkRequest";
-
-    private static final String IS_ENRICHMENT_REQUESTED = "IsEnrichmentRequested";
 
     private static final String ID_TYPE = "IdType";
 
@@ -81,25 +71,13 @@ public abstract class BaseScoring {
 
     private static final String ERROR = "error";
 
-    private static final String HAS_WARNING = "HasWarning";
-
-    private static final String HAS_ERROR = "HasError";
-
-    private static final String WARNINGS = "Warnings";
-
     private static final String RECORD_CARDINALITY = "RecordCardinality";
 
     private static final String GET_TENANT_FROM_OAUTH = "getTenantFromOAuth";
 
-    private static final String CREDENTIAL_ID = "credentialId";
-
     protected static final int MAX_ALLOWED_RECORDS = 200;
 
     private static final String TOTAL_TIME_PREFIX = "total_";
-
-    private static final String MDC_CUSTOMERSPACE = "customerspace";
-
-    private static final Log log = LogFactory.getLog(BaseScoring.class);
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
 
@@ -109,25 +87,10 @@ public abstract class BaseScoring {
     protected OAuthUserEntityMgr oAuthUserEntityMgr;
 
     @Autowired
-    private HttpStopWatch httpStopWatch;
-
-    @Autowired
-    private MetricService metricService;
-
-    @Autowired
     private ModelRetriever modelRetriever;
 
     @Autowired
-    private EnrichRequestProcessor enrichRequestProcessor;
-
-    @Autowired
     private ScoreRequestProcessor scoreRequestProcessor;
-
-    @Autowired
-    private RequestInfo requestInfo;
-
-    @Autowired
-    private Warnings warnings;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
@@ -214,7 +177,7 @@ public abstract class BaseScoring {
 
             requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
-            RequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace);
+            ScoreRequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace);
             SingleRecordMeasurement measurement = new SingleRecordMeasurement(metrics);
             metricService.write(MetricDB.SCORING, measurement);
 
@@ -222,60 +185,28 @@ public abstract class BaseScoring {
         }
     }
 
-    private RequestMetrics generateMetrics(ScoreRequest scoreRequest, ScoreResponse response,
+    private ScoreRequestMetrics generateMetrics(ScoreRequest scoreRequest, ScoreResponse response,
             CustomerSpace customerSpace) {
-        RequestMetrics metrics = new RequestMetrics();
+        ScoreRequestMetrics metrics = new ScoreRequestMetrics();
         metrics.setHasWarning(warnings.hasWarnings());
         metrics.setScore((int) response.getScore());
         metrics.setSource(StringUtils.trimToEmpty(scoreRequest.getSource()));
         metrics.setRule(StringUtils.trimToEmpty(scoreRequest.getRule()));
         metrics.setTenantId(customerSpace.toString());
         metrics.setModelId(scoreRequest.getModelId());
+        metrics.setIsEnrich(scoreRequest.isPerformEnrichment());
 
         Map<String, String> splits = httpStopWatch.getSplits();
         metrics.setGetTenantFromOAuthDurationMS(getSplit(splits, "getTenantFromOAuthDurationMS"));
-        metrics.setMatchRecordDurationMS(getSplit(splits, "matchRecordDurationMS"));
+        metrics.setMatchRecordDurationMS(getSplit(splits, MATCH_RECORD_DURATION_MS));
         metrics.setParseRecordDurationMS(getSplit(splits, "parseRecordDurationMS"));
         metrics.setRequestDurationMS(getSplit(splits, REQUEST_DURATION_MS));
-        metrics.setRequestPreparationDurationMS(getSplit(splits, "requestPreparationDurationMS"));
+        metrics.setRequestPreparationDurationMS(getSplit(splits, REQUEST_PREPARATION_DURATION_MS));
         metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
         metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
         metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
 
         return metrics;
-    }
-
-    protected EnrichResponse enrichRecord(HttpServletRequest request, EnrichRequest enrichRequest,
-            CustomerSpace customerSpace, String credentialId) {
-        requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
-        requestInfo.put(CREDENTIAL_ID, credentialId);
-        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            httpStopWatch.split("parseUuid");
-            if (log.isInfoEnabled()) {
-                log.info(JsonUtils.serialize(enrichRequest));
-            }
-            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest);
-            if (warnings.hasWarnings()) {
-                response.setWarnings(warnings.getWarnings());
-                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
-            }
-            if (log.isInfoEnabled()) {
-                log.info(JsonUtils.serialize(response));
-            }
-
-            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings()));
-            requestInfo.put(HAS_ERROR, Boolean.toString(false));
-            requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
-            requestInfo.put(IS_ENRICHMENT_REQUESTED, Boolean.toString(true));
-
-            requestInfo.logSummary(requestInfo.getStopWatchSplits());
-
-            return response;
-        }
-    }
-
-    private int getSplit(Map<String, String> splits, String key) {
-        return Integer.valueOf(splits.get(key));
     }
 
     private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,

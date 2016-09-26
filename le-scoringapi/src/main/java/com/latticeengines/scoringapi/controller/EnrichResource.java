@@ -19,12 +19,12 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
 import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
-import com.latticeengines.scoringinternalapi.controller.BaseScoring;
+import com.latticeengines.scoringinternalapi.controller.BaseEnrich;
 
 @Api(value = "enrich", description = "REST resource for retrieving enrichment values")
 @RestController
 @RequestMapping(value = "/enrich")
-public class EnrichResource extends BaseScoring {
+public class EnrichResource extends BaseEnrich {
 
     @RequestMapping(value = "/record/{uuid}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
