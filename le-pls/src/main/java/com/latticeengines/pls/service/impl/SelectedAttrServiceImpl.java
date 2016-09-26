@@ -229,15 +229,15 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
                 }
             }
 
+            if (column.getSubcategory() == null) {
+                // TODO - remove this once backend support for subcategory
+                // is implemented
+                column.setSubcategory(DUMMY_SUBCATEGORY);
+            }
+
             if (category != null) {
                 if (column.getCategory() != category) {
                     continue;
-                }
-
-                if (column.getSubcategory() == null) {
-                    // TODO - remove this once backend support for subcategory
-                    // is implemented
-                    column.setSubcategory(DUMMY_SUBCATEGORY);
                 }
 
                 if (subcategory != null && column.getSubcategory() != null
@@ -289,6 +289,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
         attr.setIsPremium(column.isPremium());
         attr.setCategory(column.getCategory().toString());
+        attr.setSubcategory(column.getSubcategory().toString());
         superimposedList.add(attr);
     }
 

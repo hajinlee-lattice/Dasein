@@ -1,8 +1,10 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,10 +72,14 @@ public class EnrichmentResource {
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
             @ApiParam(value = "Category", required = true) //
             @RequestParam String category) {
-        List<String> subcategories = new ArrayList<String>();
-        subcategories.add(DUMMY_SUBCATEGORY);
-        // once backend support is there, use that for getting subcategories
-        return subcategories;
+        Set<String> subcategories = new HashSet<String>();
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, category, null, false,
+                null, null);
+
+        for (LeadEnrichmentAttribute attr : allAttributes) {
+            subcategories.add(attr.getSubcategory());
+        }
+        return new ArrayList<String>(subcategories);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //

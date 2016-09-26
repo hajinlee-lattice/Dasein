@@ -258,7 +258,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
                     Assert.assertNotNull(matchedResult.get("AlexaGBUsers"));
                     Assert.assertNotNull(matchedResult.get("CloudTechnologies_WCMS"));
                     Assert.assertNotNull(matchedResult.get("AlexaAUUsers"));
-                    Assert.assertNotNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
+                    Assert.assertNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
                     Assert.assertNull(matchedResult.get("HPA_New_Pivoted_Source_IsMatched"));
                 } else {
                     Assert.assertTrue(false, columnSelection.toString());

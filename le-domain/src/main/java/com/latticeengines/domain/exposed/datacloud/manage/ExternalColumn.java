@@ -46,7 +46,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @Id
     @Column(name = "ExternalColumnID", nullable = false, length = 100)
     private String externalColumnID;
-    
+
     @Column(name = "DefaultColumnName", nullable = false, length = 100)
     private String defaultColumnName;
 
@@ -65,6 +65,9 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @Enumerated(EnumType.STRING)
     @Column(name = "Category", nullable = false, length = 50)
     private Category category;
+
+    @Column(name = "SubCategory", nullable = true, length = 200)
+    private String subCategory;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "StatisticalType", nullable = true, length = 50)
@@ -107,21 +110,21 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     public void setExternalColumnID(String externalColumnID) {
         this.externalColumnID = externalColumnID;
     }
-    
+
     @Transient
     public String getColumnId() {
         return externalColumnID;
     }
-    
-    @JsonIgnore
-    public String getDefaultColumnName() {
-		return defaultColumnName;
-	}
 
     @JsonIgnore
-	public void setDefaultColumnName(String defaultColumnName) {
-		this.defaultColumnName = defaultColumnName;
-	}
+    public String getDefaultColumnName() {
+        return defaultColumnName;
+    }
+
+    @JsonIgnore
+    public void setDefaultColumnName(String defaultColumnName) {
+        this.defaultColumnName = defaultColumnName;
+    }
 
     @JsonIgnore
     public String getTablePartition() {
@@ -172,6 +175,16 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonIgnore
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    @JsonIgnore
+    public String getSubCategory() {
+        return subCategory;
+    }
+
+    @JsonIgnore
+    public void setSubCategory(String subCategory) {
+        this.subCategory = subCategory;
     }
 
     @JsonIgnore
@@ -265,9 +278,11 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonIgnore
     public List<ApprovedUsage> getApprovedUsageList() {
         List<ApprovedUsage> approvedUsages = new ArrayList<>();
-        if (StringUtils.isEmpty(approvedUsage)) {  return approvedUsages; }
+        if (StringUtils.isEmpty(approvedUsage)) {
+            return approvedUsages;
+        }
         List<String> tokens = Arrays.asList(approvedUsage.split(","));
-        for (String token: tokens) {
+        for (String token : tokens) {
             approvedUsages.add(ApprovedUsage.fromName(token));
         }
         return approvedUsages;
@@ -276,7 +291,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonIgnore
     public void setApprovedUsageList(List<ApprovedUsage> approvedUsages) {
         List<String> tokens = new ArrayList<>();
-        for (ApprovedUsage usage: approvedUsages) {
+        for (ApprovedUsage usage : approvedUsages) {
             tokens.add(usage.getName());
         }
         this.approvedUsage = StringUtils.join(tokens, ",");
@@ -286,8 +301,10 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     private List<String> getApprovedUsageJson() {
         List<String> tokens = new ArrayList<>();
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
-        if (approvedUsages.isEmpty()) {  return tokens; }
-        for (ApprovedUsage approvedUsage: approvedUsages) {
+        if (approvedUsages.isEmpty()) {
+            return tokens;
+        }
+        for (ApprovedUsage approvedUsage : approvedUsages) {
             tokens.add(approvedUsage.getName());
         }
         return tokens;
@@ -296,7 +313,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonProperty("ApprovedUsage")
     private void setApprovedUsageJson(List<String> tokens) {
         List<ApprovedUsage> approvedUsages = new ArrayList<>();
-        for (String token: tokens) {
+        for (String token : tokens) {
             approvedUsages.add(ApprovedUsage.fromName(token));
         }
         setApprovedUsageList(approvedUsages);
@@ -305,7 +322,9 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonIgnore
     public List<String> getTagList() {
         List<String> tags = new ArrayList<>();
-        if (StringUtils.isEmpty(this.tags)) {  return tags; }
+        if (StringUtils.isEmpty(this.tags)) {
+            return tags;
+        }
         tags = Arrays.asList(this.tags.split(","));
         return tags;
     }
@@ -313,7 +332,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
     @JsonIgnore
     public void setTagList(List<String> tags) {
         List<String> tokens = new ArrayList<>();
-        for (String tag: tags) {
+        for (String tag : tags) {
             tokens.add(tag);
         }
         this.tags = StringUtils.join(tokens, ",");
@@ -328,6 +347,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         metadata.setDataType(getDataType());
         metadata.setDisplayName(getDisplayName());
         metadata.setCategory(getCategory());
+        metadata.setSubcategory(getSubCategory());
         metadata.setStatisticalType(getStatisticalType());
         metadata.setFundamentalType(getFundamentalType());
         metadata.setApprovedUsageList(getApprovedUsageList());

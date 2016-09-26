@@ -36,6 +36,9 @@ public class LeadEnrichmentAttribute {
     @JsonProperty("Category")
     private String category;
 
+    @JsonProperty("Subcategory")
+    private String subcategory;
+
     public String getDisplayName() {
         return displayName;
     }
@@ -115,4 +118,13 @@ public class LeadEnrichmentAttribute {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+
 }

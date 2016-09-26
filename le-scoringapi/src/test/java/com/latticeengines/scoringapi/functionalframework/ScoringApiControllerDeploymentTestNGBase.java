@@ -324,7 +324,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected List<Integer> getExpectedScoresForScoreCorrectness() {
         List<Integer> expectedScores = new ArrayList<>();
         expectedScores.add(99);
-        expectedScores.add(48);
+        expectedScores.add(47);
         expectedScores.add(89);
         expectedScores.add(88);
         return expectedScores;

@@ -31,7 +31,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cQ";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cRea";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -300,7 +300,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
-        assertEquals(count.intValue(), 2);
+        assertEquals(count.intValue(), 3);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -320,7 +320,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
-                Category.WEBSITE_PROFILE);
+                Category.TECHNOLOGY_PROFILE);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
@@ -332,7 +332,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
-                Category.WEBSITE_PROFILE);
+                Category.TECHNOLOGY_PROFILE);
         assertNotNull(combinedAttributeList);
         assertTrue(combinedAttributeList.isEmpty());
 

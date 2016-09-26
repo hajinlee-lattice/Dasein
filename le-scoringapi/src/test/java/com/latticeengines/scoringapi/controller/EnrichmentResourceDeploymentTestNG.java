@@ -25,7 +25,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cQ";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cRea";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -271,6 +271,9 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertNotNull(selectedAttributeList);
         Assert.assertFalse(selectedAttributeList.isEmpty());
         Assert.assertEquals(selectedAttributeList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
+        for (LeadEnrichmentAttribute attr: selectedAttributeList) {
+            Assert.assertNotNull(attr.getSubcategory());
+        }
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -294,7 +297,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count.intValue(), 2);
+        Assert.assertEquals(count.intValue(), 3);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -314,7 +317,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
-                Category.WEBSITE_PROFILE);
+                Category.TECHNOLOGY_PROFILE);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
 

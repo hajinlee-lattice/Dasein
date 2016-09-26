@@ -95,7 +95,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
 
         DebugScoreResponse scoreResponse = response.getBody();
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
-        double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
+        double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
         Assert.assertTrue(difference < 0.1);
     }
 
