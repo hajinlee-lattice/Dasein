@@ -1,6 +1,7 @@
 package com.latticeengines.pls.util;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -10,13 +11,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.testng.annotations.Test;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ValidateFileHeaderUtilsUnitTestNG {
 
@@ -80,5 +87,45 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         String malformedName = "2name?*wer23";
         String expectedString = "avro_2name__wer23";
         assertEquals(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(malformedName), expectedString);
+
+        Table table = new Table();
+        Attribute duplicateAttribute1 = new Attribute();
+        duplicateAttribute1.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat("1-200"));
+        Attribute duplicateAttribute2 = new Attribute();
+        duplicateAttribute2.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat("avro_1_200"));
+        Attribute duplicateAttribute3 = new Attribute();
+        duplicateAttribute3.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat("1_200"));
+        table.addAttribute(duplicateAttribute1);
+        table.addAttribute(duplicateAttribute2);
+        table.addAttribute(duplicateAttribute3);
+        table.deduplicateAttributeNames();
+        List<Attribute> attributes = table.getAttributes();
+        final List<String> expectedNames = new ArrayList<String>();
+        expectedNames.add("avro_1_200");
+        expectedNames.add("avro_1_200_1");
+        expectedNames.add("avro_1_200_2");
+        boolean allExpectedNamesAreAvroFriendly = Iterables.all(expectedNames, new Predicate<String>() {
+            @Override
+            public boolean apply(String input) {
+                return ValidateFileHeaderUtils.columnIsAvroFriendly(input);
+            }
+        });
+        assertTrue(allExpectedNamesAreAvroFriendly);
+
+        boolean convertAndDedupeAreRight = Iterables.any(table.getAttributes(), new Predicate<Attribute>() {
+            @Override
+            public boolean apply(Attribute input) {
+                return expectedNames.contains(input.getName());
+            }
+        });
+        assertTrue(convertAndDedupeAreRight);
+    }
+
+    @Test(groups = "unit")
+    public void testColumnIsAvroFriendly() {
+        String malformedName = "2name?*wer23";
+        assertFalse(ValidateFileHeaderUtils.columnIsAvroFriendly(malformedName));
+        String correctformedName = "avro_2name_23";
+        assertTrue(ValidateFileHeaderUtils.columnIsAvroFriendly(correctformedName));
     }
 }
