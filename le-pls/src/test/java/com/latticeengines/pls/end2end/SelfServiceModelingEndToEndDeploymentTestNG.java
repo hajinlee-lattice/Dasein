@@ -85,6 +85,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
+    private ModelSummary copiedModelSummary;
     private ModelSummary clonedModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
@@ -94,6 +95,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
+        testBed.bootstrapForProduct(LatticeProduct.LPA3);
         log.info("Test environment setup finished.");
         saveAttributeSelection(CustomerSpace.parse(tenantToAttach.getName()));
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
@@ -139,8 +141,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         sourceFile.setSchemaInterpretation(schemaInterpretation);
-        ResponseDocument response = restTemplate
-                .getForObject(String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
+        ResponseDocument response = restTemplate.getForObject(
+                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
                         sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
@@ -161,8 +163,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
-        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
-                getRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
+        restTemplate.postForObject(
+                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
+                        sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -260,11 +263,57 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(errors.length() > 0);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummary")
+    public void copyModel() {
+        ResponseDocument response = getRestTemplate().postForObject(
+                String.format("%s/pls/models/copymodel/%s?targetTenantId=%s", getRestAPIHostPort(),
+                        originalModelSummary.getId(), testBed.getTestTenants().get(1).getId()), //
+                null, ResponseDocument.class);
+        Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
+        assertTrue(res);
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "copyModel", timeOut = 1200000, enabled = true)
+    public void retrieveModelSummaryForCopiedModel() throws InterruptedException, IOException {
+        tenantToAttach = testBed.getTestTenants().get(1);
+        testBed.switchToSuperAdmin(tenantToAttach);
+        copiedModelSummary = getModelSummary(modelName);
+        assertNotNull(copiedModelSummary);
+        assertEquals(copiedModelSummary.getSourceSchemaInterpretation(),
+                originalModelSummary.getSourceSchemaInterpretation());
+        assertNotNull(copiedModelSummary.getTrainingTableName());
+        assertFalse(copiedModelSummary.getTrainingTableName().isEmpty());
+        // Inspect some predictors
+        String rawModelSummary = copiedModelSummary.getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode predictors = modelSummaryJson.get("Predictors");
+        for (int i = 0; i < predictors.size(); ++i) {
+            JsonNode predictor = predictors.get(i);
+            if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
+                if (predictor.get("Name").asText().equals("Some_Column")) {
+                    JsonNode tags = predictor.get("Tags");
+                    assertEquals(tags.size(), 1);
+                    assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
+                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                    assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
+                } else if (predictor.get("Name").asText().equals("Industry")) {
+                    JsonNode approvedUsages = predictor.get("ApprovedUsage");
+                    assertEquals(approvedUsages.size(), 1);
+                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
+                }
+            }
+        }
+        scoreCompareService.analyzeScores(tenantToAttach.getId(), RESOURCE_BASE + "/" + fileName,
+                copiedModelSummary.getId(), 687);
+
+    }
+
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForCopiedModel" })
     public void cloneAndRemodel() {
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
-                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), originalModelSummary.getId()),
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), copiedModelSummary.getId()),
                 List.class);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Object rawField : rawFields) {
@@ -286,7 +335,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setDisplayName(MODEL_DISPLAY_NAME);
         parameters.setDescription("clone");
         parameters.setAttributes(fields);
-        parameters.setSourceModelSummaryId(originalModelSummary.getId());
+        parameters.setSourceModelSummaryId(copiedModelSummary.getId());
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
 
         ResponseDocument<?> response;
@@ -315,8 +364,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
-                SchemaInterpretation.SalesforceLead.toString());
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -363,8 +411,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = getRestTemplate()
-                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = getRestTemplate().getForObject(
+                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -514,14 +562,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void assertJobExistsWithModelIdAndModelName(final String jobModelId) {
         log.info(String.format("The model_id is: %s", jobModelId));
         @SuppressWarnings("unchecked")
-        List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
-                List.class);
+        List<Object> rawJobs = restTemplate
+                .getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
-                        .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
+                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
+                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
+                                .equals(MODEL_DISPLAY_NAME);
             }
         }));
     }
