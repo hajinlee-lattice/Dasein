@@ -74,46 +74,29 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
-        return new Object[][] {
-                { "Mulesoft_doman_derived",
-                        "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904_domain.csv" }, //
-                { "Qlik_doman_derived", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437_domain.csv" }, //
-                { "HootSuite_domain_derived",
-                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631_domain.csv" }, //
-                { "CornerStone_domain_derived", "CornerStone_domain.csv" }, //
-                { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
-                { "Tek_domain_derived", "Tek_domain.csv" }, //
-                { "Tenable_domain", "Tenable_domain.csv" }, //
-                { "bams_domain", "bams_domain.csv" }, //
+        return new Object[][] { { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
+                { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
+                { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
+                { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
+                { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
+                { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
+                { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
+                { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
 
-        };
-    }
-
-    @DataProvider(name = "getDerivedColumnCsvFile")
-    public Object[][] getAccountDerivedColumnCsvFile2() {
-        return new Object[][] {
-                { "MuleSoftDerivedColumn", "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904.csv" }, //
-                { "QlikDerivedColumn", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437.csv" }, //
-                { "LatticeDerivedColumn", "Lattice_Relaunch_LP3_ModelingLead_OneLeadPerDomain_20160520_161932.csv" }, //
-                { "HootSuiteDerivedColumn",
-                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv" }, //
         };
     }
 
     @DataProvider(name = "getDerivedColumnCsvFile")
     public Object[][] getAccountDerivedColumnCsvFile() {
         return new Object[][] {
-                { "Mulesoft_doman_derived",
-                        "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_NA_20160808_135904_domain.csv" }, //
-                { "Qlik_doman_derived", "Qlik_Migration_LP3_ModelingLead_OneLeadPerDomain_20160808_171437_domain.csv" }, //
-                { "HootSuite_domain_derived",
-                        "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631_domain.csv" }, //
-                { "CornerStone_domain_derived", "CornerStone_domain.csv" }, //
+                { "Mulesoft_NA_doman_derived", "Mulesoft_NA_domain.csv" }, //
+                { "Mulesoft_Emea_doman_derived", "Mulesoft_Emea_domain.csv" }, //
+                { "Mulesoft_Apac_doman_derived", "Mulesoft_Apac_domain.csv" }, //
+                { "Qlik_doman_derived", "Qlik_domaiin.csv" }, //
+                { "HootSuite_domain_derived", "HootSuite_domain.csv" }, //
+                { "CornerStone_domain_derived", "CornerStone_domain.csv" },
                 { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
-                { "Tek_domain_derived", "Tek_domain.csv" }, //
-                { "Tenable_domain", "Tenable_domain.csv" }, //
-                { "bams_domain", "bams_domain.csv" }, //
-
+                { "Tenable_domain_derived", "Tenable_domain.csv" }, //
         };
     }
 
