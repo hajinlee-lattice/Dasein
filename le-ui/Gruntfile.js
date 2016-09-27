@@ -9,11 +9,12 @@ module.exports = function (grunt) {
     grunt.initConfig({
         versionString: versionStringConfig,
 
+        // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
         env: {
             dev: {
                 NODE_ENV: 'development',
-                // API_URL: 'https://testapp.lattice-engines.com',
-                API_URL: 'https://10.41.0.13:8081',
+                API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://10.41.0.13:8081',
                 APIADMIN_URL: 'https://admin-qa.lattice.local:8085/',
                 APICON_URL: 'https://testapi.lattice-engines.com:8073',
                 COMPRESSED: false,

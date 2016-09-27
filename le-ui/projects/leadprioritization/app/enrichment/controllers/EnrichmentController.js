@@ -62,9 +62,7 @@ angular.module('lp.enrichment.leadenrichment', [
         EnrichmentStore.getEnrichments(opts).then(function(result) {
             if (result != null && result.status === 200) {
                 vm.enrichments_loaded = true;
-                _.each(result.data, function(value, key){
-                    vm.enrichments.push(value);
-                });
+                vm.enrichments = vm.enrichments.concat(result.data);
                 if(result.data.length === max) {
                     getEnrichmentData({max: max, offset: offset + max});
                 } else {
@@ -157,7 +155,7 @@ angular.module('lp.enrichment.leadenrichment', [
             }, wait);
         }
     }
-    
+
     vm.closeStatusMessage = function() {
         $timeout.cancel(status_timer);
         vm.status_alert.show = false;
