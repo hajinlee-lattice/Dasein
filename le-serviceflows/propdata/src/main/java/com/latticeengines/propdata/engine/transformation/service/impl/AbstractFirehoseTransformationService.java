@@ -2,14 +2,15 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
@@ -32,7 +33,7 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
 
     private boolean ingestDataFromFirehoseAndUpdateProgress(TransformationProgress progress,
             TransformationConfiguration transformationConfiguration) {
-        String workflowDir = workflowDirInHdfs(progress);
+        String workflowDir = initialDataFlowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
             return false;
@@ -50,16 +51,16 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
     }
 
     @Override
-    protected String getRootBaseSourceDirPath() {
+    protected List<String> getRootBaseSourceDirPaths() {
         DataImportedFromHDFS source = (DataImportedFromHDFS) getSource();
-        return source.getHDFSPathToImportFrom().toString();
+        return Collections.singletonList(source.getHDFSPathToImportFrom().toString());
     }
 
     @Override
     public List<String> findUnprocessedVersions() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
-        String rootBaseSourceDir = getRootBaseSourceDirPath();
+        String rootBaseSourceDir = getRootBaseSourceDirPaths().get(0);
 
         List<String> latestVersions = null;
         List<String> latestBaseVersions = null;
@@ -191,7 +192,7 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
     protected List<String> findUnprocessedLatestVersion() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
-        String rootBaseSourceDir = getRootBaseSourceDirPath();
+        String rootBaseSourceDir = getRootBaseSourceDirPaths().get(0);
         String latestVersion = null;
         String latestBaseVersion = null;
         List<String> unprocessedBaseVersions = new ArrayList<>();
@@ -226,7 +227,7 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
     }
 
     @Override
-    String workflowAvroDir(TransformationProgress progress) {
-        return workflowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + AVRO_DIR_FOR_CONVERSION;
+    protected String finalWorkflowOuputDir(TransformationProgress progress) {
+        return initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + AVRO_DIR_FOR_CONVERSION;
     }
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.service.impl;
+package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 
 public abstract class FixedIntervalTransformationServiceTestNGBase extends TransformationServiceImplTestNGBase {
-    @Test(groups = "collection")
+
+    @Test(groups = "functional")
     public void testWholeProgress() {
         uploadBaseAvroFile();
         TransformationProgress progress = createNewProgress();

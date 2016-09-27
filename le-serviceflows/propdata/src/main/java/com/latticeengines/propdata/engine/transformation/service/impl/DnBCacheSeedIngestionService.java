@@ -14,18 +14,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.impl.DnBCacheSeedRaw;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedRawConfiguration;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedIngestionService")
@@ -44,9 +42,6 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     private static final String VERSION = "VERSION";
 
     @Autowired
-    private TransformationProgressEntityMgr progressEntityMgr;
-
-    @Autowired
     private DnBCacheSeedRaw source;
 
     @Autowired
@@ -58,11 +53,6 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     }
 
     @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
-    }
-
-    @Override
     Log getLogger() {
         return log;
     }
@@ -70,11 +60,6 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     public boolean isManualTriggerred() {
         return true;
-    }
-
-    @Override
-    protected TransformationDataFlowService getTransformationDataFlowService() {
-        return transformationDataFlowService;
     }
 
     @Override

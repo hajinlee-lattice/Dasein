@@ -12,19 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.AccountMasterLookupConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.AccountMasterLookupInputSourceConfig;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("accountMasterLookupRefreshService")
@@ -37,9 +34,6 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     private static final String VERSION = "VERSION";
 
     @Autowired
-    private TransformationProgressEntityMgr progressEntityMgr;
-
-    @Autowired
     private AccountMasterLookup source;
 
     @Autowired
@@ -48,11 +42,6 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
     }
 
     @Override
@@ -70,11 +59,6 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
             TransformationConfiguration transformationConfiguration) {
         transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
                 progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
-    }
-
-    @Override
-    protected TransformationDataFlowService getTransformationDataFlowService() {
-        return transformationDataFlowService;
     }
 
     @Override
@@ -107,11 +91,6 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
         return AccountMasterLookupConfiguration.class;
-    }
-
-    @Override
-    String workflowAvroDir(TransformationProgress progress) {
-        return dataFlowDirInHdfs(progress, CollectionDataFlowKeys.REFRESH_FLOW);
     }
 
     /*

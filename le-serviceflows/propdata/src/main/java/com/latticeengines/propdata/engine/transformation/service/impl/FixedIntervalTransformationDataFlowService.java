@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DepivotDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DepivotDataFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
@@ -70,7 +70,7 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
 
         FixedIntervalSource fixedIntervalSource = (FixedIntervalSource) source;
 
-        String flowName = CollectionDataFlowKeys.DEPIVOT_FLOW;
+        String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
         Map<String, Table> sources = new HashMap<>();

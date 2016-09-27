@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.service.impl;
+package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.HashMap;
 
@@ -10,9 +10,7 @@ import com.latticeengines.propdata.core.source.impl.BomboraDepivoted;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraDepivotConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
-import com.latticeengines.propdata.engine.transformation.service.impl.BomboraDepivotedService;
 
 @Component
 public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformationServiceTestNGBase {
@@ -23,17 +21,9 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
     @Autowired
     BomboraDepivoted source;
 
-    @Autowired
-    TransformationProgressEntityMgr progressEntityMgr;
-
     @Override
     TransformationService getTransformationService() {
         return refreshService;
-    }
-
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
     }
 
     @Override

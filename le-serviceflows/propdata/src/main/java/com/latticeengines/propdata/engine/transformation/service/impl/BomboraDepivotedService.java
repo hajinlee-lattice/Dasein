@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.BomboraDepivoted;
@@ -23,7 +23,6 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraDepivotConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("bomboraDepivotedService")
@@ -32,8 +31,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
 
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
-
-    private static final String DEPIVOT_FLOW = "DepivotFlow";
 
     private static final String VERSION = "VERSION";
 
@@ -69,11 +66,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    protected TransformationDataFlowService getTransformationDataFlowService() {
-        return transformationDataFlowService;
-    }
-
-    @Override
     Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
         BomboraDepivotConfiguration conf = (BomboraDepivotConfiguration) transformationConfiguration;
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
@@ -104,12 +96,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
         return BomboraDepivotConfiguration.class;
     }
-
-    @Override
-    String workflowAvroDir(TransformationProgress progress) {
-        return dataFlowDirInHdfs(progress, DEPIVOT_FLOW);
-    }
-
+    
     /*
      * GOAL: Ensure that over the period of time missing versions and also
      * handled.

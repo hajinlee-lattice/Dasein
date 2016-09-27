@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
@@ -25,7 +25,6 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("bomboraFirehoseIngestionService")
@@ -66,11 +65,6 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     @Override
     Log getLogger() {
         return log;
-    }
-
-    @Override
-    protected TransformationDataFlowService getTransformationDataFlowService() {
-        return transformationDataFlowService;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.service.impl;
+package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,33 +9,35 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-public abstract class TransformationServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
+public abstract class TransformationServiceImplTestNGBase extends PropDataEngineFunctionalTestNGBase {
 
-    private static final String SUCCESS_FLAG = "/_SUCCESS";
     private static final int MAX_LOOPS = 100;
-    TransformationService transformationService;
+
+    @Autowired
     TransformationProgressEntityMgr progressEntityMgr;
+
     Source source;
+
+    TransformationService transformationService;
+
     Collection<TransformationProgress> progresses = new HashSet<>();
     String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
     abstract TransformationService getTransformationService();
-
-    abstract TransformationProgressEntityMgr getProgressEntityMgr();
 
     abstract Source getSource();
 
@@ -45,16 +47,11 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
 
     abstract protected String getPathForResult();
 
-    @BeforeMethod(groups = { "collection", "deployment" })
+    @BeforeMethod(groups = { "functional" })
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod(source);
+        prepareCleanPod(source.getSourceName());
         transformationService = getTransformationService();
-        progressEntityMgr = getProgressEntityMgr();
-    }
-
-    @AfterMethod(groups = { "collection", "deployment" })
-    public void tearDown() throws Exception {
     }
 
     protected void uploadFileToHdfs(List<String> fileNames) {
@@ -134,13 +131,6 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataCollec
                 continue;
             }
             Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
-        }
-    }
-
-    protected void cleanupActiveFromProgressTables() {
-        TransformationProgress progress = progressEntityMgr.findRunningProgress(getSource());
-        if (progress != null) {
-            progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
     }
 

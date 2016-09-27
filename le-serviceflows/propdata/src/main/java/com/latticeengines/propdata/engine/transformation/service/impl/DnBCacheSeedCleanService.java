@@ -12,11 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.DnBCacheSeed;
@@ -24,7 +23,6 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedCleanService")
@@ -69,11 +67,6 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     }
 
     @Override
-    protected TransformationDataFlowService getTransformationDataFlowService() {
-        return transformationDataFlowService;
-    }
-
-    @Override
     Date checkTransformationConfigurationValidity(
             TransformationConfiguration transformationConfiguration) {
         DnBCacheSeedConfiguration conf = (DnBCacheSeedConfiguration) transformationConfiguration;
@@ -105,11 +98,6 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
         return DnBCacheSeedConfiguration.class;
-    }
-
-    @Override
-    String workflowAvroDir(TransformationProgress progress) {
-        return dataFlowDirInHdfs(progress, CollectionDataFlowKeys.CLEAN_FLOW);
     }
 
     /*

@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowKeysDeprecated;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
@@ -25,7 +25,7 @@ public abstract class AbstractPivotService extends AbstractRefreshService implem
 
     @Override
     protected String workflowDirInHdfs(RefreshProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.PIVOT_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeysDeprecated.PIVOT_FLOW)
                 .append(progress.getRootOperationUID()).toString();
     }
 

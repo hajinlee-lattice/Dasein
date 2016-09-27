@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.service.impl;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowKeysDeprecated;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
@@ -21,7 +21,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
 
     @Override
     protected String workflowDirInHdfs(RefreshProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MOST_RECENT_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeysDeprecated.MOST_RECENT_FLOW)
                 .append(progress.getRootOperationUID()).toString();
     }
 

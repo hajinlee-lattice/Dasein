@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowKeysDeprecated;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
@@ -192,7 +192,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
     }
 
     protected String workflowDirInHdfs(RefreshProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.TRANSFORM_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeysDeprecated.TRANSFORM_FLOW)
                 .append(progress.getRootOperationUID()).toString();
     }
 

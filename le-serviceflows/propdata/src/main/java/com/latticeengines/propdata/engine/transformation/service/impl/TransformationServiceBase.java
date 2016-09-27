@@ -10,7 +10,6 @@ import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.HdfsHelper;
 import com.latticeengines.propdata.engine.transformation.ProgressHelper;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
 
 public abstract class TransformationServiceBase {
     @Autowired
@@ -24,8 +23,6 @@ public abstract class TransformationServiceBase {
     abstract Log getLogger();
 
     abstract Source getSource();
-
-    abstract TransformationDataFlowService getTransformationDataFlowService();
 
     public TransformationProgress findRunningJob() {
         return progressHelper.findRunningJob(getProgressEntityMgr(), getSource());

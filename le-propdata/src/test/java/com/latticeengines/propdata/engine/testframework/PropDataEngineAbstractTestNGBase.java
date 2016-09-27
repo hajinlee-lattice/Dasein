@@ -20,17 +20,18 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
+import com.latticeengines.propdata.core.source.Source;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-engine-context.xml" })
 public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpringContextTests {
+
+    protected static final String SUCCESS_FLAG = "/_SUCCESS";
 
     @Value("${propdata.test.env}")
     protected String testEnv;
@@ -73,18 +74,7 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 
-    protected void uploadAvroToCollectionDB(String avroDir, String destTable) {
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        String customer = "TestSqoopAgent";
-
-        truncateJdbcTableIfExists(destTable);
-
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
-        DbCreds creds = new DbCreds(builder);
-        sqoopService.exportDataSync(destTable, avroDir, creds, assignedQueue,
-                customer + "-upload-" + destTable, numMappers, null);
-    }
+    protected String podId;
 
     protected void uploadDataToHdfs(Object[][] data, List<String> colNames, List<Class<?>> colTypes,
                                     String targetAvroPath, String recordName) {
@@ -110,6 +100,21 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
         } catch (Exception e) {
             Assert.fail("Failed to upload " + targetAvroPath, e);
         }
+    }
+
+    protected void prepareCleanPod(String podId) {
+        HdfsPodContext.changeHdfsPodId(podId);
+        this.podId = podId;
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void prepareCleanPod(Source source) {
+        String podId = "Test" + source.getSourceName();
+        prepareCleanPod(podId);
     }
 
     @SuppressWarnings("unused")

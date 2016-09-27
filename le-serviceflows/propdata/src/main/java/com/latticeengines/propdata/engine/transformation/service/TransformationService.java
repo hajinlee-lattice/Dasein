@@ -23,6 +23,8 @@ public interface TransformationService {
 
     List<String> findUnprocessedVersions();
 
+    List<List<String>> findUnprocessedBaseSourceVersions();
+
     Class<? extends TransformationConfiguration> getConfigurationClass();
 
     TransformationConfiguration createTransformationConfiguration(List<String> versionsToProcess);

@@ -3,7 +3,6 @@ package com.latticeengines.propdata.api.controller;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
@@ -73,7 +72,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
             + "url parameter podid is for testing purpose.")
     public TransformationProgress transform(@RequestBody TransformationRequest transformationRequest,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request) {
         checkHeader(request);
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
@@ -84,13 +83,8 @@ public class TransformationResource extends InternalResourceBase implements Tran
             TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod,
                     false);
             if (progress == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                response.getWriter().write("No unprocessed version found.");
-                response.getWriter().flush();
-                response.getWriter().close();
-                return null;
+                throw new IllegalStateException("Cannot start a new progress for your request");
             }
-            response.setStatus(HttpServletResponse.SC_ACCEPTED);
             return progress;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getSourceBeanName() });

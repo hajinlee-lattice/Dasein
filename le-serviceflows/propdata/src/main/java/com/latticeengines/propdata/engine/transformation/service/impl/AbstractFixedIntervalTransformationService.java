@@ -1,16 +1,16 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.python.jline.internal.Log;
 
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.Source;
@@ -34,7 +34,7 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
 
     private boolean transformDataAndUpdateProgress(TransformationProgress progress,
             TransformationConfiguration transformationConfiguration) {
-        String workflowDir = workflowDirInHdfs(progress);
+        String workflowDir = initialDataFlowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
             return false;
@@ -50,28 +50,28 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
     }
 
     @Override
-    protected String getRootBaseSourceDirPath() {
+    protected List<String> getRootBaseSourceDirPaths() {
         FixedIntervalSource source = (FixedIntervalSource) getSource();
-        Log.info("Source Name: " + source.getSourceName() + " Base Source Name: "
+        LOG.info("Source Name: " + source.getSourceName() + " Base Source Name: "
                 + source.getBaseSources()[0].getSourceName() + " RootBaseSourceDirPath: "
                 + getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
-        return getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString();
+        return Collections.singletonList(getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
     }
 
     @Override
     public List<String> findUnprocessedVersions() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
-        String rootBaseSourceDir = getRootBaseSourceDirPath();
+        String rootBaseSourceDir = getRootBaseSourceDirPaths().get(0);
         String rootDirForVersionLookup = rootBaseSourceDir + HDFS_PATH_SEPARATOR
                 + ((FixedIntervalSource) source).getDirForBaseVersionLookup();
         Date cutoffDate = getCutoffDate(null);
         String cutoffDateVersion = HdfsPathBuilder.dateFormat.format(cutoffDate);
-        Log.info("findUnprocessedVersions() source = " + source);
-        Log.info("findUnprocessedVersions() rootSourceDir = " + rootSourceDir);
-        Log.info("findUnprocessedVersions() rootBaseSourceDir = " + rootBaseSourceDir);
-        Log.info("findUnprocessedVersions() rootDirForVersionLookup = " + rootDirForVersionLookup);
-        Log.info("findUnprocessedVersions() cutoffDateVersion = " + cutoffDateVersion);
+        LOG.info("findUnprocessedVersions() source = " + source);
+        LOG.info("findUnprocessedVersions() rootSourceDir = " + rootSourceDir);
+        LOG.info("findUnprocessedVersions() rootBaseSourceDir = " + rootBaseSourceDir);
+        LOG.info("findUnprocessedVersions() rootDirForVersionLookup = " + rootDirForVersionLookup);
+        LOG.info("findUnprocessedVersions() cutoffDateVersion = " + cutoffDateVersion);
 
         List<String> latestVersions = null;
         List<String> latestBaseVersions = null;

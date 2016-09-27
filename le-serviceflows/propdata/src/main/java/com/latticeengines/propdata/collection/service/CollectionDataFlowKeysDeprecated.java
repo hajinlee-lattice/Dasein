@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.service;
 
-final public class CollectionDataFlowKeys {
+@Deprecated
+final public class CollectionDataFlowKeysDeprecated {
 
     public static final String MOST_RECENT_FLOW = "MostRecentFlow";
     public static final String PIVOT_FLOW = "PivotFlow";

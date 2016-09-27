@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.service.impl;
+package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
-public abstract class FirehoseTransformationDeploymentTestNGBase extends TransformationServiceImplTestNGBase {
+public abstract class FirehoseTransformationDeploymentTestNGBase extends TransformationDeploymentTestNGBase {
 
     @Autowired
     TransformationProxy transformationProxy;
@@ -20,15 +20,11 @@ public abstract class FirehoseTransformationDeploymentTestNGBase extends Transfo
         try {
             cleanupActiveFromProgressTables();
             uploadBaseGZFile();
-            List<TransformationProgress> transformationProgressList = transformationProxy
-                    .scan("FunctionalBomboraFirehose");
-            Assert.assertNotNull(transformationProgressList);
-            Assert.assertTrue(transformationProgressList.size() > 0);
-            Assert.assertNotNull(transformationProgressList.get(0).getYarnAppId());
-
-            finish(transformationProgressList.get(0));
-            confirmResultFile(transformationProgressList.get(0));
-            
+            TransformationProgress progress = transformationProxy.transform(getTransformationRequest(), podId);
+            Assert.assertNotNull(progress);
+            Assert.assertNotNull(progress.getYarnAppId());
+            finish(progress);
+            confirmResultFile(progress);
         } finally {
             cleanupProgressTables();
         }

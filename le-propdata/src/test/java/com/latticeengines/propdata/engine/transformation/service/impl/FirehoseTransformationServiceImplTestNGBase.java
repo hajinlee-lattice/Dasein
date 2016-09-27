@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.service.impl;
+package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
     @Autowired
     TransformationProxy transformationProxy;
 
-    @Test(groups = "collection")
+    @Test(groups = "functional")
     public void testTransformation() {
         uploadBaseGZFile();
         TransformationProgress progress = createNewProgress();
@@ -24,7 +24,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase extends Transf
         cleanupProgressTables();
     }
 
-    @Test(groups = "collection", dependsOnMethods = { "testTransformation" })
+    @Test(groups = "functional", dependsOnMethods = { "testTransformation" })
     public void testTransformationWithBadData() {
         uploadBadBaseGZFile();
         TransformationProgress progress = createNewProgress();

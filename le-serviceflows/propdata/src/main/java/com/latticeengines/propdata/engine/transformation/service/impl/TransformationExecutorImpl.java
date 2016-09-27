@@ -8,9 +8,9 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
@@ -57,7 +57,6 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             } catch (Exception e) {
                 log.error(e);
                 throw e;
-            } finally {
             }
         }
         throw new LedpException(LedpCode.LEDP_25015,
@@ -70,6 +69,8 @@ public class TransformationExecutorImpl implements TransformationExecutor {
 
     private void scheduleTransformationWorkflow(TransformationConfiguration transformationConfiguration,
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
+        log.info("Kick off workflow for progress " + progress);
+
         TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
                 .payloadName("Transformation").customerSpace(customerSpace).hdfsPodId(HdfsPodContext.getHdfsPodId())
                 .transformationConfiguration(transformationConfiguration)
