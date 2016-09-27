@@ -26,8 +26,8 @@ import com.latticeengines.propdata.engine.transformation.entitymgr.Transformatio
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("bomboraDepivotedService")
-public class BomboraDepivotedService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class BomboraDepivotedService extends AbstractFixedIntervalTransformationService<BomboraDepivotConfiguration>
+        implements TransformationService<BomboraDepivotConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
 
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
@@ -60,14 +60,13 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+            BomboraDepivotConfiguration transformationConfiguration) {
         transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
                 progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        BomboraDepivotConfiguration conf = (BomboraDepivotConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(BomboraDepivotConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -77,7 +76,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+    BomboraDepivotConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
         BomboraDepivotConfiguration configuration = new BomboraDepivotConfiguration();
         BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig = new BomboraFirehoseInputSourceConfig();
@@ -88,7 +87,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    BomboraDepivotConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, BomboraDepivotConfiguration.class);
     }
 
@@ -96,7 +95,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
         return BomboraDepivotConfiguration.class;
     }
-    
+
     /*
      * GOAL: Ensure that over the period of time missing versions and also
      * handled.

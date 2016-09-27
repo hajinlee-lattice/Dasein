@@ -6,27 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterReduceParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.ReducedAccountMaster;
-import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("accountMasterReduceDataFlowService")
@@ -34,31 +28,6 @@ public class AccountMasterReduceDataFlowService extends AbstractTransformationDa
 
     private static final Log log = LogFactory.getLog(AccountMasterReduceDataFlowService.class);
 
-    private static final String SOURCETABLES = "SOURCETABLES";
-
-    private static final String HIPHEN = "-";
-
-    private static final String FLOWNAME = "FLOWNAME";
-
-    @Autowired
-    protected DataTransformationService dataTransformationService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    protected HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    protected SourceColumnEntityMgr sourceColumnEntityMgr;
-
-    @Value("${propdata.collection.cascading.platform:tez}")
-    protected String cascadingPlatform;
-
-    @Override
     public void executeDataProcessing(Source source, String workflowDir, String sourceVersion, String uid,
             String dataFlowBean, TransformationConfiguration transformationConfiguration) {
 
@@ -91,9 +60,9 @@ public class AccountMasterReduceDataFlowService extends AbstractTransformationDa
         parameters.setHasSqlPresence(source instanceof HasSqlPresence);
 
         DataFlowContext ctx = dataFlowContext(source, sourceTables, parameters, targetPath);
-        ctx.setProperty(FLOWNAME, source.getSourceName() + HIPHEN + flowName);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);
 
-        ctx.setProperty(SOURCETABLES, sourceTables);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sourceTables);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
@@ -120,13 +89,4 @@ public class AccountMasterReduceDataFlowService extends AbstractTransformationDa
         return true;
     }
 
-    @Override
-    Configuration getYarnConfiguration() {
-        return yarnConfiguration;
-    }
-
-    @Override
-    String getCascadingPlatform() {
-        return cascadingPlatform;
-    }
 }

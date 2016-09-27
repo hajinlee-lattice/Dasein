@@ -15,16 +15,17 @@ import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public abstract class AbstractFirehoseTransformationService extends AbstractTransformationService {
+public abstract class AbstractFirehoseTransformationService<T extends TransformationConfiguration>
+        extends AbstractTransformationService<T> {
     private static Logger LOG = LogManager.getLogger(AbstractFirehoseTransformationService.class);
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
     abstract void uploadSourceSchema(String workflowDir) throws IOException;
+    abstract void executeDataFlow(TransformationProgress progress, String workflowDir, T transformationConfiguration);
 
     @Override
-    protected TransformationProgress transformHook(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration) {
+    protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
         if (!ingestDataFromFirehoseAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
@@ -32,7 +33,7 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
     }
 
     private boolean ingestDataFromFirehoseAndUpdateProgress(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration) {
+            T transformationConfiguration) {
         String workflowDir = initialDataFlowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);

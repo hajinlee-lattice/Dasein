@@ -6,18 +6,17 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public interface TransformationService {
+public interface TransformationService<T extends TransformationConfiguration> {
 
-    TransformationProgress startNewProgress(TransformationConfiguration transformationConfiguration, String creator);
+    TransformationProgress startNewProgress(T transformationConfiguration, String creator);
 
-    TransformationProgress transform(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration);
+    TransformationProgress transform(TransformationProgress progress, T transformationConfiguration);
 
     TransformationProgress finish(TransformationProgress progress);
 
     String getVersionString(TransformationProgress progress);
 
-    boolean isNewDataAvailable(TransformationConfiguration transformationConfiguration);
+    boolean isNewDataAvailable(T transformationConfiguration);
 
     Source getSource();
 
@@ -27,7 +26,7 @@ public interface TransformationService {
 
     Class<? extends TransformationConfiguration> getConfigurationClass();
 
-    TransformationConfiguration createTransformationConfiguration(List<String> versionsToProcess);
+    T createTransformationConfiguration(List<String> versionsToProcess);
 
     boolean isManualTriggerred();
 }

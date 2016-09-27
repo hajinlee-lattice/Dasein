@@ -8,9 +8,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
-public abstract class FirehoseTransformationDeploymentTestNGBase extends TransformationDeploymentTestNGBase {
+public abstract class FirehoseTransformationDeploymentTestNGBase<T extends TransformationConfiguration>
+        extends TransformationDeploymentTestNGBase<T> {
 
     @Autowired
     TransformationProxy transformationProxy;

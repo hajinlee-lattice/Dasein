@@ -23,6 +23,7 @@ import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
+@SuppressWarnings("deprecation")
 public abstract class AbstractRefreshService extends SourceRefreshServiceBase<RefreshProgress>
         implements RefreshService {
 

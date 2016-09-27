@@ -4,36 +4,57 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
+import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.transformation.service.TransformationDataFlowService;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-public abstract class AbstractTransformationDataFlowService implements TransformationDataFlowService {
+public abstract class AbstractTransformationDataFlowService {
 
-    abstract Configuration getYarnConfiguration();
-
-    abstract String getCascadingPlatform();
+    protected static final String SPLIT_REGEX = "\\|";
+    protected static final String HIPHEN = "-";
 
     @Value("${dataplatform.queue.scheme:legacy}")
     private String yarnQueueScheme;
+
+    @Value("${propdata.collection.cascading.platform:tez}")
+    private String cascadingPlatform;
+
+    @Autowired
+    protected DataTransformationService dataTransformationService;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     protected DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
             String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
+
         // TODO - anoop - enable TEZ once object mapper jar version conflict is fixed
-        // if ("mr".equalsIgnoreCase(getCascadingPlatform())) {
-        // ctx.setProperty("ENGINE", "MR");
-        // } else {
-        // ctx.setProperty("ENGINE", "TEZ");
-        // }
-        ctx.setProperty(DataFlowProperty.ENGINE, "MR");
+        if ("tez".equalsIgnoreCase(getCascadingPlatform())) {
+            ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
+        } else {
+            ctx.setProperty(DataFlowProperty.ENGINE, "MR");
+        }
 
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
@@ -45,7 +66,7 @@ public abstract class AbstractTransformationDataFlowService implements Transform
                 .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
-        ctx.setProperty(DataFlowProperty.HADOOPCONF, getYarnConfiguration());
+        ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         return ctx;
@@ -60,6 +81,13 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         jobProperties.put("mapreduce.output.fileoutputformat.compress.codec",
                 "org.apache.hadoop.io.compress.SnappyCodec");
 
+        jobProperties.put("tez.runtime.compress", "true");
+        jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress. SnappyCodec");
+
         return jobProperties;
+    }
+
+    protected String getCascadingPlatform() {
+        return cascadingPlatform;
     }
 }

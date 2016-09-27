@@ -13,16 +13,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
+@SuppressWarnings("rawtypes")
 @Component("propdataTransformationStepExecution")
 @Scope("prototype")
 public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
@@ -40,6 +41,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
     @Autowired
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         TransformationProgress progress = null;
@@ -48,6 +50,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
             initializeYarnClient();
             prepareTransformationConfiguration = getConfiguration();
             String serviceBeanName = prepareTransformationConfiguration.getServiceBeanName();
+
             transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
             Class<? extends TransformationConfiguration> configurationClass = transformationService
                     .getConfigurationClass();

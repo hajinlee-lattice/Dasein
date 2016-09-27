@@ -25,8 +25,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.Acco
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("accountMasterLookupRefreshService")
-public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTransformationService<AccountMasterLookupConfiguration>
+        implements TransformationService<AccountMasterLookupConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterLookupRefreshFlow";
 
     private static final Log log = LogFactory.getLog(AccountMasterLookupRefreshService.class);
@@ -56,14 +56,13 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+                                   AccountMasterLookupConfiguration transformationConfiguration) {
         transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
                 progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        AccountMasterLookupConfiguration conf = (AccountMasterLookupConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(AccountMasterLookupConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -73,7 +72,7 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+    AccountMasterLookupConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
         AccountMasterLookupConfiguration configuration = new AccountMasterLookupConfiguration();
         AccountMasterLookupInputSourceConfig accountMasterLookupInputSourceConfig = new AccountMasterLookupInputSourceConfig();
@@ -84,7 +83,7 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterLookupConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterLookupConfiguration.class);
     }
 

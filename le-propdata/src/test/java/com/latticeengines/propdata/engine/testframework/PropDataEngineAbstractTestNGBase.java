@@ -21,7 +21,6 @@ import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
@@ -59,9 +58,6 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
 
     @Autowired
     protected Configuration yarnConfiguration;
-
-    @Autowired
-    private SqoopSyncJobService sqoopService;
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -123,6 +119,7 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
                 + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
     }
 
+    @SuppressWarnings("unused")
     private void truncateJdbcTableIfExists(String tableName) {
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);

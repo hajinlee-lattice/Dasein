@@ -9,6 +9,7 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
+@SuppressWarnings("deprecation")
 public abstract class AbstractMostRecentService extends AbstractRefreshService implements RefreshService {
 
     @Override

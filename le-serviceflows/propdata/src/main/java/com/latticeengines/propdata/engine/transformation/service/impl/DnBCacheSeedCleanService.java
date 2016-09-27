@@ -26,8 +26,8 @@ import com.latticeengines.propdata.engine.transformation.entitymgr.Transformatio
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedCleanService")
-public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformationService<DnBCacheSeedConfiguration>
+        implements TransformationService<DnBCacheSeedConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "dnbCacheSeedCleanFlow";
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanService.class);
@@ -60,16 +60,13 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
-        transformationDataFlowService.executeDataProcessing(source, workflowDir,
-                getVersion(progress), progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME,
-                transformationConfiguration);
+            DnBCacheSeedConfiguration transformationConfiguration) {
+        transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
+                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(
-            TransformationConfiguration transformationConfiguration) {
-        DnBCacheSeedConfiguration conf = (DnBCacheSeedConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(DnBCacheSeedConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -79,8 +76,8 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
-            String newLatestVersion, List<SourceColumn> sourceColumns) {
+    DnBCacheSeedConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+            List<SourceColumn> sourceColumns) {
         DnBCacheSeedConfiguration configuration = new DnBCacheSeedConfiguration();
         DnBCacheSeedInputSourceConfig dnbCacheSeedInputSourceConfig = new DnBCacheSeedInputSourceConfig();
         dnbCacheSeedInputSourceConfig.setVersion(latestBaseVersion.get(0));
@@ -90,8 +87,7 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr)
-            throws IOException {
+    DnBCacheSeedConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, DnBCacheSeedConfiguration.class);
     }
 

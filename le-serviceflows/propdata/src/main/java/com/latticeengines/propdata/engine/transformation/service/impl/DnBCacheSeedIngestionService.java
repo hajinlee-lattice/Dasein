@@ -27,8 +27,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBC
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedIngestionService")
-public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformationService
-        implements TransformationService {
+public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformationService<DnBCacheSeedRawConfiguration>
+        implements TransformationService<DnBCacheSeedRawConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "dnbCacheSeedUncompressAndConvertToAvroFlow";
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedIngestionService.class);
@@ -64,19 +64,16 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+            DnBCacheSeedRawConfiguration transformationConfiguration) {
         CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(
                 transformationConfiguration.getSourceColumns());
         transformationDataFlowService.setFieldTypeMapping(fieldTypeMapping);
-        transformationDataFlowService.executeDataProcessing(source, workflowDir,
-                getVersion(progress), progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME,
-                transformationConfiguration);
+        transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
+                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(
-            TransformationConfiguration transformationConfiguration) {
-        DnBCacheSeedRawConfiguration conf = (DnBCacheSeedRawConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(DnBCacheSeedRawConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -86,7 +83,7 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     }
 
     @Override
-    protected TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
+    protected DnBCacheSeedRawConfiguration createNewConfiguration(List<String> latestBaseVersion,
             String newLatestVersion, List<SourceColumn> sourceColumns) {
         DnBCacheSeedRawConfiguration configuration = new DnBCacheSeedRawConfiguration();
         configuration.setInputFirehoseVersion(latestBaseVersion.get(0));
@@ -100,16 +97,14 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     void uploadSourceSchema(String workflowDir) throws IOException {
         String schemaFileName = DNB_CACHESEED_AVRO_SCHEMA_AVSC;
-        InputStream fileStream = ClassLoader
-                .getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
+        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
         String targetPath = workflowDir + PATH_SEPARATOR + schemaFileName;
 
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr)
-            throws IOException {
+    DnBCacheSeedRawConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, DnBCacheSeedRawConfiguration.class);
     }
 

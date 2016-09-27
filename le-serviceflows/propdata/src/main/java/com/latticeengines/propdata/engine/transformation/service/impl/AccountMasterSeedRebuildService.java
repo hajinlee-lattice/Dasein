@@ -25,8 +25,9 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.Acco
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("accountMasterSeedRebuildService")
-public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class AccountMasterSeedRebuildService
+        extends AbstractFixedIntervalTransformationService<AccountMasterSeedConfiguration>
+        implements TransformationService<AccountMasterSeedConfiguration> {
 
     private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildService.class);
 
@@ -39,7 +40,7 @@ public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransf
 
     @Autowired
     private AccountMasterSeedRebuildDataFlowService transformationDataFlowService;
-    
+
     @Override
     public boolean isManualTriggerred() {
         return true;
@@ -53,17 +54,15 @@ public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransf
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
-            String newLatestVersion, List<SourceColumn> sourceColumns) {
+    AccountMasterSeedConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+            List<SourceColumn> sourceColumns) {
         AccountMasterSeedConfiguration configuration = new AccountMasterSeedConfiguration();
         setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
         return configuration;
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(
-            TransformationConfiguration transformationConfiguration) {
-        AccountMasterSeedConfiguration conf = (AccountMasterSeedConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(AccountMasterSeedConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -87,9 +86,9 @@ public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransf
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
-        transformationDataFlowService.executeDataProcessing(source, workflowDir, null,
-                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
+            AccountMasterSeedConfiguration transformationConfiguration) {
+        transformationDataFlowService.executeDataProcessing(source, workflowDir, null, progress.getRootOperationUID(),
+                DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
@@ -98,8 +97,7 @@ public class AccountMasterSeedRebuildService extends AbstractFixedIntervalTransf
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr)
-            throws IOException {
+    AccountMasterSeedConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterSeedConfiguration.class);
     }
 

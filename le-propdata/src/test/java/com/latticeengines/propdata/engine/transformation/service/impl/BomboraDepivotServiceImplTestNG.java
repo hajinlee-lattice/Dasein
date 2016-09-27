@@ -7,13 +7,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.BomboraDepivoted;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraDepivotConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component
-public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformationServiceTestNGBase {
+public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformationServiceTestNGBase<BomboraDepivotConfiguration> {
 
     @Autowired
     BomboraDepivotedService refreshService;
@@ -22,7 +21,7 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
     BomboraDepivoted source;
 
     @Override
-    TransformationService getTransformationService() {
+    TransformationService<BomboraDepivotConfiguration> getTransformationService() {
         return refreshService;
     }
 
@@ -32,7 +31,7 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
     }
 
     @Override
-    TransformationConfiguration createTransformationConfiguration() {
+    BomboraDepivotConfiguration createTransformationConfiguration() {
         BomboraDepivotConfiguration conf = new BomboraDepivotConfiguration();
         conf.setSourceName(source.getSourceName());
         conf.setSourceConfigurations(new HashMap<String, String>());

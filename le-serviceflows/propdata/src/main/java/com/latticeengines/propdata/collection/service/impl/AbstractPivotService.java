@@ -11,6 +11,7 @@ import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 
+@SuppressWarnings("deprecation")
 public abstract class AbstractPivotService extends AbstractRefreshService implements PivotService {
 
     @Override

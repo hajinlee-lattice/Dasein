@@ -28,8 +28,8 @@ import com.latticeengines.propdata.engine.transformation.entitymgr.Transformatio
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("bomboraFirehoseIngestionService")
-public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService
-        implements TransformationService {
+public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService<BomboraFirehoseConfiguration>
+        implements TransformationService<BomboraFirehoseConfiguration> {
 
     private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
 
@@ -69,7 +69,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+                                   BomboraFirehoseConfiguration transformationConfiguration) {
         CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(
                 transformationConfiguration.getSourceColumns());
         transformationDataFlowService.setFieldTypeMapping(fieldTypeMapping);
@@ -78,8 +78,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        BomboraFirehoseConfiguration conf = (BomboraFirehoseConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(BomboraFirehoseConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
         try {
             return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
@@ -89,7 +88,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     }
 
     @Override
-    protected TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
+    protected BomboraFirehoseConfiguration createNewConfiguration(List<String> latestBaseVersion,
             String newLatestVersion, List<SourceColumn> sourceColumns) {
         BomboraFirehoseConfiguration configuration = new BomboraFirehoseConfiguration();
         configuration.setInputFirehoseVersion(latestBaseVersion.get(0));
@@ -109,7 +108,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    BomboraFirehoseConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, BomboraFirehoseConfiguration.class);
     }
 

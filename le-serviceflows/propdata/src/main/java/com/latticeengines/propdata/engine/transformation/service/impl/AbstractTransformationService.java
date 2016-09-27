@@ -18,7 +18,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -34,8 +33,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-
-public abstract class AbstractTransformationService extends TransformationServiceBase implements TransformationService {
+public abstract class AbstractTransformationService<T extends TransformationConfiguration>
+        extends TransformationServiceBase implements TransformationService<T> {
     private static final String SUCCESS_FLAG = "_SUCCESS";
 
     private static Logger LOG = LogManager.getLogger(AbstractTransformationService.class);
@@ -50,36 +49,32 @@ public abstract class AbstractTransformationService extends TransformationServic
     protected HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
-    private TransformationProgressEntityMgr transformationProgressEntityMgr;
+    protected TransformationProgressEntityMgr transformationProgressEntityMgr;
 
     @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     protected YarnConfiguration yarnConfiguration;
 
     @Autowired
-    private SourceColumnEntityMgr sourceColumnEntityMgr;
+    protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Override
     TransformationProgressEntityMgr getProgressEntityMgr() {
         return transformationProgressEntityMgr;
     }
 
-    abstract void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration);
+    abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 
-    abstract Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration);
+    abstract TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration);
 
-    abstract TransformationProgress transformHook(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration);
-
-    abstract TransformationConfiguration createNewConfiguration(List<String> latestBaseVersions,
-            String newLatestVersion, List<SourceColumn> sourceColumns);
+    abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
+            List<SourceColumn> sourceColumns);
 
     abstract List<String> getRootBaseSourceDirPaths();
 
-    abstract TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException;
+    abstract T readTransformationConfigurationObject(String confStr) throws IOException;
 
     @Override
     public boolean isManualTriggerred() {
@@ -93,7 +88,7 @@ public abstract class AbstractTransformationService extends TransformationServic
             DerivedSource derivedSource = (DerivedSource) source;
             Source[] baseSources = derivedSource.getBaseSources();
             List<String> latestBaseSourceVersions = new ArrayList<>();
-            for (Source baseSource: baseSources) {
+            for (Source baseSource : baseSources) {
                 String baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
                 latestBaseSourceVersions.add(baseSourceVersion);
             }
@@ -114,8 +109,7 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     @Override
-    public TransformationProgress startNewProgress(TransformationConfiguration transformationConfiguration,
-            String creator) {
+    public TransformationProgress startNewProgress(T transformationConfiguration, String creator) {
         checkTransformationConfigurationValidity(transformationConfiguration);
         TransformationProgress progress;
         try {
@@ -139,23 +133,22 @@ public abstract class AbstractTransformationService extends TransformationServic
         return progress;
     }
 
-    protected void writeTransformationConfig(TransformationConfiguration transformationConfiguration,
-            TransformationProgress progress) throws IOException {
+    protected void writeTransformationConfig(T transformationConfiguration, TransformationProgress progress)
+            throws IOException {
         transformationConfiguration.setRootOperationId(progress.getRootOperationUID());
         HdfsUtils.writeToFile(getYarnConfiguration(),
                 finalWorkflowOuputDir(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF,
                 JsonUtils.serialize(transformationConfiguration));
     }
 
-    protected TransformationConfiguration readTransformationConfig(TransformationProgress progress) throws IOException {
+    protected T readTransformationConfig(TransformationProgress progress) throws IOException {
         String confFilePath = finalWorkflowOuputDir(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF;
         String confStr = HdfsUtils.getHdfsFileContents(getYarnConfiguration(), confFilePath);
         return readTransformationConfigurationObject(confStr);
     }
 
     @Override
-    public TransformationProgress transform(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration) {
+    public TransformationProgress transform(TransformationProgress progress, T transformationConfiguration) {
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
@@ -174,7 +167,7 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     @Override
-    public boolean isNewDataAvailable(TransformationConfiguration transformationConfiguration) {
+    public boolean isNewDataAvailable(T transformationConfiguration) {
         return true;
     }
 
@@ -287,54 +280,20 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     protected boolean isAlreadyBeingProcessed(Source source, String version) {
-        return transformationProgressEntityMgr.findRunningProgress(source, version) == null ? false : true;
+        return transformationProgressEntityMgr.findRunningProgress(source, version) != null;
     }
 
     @Override
-    public TransformationConfiguration createTransformationConfiguration(List<String> versionsToProcess) {
-        TransformationConfiguration configuration;
-        configuration = createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
+    public T createTransformationConfiguration(List<String> versionsToProcess) {
+        return createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
                 sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
-        return configuration;
     }
 
-    protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns,
-            TransformationConfiguration configuration) {
+    protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns, T configuration) {
         configuration.setSourceName(getSource().getSourceName());
         Map<String, String> sourceConfigurations = new HashMap<>();
         configuration.setSourceConfigurations(sourceConfigurations);
         configuration.setVersion(newLatestVersion);
         configuration.setSourceColumns(sourceColumns);
-    }
-
-    protected String sourceDirInHdfs(Source source) {
-        String sourceDirInHdfs = getHdfsPathBuilder().constructTransformationSourceDir(source).toString();
-        LOG.info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
-        return sourceDirInHdfs;
-    }
-
-    protected String sourceVersionDirInHdfs(TransformationProgress progress) {
-        String sourceDirInHdfs = getHdfsPathBuilder()
-                .constructTransformationSourceDir(getSource(), progress.getVersion()).toString();
-        LOG.info("sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
-        return sourceDirInHdfs;
-    }
-
-    protected String initialDataFlowDirInHdfs(TransformationProgress progress) {
-        String workflowDir = dataFlowDirInHdfs(progress, CollectionDataFlowKeys.TRANSFORM_FLOW);
-        LOG.info("initialDataFlowDirInHdfs for " + getSource().getSourceName() + " = " + workflowDir);
-        return workflowDir;
-    }
-
-    protected String dataFlowDirInHdfs(TransformationProgress progress, String dataFlowName) {
-        String dataflowDir = getHdfsPathBuilder().constructWorkFlowDir(getSource(), dataFlowName)
-                .append(progress.getRootOperationUID()).toString();
-        LOG.info("dataFlowDirInHdfs for " + getSource().getSourceName() + " = " + dataflowDir);
-        return dataflowDir;
-    }
-
-    protected String finalWorkflowOuputDir(TransformationProgress progress) {
-        // Firehose transformation has special setting. Otherwise, it is the default dataFlowDir
-        return initialDataFlowDirInHdfs(progress);
     }
 }

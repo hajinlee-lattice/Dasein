@@ -16,24 +16,24 @@ import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public abstract class AbstractFixedIntervalTransformationService extends AbstractTransformationService {
+public abstract class AbstractFixedIntervalTransformationService<T extends TransformationConfiguration>
+        extends AbstractTransformationService<T> {
     private static Logger LOG = LogManager.getLogger(AbstractFixedIntervalTransformationService.class);
     private static final int SECONDS_TO_MILLIS = 1000;
 
     abstract List<String> compareVersionLists(Source source, List<String> latestBaseVersions,
             List<String> latestVersions, String baseDir);
+    abstract void executeDataFlow(TransformationProgress progress, String workflowDir, T transformationConfiguration);
 
     @Override
-    protected TransformationProgress transformHook(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration) {
+    protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
         if (!transformDataAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
         return null;
     }
 
-    private boolean transformDataAndUpdateProgress(TransformationProgress progress,
-            TransformationConfiguration transformationConfiguration) {
+    private boolean transformDataAndUpdateProgress(TransformationProgress progress, T transformationConfiguration) {
         String workflowDir = initialDataFlowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
@@ -55,7 +55,8 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
         LOG.info("Source Name: " + source.getSourceName() + " Base Source Name: "
                 + source.getBaseSources()[0].getSourceName() + " RootBaseSourceDirPath: "
                 + getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
-        return Collections.singletonList(getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
+        return Collections
+                .singletonList(getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
     }
 
     @Override

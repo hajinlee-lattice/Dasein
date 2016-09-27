@@ -19,14 +19,15 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 import com.latticeengines.propdata.workflow.engine.TransformationWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
+@SuppressWarnings("rawtypes")
 public class TransformationExecutorImpl implements TransformationExecutor {
     private static final Log log = LogFactory.getLog(TransformationExecutor.class);
     private static final int MAX_RETRY = 3;
 
     private String jobSubmitter;
     private TransformationWorkflowConfiguration.Builder builder = new TransformationWorkflowConfiguration.Builder();
-    private WorkflowProxy workflowProxy;
-    private TransformationService transformationService;
+    private WorkflowProxy workflowProxy;    
+	private TransformationService transformationService;
     private CustomerSpace customerSpace;
 
     public TransformationExecutorImpl(TransformationService transformationService, WorkflowProxy workflowProxy) {
@@ -36,6 +37,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         this.customerSpace = new CustomerSpace("PropDataService", "PropDataService", "Production");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TransformationProgress kickOffNewProgress(TransformationProgressEntityMgr transformationProgressEntityMgr) {
         Integer retries = 0;

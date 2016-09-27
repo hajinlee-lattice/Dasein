@@ -6,16 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedRebuildFlowParameter;
@@ -25,12 +22,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -39,34 +33,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformationDataFlowService {
     private static Logger LOG = LogManager.getLogger(AccountMasterSeedRebuildDataFlowService.class);
 
-    private static final String SOURCETABLES = "SOURCETABLES";
-
-    private static final String SPLIT_REGEX = "\\|";
-
-    private static final String HIPHEN = "-";
-
-    private static final String FLOWNAME = "FLOWNAME";
-
-    @Autowired
-    private DataTransformationService dataTransformationService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private SourceColumnEntityMgr sourceColumnEntityMgr;
-
-    @Value("${propdata.collection.cascading.platform:tez}")
-    private String cascadingPlatform;
-
     @SuppressWarnings("unchecked")
-    @Override
     public void executeDataProcessing(Source source, String workflowDir, String baseVersion,
             String uid, String dataFlowBean,
             TransformationConfiguration transformationConfiguration) {
@@ -124,20 +91,10 @@ public class AccountMasterSeedRebuildDataFlowService extends AbstractTransformat
         parameters.setBaseSourcePrimaryKeys(baseSourcePrimaryKeysList);
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
-        ctx.setProperty(FLOWNAME, source.getSourceName() + HIPHEN + flowName);
-        ctx.setProperty(SOURCETABLES, sources);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);
+        ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
 
-    }
-
-    @Override
-    Configuration getYarnConfiguration() {
-        return yarnConfiguration;
-    }
-
-    @Override
-    String getCascadingPlatform() {
-        return cascadingPlatform;
     }
 }

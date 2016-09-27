@@ -22,10 +22,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.testframework.PropDataEngineDeploymentTestNGBase;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-public abstract class TransformationDeploymentTestNGBase extends PropDataEngineDeploymentTestNGBase {
+public abstract class TransformationDeploymentTestNGBase<T extends TransformationConfiguration>
+        extends PropDataEngineDeploymentTestNGBase {
 
     private static final int MAX_LOOPS = 100;
     private static final Log log = LogFactory.getLog(TransformationDeploymentTestNGBase.class);
@@ -34,11 +36,11 @@ public abstract class TransformationDeploymentTestNGBase extends PropDataEngineD
     TransformationProgressEntityMgr progressEntityMgr;
 
     Source source;
-    TransformationService transformationService;
+    TransformationService<T> transformationService;
     Collection<TransformationProgress> progresses = new HashSet<>();
     String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
-    protected abstract TransformationService getTransformationService();
+    protected abstract TransformationService<T> getTransformationService();
 
     protected abstract String getTransformationServiceBeanName();
 
@@ -114,7 +116,7 @@ public abstract class TransformationDeploymentTestNGBase extends PropDataEngineD
                 HdfsUtils.rmdir(yarnConfiguration, getPathToUploadBaseData());
             }
             for (String fileName : fileNames) {
-                log.info("Uploading file " + fileName + " to hdfs folder "+ getPathToUploadBaseData());
+                log.info("Uploading file " + fileName + " to hdfs folder " + getPathToUploadBaseData());
                 InputStream fileStream = ClassLoader.getSystemResourceAsStream("sources/" + fileName);
                 String targetPath = getPathToUploadBaseData() + "/" + fileName;
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);

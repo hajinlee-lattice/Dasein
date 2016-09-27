@@ -47,6 +47,7 @@ alias microservicedpl='mvn -DskipTests clean package && microservicedplnobld'
 alias msbld='pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package && popd'
 
 alias swlibdpl='hadoop fs -rm -r /app/swlib || true && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar'
+alias sfbld='pushd $WSHOME/le-serviceflows && mvn -T6 -DskipTests clean install && popd'
 
 alias cfgdplnobld='hdfs dfs -rm -r -f /app/conf || true; hdfs dfs -mkdir -p /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/conf;'
 alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'

@@ -23,6 +23,7 @@ import com.latticeengines.propdata.engine.transformation.service.ExternalEnrichS
 
 public class AbstractExternalEnrichServiceTestNG extends PropDataEngineFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AbstractExternalEnrichServiceTestNG.class);
 
     private static final String ROOT_DIR = "/tmp/AbstractExternalEnrichServiceTestNG";

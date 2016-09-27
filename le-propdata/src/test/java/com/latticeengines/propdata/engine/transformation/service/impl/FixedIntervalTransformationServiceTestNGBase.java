@@ -7,8 +7,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public abstract class FixedIntervalTransformationServiceTestNGBase extends TransformationServiceImplTestNGBase {
+public abstract class FixedIntervalTransformationServiceTestNGBase<T extends TransformationConfiguration>
+        extends TransformationServiceImplTestNGBase<T> {
 
     @Test(groups = "functional")
     public void testWholeProgress() {

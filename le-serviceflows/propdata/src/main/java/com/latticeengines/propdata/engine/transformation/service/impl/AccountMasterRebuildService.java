@@ -24,8 +24,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.Acco
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("accountMasterRebuildService")
-public class AccountMasterRebuildService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class AccountMasterRebuildService extends AbstractFixedIntervalTransformationService<AccountMasterRebuildConfiguration>
+        implements TransformationService<AccountMasterRebuildConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterRebuildFlow";
 
     private static final Log log = LogFactory.getLog(AccountMasterRebuildService.class);
@@ -57,14 +57,13 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+                                   AccountMasterRebuildConfiguration transformationConfiguration) {
         accountMasterRebuildDataFlowService.executeDataProcessing(accountMaster, workflowDir, progress.getVersion(),
                 progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        AccountMasterRebuildConfiguration conf = (AccountMasterRebuildConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(AccountMasterRebuildConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
 
         try {
@@ -75,19 +74,16 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+    AccountMasterRebuildConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
-
         AccountMasterRebuildConfiguration configuration = new AccountMasterRebuildConfiguration();
-
         String version = HdfsPathBuilder.dateFormat.format(new Date());
         setAdditionalDetails(version, sourceColumns, configuration);
-
         return configuration;
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterRebuildConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterRebuildConfiguration.class);
     }
 

@@ -34,6 +34,7 @@ import com.latticeengines.propdata.core.source.impl.HGData;
 import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
+@SuppressWarnings("deprecation")
 @Component("collectionDataFlowService")
 public class CollectionDataFlowServiceImpl implements CollectionDataFlowService {
 

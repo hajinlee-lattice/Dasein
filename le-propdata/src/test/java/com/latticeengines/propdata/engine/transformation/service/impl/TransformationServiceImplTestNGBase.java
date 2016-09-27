@@ -23,7 +23,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-public abstract class TransformationServiceImplTestNGBase extends PropDataEngineFunctionalTestNGBase {
+public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration> extends PropDataEngineFunctionalTestNGBase {
 
     private static final int MAX_LOOPS = 100;
 
@@ -32,18 +32,18 @@ public abstract class TransformationServiceImplTestNGBase extends PropDataEngine
 
     Source source;
 
-    TransformationService transformationService;
+    TransformationService<T> transformationService;
 
     Collection<TransformationProgress> progresses = new HashSet<>();
     String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
-    abstract TransformationService getTransformationService();
+    abstract TransformationService<T> getTransformationService();
 
     abstract Source getSource();
 
     abstract String getPathToUploadBaseData();
 
-    abstract TransformationConfiguration createTransformationConfiguration();
+    abstract T createTransformationConfiguration();
 
     abstract protected String getPathForResult();
 

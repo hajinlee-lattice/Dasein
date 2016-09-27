@@ -24,8 +24,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.Acco
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("accountMasterReduceService")
-public class AccountMasterReduceService extends AbstractFixedIntervalTransformationService
-        implements TransformationService {
+public class AccountMasterReduceService extends AbstractFixedIntervalTransformationService<AccountMasterReduceConfiguration>
+        implements TransformationService<AccountMasterReduceConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterReduceFlow";
 
     private static final Log log = LogFactory.getLog(AccountMasterReduceService.class);
@@ -57,14 +57,13 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
 
     @Override
     protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            TransformationConfiguration transformationConfiguration) {
+                                   AccountMasterReduceConfiguration transformationConfiguration) {
         accountMasterReduceDataFlowService.executeDataProcessing(reducedAccountMaster, workflowDir, progress.getVersion(),
                 progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(TransformationConfiguration transformationConfiguration) {
-        AccountMasterReduceConfiguration conf = (AccountMasterReduceConfiguration) transformationConfiguration;
+    Date checkTransformationConfigurationValidity(AccountMasterReduceConfiguration conf) {
         conf.getSourceConfigurations().put(VERSION, conf.getVersion());
 
         try {
@@ -75,7 +74,7 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
     }
 
     @Override
-    TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+    AccountMasterReduceConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
 
         AccountMasterReduceConfiguration configuration = new AccountMasterReduceConfiguration();
@@ -87,7 +86,7 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
     }
 
     @Override
-    TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterReduceConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterReduceConfiguration.class);
     }
 

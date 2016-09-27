@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-public class BomboraFirehoseDeploymentTestNG extends FirehoseTransformationDeploymentTestNGBase {
+public class BomboraFirehoseDeploymentTestNG extends FirehoseTransformationDeploymentTestNGBase<BomboraFirehoseConfiguration> {
 
     @Autowired
     BomboraFirehoseIngestionService refreshService;
@@ -15,7 +16,7 @@ public class BomboraFirehoseDeploymentTestNG extends FirehoseTransformationDeplo
     BomboraFirehose source;
 
     @Override
-    protected TransformationService getTransformationService() {
+    protected TransformationService<BomboraFirehoseConfiguration> getTransformationService() {
         return refreshService;
     }
 

@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -12,6 +13,7 @@ import com.latticeengines.propdata.engine.transformation.ProgressHelper;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 
 public abstract class TransformationServiceBase {
+
     @Autowired
     private HdfsHelper hdfsHelper;
 
@@ -63,6 +65,38 @@ public abstract class TransformationServiceBase {
 
     protected TransformationProgress finishProgress(TransformationProgress progress) {
         return progressHelper.finishProgress(getProgressEntityMgr(), progress, getLogger());
+    }
+
+    protected String sourceDirInHdfs(Source source) {
+        String sourceDirInHdfs = getHdfsPathBuilder().constructTransformationSourceDir(source).toString();
+        getLogger().info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        return sourceDirInHdfs;
+    }
+
+    protected String sourceVersionDirInHdfs(TransformationProgress progress) {
+        String sourceDirInHdfs = getHdfsPathBuilder()
+                .constructTransformationSourceDir(getSource(), progress.getVersion()).toString();
+        getLogger().info("sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        return sourceDirInHdfs;
+    }
+
+    protected String initialDataFlowDirInHdfs(TransformationProgress progress) {
+        String workflowDir = dataFlowDirInHdfs(progress, CollectionDataFlowKeys.TRANSFORM_FLOW);
+        getLogger().info("initialDataFlowDirInHdfs for " + getSource().getSourceName() + " = " + workflowDir);
+        return workflowDir;
+    }
+
+    protected String dataFlowDirInHdfs(TransformationProgress progress, String dataFlowName) {
+        String dataflowDir = getHdfsPathBuilder().constructWorkFlowDir(getSource(), dataFlowName)
+                .append(progress.getRootOperationUID()).toString();
+        getLogger().info("dataFlowDirInHdfs for " + getSource().getSourceName() + " = " + dataflowDir);
+        return dataflowDir;
+    }
+
+    protected String finalWorkflowOuputDir(TransformationProgress progress) {
+        // Firehose transformation has special setting. Otherwise, it is the
+        // default dataFlowDir
+        return initialDataFlowDirInHdfs(progress);
     }
 
     protected Configuration getYarnConfiguration() {

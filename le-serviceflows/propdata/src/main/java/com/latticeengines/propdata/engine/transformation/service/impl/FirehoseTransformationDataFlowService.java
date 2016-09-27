@@ -9,10 +9,8 @@ import javax.mail.MethodNotSupportedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -34,21 +32,13 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     private static final Log log = LogFactory.getLog(FirehoseTransformationDataFlowService.class);
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
-
     private static final String UNCOMPRESSED_FILE = "UNCOMPRESSED-";
 
     @Autowired
     private SimpleCascadingExecutor simpleCascadingExecutor;
 
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Value("${propdata.collection.cascading.platform:tez}")
-    private String cascadingPlatform;
-
     private CsvToAvroFieldMapping fieldTypeMapping;
 
-    @Override
     public void executeDataProcessing(Source source, String workflowDir, String baseVersion,
             String uid, String dataFlowBean,
             TransformationConfiguration transformationConfiguration) {
@@ -171,16 +161,6 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath,
                 avroDirPath, inputConfig.getDelimiter(), inputConfig.getQualifier(),
                 inputConfig.getCharset());
-    }
-
-    @Override
-    Configuration getYarnConfiguration() {
-        return yarnConfiguration;
-    }
-
-    @Override
-    String getCascadingPlatform() {
-        return cascadingPlatform;
     }
 
     public void setFieldTypeMapping(CsvToAvroFieldMapping fieldTypeMapping) {

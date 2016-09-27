@@ -59,7 +59,7 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
 
-        TransformationService transformationService = (TransformationService) applicationContext
+        TransformationService<?> transformationService = (TransformationService<?>) applicationContext
                 .getBean(request.getSourceBeanName());
         if (fromScan && transformationService.isManualTriggerred()) {
             return null;
