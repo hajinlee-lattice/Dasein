@@ -191,7 +191,7 @@ public class ValidateFileHeaderUtils {
         return sb.append(fieldName).toString().replaceAll("[^A-Za-z0-9_]", "_");
     }
 
-    public static boolean columnIsAvroFriendly(String fieldName) {
+    public static boolean isAvroFriendlyFieldName(String fieldName) {
         return convertFieldNameToAvroFriendlyFormat(fieldName).equals(fieldName);
     }
 }

@@ -107,7 +107,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         boolean allExpectedNamesAreAvroFriendly = Iterables.all(expectedNames, new Predicate<String>() {
             @Override
             public boolean apply(String input) {
-                return ValidateFileHeaderUtils.columnIsAvroFriendly(input);
+                return ValidateFileHeaderUtils.isAvroFriendlyFieldName(input);
             }
         });
         assertTrue(allExpectedNamesAreAvroFriendly);
@@ -122,10 +122,10 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testColumnIsAvroFriendly() {
+    public void testisAvroFriendlyFieldName() {
         String malformedName = "2name?*wer23";
-        assertFalse(ValidateFileHeaderUtils.columnIsAvroFriendly(malformedName));
+        assertFalse(ValidateFileHeaderUtils.isAvroFriendlyFieldName(malformedName));
         String correctformedName = "avro_2name_23";
-        assertTrue(ValidateFileHeaderUtils.columnIsAvroFriendly(correctformedName));
+        assertTrue(ValidateFileHeaderUtils.isAvroFriendlyFieldName(correctformedName));
     }
 }
