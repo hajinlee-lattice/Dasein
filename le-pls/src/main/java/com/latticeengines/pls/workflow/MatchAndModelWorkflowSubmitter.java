@@ -82,6 +82,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             dataRules = eventTable.getDataRules();
         }
 
+        String trainingFilePath = modelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TrainingFilePath, "");
+
         MatchAndModelWorkflowConfiguration.Builder builder = new MatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -107,6 +110,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                         parameters.isExcludePropDataAttributes()) //
                 .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
                         parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
+                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath)
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(Predefined.getDefaultSelection(), null)

@@ -161,6 +161,9 @@ public class ModelSummaryParser {;
                     JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Propdata_Columns"), Boolean.class, false));
             configuration.setBoolean(ProvenancePropertyName.ExcludePublicDomains,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Public_Domains"), Boolean.class, false));
+            configuration.setString(ProvenancePropertyName.TrainingFilePath,
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Training_File_Path"),
+                            String.class, ""));
             summary.setModelSummaryConfiguration(configuration);
         }
 

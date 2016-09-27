@@ -26,6 +26,12 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.TrainingFileExist = data.ModelDetails.TrainingFileExist;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
     $scope.sourceType = data.ModelDetails.SourceSchemaInterpretation;
+    var propertyLength = data.ModelDetails.ModelSummaryProvenanceProperties.length;
+    for (var i = 0; i < propertyLength; i++) {
+        if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == ResourceUtility.getString("MODEL_TRAINING_FILE_PATH")) {
+            $scope.TrainingFilePath = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value;
+        }
+    }
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);

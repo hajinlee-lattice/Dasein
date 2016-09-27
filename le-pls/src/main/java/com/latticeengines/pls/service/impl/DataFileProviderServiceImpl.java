@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,14 +52,9 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response,
             String modelId, String mimeType) throws IOException {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        String trainingTableName = summary.getTrainingTableName();
-        if (trainingTableName != null && !trainingTableName.isEmpty()) {
-            SourceFile sourceFile = sourceFileEntityMgr.getByTableName(trainingTableName);
-            if (sourceFile != null) {
-                String filePath = sourceFile.getPath();
-                downloadFileByPath(request, response, mimeType, filePath);
-            }
-        }
+        String trainingFilePath = summary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TrainingFilePath, "");
+        downloadFileByPath(request, response, mimeType, trainingFilePath);
     }
 
     @Override

@@ -165,6 +165,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
                         parameters.getExcludePropDataColumns()) //
+                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName != null ? moduleName : null) //
                 .runTimeParams(parameters.runTimeParams) //
