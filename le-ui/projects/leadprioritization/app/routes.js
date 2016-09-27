@@ -992,7 +992,7 @@ angular
                             EnrichmentStore.setMetadata('current', 1);
                         }
                     },
-                    templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
+                    //templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {
                     resolve: {

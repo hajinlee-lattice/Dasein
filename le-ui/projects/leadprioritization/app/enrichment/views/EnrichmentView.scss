@@ -623,7 +623,7 @@
     .status-alert-box {
         @include flex-container;
         position: fixed;
-        top: 245px;
+        top: 130px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 100;

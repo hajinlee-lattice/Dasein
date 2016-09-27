@@ -31,6 +31,8 @@ angular.module('lp.enrichment.leadenrichment', [
             disabled_alert: 'You have disabled an attribute.'
         },
         enrichments_loaded: false,
+        enrichments_completed: false,
+        enrichmetns: {},
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -50,12 +52,24 @@ angular.module('lp.enrichment.leadenrichment', [
         view: 'list'
     });
 
+    var enrichment_chunk_size = 100;
     var getEnrichmentData = function(opts) {
-        var deferred = $q.defer();
+        var deferred = $q.defer(),
+            opts = opts || {},
+            max = opts.max || 100,
+            offset = opts.offset || 0;
+
         EnrichmentStore.getEnrichments(opts).then(function(result) {
             if (result != null && result.status === 200) {
                 vm.enrichments_loaded = true;
-                vm.enrichments = result.data;
+                _.each(result.data, function(value, key){
+                    vm.enrichments.push(value);
+                });
+                if(result.data.length === max) {
+                    getEnrichmentData({max: max, offset: offset + max});
+                } else {
+                    vm.enrichments_completed = true;
+                }
             }
         });
     }
@@ -79,6 +93,7 @@ angular.module('lp.enrichment.leadenrichment', [
         }
         vm.category = (remove ? '' : category);
     }
+
     vm.categoryClass = function(category){
         var category = category.toLowerCase().replace(' ','-');
         return category;
@@ -142,6 +157,7 @@ angular.module('lp.enrichment.leadenrichment', [
             }, wait);
         }
     }
+    
     vm.closeStatusMessage = function() {
         $timeout.cancel(status_timer);
         vm.status_alert.show = false;
@@ -207,7 +223,7 @@ angular.module('lp.enrichment.leadenrichment', [
             var sub_targets = parent.find('.subcategory-toggle'),
                 categories = parent.find('ul').first();
 
-            categories.css({minWidth: parent.width(), top: parent.height() - 1});
+            categories.css({minWidth: parent.width() - 1, top: parent.height() - 1});
 
             sub_targets.each(function(key, value){
                 var target = angular.element(value),
@@ -301,7 +317,7 @@ angular.module('lp.enrichment.leadenrichment', [
 
     vm.init = function() {
         _resized();
-        getEnrichmentData({max: 50});
+        getEnrichmentData({max: enrichment_chunk_size});
         vm.categories = EnrichmentCategories.data;
         _.each(vm.categories, function(value, key){
             var subcategory = getEnrichmentSubcategories(value);

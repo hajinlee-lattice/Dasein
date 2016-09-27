@@ -226,4 +226,37 @@ angular
         return deferred.promise;
     }
 
+    this.GetMarketoMatchFields = function(credential) {
+        var deferred = $q.defer();
+        var result;
+
+        $http({
+            method: 'GET',
+            url: '/pls/marketo/credentials/matchfields',
+            params: {
+                marketoSoapEndpoint: credential.soap_endpoint,
+                marketoSoapUserId: credential.soap_user_id,
+                marketoSoapEncryptionKey: credential.soap_encryption_key
+            },
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
 });

@@ -14,7 +14,7 @@
                             <span class="fa fa-search" ng-show="!vm.query.length"></span>
                             <span class="fa fa-times" ng-show="vm.query.length"></span>
                         </a>
-                        <input type="text" class="form-control" placeholder="Search all {{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
+                        <input type="text" class="form-control" placeholder="Search {{vm.enrichments.length > filteredList.length ? '' : 'all '}}{{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
                     <div class="tag" ng-if="vm.category" ng-click="vm.changeCategory({category: ''});">{{vm.category}}</div>
                 </li>
@@ -25,11 +25,11 @@
                             <li ng-repeat="(key, value) in vm.categories">
                                 <div class="category" ng-class="{active: vm.category == value}">
                                     <span class="subcategory-arrow" ng-class="{'subcategory-toggle': vm.subcategories[value]}"></span>
-                                    <span class="category-name" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});">
+                                    <span class="category-name" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});  vm.metadata.current = 1;">
                                         <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(value)}}"></div>
                                         {{value}}
                                     </span>
-                                    <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});" ng-class="{active: vm.category == value}"></span>
+                                    <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});  vm.metadata.current = 1;" ng-class="{active: vm.category == value}"></span>
                                 </div>                                
                                 <ul ng-if="vm.subcategories[value]">
                                     <li ng-repeat="(key, value) in vm.subcategories[value]">{{value}}</li>
@@ -51,7 +51,7 @@
         <div class="filters-enrichments">
             <div class="filters-container">
                 <div class="side">
-                    <h4>Enabled Attributes</h4>
+                    <h4>Filter Attributes</h4>
                     <ul class="info">
                         <li class="premiums">
                             <span class="fa fa-star"></span> {{vm.label.premium}} <em class="badge">{{(vm.premiumTotal = vm.enrichments | filter: {'IsSelected': true, 'IsPremium': true}).length}} / {{vm.premiumSelectLimit}}</em>
@@ -109,27 +109,27 @@
                     ng-class="{'active': enrichment.IsSelected}">
                         <div class="box-inner">
                             <div class="header">
-                                <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(enrichment.Category)}}"></div>
+                                <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
                                 <ul class="categories">
-                                    <li ng-if="enrichment.Category">{{enrichment.Category}}</li>
-                                    <li ng-if="enrichment.SubCategory">{{enrichment.SubCategory}}</li>
+                                    <li ng-if="enrichment.Category">{{::enrichment.Category}}</li>
+                                    <li ng-if="enrichment.SubCategory">{{::enrichment.SubCategory}}</li>
                                 </ul>
                                 <ul class="tags">
                                     <li ng-if="enrichment.IsPremium" class="premium">premium</li>
                                 </ul>
                                 <h2>
-                                    <strong>{{enrichment.DisplayName}}</strong>
+                                    <strong>{{::enrichment.DisplayName}}</strong>
                                 </h2>
                             </div>
-                            <p class="description">{{enrichment.Description}}</p>
+                            <p class="description">{{::enrichment.Description}}</p>
                             <div class="controls">
                                 <div class="field-type">
                                     <strong>Field Type</strong>
-                                    <em>{{vm.fieldType(enrichment.FieldType)}}</em>
+                                    <em>{{::vm.fieldType(enrichment.FieldType)}}</em>
                                 </div>
                                 <div class="toggle">
                                     <button class="button" 
-                                            ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'xis-dirty': enrichment.IsDirty, 'selected': enrichment.IsSelected}" 
+                                            ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 
                                             ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                                         <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                                     </button>

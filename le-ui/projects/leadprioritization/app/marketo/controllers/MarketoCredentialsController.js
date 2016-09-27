@@ -90,6 +90,8 @@ angular.module('lp.marketo', [
 .controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
     var vm = this;
 
+    credId = vm.credential.credential_id;
+
     angular.extend(vm, {
 		credentials: MarketoCredentials
     });
