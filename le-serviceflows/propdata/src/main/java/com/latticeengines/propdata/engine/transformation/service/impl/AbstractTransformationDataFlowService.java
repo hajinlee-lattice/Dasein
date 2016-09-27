@@ -29,6 +29,9 @@ public abstract class AbstractTransformationDataFlowService {
     @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;
 
+    @Value("${propdata.collection.cascading.partitions:8}")
+    protected Integer cascadingPartitions;
+
     @Autowired
     protected DataTransformationService dataTransformationService;
 
@@ -67,6 +70,7 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         return ctx;
